@@ -1,0 +1,305 @@
+import { test, expect, goToSettingsSection, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+
+async function setting(page, name, value) {
+  await page.evaluate(async ({ name, value }) => {
+    await window.$store.dispatch(name, value)
+  }, { name, value })
+}
+
+async function captureTray(app, page) {
+  await app.electronApp.evaluate(({ Tray }) => {
+    const original = Tray.prototype.setContextMenu
+    Tray.prototype.setContextMenu = function(menu) {
+      globalThis.testTray = this
+      globalThis.testTrayMenu = menu
+      return original.call(this, menu)
+    }
+  })
+  // Changing the media controls rebuilds the existing tray menu without replacing the icon.
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({
+    playbackState: 'paused',
+    hasMetadata: true,
+    actions: ['play']
+  }))
+  await expect.poll(() => app.electronApp.evaluate(() => !!globalThis.testTray)).toBe(true)
+}
+
+async function windowVisible(app) {
+  return app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.isVisible() ?? false)
+}
+
+async function trayClick(app) {
+  await app.electronApp.evaluate(() => globalThis.testTray.emit('click'))
+}
+
+async function captureTrayForIcons(app, page) {
+  const platform = await app.electronApp.evaluate(() => process.platform)
+  if (platform === 'darwin') {
+    // macOS constructs the menu on right click instead of attaching it to the tray.
+    await app.electronApp.evaluate(({ Tray }) => {
+      const setToolTip = Tray.prototype.setToolTip
+      Tray.prototype.setToolTip = function (text) {
+        globalThis.testTray = this
+        return setToolTip.call(this, text)
+      }
+      Tray.prototype.popUpContextMenu = function (menu) { globalThis.testTrayMenu = menu }
+    })
+    await setting(page, 'updateUseTrayIcon', false)
+    await setting(page, 'updateUseTrayIcon', true)
+    await expect.poll(() => app.electronApp.evaluate(() => !!globalThis.testTray)).toBe(true)
+  } else {
+    await captureTray(app, page)
+  }
+}
+
+test('tray menu icons render for both packs across native appearances', async ({ app, page }) => {
+  await captureTrayForIcons(app, page)
+  let materialIcons
+  const platform = await app.electronApp.evaluate(() => process.platform)
+  const icons = () => app.electronApp.evaluate(() => {
+    if (process.platform === 'darwin') globalThis.testTray.emit('right-click')
+    const result = []
+    const collect = menu => {
+      for (const item of menu.items) {
+        if (item.type !== 'separator') {
+          result.push({ label: item.label, size: item.icon?.getSize(), scales: item.icon?.getScaleFactors(), empty: item.icon?.isEmpty(), png: item.icon?.toDataURL(), template: item.icon?.isTemplateImage() })
+        }
+        if (item.submenu) collect(item.submenu)
+      }
+    }
+    collect(globalThis.testTrayMenu)
+    return result
+  })
+  for (const pack of ['material', 'remix']) {
+    await setting(page, 'updateIconPack', pack)
+    await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'light' })
+    await expect.poll(async () => (await icons()).every(icon => icon.empty === false && icon.size.width === 16 && icon.size.height === 16)).toBe(true)
+    const lightIcons = await icons()
+    expect(lightIcons.every(icon => icon.scales.includes(1) && icon.scales.includes(2))).toBe(true)
+    await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'dark' })
+    if (platform === 'darwin') expect((await icons()).every(icon => icon.template)).toBe(true)
+    expect((await icons())[0].png).toBe(lightIcons[0].png)
+    if (pack === 'material') {
+      materialIcons = lightIcons
+    } else {
+      expect(lightIcons[0].png).not.toBe(materialIcons[0].png)
+    }
+  }
+  const beforePause = (await icons()).find(icon => icon.label === 'Play').png
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({ playbackState: 'playing', hasMetadata: true, actions: ['pause'] }))
+  await expect.poll(async () => (await icons()).find(icon => icon.label === 'Pause')?.png).not.toBeUndefined()
+  expect((await icons()).find(icon => icon.label === 'Pause').png).not.toBe(beforePause)
+  await trayClick(app)
+  await expect.poll(async () => (await icons()).some(icon => icon.label === 'Show')).toBe(true)
+  await trayClick(app)
+  ;({ page } = await app.relaunch())
+  await captureTrayForIcons(app, page)
+  await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'light' })
+  await expect.poll(async () => (await icons())[0].png).not.toBe(materialIcons[0].png)
+})
+
+test('tray settings default independently and background refresh forces the tray', async ({ app, page }) => {
+  await captureTray(app, page)
+  const general = await goToSettingsSection(page, 'general')
+  const useTray = general.getByRole('checkbox', { name: /^Use tray icon/ })
+  const closeToTray = general.getByRole('checkbox', { name: /^Close to system tray/ })
+  const minimizeToTray = general.getByRole('checkbox', { name: /Minimi[sz]e to system tray/ })
+  await expect(useTray).toBeChecked()
+  await expect(general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })).toHaveCount(0)
+  await expect(closeToTray).not.toBeChecked()
+  await expect(minimizeToTray).not.toBeChecked()
+  await setting(page, 'updateUseTrayIcon', false)
+  await expect(useTray).not.toBeChecked()
+  await expect(closeToTray).toBeDisabled()
+  await expect(minimizeToTray).toBeDisabled()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())).toBe(true)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  await expect(useTray).toBeChecked()
+  await expect(useTray).toBeDisabled()
+  await expect(general.getByRole('button', { name: 'The tray icon is required while background subscription refresh is enabled.', exact: true })).toBeVisible()
+  await expect(closeToTray).toBeEnabled()
+  await expect.poll(() => app.electronApp.evaluate(() => !globalThis.testTray.isDestroyed())).toBe(true)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', false)
+  await expect(useTray).not.toBeChecked()
+  await expect(useTray).toBeEnabled()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())).toBe(true)
+})
+
+test('left click toggles the window and disabling the tray restores it', async ({ app, page }) => {
+  await captureTray(app, page)
+  await trayClick(app)
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  await trayClick(app)
+  await expect.poll(() => windowVisible(app)).toBe(true)
+  await trayClick(app)
+  await setting(page, 'updateUseTrayIcon', false)
+  await expect.poll(() => windowVisible(app)).toBe(true)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testTray.isDestroyed())).toBe(true)
+})
+
+test('close-to-tray preserves tabs and Quit exits hidden windows', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateHideToTrayOnClose', true)
+  const tabs = await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+  await trayClick(app)
+  await expect.poll(() => windowVisible(app)).toBe(true)
+  expect(await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))).toEqual(tabs)
+  await trayClick(app)
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(() => globalThis.testTrayMenu.items.find(item => item.label === 'Quit').click())
+  await closed
+})
+
+test('closing the last window confirms quitting when close-to-tray is disabled', async ({ app, page }) => {
+  await page.locator('.newTabButton').click()
+  await setting(page, 'updateConfirmCloseApp', true)
+  await setting(page, 'updateConfirmCloseWindowWithMultipleTabs', true)
+  await setting(page, 'updateHideToTrayOnClose', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  await app.electronApp.evaluate(({ dialog }) => {
+    globalThis.testClosePrompts = []
+    globalThis.testClosePromptResolvers = []
+    dialog.showMessageBox = (_window, options) => new Promise(resolve => {
+      globalThis.testClosePrompts.push({
+        message: options.message,
+        detail: options.detail,
+        buttons: options.buttons
+      })
+      globalThis.testClosePromptResolvers.push(response => resolve({ response }))
+    })
+  })
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testClosePrompts)).toEqual([{
+    message: 'Are you sure you want to quit OpenTubeX?',
+    detail: 'Quitting will stop background subscription refreshes.\n\nYou can re-enable this confirmation in Settings → General → Confirm before…',
+    buttons: ['Quit', 'Hide Window', 'Cancel', 'Never ask again']
+  }])
+  await app.electronApp.evaluate(() => globalThis.testClosePromptResolvers[0](1))
+  await expect.poll(() => windowVisible(app)).toBe(false)
+
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(({ app }) => app.exit())
+  await closed
+})
+
+test('closing the last window hides it while background refresh runs without a close prompt', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateConfirmCloseApp', false)
+  await setting(page, 'updateHideToTrayOnClose', false)
+  await setting(page, 'updateConfirmCloseWindowWithMultipleTabs', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+
+  // Other windows still close.
+  const secondWindow = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(secondWindow)
+  await secondWindow.locator('.newTabButton').click()
+  await expect.poll(() => secondWindow.evaluate(async () => (
+    (await window.ftElectron.tabs.getState()).tabs.length
+  ))).toBe(2)
+  const secondClosed = secondWindow.waitForEvent('close')
+  await secondWindow.evaluate(() => window.close())
+  await secondClosed
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+
+  // Clicking the macOS Dock icon brings the hidden window back.
+  await app.electronApp.evaluate(({ app }) => app.emit('activate', {}, false))
+  await expect.poll(() => windowVisible(app)).toBe(true)
+
+  // An explicit tray Close still quits.
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(() => globalThis.testTrayMenu.items[0].submenu.items.find(item => item.label === 'Close').click())
+  await closed
+})
+
+test('native minimize hides to tray and the tray restores the window', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateHideToTrayOnMinimize', true)
+  // Xvfb has no window manager; emit the native notification Electron delivers
+  // after a minimize. KWin detection and its callback are covered by unit tests.
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].emit('minimize'))
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  await trayClick(app)
+  await expect.poll(() => windowVisible(app)).toBe(true)
+})
+
+test('tray media actions update with playback and reach the media coordinator', async ({ app, page }) => {
+  await captureTray(app, page)
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({ playbackState: 'playing', hasMetadata: true, actions: ['pause', 'nexttrack'] }))
+  const controls = () => app.electronApp.evaluate(() => globalThis.testTrayMenu.items.filter(item => ['Previous', 'Play', 'Pause', 'Next'].includes(item.label)).map(item => ({ label: item.label, enabled: item.enabled })))
+  await expect.poll(controls).toEqual([{ label: 'Previous', enabled: false }, { label: 'Pause', enabled: true }, { label: 'Next', enabled: true }])
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    const webContents = BrowserWindow.getAllWindows()[0].webContents
+    const original = webContents.send.bind(webContents)
+    globalThis.testMediaActions = []
+    webContents.send = (channel, ...args) => {
+      if (channel === 'tabs-request-media-session-action') globalThis.testMediaActions.push(args[0])
+      return original(channel, ...args)
+    }
+    globalThis.testTrayMenu.items.find(item => item.label === 'Pause').click()
+    globalThis.testTrayMenu.items.find(item => item.label === 'Next').click()
+  })
+  expect(await app.electronApp.evaluate(() => globalThis.testMediaActions)).toEqual(['pause', 'nexttrack'])
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({ playbackState: 'paused', hasMetadata: true, actions: ['play'] }))
+  await expect.poll(controls).toEqual([{ label: 'Previous', enabled: false }, { label: 'Play', enabled: true }, { label: 'Next', enabled: false }])
+})
+
+test('closing the final tab still exits with close-to-tray enabled', async ({ app, page }) => {
+  await setting(page, 'updateHideToTrayOnClose', true)
+  const closed = app.electronApp.waitForEvent('close')
+  await page.evaluate(() => {
+    const store = window.$store
+    window.ftElectron.tabs.close(store.state.tabs.tabs[0].id)
+  })
+  await closed
+})
+
+test('closing the final tab still exits while background refresh runs without a close prompt', async ({ app, page }) => {
+  await setting(page, 'updateConfirmCloseApp', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  const closed = app.electronApp.waitForEvent('close')
+  // The app menu closes the emptied window without marking it confirmed.
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const item = Menu.getApplicationMenu().items
+      .flatMap(menuItem => menuItem.submenu?.items ?? [])
+      .find(menuItem => menuItem.label === 'Close Tab')
+    item.click(undefined, BrowserWindow.getAllWindows()[0])
+  })
+  await closed
+})
+
+test('explicit tray Close closes the window even with close-to-tray enabled', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateHideToTrayOnClose', true)
+  await trayClick(app)
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(() => globalThis.testTrayMenu.items[0].submenu.items.find(item => item.label === 'Close').click())
+  await closed
+})
+
+test('cancelling explicit tray Close restores normal close-to-tray behavior', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateHideToTrayOnClose', true)
+  await setting(page, 'updateConfirmCloseApp', true)
+  await app.electronApp.evaluate(({ dialog }) => {
+    globalThis.testClosePrompts = 0
+    dialog.showMessageBox = async () => {
+      globalThis.testClosePrompts++
+      return { response: 1 }
+    }
+    globalThis.testTrayMenu.items[0].submenu.items.find(item => item.label === 'Close').click()
+  })
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testClosePrompts)).toBe(1)
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  expect(await app.electronApp.evaluate(() => globalThis.testClosePrompts)).toBe(1)
+  await setting(page, 'updateConfirmCloseApp', false)
+})

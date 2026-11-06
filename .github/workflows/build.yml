@@ -7,34 +7,71 @@ on:
   push:
     branches: [ master, development, '**-RC' ]
     paths-ignore:
+      - '.editorconfig'
+      - '.gitignore'
+      - '.vscode/**'
+      - '.whitesource'
+      - 'CONTRIBUTING.md'
+      - 'LICENSE'
       - 'README.md'
+      - 'docs/**'
+      - 'e2e/**'
+      - 'test/**'
+      - 'tests/**'
+      - '**/__tests__/**'
+      - '**/*.spec.*'
+      - '**/*.test.*'
+      - 'jsconfig.json'
+      - 'lefthook-local.yml.example'
+      - 'lefthook.yml'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/dependabot.yml'
       - '.github/**/*.md'
-      - '.github/workflows/autoMerge.yml'
+      - '.github/issue-labeler.yml'
+      - '.github/pr-labeler.yml'
+      - '.github/pull.yml'
       - '.github/workflows/codeql.yml'
       - '.github/workflows/compress-images.yml'
       - '.github/workflows/conflicts.yml'
+      - '.github/workflows/e2e.yml'
+      - '.github/workflows/e2e-flaky.yml'
+      - '.github/workflows/flatpak.yml'
       - '.github/workflows/label-issue.yml'
       - '.github/workflows/label-pr.yml'
+      - '.github/workflows/linter.yml'
+      - '.github/workflows/nightly.yml'
       - '.github/workflows/no-response.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/remove-outdated-labels.yml'
+      - '.github/workflows/retry-unscheduled-jobs.yml'
       - '.github/workflows/stale.yml'
       - '.github/workflows/updateSite.yml'
+      - '.github/workflows/updateSiteScreenshots.yml'
 
   workflow_dispatch:
+    inputs:
+      publishNightly:
+        description: Publish and distribute this development build as a nightly release
+        required: false
+        default: false
+        type: boolean
 
 cache-mode: none
 permissions: {}
+
+concurrency:
+  group: build-${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && 'development' || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' }}
 
 jobs:
   build:
     name: Build
 
     # As this action runs on every push to the default branch and uses quite a lot of resources (both minutes and caches),
-    # only run it in the FreeTubeApp/FreeTube repository to avoid unnecessary GitHub Actions usage/billing in forks.
+    # only run it in the OpenTubeX/OpenTubeX repository to avoid unnecessary GitHub Actions usage/billing in forks.
     # Still allow manually triggering the workflow.
     # If a fork does need this workflow to run on every push to the default branch, they can change this condition in their fork to include their repository.
-    if: github.repository == 'FreeTubeApp/FreeTube' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
 
     cache-mode: write
     permissions:
@@ -56,10 +93,10 @@ jobs:
           os: ubuntu-latest
 
         - runtime: linux-arm64
-          os: ubuntu-latest
+          os: ubuntu-24.04-arm
 
         - runtime: osx-x64
-          os: macOS-latest
+          os: macos-26-intel
 
         - runtime: osx-arm64
           os: macOS-latest
@@ -73,20 +110,29 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
+    - name: Set up MSBuild for the Windows portable interposer
+      if: matrix.runtime == 'win-x64'
+      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache-dependency-path: _scripts/cast-sender/go.sum
+
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 #v7.1.0
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: ${{ matrix.node-version }}
         package-manager-cache: false
 
     - name: Install pnpm
-      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 #v6.1.1
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       with:
-        version: 11
         cache: false
 
     - name: Get pnpm cache directory
@@ -101,7 +147,7 @@ jobs:
 
     - name: Restore pnpm cache
       id: restore_cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
@@ -127,15 +173,30 @@ jobs:
 
         package_json="$(jq --arg version "$version" '.version = $version' package.json)"
 
-        echo -E "$package_json" > package.json
-        echo "version=${version}" >> "$GITHUB_OUTPUT"
+        printf '%s\n' "$package_json" > package.json
+        printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
 
-    - name: Install libarchive-tools
+    - name: Install Linux packaging dependencies
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
         sudo apt update
-        sudo apt -y install libarchive-tools
+        apt_package() {
+          for package_name in "$@"; do
+            if apt-cache show "$package_name" >/dev/null 2>&1; then
+              printf '%s\n' "$package_name"
+              return 0
+            fi
+          done
+
+          return 1
+        }
+        sudo apt -y install \
+          binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 \
+          "$(apt_package libatk-bridge2.0-0t64 libatk-bridge2.0-0)" \
+          "$(apt_package libatspi2.0-0t64 libatspi2.0-0)" \
+          "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
+          libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
 
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
@@ -147,185 +208,541 @@ jobs:
       shell: bash
       run: pnpm run build:arm64
 
+    - name: Test Windows x64 portable package
+      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
+      shell: pwsh
+      run: ./_scripts/testWindowsPortable.ps1
+
+    - name: Convert x64 AppImage to Anylinux AppImage
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
+      shell: bash
+      env:
+        VERSION: ${{ steps.versionNumber.outputs.version }}
+      run: |
+        docker run --rm -v "$PWD":/work -w /work ghcr.io/pkgforge-dev/archlinux:latest@sha256:0fbc66772be7e8becbeda2133360fed947624c888283934528b9cd3fdf1473e4 \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
+
+    - name: Convert ARM64 AppImage to Anylinux AppImage
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
+      shell: bash
+      env:
+        VERSION: ${{ steps.versionNumber.outputs.version }}
+      run: |
+        docker run --rm -v "$PWD":/work -w /work ghcr.io/pkgforge-dev/archlinux:latest@sha256:0fbc66772be7e8becbeda2133360fed947624c888283934528b9cd3fdf1473e4 \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
+
     - name: Upload Linux .zip x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.zip
 
     - name: Upload Linux .7z x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.7z
 
     - name: Upload Linux .zip ARM64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.zip
 
     - name: Upload Linux .7z ARM64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.7z
 
     - name: Upload .deb x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube_${{ steps.versionNumber.outputs.version }}_amd64.deb
-        path: build/freetube_${{ steps.versionNumber.outputs.version }}_amd64.deb
+        name: opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
+        path: build/opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
 
     - name: Upload .deb ARM64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
-        name: freetube_${{ steps.versionNumber.outputs.version }}_arm64.deb
-        path: build/freetube_${{ steps.versionNumber.outputs.version }}_arm64.deb
+        name: opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
+        path: build/opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
 
     - name: Upload AppImage x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
-        path: build/FreeTube-${{ steps.versionNumber.outputs.version }}.AppImage
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
 
     - name: Upload AppImage ARM64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
-        path: build/FreeTube-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
 
     - name: Upload .rpm x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}.amd64.rpm
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.x86_64.rpm
+        name: opentubex-${{ steps.versionNumber.outputs.version }}.amd64.rpm
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.x86_64.rpm
 
     - name: Upload .rpm ARM64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}.arm64.rpm
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.aarch64.rpm
+        name: opentubex-${{ steps.versionNumber.outputs.version }}.arm64.rpm
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.aarch64.rpm
 
     - name: Upload Pacman .pacman x64 Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-amd64.pacman
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.pacman
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.pacman
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.pacman
 
     - name: Upload Windows x64 .exe Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-setup-x64.exe
-        path: build/freetube Setup ${{ steps.versionNumber.outputs.version }}.exe
-
-    - name: Upload Windows x64 Portable Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-x64-portable.exe
-        path: build/freetube ${{ steps.versionNumber.outputs.version }}.exe
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-x64.exe
+        path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows x64 .zip Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-x64-portable.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-win.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.zip
 
     - name: Upload Windows x64 .7z Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-x64-portable.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-win.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.7z
 
     - name: Upload Windows arm64 .exe Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-setup-arm64.exe
-        path: build/freetube Setup ${{ steps.versionNumber.outputs.version }}.exe
-
-    - name: Upload Windows arm64 Portable Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.exe
-        path: build/freetube ${{ steps.versionNumber.outputs.version }}.exe
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-arm64.exe
+        path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows arm64 .zip Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64-win.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.zip
+        if-no-files-found: error
 
     - name: Upload Windows arm64 .7z Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64-win.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.7z
+        if-no-files-found: error
 
     - name: Upload Mac x64 .dmg Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-x64.dmg
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}.dmg
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.dmg
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}.dmg
 
     - name: Upload Mac x64 .zip Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-x64.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-mac.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.zip
 
     - name: Upload Mac x64 .7z Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-x64.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-mac.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.7z
 
     - name: Upload Mac arm64 .dmg Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-arm64.dmg
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64.dmg
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.dmg
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.dmg
 
     - name: Upload Mac arm64 .zip Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-arm64.zip
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64-mac.zip
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.zip
 
     - name: Upload Mac arm64 .7z Artifact
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
-        name: freetube-${{ steps.versionNumber.outputs.version }}-mac-arm64.7z
-        path: build/freetube-${{ steps.versionNumber.outputs.version }}-arm64-mac.7z
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.7z
 
     - name: Save pnpm cache
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       # Only save the cache if we weren't able to restore an existing one above
       if: steps.restore_cache.outputs.cache-primary-key != steps.restore_cache.outputs.cache-matched-key
       with:
         key: ${{ steps.restore_cache.outputs.cache-primary-key }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+  android:
+    name: Build Android APK
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Use Node.js 24
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - name: Use Java 21
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      with:
+        packages: platform-tools ndk;28.2.13676358
+
+    - name: Install Android runtime packer
+      run: sudo apt-get update && sudo apt-get install --yes 7zip
+
+    - run: pnpm run ci
+      shell: bash
+
+    - name: Test Android APK packaging
+      run: python3 -m unittest discover -s tests/android
+
+    - name: Build signed Android APKs
+      id: apk
+      shell: bash
+      run: |
+        set -euo pipefail
+        base_version="$(jq --raw-output .version package.json)"
+        lower_case_ref="${GITHUB_REF,,}"
+        version="$base_version"
+        if [[ "$lower_case_ref" == *development* ]]; then
+          version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
+        elif [[ "$lower_case_ref" == *rc* ]]; then
+          version="${base_version}-RC-${GITHUB_RUN_NUMBER}"
+        fi
+
+        package_json="$(jq --arg version "$version" '.version = $version' package.json)"
+        printf '%s\n' "$package_json" > package.json
+
+        # Reserve the next code for stable promotion of this commit.
+        ANDROID_VERSION_CODE="$(( $(git rev-list --count HEAD) * 2 ))"
+        ANDROID_VERSION_NAME="$version"
+        export ANDROID_VERSION_CODE ANDROID_VERSION_NAME
+
+        pnpm run capacitor:sync:android
+        ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks \
+          -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks
+        ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks -Plite \
+          -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite
+        printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
+    - name: Upload Android arm64-v8a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-arm64-v8a.apk
+        path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-arm64-v8a.apk
+        if-no-files-found: error
+
+    - name: Upload Android armeabi-v7a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-armeabi-v7a.apk
+        path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-armeabi-v7a.apk
+        if-no-files-found: error
+
+    - name: Upload Android x86 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-x86.apk
+        path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-x86.apk
+        if-no-files-found: error
+
+    - name: Upload Android x86_64 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-x86_64.apk
+        path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-x86_64.apk
+        if-no-files-found: error
+
+    - name: Upload Android universal APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
+        path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite arm64-v8a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite armeabi-v7a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite x86 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite x86_64 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite universal APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
+        if-no-files-found: error
+
+  ios:
+    name: Build iOS IPA
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      snapshot: true
+
+  publish-nightly:
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+    name: Publish nightly release
+    needs: [build, android, ios]
+    if: github.event_name == 'workflow_dispatch' && inputs.publishNightly && github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      attestations: write
+      contents: write
+      id-token: write
+      issues: read
+      pull-requests: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        pattern: opentubex*
+        path: artifacts
+
+    - name: Prepare release assets
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir release-assets
+
+        for artifact_directory in artifacts/*; do
+          artifact_name="$(basename "$artifact_directory")"
+          mapfile -t files < <(find "$artifact_directory" -type f -print)
+
+          if (( ${#files[@]} != 1 )); then
+            echo "Expected one file in $artifact_directory, found ${#files[@]}" >&2
+            exit 1
+          fi
+
+          cp "${files[0]}" "release-assets/$artifact_name"
+        done
+
+    - name: Attest build provenance
+      id: attest
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-path: release-assets/*
+
+    - name: Generate nightly release notes
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TARGET_BRANCH: development
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        node _scripts/releaseNotes.mjs generate-nightly nightly-changelog.md
+
+        {
+          printf '> [!WARNING]\n'
+          printf '> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\n'
+          printf 'Automated development build from commit %s.\n\n' "$GITHUB_SHA"
+          printf '<details>\n<summary>Changelog since the latest release</summary>\n\n'
+          cat nightly-changelog.md
+          printf '\n</details>\n'
+        } > release-notes.md
+
+    - name: Create nightly release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        base_version="$(jq --raw-output .version package.json)"
+        version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
+        tag="v${version}"
+        cp "$BUNDLE" "release-assets/opentubex-${version}.intoto.jsonl"
+
+        gh release create "$tag" release-assets/* \
+          --prerelease \
+          --target "$GITHUB_SHA" \
+          --title "v${version}" \
+          --notes-file release-notes.md
+
+        {
+          echo "tag=$tag"
+          echo "version=$version"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Remove expired nightly releases
+      if: always()
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+          --jq '.[] | select(.prerelease and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-nightly-[0-9]+$"))) | [.created_at, .tag_name] | @tsv' \
+          | sort --reverse \
+          | tail --lines=+31 \
+          | cut --fields=2- \
+          | while IFS= read -r tag; do
+              gh release delete "$tag" --cleanup-tag --yes
+            done
+
+  notify-nightly-repositories:
+    name: Notify ${{ matrix.repository }} of nightly release
+    needs: publish-nightly
+    # Publication outputs remain usable if pruning old releases fails afterward.
+    if: ${{ !cancelled() && needs.publish-nightly.outputs.tag != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: apt
+            pattern: '[.]deb$'
+            count: 2
+          - repository: rpm
+            pattern: '[.](amd64|arm64)[.]rpm$'
+            count: 2
+          - repository: arch
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: aur
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: fdroid
+            pattern: '-android-(lite-)?(arm64-v8a|armeabi-v7a|x86_64|x86|universal)[.]apk$'
+            count: 10
+          - repository: flatpak
+            pattern: '-linux-(x64|arm64)-portable[.]zip$'
+            count: 2
+          - repository: snap
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: sidestore
+            pattern: '-ios-unsigned[.]ipa$'
+            count: 1
+          - repository: homebrew-tap
+            pattern: '-mac-(x64|arm64)[.]zip$'
+            count: 2
+          - repository: scoop-bucket
+            pattern: '-win-(x64|arm64)-portable[.]zip$'
+            count: 2
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ needs.publish-nightly.outputs.tag }}
+        ASSET_PATTERN: ${{ matrix.pattern }}
+        ASSET_COUNT: ${{ matrix.count }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "tags/$TAG" "$ASSET_PATTERN" "$ASSET_COUNT"
+
+    - name: Notify package repository
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        REPOSITORY: ${{ matrix.repository }}
+        TAG: ${{ needs.publish-nightly.outputs.tag }}
+        VERSION: ${{ needs.publish-nightly.outputs.version }}
+      shell: bash
+      run: |
+        gh api "repos/OpenTubeX/${REPOSITORY}/dispatches" \
+          --method POST \
+          -f event_type=opentubex-nightly \
+          -f "client_payload[tag]=$TAG" \
+          -f "client_payload[version]=$VERSION"

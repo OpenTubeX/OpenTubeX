@@ -1,0 +1,304 @@
+.navigationPreview {
+  block-size: 100%;
+  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.previewWindow {
+  background-color: var(--bg-color);
+  block-size: 100%;
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-medium);
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  overflow: hidden;
+}
+
+/* Show the desktop layout at a typical window width, scaled down to fit,
+   so the header and rail keep the real app's proportions. */
+.desktop .previewWindow {
+  zoom: min(1, calc(100cqi / 1000px));
+}
+
+.mobile .previewWindow {
+  border-radius: var(--shape-corner-extra-large);
+  border-width: 6px;
+  inline-size: min(100%, 320px);
+}
+
+.previewTopBar {
+  align-items: center;
+  background-color: var(--card-bg-color);
+  block-size: 56px;
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-inline: 16px;
+}
+
+/* Center the search bar like the real top navigation, shrinking it so
+   both sides fit the menu icon and logo. */
+.desktop .previewTopBar {
+  --preview-header-side: calc(20px + 16px + 130px);
+
+  display: grid;
+  grid-template-columns: minmax(var(--preview-header-side), 1fr) minmax(36px, 440px) minmax(var(--preview-header-side), 1fr);
+}
+
+/* Without room for equal sides, let the search bar take the remaining space.
+   The grid needs both sides, the search bar minimum, two gaps and the padding. */
+@container (width < 432px) {
+  .desktop .previewTopBar {
+    display: flex;
+  }
+
+  .desktop .previewSearch {
+    flex: 1 1 auto;
+  }
+}
+
+.previewTopBarStart {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  min-inline-size: 0;
+}
+
+.previewTopBarIcon {
+  font-size: 20px;
+}
+
+.previewLogo {
+  /* Matches the real header's 25px icon and 100px wordmark. */
+  block-size: auto;
+  flex-shrink: 0;
+  inline-size: 130px;
+}
+
+.previewSearch {
+  align-items: center;
+  background-color: var(--search-bar-color);
+  block-size: 36px;
+  border-radius: calc(18px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  display: flex;
+  justify-content: flex-end;
+  min-inline-size: 36px;
+  padding-inline: 12px;
+  box-sizing: border-box;
+}
+
+.mobile .previewSearch {
+  background: none;
+  margin-inline-start: auto;
+  padding: 0;
+}
+
+.previewProfile {
+  align-items: center;
+  block-size: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  inline-size: 36px;
+  justify-content: center;
+  justify-self: end;
+  margin-inline-start: auto;
+  overflow: hidden;
+}
+
+.previewProfileIcon {
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.mobile .previewProfile {
+  margin-inline-start: 0;
+}
+
+.previewBody {
+  display: flex;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.previewRail {
+  background-color: var(--side-nav-color);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  inline-size: var(--desktop-nav-rail-width, 104px);
+  overflow: hidden;
+  padding-block-start: 10px;
+}
+
+.hiddenLabels .previewRail {
+  inline-size: 50px;
+}
+
+.previewRail .previewNavItem {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 4px;
+  padding-block: 6px;
+  padding-inline: 4px;
+  position: relative;
+}
+
+.hiddenLabels .previewRail .previewNavItem {
+  block-size: 50px;
+  box-sizing: border-box;
+  justify-content: center;
+  padding: 0;
+}
+
+.previewNavIcon {
+  display: grid;
+  font-size: 24px;
+  block-size: 32px;
+  place-items: center;
+  inline-size: 64px;
+  border-radius: var(--shape-corner-full);
+}
+
+.hiddenLabels .previewNavIcon {
+  block-size: 42px;
+  inline-size: 42px;
+  font-size: 20px;
+}
+
+.previewNavLabel {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.hiddenLabels .previewRail .previewNavLabel {
+  display: none;
+}
+
+.previewNavItem.active {
+  color: var(--primary-color);
+}
+
+.previewNavItem.active .previewNavIcon {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.previewNavItem.active .previewNavLabel {
+  color: var(--primary-text-color);
+  font-weight: 700;
+}
+
+.previewRail hr {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  block-size: 1px;
+  border: 0;
+  inline-size: calc(100% - 24px);
+  margin: 12px;
+}
+
+.previewChannel {
+  align-self: center;
+  background-color: var(--secondary-card-bg-color);
+  block-size: 35px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  inline-size: 35px;
+  margin-block: 5px;
+  overflow: hidden;
+}
+
+.previewChannel :deep(:is(img, .retryImagePlaceholder)) {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.previewPage {
+  align-content: start;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 16px 12px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  overflow: hidden;
+  padding: 16px;
+}
+
+.mobile .previewPage {
+  grid-template-columns: 1fr;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewThumbnail {
+  aspect-ratio: 16 / 9;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-medium);
+}
+
+.previewLine {
+  background-color: var(--secondary-card-bg-color);
+  block-size: 10px;
+  border-radius: calc(5px * var(--ui-roundness));
+}
+
+.previewLine.short {
+  inline-size: 60%;
+}
+
+.previewBottomBar {
+  background-color: var(--side-nav-color);
+  block-size: 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  padding-inline: 4px;
+}
+
+.compactLabels .previewBottomBar {
+  block-size: 48px;
+}
+
+.mobile .previewBottomBar .previewNavItem {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  min-inline-size: 0;
+}
+
+.mobile .previewBottomBar .previewNavIcon {
+  inline-size: min(64px, 100%);
+}
+
+.mobile .previewBottomBar .previewNavLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compactLabels .previewBottomBar .previewNavLabel {
+  display: none;
+}

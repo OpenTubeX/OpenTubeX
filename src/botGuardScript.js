@@ -28,6 +28,8 @@ export default async function (videoId, context, initialAttestationData, ytConfi
       'https://www.youtube.com/youtubei/v1/att/get?prettyPrint=false&alt=json',
       {
         method: 'POST',
+        // Android runs this script in its shared WebView cookie store
+        credentials: 'omit',
         headers: {
           Accept: '*/*',
           'Content-Type': 'application/json',
@@ -82,6 +84,7 @@ export default async function (videoId, context, initialAttestationData, ytConfi
 
   const integrityTokenResponse = await fetch(buildURL('GenerateIT', true), {
     method: 'POST',
+    credentials: 'omit',
     headers: {
       'content-type': 'application/json+protobuf',
       'x-goog-api-key': GOOG_API_KEY,
@@ -97,6 +100,10 @@ export default async function (videoId, context, initialAttestationData, ytConfi
   }
 
   const integrityTokenBasedMinter = await WebPoMinter.create({ integrityToken: response[0] }, webPoSignalOutput)
+
+  // The desktop app mints later tokens from this attestation until it needs refreshing
+  window.ftMintPoToken = id => integrityTokenBasedMinter.mintAsWebsafeString(id)
+  window.ftPoTokenValidForSecs = response[1] - (response[2] ?? 0)
 
   return await integrityTokenBasedMinter.mintAsWebsafeString(videoId)
 }

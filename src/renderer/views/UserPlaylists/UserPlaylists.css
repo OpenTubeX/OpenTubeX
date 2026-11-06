@@ -1,18 +1,51 @@
 .card {
+  --playlist-control-gap: 20px;
+
+  /*
+    As far below the heading as its content is from the top of the card (its
+    padding and the title offset), so the actions have the same space above and
+    below them.
+  */
+  --playlist-heading-gap: calc(3px + var(--page-title-offset));
+  --playlist-field-label-outset: 7px;
+
   position: relative;
-  inline-size: 85%;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
 
+.headingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block-start: var(--page-title-offset);
+}
+
 .headingText {
-  display: inline-block;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.heading:not(:has(.optionsRow)) + .playlistList {
+  margin-block-start: var(--playlist-control-gap);
+}
+
+/* Playlist tiles need no reserved space for video metadata. */
+.playlistList :deep(.grid) {
+  min-block-size: 0;
+}
+
+.playlistList :deep(.ft-list-item.grid) {
+  min-block-size: 0;
+  padding-block: 6px;
 }
 
 .newPlaylistButton {
-  margin-inline-start: 0.5em;
-  display: inline-block;
-  vertical-align: middle;
+  flex: 0 0 auto;
 }
 
 .searchInputsRow {
@@ -21,6 +54,16 @@
   /* 2 columns */
   grid-template-columns: 1fr auto;
   column-gap: 16px;
+}
+
+.playlistSearch {
+  --input-bottom-spacing: 0;
+
+  margin-block: var(--playlist-heading-gap) var(--playlist-control-gap);
+}
+
+.playlistSearch.outlined {
+  margin-block-start: calc(var(--playlist-heading-gap) + var(--playlist-field-label-outset));
 }
 
 @media only screen and (width <= 800px) {
@@ -32,10 +75,41 @@
 }
 
 .optionsRow {
+  --settings-control-margin: 0;
+
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr;
   align-items: center;
+  row-gap: var(--playlist-control-gap);
+  margin-block-end: var(--playlist-control-gap);
+}
+
+.matchingVideosToggle {
+  --playlist-switch-hit-height: var(--switch-touch-height);
+  --playlist-switch-padding: calc((var(--playlist-switch-hit-height) - var(--switch-track-height)) / 2);
+}
+
+/* Space the visible track while retaining the switch's full touch target. */
+.matchingVideosToggle :deep(.switch-label) {
+  padding-block: var(--playlist-switch-padding);
+  margin-block: calc(-1 * var(--playlist-switch-padding));
+}
+
+.matchingVideosToggle :deep(.switch-label-text) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--switch-track-height);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --playlist-field-label-outset: 9px;
+  }
+
+  .matchingVideosToggle {
+    --playlist-switch-hit-height: max(48px, var(--switch-touch-height));
+  }
 }
 
 @media only screen and (width <= 800px) {
@@ -52,8 +126,15 @@
   margin-inline-start: auto;
 }
 
+.sortSelect.outlined {
+  margin-block-start: var(--playlist-field-label-outset);
+}
+
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .headingIcon {
@@ -62,6 +143,31 @@
 
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
   }
+}
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.headingActions > .btn {
+  min-block-size: 44px;
+  margin: 0;
+}
+
+@media (width <= 680px) {
+  .headingRow {
+    flex-wrap: wrap;
+  }
+}
+
+:global(.promptCard.fixedLayout.playlistRepairPrompt) {
+  inline-size: min(520px, 100%);
+  block-size: auto;
 }

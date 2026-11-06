@@ -2,7 +2,7 @@
   <div>
     <FtCard class="card">
       <h2>
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'info-circle']"
           class="headingIcon"
         />
@@ -13,6 +13,29 @@
         <div class="version">
           {{ versionNumber }} {{ $t("About.Beta") }}
         </div>
+        <div
+          v-if="commitId"
+          class="commit"
+        >
+          {{ commitLabel }}
+          <a
+            :href="commitUrl"
+            :title="buildCommit"
+          >{{ commitId }}</a>
+        </div>
+        <dl
+          v-if="runtimeVersions"
+          class="runtimeVersions"
+        >
+          <div
+            v-for="runtime in runtimeVersions"
+            :key="runtime.name"
+            class="runtimeVersion"
+          >
+            <dt>{{ runtime.name }}</dt>
+            <dd>{{ runtime.version }}</dd>
+          </div>
+        </dl>
       </section>
       <section class="about-chunks">
         <figure
@@ -20,7 +43,7 @@
           :key="chunk.title"
           class="chunk"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="icon"
             :icon="chunk.icon"
           />
@@ -38,91 +61,97 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
+import { getNightlyCommit } from '../../helpers/versionDisplay.js'
 
-import { ABOUT_BITCOIN_ADDRESS } from '../../../constants'
 import packageDetails from '../../../../package.json'
 
 const { t } = useI18n()
 
 const versionNumber = `v${packageDetails.version}`
+const buildCommit = process.env.BUILD_COMMIT
+const commitId = getNightlyCommit(packageDetails.version, buildCommit)
+const commitLabel = `${t('About.Commit')}:`
+const commitUrl = `https://github.com/OpenTubeX/OpenTubeX/commit/${buildCommit}`
+const runtimeVersions = process.env.IS_ELECTRON
+  ? [
+      { name: 'Electron', version: window.ftElectron.runtimeVersions.electron },
+      { name: 'Chromium', version: window.ftElectron.runtimeVersions.chromium },
+      { name: 'Node.js', version: window.ftElectron.runtimeVersions.node },
+      { name: 'V8', version: window.ftElectron.runtimeVersions.v8 }
+    ]
+  : null
 
 const chunks = computed(() => [
   {
     icon: ['fab', 'github'],
     title: t('About.Source code'),
     content: [
-      '<a href="https://github.com/FreeTubeApp/FreeTube" lang="en" dir="ltr">GitHub: FreeTubeApp/FreeTube</a>',
+      '<a href="https://github.com/OpenTubeX/OpenTubeX" lang="en" dir="ltr">GitHub: OpenTubeX/OpenTubeX</a>',
       t('About.Licensed under the {licenseLink}', {
         licenseLink: `<a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`,
       }),
     ].join('<br>'),
   },
   {
+    icon: ['fas', 'globe'],
+    title: t('About.Website'),
+    content: '<a href="https://opentubex.org/">https://opentubex.org/</a>',
+  },
+  {
     icon: ['fas', 'file-download'],
-    title: t('About.Downloads / Changelog'),
-    content: `<a href="https://github.com/FreeTubeApp/FreeTube/releases">${t('About.GitHub releases')}</a>`,
+    title: t('About.Downloads'),
+    content: [
+      `<a href="https://opentubex.org/downloads/">${t('About.Website')}</a>`,
+      `<a href="https://github.com/OpenTubeX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`,
+    ].join('<br>'),
+  },
+  {
+    icon: ['fas', 'file-lines'],
+    title: t('About.Changelog'),
+    content: '<a href="https://opentubex.org/changelog/">https://opentubex.org/changelog/</a>',
   },
   {
     icon: ['fas', 'question-circle'],
     title: t('About.Help'),
     content: [
-      `<a href="https://docs.freetubeapp.io/">${t('About.FreeTube Wiki')}</a>`,
-      `<a href="https://docs.freetubeapp.io/faq/">${t('About.FAQ')}</a>`,
-      `<a href="https://github.com/FreeTubeApp/FreeTube/discussions/">${t('About.Discussions')}</a>`
+      `<a href="https://github.com/OpenTubeX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`,
     ].join(' / '),
   },
   {
     icon: ['fas', 'exclamation-circle'],
     title: t('About.Report a problem'),
     content: [
-      `<a href="https://github.com/FreeTubeApp/FreeTube/issues">${t('About.GitHub issues')}</a>`,
+      `<a href="https://github.com/OpenTubeX/OpenTubeX/issues">${t('About.GitHub issues')}</a>`,
       t('About.Please check for duplicates before posting'),
     ].join('<br>'),
   },
   {
-    icon: ['fas', 'globe'],
-    title: t('About.Website'),
-    content: '<a href="https://freetubeapp.io/">https://freetubeapp.io/</a>',
+    icon: ['fac', 'fluxer'],
+    title: t('About.Fluxer'),
+    content: '<a href="https://fluxer.opentubex.org">https://fluxer.opentubex.org</a>',
   },
   {
-    icon: ['fab', 'mastodon'],
-    title: t('About.Mastodon'),
-    content: '<a href="https://fosstodon.org/@FreeTube">@FreeTube@fosstodon.org</a>',
-  },
-  {
-    icon: ['fab', 'matrix'],
+    icon: ['fac', 'matrix'],
     title: t('About.Chat on Matrix'),
-    content: [
-      '<a href="https://matrix.to/#/#freetubeapp:matrix.org">#freetubeapp:matrix.org</a>',
-      t('About.Please read the {roomRulesLink}', {
-        roomRulesLink: `<a href="https://docs.freetubeapp.io/community/matrix/">${t('About.room rules')}</a>`,
-      }),
-    ].join('<br>'),
+    content: '<a href="https://matrix.opentubex.org">#opentubex:matrix.org</a>',
   },
   {
     icon: ['fas', 'language'],
     title: t('About.Translate'),
-    content: '<a href="https://hosted.weblate.org/engage/free-tube/">https://hosted.weblate.org/engage/free-tube/</a>',
+    content: '<a href="https://weblate.opentubex.org/engage/opentubex/">https://weblate.opentubex.org/engage/opentubex/</a>',
   },
   {
-    icon: ['fas', 'users'],
-    title: t('About.Credits'),
-    content: t('About.FreeTube is made possible by {creditsPageLink}', {
-      creditsPageLink: `<a href="https://docs.freetubeapp.io/credits/">${t('About.these people and projects')}</a>`,
-    }),
+    icon: ['fas', 'heart'],
+    title: t('About.Donate'),
+    content: `<a href="https://opentubex.org/donate/">${t('About.Support the development of OpenTubeX')}</a>`,
   },
-  {
-    icon: ['fab', 'bitcoin'],
-    title: `${t('About.Donate')} - BTC`,
-    content: `<a href="bitcoin:${ABOUT_BITCOIN_ADDRESS}">${ABOUT_BITCOIN_ADDRESS}</a>`
-  }
 ])
 </script>
 

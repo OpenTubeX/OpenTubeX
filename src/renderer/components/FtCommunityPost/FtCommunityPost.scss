@@ -14,20 +14,39 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  block-size: 100%;
-  padding-block-end: 20px;
 }
 
-.hiddenVideo {
+// Feed posts sit on their own tonal card.
+.ft-list-post.ft-list-item {
+  padding: 16px;
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+}
+
+// Stacked feed posts form a connected list: only its outer corners stay large.
+:where(.autoGrid.list > :not(:first-child)) > .ft-list-post.ft-list-item {
+  border-start-start-radius: var(--shape-corner-extra-small);
+  border-start-end-radius: var(--shape-corner-extra-small);
+}
+
+:where(.autoGrid.list > :not(:last-child)) > .ft-list-post.ft-list-item {
+  border-end-start-radius: var(--shape-corner-extra-small);
+  border-end-end-radius: var(--shape-corner-extra-small);
+}
+
+.hiddenVideo,
+.unavailablePost {
   font-style: italic;
   opacity: 0.85;
   text-align: center;
 }
 
 .communityImage {
-  block-size: 100%;
+  display: block;
   inline-size: 100%;
-  object-fit: contain;
+  block-size: auto;
+  border-radius: var(--shape-corner-medium);
 }
 
 .communityThumbnail {
@@ -38,12 +57,17 @@
 }
 
 .author-div {
+  align-items: center;
   display: flex;
+
+  .authorThumbnailLink {
+    display: flex;
+  }
 
   .authorName {
     font-size: 15px;
     font-weight: bold;
-    margin-block: 5px 0;
+    margin-block: 0;
     margin-inline: 5px 6px;
 
     .authorNameLink {
@@ -54,7 +78,7 @@
 
   .publishedText {
     font-size: 15px;
-    margin-block: 5px 0;
+    margin-block: 0;
     margin-inline: 5px 6px;
   }
 }
@@ -65,17 +89,32 @@
 }
 
 .commentsLink {
+  align-items: center;
+  display: inline-flex;
+  min-block-size: 38px;
+  border-radius: calc(19px * var(--ui-roundness));
   color: var(--primary-text-color);
   text-decoration: none;
   font-weight: bold;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+  }
+
+  &:active {
+    border-radius: var(--shape-corner-medium);
+  }
 }
 
 .bottomSection {
-  color: var(--tertiary-text-color);
+  color: var(--primary-text-color);
   display: flex;
   align-items: center;
   font-size: 15px;
-  margin-block-start: 4px;
+  margin-block-start: 12px;
   max-inline-size: 100%;
   text-align: start;
 
@@ -85,17 +124,50 @@
   }
 
   .likeBar {
-    border-radius: 4px;
+    border-radius: var(--shape-corner-full);
     block-size: 8px;
     margin-block-end: 4px;
   }
 
-  .likeCount {
-    margin-inline: 5px 6px;
+  .likeCount,
+  .commentCount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
   }
 
-  .shareButton {
-    margin-inline-start: 10px;
+  .likeCount,
+  .commentsLink {
+    padding-inline: 10px;
+  }
+
+  .optionsButton {
+    opacity: 1;
+  }
+
+  @media (pointer: coarse), (width <= 680px) {
+    .likeCount,
+    .commentsLink {
+      // Match the space around a 20px icon in a 48px touch target.
+      padding-inline: 14px;
+    }
+
+    .commentsLink {
+      min-block-size: 48px;
+      border-radius: calc(24px * var(--ui-roundness));
+
+      &:active {
+        border-radius: var(--shape-corner-medium);
+      }
+    }
+
+    .shareButton :deep(.iconButton) {
+      min-block-size: 48px;
+      min-inline-size: 48px;
+    }
+
+    .shareButton :deep(.icon) {
+      font-size: 20px;
+    }
   }
 }
 
@@ -152,6 +224,33 @@
   }
 }
 
+.ft-list-item.grid {
+  min-block-size: 0 !important;
+}
+
+// The shared list layout is a 'grabBar thumbnail info' column grid meant for
+// video cards. A post has none of those areas, so its sections would get
+// auto-placed into those columns side by side instead of stacking.
+.ft-list-item.list {
+  display: block;
+}
+
 .sliderContainer {
   display: grid;
+}
+
+.sharedPostCard {
+  border-radius: var(--shape-corner-large);
+  background-color: var(--card-bg-color);
+  margin-block-start: 8px;
+  padding: 12px;
+
+  .communityThumbnail {
+    block-size: 40px;
+    inline-size: 40px;
+  }
+
+  .bottomSection {
+    margin-block-start: 8px;
+  }
 }

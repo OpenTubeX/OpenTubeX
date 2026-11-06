@@ -1,15 +1,76 @@
 .card {
-  inline-size: 85%;
+  --popular-top-bar-block-size: 60px;
+
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
+  overflow: visible;
+}
+
+.popularPage.hasTabBar .card {
+  --popular-top-bar-block-size: 92px;
+}
+
+.pageHeader {
+  position: sticky;
+  inset-block-start: var(--popular-top-bar-block-size);
+  z-index: 3;
+  margin-inline: -16px;
+  padding-block: var(--page-title-offset) 12px;
+  padding-inline: 16px;
+  border-start-start-radius: var(--shape-corner-medium);
+  border-start-end-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 0 var(--primary-shadow-color);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+}
+
+.headerRefreshWidget {
+  min-inline-size: min(100%, 360px);
 }
 
 .headingIcon {
   color: var(--primary-color);
 }
 
+.emptyMessage {
+  margin-block: 48px;
+  color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
+  }
+
+  .pageHeader {
+    padding-block-end: 10px;
+  }
+
+  .titleRow {
+    align-items: flex-start;
+  }
+
+  .pageTitle,
+  .headerRefreshWidget {
+    inline-size: 100%;
   }
 }

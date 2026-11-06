@@ -8,7 +8,9 @@
 .videoTitle {
   display: block;
   font-size: 22px;
-  font-weight: normal;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
   margin-block: 0;
   margin-inline: 0;
   overflow-wrap: break-word;
@@ -22,20 +24,23 @@
   gap: 10px;
 }
 
+.videoButtons {
+  flex-wrap: wrap;
+}
+
 .videoBadges {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-block-start: 4px;
+  gap: 4px;
 }
 
-.unlistedBadge,
-.aiBadge {
-  background-color: var(--secondary-card-bg-color);
-  border-radius: 5px;
-  display: inline-flex;
+.videoBadge {
   align-items: center;
-  gap: 5px;
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  border-radius: var(--shape-corner-small);
+  display: inline-flex;
+  gap: 3px;
   padding-inline: 5px;
   padding-block: 2px;
   white-space: nowrap;
@@ -48,17 +53,73 @@
   align-items: center;
 }
 
+.collaboratorSummary {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font: inherit;
+  margin: 0;
+  padding: 0;
+  text-align: start;
+}
+
+.collaboratorSummaryThumbnails {
+  display: flex;
+  margin-inline-end: 10px;
+}
+
 .channelThumbnail {
   border-radius: 50%;
   cursor: pointer;
   margin-inline-end: 10px;
   inline-size: 56px;
+  block-size: 56px;
+  vertical-align: middle;
+}
+
+.channelThumbnailLink {
+  display: flex;
+  border-radius: 50%;
+  margin-inline-end: 10px;
+}
+
+.channelThumbnailLink:focus-visible {
+  outline-offset: 2px;
+}
+
+.channelThumbnailLink .channelThumbnail {
+  margin-inline-end: 0;
+}
+
+.collaboratorThumbnail {
+  display: block;
+  border: 2px solid var(--card-bg-color);
+  flex: 0 0 auto;
+  inline-size: 36px;
+  block-size: 36px;
+  margin-inline-end: 0;
+}
+
+.collaboratorThumbnailImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.collaboratorThumbnail + .collaboratorThumbnail {
+  margin-inline-start: -12px;
 }
 
 .channelName {
   color: inherit;
   cursor: pointer;
   display: block;
+  font-weight: 500;
   margin-inline-start: 6px;
   margin-block-end: 3px;
   position: relative;
@@ -66,86 +127,105 @@
   inset-block-start: -2px;
 }
 
+.collaboratorSummaryName {
+  margin-inline-start: 0;
+  margin-block-end: 0;
+  overflow-wrap: anywhere;
+  inset-block-start: 0;
+}
+
 .videoMetrics {
   font-size: 14px;
   color: var(--tertiary-text-color);
+  flex-wrap: wrap;
 }
 
-.likeSection {
-  color: var(--tertiary-text-color);
+.datePublishedAndViewCount {
   display: flex;
-  flex-direction: column;
-  margin-inline-start: auto;
-  margin-block-start: 4px;
-  max-inline-size: 210px;
-  text-align: end;
+  flex: 1 1 240px;
+  flex-wrap: wrap;
+  min-inline-size: 0;
 }
 
-.likeBar {
-  border-radius: 4px;
-  block-size: 8px;
-  margin-block-end: 4px;
+.videoCategory {
+  white-space: normal;
 }
 
-.likeCount {
-  margin-inline-end: 0;
-  display: flex;
-  gap: 3px;
-}
 
+.publishedTimeAgo,
 .videoViews {
   white-space: nowrap;
 }
 
-.videoOptions {
-  display: flex;
-  gap: 4px;
-}
-
-.videoOptionsMobileRow {
-  display: flex;
-  gap: 4px;
+/*
+  Blurred theme cards give the card and the toolbar backdrop filters, which
+  make them stacking contexts. Lift both while a dropdown is open, or the cards
+  below would paint over it (see WatchVideoToolbar).
+*/
+.watchVideoInfo:has(.iconDropdown) {
+  position: relative;
+  z-index: 1;
 }
 
 .initialCursor {
   cursor: initial;
 }
 
-@media screen and (width <= 730px) {
-  .videoButtons {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-block-start: 10px;
-  }
+:global(.channelSettingsDropdown) {
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 16px);
+  padding: 4px;
 }
 
-@media screen and (width <= 680px) {
-  .likeSection {
-    margin-inline-start: 0;
-    text-align: start;
-  }
+.channelSettingRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-@media screen and (width <= 460px) {
-  .datePublishedAndViewCount {
-    display: flex;
-    justify-content: left;
-    flex-direction: column;
-  }
-
-  .seperator {
-    display: none;
-  }
+.channelSettingRow + .channelSettingRow {
+  margin-block-start: 2px;
 }
 
-@media screen and (width <= 380px) {
-  .videoOptions {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-block-start: 10px;
-  }
+.channelSettingSave {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 40px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  border-radius: var(--shape-corner-medium);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
 
-  .videoOptionsMobileRow :deep(.iconDropdown) {
-    inset-inline: 0 auto;
-  }
+.channelSettingSave > .ft-icon {
+  flex: none;
+  inline-size: 18px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+}
+
+.channelSettingSave:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.channelSettingSave:not(:disabled):is(:hover, :focus-visible) {
+  background: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.channelSettingSave:not(:disabled):is(:hover, :focus-visible) > .ft-icon {
+  color: inherit;
+}
+
+.channelSettingSave:not(:disabled):active {
+  border-radius: var(--shape-corner-extra-small);
 }

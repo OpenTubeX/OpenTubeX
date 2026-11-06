@@ -1,0 +1,500 @@
+.statsPage {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
+  margin-block: 0 60px;
+  margin-inline: auto;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.headingIcon {
+  color: var(--primary-color);
+}
+
+.statsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-end: 12px;
+  padding-block-start: var(--page-title-offset);
+}
+
+.deviceSegments {
+  --device-fade-left: 0%;
+  --device-fade-right: 0%;
+
+  inline-size: max-content;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+
+.deviceSegments.fadeLeft {
+  --device-fade-left: 24px;
+}
+
+.deviceSegments.fadeRight {
+  --device-fade-right: 24px;
+}
+
+.deviceSegments.fadeLeft,
+.deviceSegments.fadeRight {
+  mask-image: linear-gradient(to right, transparent, #000 var(--device-fade-left), #000 calc(100% - var(--device-fade-right)), transparent);
+}
+
+.deviceSegmentTrack {
+  position: relative;
+  display: flex;
+  inline-size: max-content;
+  box-sizing: border-box;
+  padding: 4px;
+  border-radius: calc(24px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
+}
+
+/* The indicator moves without overshoot: it sits inside the scroll viewport,
+   where an overshoot would briefly widen the scroll range. */
+.deviceSegmentIndicator {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: 4px;
+  inline-size: 0;
+  border-radius: calc(20px * var(--ui-roundness));
+  background-color: var(--selected-container-color);
+  transition: inset-inline-start var(--motion-default-effects), inline-size var(--motion-default-effects);
+}
+
+.deviceSegment {
+  position: relative;
+  min-inline-size: 0;
+  flex-shrink: 0;
+  padding-block: 10px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: calc(20px * var(--ui-roundness));
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial), color var(--motion-fast-effects);
+}
+
+.deviceSegment[aria-pressed='false']:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.deviceSegment[aria-pressed='false']:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.deviceSegmentIcon {
+  margin-inline-end: 6px;
+}
+
+.deviceSegment[aria-pressed='true'] {
+  color: var(--on-selected-container-color);
+  font-weight: 600;
+}
+
+.deviceSegment:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-block-end: 14px;
+}
+
+.summaryCard,
+.chartCard {
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+}
+
+/* Tonal primary containers set the key numbers apart from the charts. */
+.summaryCard {
+  position: relative;
+  overflow: hidden;
+  padding-block: 20px;
+  padding-inline: 20px;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.summaryLabel,
+.summaryHint {
+  display: block;
+  color: var(--tertiary-text-color);
+}
+
+.summaryLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summaryCard strong {
+  display: block;
+  margin-block: 10px 5px;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.summaryHint {
+  font-size: 0.78rem;
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 14px;
+}
+
+.chartCard {
+  min-inline-size: 0;
+  padding-block: 22px;
+  padding-inline: 22px;
+}
+
+.chartHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 20px;
+}
+
+.chartHeading h2 {
+  margin-block: 4px 0;
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.chartScale {
+  padding-block: 7px;
+  padding-inline: 10px;
+  border-radius: var(--shape-corner-small);
+  color: var(--tertiary-text-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
+  font-size: 0.75rem;
+}
+
+.lineChartPlot {
+  position: relative;
+  inline-size: 100%;
+  block-size: 240px;
+}
+
+.lineChartPlot svg {
+  position: absolute;
+  display: block;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.gridLine {
+  stroke: var(--tertiary-text-color);
+  stroke-dasharray: 4 7;
+  stroke-opacity: 0.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.chartArea {
+  fill: url('#watchTimeArea');
+}
+
+.chartLine {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.chartPoint {
+  position: absolute;
+  box-sizing: border-box;
+  inline-size: 12px;
+  block-size: 12px;
+  padding: 0;
+  border: 3px solid var(--primary-color);
+  border-radius: 50%;
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.chartPoint:hover,
+.chartPoint:focus-visible {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 22%, transparent);
+}
+
+.chartTooltip {
+  position: absolute;
+  inset-block-end: calc(100% + 10px);
+  inset-inline-start: 50%;
+  z-index: 5;
+  min-inline-size: max-content;
+  padding-block: 7px;
+  padding-inline: 10px;
+  border: 1px solid color-mix(in srgb, var(--primary-text-color) 20%, transparent);
+  border-radius: var(--shape-corner-small);
+  color: var(--card-bg-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 94%, transparent);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 24%);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  text-align: start;
+  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient)), 4px);
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-spatial), visibility var(--motion-fast-effects);
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.chartTooltip strong,
+.chartTooltip span {
+  display: block;
+}
+
+.chartTooltip strong {
+  font-weight: 700;
+}
+
+.tooltipStart .chartTooltip {
+  inset-inline-start: 0;
+  transform: translateY(4px);
+}
+
+.tooltipEnd .chartTooltip {
+  inset-inline: auto 0;
+  transform: translateY(4px);
+}
+
+.tooltipBelow .chartTooltip {
+  inset-block: calc(100% + 10px) auto;
+}
+
+.dailyLabels {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  color: var(--tertiary-text-color);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.barChart {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(22px, 1fr));
+  gap: 8px;
+  block-size: 260px;
+}
+
+.barColumn {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  color: var(--tertiary-text-color);
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.barTarget {
+  position: relative;
+  display: flex;
+  inline-size: 100%;
+  min-block-size: 0;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.barTarget:focus-visible {
+  border-radius: var(--shape-corner-small);
+  box-shadow: 0 0 0 2px var(--primary-color);
+  outline: none;
+}
+
+.barTrack {
+  display: flex;
+  inline-size: min(26px, 80%);
+  block-size: 100%;
+  min-block-size: 0;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--shape-corner-small);
+  background-color: color-mix(in srgb, var(--subtle-surface-color) 8%, transparent);
+}
+
+.bar {
+  inline-size: 100%;
+  block-size: var(--bar-height);
+  border-radius: var(--shape-corner-small);
+  background: linear-gradient(to top, var(--primary-color), color-mix(in srgb, var(--primary-color) 55%, rgb(255 255 255)));
+  transition: block-size var(--motion-slow-effects);
+}
+
+.barTarget .chartTooltip {
+  inset-block-end: calc(var(--bar-height) + 10px);
+}
+
+.barTarget.tooltipBelow .chartTooltip {
+  inset-block: 10px auto;
+}
+
+.chartPoint:hover .chartTooltip,
+.chartPoint:focus-visible .chartTooltip,
+.barTarget:hover .chartTooltip,
+.barTarget:focus-visible .chartTooltip {
+  opacity: 1;
+  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient)), 0);
+  visibility: visible;
+}
+
+.tooltipStart:hover .chartTooltip,
+.tooltipStart:focus-visible .chartTooltip,
+.tooltipEnd:hover .chartTooltip,
+.tooltipEnd:focus-visible .chartTooltip {
+  transform: translateY(0);
+}
+
+.emptyState {
+  display: grid;
+  min-block-size: 260px;
+  place-items: center;
+  margin: 0;
+  color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.statsFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-block-start: 24px;
+}
+
+.statsActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.statsActions:has(> .btn ~ .btn) {
+  align-items: center;
+}
+
+.statsActions > .btn {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin: 0;
+  white-space: normal;
+}
+
+.estimateNote {
+  margin: 0;
+  color: var(--tertiary-text-color);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.historicalAdjustment {
+  inline-size: min(440px, 80vw);
+}
+
+.historicalAdjustment > p {
+  margin-block: 0 20px;
+}
+
+.historicalAdjustment .channelSpeedNote {
+  margin-block: 14px 20px;
+  color: var(--tertiary-text-color);
+  font-size: 0.8rem;
+}
+
+.adjustmentActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media only screen and (width <= 980px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  .statsPage {
+    inline-size: 100%;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .summaryCard,
+  .chartCard {
+    border-radius: var(--shape-corner-large);
+    padding-block: 16px;
+    padding-inline: 16px;
+  }
+
+  .lineChartPlot {
+    block-size: 190px;
+  }
+
+  .hiddenLabel {
+    visibility: hidden;
+  }
+
+}
+
+@media only screen and (width <= 500px) {
+  .statsHeader {
+    flex-wrap: wrap;
+  }
+
+  .deviceSegments {
+    flex-basis: 100%;
+  }
+}

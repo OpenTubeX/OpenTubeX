@@ -1,14 +1,17 @@
 <template>
   <FtPrompt
+    autosize
+    fixed-layout
     :label="title"
     @click="hideCreatePlaylistPrompt"
   >
     <FtFlexBox>
       <FtInput
         ref="playlistNameInput"
-        :placeholder="$t('User Playlists.Playlist Name')"
+        :label="$t('User Playlists.Playlist Name')"
+        :icon="['fas', 'list']"
+        :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
         :show-action-button="false"
-        :show-label="false"
         :value="playlistName"
         :maxlength="255"
         class="playlistNameInput"
@@ -26,19 +29,24 @@
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
-    <FtFlexBox>
-      <FtButton
-        :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
-        :disabled="playlistPersistenceDisabled"
-        @click="createNewPlaylist"
-      />
-      <FtButton
-        :label="$t('User Playlists.Cancel')"
-        :text-color="null"
-        :background-color="null"
-        @click="hideCreatePlaylistPrompt"
-      />
-    </FtFlexBox>
+    <template #footer>
+      <FtFlexBox>
+        <FtButton
+          theme="primary"
+          :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
+          :icon="['fas', 'playlist-add']"
+          :disabled="playlistPersistenceDisabled"
+          @click="createNewPlaylist"
+        />
+        <FtButton
+          :label="$t('User Playlists.Cancel')"
+          :icon="['fas', 'xmark']"
+          :text-color="null"
+          :background-color="null"
+          @click="hideCreatePlaylistPrompt"
+        />
+      </FtFlexBox>
+    </template>
   </FtPrompt>
 </template>
 
@@ -104,20 +112,34 @@ async function createNewPlaylist() {
   // It is still possible to attempt to create via pressing enter
   if (playlistPersistenceDisabled.value) { return }
 
+  // Copy any videos handed over by the opener (e.g. the add to playlist dropdown),
+  // as they get processed in place and must not be reactive store state
+  const initialVideos = (store.getters.getNewPlaylistVideoObject.videos ?? [])
+    .map((video) => ({ ...video }))
+
   const playlistObject = {
     playlistName: playlistName.value,
     protected: false,
-    description: '',
-    videos: [],
+    description: store.getters.getNewPlaylistVideoObject.description || '',
+    videos: initialVideos,
   }
+
+  const sourcePlaylistId = store.getters.getNewPlaylistVideoObject.sourcePlaylistId
+  if (sourcePlaylistId) playlistObject.sourcePlaylistId = sourcePlaylistId
 
   try {
     await store.dispatch('addPlaylist', playlistObject)
-    showToast(t('User Playlists.CreatePlaylistPrompt.Toast["Playlist {playlistName} has been successfully created."]', {
-      playlistName: playlistName.value,
-    }))
+    showToast({
+      message: t('User Playlists.CreatePlaylistPrompt.Toast["Playlist {playlistName} has been successfully created."]', {
+        playlistName: playlistName.value,
+      }),
+      icon: ['fac', 'playlist-check'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]'))
+    showToast({
+      message: t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   } finally {
     hideCreatePlaylistPrompt()

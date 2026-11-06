@@ -1,11 +1,173 @@
 <template>
   <FtCard
     class="card relative"
-    :class="{ hasError }"
+    :class="{ hasError, fullscreenChat: fullscreenOverlay }"
   >
-    <FtLoader
+    <header
+      v-if="fullscreenOverlay"
+      class="liveChatDockHeader"
+    >
+      <h3>
+        <FtIcon
+          class="liveChatDockTitleIcon"
+          :icon="['fas', 'message']"
+        />
+        {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
+      </h3>
+      <div
+        ref="liveChatActionsRef"
+        class="liveChatDockActions"
+        @keydown.esc="closeSettingsMenu"
+      >
+        <button
+          type="button"
+          class="liveChatDockAction"
+          :class="{ active: settingsMenuOpen }"
+          :aria-label="t('Video.Live Chat Settings')"
+          :title="t('Video.Live Chat Settings')"
+          :aria-expanded="String(settingsMenuOpen)"
+          @click="settingsMenuOpen = !settingsMenuOpen"
+        >
+          <FtIcon :icon="['fas', 'sliders-h']" />
+        </button>
+        <a
+          v-if="!isReplay"
+          :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
+          :aria-label="t('Video.Popout Live Chat')"
+          :title="t('Video.Popout Live Chat')"
+          target="_blank"
+          class="liveChatDockAction"
+        >
+          <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
+        </a>
+        <button
+          type="button"
+          class="liveChatDockAction"
+          :aria-label="closeButtonTitle"
+          :title="closeButtonTitle"
+          @click="emit('close')"
+        >
+          <FtIcon :icon="['fas', 'xmark']" />
+        </button>
+        <div
+          v-if="settingsMenuOpen"
+          class="liveChatSettingsMenu"
+        >
+          <FtToggleSwitch
+            :label="t('Video.Show Live Chat Timestamps')"
+            :default-value="showLiveChatTimestamps"
+            :compact="true"
+            @change="updateShowLiveChatTimestamps"
+          />
+          <FtRadioButton
+            v-if="canFilter"
+            :disabled="offline"
+            class="liveChatFilter"
+            :title="t('Video.Chat Filter')"
+            :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+            :values="['TOP_CHAT', 'LIVE_CHAT']"
+            :model-value="liveChatFilter"
+            @update:model-value="updateLiveChatFilter"
+          />
+        </div>
+      </div>
+    </header>
+    <Teleport
+      v-else
+      :to="phonePanelHeader || 'body'"
+      :disabled="!phonePanelHeader"
+    >
+      <div
+        class="titleContainer"
+      >
+        <h4 class="title">
+          {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
+          <span
+            v-if="!hideVideoViews && watchingCount !== null"
+            class="watchingCount"
+          >
+            {{ t('Global.Counts.Watching Count', { count: formattedWatchingCount }, watchingCount) }}
+          </span>
+        </h4>
+        <div
+          ref="liveChatActionsRef"
+          class="liveChatActions"
+          @keydown.esc="closeSettingsMenu"
+        >
+          <button
+            type="button"
+            class="liveChatActionButton"
+            :class="{ active: settingsMenuOpen }"
+            :aria-label="t('Video.Live Chat Settings')"
+            :title="t('Video.Live Chat Settings')"
+            :aria-expanded="String(settingsMenuOpen)"
+            @click="settingsMenuOpen = !settingsMenuOpen"
+          >
+            <FtIcon :icon="['fas', 'sliders-h']" />
+          </button>
+          <a
+            v-if="!isReplay"
+            :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
+            :aria-label="t('Video.Popout Live Chat')"
+            :title="t('Video.Popout Live Chat')"
+            target="_blank"
+            class="liveChatActionButton"
+          >
+            <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
+          </a>
+          <button
+            v-if="!phonePanelHeader"
+            type="button"
+            class="liveChatActionButton"
+            :aria-label="closeButtonTitle"
+            :title="closeButtonTitle"
+            @click="emit('close')"
+          >
+            <FtIcon :icon="['fas', 'xmark']" />
+          </button>
+          <div
+            v-if="settingsMenuOpen"
+            class="liveChatSettingsMenu"
+          >
+            <FtToggleSwitch
+              :label="t('Video.Show Live Chat Timestamps')"
+              :default-value="showLiveChatTimestamps"
+              :compact="true"
+              @change="updateShowLiveChatTimestamps"
+            />
+            <FtRadioButton
+              v-if="canFilter"
+              :disabled="offline"
+              class="liveChatFilter"
+              :title="t('Video.Chat Filter')"
+              :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+              :values="['TOP_CHAT', 'LIVE_CHAT']"
+              :model-value="liveChatFilter"
+              @update:model-value="updateLiveChatFilter"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    <div
       v-if="isLoading"
-    />
+      class="liveChatSkeleton"
+      :style="{ blockSize: chatHeight }"
+      data-tab-loading-indicator
+      aria-hidden="true"
+    >
+      <div
+        v-for="index in 24"
+        :key="index"
+        class="liveChatSkeletonMessage"
+      >
+        <div class="liveChatSkeletonAvatar ft-shimmer" />
+        <div class="liveChatSkeletonContent">
+          <div class="liveChatSkeletonAuthor ft-shimmer" />
+          <div class="liveChatSkeletonText ft-shimmer" />
+        </div>
+      </div>
+    </div>
     <div
       v-else-if="hasError"
       class="messageContainer"
@@ -16,13 +178,14 @@
       >
         {{ errorMessage }}
       </p>
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'exclamation-circle']"
         class="errorIcon"
       />
       <FtButton
         v-if="showEnableChat"
         :label="t('Video.Enable Live Chat')"
+        :icon="['fas', 'comment-alt']"
         class="enableLiveChat"
         @click="enableLiveChat"
       />
@@ -34,7 +197,9 @@
       <p
         class="message"
       >
-        {{ t("Video['Live chat is enabled. Chat messages will appear here once sent.']") }}
+        {{ isReplay
+          ? t("Video['Live chat replay is enabled. Chat messages will appear here as the video plays.']")
+          : t("Video['Live chat is enabled. Chat messages will appear here once sent.']") }}
       </p>
     </div>
     <div
@@ -42,34 +207,8 @@
       class="relative"
     >
       <div
-        class="titleContainer"
-      >
-        <h4
-          class="title"
-        >
-          {{ t("Video.Live Chat") }}
-          <span
-            v-if="!hideVideoViews && watchingCount !== null"
-            class="watchingCount"
-          >
-            {{ t('Global.Counts.Watching Count', { count: formattedWatchingCount }, watchingCount) }}
-          </span>
-        </h4>
-        <a
-          :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
-          :aria-label="t('Video.Popout Live Chat')"
-          :title="t('Video.Popout Live Chat')"
-          target="_blank"
-          class="popoutChatButton"
-        >
-          <FontAwesomeIcon
-            class="popoutChatIcon"
-            :icon="['fas', 'fa-arrow-up-right-from-square']"
-          />
-        </a>
-      </div>
-      <div
         v-if="superChatComments.length > 0"
+        v-overlay-scrollbars
         class="superChatComments"
       >
         <div
@@ -83,11 +222,11 @@
           @click="showSuperChatComment(comment)"
           @keydown.enter.space.prevent="showSuperChatComment(comment)"
         >
-          <img
+          <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="comment.author.thumbnailUrl"
             class="channelThumbnail"
-            alt=""
-          >
+          />
           <p
             class="superChatContent"
           >
@@ -99,129 +238,181 @@
           </p>
         </div>
       </div>
-      <div
-        v-if="showSuperChat"
-        class="openedSuperChat"
-        :class="superChat.superChat.colorClass"
-        role="button"
-        tabindex="0"
-        @click="hideSuperChat"
-        @keydown.enter.space.prevent="hideSuperChat"
-      >
+      <div class="liveChatBody">
         <div
-          class="superChatMessage"
-          @click.stop.prevent
+          v-if="showSuperChat"
+          class="openedSuperChat"
+          :class="superChat.superChat.colorClass"
+          role="button"
+          tabindex="0"
+          @click.self="hideSuperChat"
+          @keydown.enter.space.self.prevent="hideSuperChat"
         >
-          <div
-            class="upperSuperChatMessage"
-          >
-            <img
-              :src="superChat.author.thumbnailUrl"
-              class="channelThumbnail"
-              alt=""
-            >
-            <p
-              class="channelName"
-              dir="auto"
-            >
-              {{ superChat.author.name }}
-            </p>
-            <p
-              class="donationAmount"
-              dir="auto"
-            >
-              {{ superChat.superChat.amount }}
-            </p>
-          </div>
-          <p
-            v-safer-html="superChat.message"
-            class="chatMessage"
-            dir="auto"
-          />
-        </div>
-      </div>
-      <div
-        ref="commentsRef"
-        class="liveChatComments"
-        :style="{ blockSize: chatHeight }"
-        @mousewheel.passive="onScroll"
-        @scrollend="e => onScroll(e, true)"
-      >
-        <div
-          v-for="comment in comments"
-          :key="comment.id"
-          class="comment"
-          :class="comment.superChat ? `superChatMessage ${comment.superChat.colorClass}` : ''"
-        >
-          <template
-            v-if="comment.superChat"
-          >
+          <div class="superChatMessage">
             <div
               class="upperSuperChatMessage"
             >
-              <img
-                :src="comment.author.thumbnailUrl"
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
+                :src="superChat.author.thumbnailUrl"
                 class="channelThumbnail"
-                alt=""
-              >
-              <p
-                class="channelName"
-                dir="auto"
-              >
-                {{ comment.author.name }}
-              </p>
+              />
+              <div class="superChatAuthor">
+                <span
+                  v-if="showLiveChatTimestamps"
+                  class="liveChatTimestamp"
+                >
+                  {{ superChat.timestampText }}
+                </span>
+                <RouterLink
+                  class="channelName"
+                  dir="auto"
+                  :to="`/channel/${superChat.author.id}`"
+                >
+                  {{ superChat.author.name }}
+                </RouterLink>
+                <FtVerifiedBadge
+                  :verified="superChat.author.isVerified"
+                  class="liveChatVerifiedBadge"
+                />
+              </div>
               <p
                 class="donationAmount"
                 dir="auto"
               >
-                {{ comment.superChat.amount }}
+                {{ superChat.superChat.amount }}
               </p>
             </div>
             <p
-              v-if="comment.message"
-              v-safer-html="comment.message"
+              v-safer-html="superChat.message"
               class="chatMessage"
               dir="auto"
             />
-          </template>
-          <template
-            v-else
+          </div>
+        </div>
+        <div
+          ref="commentsRef"
+          v-overlay-scrollbars
+          class="liveChatComments"
+          :class="{ atLiveEdge: !showScrollToBottom }"
+          :style="{ blockSize: chatHeight }"
+          tabindex="0"
+          @pointerdown="handleLiveChatPointerDown"
+          @scroll.passive="onScroll"
+          @scrollend="onScrollEnd"
+          @keydown="handleLiveChatScrollKeydown"
+          @wheel.passive="stopScrollingToBottom"
+        >
+          <TransitionGroup
+            name="live-chat-message"
+            tag="div"
+            class="liveChatCommentList"
+            @after-enter="onLiveChatMessageEntered"
+            @after-leave="onLiveChatMessageLeft"
           >
-            <img
-              :src="comment.author.thumbnailUrl"
-              class="channelThumbnail"
-              alt=""
+            <div
+              v-for="comment in comments"
+              :key="comment.id"
+              class="comment"
+              :class="comment.superChat ? `superChatMessage ${comment.superChat.colorClass}` : ''"
             >
-            <p
-              class="chatContent"
-            >
-              <bdi
-                class="channelName"
-                :class="{
-                  member: comment.author.isMember,
-                  moderator: comment.author.isModerator,
-                  owner: comment.author.isOwner
-                }"
+              <template
+                v-if="comment.superChat"
               >
-                {{ comment.author.name }}
-              </bdi>
-              <span
-                v-if="comment.author.badge"
-                class="badge"
-              >
-                <img
-                  :src="comment.author.badge.url"
-                  alt=""
-                  :title="comment.author.badge.tooltip"
-                  class="badgeImage"
+                <div
+                  class="upperSuperChatMessage"
                 >
-              </span>
-              <bdi
-                v-safer-html="comment.message"
-                class="chatMessage"
-              />
-            </p>
-          </template>
+                  <FtRetryImage
+                    :fallback-icon="['fas', 'circle-user']"
+                    :src="comment.author.thumbnailUrl"
+                    class="channelThumbnail"
+                  />
+                  <div class="superChatAuthor">
+                    <span
+                      v-if="showLiveChatTimestamps"
+                      class="liveChatTimestamp"
+                    >
+                      {{ comment.timestampText }}
+                    </span>
+                    <RouterLink
+                      class="channelName"
+                      dir="auto"
+                      :to="`/channel/${comment.author.id}`"
+                    >
+                      {{ comment.author.name }}
+                    </RouterLink>
+                    <FtVerifiedBadge
+                      :verified="comment.author.isVerified"
+                      class="liveChatVerifiedBadge"
+                    />
+                  </div>
+                  <p
+                    class="donationAmount"
+                    dir="auto"
+                  >
+                    {{ comment.superChat.amount }}
+                  </p>
+                </div>
+                <p
+                  v-if="comment.message"
+                  v-safer-html="comment.message"
+                  class="chatMessage"
+                  dir="auto"
+                />
+              </template>
+              <template
+                v-else
+              >
+                <FtRetryImage
+                  :fallback-icon="['fas', 'circle-user']"
+                  :src="comment.author.thumbnailUrl"
+                  class="channelThumbnail"
+                />
+                <p
+                  class="chatContent"
+                >
+                  <span
+                    v-if="showLiveChatTimestamps"
+                    class="liveChatTimestamp"
+                  >
+                    {{ comment.timestampText }}
+                  </span>
+                  <RouterLink
+                    class="channelName"
+                    :class="{
+                      member: comment.author.isMember,
+                      moderator: comment.author.isModerator,
+                      owner: comment.author.isOwner
+                    }"
+                    dir="auto"
+                    :to="`/channel/${comment.author.id}`"
+                  >
+                    {{ comment.author.name }}
+                  </RouterLink>
+                  <FtVerifiedBadge
+                    :verified="comment.author.isVerified"
+                    class="liveChatVerifiedBadge"
+                  />
+                  <span
+                    v-if="comment.badge?.url"
+                    class="badge"
+                  >
+                    <FtRetryImage
+                      :fallback-icon="['fas', 'user-check']"
+                      :src="comment.badge.url"
+                      alt=""
+                      :title="comment.badge.tooltip"
+                      class="badgeImage"
+                    />
+                  </span>
+                  <bdi
+                    v-safer-html="comment.message"
+                    class="chatMessage"
+                  />
+                </p>
+              </template>
+            </div>
+          </TransitionGroup>
         </div>
       </div>
       <div
@@ -230,10 +421,10 @@
         :aria-label="t('Video.Scroll to Bottom')"
         role="button"
         tabindex="0"
-        @click="scrollToBottom"
-        @keydown.enter.space.prevent="scrollToBottom"
+        @click="scrollToBottom()"
+        @keydown.enter.space.prevent="scrollToBottom()"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="icon"
           :icon="['fas', 'arrow-down']"
         />
@@ -243,24 +434,46 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { computed, nextTick, onBeforeUnmount, ref, shallowReactive, useTemplateRef } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { YTNodes } from 'youtubei.js'
 
-import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
 
-import { formatNumber } from '../../helpers/utils'
+import { formatNumber, showInvidiousFallbackToast } from '../../helpers/utils'
+import { formatTime } from '../../helpers/dateFormat'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
+import { isRecoverableNetworkError } from '../../helpers/networkRecovery'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
+import {
+  createCoalescingPoller,
+  parseReplayOffsetMs,
+  shouldPrefetchReplay,
+  takeDueReplayComments
+} from './liveChatReplay.js'
 
+const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false
+  },
   /** @type {import('vue').PropType<import('youtubei.js').YT.LiveChat | null>} */
   liveChat: {
     type: Object,
@@ -273,27 +486,118 @@ const props = defineProps({
   channelId: {
     type: String,
     required: true
+  },
+  seekRequest: {
+    type: Object,
+    default: null
+  },
+  currentTime: {
+    type: Number,
+    default: 0
   }
 })
 
-const { t } = useI18n()
+const emit = defineEmits(['close', 'loaded'])
+
+const { locale, t } = useI18n()
+const timeFormat = computed(() => store.getters.getTimeFormat)
 
 /** @type {import('youtubei.js').YT.LiveChat|null} */
 let liveChatInstance = null
 let hasEnded = false
-let stayAtBottom = false
+let isUnmounted = false
+let stayAtBottom = true
+let isScrollingToBottom = false
+/** Incremented by user scroll input so pending live-edge jumps can yield to it. */
+let userScrollGeneration = 0
+/** @type {number | null} */
+let liveEdgeScrollFrame = null
+/** @type {ReturnType<typeof setTimeout> | null} */
+let scrollToLiveHoldTimer = null
+/**
+ * @typedef {object} ReadbackTrimRestore
+ * @property {HTMLElement} viewport
+ * @property {HTMLElement} contentElement
+ * @property {number} previousScrollTop
+ * @property {Set<HTMLElement>} leavingElements
+ * @property {HTMLElement|null} anchorElement
+ * @property {number} anchorOffset
+ */
+/** @type {ReadbackTrimRestore|null} */
+let pendingReadbackTrimRestore = null
+/** @type {number | null} */
+let startLiveChatFrame = null
+/** @type {ReturnType<typeof setTimeout> | null} */
+let finishLoadingTimer = null
+let skeletonShownAt = 0
+
+/** Hold auto-follow through the message enter animation (~180ms). */
+const SCROLL_TO_LIVE_HOLD_MS = 220
+/** Avoid replacing a fast-loading skeleton before it can be perceived. */
+const MINIMUM_SKELETON_DURATION_MS = 1000
+/** Coalesce the repeated viewport resizes produced by stacked dock transitions. */
+const VIEWPORT_RESIZE_SETTLE_MS = 50
+/** Keep the live edge light while retaining a larger, bounded read-back window. */
+const MAX_LIVE_CHAT_COMMENTS = 150
+const MAX_LIVE_CHAT_READBACK_COMMENTS = 500
+
+/**
+ * Replay messages that were fetched but that the player hasn't reached yet.
+ * @type {{ offsetMs: number, comment: any }[]}
+ */
+let pendingReplayComments = []
+/** @type {number|null} */
+let pendingReplaySeekSeconds = null
+
+/**
+ * The player position the replay has been fetched up to. Unlike the pending
+ * messages this doesn't shrink as messages are shown, so stretches of the stream
+ * without any chat activity don't look like an empty buffer.
+ */
+let replayFetchedUntilMs = 0
+
+/**
+ * Tops the replay buffer back up once it no longer reaches far enough ahead of the player.
+ */
+const requestMoreReplayComments = createCoalescingPoller(async () => {
+  if (liveChatInstance === null || !shouldPrefetchReplay(replayFetchedUntilMs, props.currentTime)) {
+    return
+  }
+
+  await liveChatInstance.pollNext()
+})
 
 const isLoading = ref(true)
+const isReplay = ref(Boolean(props.liveChat?.is_replay))
+const closeButtonTitle = computed(() => isReplay.value
+  ? t('Video.Close Live Chat Replay')
+  : t('Video.Close Live Chat'))
+const canFilter = ref(false)
 const hasError = ref(false)
 const showEnableChat = ref(false)
 const errorMessage = ref('')
 const showSuperChat = ref(false)
 const showScrollToBottom = ref(false)
+const settingsMenuOpen = ref(false)
+
+/**
+ * Escape closes an open settings menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeSettingsMenu(event) {
+  if (!settingsMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  settingsMenuOpen.value = false
+}
+const liveChatActionsRef = useTemplateRef('liveChatActionsRef')
 const comments = shallowReactive([])
 const superChatComments = shallowReactive([])
 const superChat = ref({
   id: '',
   author: {
+    id: '',
     name: '',
     thumbnailUrl: ''
   },
@@ -304,7 +608,7 @@ const superChat = ref({
   }
 })
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
@@ -317,6 +621,10 @@ const scrollingBehaviour = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
+const showLiveChatTimestamps = computed(() => store.getters.getShowLiveChatTimestamps)
+
+/** @type {import('vue').ComputedRef<'TOP_CHAT' | 'LIVE_CHAT'>} */
+const liveChatFilter = computed(() => store.getters.getLiveChatFilter)
 
 /** @type {import('vue').Ref<number | null>} */
 const watchingCount = ref(null)
@@ -326,29 +634,72 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
+  emit('loaded', false)
+  isUnmounted = true
+  pendingReadbackTrimRestore = null
+  if (liveEdgeScrollFrame !== null) {
+    cancelAnimationFrame(liveEdgeScrollFrame)
+    liveEdgeScrollFrame = null
+  }
+  stopOutsidePress?.()
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
+  if (startLiveChatFrame !== null) {
+    cancelAnimationFrame(startLiveChatFrame)
+    startLiveChatFrame = null
+  }
+  if (finishLoadingTimer !== null) {
+    clearTimeout(finishLoadingTimer)
+    finishLoadingTimer = null
+  }
   handleEnd()
 })
 
-if (!process.env.SUPPORTS_LOCAL_API) {
-  hasError.value = true
-  errorMessage.value = t('Video["Live Chat is currently not supported in this build."]')
-  isLoading.value = false
-} else {
+onMounted(() => {
+  // Fullscreen docks stop pointer events from bubbling into the player. Capture
+  // the event first so clicking another dock can still dismiss this menu.
+  stopOutsidePress = listenForOutsidePress(handleChatSettingsClickOutside, true)
+
+  // Setup can finish after a cached continuation has already returned. Starting
+  // on the next frame guarantees the loading skeleton is painted before chat
+  // polling begins, so it covers the real request instead of flashing afterward.
+  skeletonShownAt = performance.now()
+  startLiveChatFrame = requestAnimationFrame(() => {
+    startLiveChatFrame = null
+    initializeLiveChat()
+  })
+})
+
+function initializeLiveChat() {
+  if (!process.env.SUPPORTS_LOCAL_API) {
+    hasError.value = true
+    errorMessage.value = t('Video["Live Chat is currently not supported in this build."]')
+    isLoading.value = false
+    return
+  }
+
   switch (backendPreference.value) {
     case 'local':
       if (props.liveChat) {
-        liveChatInstance = props.liveChat
+        // Vue proxies the chat stored in Watch data; its private-field methods need the raw instance.
+        liveChatInstance = toRaw(props.liveChat)
         startLiveChatLocal()
       } else {
         showLiveChatUnavailable()
       }
       break
     case 'invidious':
+    case 'yattee':
       if (backendFallback.value) {
+        showInvidiousFallbackToast(backendPreference.value)
         getLiveChatLocal()
       } else {
         hasError.value = true
-        errorMessage.value = t('Video["Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required."]')
+        errorMessage.value = backendPreference.value === 'yattee'
+          ? t('Video["Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required."]')
+          : t('Video["Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required."]')
         showEnableChat.value = true
         isLoading.value = false
       }
@@ -357,14 +708,33 @@ if (!process.env.SUPPORTS_LOCAL_API) {
 }
 
 function enableLiveChat() {
+  if (backendPreference.value !== 'local') showInvidiousFallbackToast(backendPreference.value)
   hasError.value = false
   showEnableChat.value = false
   isLoading.value = true
+  skeletonShownAt = performance.now()
   getLiveChatLocal()
 }
 
 async function getLiveChatLocal() {
-  const videoInfo = await getLocalVideoInfo(props.videoId)
+  let videoInfo
+  try {
+    videoInfo = await getLocalVideoInfo(props.videoId)
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error(error)
+      errorMessage.value = `[${error.name}] ${error.message}`
+      hasError.value = true
+      isLoading.value = false
+    }
+    return
+  }
+
+  // The component tears down while this request is pending when the video
+  // changes or the chat closes; starting a chat now would poll forever.
+  if (isUnmounted) {
+    return
+  }
 
   if (videoInfo.livechat) {
     liveChatInstance = videoInfo.getLiveChat()
@@ -383,53 +753,287 @@ function showLiveChatUnavailable() {
 }
 
 function startLiveChatLocal() {
-  liveChatInstance.once('start', handleStart)
+  isReplay.value = liveChatInstance.is_replay
+
+  // Replays emit `start` again after every seek, so this can't be a `once` listener.
+  liveChatInstance.on('start', handleStart)
   liveChatInstance.on('chat-update', handleChatUpdate)
   liveChatInstance.on('metadata-update', handleMetadataUpdate)
-  liveChatInstance.once('error', handleError)
+  liveChatInstance.on('error', handleError)
   liveChatInstance.once('end', handleEnd)
+
+  // Videos opened at a saved watch progress start midway through the replay.
+  const startSeconds = pendingReplaySeekSeconds ?? props.currentTime
+  pendingReplaySeekSeconds = null
+  if (isReplay.value && startSeconds > 0) {
+    liveChatInstance.seekTo(startSeconds * 1000)
+  }
+
+  // A component remount (notably Vue HMR in development) can receive the same
+  // chat instance after it has already advanced beyond its initial continuation.
+  // Restarting that instance resumes polling, but it cannot emit `start` again
+  // until a replay seek. Rehydrate from youtubei.js' cached initial payload so
+  // loading and the chat filter UI do not wait forever.
+  if (liveChatInstance.initial_info) {
+    handleStart(liveChatInstance.initial_info)
+  }
 
   liveChatInstance.start()
 }
 
 const commentsRef = useTemplateRef('commentsRef')
 
+watch(() => props.fullscreenOverlay, () => {
+  // Entering and leaving the dock both change the viewport height, so the
+  // previous end offset no longer marks the live edge.
+  if (stayAtBottom) {
+    scrollToLiveAfterLayout()
+  }
+})
+
+/**
+ * Keep the live edge glued across dock open/close animations and height shares.
+ * Content changes are synchronized immediately, while viewport changes settle
+ * first so a dock transition does not force scrollbar layout on every frame.
+ * A stale scrollTop past the content end would otherwise leave an empty view
+ * until the user scrolls up (same failure mode as the comments dock).
+ */
+watch(commentsRef, (element, _previous, onCleanup) => {
+  if (element == null) {
+    return
+  }
+
+  const contentElement = element.querySelector('.liveChatCommentList')
+  let viewportResizeTimer = null
+  const syncScrollPosition = () => {
+    clampOverlayScrollTop(element, contentElement)
+
+    if (!stayAtBottom) {
+      return
+    }
+
+    scrollToBottom('instant')
+  }
+  const viewportResizeObserver = new ResizeObserver(() => {
+    if (viewportResizeTimer !== null) {
+      clearTimeout(viewportResizeTimer)
+    }
+    viewportResizeTimer = setTimeout(() => {
+      viewportResizeTimer = null
+      syncScrollPosition()
+    }, VIEWPORT_RESIZE_SETTLE_MS)
+  })
+  const contentResizeObserver = new ResizeObserver(syncScrollPosition)
+
+  viewportResizeObserver.observe(element)
+  if (contentElement !== null) {
+    contentResizeObserver.observe(contentElement)
+  }
+  onCleanup(() => {
+    viewportResizeObserver.disconnect()
+    contentResizeObserver.disconnect()
+    if (viewportResizeTimer !== null) {
+      clearTimeout(viewportResizeTimer)
+    }
+  })
+}, { flush: 'post' })
+
+/**
+ * The viewport settles its size after Vue renders. Waiting through the
+ * following frame ensures both sidebar creation and dock teleporting have
+ * their final height before the chat is anchored to the live edge.
+ */
+function scrollToLiveAfterLayout() {
+  const generation = userScrollGeneration
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Scrolling during these frames must not be snapped back to the live edge.
+        if (generation === userScrollGeneration) {
+          scrollToBottom('instant')
+        }
+      })
+    })
+  })
+}
+
 /**
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
-  const actions = initialData.actions.filterType(YTNodes.AddChatItemAction)
+  emit('loaded', true)
+  const viewSelector = initialData.header?.view_selector ?? liveChatInstance?.initial_info?.header?.view_selector
+  canFilter.value = (viewSelector?.sub_menu_items?.length ?? 0) > 1
 
-  for (const { item } of actions) {
-    if (item.is(YTNodes.LiveChatTextMessage)) {
-      parseLiveChatComment(item)
-    } else if (item.is(YTNodes.LiveChatPaidMessage)) {
-      parseLiveChatSuperChat(item)
-    }
+  // A chat always starts on YouTube's default view, so switch away from it before
+  // showing anything if the other one is the view that is wanted.
+  if (!props.offline && canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
+    applyChatFilter()
+    return
   }
 
-  isLoading.value = false
+  for (const action of initialData.actions) {
+    handleChatAction(action)
+  }
 
-  nextTick(() => {
-    commentsRef.value?.scrollTo({
-      top: commentsRef.value.scrollHeight,
-      behavior: 'instant'
-    })
-  })
+  finishLoading()
+
+  if (isReplay.value) {
+    releaseReplayComments()
+    requestMoreReplayComments()
+  }
+}
+
+function finishLoading() {
+  const remainingDuration = MINIMUM_SKELETON_DURATION_MS - (performance.now() - skeletonShownAt)
+
+  if (finishLoadingTimer !== null) {
+    clearTimeout(finishLoadingTimer)
+    finishLoadingTimer = null
+  }
+
+  if (remainingDuration <= 0) {
+    isLoading.value = false
+    scrollToLiveAfterLayout()
+    return
+  }
+
+  finishLoadingTimer = setTimeout(() => {
+    finishLoadingTimer = null
+    isLoading.value = false
+    scrollToLiveAfterLayout()
+  }, remainingDuration)
 }
 
 /**
  * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').ChatAction} action
  */
 function handleChatUpdate(action) {
-  if (!hasEnded && action.is(YTNodes.AddChatItemAction)) {
-    if (action.item.is(YTNodes.LiveChatTextMessage)) {
-      parseLiveChatComment(action.item)
-    } else if (action.item.is(YTNodes.LiveChatPaidMessage)) {
-      parseLiveChatSuperChat(action.item)
-    }
+  if (!hasEnded) {
+    handleChatAction(action)
   }
 }
+
+/**
+ * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').ChatAction} action
+ * @param {number} [offsetMs] the player position this action belongs to, for replays
+ */
+function handleChatAction(action, offsetMs) {
+  if (action.is(YTNodes.ReplayChatItemAction)) {
+    const actionOffsetMs = parseReplayOffsetMs(action.video_offset_time_msec)
+
+    replayFetchedUntilMs = Math.max(replayFetchedUntilMs, actionOffsetMs)
+
+    for (const replayedAction of action.actions) {
+      handleChatAction(replayedAction, actionOffsetMs)
+    }
+
+    return
+  }
+
+  if (!action.is(YTNodes.AddChatItemAction)) {
+    return
+  }
+
+  let comment = null
+
+  if (action.item.is(YTNodes.LiveChatTextMessage)) {
+    comment = parseLiveChatComment(action.item)
+  } else if (action.item.is(YTNodes.LiveChatPaidMessage)) {
+    comment = parseLiveChatSuperChat(action.item)
+  }
+
+  if (comment === null) {
+    return
+  }
+
+  if (offsetMs === undefined) {
+    deliverComment(comment)
+  } else {
+    pendingReplayComments.push({ offsetMs, comment })
+  }
+}
+
+/**
+ * Drops everything on screen, which is what switching to a different part of the
+ * video or to a different view of the chat leaves behind.
+ */
+function clearChat() {
+  pendingReadbackTrimRestore = null
+  comments.splice(0, comments.length)
+  superChatComments.splice(0, superChatComments.length)
+  showSuperChat.value = false
+  pendingReplayComments = []
+  replayFetchedUntilMs = 0
+}
+
+/**
+ * Moves the chat onto the currently selected view, keeping a replay at the
+ * position the player is at.
+ */
+function applyChatFilter() {
+  if (props.offline) return
+  if (liveChatInstance === null || !canFilter.value || liveChatInstance.filter === liveChatFilter.value) {
+    return
+  }
+
+  clearChat()
+  liveChatInstance.setFilter(liveChatFilter.value)
+
+  if (isReplay.value) {
+    liveChatInstance.seekTo(props.currentTime * 1000)
+    requestMoreReplayComments()
+  }
+}
+
+watch([liveChatFilter, () => props.offline], applyChatFilter)
+
+/**
+ * Shows every buffered replay message that the player has reached by now.
+ */
+function releaseReplayComments() {
+  for (const { comment } of takeDueReplayComments(pendingReplayComments, props.currentTime)) {
+    deliverComment(comment)
+  }
+}
+
+watch([() => props.currentTime, () => props.seekRequest, () => props.offline], ([currentTime, seekRequest], [, previousSeekRequest]) => {
+  const seeked = seekRequest !== null && seekRequest !== previousSeekRequest
+  if (liveChatInstance === null) {
+    // Metadata loading can finish after a paused seek. Keep its precision, but
+    // use the latest playback position if playback has since moved on.
+    if (seeked) {
+      pendingReplaySeekSeconds = seekRequest.seconds
+    } else if (pendingReplaySeekSeconds !== null && currentTime !== Math.floor(pendingReplaySeekSeconds)) {
+      pendingReplaySeekSeconds = null
+    }
+    return
+  }
+  if (!isReplay.value) {
+    return
+  }
+
+  if (props.offline) {
+    if (seeked) {
+      pendingReplaySeekSeconds = seekRequest.seconds
+    } else if (pendingReplaySeekSeconds !== null && currentTime !== Math.floor(pendingReplaySeekSeconds)) {
+      pendingReplaySeekSeconds = currentTime
+    }
+    if (pendingReplaySeekSeconds !== null) return
+  }
+
+  if (seeked || pendingReplaySeekSeconds !== null) {
+    // Only an actual player seek invalidates chat. Delayed time updates can span
+    // many seconds on a busy or backgrounded renderer during ordinary playback.
+    clearChat()
+    liveChatInstance.seekTo((seeked ? seekRequest.seconds : pendingReplaySeekSeconds) * 1000)
+    pendingReplaySeekSeconds = null
+  } else {
+    releaseReplayComments()
+  }
+
+  requestMoreReplayComments()
+})
 
 /**
  * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').LiveMetadata} metadata
@@ -458,12 +1062,22 @@ function handleEnd() {
  * @param {Error} error
  */
 function handleError(error) {
+  // Chat polling retries body-read failures, which happen after fetch recovery returns.
+  if (isRecoverableNetworkError(error)) return
   handleEnd()
 
   console.error(error)
   errorMessage.value = `[${error.name}] ${error.message}`
   hasError.value = true
   isLoading.value = false
+}
+
+/**
+ * Live chat marks verified authors with a `VERIFIED` icon badge instead of a badge style.
+ * @param {import('youtubei.js').Misc.Author} author
+ */
+function isLiveChatAuthorVerified(author) {
+  return author.badges?.some(badge => badge.is(YTNodes.LiveChatAuthorBadge) && badge.icon_type === 'VERIFIED') ?? false
 }
 
 /**
@@ -475,12 +1089,15 @@ function parseLiveChatComment(comment) {
 
   const parsedComment = {
     id: comment.id,
-    message: autolinker.link(parseLocalTextRuns(comment.message.runs, 20)),
+    timestampText: formatLiveChatTimestamp(comment),
+    message: parseLiveChatMessage(comment.message),
     author: {
+      id: comment.author.id,
       name: comment.author.name,
       thumbnailUrl: comment.author.thumbnails.at(-1).url,
       isOwner: comment.author.id === props.channelId,
       isModerator: comment.author.is_moderator,
+      isVerified: isLiveChatAuthorVerified(comment.author),
       isMember: !!badge
     }
   }
@@ -492,7 +1109,7 @@ function parseLiveChatComment(comment) {
     }
   }
 
-  pushComment(parsedComment)
+  return parsedComment
 }
 
 /**
@@ -501,10 +1118,13 @@ function parseLiveChatComment(comment) {
 function parseLiveChatSuperChat(superChat) {
   const parsedComment = {
     id: superChat.id,
-    message: autolinker.link(parseLocalTextRuns(superChat.message.runs, 20)),
+    timestampText: formatLiveChatTimestamp(superChat),
+    message: parseLiveChatMessage(superChat.message),
     author: {
-      name: superChat.author.name.text,
-      thumbnailUrl: superChat.author.thumbnails[0].url
+      id: superChat.author.id,
+      name: superChat.author.name,
+      thumbnailUrl: superChat.author.thumbnails[0].url,
+      isVerified: isLiveChatAuthorVerified(superChat.author)
     },
     superChat: {
       amount: superChat.purchase_amount,
@@ -512,32 +1132,127 @@ function parseLiveChatSuperChat(superChat) {
     }
   }
 
-  superChatComments.unshift(parsedComment)
+  return parsedComment
+}
 
-  setTimeout(() => {
-    removeFromSuperChat(parsedComment)
-  }, 120000)
+function parseLiveChatMessage(message) {
+  return autolinker.link(parseLocalTextRuns(message.runs ?? [{ text: message.text ?? '' }], 20))
+}
 
-  pushComment(parsedComment)
+/**
+ * Adds a parsed message to the chat. For replays this happens once the player
+ * reaches the position the message was sent at, rather than as soon as it is fetched.
+ * @param {any} comment
+ */
+function deliverComment(comment) {
+  if (comment.superChat) {
+    superChatComments.unshift(comment)
+
+    setTimeout(() => {
+      removeFromSuperChat(comment)
+    }, 120000)
+  }
+
+  pushComment(comment)
 }
 
 /**
  * @param {any} comment
  */
 function pushComment(comment) {
+  const shouldStayAtBottom = stayAtBottom
   comments.push(comment)
 
-  if (!isLoading.value && stayAtBottom) {
-    nextTick(() => {
-      commentsRef.value?.scrollTo({
-        top: commentsRef.value.scrollHeight,
-        behavior: scrollingBehaviour.value
-      })
-    })
+  // Trim before re-anchoring so the anchored scrollTop cannot point past
+  // messages that were just removed from the top.
+  const commentLimit = shouldStayAtBottom
+    ? MAX_LIVE_CHAT_COMMENTS
+    : MAX_LIVE_CHAT_READBACK_COMMENTS
+  if (comments.length > commentLimit) {
+    trimLiveChatComments(commentLimit, !shouldStayAtBottom)
   }
 
-  if (comments.length > 150 && stayAtBottom) {
-    comments.splice(0, comments.length - 150)
+  if (!isLoading.value && shouldStayAtBottom) {
+    scheduleLiveEdgeScroll()
+  }
+}
+
+/**
+ * Bounds chat memory even when the user reads older messages. When trimming a
+ * read-back viewport, retain the first surviving DOM node as a scroll anchor so
+ * removing its predecessors does not make the visible conversation jump.
+ * @param {number} limit
+ * @param {boolean} preserveScrollAnchor
+ */
+function trimLiveChatComments(limit, preserveScrollAnchor) {
+  const removeCount = comments.length - limit
+  const viewport = commentsRef.value
+  /** @type {HTMLElement|null} */
+  const contentElement = viewport?.querySelector('.liveChatCommentList') ?? null
+
+  if (preserveScrollAnchor && viewport && contentElement) {
+    scheduleReadbackTrimRestore(viewport, contentElement, removeCount)
+  }
+
+  comments.splice(0, removeCount)
+}
+
+/**
+ * Coalesces message batches into scroll corrections that run after Vue removes
+ * each leaving node from the TransitionGroup's layout.
+ * @param {HTMLElement} viewport
+ * @param {HTMLElement} contentElement
+ * @param {number} removeCount
+ */
+function scheduleReadbackTrimRestore(viewport, contentElement, removeCount) {
+  let restore = pendingReadbackTrimRestore
+
+  if (restore == null || restore.viewport !== viewport) {
+    restore = {
+      viewport,
+      contentElement,
+      previousScrollTop: viewport.scrollTop,
+      leavingElements: new Set(),
+      anchorElement: null,
+      anchorOffset: 0,
+    }
+    pendingReadbackTrimRestore = restore
+  }
+
+  const retainedElements = Array.from(contentElement.children)
+    .filter(element => !restore.leavingElements.has(/** @type {HTMLElement} */ (element)))
+  for (const element of retainedElements.slice(0, removeCount)) {
+    restore.leavingElements.add(/** @type {HTMLElement} */ (element))
+  }
+
+  restore.previousScrollTop = viewport.scrollTop
+  restore.anchorElement = /** @type {HTMLElement|null} */ (retainedElements[removeCount] ?? null)
+  restore.anchorOffset = restore.anchorElement?.offsetTop ?? 0
+}
+
+/**
+ * @param {HTMLElement} element
+ */
+function onLiveChatMessageLeft(element) {
+  const restore = pendingReadbackTrimRestore
+  if (restore == null || !restore.leavingElements.delete(element)) {
+    return
+  }
+  if (commentsRef.value !== restore.viewport) {
+    pendingReadbackTrimRestore = null
+    return
+  }
+
+  const nextScrollTop = restore.anchorElement == null
+    ? restore.previousScrollTop
+    : restore.previousScrollTop + restore.anchorElement.offsetTop - restore.anchorOffset
+  restoreOverlayScrollTop(restore.viewport, Math.max(0, nextScrollTop))
+  clampOverlayScrollTop(restore.viewport, restore.contentElement)
+
+  restore.previousScrollTop = restore.viewport.scrollTop
+  restore.anchorOffset = restore.anchorElement?.offsetTop ?? 0
+  if (restore.leavingElements.size === 0 && pendingReadbackTrimRestore === restore) {
+    pendingReadbackTrimRestore = null
   }
 }
 
@@ -547,7 +1262,15 @@ function pushComment(comment) {
 function removeFromSuperChat(comment) {
   const index = superChatComments.indexOf(comment)
 
-  superChatComments.splice(index, 1)
+  // Seeking a replay clears the ticker while the removal timeouts are still pending.
+  if (index !== -1) {
+    superChatComments.splice(index, 1)
+  }
+
+  // The ticker chip is gone; don't leave its expanded card floating over chat.
+  if (showSuperChat.value && superChat.value.id === comment.id) {
+    showSuperChat.value = false
+  }
 }
 
 /**
@@ -562,25 +1285,135 @@ function showSuperChatComment(comment) {
   }
 }
 
-/**
- * @param {any} event
- * @param {boolean} [isScrollEnd]
- */
-function onScroll(event, isScrollEnd = false) {
-  const SCROLL_BOTTOM_THRESHOLD_PX = 20
-  const liveChatComments = commentsRef.value
-  if (event.wheelDelta >= 0 && stayAtBottom) {
-    stayAtBottom = false
+function formatLiveChatTimestamp(comment) {
+  if (comment.timestamp_text) {
+    return comment.timestamp_text
+  }
 
-    if (liveChatComments.scrollHeight > liveChatComments.clientHeight) {
-      showScrollToBottom.value = true
+  if (Number.isFinite(comment.timestamp)) {
+    return formatTime(comment.timestamp, locale.value, timeFormat.value, { timeStyle: 'short' })
+  }
+
+  return ''
+}
+
+let stopOutsidePress = null
+function handleChatSettingsClickOutside(event) {
+  if (settingsMenuOpen.value && !liveChatActionsRef.value?.contains(event.target)) {
+    settingsMenuOpen.value = false
+  }
+}
+
+function updateShowLiveChatTimestamps(value) {
+  store.dispatch('updateShowLiveChatTimestamps', value)
+}
+
+function updateLiveChatFilter(value) {
+  if (props.offline) return
+  store.dispatch('updateLiveChatFilter', value)
+}
+
+function onScroll() {
+  const liveChatComments = commentsRef.value
+  if (liveChatComments === null || liveChatComments.clientHeight === 0) {
+    return
+  }
+
+  const isAtBottom = liveChatComments.scrollHeight - liveChatComments.scrollTop - liveChatComments.clientHeight <= 1
+
+  if (isAtBottom) {
+    stayAtBottom = true
+    // Keep the programmatic follow flag for the enter-animation hold window.
+    if (scrollToLiveHoldTimer === null) {
+      isScrollingToBottom = false
     }
-  } else if (
-    (isScrollEnd || event.wheelDelta < 0) &&
-    !stayAtBottom &&
-    liveChatComments.scrollHeight - liveChatComments.scrollTop - liveChatComments.clientHeight <= SCROLL_BOTTOM_THRESHOLD_PX
-  ) {
-    scrollToBottom()
+    showScrollToBottom.value = false
+  } else if (!isScrollingToBottom) {
+    // Scroll events are also emitted while a replay seek replaces the list and
+    // while message/dock animations reflow it. Only explicit user input should
+    // cancel live-edge following; stopScrollingToBottom handles wheel, pointer,
+    // and keyboard input before the resulting scroll event arrives.
+    showScrollToBottom.value = !stayAtBottom && liveChatComments.scrollHeight > liveChatComments.clientHeight
+  }
+}
+
+function onScrollEnd() {
+  // Programmatic follow uses a hold timer through the enter animation; don't let
+  // an intermediate scrollend drop stayAtBottom early.
+  if (scrollToLiveHoldTimer !== null) {
+    return
+  }
+
+  isScrollingToBottom = false
+  onScroll()
+}
+
+function stopScrollingToBottom() {
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
+
+  isScrollingToBottom = false
+  stayAtBottom = false
+  userScrollGeneration++
+}
+
+/**
+ * Clicking links or selecting text in chat must not disable auto-follow. Pointer
+ * input only expresses scroll intent when it pans the viewport or uses its
+ * scrollbar; wheel and keyboard scrolling have their own handlers.
+ * @param {PointerEvent} event
+ */
+function handleLiveChatPointerDown(event) {
+  const clickedScrollbar = event.target instanceof Element && event.target.closest('.os-scrollbar-vertical') !== null
+  if (event.button === 1 || clickedScrollbar) {
+    stopScrollingToBottom()
+    return
+  }
+
+  if (event.pointerType !== 'touch') {
+    return
+  }
+
+  const element = event.currentTarget
+  const pointerId = event.pointerId
+  const startX = event.clientX
+  const startY = event.clientY
+
+  const finish = (finishEvent) => {
+    if (finishEvent.pointerId !== pointerId) {
+      return
+    }
+
+    element.removeEventListener('pointermove', handlePointerMove)
+    element.removeEventListener('pointerup', finish)
+    element.removeEventListener('pointercancel', finish)
+  }
+
+  const handlePointerMove = (moveEvent) => {
+    if (moveEvent.pointerId !== pointerId || Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 6) {
+      return
+    }
+
+    stopScrollingToBottom()
+    finish(moveEvent)
+  }
+
+  element.addEventListener('pointermove', handlePointerMove, { passive: true })
+  element.addEventListener('pointerup', finish, { passive: true })
+  element.addEventListener('pointercancel', finish, { passive: true })
+}
+
+/**
+ * Keyboard scrolling does not emit pointer or wheel events. Cancel the
+ * auto-follow hold before the browser moves the viewport so it is not snapped
+ * back to the live edge on a busy chat.
+ * @param {KeyboardEvent} event
+ */
+function handleLiveChatScrollKeydown(event) {
+  if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+    stopScrollingToBottom()
   }
 }
 
@@ -588,14 +1421,79 @@ function hideSuperChat() {
   showSuperChat.value = false
 }
 
-function scrollToBottom() {
-  commentsRef.value.scrollTo({
-    top: commentsRef.value.scrollHeight,
-    behavior: scrollingBehaviour.value
+/**
+ * Enter animation can leave the viewport short of the live edge for a frame;
+ * re-pin once the new message has finished sliding in.
+ */
+function onLiveChatMessageEntered() {
+  scheduleLiveEdgeScroll()
+}
+
+/**
+ * Replay batches and their enter hooks can request hundreds of identical forced
+ * scrollbar measurements. Measure once per frame, after Vue renders the batch.
+ */
+function scheduleLiveEdgeScroll() {
+  if (liveEdgeScrollFrame !== null || !stayAtBottom) {
+    return
+  }
+
+  liveEdgeScrollFrame = requestAnimationFrame(() => {
+    liveEdgeScrollFrame = null
+    // Wheel/keyboard input or unmounting may have happened since scheduling.
+    if (stayAtBottom && !isUnmounted) {
+      scrollToBottom('instant')
+    }
   })
+}
+
+/**
+ * @param {ScrollBehavior | 'instant'} [behavior]
+ */
+function scrollToBottom(behavior = scrollingBehaviour.value) {
+  const liveChatComments = commentsRef.value
+  if (!liveChatComments) {
+    return
+  }
 
   stayAtBottom = true
+  isScrollingToBottom = true
   showScrollToBottom.value = false
+
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
+
+  const top = liveChatComments.scrollHeight
+  const contentElement = liveChatComments.querySelector('.liveChatCommentList')
+
+  if (behavior === 'instant' || behavior === 'auto') {
+    // Jump to the new end and clamp it to the rendered comments, replacing a
+    // pre-teleport / pre-trim position.
+    restoreOverlayScrollTop(liveChatComments, top)
+    clampOverlayScrollTop(liveChatComments, contentElement)
+    scrollToLiveHoldTimer = setTimeout(() => {
+      scrollToLiveHoldTimer = null
+      if (commentsRef.value !== liveChatComments) {
+        return
+      }
+
+      if (stayAtBottom) {
+        restoreOverlayScrollTop(liveChatComments, liveChatComments.scrollHeight)
+        clampOverlayScrollTop(liveChatComments, contentElement)
+      }
+
+      isScrollingToBottom = false
+      onScroll()
+    }, SCROLL_TO_LIVE_HOLD_MS)
+    return
+  }
+
+  liveChatComments.scrollTo({
+    top,
+    behavior
+  })
 }
 
 </script>

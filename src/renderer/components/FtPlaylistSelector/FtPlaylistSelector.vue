@@ -8,23 +8,24 @@
     <div
       class="thumbnail"
     >
-      <FontAwesomeIcon
+      <FtIcon
         v-if="selected"
         class="selectedIcon"
         :icon="['fas', 'check']"
       />
-      <img
+      <FtRetryImage
         alt=""
         :src="thumbnail"
         class="thumbnailImage"
-      >
+        :class="{ blur: store.getters.getBlurThumbnails }"
+      />
       <div
         class="videoCountContainer"
       >
         <div class="background" />
         <div class="inner">
           <div>{{ playlist.videos.length }}</div>
-          <div><FontAwesomeIcon :icon="['fas', 'list']" /></div>
+          <div><FtIcon :icon="['fas', 'list']" /></div>
         </div>
       </div>
     </div>
@@ -52,12 +53,14 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import store from '../../store/index'
+import FtRetryImage from '../FtRetryImage.vue'
+import { getVideoThumbnailUrl } from '../../helpers/utils'
 
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -174,15 +177,13 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
     videoPresenceCountInPlaylistText.value != null
 })
 
-const thumbnail = ref(thumbnailPlaceholder)
-
-if (props.playlist.videos.length > 0) {
-  const origin = backendPreference.value === 'invidious'
-    ? currentInvidiousInstanceUrl.value
-    : 'https://i.ytimg.com'
-
-  thumbnail.value = `${origin}/vi/${props.playlist.videos[0].videoId}/mqdefault.jpg`
-}
+const thumbnail = computed(() => {
+  if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
+  if (props.playlist.customThumbnail) return props.playlist.customThumbnail
+  return props.playlist.videos.length > 0
+    ? getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
+    : thumbnailPlaceholder
+})
 
 function toggleSelection() {
   if (!props.disabled) {

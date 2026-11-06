@@ -4,60 +4,114 @@
   color: var(--primary-text-color);
   cursor: pointer;
   font-size: 1rem;
+  min-inline-size: 24px;
+  min-block-size: 24px;
   padding: 0;
 }
 
+/* Material 3 rich tooltip: a tonal surface for longer help text. */
 .text {
-  background-color: color-mix(in srgb, var(--primary-text-color) 80%, transparent);
-  border-radius: 20px;
+  background-color: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg-color) 94%, var(--primary-text-color)));
+  border-radius: var(--shape-corner-medium);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 6px 2px rgb(0 0 0 / 15%);
   box-sizing: border-box;
-  color: var(--card-bg-color);
-  font-size: 1rem;
-  line-height: 120%;
+  color: var(--md-sys-color-on-surface-variant, var(--primary-text-color));
+  display: none;
+  font-family: var(--app-font-family);
+  font-size: 14px;
+  inline-size: max-content;
+  letter-spacing: 0.25px;
+  line-height: 20px;
   margin: 0;
-  inline-size: 15em;
-  overflow-wrap: anywhere;
-  opacity: 0;
-  padding-block: 10px;
-  padding-inline: 8px;
+  max-inline-size: min(320px, calc(100vw - 16px));
+  padding-block: 12px;
+  padding-inline: 16px;
   pointer-events: none;
   position: fixed;
-  text-align: center;
-  transition-duration: 275ms;
-  transition-property: opacity, transform, visibility;
-  visibility: hidden;
+  text-align: start;
+  transform-origin: top center;
 
-  /* Higher than nav bar and top bar */
-  z-index: 99;
+  /* Above prompts, including the prompt layer in full-window playback. */
+  z-index: 1002;
+
+  /* Only opacity and transform animate, so the compositor runs the animation
+     at full frame rate even while the main thread is busy. */
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects),
+    display var(--motion-fast-effects) allow-discrete;
 }
 
-.text.bottom {
-  transform: translateY(-1em);
+/* Any lighter tint of Hot Pink's card drops its white text below 4.5:1. */
+.hotPink .text {
+  background-color: var(--card-bg-color);
 }
 
-.text.bottom-left {
-  transform: translateY(-1em);
+.text.open {
+  display: block;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-spatial),
+    display var(--motion-fast-effects) allow-discrete;
 }
 
-.text.left {
-  transform: translateX(1em);
-}
-
-.text.right {
-  transform: translateX(-1em);
+@starting-style {
+  .text.open {
+    opacity: 0;
+    transform: scale(0.8);
+  }
 }
 
 .text.top {
-  transform: translateY(1em);
+  transform-origin: bottom center;
 }
 
-.text.visible {
-  opacity: 1;
-  transform: none;
-  visibility: visible;
+.text.left {
+  transform-origin: center right;
+}
+
+.text.right {
+  transform-origin: center left;
+}
+
+.text.left:dir(rtl) {
+  transform-origin: center left;
+}
+
+.text.right:dir(rtl) {
+  transform-origin: center right;
+}
+
+.text.bottom-left {
+  transform-origin: top right;
+}
+
+.text.bottom-left:dir(rtl) {
+  transform-origin: top left;
+}
+
+.text.allowNewlines {
+  white-space: pre-wrap;
+  inline-size: 55vw;
 }
 
 .tooltip {
   display: inline-block;
   position: relative;
+}
+
+.dialogText {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-block: 8px 16px;
+  margin-inline: 8px;
+  max-inline-size: 30em;
+}
+
+.dialogText.allowNewlines {
+  white-space: pre-wrap;
 }

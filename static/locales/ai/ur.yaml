@@ -1,0 +1,2627 @@
+# Optional AI-generated translations for keys missing from ../ur.yaml.
+Color Picker:
+  Hue: رنگت
+  Opacity: غیر شفافیت
+  Backdrop Blur: پس منظر کا دھندلا پن
+  Hex Color: ہیکس رنگ
+  Apply Color: لاگو کریں
+  Reset Color: ری سیٹ کریں
+  Copy Color: کاپی کریں
+  Copy From Another Color: کسی دوسرے رنگ سے کاپی کریں
+  Color Copied: رنگ کاپی ہو گیا
+  Invalid Color: درست ہیکس رنگ درج کریں
+  Clipboard Unavailable: کلپ بورڈ دستیاب نہیں
+  Saturation and Brightness: سیچوریشن اور چمک
+New Tab: نیا ٹیب
+Maximize: بڑا کریں
+Restore: بحال کریں
+Close Tab: ٹیب بند کریں
+Close Confirmation:
+  Title: OpenTubeX سے باہر نکلیں؟
+  Message: کیا آپ واقعی OpenTubeX سے باہر نکلنا چاہتے ہیں؟
+  Background Sync Warning: باہر نکلنے سے پس منظر میں سبسکرپشنز کی ریفریش رک جائے گی۔
+  Hide Window: ونڈو چھپائیں
+  Quit: باہر نکلیں
+  Never Ask Again: دوبارہ کبھی نہ پوچھیں
+Older Version Changes:
+  Title: پرانے ورژن کی تبدیلیاں
+  Message: OpenTubeX کے پرانے ورژن میں کی گئی آپ کی تبدیلیاں آپ کی لائبریری پر لاگو کر دی گئیں۔
+  Detail: اگر کوئی آئٹم دونوں ورژنز میں تبدیل ہوا تھا تو پرانے ورژن کی تبدیلی برقرار رکھی گئی۔ آپ کی لائبریری کا پہلے والا بیک اپ آپ کے پروفائل فولڈر میں موجود ہے۔
+Library Format Changed:
+  Title: لائبریری نئے فارمیٹ میں منتقل ہو گئی
+  Message: آپ کی لائبریری اب اسٹوریج کا نیا فارمیٹ استعمال کرتی ہے۔
+  Detail: OpenTubeX کے پرانے ورژن اب بھی آپ کی لائبریری کھول سکتے ہیں، لیکن وہ اسے اسی حالت میں دکھاتے ہیں جیسی یہ اس اپ ڈیٹ سے پہلے تھی۔ پرانے ورژن میں کی گئی تبدیلیاں اس ورژن پر واپس آنے پر دوبارہ شامل کر دی جاتی ہیں۔
+Close Window Confirmation:
+  Title: ونڈو بند کریں؟
+  Message: اس ونڈو میں {count} ٹیبز ہیں۔ کیا آپ واقعی اسے بند کرنا چاہتے ہیں؟
+  Close Window: ونڈو بند کریں
+Confirmations:
+  Never Ask Again: دوبارہ کبھی نہ پوچھیں
+  Settings Hint: آپ اس تصدیق کو سیٹنگز → عام → اس سے پہلے تصدیق کریں… میں دوبارہ فعال کر سکتے ہیں
+Close Multiple Tabs Confirmation:
+  Title: متعدد ٹیبز بند کریں؟
+  Message: اس سے {count} ٹیبز بند ہو جائیں گے۔
+  Close Tabs: '{count} ٹیبز بند کریں'
+Load Multiple Tabs Confirmation:
+  Title: متعدد ٹیبز لوڈ کریں؟
+  Message: اس سے {count} ٹیبز لوڈ ہو جائیں گے۔
+  Load Tabs: '{count} ٹیبز لوڈ کریں'
+Unload Multiple Tabs Confirmation:
+  Title: متعدد ٹیبز ان لوڈ کریں؟
+  Message: اس سے {count} ٹیبز ان لوڈ ہو جائیں گے۔
+  Unload Tabs: '{count} ٹیبز ان لوڈ کریں'
+Tabs Unloaded To Free Memory: میموری خالی کرنے کے لیے {count} ٹیب ان لوڈ کیا گیا جسے آپ نے حال ہی میں استعمال نہیں کیا | میموری خالی کرنے کے لیے {count} ٹیبز ان لوڈ کیے گئے جنہیں آپ نے حال ہی میں استعمال نہیں کیا
+Use Vertical Tabs: عمودی ٹیبز استعمال کریں
+Use Horizontal Tabs: افقی ٹیبز استعمال کریں
+Resize Tab Bar: ٹیب بار کا سائز بدلیں
+Find in page: صفحے میں تلاش کریں
+Previous match: پچھلا نتیجہ
+Next match: اگلا نتیجہ
+Close find bar: تلاش بار بند کریں
+No matches: کوئی نتیجہ نہیں ملا
+Version {versionNumber} is now available.: ورژن {versionNumber} اب دستیاب ہے۔
+See changes and update: تبدیلیاں دیکھیں اور اپ ڈیٹ کریں
+Dismiss: نظر انداز کریں
+Update to {version}: '{version} پر اپ ڈیٹ کریں'
+Update With Package Manager: '{packageManager} کے ذریعے اپ ڈیٹ کریں:'
+Update Command Copied: اپ ڈیٹ کمانڈ کاپی ہو گئی
+Global:
+  Ambient Mode: ایمبیئنٹ موڈ
+  Loading More: مزید لوڈ ہو رہا ہے
+  New: نیا
+Search Bar:
+  Use Suggestion: تجویز استعمال کریں
+  Open Search Container: تلاش کا خانہ کھولیں
+  Search: تلاش کریں
+Search Listing:
+  Label:
+    Members Only: صرف ممبران کے لیے
+    Possibly AI-generated: ممکنہ طور پر AI سے تیار کردہ
+Search Filters:
+  Possible Age Restriction Hint: ہو سکتا ہے YouTube نے اس تلاش پر عمر کی پابندی لگا دی ہو۔
+  Cookie Search Failed: ترتیب دی گئی کوکیز کے ساتھ تلاش ناکام ہو گئی۔
+  Showing results for: '{query} کے نتائج دکھائے جا رہے ہیں'
+  Search instead for: اس کے بجائے {query} تلاش کریں
+  Including results for: '{query} کے نتائج بھی شامل ہیں'
+  Search only for: صرف {query} تلاش کریں
+  Did you mean: کیا آپ کا مطلب {query} تھا؟
+  Prioritize:
+    Prioritize: ترجیح دیں
+    Popularity: مقبولیت
+  Duration:
+    < 3 minutes: < 3 منٹ
+    3 - 20 minutes: 3 - 20 منٹ
+    '> 20 minutes': '> 20 منٹ'
+Stats:
+  Left of daily limit: 'آپ کی {limit} کی روزانہ حد میں سے {duration} باقی ہے'
+  Daily limit reached: '{limit} کی روزانہ حد پوری ہو گئی'
+  Replace old device: پرانا ڈیوائس تبدیل کریں
+  Replacement explanation: '{device} کو اس ڈیوائس کے ساتھ صرف اسی صورت میں ملائیں جب دونوں اندراجات ایک ہی فزیکل ڈیوائس کے ہوں۔'
+  Overlapping days: 'دونوں ہسٹریز میں موجود دن: {count}'
+  Overlapping watch time: مشترکہ دیکھنے کا وقت
+  Keep larger daily total: بڑا روزانہ مجموعہ رکھیں
+  Larger total explanation: ڈوپلیکیٹ ہسٹریز کے لیے بہترین۔ ایک ہی دن میں اضافی دیکھا گیا وقت شمار سے رہ سکتا ہے۔
+  Add daily totals: روزانہ مجموعے جمع کریں
+  Add totals explanation: الگ الگ ہسٹریز کے لیے بہترین۔ ڈوپلیکیٹ دیکھا گیا وقت دو بار شمار ہو سکتا ہے۔
+  Replacement preservation: صرف ایک ہسٹری میں موجود دن برقرار رکھے جاتے ہیں۔ اصل ہسٹریز انکرپٹڈ سنک میں محفوظ رہتی ہیں۔
+  Combined watch time: مجموعی دیکھنے کا وقت
+  Replacement changed: دیکھنے کا وقت تبدیل ہو گیا۔ نئے مجموعے دیکھنے کے لیے یہ پیش نظارہ بند کر کے دوبارہ کھولیں۔
+  Replacement success: ڈیوائس کے اعداد و شمار ملا دیے گئے
+  Stats: اعداد و شمار
+  All devices: تمام ڈیوائسز
+  Watch time summary: دیکھنے کے وقت کا خلاصہ
+  Today: آج
+  This week: اس ہفتے
+  Total watch time: کل دیکھنے کا وقت
+  Daily average: روزانہ اوسط
+  So far today: آج اب تک
+  Since: '{day} سے'
+  All recorded time: تمام ریکارڈ شدہ وقت
+  Per calendar day: فی کیلنڈر دن
+  Day by day: دن بہ دن
+  Highest: 'سب سے زیادہ: {duration}'
+  Week by week: ہفتہ بہ ہفتہ
+  Last 14 days: پچھلے 14 دن
+  Last 8 weeks: پچھلے 8 ہفتے
+  Daily chart aria: پچھلے 14 دنوں کا روزانہ دیکھنے کا وقت
+  Weekly chart aria: پچھلے 8 ہفتوں کا ہفتہ وار دیکھنے کا وقت
+  No data: ویڈیوز دیکھنے کے ساتھ ساتھ دیکھنے کا وقت یہاں ظاہر ہوگا۔
+  Estimate note: اس اپ ڈیٹ سے پہلے کا دیکھنے کا وقت آپ کی محفوظ شدہ پلے بیک پیش رفت سے اندازاً لگایا گیا ہے۔
+  Adjust imported watch time: امپورٹ شدہ دیکھنے کا وقت ایڈجسٹ کریں
+  Imported watch time: امپورٹ شدہ دیکھنے کا وقت
+  Imported watch time explanation: وہ پلے بیک اسپیڈ منتخب کریں جو آپ عام طور پر استعمال کرتے تھے۔ دیکھنے میں صرف ہونے والے اصل وقت کا اندازہ لگانے کے لیے امپورٹ شدہ ویڈیوز کے دورانیے کو اس اسپیڈ سے تقسیم کیا جائے گا۔
+  Playback speed: پلے بیک اسپیڈ
+  Channel speed note: جہاں دستیاب ہوں، چینلز کی محفوظ شدہ پلے بیک اسپیڈز استعمال کی جاتی ہیں۔
+  Apply playback speed: پلے بیک اسپیڈ لاگو کریں
+  Imported watch time adjusted: امپورٹ شدہ دیکھنے کا وقت ایڈجسٹ کر دیا گیا ہے
+  Reset statistics: اعداد و شمار ری سیٹ کریں
+  Reset: ری سیٹ کریں
+  Reset confirmation: کیا آپ واقعی دیکھنے کے تمام اعداد و شمار ری سیٹ کرنا چاہتے ہیں؟ اسے واپس نہیں لیا جا سکے گا۔
+  Reset success: دیکھنے کے اعداد و شمار ری سیٹ کر دیے گئے ہیں
+  Less than a minute: < 1 منٹ
+  Minutes: '{minutes} منٹ'
+  Hours: '{hours} گھنٹے'
+  Hours and minutes: '{hours} گھنٹے {minutes} منٹ'
+Home Page:
+  Keep disabled and hide this section: غیر فعال رکھیں اور یہ سیکشن چھپائیں
+  Familiar description: ان چینلز کی نہ دیکھی گئی ویڈیوز کو ترجیح دیں جو آپ پہلے سے پسند کرتے ہیں۔
+  Balanced description: مانوس چینلز کو ایسے نئے چینلز کے ساتھ ملائیں جو آپ کی دلچسپیوں سے مطابقت رکھتے ہوں۔
+  Explore description: آپ کی دلچسپیوں سے متعلق نئے چینلز کو زیادہ جگہ دیں۔
+  Turn off recommendations: تجاویز بند کریں
+  Recommended for you: آپ کے لیے تجویز کردہ
+  Recommendations description: آپ کی دیکھنے کی ہسٹری کی بنیاد پر ویڈیوز کی درجہ بندی آپ کے ڈیوائس پر ہی کریں۔ ویڈیوز تلاش کرنے کے لیے چینل IDs اور موضوعاتی تلاشیں آپ کے منتخب کردہ بیک اینڈ کو بھیجی جاتی ہیں۔
+  Enable recommendations: تجاویز فعال کریں
+  Recommendations need history: تجاویز حاصل کرنے کے لیے ہسٹری فعال کر کے کچھ ویڈیوز دیکھیں۔
+  No recommendations: کوئی تجویز نہیں ملی۔ مزید ویڈیوز دیکھنے کے بعد ریفریش کر کے دیکھیں۔
+  Recommendations unavailable: تجاویز لوڈ نہیں ہو سکیں۔ بعد میں دوبارہ کوشش کریں۔
+  More like this: اس جیسی مزید
+  Not interested: دلچسپی نہیں
+  Hide this channel: یہ چینل چھپائیں
+  Reset recommendations: تجاویز ری سیٹ کریں
+  Discovery: دریافت
+  Familiar: مانوس
+  Balanced: متوازن
+  Explore: دریافت کریں
+  Related to: '{title} سے متعلق'
+  More from: '{channel} کی مزید ویڈیوز'
+  Matches interest: '{topic} میں آپ کی دلچسپی سے مطابقت رکھتی ہے'
+  Related discovery privacy: متعلقہ ویڈیوز تلاش کرنے کے لیے ویڈیو IDs بھی بھیجی جاتی ہیں۔
+  Home: ہوم
+  Description: وہیں سے شروع کریں جہاں آپ نے چھوڑا تھا اور حالیہ سرگرمی دیکھیں۔
+  Customize: ہوم کو حسب ضرورت بنائیں
+  Done: ہو گیا
+  Customize description: منتخب کریں کہ کون سے سیکشن ظاہر ہوں اور انہیں اپنی مرضی کی ترتیب میں رکھیں۔
+  Continue watching: دیکھنا جاری رکھیں
+  New since last visit: پچھلے وزٹ کے بعد سے نیا
+  Watch queue: دیکھنے کی قطار
+  Recent playlists: حالیہ پلے لسٹس
+  Recent downloads: حالیہ ڈاؤن لوڈز
+  Upcoming reminders: آنے والی یاد دہانیاں
+  Watch statistics: دیکھنے کے اعداد و شمار
+  View all: سب دیکھیں
+  Previous shelf page: '{section} کا پچھلا صفحہ'
+  Next shelf page: '{section} کا اگلا صفحہ'
+  Shelf page status: '{section}، صفحہ {page} از {total}۔'
+  Move section up: '{section} کو اوپر لے جائیں'
+  Move section down: '{section} کو نیچے لے جائیں'
+  Section moved: '{section} کو {total} میں سے {position} مقام پر منتقل کر دیا گیا۔'
+  Nothing here yet: یہاں ابھی کچھ نہیں ہے
+  Empty description: آپ کی شروع کردہ ویڈیوز، استعمال کردہ پلے لسٹس، ڈاؤن لوڈز اور یاد دہانیاں یہاں ظاہر ہوں گی۔
+  All sections hidden: تمام سیکشن پوشیدہ ہیں
+  All sections hidden description: کسی سیکشن کو دوبارہ دکھانے کے لیے ہوم کو حسب ضرورت بنائیں۔
+Subscriptions:
+  New video from {channel}: '{channel} کی نئی ویڈیو'
+  New short from {channel}: '{channel} کا نیا شارٹ'
+  '{channel} is live': '{channel} لائیو ہے'
+  New post from {channel}: '{channel} کی نئی پوسٹ'
+  Mark As Unseen: نہ دیکھا گیا نشان زد کریں
+  Copy Error Details: تکنیکی تفصیلات کاپی کریں
+  Refresh Errors: 'وہ چینلز جو ریفریش نہیں ہو سکے: {channels}۔ تفصیلات دیکھنے کے لیے کلک کریں۔'
+  Refresh Error Channels More: '{channels} اور {count} مزید | {channels} اور {count} مزید'
+  Never show {type} from this channel in feeds again: اس چینل کی {type} فیڈز میں دوبارہ کبھی نہ دکھائیں
+  Refreshing Subscription Videos: سبسکرپشن ویڈیوز ریفریش ہو رہی ہیں
+  Refreshing Subscription Shorts: سبسکرپشن شارٹس ریفریش ہو رہے ہیں
+  Refreshing Subscription Live Streams: سبسکرپشن لائیو اسٹریمز ریفریش ہو رہی ہیں
+  Refreshing Subscription Posts: سبسکرپشن پوسٹس ریفریش ہو رہی ہیں
+  New Content: نیا مواد
+  New Feed Refresh Warning Title: سبسکرپشن کی تمام فیڈز ریفریش کریں؟
+  New Feed Refresh Warning: 1 سبسکرپشن کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟ | {count} سبسکرپشنز کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟
+  New Since Last Refresh: پچھلی ریفریش کے بعد سے نیا
+  Mark As Seen: دیکھا گیا نشان زد کریں
+  Mark All as Seen: سب کو دیکھا گیا نشان زد کریں
+  No New Content: کوئی نیا مواد نہیں ہے۔
+  New Content Tabs: نئے مواد کے ٹیبز
+  Show Tabbed View: ٹیبز والا منظر دکھائیں
+  Show Combined View: یکجا منظر دکھائیں
+  Newest First: نئے پہلے
+  Oldest First: پرانے پہلے
+  Posts:
+    RSS Message: YouTube پوسٹس کے لیے RSS فیڈز فراہم نہیں کرتا۔ پوسٹس دیکھنے کے لیے "{rssSetting}" سیٹنگ غیر فعال کریں یا یہ ٹیب چھپانے کے لیے "{hideSetting}" سیٹنگ فعال کریں۔
+  RSS Feeds:
+    Refreshing: RSS فیڈز تازہ ہو رہی ہیں
+    Tab: RSS
+    Followed Feeds: فالو کی گئی RSS فیڈز
+    Add Feed: فیڈ شامل کریں
+    Feed URL: RSS یا Atom فیڈ کا URL
+    Remove Feed: '{feed} ہٹائیں'
+    Invalid Feed URL: ایسا ویب ایڈریس درج کریں جو http:// یا https:// سے شروع ہو۔
+    Feed Already Followed: آپ پہلے ہی یہ فیڈ فالو کر رہے ہیں۔
+    Feed Could Not Be Loaded: فیڈ لوڈ نہیں ہو سکی۔ چیک کریں کہ ایڈریس کسی RSS یا Atom فیڈ کی طرف اشارہ کرتا ہے۔
+    Feed Requires Browser Check: اس سائٹ کو براؤزر کی جانچ درکار ہے جو OpenTubeX مکمل نہیں کر سکتا۔ اس فیڈ کے لیے کوئی اور پتہ یا RSSHub انسٹنس آزمائیں۔
+    Refresh Errors: 1 فیڈ ریفریش نہیں ہو سکی۔ | {count} فیڈز ریفریش نہیں ہو سکیں۔
+    Description: دوسرے پلیٹ فارمز کے تخلیق کاروں کو فالو کرنے کے لیے کوئی RSS یا Atom فیڈ شامل کریں۔ {rssHub} انسٹنسز بہت سی سائٹس کے لیے فیڈز فراہم کرتے ہیں، جیسے Twitch۔
+    Empty Items: آپ کی فیڈز میں فی الحال کوئی آئٹم نہیں ہے۔
+    No Feeds: آپ ابھی کوئی RSS فیڈ فالو نہیں کرتے۔
+    RSSHub:
+      Browse: RSSHub براؤز کریں
+      Title: RSSHub سے فیڈ شامل کریں
+      Description: RSSHub انسٹنس، سروس اور جسے فالو کرنا ہے منتخب کریں۔ فیڈ کا پتہ آپ کے لیے بنا دیا جاتا ہے۔
+      Instance: RSSHub انسٹنس
+      Service: سروس
+      Search Services: سروسز تلاش کریں
+      Loading Services: سروسز لوڈ ہو رہی ہیں…
+      Services Could Not Be Loaded: اس انسٹنس نے اپنی سروسز واپس نہیں کیں۔ پتہ چیک کریں یا کوئی اور انسٹنس منتخب کریں۔
+      Feed Type: فیڈ کی قسم
+      Requires Configuration: اس فیڈ کو انسٹنس پر اضافی سیٹ اپ درکار ہے، اس لیے یہ عوامی انسٹنسز پر کام نہ کرے۔
+      Optional Parameter: '{parameter} (اختیاری)'
+      Not Set: سیٹ نہیں
+    Retry Feed: '{feed} دوبارہ آزمائیں'
+Channels:
+  Load More Channels: مزید چینلز لوڈ کریں
+Subscription Groups:
+  Groups: گروپس
+  All: تمام
+  New Group: نیا گروپ
+  Edit Group: گروپ ایڈٹ کریں
+  Group Name: گروپ کا نام
+  Create: بنائیں
+  Save: محفوظ کریں
+  Delete Group: گروپ حذف کریں
+  Delete Prompt: گروپ "{groupName}" حذف کریں؟ اس کے چینلز کی سبسکرپشن برقرار رہے گی۔
+  Empty Group: موجودہ پروفائل میں اس گروپ میں کوئی چینل نہیں ہے۔
+  Save Failed: گروپ محفوظ نہیں ہو سکا۔
+  Delete Failed: گروپ حذف نہیں ہو سکا۔
+  Group Icon: گروپ آئیکن
+  No Icon: کوئی آئیکن نہیں
+Trending:
+  Music: موسیقی
+  Load Error: ٹرینڈنگ لوڈ نہیں ہو سکی۔
+  Unsupported Backend: ٹرینڈنگ کے لیے لوکل API درکار ہے۔ لوکل API منتخب کریں یا بیک اینڈ فال بیک فعال کریں۔
+Most Popular Feed Empty: اس Invidious انسٹنس کی مقبول ترین فیڈ خالی ہے۔
+Feed:
+  Cancel Refresh: ریفریش منسوخ کریں
+  Next Auto Refresh: 'اگلی خودکار ریفریش: {date}'
+User Playlists:
+  Add new videos to the top (custom order): نئی ویڈیوز سب سے اوپر شامل کریں (حسب ضرورت ترتیب)
+  Shuffle videos by default: ڈیفالٹ کے طور پر ویڈیوز شفل کریں
+  Repair Playlists: پلے لسٹس کی مرمت کریں
+  Repair Description: YouTube Takeout ZIP امپورٹ کرنے کے بعد ویڈیوز کی گمشدہ تفصیلات بحال کریں۔ پلے لسٹ کی ترتیب تبدیل نہیں ہوتی۔
+  Add Missing Videos: سورس پلے لسٹ سے گمشدہ ویڈیوز شامل کریں
+  Source Playlist: سورس پلے لسٹ
+  Load More Playlists: مزید پلے لسٹس لوڈ کریں
+  This playlist is private or does not exist.: یہ پلے لسٹ نجی ہے یا موجود نہیں ہے۔
+  Save to: اس میں محفوظ کریں…
+  Move Video to the Top: ویڈیو سب سے اوپر لے جائیں
+  Move Video to the Bottom: ویڈیو سب سے نیچے لے جائیں
+  Quick Bookmark Icon: فوری بک مارک آئیکن
+  Custom Emoji: حسب ضرورت ایموجی
+  Choose Image: تصویر منتخب کریں
+  Use Bookmark Icon: بک مارک آئیکن استعمال کریں
+  Save: محفوظ کریں
+  Save Playlist: پلے لسٹ محفوظ کریں
+  Remove Saved Playlist: محفوظ کردہ پلے لسٹ ہٹائیں
+  Edit: ایڈٹ کریں
+  Remove Unavailable Videos: غیر دستیاب ویڈیوز ہٹائیں
+  Remove Unavailable Videos Confirmation: 'غیر دستیاب ویڈیوز ہٹائیں؟ ملیں: {count}۔ چیک نہیں ہو سکیں: {uncertain}۔ چیک نہ ہونے والی ویڈیوز برقرار رکھی جائیں گی۔'
+  Pin to Navigation: نیویگیشن میں پن کریں
+  Unpin from Navigation: نیویگیشن سے ان پن کریں
+  Reorder Hint: ترتیب بدلنے کے لیے گھسیٹیں یا ایرو کیز استعمال کریں
+  SinglePlaylistView:
+    Retry: دوبارہ کوشش کریں
+    This playlist could not be loaded.: یہ پلے لسٹ لوڈ نہیں ہو سکی۔
+    More videos could not be loaded.: مزید ویڈیوز لوڈ نہیں ہو سکیں۔
+  AddVideoPrompt:
+    And N more videos: اور {count} مزید ویڈیو | اور {count} مزید ویڈیوز
+  Playlist Thumbnail: پلے لسٹ تھمب نیل
+  Restore Default Thumbnail: ڈیفالٹ تھمب نیل بحال کریں
+  Move Up: اوپر
+  Move Down: نیچے
+  Remove: ہٹائیں
+History:
+  From Date: سے
+  To Date: تک
+  Channel Filter: چینل
+  All Channels: تمام چینلز
+  Clear Filters: فلٹرز صاف کریں
+  Invalid Date Range: '"سے" کی تاریخ "تک" کی تاریخ سے پہلے یا اس کے برابر ہونی چاہیے۔'
+  Empty Filter Message: آپ کی ہسٹری میں کوئی ویڈیو ان فلٹرز سے مماثل نہیں ہے۔
+  Repair Use Cookies: ترتیب دی گئی yt-dlp کوکیز استعمال کریں
+  Repair Cookies Hint: 500 سے زیادہ ویڈیوز کو چیک کرنے کی ضرورت ہے۔ ریٹ لمٹنگ کا خطرہ کم کرنے کے لیے yt-dlp سیٹنگز میں کوکیز ترتیب دیں اور انہیں یہاں فعال کریں۔
+  Repair Description: ہسٹری امپورٹ کرنے کے بعد، یا جب ویڈیوز کی تفصیلات غائب ہوں یا LIVE لیبل غلط ہو، اسے استعمال کریں۔
+  Repair Details: گمشدہ عنوانات، چینلز اور اشاعت کی تاریخیں پُر کرتا ہے، اور دورانیے اور LIVE لیبلز چیک کرتا ہے۔ آپ کی دیکھنے کی پیش رفت اور دیکھی گئی حیثیت تبدیل نہیں ہوتی۔
+  Repair Notice: بڑی ہسٹریز میں کچھ وقت لگ سکتا ہے۔ ناکام درخواستیں خود بخود دوبارہ آزمائی جاتی ہیں۔ حذف شدہ یا نجی ویڈیوز نامکمل رہ سکتی ہیں۔
+  Start Repair: مرمت شروع کریں
+  Repair Checking: ویڈیو کی تفصیلات چیک کی جا رہی ہیں
+  Repair Waiting: YouTube کا انتظار ہے۔ مرمت خود بخود دوبارہ شروع ہو جائے گی۔
+  Repair Retrying: ناکام درخواستیں دوبارہ آزمائی جا رہی ہیں
+  Repair Finished: مرمت مکمل ہو گئی
+  Repair Stopped: مرمت روک دی گئی
+  Repair: ہسٹری کی مرمت کریں
+  Repair Compact: مرمت
+  Mark All Watched Compact: سب دیکھی گئی
+  Repair Progress: چیک کی گئیں {checked}/{total} · مرمت شدہ {repaired} · ناکام {failed}
+  Mark All As Watched: سب کو دیکھا گیا نشان زد کریں
+  Mark All As Watched Confirmation: کیا آپ واقعی اپنی ہسٹری کی تمام ویڈیوز کو دیکھی گئی نشان زد کرنا چاہتے ہیں؟
+  All History Marked as Watched: آپ کی ہسٹری کی تمام ویڈیوز دیکھی گئی نشان زد کر دی گئی ہیں
+  Select History Age: منتخب کریں کہ حذف ہونے سے پہلے اندراج کتنا پرانا ہونا چاہیے۔
+  Delete Entries Older Than: اس سے پرانے اندراجات حذف کریں
+  Number of Days: دنوں کی تعداد
+  History Cleanup Warning: اس سے مماثل دیکھنے کی ہسٹری کے اندراجات مستقل طور پر حذف ہو جاتے ہیں۔
+  1 Day: 1 دن
+  1 Week: 1 ہفتہ
+  1 Month: 1 مہینہ
+  3 Months: 3 مہینے
+  1 Year: 1 سال
+  All Time: تمام وقت
+  Custom: حسب ضرورت
+  History Older Than Days Removed: 1 دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے | {days} دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے
+Settings:
+  Tab Unloading:
+    Automatically unload tabs: ٹیبز خود بخود ان لوڈ کریں
+    Memory threshold: میموری کی حد
+    Tabs to unload: ان لوڈ کرنے کے لیے ٹیبز
+    Automatic unloading help: میموری خالی کرنے کے لیے سب سے پرانے پس منظر کے ٹیبز ان لوڈ کریں۔ فعال اور چلنے والے ٹیبز لوڈ رہتے ہیں۔
+    Memory threshold help: رینڈرر کی میموری حد کا فیصد، نہ کہ سسٹم کی کل RAM کا۔
+  Navigation and Controls: نیویگیشن اور کنٹرولز
+  Interface Customizer:
+    Customize Interface: انٹرفیس کو حسب ضرورت بنائیں
+    Preview: پیش نظارہ
+    Player: پلیئر
+    Desktop: ڈیسک ٹاپ
+    Mobile: موبائل
+    Playing: چل رہا ہے
+    Player Menu: پلیئر مینو
+    Fullscreen: فل اسکرین
+    Paused: رکا ہوا
+    Controls: کنٹرولز
+    Example Video Title: مثالی ویڈیو
+    Resolution: ریزولوشن
+    Loop: لوپ
+    'Off': 'بند'
+  Control Bar:
+    Title: کنٹرول بار
+    Customize: کنٹرول بار کو حسب ضرورت بنائیں
+    Hidden: پوشیدہ
+    Empty: کوئی کنٹرول نہیں
+    Move to Control Bar: '{control} کو کنٹرول بار میں منتقل کریں'
+    Move to Player Menu: '{control} کو پلیئر مینو میں منتقل کریں'
+    Hide: '{control} چھپائیں'
+  Fullscreen Actions:
+    Recommended Videos: تجویز کردہ ویڈیوز
+    Title: فل اسکرین ایکشنز
+    Customize: فل اسکرین ایکشنز کو حسب ضرورت بنائیں
+    Add Action: ایکشن شامل کریں
+    Empty: کوئی فل اسکرین ایکشن منتخب نہیں کیا گیا
+    Quick Bookmark: فوری بک مارک
+    Availability Hint: "ایکشنز صرف اُن ویڈیوز پر ظاہر ہوتے ہیں جن پر وہ لاگو ہوتے ہیں۔"
+    Disabled: "(غیر فعال)"
+  Quick Settings:
+    Quick Settings: فوری سیٹنگز
+    Customize Quick Settings: فوری سیٹنگز کو حسب ضرورت بنائیں
+    Add Setting: سیٹنگ شامل کریں
+    Appearance: ظاہری شکل
+    Playback: پلے بیک
+    Content: مواد
+    Language and Region: زبان اور خطہ
+    All Settings: تمام سیٹنگز
+    Profile Selector Hint: پروفائل تبدیل کرنے کے لیے آپ پروفائل آئیکن پر رائٹ کلک بھی کر سکتے ہیں
+    Profile Selector Touch Hint: پروفائل تبدیل کرنے کے لیے آپ پروفائل آئیکن کو دبا کر بھی رکھ سکتے ہیں
+  Categories:
+    General Description: زبان، آغاز، ٹیبز اور ترجمہ
+    Appearance: ظاہری شکل
+    Appearance Description: تھیم، لے آؤٹ، نیویگیشن اور ویڈیو فہرستیں
+    Content appearance: ویڈیو فہرستیں اور تھمب نیلز
+    Layout: لے آؤٹ
+    Playback Description: پلیئر کی ڈیفالٹ سیٹنگز، کیپشنز اور ہر چینل کی سیٹنگز
+    Subscriptions Description: فیڈ ریفریش، نئی ویڈیوز کی اطلاعات اور RSS فیڈز
+    Downloads Description: ڈاؤن لوڈ فولڈر، ٹیمپلیٹس اور خودکار ڈاؤن لوڈز
+    Focus: توجہ
+    Focus Description: پوشیدہ مواد، دیکھنے کی حدیں، یاد دہانیاں اور والدین کا کنٹرول
+    Add-ons: ایڈ آنز
+    Add-ons Description: SponsorBlock، DeArrow، ناپسندیدگیاں، AiSList اور وائس اوور ترجمہ
+    Privacy Description: ہسٹری، تلاش کی تجاویز، لنکس اور ایپ کا پاس ورڈ
+    Online activity: آن لائن سرگرمی
+    Data And Storage Description: بیک اپس، امپورٹ اور ایکسپورٹ، ڈسک کا استعمال اور صفائی
+    Sync Description: سنک سرور اکاؤنٹ، ڈیوائس جوڑنا اور سنک شدہ ڈیٹا
+    Advanced: ایڈوانسڈ
+    Advanced Description: بیک اینڈز، بفرنگ، بیرونی ٹولز، پراکسی اور تشخیص
+    Alternative providers: ویڈیو اور میٹا ڈیٹا فراہم کنندگان
+  Highlight Changed Settings: ڈیفالٹ سے تبدیل شدہ سیٹنگز کو نمایاں کریں
+  Reset Setting to Default: اس سیٹنگ کو ڈیفالٹ پر ری سیٹ کریں
+  Performance Impact:
+    Show Performance Impact: کارکردگی پر اثر کے اشارے دکھائیں
+    Moderate: درمیانہ اثر
+    High: زیادہ اثر
+    Description: یہ سیٹنگ {resources} کا استعمال بڑھا سکتی ہے
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: میموری
+      Network: نیٹ ورک
+      Disk: ڈسک
+  General Settings:
+    Limit Titles to Two Lines: "عنوانات کو دو سطروں تک محدود کریں"
+    Preferred Video Codec: ترجیحی ویڈیو کوڈیک
+    Enable Tabs: ٹیبز فعال کریں
+    Thumbnail Swipe Gestures:
+      Left: تھمب نیلز پر بائیں سوائپ
+      Right: تھمب نیلز پر دائیں سوائپ
+      Description: منتخب کردہ ایکشن انجام دینے کے لیے ویڈیو تھمب نیل کو افقی طور پر سوائپ کر کے چھوڑ دیں۔
+    Data Saver Thumbnails: ڈیٹا بچانے والے تھمب نیلز
+    Use tray icon: ٹرے آئیکن استعمال کریں
+    Close to system tray: بند کرنے پر سسٹم ٹرے میں رکھیں
+    Tray required for background refresh: پس منظر میں سبسکرپشن ریفریش فعال ہونے کے دوران ٹرے آئیکن ضروری ہے۔
+    Show Video Menu Button: ویڈیو مینو بٹن دکھائیں
+    Swipe to refresh: ریفریش کے لیے سوائپ کریں
+    Blur Thumbnails: تھمب نیلز دھندلے کریں
+    Navigation:
+      Always Show Navigation Bar: نیویگیشن بار نیچے ہونے پر اسے ہمیشہ دکھائیں
+      Compact Tab Labels: نیویگیشن بار نیچے ہونے پر اسے مختصر کریں
+      Show Active Subscriptions: سائیڈ بار میں فعال سبسکرپشنز دکھائیں
+      Navigation: نیویگیشن
+      Customize Navigation: نیویگیشن کو حسب ضرورت بنائیں
+      Add Item: آئٹم شامل کریں
+    Mobile Layout:
+      Mobile Layout: موبائل لے آؤٹ
+      Automatic: خودکار
+      Phone: فون
+      Tablet: ٹیبلیٹ
+    Update Relative Timestamps: نسبتی ٹائم اسٹیمپس کو اپ ڈیٹ رکھیں
+    Automatically switch stream extraction methods: اسٹریم نکالنے کے طریقے خود بخود تبدیل کریں
+    Stream Extraction Method:
+      Stream Extraction Method: اسٹریم نکالنے کا طریقہ
+      yt-dlp: yt-dlp
+      Built-in: بلٹ ان
+    Confirm Before: اس سے پہلے تصدیق کریں…
+    Confirmation Options:
+      Closing App: OpenTubeX بند کرنا
+      Closing Window: متعدد ٹیبز والی ونڈو بند کرنا
+      Closing Tabs: متعدد ٹیبز بند کرنا
+      Loading Tabs: متعدد ٹیبز لوڈ کرنا
+      Unloading Tabs: متعدد ٹیبز ان لوڈ کرنا
+    Always Use Backup Media Server: ہمیشہ بیک اپ میڈیا سرور استعمال کریں
+    Close Window With Last Tab: آخری ٹیب بند کرنے پر ونڈو بند کریں
+    Remember Tab Navigation History: ٹیب کی نیویگیشن ہسٹری یاد رکھیں
+    New Tab Position:
+      New Tab Position: نئے ٹیب کی جگہ
+      At the end: آخر میں
+      After current tab: موجودہ ٹیب کے بعد
+      After current tab in opened order: موجودہ ٹیب کے بعد، کھولنے کی ترتیب میں
+    Tab Close Focus:
+      Last active tab: آخری فعال ٹیب
+      Next tab in tab order: ٹیب کی ترتیب میں اگلا ٹیب
+      Previous tab in tab order: ٹیب کی ترتیب میں پچھلا ٹیب
+      Tab Close Focus: فعال ٹیب بند کرنے کے بعد
+    Startup Behavior:
+      Startup Behavior: آغاز پر
+      Load all tabs: تمام ٹیبز لوڈ کریں
+      Load previously loaded tabs: پہلے لوڈ شدہ ٹیبز لوڈ کریں
+      Load last active tab: آخری فعال ٹیب لوڈ کریں
+      Start with an empty session: خالی سیشن سے شروع کریں
+      Load landing page, keep other tabs unloaded: لینڈنگ پیج لوڈ کریں، دوسرے ٹیبز ان لوڈ رکھیں
+    Date Format: تاریخ کا فارمیٹ
+    Time Format: وقت کا فارمیٹ
+    Language Default: زبان کا ڈیفالٹ
+    Use AI Translation Completions: گمشدہ ترجمے AI سے تیار کردہ ترجموں سے پُر کریں
+    Reduced Motion:
+      Reduced Motion: کم حرکت
+      System: سسٹم
+      Force On: ہمیشہ آن
+      Force Off: ہمیشہ آف
+    Comment Translation:
+      Title: کمنٹس کے ترجمے
+      Enable: کمنٹس کے ترجمے فعال کریں
+      Never Translate: ان زبانوں کے کمنٹس کا کبھی ترجمہ نہ کریں
+      Choose Language: زبان منتخب کریں
+      Description: ایپ کی زبان کے کمنٹس پہلے ہی خارج ہیں۔ کوئی دوسری زبانیں شامل کریں جو آپ پڑھ سکتے ہیں۔
+      Remove Language: '{language} کمنٹس کا دوبارہ ترجمہ کریں'
+    Avoid translation:
+      Avoid translation: ویڈیو کے غیر ترجمہ شدہ متن کو ترجیح دیں
+      Disabled: غیر فعال
+      Watch Only: صرف ویڈیو UI
+      Entire App: پوری ایپ
+    Preferred API Backend:
+      Yattee Server: Yattee سرور
+    Video View Type:
+      Full Width: پوری چوڑائی
+    Playlist View Type:
+      Playlist View Type: پلے لسٹ دیکھنے کی قسم
+    Grid Columns:
+      Grid Columns: گرڈ کالمز
+      Playlist Grid Columns: پلے لسٹ گرڈ کالمز
+      Auto: خودکار
+    Show Thumbnail Previews: تھمب نیل پیش نظارے دکھائیں
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: تھمب نیل کا اضافی ایکشن بٹن
+      None: کوئی نہیں
+      Mark as Watched: دیکھی گئی نشان زد کریں
+      Copy YouTube Link: YouTube لنک کاپی کریں
+      Open in YouTube: YouTube میں کھولیں
+    Yattee Server:
+      Server URL: Yattee سرور کا URL
+      Username: صارف نام
+      Password: پاس ورڈ
+      Proxy Videos: ویڈیوز کو Yattee سرور کے ذریعے پراکسی کریں
+      Test Connection: کنکشن ٹیسٹ کریں
+      Testing: کنکشن ٹیسٹ ہو رہا ہے…
+      Connected: Yattee سرور {version} سے منسلک ہو گیا
+      Errors:
+        Invalid URL: سرور کا URL درج کریں، جو https:// یا http:// سے شروع ہو۔
+        Unreachable: سرور تک رسائی نہیں ہو سکی۔ URL چیک کریں اور یہ کہ سرور چل رہا ہے یا نہیں۔
+        Media not allowed: منسلک ہو گیا، لیکن سرور اس ایپ کو ویڈیوز لوڈ کرنے کی اجازت نہیں دیتا۔ سرور کے ماحول میں CORS_ORIGINS={origins} سیٹ کریں۔
+        Not a Yattee server: سرور نے جواب دیا، لیکن یہ Yattee سرور نہیں ہے۔
+        Credentials required: سرور کو صارف نام اور پاس ورڈ درکار ہے۔
+        Invalid credentials: سرور نے صارف نام یا پاس ورڈ مسترد کر دیا۔
+        Rate limited: بہت زیادہ ناکام کوششوں کے بعد سرور سائن ان کو روک رہا ہے۔ بعد میں دوبارہ کوشش کریں۔
+        Server error: سرور نے ایرر واپس کیا (HTTP {status})۔
+    Notifications:
+      Notifications: اطلاعات
+      System and In-App: سسٹم اور ایپ میں
+      System Only: صرف سسٹم
+      Off: بند
+  Context Menu Search Settings:
+    Context Menu Search Settings: کانٹیکسٹ مینو تلاش
+    Description: منتخب کریں کہ منتخب متن پر رائٹ کلک کرنے پر کون سے سرچ انجن ظاہر ہوں۔ تلاشیں آپ کے ڈیفالٹ براؤزر میں کھلتی ہیں۔
+    Icon Hint: کسی انجن کو فعال کرنے سے فیو آئیکن لوڈ کرنے کے لیے اس کی ویب سائٹ سے رابطہ کیا جاتا ہے۔
+    Engine Name: انجن کا نام
+    Search URL: تلاش کا URL
+    URL Hint: URL میں جہاں انکوڈ شدہ منتخب متن ہونا چاہیے وہاں %s استعمال کریں۔
+    Add Custom Engine: حسب ضرورت انجن شامل کریں
+    Add Engine: انجن شامل کریں
+    Remove Engine: '{engine} ہٹائیں'
+    Invalid Engine: نام اور %s پر مشتمل ایک درست HTTP یا HTTPS تلاش URL درج کریں۔
+    Engine Limit: آپ زیادہ سے زیادہ {count} حسب ضرورت سرچ انجن شامل کر سکتے ہیں۔
+  Theme Settings:
+    Sections:
+      Interface: "انٹرفیس"
+      Side Bar and Header: "سائیڈ بار اور ہیڈر"
+      Tabs: "ٹیبز"
+      Player: "پلیئر"
+      Scrolling: "اسکرولنگ"
+      Notifications: "اطلاعات"
+    Only Show Important Notifications: صرف اہم اطلاعات دکھائیں
+    Material Accent Color: Material ایکسنٹ رنگ
+    Tally Accent Color: Tally ایکسنٹ رنگ
+    Material Wallpaper Colors: وال پیپر کے رنگ
+    Material System Accent Color: "سسٹم کا نمایاں رنگ"
+    Tab Loading Indicator:
+      Tab Loading Indicator: ٹیب لوڈنگ کا انداز
+      Bar: بار
+      Dot: نقطہ (کلاسک)
+    Compact Mobile Mini Player: مختصر موبائل منی پلیئر
+    Always Show Mobile Search Bar: موبائل سرچ بار ہمیشہ دکھائیں
+    Move Downloads to App Header: ڈاؤن لوڈز کو ایپ ہیڈر میں منتقل کریں
+    Move Settings to App Header: سیٹنگز کو ایپ ہیڈر میں منتقل کریں
+    Hide Side Bar on Watch Pages: دیکھنے والے صفحات پر سائیڈ بار چھپائیں
+    UI Roundness: UI کی گولائی
+    Scrollbar Width: اسکرول بار کی چوڑائی
+    Scroll Speed: اسکرول کی رفتار
+    Visible Search Suggestions: نظر آنے والی تلاش کی تجاویز
+    Animation Speed: اینیمیشن کی رفتار
+    Thumbnail Size: تھمب نیل کا سائز
+    Playlist Thumbnail Size: پلے لسٹ تھمب نیل کا سائز
+    Show Tab Icons: ٹیب آئیکنز دکھائیں
+    Load Missing Tab Icons: گمشدہ ٹیب آئیکنز لوڈ کریں
+    Loading Missing Tab Icons: گمشدہ ٹیب آئیکنز لوڈ ہو رہے ہیں…
+    No Missing Tab Icons: تمام معاون ٹیب آئیکنز پہلے ہی لوڈ ہو چکے ہیں
+    Loaded Tab Icons: 'گمشدہ ٹیب آئیکن لوڈ ہو گیا: {count} | گمشدہ ٹیب آئیکنز لوڈ ہو گئے: {count}'
+    Loaded Tab Icons With Failures: '{loaded} ٹیب آئیکنز لوڈ ہو گئے؛ {failed} لوڈ نہیں ہو سکے'
+    Show Tab Previews: ٹیب پیش نظارے دکھائیں
+    Use Fixed Tab Width: افقی موڈ میں مقررہ ٹیب چوڑائی استعمال کریں
+    Use Custom Title Bar: حسب ضرورت ٹائٹل بار استعمال کریں
+    Tab Width: ٹیب کی چوڑائی
+    Vertical Tab Height: عمودی ٹیبز کی اونچائی
+    Tab Layout:
+      Tab Layout: ٹیب لے آؤٹ
+      Horizontal Top: اوپر افقی
+      Horizontal Bottom: نیچے افقی
+      Vertical Left: بائیں جانب عمودی
+      Vertical Right: دائیں جانب عمودی
+    Show Toast Timeout Indicator: ٹوسٹ کے ختم ہونے کا اشارہ دکھائیں
+    Use Grid Player Menu: گرڈ پلیئر مینو استعمال کریں
+    Frosted Glass Player UI: فراسٹڈ گلاس پلیئر UI
+    Show Progress as Notification: پیش رفت کو نوٹیفکیشن کے طور پر دکھائیں
+    Operation in Progress: کارروائی جاری ہے
+    Toast Position:
+      Toast Position: ٹوسٹ کی جگہ
+      Test Toast: آزمائشی ٹوسٹ
+      Bottom Left: نیچے بائیں
+      Bottom Center: نیچے درمیان
+      Bottom Right: نیچے دائیں
+      Top Left: اوپر بائیں
+      Top Center: اوپر درمیان
+      Top Right: اوپر دائیں
+    Icon Pack:
+      Icon Pack: آئیکن پیک
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: ایپ فونٹ
+      System Default: سسٹم ڈیفالٹ
+      Unable to Load: انسٹال شدہ سسٹم فونٹس لوڈ نہیں ہو سکے
+      Bundled Fonts: شامل کردہ فونٹس
+      System Fonts: سسٹم فونٹس
+    Always Show Scrollbars: اسکرول بارز ہمیشہ دکھائیں
+    Compact Settings Categories: مختصر سیٹنگز کیٹیگریز
+    Base Theme:
+      Material Light: Material لائٹ
+      Material Dark: Material ڈارک
+      Material Black: Material کالا
+      Dynamic colors: متحرک رنگ
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: Tally لائٹ
+      Tally Dark: Tally ڈارک
+      Custom: حسب ضرورت
+      Built-in Themes: بلٹ ان تھیمز
+      Custom Themes: حسب ضرورت تھیمز
+    Light Theme: لائٹ تھیم
+    Dark Theme: ڈارک تھیم
+    Custom Theme:
+      Share Restrictions Prompt: تفصیلات میں Markdown سمیت زیادہ سے زیادہ 500 حروف ہو سکتے ہیں۔ صرف GitHub پر ہوسٹ کیے گئے لنکس اور تصاویر کی اجازت ہے، بشمول یہاں براہ راست اپ لوڈز۔ بوٹ بیرونی لنکس اور تصاویر ہٹا دیتا ہے، لمبی تفصیلات کو مختصر کرتا ہے، اور کسی بھی تبدیلی کی وضاحت کرتے ہوئے کمنٹ کرتا ہے۔
+      Import from Clipboard: کلپ بورڈ سے امپورٹ کریں
+      Invalid Clipboard Theme: کلپ بورڈ میں کوئی درست تھیم نہیں ہے۔ تھیم JSON کاپی کر کے دوبارہ کوشش کریں۔
+      Create Custom Theme: حسب ضرورت تھیم بنائیں
+      Edit Custom Theme: حسب ضرورت تھیم ایڈٹ کریں
+      Custom Theme Creator: حسب ضرورت تھیم ساز
+      Theme Name: تھیم کا نام
+      Based On: اس پر مبنی
+      Import Theme: تھیم امپورٹ کریں
+      Export Theme: تھیم ایکسپورٹ کریں
+      Share Theme: تھیم شیئر کریں
+      Share Description Prompt: تھیم کی وضاحت کریں اور وہ سب کچھ بتائیں جو لوگوں کو اسے استعمال کرنے سے پہلے جاننا چاہیے۔
+      Share Screenshots Prompt: ایک یا زیادہ اسکرین شاٹس یہاں گھسیٹ کر چھوڑیں۔ اس سیکشن کو خالی چھوڑ دیں تاکہ بوٹ آپ کے ذاتی ڈیٹا کے بغیر نمونہ مواد استعمال کرتے ہوئے تین پیش نظارے شامل کر دے۔
+      Delete Theme: تھیم حذف کریں
+      Delete Theme Confirmation: “{name}” حذف کریں؟ اسے واپس نہیں لیا جا سکے گا۔
+      Save and Apply: محفوظ کریں اور لاگو کریں
+      Discard Changes: تبدیلیاں رد کریں
+      Reset Colors: بنیادی تھیم پر ری سیٹ کریں
+      Theme File: OpenTubeX تھیم فائل
+      Theme Saved: حسب ضرورت تھیم محفوظ اور لاگو ہو گئی
+      Theme Imported: تھیم ایڈیٹر میں امپورٹ ہو گئی
+      Theme Exported: تھیم ایکسپورٹ ہو گئی
+      Theme Deleted: حسب ضرورت تھیم حذف ہو گئی
+      Unable to Load: حسب ضرورت تھیم لوڈ نہیں ہو سکی
+      Unable to Save: حسب ضرورت تھیم محفوظ نہیں ہو سکی
+      Unable to Export: حسب ضرورت تھیم ایکسپورٹ نہیں ہو سکی
+      Unable to Share: حسب ضرورت تھیم شیئر نہیں ہو سکی
+      Unable to Delete: حسب ضرورت تھیم حذف نہیں ہو سکی
+      Invalid Theme File: غلط حسب ضرورت تھیم فائل
+      Colors:
+        Watched thumbnail overlay: دیکھی گئی ویڈیو کے تھمب نیل کا اوورلے
+        Main text: مرکزی متن
+        Secondary text: ثانوی متن
+        Subtle text: ہلکا متن
+        Borders and dividers: حاشیے اور تقسیم کار
+        Subtle surfaces and indicators: ہلکی سطحیں اور اشارے
+        Title text: عنوان کا متن
+        Selected text background: منتخب متن کا پس منظر
+        Selected text: منتخب متن
+        Logo icon: لوگو آئیکن
+        Logo text: لوگو کا متن
+        Logo hover: لوگو پر ہوور
+        Logo pressed: لوگو دبایا گیا
+        Page background: صفحے کا پس منظر
+        Card background: کارڈ کا پس منظر
+        Secondary card background: ثانوی کارڈ کا پس منظر
+        Favorite icon: پسندیدہ آئیکن
+        Error color: ایرر کا رنگ
+        Scrollbar thumb: اسکرول بار تھمب
+        Scrollbar thumb hover: اسکرول بار تھمب پر ہوور
+        Scrollbar thumb pressed: اسکرول بار تھمب دبایا گیا
+        Dropdown item hover text: ڈراپ ڈاؤن آئٹم پر ہوور کا متن
+        Dropdown item hover background: ڈراپ ڈاؤن آئٹم پر ہوور کا پس منظر
+        Navigation and panel background: نیویگیشن اور پینل کا پس منظر
+        Neutral item hover and focus background: عام آئٹم پر ہوور اور فوکس کا پس منظر
+        Neutral item hover and focus text and icons: عام آئٹم پر ہوور اور فوکس کا متن اور آئیکنز
+        Neutral item pressed background: دبائے گئے عام آئٹم کا پس منظر
+        Neutral item pressed text and icons: دبائے گئے عام آئٹم کا متن اور آئیکنز
+        Header button hover and focus background: ہیڈر بٹن پر ہوور اور فوکس کا پس منظر
+        Header button hover and focus text and icons: ہیڈر بٹن پر ہوور اور فوکس کا متن اور آئیکنز
+        Header button pressed background: دبائے گئے ہیڈر بٹن کا پس منظر
+        Header button pressed text and icons: دبائے گئے ہیڈر بٹن کا متن اور آئیکنز
+        Search and dropdown background: تلاش اور ڈراپ ڈاؤن کا پس منظر
+        Settings search background: سیٹنگز تلاش کا پس منظر
+        Instance menu: انسٹنس مینو
+        Shadow color: سائے کا رنگ
+        Primary controls and highlights: بنیادی کنٹرولز اور نمایاں حصے
+        Primary control hover and focus: بنیادی کنٹرول پر ہوور اور فوکس
+        Primary control pressed: دبایا گیا بنیادی کنٹرول
+        Text and icons on primary controls: بنیادی کنٹرولز پر متن اور آئیکنز
+        Secondary controls and highlights: ثانوی کنٹرولز اور نمایاں حصے
+        Secondary control hover and focus: ثانوی کنٹرول پر ہوور اور فوکس
+        Secondary control pressed: دبایا گیا ثانوی کنٹرول
+        Light secondary color: ہلکا ثانوی رنگ
+        Visited accent: دیکھے گئے کا ایکسنٹ
+        Text and icons on secondary controls: ثانوی کنٹرولز پر متن اور آئیکنز
+        Links: لنکس
+        Visited links: دیکھے گئے لنکس
+        Destructive action: تباہ کن کارروائی
+        Destructive hover and focus: تباہ کن کارروائی پر ہوور اور فوکس
+        Destructive pressed: دبائی گئی تباہ کن کارروائی
+        Text and icons on destructive actions: تباہ کن کارروائیوں پر متن اور آئیکنز
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: Catppuccin Macchiato Rosewater
+      Catppuccin Macchiato Flamingo: Catppuccin Macchiato Flamingo
+      Catppuccin Macchiato Pink: Catppuccin Macchiato Pink
+      Catppuccin Macchiato Mauve: Catppuccin Macchiato Mauve
+      Catppuccin Macchiato Red: Catppuccin Macchiato Red
+      Catppuccin Macchiato Maroon: Catppuccin Macchiato Maroon
+      Catppuccin Macchiato Peach: Catppuccin Macchiato Peach
+      Catppuccin Macchiato Yellow: Catppuccin Macchiato Yellow
+      Catppuccin Macchiato Green: Catppuccin Macchiato Green
+      Catppuccin Macchiato Teal: Catppuccin Macchiato Teal
+      Catppuccin Macchiato Sky: Catppuccin Macchiato Sky
+      Catppuccin Macchiato Sapphire: Catppuccin Macchiato Sapphire
+      Catppuccin Macchiato Blue: Catppuccin Macchiato Blue
+      Catppuccin Macchiato Lavender: Catppuccin Macchiato Lavender
+  Player Settings:
+    Sections:
+      Playback: پلے بیک
+      Autoplay: آٹو پلے
+      Playback Speed: پلے بیک اسپیڈ
+      Player Controls: پلیئر کنٹرولز
+      Gestures: اشارے
+      Viewing Modes: دیکھنے کے موڈز
+      Shorts: شارٹس
+      Screenshots: اسکرین شاٹس
+    Lights Off: لائٹس بند
+    Show Lights Off Toggle: لائٹس بند کا ٹوگل دکھائیں
+    Show Volume Boost Toggle: والیوم بوسٹ کا ٹوگل دکھائیں
+    Show Mono Audio Toggle: مونو آڈیو کا ٹوگل دکھائیں
+    Show Music Mode Toggle: میوزک موڈ کا ٹوگل دکھائیں
+    Swipe Gestures:
+      Fullscreen Brightness: فل اسکرین میں پوری چمک
+      Left: بائیں جانب سوائپ
+      Right: دائیں جانب سوائپ
+      Disabled: غیر فعال
+      Brightness: چمک
+      Volume: والیوم
+      Hint: ویڈیو کی کسی بھی جانب اوپر یا نیچے سوائپ کریں۔
+      Unavailable: پلے بیک کنٹرولز ایڈجسٹ نہیں ہو سکے۔
+    yt-dlp Streaming: yt-dlp اسٹریمنگ
+    Music Visualizer: میوزک ویژولائزر
+    Skip Unavailable Playlist Videos: پلے لسٹ کی غیر دستیاب ویڈیوز چھوڑ دیں
+    Automatically Open Chapters: چیپٹرز خود بخود کھولیں
+    Caption Appearance:
+      Caption Appearance: کیپشن کی ظاہری شکل
+      Captions: کیپشنز
+      Preferred Language: کیپشن کی ترجیحی زبان
+      Application Language: ایپلیکیشن کی زبان
+      Enable Translations: کیپشن کے ترجمے فعال کریں
+      Text Color: متن کا رنگ
+      Background Color: پس منظر کا رنگ
+      Background Opacity: پس منظر کی غیر شفافیت
+      Font Size: فونٹ سائز
+      Text Opacity: متن کی غیر شفافیت
+      Default: ڈیفالٹ
+      Font Family:
+        Font Family: فونٹ فیملی
+        Monospaced Serif: Monospaced Serif
+        Proportional Serif: Proportional Serif
+        Monospaced Sans-Serif: Monospaced Sans-Serif
+        Proportional Sans-Serif: Proportional Sans-Serif
+      Colors:
+        White: سفید
+        Yellow: پیلا
+        Green: سبز
+        Cyan: سیان
+        Blue: نیلا
+        Magenta: میجنٹا
+        Red: سرخ
+        Black: کالا
+      Anchor:
+        Anchor: جگہ
+        Top Left: اوپر بائیں
+        Top Center: اوپر درمیان
+        Top Right: اوپر دائیں
+        Center Left: درمیان بائیں
+        Center: درمیان
+        Center Right: درمیان دائیں
+        Bottom Left: نیچے بائیں
+        Bottom Center: نیچے درمیان
+        Bottom Right: نیچے دائیں
+      Edge Style:
+        Edge Style: کنارے کا انداز
+        None: کوئی نہیں
+        Outline: خاکہ
+        Drop Shadow: سایہ
+        Raised: ابھرا ہوا
+        Depressed: دبا ہوا
+      Reset: کیپشن کی ظاہری شکل ری سیٹ کریں
+    Default Viewing Mode:
+      Full Window (Always On): پوری ونڈو (ہمیشہ آن)
+      Full Screen (Always On): فل اسکرین (ہمیشہ آن)
+      Tooltip: زیادہ تر ڈیفالٹ ویونگ موڈز صرف ہر دیکھنے کے سیشن کے آغاز پر لاگو ہوتے ہیں۔ سیشن کے دوران کی گئی تبدیلیاں اس کے ختم ہونے تک برقرار رہتی ہیں۔ ہمیشہ آن ویونگ موڈز ہر نئی ویڈیو پر جانے پر لاگو ہوتے ہیں، چاہے پچھلی ویڈیو دیکھتے وقت ویونگ موڈ میں کوئی بھی تبدیلی کی گئی ہو۔
+    Auto Picture in Picture:
+      Auto Picture in Picture: خود بخود پکچر ان پکچر میں جائیں
+      On Tab Change: ٹیبز تبدیل کرتے وقت
+      On Window Minimize: ونڈو چھوٹی کرتے وقت
+      On Window Hide: جب ونڈو فوکس کھو دے یا اس سے ہٹ جایا جائے
+      Wayland Minimize Unsupported: Wayland ایپس کو ونڈو چھوٹی ہونے کی اطلاع نہیں دیتا، اس لیے یہ ٹرگر دستیاب نہیں ہے۔ اس کے بجائے "جب ونڈو فوکس کھو دے یا اس سے ہٹ جایا جائے" استعمال کریں، جو چھوٹا کرنے کو بھی شامل کرتا ہے۔
+    Scroll Mini Player:
+      Scroll Mini Player: اسکرول منی پلیئر
+      When Scrolling Down: نیچے اسکرول کرتے وقت منی پلیئر اسکرین پر رکھیں
+      On All Tabs: ٹیبز تبدیل کرتے وقت منی پلیئر اسکرین پر رکھیں
+      On Navigation: ویڈیو سے ہٹ کر نیویگیٹ کرتے وقت چلانا جاری رکھیں
+    Multiply Seek Interval by Playback Rate: سیک کے وقفے کو پلے بیک ریٹ سے ضرب دیں
+    Rotate Wide Videos to Landscape in Fullscreen: فل اسکرین میں چوڑی ویڈیوز کو لینڈ اسکیپ میں گھمائیں
+    Swipe Up or Down to Enter or Exit Fullscreen: فل اسکرین میں جانے یا باہر نکلنے کے لیے اوپر یا نیچے سوائپ کریں
+    Show Playback Rate Adjusted Timestamp: پلے بیک ریٹ کے مطابق ٹائم اسٹیمپ دکھائیں
+    Use YouTube-style Shorts: YouTube طرز کے شارٹس استعمال کریں
+    Loop Shorts: شارٹس لوپ کریں
+    Preload Upcoming Videos: آنے والی ویڈیوز پہلے سے لوڈ کریں
+    Upcoming Videos to Preload: پہلے سے لوڈ کرنے کے لیے آنے والی ویڈیوز
+    Concurrent Preloads: بیک وقت پری لوڈز
+    Remember Volume: والیوم یاد رکھیں
+    Mono Audio: مونو آڈیو
+    Skip Silence: خاموشی چھوڑ دیں
+    Show Skip Silence Toggle: خاموشی چھوڑنے کا ٹوگل دکھائیں
+    Enable DLNA Casting: DLNA کاسٹنگ فعال کریں
+    Enable Skip Silence by Default: ڈیفالٹ کے طور پر خاموشی چھوڑنا فعال کریں
+    Enable Video Zoom: ویڈیو زوم فعال کریں
+    Enable Seek History: سیک ہسٹری فعال کریں
+    Pause on Stream Recovery: اسٹریم بحال ہونے پر روکیں
+    Continue Playback When Screen Is Locked: اسکرین لاک ہونے پر بھی پلے بیک جاری رکھیں
+    Voice-over Translation:
+      Title: وائس اوور ترجمہ
+      Attribution: (Yandex کے ذریعے)
+      Enable: وائس اوور ترجمہ فعال کریں
+      Prepare in Background: وائس اوور ترجمے پس منظر میں تیار کرنا شروع کریں
+      Background Preparation Tooltip: معاون ویڈیو لوڈ ہوتے ہی موجودہ ویڈیو کی ID، دورانیہ اور منتخب زبان ترجمہ سروس کو بھیج دیتا ہے۔
+      Language: وائس اوور ترجمے کی زبان
+      Supported Source Languages: 'معاون ماخذ زبانیں: روسی، انگریزی، چینی، کوریائی، عربی، فرانسیسی، اطالوی، ہسپانوی، جرمن اور جاپانی۔'
+      Voice Volume: ترجمہ شدہ آواز کا والیوم
+      Original Volume: اصل آڈیو کا والیوم
+      Russian: روسی
+      English: انگریزی
+      Kazakh: قازق
+    Hold to Double Playback Speed: پلے بیک اسپیڈ دگنی کرنے کے لیے دبا کر رکھیں
+    Use Quick Playback Speed Bar: فوری پلے بیک اسپیڈ بار استعمال کریں
+    Customize Quick Playback Speed Bar: فوری پلے بیک اسپیڈ بار کو حسب ضرورت بنائیں
+    Quick Playback Speed Bar Manager: فوری پلے بیک اسپیڈ بار
+    Add Playback Speed: پلے بیک اسپیڈ شامل کریں
+    Reset Quick Playback Speed Bar: ڈیفالٹس پر ری سیٹ کریں
+    Playback Speed Name: نام
+    Edit Playback Speed Name: پلے بیک اسپیڈ کا نام ایڈٹ کریں
+    Use Automatic Playback Speed Name: پلے بیک اسپیڈ کا خودکار نام استعمال کریں
+    Reorder Playback Speed: پلے بیک اسپیڈ کی ترتیب بدلنے کے لیے گھسیٹیں
+    Playback Speed: پلے بیک اسپیڈ
+    Parallel Segment Loading: متوازی سیگمنٹ لوڈنگ
+    Default Media Format:
+      Default Media Format: ڈیفالٹ میڈیا فارمیٹ
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: میٹرڈ نیٹ ورکس پر کوالٹی کی حد
+      No Limit: کوئی حد نہیں
+      Tooltip: موبائل ڈیٹا اور دیگر میٹرڈ نیٹ ورکس پر ویڈیوز اس کوالٹی یا اس سے کم پر شروع ہوتی ہیں۔ آپ پھر بھی پلیئر میں زیادہ کوالٹی منتخب کر سکتے ہیں۔
+    Buffering:
+      Buffering: بفرنگ
+      Description: منتخب کریں کہ پلیئر کتنی ویڈیو پہلے سے لوڈ کرے اور لوڈ رکھے۔
+      Buffer Ahead Hint: آگے کا زیادہ بفر طویل کنکشن ٹوٹنے کے دوران بھی پلے بیک جاری رکھتا ہے، لیکن ایسی ویڈیو بھی ڈاؤن لوڈ کرتا ہے جو شاید آپ نہ دیکھیں۔
+      Rewind Buffer Hint: بڑا ریوائنڈ بفر آپ کو دوبارہ ڈاؤن لوڈ کیے بغیر پیچھے جانے دیتا ہے، لیکن زیادہ میموری استعمال کرتا ہے۔
+      Buffer Before Playing Hint: چلانے سے پہلے زیادہ ویڈیو کا انتظار غیر مستحکم کنکشنز پر بار بار رکنے سے بچاتا ہے، لیکن ویڈیوز کو شروع ہونے اور سیک کے بعد دوبارہ چلنے میں زیادہ وقت لگتا ہے۔
+      Preset: بفرنگ پری سیٹ
+      Presets:
+        Data Saver: ڈیٹا سیور
+        Default: ڈیفالٹ
+        Smooth Playback: ہموار پلے بیک
+        Custom: حسب ضرورت
+      Buffer Ahead: آگے کا بفر
+      Buffer Ahead Tooltip: 'موجودہ مقام سے کتنا آگے تک لوڈ کیا جائے۔ زیادہ کوالٹی پر میموری کی حدیں بہت زیادہ قدروں کو محدود کر سکتی ہیں۔ ڈیفالٹ: {value}'
+      Rewind Buffer: ریوائنڈ بفر
+      Rewind Buffer Tooltip: 'آپ کی پہلے سے دیکھی گئی ویڈیو کا کتنا حصہ لوڈ رہے۔ ڈیفالٹ: {value}'
+      Buffer Before Playing: چلانے سے پہلے بفر
+      Buffer Before Playing Tooltip: 'پلے بیک شروع ہونے، یا رکنے کے بعد دوبارہ چلنے سے پہلے کتنی ویڈیو لوڈ ہونی چاہیے۔ ڈیفالٹ: {value}'
+    Screenshot:
+      Mode: اسکرین شاٹ موڈ
+      Modes:
+        Save To Folder: فولڈر میں محفوظ کریں
+        Clipboard: کلپ بورڈ میں کاپی کریں
+      Legacy Formats: پرانے فارمیٹس
+      Modern Formats: جدید فارمیٹس
+    Ignore System Rotation Lock for Fullscreen: فل اسکرین کے لیے سسٹم روٹیشن لاک کو نظر انداز کریں
+    Swipe Left or Right to Seek in Fullscreen: فل اسکرین میں سیک کرنے کے لیے بائیں یا دائیں سوائپ کریں
+    Show Swipe to Seek Preview: سوائپ سے سیک کا پیش نظارہ دکھائیں
+    Enable Google Cast: Google Cast فعال کریں
+    Enable FCast: FCast فعال کریں
+  Channel Settings:
+    Channel Settings: چینل سیٹنگز
+    Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
+    Enable Channel Playback Settings: چینل پلے بیک سیٹنگز فعال کریں
+    Auto Save Playback Speed: پلے بیک اسپیڈ کی تبدیلیاں خود بخود محفوظ کریں
+    Auto Save Video Quality: ویڈیو کوالٹی کی تبدیلیاں خود بخود محفوظ کریں
+    Auto Save Subtitles State: سب ٹائٹلز کی حالت کی تبدیلیاں خود بخود محفوظ کریں
+    Auto Save Volume: والیوم کی تبدیلیاں خود بخود محفوظ کریں
+    Manage Saved Channels: محفوظ شدہ چینلز کا انتظام کریں ({channelCount})
+    Saved Channels: محفوظ شدہ چینل سیٹنگز
+    Enable Saved Channel Settings Sync: محفوظ شدہ چینل سیٹنگز سنک کریں
+    Disable Saved Channel Settings Sync: محفوظ شدہ چینل سیٹنگز کی سنک روکیں
+    Search Channels: چینلز تلاش کریں
+    No Saved Channels: ابھی تک کوئی چینل مخصوص سیٹنگ محفوظ نہیں کی گئی
+    No Matching Channels: کوئی چینل آپ کی تلاش سے مماثل نہیں
+    Forget Channel: اس چینل کی تمام سیٹنگز بھول جائیں
+    Forget Value: یہ سیٹنگ بھول جائیں
+    Add Setting: اس چینل کے لیے ایک اور سیٹنگ یاد رکھیں
+    Add Subscribed Channel: سبسکرائب شدہ چینل شامل کریں
+    Video Quality: ویڈیو کوالٹی
+    Subtitles Enabled: سب ٹائٹلز فعال
+    Volume: والیوم
+  Download Settings:
+    Download Settings: ڈاؤن لوڈز
+    Enable Downloads: ڈاؤن لوڈز فعال کریں
+    Managed Tools Download Started Template: 'ضروری بیرونی سافٹ ویئر نہیں ملا: {tools}۔ منظم کاپیاں ڈاؤن لوڈ ہو رہی ہیں…'
+    Managed Tools Download Finished Template: '{tools} کا ڈاؤن لوڈ مکمل ہو گیا'
+    Managed Tools Update Started Template: '{tools} کے لیے اپ ڈیٹ ملی۔ ڈاؤن لوڈ ہو رہی ہے…'
+    Managed Tools Update Finished Template: '{tools} کی اپ ڈیٹ مکمل ہو گئی'
+    Managed Tools Update Available Template: '{tools} کے لیے اپ ڈیٹ دستیاب ہے۔'
+    Managed Tools Update Source Notice: OpenTubeX اسے براہ راست GitHub سے ڈاؤن لوڈ کرتا ہے، اس لیے F-Droid اور دیگر ایپ اسٹورز اسے چیک نہیں کرتے۔
+    Update Managed Tools: اپ ڈیٹ کریں
+    Managed Tools Download Error Template: 'منظم ٹولز ڈاؤن لوڈ نہیں ہو سکے: {errors}'
+    Download Folder: ڈاؤن لوڈ فولڈر
+    Global Additional yt-dlp Arguments: اضافی yt-dlp آرگیومینٹس
+    Concurrent Downloads: بیک وقت ڈاؤن لوڈز
+    Bandwidth Limit: بینڈوڈتھ کی حد (KiB/s)
+    Choose Download Folder: ڈاؤن لوڈ فولڈر منتخب کریں
+    Download Templates: ڈاؤن لوڈ ٹیمپلیٹس
+    Manage Download Templates: ڈاؤن لوڈ ٹیمپلیٹس کا انتظام کریں ({templateCount})
+    New Template: نیا ٹیمپلیٹ
+    Template Source: ایڈٹ کرنے یا بنیاد کے طور پر استعمال کرنے کے لیے ٹیمپلیٹ
+    Built-in Template: '{name} (بلٹ ان)'
+    Custom Template Name: '{name} (حسب ضرورت)'
+    Create Template Copy: کاپی بنائیں
+    Template Copy Name: '{name} کاپی'
+    Automatic Downloads: خودکار ڈاؤن لوڈز
+    Manage Automatic Downloads: خودکار ڈاؤن لوڈز کا انتظام کریں ({channelCount})
+    Automatic Downloads Description: ہر سبسکرائب شدہ چینل کے لیے ڈاؤن لوڈ ٹیمپلیٹ اور فلٹرز منتخب کریں۔ سبسکرپشن فیڈز ریفریش ہونے پر مماثل ویڈیوز پس منظر میں ڈاؤن لوڈ ہوتی ہیں۔
+    Automatic Downloads New Only: کسی چینل کو فعال کرنے سے اس کی اگلی نئی اپ لوڈ سے آغاز ہوتا ہے۔ موجودہ ویڈیوز اور چینل کا پچھلا مواد ڈاؤن لوڈ نہیں ہوتا۔
+    Automatic Downloads No Channels: خودکار ڈاؤن لوڈز ترتیب دینے سے پہلے کسی چینل کو سبسکرائب کریں۔
+    No Matching Automatic Download Channels: کوئی چینل آپ کی تلاش سے مماثل نہیں۔
+    Automatic Downloads Livestreams: لائیو اسٹریمز
+    Automatic Downloads Require Unmetered Network: صرف ان میٹرڈ نیٹ ورکس پر
+    Automatic Downloads Require Charging: صرف چارجنگ کے دوران
+    Minimum Duration Seconds: کم از کم دورانیہ (سیکنڈ)
+    Maximum Duration Seconds: زیادہ سے زیادہ دورانیہ (سیکنڈ)
+    Minimum File Size MB: کم از کم فائل سائز (MB)
+    Maximum File Size MB: زیادہ سے زیادہ فائل سائز (MB)
+    Maximum Age Days: زیادہ سے زیادہ عمر (دن)
+    Title Includes: عنوان میں شامل ہو
+    Title Excludes: عنوان میں شامل نہ ہو
+    Title Filter Hint: عنوان کی متعدد اصطلاحات کو کوما سے الگ کریں۔ ویڈیو کو کم از کم ایک شامل اصطلاح سے مماثل ہونا چاہیے اور کسی خارج اصطلاح سے نہیں۔
+  External Software Settings:
+    Create YouTube session: YouTube سیشن بنائیں
+    YouTube session hint: ضرورت ہو تو سائن ان کریں، پھر محفوظ کریں۔ سیٹنگز میں منتخب کریں کہ یہ سیشن ڈاؤن لوڈز، پلے بیک یا سب ٹائٹلز کے لیے استعمال ہو یا نہیں۔
+    Use cookies for downloads: ڈاؤن لوڈز کے لیے کوکیز استعمال کریں
+    YouTube session failed: YouTube سیشن محفوظ نہیں ہو سکا۔
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe چیک ہو رہے ہیں…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ابھی ڈاؤن لوڈ نہیں ہوئے۔ انہیں ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
+    External Software Settings: بیرونی سافٹ ویئر
+    yt-dlp Source: yt-dlp کا ماخذ
+    yt-dlp Channel: yt-dlp چینل
+    Sources:
+      System: سسٹم (PATH یا حسب ضرورت راستہ)
+      Managed: OpenTubeX کے زیر انتظام
+    Detected Version Template: 'yt-dlp کا ورژن ملا: {version}'
+    Managed Not Downloaded: yt-dlp ابھی ڈاؤن لوڈ نہیں ہوا۔ اسے ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
+    System yt-dlp Missing Warning: آپ کے سسٹم پر yt-dlp نہیں ملا۔ اسے انسٹال کریں، نیچے حسب ضرورت راستہ سیٹ کریں، یا ماخذ کو "OpenTubeX کے زیر انتظام" پر تبدیل کریں۔
+    Download yt-dlp: yt-dlp ڈاؤن لوڈ کریں
+    Update yt-dlp: yt-dlp اپ ڈیٹ کریں
+    Checking yt-dlp: yt-dlp چیک ہو رہا ہے…
+    Downloading yt-dlp: yt-dlp ڈاؤن لوڈ ہو رہا ہے…
+    yt-dlp Downloaded Template: yt-dlp {version} ڈاؤن لوڈ ہو گیا ہے
+    yt-dlp Download Error Template: 'yt-dlp ڈاؤن لوڈ کرنا ناکام ہو گیا: {error}'
+    FFmpeg Source: FFmpeg کا ماخذ
+    Detected FFmpeg Version Template: 'FFmpeg کا ورژن ملا: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'FFmpeg/FFprobe کا ورژن ملا: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg ابھی ڈاؤن لوڈ نہیں ہوا۔ اسے ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
+    System FFmpeg Missing Warning: آپ کے سسٹم پر FFmpeg نہیں ملا۔ ویڈیو اور آڈیو کو ملانے اور آڈیو کنورژن کے لیے یہ ضروری ہے۔ اسے انسٹال کریں، نیچے حسب ضرورت راستہ سیٹ کریں، یا ماخذ کو "OpenTubeX کے زیر انتظام" پر تبدیل کریں۔
+    Download FFmpeg: FFmpeg ڈاؤن لوڈ کریں
+    Update FFmpeg: FFmpeg اپ ڈیٹ کریں
+    Checking FFmpeg: FFmpeg چیک ہو رہا ہے…
+    Downloading FFmpeg: FFmpeg ڈاؤن لوڈ ہو رہا ہے…
+    FFmpeg Downloaded Template: FFmpeg {version} ڈاؤن لوڈ ہو گیا ہے
+    FFmpeg Download Error Template: 'FFmpeg ڈاؤن لوڈ کرنا ناکام ہو گیا: {error}'
+    Detected FFprobe Version Template: 'FFprobe کا ورژن ملا: {version}'
+    FFprobe Managed Not Downloaded: FFprobe ابھی ڈاؤن لوڈ نہیں ہوا۔ اسے FFmpeg کے ساتھ ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
+    System FFprobe Missing Warning: آپ کے سسٹم پر FFprobe نہیں ملا۔ پوسٹ پروسیسنگ کے دوران میڈیا کا معائنہ کرنے کے لیے یہ ضروری ہے۔ اسے FFmpeg کے ساتھ انسٹال کریں، یا ماخذ کو "OpenTubeX کے زیر انتظام" پر تبدیل کریں۔
+    Checking FFprobe: FFprobe چیک ہو رہا ہے…
+    Download FFmpeg and FFprobe: FFmpeg اور FFprobe ڈاؤن لوڈ کریں
+    Update FFmpeg and FFprobe: FFmpeg اور FFprobe اپ ڈیٹ کریں
+    Downloading FFmpeg and FFprobe: FFmpeg اور FFprobe ڈاؤن لوڈ ہو رہے ہیں…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg اور FFprobe {version} ڈاؤن لوڈ ہو گئے ہیں
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg اور FFprobe ڈاؤن لوڈ کرنا ناکام ہو گیا: {error}'
+    Managed Tool Already Current Template: '{tool} {version} پہلے ہی تازہ ترین ہے'
+    Managed Tool Errors:
+      Removed: ڈاؤن لوڈ کی گئی فائل ہٹا دی گئی، غالباً اینٹی وائرس سافٹ ویئر نے
+      Unusable: ڈاؤن لوڈ کیا گیا پروگرام چل نہیں سکا۔ ممکن ہے اینٹی وائرس سافٹ ویئر اسے روک رہا ہو، یا یہ اس سسٹم کو سپورٹ نہیں کرتا
+      Release Not Found: تازہ ترین ریلیز نہیں مل سکی
+      Verification Failed: ڈاؤن لوڈ کی سرکاری ریلیز کے طور پر تصدیق نہیں ہو سکی
+      Downgrade: ڈاؤن لوڈ کی گئی ریلیز انسٹال شدہ ریلیز سے پرانی ہے
+      Invalid Archive: ڈاؤن لوڈ کیا گیا آرکائیو غلط ہے
+      Rollback Failed: اپ ڈیٹ ناکام ہو گئی اور پچھلا ورژن مکمل طور پر بحال نہیں ہو سکا
+    Managed Tool Updates: منظم ٹولز کی اپ ڈیٹس
+    Update Modes:
+      Automatic: خود بخود اپ ڈیٹ کریں
+      Ask: اپ ڈیٹ کرنے سے پہلے پوچھیں
+      Manual: صرف دستی طور پر اپ ڈیٹ کریں
+    yt-dlp Executable Path: yt-dlp ایگزیکیوٹیبل
+    FFmpeg Executable Path: FFmpeg ایگزیکیوٹیبل
+    Restricted Playback Authentication: yt-dlp کوکیز
+    Cookie Source: کوکی کا ماخذ
+    Cookie Sources:
+      None: کوئی نہیں
+      File: فائل
+      Browser: براؤزر
+    Cookie File: کوکی فائل
+    Browser for Cookies: کوکیز کے لیے براؤزر
+    Browser Profile: براؤزر پروفائل (اختیاری)
+    Browser Profile Placeholder: پروفائل کا نام یا راستہ
+    Select Browser: براؤزر منتخب کریں
+    Always Use Cookies: ہمیشہ کوکیز استعمال کریں
+    Restricted Playback Authentication Hint: ڈیفالٹ کے طور پر، OpenTubeX یہ کوکیز yt-dlp کو صرف تب دیتا ہے جب آپ عمر کی پابندی والی یا صرف ممبران کے لیے ویڈیو پر "ترتیب دی گئی کوکیز کے ساتھ آزمائیں" منتخب کرتے ہیں۔
+    Restricted Playback Authentication Warning: Google اکاؤنٹ کے ساتھ yt-dlp استعمال کرنے سے اکاؤنٹ پر عارضی یا مستقل پابندیاں لگ سکتی ہیں۔
+    Use cookies for subtitles: سب ٹائٹلز کے لیے کوکیز استعمال کریں
+  Privacy Settings:
+    Internet Connectivity Checks: انٹرنیٹ کنیکٹیویٹی چیکس
+    Internet Connectivity Checks Tooltip: انٹرنیٹ تک رسائی چیک کرنے کے لیے GrapheneOS کے ہوسٹ کردہ سرور کو چھوٹی درخواستیں بھیجتا ہے۔
+    Automatic History Retention: خودکار ہسٹری برقرار رکھنا (دن)
+    Automatic History Retention Placeholder: ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں
+    Automatic History Retention Tooltip: ہسٹری ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں۔ کوئی عدد محفوظ کرنے سے پرانے اندراجات ابھی اور ایپ کھلی رہنے کے دوران خود بخود ہٹ جاتے ہیں۔
+    History Retention Saved: ہسٹری برقرار رکھنے کی مدت محفوظ ہو گئی ہے
+    Invalid History Retention Days: صفر سے زیادہ دنوں کا پورا عدد درج کریں
+    Enable Watch Statistics: دیکھنے کے اعداد و شمار فعال کریں
+    Week Starts On: ہفتہ اس دن سے شروع ہوتا ہے
+    Cache Video Metadata: میٹا ڈیٹا ہسٹری
+    Cache Video Metadata Tooltip: آپ کی دیکھی گئی ویڈیوز کے معاون میٹا ڈیٹا کا ہر ورژن رکھتا ہے، بشمول عنوانات، تھمب نیلز اور تفصیلات۔ آپ کی سبسکرپشن فیڈز میں دکھائے گئے عنوانات بھی رکھتا ہے۔ ڈیفالٹ کے طور پر غیر فعال ہے کیونکہ میٹا ڈیٹا ہسٹری محفوظ کرنے سے ڈسک کا استعمال بڑھتا ہے۔
+    Watched Percentage Threshold: دیکھی گئی فیصد کی حد
+    Watched Percentage Threshold Tooltip: ویڈیوز منتخب فیصد تک پہنچنے اور 2 منٹ سے زیادہ باقی نہ رہنے کے بعد دیکھی گئی نشان زد ہوتی ہیں۔ 0% پر وہ پلے بیک شروع ہوتے ہی نشان زد ہو جاتی ہیں۔ 100% پر وہ پلے بیک ختم ہونے پر نشان زد ہوتی ہیں۔
+    Clear Video Metadata Cache: ویڈیو میٹا ڈیٹا کیش صاف کریں
+    Are you sure you want to clear the video metadata cache?: کیا آپ واقعی کیش شدہ ویڈیو عنوانات، تھمب نیلز اور تفصیلات صاف کرنا چاہتے ہیں؟
+    Failed to clear video metadata cache: ویڈیو میٹا ڈیٹا کیش صاف کرنا ناکام ہو گیا
+    Video metadata cache has been cleared: ویڈیو میٹا ڈیٹا کیش صاف کر دیا گیا ہے
+    Video Metadata Cache Size: 'ویڈیو میٹا ڈیٹا کیش: {size}'
+  Storage Settings:
+    Storage: اسٹوریج
+    Downloaded Media: ٹریک شدہ ڈاؤن لوڈ کردہ میڈیا
+    Storage Breakdown: اسٹوریج کی تفصیل
+    Shown Total: دکھایا گیا مجموعہ
+    Calculating: حساب لگایا جا رہا ہے…
+    Not Available: درست سائز دستیاب نہیں
+    At Least: کم از کم {size}
+    Failed To Read Storage: کچھ اسٹوریج سائز پڑھے نہیں جا سکے
+    Downloaded Media Description: ویڈیو، آڈیو اور سب ٹائٹل فائلیں جنہیں ڈاؤن لوڈ ہسٹری اب بھی ٹریک کرتی ہے۔
+    Selected Download Folders: صارف کے منتخب کردہ ڈاؤن لوڈ فولڈرز
+    Download History Records: ڈاؤن لوڈ ہسٹری کے ریکارڈز
+    Download History Records Description: '{count} مکمل ڈاؤن لوڈ کا ریکارڈ۔ یہ ریکارڈ حالت اور فائل کے مقامات کو ٹریک کرتا ہے لیکن اس میں ڈاؤن لوڈ کردہ میڈیا شامل نہیں ہوتا۔ | {count} مکمل ڈاؤن لوڈز کے ریکارڈز۔ یہ ریکارڈز حالت اور فائل کے مقامات کو ٹریک کرتے ہیں لیکن ان میں ڈاؤن لوڈ کردہ میڈیا شامل نہیں ہوتا۔'
+    Clear Download History Records: ڈاؤن لوڈ ہسٹری کے ریکارڈز صاف کریں
+    Clear Download History Confirmation: تمام مکمل ڈاؤن لوڈ ریکارڈز صاف کریں؟
+    Download Files Stay On Disk: ڈاؤن لوڈ کی گئی فائلیں ڈسک پر رہیں گی، لیکن وہ ڈاؤن لوڈز کے صفحے پر مزید ظاہر نہیں ہوں گی۔
+    Clear Records: ریکارڈز صاف کریں
+    Replaceable Caches: قابل تبدیل کیشز
+    Application Caches: ایپلیکیشن کیشز
+    Browser Caches: براؤزر کیشز
+    Browser Caches Hint: Chromium کے HTTP، GPU، کوڈ، شیڈر، سروس ورکر اور لغت کے کیشز۔
+    Clear Android Cache Confirmation: Android کا براؤزر کیش صاف کریں؟
+    Stored App Data: محفوظ شدہ ایپ ڈیٹا
+    Included In App Data: اوپر ایپ ڈیٹا میں شامل
+    Browser Runtime Data: براؤزر رن ٹائم ڈیٹا
+    Browser Runtime Data Hint: Chromium کا سیشن اور لوکل اسٹوریج، کوکیز، رازداری اور نیٹ ورک کی حالت، اور کریش فائلیں۔
+    Subscription Feed Cache: سبسکرپشن اور فیڈ کیش
+    Subscription Feed Cache Description: حاصل کردہ سبسکرپشن ویڈیوز، شارٹس، لائیو اسٹریمز اور پوسٹس محفوظ کرتا ہے۔ OpenTubeX اگلی فیڈ ریفریش پر اسے دوبارہ بنا لیتا ہے۔
+    Clear Subscription Feed Cache: سبسکرپشن اور فیڈ کیش صاف کریں
+    Clear Subscription Feed Cache Confirmation: سبسکرپشن اور فیڈ کیش صاف کریں؟
+    Subscription Feed Cache Effect: سبسکرپشن فیڈز ریفریش ہونے تک خالی نظر آ سکتی ہیں۔ آپ کی سبسکرپشنز اور پروفائلز تبدیل نہیں ہوں گے۔
+    Session Search Cache: سیشن تلاش کیش
+    In Memory: میموری میں
+    Session Search Cache Description: '{count} تلاش تیزی سے واپس جانے کے لیے میموری میں کیش ہے۔ OpenTubeX بند ہونے پر یہ کیش ختم ہو جاتا ہے۔ | {count} تلاشیں تیزی سے واپس جانے کے لیے میموری میں کیش ہیں۔ OpenTubeX بند ہونے پر یہ کیش ختم ہو جاتا ہے۔'
+    Clear Session Search Cache: سیشن تلاش کیش صاف کریں
+    Clear Session Search Cache Confirmation: سیشن تلاش کیش صاف کریں؟
+    Session Search Cache Effect: کیش شدہ نتائج کے صفحات ختم کر دیے جائیں گے۔ محفوظ شدہ سرچ ہسٹری تبدیل نہیں ہوگی۔
+    HTTP Cache: HTTP کیش
+    HTTP Cache Description: Electron نیٹ ورک جوابات ڈسک پر محفوظ کرتا ہے تاکہ بار بار کی درخواستیں وہی ڈیٹا دوبارہ ڈاؤن لوڈ کیے بغیر لوڈ ہو سکیں۔ OpenTubeX ضرورت کے مطابق یہ کیش دوبارہ بناتا ہے۔
+    Managed By Electron: Electron کے زیر انتظام
+    Clear HTTP Cache: HTTP کیش صاف کریں
+    Clear HTTP Cache Confirmation: Electron کا HTTP کیش صاف کریں؟
+    HTTP Cache Effect: کیش دوبارہ بننے کے دوران تصاویر اور دیگر نیٹ ورک وسائل ایک بار آہستہ لوڈ ہو سکتے ہیں۔
+    Tab Image Cache: ٹیب تھمب نیلز اور چینل اوتار
+    Tab Image Cache Description: کھلے اور بحال شدہ ٹیبز کے لیے پیش نظارہ تصاویر اور چینل اوتار محفوظ کرتا ہے۔ OpenTubeX ٹیبز کے استعمال کے دوران انہیں دوبارہ بناتا ہے۔
+    Clear Tab Image Cache: ٹیب تصویری کیش صاف کریں
+    Clear Tab Image Cache Confirmation: ٹیب تھمب نیلز اور چینل اوتار صاف کریں؟
+    Tab Image Cache Effect: ٹیب کی تصاویر تھوڑی دیر کے لیے غائب ہو سکتی ہیں اور ٹیبز کے استعمال پر دوبارہ بن جائیں گی۔
+    Playback Caches: پلے بیک کیشز
+    Playback Caches Description: ایپ سیشنز کے درمیان yt-dlp اسٹریم URLs کے ساتھ YouTube پلیئر فائلیں محفوظ کرتا ہے۔ URL کیش صرف yt-dlp کے ذریعے حاصل کردہ اسٹریمز پر لاگو ہوتا ہے۔
+    Playback URL Cache Entry Size: yt-dlp اسٹریم URL کیش کی حد
+    Playback URL Cache Entry Size Tooltip: ہر کیش شدہ yt-dlp اسٹریم اندراج کا زیادہ سے زیادہ سائز مقرر کرتا ہے۔ yt-dlp اسٹریمز کے لیے مستقل کیشنگ غیر فعال کرنے کے لیے اسے 0 MB پر سیٹ کریں۔
+    Clear Playback Caches: پلے بیک کیشز صاف کریں
+    Clear Playback Caches Confirmation: yt-dlp اور پلیئر کیشز صاف کریں؟
+    Playback Caches Effect: اسٹریم اور پلیئر کا ڈیٹا دوبارہ حاصل ہونے کے دوران اگلی لوکل پلے بیک درخواست میں زیادہ وقت لگ سکتا ہے۔
+    Clear Cache: کیش صاف کریں
+    History Data: محفوظ شدہ ہسٹریز
+    Video Metadata Description: معاون ویڈیوز کے پرانے عنوانات، تھمب نیلز اور تفصیلات محفوظ کرتا ہے۔ حذف کرنے کے بعد پرانی ترامیم دوبارہ نہیں بنائی جا سکتیں۔
+    Video Metadata Effect: محفوظ شدہ میٹا ڈیٹا ترامیم مستقل طور پر حذف ہو جائیں گی۔ ویڈیو کی موجودہ تفصیلات پھر بھی دوبارہ حاصل کی جا سکتی ہیں۔
+    Watch History: دیکھنے کی ہسٹری اور اعداد و شمار
+    Watch History Description: دیکھنے کی ہسٹری دیکھی گئی ویڈیوز اور پیش رفت ریکارڈ کرتی ہے۔ دیکھنے کے اعداد و شمار روزانہ دیکھنے کے مجموعے محفوظ کرتے ہیں۔ برقرار رکھنے کی مدت صرف دیکھنے کی ہسٹری پر لاگو ہوتی ہے۔
+    Clear Watch Statistics: دیکھنے کے اعداد و شمار صاف کریں
+    Watch History Effect: دیکھی گئی ویڈیوز کے ریکارڈز اور محفوظ شدہ پیش رفت حذف ہو جائیں گی۔ دیکھنے کے اعداد و شمار برقرار رہیں گے۔
+    Clear Watch Statistics Confirmation: دیکھنے کے تمام اعداد و شمار حذف کریں؟
+    Watch Statistics Effect: روزانہ دیکھنے کے مجموعے حذف ہو جائیں گے۔ دیکھنے کی ہسٹری برقرار رہے گی۔
+    Search History: سرچ ہسٹری
+    Search History Description: وہ تلاشیں محفوظ کرتا ہے جنہیں آپ نے یاد رکھنے کا انتخاب کیا۔
+    Delete Search History: سرچ ہسٹری حذف کریں
+    Delete Search History Confirmation: تمام محفوظ شدہ سرچ ہسٹری حذف کریں؟
+    Search History Effect: آپ کی پچھلی تلاشوں سے محفوظ شدہ تلاش کی تجاویز غائب ہو جائیں گی۔ موجودہ سیشن کیش برقرار رہے گا۔
+    Other User Data: صارف کا دیگر ڈیٹا
+    Other Profile Files: دیگر پروفائل فائلیں
+    Other Profile Files Hint: بیک اپس، عارضی فائلیں، اور پروفائل اندراجات جنہیں OpenTubeX ابھی نہیں پہچانتا۔
+    Subscriptions And Profiles: سبسکرپشنز اور پروفائلز
+    Subscriptions And Profiles Description: سبسکرائب شدہ چینلز، پروفائل کے نام اور پروفائل کی رکنیت محفوظ کرتا ہے۔
+    Subscriptions And Profiles Effect: تمام سبسکرپشنز اور اضافی پروفائلز مستقل طور پر حذف ہو جائیں گے۔ فیڈ کیش کا ڈیٹا بھی صاف ہو جائے گا۔
+    Playlists Description: پلے لسٹس کے نام، تفصیلات اور محفوظ شدہ ویڈیوز محفوظ کرتا ہے۔
+    Playlists Effect: ہر پلے لسٹ اور اس کی محفوظ شدہ ویڈیوز کی فہرست مستقل طور پر حذف ہو جائے گی۔ ڈاؤن لوڈ کردہ میڈیا فائلیں برقرار رہیں گی۔
+    Settings And Sessions: سیٹنگز، ٹیب سیشنز اور یاد دہانیاں
+    Settings And Sessions Description: ایپ کی ترجیحات، بحال ہونے والے ٹیبز اور لائیو اسٹریم کی یاد دہانیاں محفوظ کرتا ہے۔ ان فائلوں کا معائنہ یا بیک اپ کرنے کے لیے پروفائل ڈائریکٹری کھولیں؛ یہ صفحہ انہیں حذف نہیں کرتا۔
+    Cleanup Complete: اسٹوریج کی صفائی مکمل ہو گئی
+    Cleanup Failed: اسٹوریج کی صفائی ناکام ہو گئی
+  Subscription Settings:
+    Fetch Feed on Startup: آغاز پر فیڈ حاصل کریں
+    Show New Content Feed: نئے مواد کی فیڈ دکھائیں
+    RSS Feeds: RSS فیڈز
+    Enable RSS Feeds: دیگر پلیٹ فارمز کے لیے RSS فیڈز فعال کریں
+    Manage RSS Feeds: RSS فیڈز کا انتظام کریں
+    Show New Content Indicators: نئے مواد کے اشارے دکھائیں
+    Show Scheduled Live Streams / Premieres First: شیڈول شدہ لائیو اسٹریمز / پریمیئرز پہلے دکھائیں
+    Auto Refresh Interval: خودکار ریفریش کا وقفہ
+    Videos Auto Refresh Interval: ویڈیوز کی خودکار ریفریش کا وقفہ
+    Shorts Auto Refresh Interval: شارٹس کی خودکار ریفریش کا وقفہ
+    Live Auto Refresh Interval: لائیو کی خودکار ریفریش کا وقفہ
+    Posts Auto Refresh Interval: پوسٹس کی خودکار ریفریش کا وقفہ
+    Refresh Subscriptions While App Is Closed: ایپ بند ہونے پر بھی سبسکرپشنز ریفریش کریں
+    Notify About New Uploads: نئی اپ لوڈز کی اطلاع دیں
+    RSS Feeds Auto Refresh Interval: RSS فیڈز کی خودکار ریفریش کا وقفہ
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: دیکھنے کا وقت شمار کریں از
+      Break Reminder Action: جب وقفے کا وقت ہو
+      Grayscale: گرے اسکیل
+      'Off': 'بند'
+      Always: ہمیشہ
+      During Bedtime: سونے کے وقت کے دوران
+      After the Daily Limit: روزانہ حد کے بعد
+      Daily Watch Time Limit: روزانہ دیکھنے کے وقت کی حد
+      Daily Shorts Limit: روزانہ شارٹس کی حد
+      When a Limit Is Reached: جب کوئی حد پوری ہو جائے
+      Remind Me: مجھے یاد دلائیں
+      Pause Playback: پلے بیک روکیں
+      Take a Break Reminder: وقفہ لینے کی یاد دہانی
+      Every: ہر {duration}
+      Bedtime Reminder: سونے کے وقت کی یاد دہانی
+      Bedtime Start: سونے کے وقت کا آغاز
+      Bedtime End: سونے کے وقت کا اختتام
+      Wait Until the Video Ends: ویڈیو ختم ہونے تک انتظار کریں
+      Silence Upload Notifications at Bedtime: سونے کے وقت اپ لوڈ کی اطلاعات خاموش کریں
+      Stop Autoplay at Bedtime and After the Daily Limit: سونے کے وقت اور روزانہ حد کے بعد آٹو پلے روکیں
+    AI Video Summaries: AI ویڈیو خلاصے
+    Hide: چھپائیں
+    Collapsed: سمٹے ہوئے
+    Expanded: پھیلے ہوئے
+    Video Descriptions: ویڈیو کی تفصیل
+    Video Description Modes:
+      Hide: چھپائیں
+      Collapsed: سمٹی ہوئی
+      Expanded: پھیلی ہوئی
+    Playing Interface Hide Delay: چلتے وقت انٹرفیس چھپنے میں تاخیر
+    Hide Startup Splash: آغاز کی اسپلیش اسکرین چھپائیں
+    Hide Header Sync Indicator: ہیڈر کا سنک اشارہ چھپائیں
+    Hide Repeat Stats: دہرانے کے اعداد و شمار چھپائیں
+    Sections:
+      Digital Wellbeing: ڈیجیٹل ویل بیئنگ
+      Visible While Paused: پوری ونڈو / فل اسکرین میں رکنے پر نظر آنے والے
+    Hide Channel Avatars: چینل اوتار چھپائیں
+    Shorten View Counts: ویوز، کمنٹس اور کمنٹ لائکس کی تعداد مختصر کریں
+    Hide Home: ہوم چھپائیں
+    Hide Live Chat Replay: لائیو چیٹ ری پلے چھپائیں
+    Hide Popularity Graph: مقبولیت کا گراف چھپائیں
+    Disable A-B Repeat: A-B ریپیٹ غیر فعال کریں
+    Hide End-Screen Annotations: اختتامی اسکرین کی تشریحات چھپائیں
+    Hide End-Screen Recommendations: اختتامی اسکرین کی تجاویز چھپائیں
+    Hide Paid Promotion Badge: معاوضہ شدہ تشہیر کا بیج چھپائیں
+    Enable Block Lists: بلاک لسٹس فعال کریں
+    Show Player Controls: پلیئر کنٹرولز دکھائیں
+    Show Video Title: ویڈیو کا عنوان دکھائیں
+    Show Bottom Right Actions Dock: نیچے دائیں ایکشنز ڈاک دکھائیں
+    Paused Interface Hide Delay: رکنے پر انٹرفیس چھپنے میں تاخیر
+    Add: شامل کریں
+    Remove: ہٹائیں
+    Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
+  Data Settings:
+    Scheduled backups: شیڈول شدہ بیک اپس
+    Scheduled backup description: OpenTubeX کھلا ہونے کے دوران مکمل ZIP بیک اپس محفوظ کریں۔ چھوٹ جانے والے بیک اپس آغاز پر چلتے ہیں۔ حد صرف اس فولڈر کے شیڈول شدہ بیک اپس پر لاگو ہوتی ہے۔
+    Choose backup folder: بیک اپ فولڈر منتخب کریں
+    No backup folder selected: کوئی بیک اپ فولڈر منتخب نہیں
+    Enable scheduled backups: شیڈول شدہ بیک اپس فعال کریں
+    Backup frequency: بیک اپ کی تعدد
+    Backups to keep: رکھنے کے لیے بیک اپس
+    Daily: روزانہ
+    Weekly: ہفتہ وار
+    Every 30 days: ہر 30 دن
+    Last scheduled backup: 'آخری شیڈول شدہ بیک اپ: {date}'
+    No scheduled backup yet: ابھی تک کوئی شیڈول شدہ بیک اپ نہیں
+    Scheduled backup failed: بیک اپ ناکام ہو گیا۔ چیک کریں کہ فولڈر قابل تحریر ہے۔ پانچ منٹ میں دوبارہ کوشش کی جائے گی۔
+    Import Preview:
+      Title: تبدیلیوں کا پیش نظارہ
+      New: 'نئے: {count}'
+      Existing: 'موجودہ: {count}'
+      Skipped: 'چھوڑے گئے: {count}'
+      Unreadable files: 'ناقابل مطالعہ فائلیں: {count}'
+      Settings effect: مماثل سیٹنگز تبدیل کر دی جاتی ہیں۔ نجی اور نامعلوم سیٹنگز چھوڑ دی جاتی ہیں۔
+      Details effect: موجودہ سبسکرپشنز یا ویڈیوز برقرار رکھی جاتی ہیں۔ امپورٹ کی گئی پروفائل یا پلے لسٹ کی تفصیلات موجودہ تفصیلات کی جگہ لے لیتی ہیں۔
+      Merge effect: موجودہ ڈیٹا برقرار رکھا جاتا ہے اور مماثل ریکارڈز کے ساتھ ملا دیا جاتا ہے۔
+      Subscriptions effect: موجودہ سبسکرپشنز برقرار رکھی جاتی ہیں۔ صرف نئے چینلز شامل کیے جاتے ہیں۔
+      History replace effect: مماثل ویڈیوز کی دیکھنے کی ہسٹری تبدیل کر دی جاتی ہے۔ باقی ہسٹری برقرار رکھی جاتی ہے۔
+    Select export data: ایکسپورٹ کرنے کے لیے ڈیٹا منتخب کریں
+    Export selected data: منتخب ڈیٹا ایکسپورٹ کریں
+    Complete backup: مکمل بیک اپ
+    Import backup: بیک اپ امپورٹ کریں
+    Export backup: بیک اپ ایکسپورٹ کریں
+    Backup description: پروفائلز، پلے لسٹس، ہسٹری، اعداد و شمار اور قابل منتقلی سیٹنگز ایک ZIP فائل میں محفوظ کریں۔ امپورٹ کرنے سے یہ اس ڈیوائس پر پہلے سے موجود ڈیٹا کے ساتھ مل جاتے ہیں۔
+    Select backup data: امپورٹ کرنے کے لیے ڈیٹا منتخب کریں
+    Profiles and subscriptions: پروفائلز اور سبسکرپشنز
+    Backup exported: بیک اپ کامیابی سے ایکسپورٹ ہو گیا
+    Backup imported: بیک اپ کامیابی سے امپورٹ ہو گیا
+    Import YouTube Takeout ZIP: YouTube Takeout ZIP امپورٹ کریں
+    Select Takeout data: امپورٹ کرنے کے لیے ڈیٹا منتخب کریں
+    Import selected data: منتخب ڈیٹا امپورٹ کریں
+    No supported Takeout data: اس ZIP میں کوئی معاون YouTube ڈیٹا نہیں ملا۔
+    Data And Storage: ڈیٹا اور اسٹوریج
+    Profile Directory: پروفائل ڈائریکٹری
+    Open Profile Directory: پروفائل ڈائریکٹری کھولیں
+    Settings File: سیٹنگز فائل
+    Import Settings: سیٹنگز امپورٹ کریں
+    Export Settings: سیٹنگز ایکسپورٹ کریں
+    Settings Tooltip: وہ سیٹنگز جو OS/صارف کے لیے مخصوص یا تجرباتی ہیں ایکسپورٹ یا امپورٹ نہیں کی جا سکتیں (مثلاً پراکسی، بیرونی پلیئر، اسکرین شاٹ فولڈر...)
+    Invalid JSON row, skipping item: قطار {row} پر غلط JSON، آئٹم چھوڑا جا رہا ہے
+    All settings have been successfully imported: تمام سیٹنگز کامیابی سے امپورٹ ہو گئی ہیں
+    All settings have been successfully exported: تمام سیٹنگز کامیابی سے ایکسپورٹ ہو گئی ہیں
+    Setting object has insufficient data, skipping item: سیٹنگ آبجیکٹ میں ناکافی ڈیٹا ہے، آئٹم چھوڑا جا رہا ہے
+    Unknown setting key: 'نامعلوم سیٹنگ کلید: {key}'
+    Non-transferable setting key: 'ناقابل منتقلی سیٹنگ کلید: {key}'
+    Import subscriptions formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، LibreTube بیک اپ یا FreeTube ایکسپورٹ (.json)'
+    Import history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، LibreTube بیک اپ (.json)'
+    Import playlists formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)'
+    Import search history formats: 'معاون فارمیٹس: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Channel playback speeds: چینل پلے بیک اسپیڈز
+    Import channel playback speeds: چینل پلے بیک اسپیڈز امپورٹ کریں
+    Channel playback speeds file: چینل پلے بیک اسپیڈز فائل
+    Import channel playback speeds formats: 'معاون فارمیٹس: {script} یوزر اسکرپٹ اسٹوریج (.json)'
+    Invalid channel playback speeds file: اس فائل میں کوئی چینل پلے بیک اسپیڈ نہیں ملی
+    Channel playback speeds imported: '{count} چینل کی پلے بیک اسپیڈ امپورٹ کی گئی | {count} چینلز کی پلے بیک اسپیڈز امپورٹ کی گئیں'
+    Channels not found: '{count} چینل نہیں مل سکا | {count} چینلز نہیں مل سکے'
+  Sync Settings:
+    Revoke Session Tabs Warning: اس ڈیوائس کے سنک شدہ ٹیب سیٹس بھی حذف ہو جائیں گے۔
+    Revoke Session Partial Failure: سنک شدہ ٹیب سیٹس حذف ہو گئے، لیکن رسائی منسوخ ہونے کی تصدیق نہیں ہو سکی۔ رسائی منسوخ کرنے کے لیے دوبارہ کوشش کریں۔
+    Tab Sync Revocation Pending: اس لاگ ان کی منسوخی زیر التوا ہونے کے دوران ٹیب سنک روک دی گئی ہے۔ سنک سیٹنگز میں منسوخی دوبارہ آزمائیں۔
+    Sync Automatically: خود بخود سنک کریں
+    Activity: اکاؤنٹ کی سرگرمی
+    No Activity: کوئی حالیہ سرگرمی نہیں
+    Clear Activity: اس ڈیوائس پر صاف کریں
+    Clear Activity Hint: اس ڈیوائس پر اکاؤنٹ کی موجودہ سرگرمی چھپائیں۔ سرور اور دیگر ڈیوائسز پر سرگرمی تبدیل نہیں ہوتی۔ نئی سرگرمی پھر بھی ظاہر ہوگی۔
+    Show More: مزید دکھائیں
+    Setting Changed: '{device} نے {setting} کو {value} میں تبدیل کیا'
+    Item Updated: '{device} نے {setting} اپ ڈیٹ کیا'
+    Item Added: '{device} نے {item} کو {setting} میں شامل کیا'
+    Item Removed: '{device} نے {item} کو {setting} سے ہٹایا'
+    Item Renamed: '{device} نے {item} کا نام بدل کر {value} رکھا'
+    Saved Playlists: محفوظ شدہ پلے لسٹس
+    No Feed Types: کوئی فیڈ قسم نہیں
+    Open On Device: کسی دوسرے ڈیوائس پر کھولیں
+    Video Sent: ویڈیو بھیج دی گئی۔ آف لائن ڈیوائسز دوبارہ منسلک ہونے پر اسے 24 گھنٹے تک وصول کر سکتے ہیں۔
+    Video Received: 'ویڈیو موصول ہوئی: {title}'
+    Previous Auto Sync Notice: خودکار سنک بند ہے۔ ممکن ہے کسی پرانے ورژن نے ڈیٹا کے نقصان سے بچنے کے لیے اسے غیر فعال کر دیا ہو۔
+    Enable Automatic Sync: خودکار سنک فعال کریں
+    Destructive Sync Blocked: ڈیٹا کے نقصان سے بچنے کے لیے سنک روک دی گئی۔ خودکار سنک بند ہے۔ حذف شدگیوں کا جائزہ لینے کے لیے سنک سیٹنگز کھولیں۔
+    Turn Flashlight On: فلیش لائٹ آن کریں
+    Turn Flashlight Off: فلیش لائٹ آف کریں
+    Sync Settings: سنک
+    Watch stats: دیکھنے کے اعداد و شمار
+    Enable Sync: سنک فعال کریں
+    Privacy Passphrase: رازداری کا پاس فریز
+    Privacy Passphrase Hint: اپنے اکاؤنٹ کے پاس ورڈ سے الگ پاس فریز استعمال کریں۔ یہ کبھی اس ڈیوائس سے باہر نہیں جاتا اور ہر ڈیوائس پر ضروری ہے؛ اسے کھو دینے سے انکرپٹڈ سنک ڈیٹا ناقابل بازیافت ہو جاتا ہے۔
+    Privacy Policy: اس سرور کی رازداری کی پالیسی
+    Enhanced Privacy Enabled: بہتر رازداری فعال ہے۔ سرور صرف انکرپٹڈ سنک ڈیٹا محفوظ کرتا ہے۔
+    Enhanced Privacy Unsupported: انتباہ — یہ سرور بہتر رازداری کو سپورٹ نہیں کرتا۔ سنک شدہ ڈیٹا اس کے آپریٹر کو نظر آتا ہے۔
+    Description: سبسکرپشنز، پروفائلز، پلے لسٹس، دیکھنے کی ہسٹری اور معاون سیٹنگز کو OpenTubeX یا LibreTube سنک سرور کے ساتھ ہم آہنگ کریں۔ LibreTube سرورز ہر سنک فیچر کو سپورٹ نہیں کرتے۔
+    Server URL: سنک سرور کا URL
+    Checking Server: سنک سرور چیک ہو رہا ہے…
+    Server Unavailable: اس سنک سرور سے منسلک نہیں ہو سکا۔ URL چیک کر کے دوبارہ کوشش کریں۔
+    Username: صارف نام
+    Log In: لاگ ان کریں
+    Register: رجسٹر کریں
+    Pair Another Device: کوئی اور ڈیوائس جوڑیں
+    Pair With Existing Device: موجودہ ڈیوائس کے ساتھ جوڑیں
+    Device Name: ڈیوائس کا نام
+    This Device: یہ ڈیوائس
+    Device Name Required: اس ڈیوائس کے لیے نام درج کریں۔
+    Pairing Device Name Hint: ایسا نام منتخب کریں جسے آپ اس درخواست کو منظور کرنے والے ڈیوائس پر پہچان سکیں۔
+    Create Pairing Code: جوڑنے کا کوڈ بنائیں
+    Creating Pairing Code: محفوظ جوڑنے کا کوڈ بنایا جا رہا ہے…
+    Pairing QR Alt: '{device} کے لیے جوڑنے کا QR کوڈ'
+    Scan Pairing Code: پہلے سے منسلک ڈیوائس پر "کوئی اور ڈیوائس جوڑیں" کھولیں اور یہ کوڈ اسکین کریں۔
+    Pairing Code: جوڑنے کا کوڈ
+    Use Text Pairing Code: اس کے بجائے متنی کوڈ استعمال کریں
+    Show QR Code: QR کوڈ دکھائیں
+    Text Pairing Code Hint: یہ کوڈ موجودہ ڈیوائس پر کاپی کریں۔ اس میں جوڑنے کا راز شامل ہے، اس لیے جوڑنے کے بعد اسے کلپ بورڈ ہسٹری سے صاف کر دیں۔
+    Pairing QR Warning: یہ کوڈ صرف اس قابل اعتماد، پہلے سے منسلک ڈیوائس کو دکھائیں جو اس درخواست کو منظور کرے گا۔ یہ دو منٹ بعد ختم ہو جاتا ہے۔
+    Pairing Expires: جوڑنے کا کوڈ {time} پر ختم ہو جائے گا۔
+    Verifying Pairing: منتقل شدہ رازداری کلید کی تصدیق ہو رہی ہے…
+    Completing Pairing: ڈیوائس کو جوڑنے کا عمل مکمل ہو رہا ہے…
+    Compare Pairing Codes: جوڑنے کے کوڈز کا موازنہ کریں
+    Pairing Code Match Hint: صرف اسی صورت میں تصدیق کریں جب یہ کوڈ آپ کے موجودہ ڈیوائس پر موجود کوڈ سے مماثل ہو۔
+    Pairing Codes Match: کوڈز مماثل ہیں
+    Pairing Approval Code Hint: یہ ونڈو کھلی رکھیں اور اس کوڈ کا نئے ڈیوائس سے موازنہ کریں۔ اگر کوڈز مختلف ہوں تو نئے ڈیوائس کو جاری نہیں رکھنا چاہیے۔
+    Pairing Scan Hint: جو ڈیوائس آپ شامل کر رہے ہیں اس پر دکھایا گیا جوڑنے کا کوڈ اسکین کریں۔
+    Enter Pairing Code: کوڈ دستی طور پر درج کریں
+    Pairing Code Entry Hint: جو ڈیوائس آپ شامل کر رہے ہیں اس پر دکھایا گیا جوڑنے کا کوڈ پیسٹ کریں۔
+    Check Pairing Code: کوڈ چیک کریں
+    Scan QR Code: QR کوڈ اسکین کریں
+    Waiting For Pairing Code: جوڑنے کے کوڈ کا انتظار ہے…
+    Checking Pairing Request: جوڑنے کی درخواست چیک ہو رہی ہے…
+    Approving Pairing Request: رازداری کلید انکرپٹ کر کے بھیجی جا رہی ہے…
+    Pairing Approval Warning: صرف اسی صورت میں منظور کریں جب آپ یہ درخواست اس ڈیوائس پر دیکھ سکیں جسے آپ شامل کر رہے ہیں۔ جوڑنے سے اکاؤنٹ تک رسائی مل جاتی ہے اور رازداری کلید منتقل ہو جاتی ہے۔
+    Approve Pairing: جوڑنا منظور کریں
+    Try Again: دوبارہ کوشش کریں
+    Scan Again: دوبارہ اسکین کریں
+    Camera Unavailable: OpenTubeX کیمرے تک رسائی حاصل نہیں کر سکا۔ کیمرے کی اجازت چیک کریں یا جوڑنے کا کوڈ دستی طور پر درج کریں۔
+    Pairing Unsupported: یہ سنک سرور محفوظ ڈیوائس جوڑنے کو سپورٹ نہیں کرتا۔
+    Pairing Failed: ڈیوائس جوڑنا ناکام ہو گیا۔ نئے کوڈ کے ساتھ دوبارہ کوشش کریں۔
+    Pairing Request Changed: جوڑنے کی درخواست تبدیل ہو گئی، ختم ہو گئی، یا پہلے ہی استعمال ہو چکی ہے۔ نیا کوڈ بنائیں۔
+    Pairing Server Mismatch: یہ کوڈ کسی دوسرے سنک سرور کا ہے۔
+    Pairing Verification Unavailable: منتقل شدہ کلید کی تصدیق کے لیے کوئی انکرپٹڈ سنک کلیکشن دستیاب نہیں ہے۔ موجودہ ڈیوائس کو سنک کریں، پھر دوبارہ کوشش کریں۔
+    Pairing Completed: ڈیوائس جوڑنا مکمل ہو گیا
+    Pairing Approved: ڈیوائس جوڑنا منظور ہو گیا
+    Use Pairing Invite: منسلک ڈیوائس کا کوڈ استعمال کریں
+    Show Pairing Invite: جوڑنے کا کوڈ دکھائیں
+    Scan Pairing Invite: جو ڈیوائس آپ شامل کر رہے ہیں اس پر "موجودہ ڈیوائس کے ساتھ جوڑیں" کھولیں، "منسلک ڈیوائس کا کوڈ استعمال کریں" منتخب کریں، اور یہ کوڈ اسکین کریں۔
+    Pairing Invite QR Alt: آپ جو ڈیوائس شامل کر رہے ہیں اس کے لیے جوڑنے کا QR کوڈ
+    Pairing Invite Text Hint: یہ کوڈ اس ڈیوائس پر کاپی کریں جسے آپ شامل کر رہے ہیں۔ اس سے کوئی ڈیوائس آپ کے اکاؤنٹ تک رسائی کی درخواست کر سکتا ہے، اس لیے جوڑنے کے بعد اسے کلپ بورڈ ہسٹری سے صاف کر دیں۔
+    Pairing Invite Warning: یہ کوڈ صرف اس ڈیوائس کو دکھائیں جسے آپ شامل کر رہے ہیں۔ آپ کو پھر بھی اس ڈیوائس پر اس کی درخواست منظور کرنی ہوگی۔
+    Pairing Invite Scan Hint: اپنے منسلک ڈیوائس پر دکھایا گیا جوڑنے کا کوڈ اسکین کریں۔
+    Pairing Invite Entry Hint: اپنے منسلک ڈیوائس پر دکھایا گیا جوڑنے کا کوڈ پیسٹ کریں۔
+    Pairing Invite Code Hint: اپنے منسلک ڈیوائس پر درخواست صرف اسی صورت میں منظور کریں جب وہ یہ کوڈ دکھائے۔ اس کے بعد جوڑنا خود بخود مکمل ہو جاتا ہے۔
+    Pairing Invite Approval Hint: صرف اسی صورت میں منظور کریں جب آپ کا شامل کیا جانے والا ڈیوائس یہ کوڈ دکھائے۔
+    Pairing Invite Approved: جوڑنا منظور ہو گیا۔ نیا ڈیوائس خود بخود جوڑنا مکمل کر لیتا ہے۔
+    Disconnect: منقطع کریں
+    Delete Account: سنک اکاؤنٹ حذف کریں
+    Delete Account Confirmation: سنک اکاؤنٹ حذف کریں؟
+    Delete Account Warning: اس سے آپ کا سنک اکاؤنٹ اور اس سرور پر محفوظ تمام ڈیٹا مستقل طور پر حذف ہو جاتا ہے۔ آپ کا لوکل OpenTubeX ڈیٹا حذف نہیں ہوگا۔
+    Confirm Delete Account: اکاؤنٹ حذف کریں
+    Password Required: پاس ورڈ ضروری ہے
+    Account Deleted: سنک اکاؤنٹ حذف ہو گیا
+    Devices: ڈیوائسز
+    Devices Hint: ان ڈیوائسز کا جائزہ لیں جو اس سنک اکاؤنٹ تک رسائی رکھتے ہیں۔
+    Change Password: پاس ورڈ تبدیل کریں
+    Refresh Devices: ڈیوائسز ریفریش کریں
+    Current Device: موجودہ ڈیوائس
+    Revoke Session: رسائی منسوخ کریں
+    Session Created: بنایا گیا
+    Last Active: آخری بار فعال
+    Session Expires: ختم ہوتا ہے
+    Unknown Device: نامعلوم ڈیوائس
+    Operating System: آپریٹنگ سسٹم
+    Rename Device: ڈیوائس کا نام بدلیں
+    Save Device Name: نام محفوظ کریں
+    Device Name Invalid: ڈیوائس کے نام میں زیادہ سے زیادہ 80 حروف ہو سکتے ہیں اور کوئی کنٹرول حروف نہیں۔
+    Device Renamed: ڈیوائس کا نام بدل دیا گیا
+    Revoke Session Confirmation: یہ سیشن منسوخ کریں؟
+    Revoke Current Session Warning: یہ سیشن منسوخ کرنے سے یہ ڈیوائس سنک اکاؤنٹ سے منقطع ہو جائے گا۔
+    Revoke Session Warning: '{device} اس سنک اکاؤنٹ تک رسائی کھو دے گا۔'
+    Confirm Revoke Session: سیشن منسوخ کریں
+    Session Revoked: سیشن منسوخ ہو گیا
+    Change Password Warning: پاس ورڈ تبدیل کرنے سے باقی تمام ڈیوائسز سائن آؤٹ ہو جائیں گے۔ یہ ڈیوائس منسلک رہے گا۔
+    Current Password: موجودہ پاس ورڈ
+    New Password: نیا پاس ورڈ
+    Confirm New Password: نئے پاس ورڈ کی تصدیق کریں
+    Save New Password: نیا پاس ورڈ محفوظ کریں
+    Account Management Failed: سنک اکاؤنٹ کی تفصیلات لوڈ نہیں ہو سکیں۔
+    All Password Fields Required: پاس ورڈ کے تمام خانے پُر کریں۔
+    New Password Too Short: نیا پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے۔
+    New Passwords Do Not Match: نئے پاس ورڈ مماثل نہیں ہیں۔
+    Password Changed: پاس ورڈ تبدیل ہو گیا۔ دوسرے ڈیوائسز سائن آؤٹ کر دیے گئے ہیں۔
+    Connected as: '{username} کے طور پر منسلک'
+    Profiles: پروفائلز
+    Open Tabs: کھلے ٹیبز اور سیشن
+    Use Shared Tabs: تمام ڈیوائسز پر ایک مشترکہ ٹیب سیٹ استعمال کریں
+    Shared Tabs Warning: اس ڈیوائس کے کھلے ٹیبز مشترکہ سیٹ بن جاتے ہیں۔ دوسرے ڈیوائسز سنک ہونے پر اپنے کھلے ٹیبز کو اس سیٹ سے بدل دیتے ہیں؛ مختلف ڈیوائسز کے ٹیبز آپس میں نہیں ملائے جاتے۔
+    Tabs From Other Devices: دوسرے ڈیوائسز کے ٹیبز
+    Device Tab Session: '{platform} · {count} ٹیبز'
+    Mobile Device: موبائل
+    Desktop Device: ڈیسک ٹاپ
+    Open All Tabs: تمام ٹیبز کھولیں
+    Open All Tabs Confirmation: تمام ٹیبز کھولیں؟
+    Disable Setting Sync: اس سیٹنگ کی سنک روکیں
+    Enable Setting Sync: یہ سیٹنگ سنک کریں
+    Sync Now: ابھی سنک کریں
+    Downloading encrypted data: انکرپٹڈ سنک ڈیٹا ڈاؤن لوڈ ہو رہا ہے…
+    Syncing subscriptions: سبسکرپشنز سنک ہو رہی ہیں…
+    Syncing playlists: پلے لسٹس سنک ہو رہی ہیں…
+    Syncing history: دیکھنے کی ہسٹری سنک ہو رہی ہے…
+    Syncing statistics: دیکھنے کے اعداد و شمار سنک ہو رہے ہیں…
+    Syncing profiles: پروفائلز سنک ہو رہے ہیں…
+    Syncing open tabs: کھلے ٹیبز اور سیشن سنک ہو رہے ہیں…
+    Syncing settings: سیٹنگز سنک ہو رہی ہیں…
+    Uploading encrypted data: انکرپٹڈ سنک ڈیٹا اپ لوڈ ہو رہا ہے…
+    Finishing sync: سنک مکمل ہو رہی ہے…
+    Sync progress percentage: '{percentage}٪'
+    Last synced: 'آخری سنک: {date}'
+    History not supported: سرور کا یہ ورژن دیکھنے کی ہسٹری کی سنک کو سپورٹ نہیں کرتا۔
+    Settings not supported: سرور کا یہ ورژن سیٹنگز کی سنک کو سپورٹ نہیں کرتا۔
+    Sync completed: سنک مکمل ہو گئی
+    Sync failed: 'سنک ناکام ہو گئی: {error}'
+    Data Loss Confirmation: تباہ کن سنک کی تصدیق کریں؟
+    Data Loss Warning: سرور کی حالت پہلے سے سنک شدہ {previous} میں سے {deleted} {collection} آئٹمز حذف کر دے گی۔ یہ سرور کی ناکام منتقلی یا ری سیٹ کی نشاندہی کر سکتا ہے۔ صرف اسی صورت میں جاری رکھیں جب یہ حذف کرنا جان بوجھ کر ہو اور آپ کے پاس بیک اپ موجود ہو۔
+    Confirm Data Loss: حذف کریں اور جاری رکھیں
+    Server Update Required: انکرپٹڈ لائیو سنک کو سپورٹ کرنے کے لیے یہ سرور اپ ڈیٹ کریں۔
+  Proxy Settings:
+    IP Block Recovery Script Path: IP بلاک سے بحالی کا اسکرپٹ
+    Select IP Block Recovery Script File: IP بلاک سے بحالی کی اسکرپٹ فائل منتخب کریں
+    Running IP block recovery script: IP بلاک سے بحالی کا اسکرپٹ چل رہا ہے
+    IP block recovery script failed: 'IP بلاک سے بحالی کا اسکرپٹ ناکام ہو گیا (ایگزٹ کوڈ: {exitCode})'
+    IP block recovery script finished: IP بلاک سے بحالی کا اسکرپٹ مکمل ہو گیا
+    Reloading video after IP block recovery: IP بلاک سے بحالی کے بعد ویڈیو دوبارہ لوڈ ہو رہی ہے
+    Failed to select IP block recovery script: IP بلاک سے بحالی کا اسکرپٹ منتخب نہیں ہو سکا
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: SponsorBlock میں جمع کرانا فعال کریں
+    SponsorBlock Private User ID (optional): نجی صارف ID (اختیاری)
+    SponsorBlock Private User ID Tooltip: براؤزر ایکسٹینشن سے نجی SponsorBlock صارف ID پیسٹ کریں۔ ایپ کی تیار کردہ ID استعمال کرنے کے لیے اسے خالی چھوڑ دیں۔
+    Generated SponsorBlock User ID: تیار کردہ SponsorBlock صارف ID
+    Generated SponsorBlock User ID Tooltip: ایپ کی تیار کردہ یہ SponsorBlock صارف ID براؤزر ایکسٹینشن میں یا کسی دوسرے کمپیوٹر پر ایپ استعمال کرنے کی صورت میں استعمال کی جا سکتی ہے۔
+    Reveal Generated User ID: تیار کردہ صارف ID ظاہر کریں
+    Generated SponsorBlock User ID Copy Button: تیار کردہ SponsorBlock صارف ID کاپی کریں
+    Generated SponsorBlock User ID Copied: تیار کردہ SponsorBlock صارف ID کلپ بورڈ پر کاپی ہو گئی
+    Skip notification timeout: اسکیپ اطلاع کا دورانیہ
+    DeArrow Settings: DeArrow
+    Custom Color: حسب ضرورت رنگ
+    Excluded Channels:
+      Excluded Channels: خارج شدہ چینلز
+      Tooltip: کسی چینل کی ویڈیوز میں SponsorBlock سیگمنٹس کو اسکیپ ہونے سے روکنے کے لیے اس چینل کی ID درج کریں۔ ID بالکل مماثل ہونی چاہیے اور اس میں بڑے اور چھوٹے حروف کا فرق ہوتا ہے۔
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike فعال کریں
+    Return YouTube Dislike Url: API کا URL
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: AI سلوپ چینلز چھپائیں
+    Hide AI Slop Channels Tooltip: کمیونٹی کے زیر انتظام AiSList بلاک لسٹ (aisloplist.com) کے چینلز کو تلاش کے نتائج، ٹرینڈنگ اور تجاویز سے چھپاتا ہے، اور اس کی وارننگ لسٹ کے چینلز کی ویڈیوز پر لیبل لگاتا ہے۔ سبسکرپشنز متاثر نہیں ہوتیں۔ فہرستیں دن میں ایک بار GitHub سے ڈاؤن لوڈ ہوتی ہیں اور صرف لوکل API سے لوڈ کیے گئے نتائج پر لاگو ہوتی ہیں۔
+    Downloading: فہرستیں ڈاؤن لوڈ ہو رہی ہیں…
+    Failed to Download: فہرستیں ڈاؤن لوڈ نہیں ہو سکیں
+    Loaded Status: 'بلاک شدہ چینلز: {blocked} · نشان زد چینلز: {warned} · اپ ڈیٹ: {date}'
+  Parental Control Settings:
+    Disable Channel Links: چینل لنکس غیر فعال کریں
+  Experimental Settings:
+    Disable Hardware Acceleration: ہارڈ ویئر ایکسلریشن غیر فعال کریں
+  Diagnostics:
+    Diagnostics: تشخیص
+    Description: تشخیصی لاگنگ آن ہونے کے دوران OpenTubeX حالیہ لاگ پیغامات میموری میں رکھتا ہے تاکہ آپ انہیں بگ رپورٹس کے ساتھ منسلک کر سکیں۔ یہ انہیں کبھی خود سے نہ محفوظ کرتا ہے نہ بھیجتا ہے، اور لاگنگ بند کرنے سے وہ حذف ہو جاتے ہیں۔ رپورٹس میں کوکیز، ٹوکنز، IP ایڈریسز اور URL پیرامیٹرز شامل نہیں ہوتے، لیکن ان میں آپ کی چلائی گئی ویڈیوز کی IDs شامل ہو سکتی ہیں، اس لیے شیئر کرنے سے پہلے رپورٹ چیک کر لیں۔
+    Enable Logging: تشخیصی لاگنگ فعال کریں
+    Copy Report: رپورٹ کاپی کریں
+    Save Report: رپورٹ محفوظ کریں
+    Clear Log: لاگ صاف کریں
+    Report Copied: تشخیصی رپورٹ کاپی ہو گئی
+    Report Saved: تشخیصی رپورٹ محفوظ ہو گئی
+    Report File: تشخیصی رپورٹ
+    Save Failed: تشخیصی رپورٹ محفوظ نہیں ہو سکی
+    Log Cleared Message: تشخیصی لاگ صاف ہو گیا
+  Password Dialog:
+    Incorrect Password: غلط پاس ورڈ
+    Unlock: ان لاک کریں
+    Unlocking: ان لاک ہو رہا ہے…
+  Search Settings: سیٹنگز تلاش کریں
+  No Settings Found: کوئی سیٹنگ نہیں ملی
+  Password Settings:
+    Failed to Save Password: پاس ورڈ محفوظ نہیں ہو سکا۔
+    Confirm Password: پاس ورڈ کی تصدیق کریں
+    Passwords Do Not Match: پاس ورڈ مماثل نہیں ہیں۔
+Tutorial:
+  Skip: چھوڑیں
+  Next: اگلا
+  Finish: ختم کریں
+  Welcome:
+    Title: OpenTubeX میں خوش آمدید
+    Description: یہ چند کنٹرولز آپ کو یہاں مانوس محسوس کرنے میں مدد دیں گے۔
+  Navigation:
+    Title: آپ کی لائبریری ہمیشہ قریب ہے
+    Description: سبسکرپشنز، پلے لسٹس، ہسٹری اور مزید تک پہنچنے کے لیے نیویگیشن استعمال کریں۔
+  Search:
+    Title: تلاش کریں یا لنک پیسٹ کریں
+    Description: ویڈیوز اور چینلز تلاش کریں، یا کوئی معاون ویڈیو URL براہ راست تلاش کے خانے میں پیسٹ کریں۔
+  Tabs:
+    Title: صفحات کو ٹیبز میں کھلا رکھیں
+    Description: اپنی جگہ کھوئے بغیر ایک ساتھ کئی صفحات کھولیں۔ منتخب کریں کہ آپ کے لے آؤٹ میں ٹیبز کہاں بہتر لگتے ہیں۔
+  Quick Settings:
+    Title: اسے اپنا بنائیں
+    Description: تھیم اور ڈیفالٹ ویڈیو کوالٹی منتخب کریں۔ انہیں اور دیگر ترجیحات کو کسی بھی وقت اپنے پروفائل مینو سے تبدیل کریں، یا پروفائل تبدیل کرنے کے لیے اس پر رائٹ کلک کریں۔
+    Touch Description: تھیم اور ڈیفالٹ ویڈیو کوالٹی منتخب کریں۔ انہیں اور دیگر ترجیحات کو کسی بھی وقت اپنے پروفائل مینو سے تبدیل کریں، یا پروفائل تبدیل کرنے کے لیے اسے دبا کر رکھیں۔
+  Import Data:
+    Title: اپنا ڈیٹا ساتھ لائیں
+    Description: اختیاری طور پر کسی دوسری معاون ایپ یا بیک اپ سے سبسکرپشنز، ہسٹری، پلے لسٹس، سرچ ہسٹری یا سیٹنگز امپورٹ کریں۔
+    Action: ڈیٹا امپورٹ کریں
+    Not Now: ابھی نہیں
+About:
+  Downloads: ڈاؤن لوڈز
+  Changelog: تبدیلیوں کا ریکارڈ
+  Commit: کمٹ
+  Licensed under the {licenseLink}: '{licenseLink} کے تحت لائسنس یافتہ'
+  Fluxer: ہماری Fluxer کمیونٹی میں شامل ہوں
+  Matrix: Matrix
+  Email: ای میل
+  Please read the {roomRulesLink}: براہ کرم {roomRulesLink} پڑھیں
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX کو {creditsPageLink} نے ممکن بنایا ہے
+  Support the development of OpenTubeX: "OpenTubeX کی تیاری میں تعاون کریں"
+Profile:
+  Customization: حسب ضرورت
+  Manage Profile Subscriptions: پروفائل سبسکرپشنز کا انتظام کریں
+  Icon Names:
+    Person: شخص
+    People: لوگ
+    Headphones: ہیڈ فونز
+    Gaming: گیمنگ
+    Film: فلم
+    Art: آرٹ
+    Science: سائنس
+    Globe: گلوب
+    Heart: دل
+    Sun: سورج
+    Moon: چاند
+    Trophy: ٹرافی
+  Profile Icon: پروفائل آئیکن
+  Choose an Emoji: ایموجی منتخب کریں
+  Custom Emoji: حسب ضرورت ایموجی
+  Emoji: ایموجی
+  Choose Image: تصویر منتخب کریں
+  Crop Image: تصویر کاٹیں
+  Zoom: زوم
+  Apply Crop: کٹائی لاگو کریں
+  Transparent: شفاف
+  Use Initial: ابتدائی حرف استعمال کریں
+  The selected image could not be loaded: منتخب تصویر لوڈ نہیں ہو سکی
+  Theme Color: تھیم کا رنگ
+  Go To Profile Manager: پروفائل مینیجر پر جائیں
+Channel:
+  Fewer videos per day: "فی دن کم ویڈیوز"
+  More videos per day: "فی دن زیادہ ویڈیوز"
+  Subscription settings: سبسکرپشن سیٹنگز
+  Failed to save subscription settings: چینل سیٹنگز محفوظ نہیں ہو سکیں
+  Videos per day: فی دن ویڈیوز
+  Use global setting: عمومی سیٹنگ استعمال کریں
+  Unlimited: لامحدود
+  More videos hidden: '+{count} مزید | +{count} مزید'
+  Verified: تصدیق شدہ
+  Official Artist Channel: آفیشل آرٹسٹ چینل
+  Show in subscription feed: سبسکرپشن فیڈ میں دکھائیں
+  Notify about new uploads: نئی اپ لوڈز کی اطلاع دیں
+  Show members-only videos: صرف ممبران کے لیے ویڈیوز دکھائیں
+  Upload Notifications On: آپ کی سبسکرپشنز ریفریش ہونے پر آپ کو {channelName} کی نئی اپ لوڈز کی اطلاع دی جائے گی
+  Upload Notifications Off: آپ کو {channelName} کی نئی اپ لوڈز کی اطلاع نہیں دی جائے گی
+  Upload Notifications Disabled In Settings: '{channelName} کے لیے اطلاعات آن ہیں، لیکن آپ کی سیٹنگز میں اپ لوڈ کی اطلاعات بند ہیں'
+  Turn On Upload Notifications: آن کریں
+  Channel Name Unavailable: چینل کا نام دستیاب نہیں
+  Search Result Types: تلاش کے نتائج کی اقسام
+  All Results: تمام
+  View All: سب دیکھیں
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: اس چینل پر ویڈیوز ہیں لیکن کوئی بھی دکھائی نہیں جا سکی، مزید حاصل کرنے کی کوشش کریں
+  About:
+    Links: لنکس
+  Posts:
+    Original post unavailable: اصل پوسٹ دستیاب نہیں
+    Members-only video hidden by OpenTubeX: "صرف اراکین کے لیے ویڈیو OpenTubeX نے چھپا دی"
+    Video hidden by OpenTubeX because of its title: "ویڈیو OpenTubeX نے چھپا دی کیونکہ اس کے عنوان میں چھپایا گیا متن شامل ہے"
+  Shows:
+    Shows: شوز
+    This channel does not currently have any shows: اس چینل پر فی الحال کوئی شوز نہیں ہیں
+Video:
+  Mark As Fully Watched: مکمل دیکھی گئی نشان زد کریں
+  AI-generated video summary: AI سے تیار کردہ ویڈیو کا خلاصہ
+  Quality and accuracy may vary: معیار اور درستگی مختلف ہو سکتی ہے
+  Includes paid promotion: معاوضہ شدہ تشہیر شامل ہے
+  Age Restricted Badge: عمر کی پابندی
+  Music Video Badge: میوزک ویڈیو
+  Queue: قطار
+  Play Next: اگلا چلائیں
+  Add to Queue: قطار میں شامل کریں
+  Added to Play Next: ویڈیو اگلی چلے گی
+  Added to Queue: ویڈیو قطار میں شامل کر دی گئی
+  Clear Queue: قطار صاف کریں
+  Save Queue to Playlist: قطار کو پلے لسٹ میں محفوظ کریں
+  Queue Video Count: '{count} ویڈیو | {count} ویڈیوز'
+  Remove from Queue: '{title} کو قطار سے ہٹائیں'
+  Remove Video from Queue: قطار سے ہٹائیں
+  Drag to Reorder Queue: قطار کی ترتیب بدلنے کے لیے {title} کو گھسیٹیں
+  Reorder Queue Item: '{title} کی ترتیب بدلیں'
+  Reorder Queue Item Instructions: اس ویڈیو کو قطار میں منتقل کرنے کے لیے اوپر اور نیچے ایرو کیز استعمال کریں۔
+  Queue Item Moved: '{title} کو {total} میں سے {position} مقام پر منتقل کر دیا گیا۔'
+  Queue Item Cannot Move Up: '{title} کو اوپر نہیں لے جایا جا سکتا۔ یہ پہلے ہی {total} میں سے مقام 1 پر ہے۔'
+  Queue Item Cannot Move Down: '{title} کو نیچے نہیں لے جایا جا سکتا۔ یہ پہلے ہی {total} میں سے مقام {total} پر ہے۔'
+  Metadata: ویڈیو کی معلومات
+  Close Metadata: ویڈیو کی معلومات بند کریں
+  Metadata Cache:
+    Title History: عنوان کی ہسٹری
+    Thumbnail History: تھمب نیل کی ہسٹری
+    Description History: تفصیل کی ہسٹری
+    Previous Version: پچھلا {number}
+    Empty: (خالی)
+  Fetching Streams: yt-dlp کے ذریعے اسٹریمز حاصل کی جا رہی ہیں…
+  Transcript:
+    Title: ٹرانسکرپٹ
+    Search: ٹرانسکرپٹ میں تلاش کریں
+    Language: ٹرانسکرپٹ کی زبان
+    Save: محفوظ کریں
+    Show: ٹرانسکرپٹ دکھائیں
+    Hide: ٹرانسکرپٹ چھپائیں
+    Close: ٹرانسکرپٹ بند کریں
+    Copied: ٹرانسکرپٹ کلپ بورڈ پر کاپی ہو گیا
+    Saved: ٹرانسکرپٹ محفوظ ہو گیا
+    Save Error: ٹرانسکرپٹ محفوظ نہیں ہو سکا
+    Text File: متنی فائل
+    Unavailable: اس ویڈیو کے لیے ٹرانسکرپٹ دستیاب نہیں ہے۔
+    Load Error: ٹرانسکرپٹ لوڈ نہیں ہو سکا۔
+    Empty: اس ٹرانسکرپٹ میں کوئی متن نہیں ہے۔
+    No Results: کوئی ٹرانسکرپٹ حصہ آپ کی تلاش سے مماثل نہیں۔
+  Retry With Built-in Extraction: بلٹ ان ایکسٹریکشن کے ساتھ دوبارہ کوشش کریں
+  Retry With yt-dlp Extraction: yt-dlp ایکسٹریکشن کے ساتھ دوبارہ کوشش کریں
+  Reloading video after streaming URL error: اسٹریمنگ URL ایرر کے بعد ویڈیو دوبارہ لوڈ ہو رہی ہے
+  Configure Restricted Playback Cookies Hint: سیٹنگز → ایڈوانسڈ → بیرونی سافٹ ویئر → yt-dlp کوکیز میں کوکیز ترتیب دیں۔
+  Try With Configured Cookies: ترتیب دی گئی کوکیز کے ساتھ آزمائیں
+  Restricted Playback Authentication Failed Template: 'yt-dlp ترتیب دی گئی کوکیز کے ساتھ اس ویڈیو تک رسائی حاصل نہیں کر سکا: {error}'
+  External DRM Protected: DRM سے محفوظ ویڈیوز OpenTubeX میں نہیں چلائی جا سکتیں، کیونکہ ان کے لیے ملکیتی، بند سورس اجزاء درکار ہوتے ہیں۔
+  Invalid Media URL: غلط میڈیا URL
+  External Media:
+    Dislikes: ناپسند | ناپسند
+    Reposts: ری پوسٹ | ری پوسٹس
+    Saves: محفوظ | محفوظ
+    Series: سیریز
+    Season: سیزن
+    Season Number: سیزن نمبر
+    Episode: قسط
+    Episode Number: قسط نمبر
+    Track: ٹریک
+    Track Number: ٹریک نمبر
+    Artists: فنکار
+    Album: البم
+    Genres: اصناف
+    Media Type: میڈیا کی قسم
+    Availability: دستیابی
+    Age Limit: عمر کی حد
+    Release Date: ریلیز کی تاریخ
+    Availability Values:
+      public: عوامی
+      private: نجی
+      premium_only: صرف Premium
+      subscriber_only: صرف سبسکرائبرز
+      needs_auth: سائن ان ضروری ہے
+      unlisted: غیر فہرست شدہ
+  Private: نجی ویڈیوز OpenTubeX میں نہیں دیکھی جا سکتیں کیونکہ ان کے لیے Google لاگ ان اور ویڈیو کی ملکیت ضروری ہے۔
+  Unmark As Watched: دیکھی گئی کا نشان ہٹائیں
+  Video has been unmarked as watched: ویڈیو سے دیکھی گئی کا نشان ہٹا دیا گیا ہے
+  Save Channel Playback Speed: چینل کی پلے بیک اسپیڈ محفوظ کریں
+  Channel Playback Speed Saved: چینل کی پلے بیک اسپیڈ محفوظ ہو گئی
+  Save Channel Video Quality: چینل کی ویڈیو کوالٹی محفوظ کریں
+  Channel Video Quality Saved: چینل کی ویڈیو کوالٹی محفوظ ہو گئی
+  Save Channel Subtitles State: چینل کے سب ٹائٹلز کی حالت محفوظ کریں
+  Channel Subtitles State Saved: چینل کے سب ٹائٹلز کی حالت محفوظ ہو گئی
+  Save Channel Volume: چینل کا والیوم محفوظ کریں
+  Channel Volume Saved: چینل کا والیوم محفوظ ہو گیا
+  Save Channel Setting: چینل سیٹنگ محفوظ کریں…
+  Channel Setting Already Set: '{setting} پہلے ہی {value} پر سیٹ ہے'
+  Video has been saved to {playlistName}: ویڈیو {playlistName} میں محفوظ کر دی گئی ہے
+  Video has been removed from {playlistName}: ویڈیو {playlistName} سے ہٹا دی گئی ہے
+  There was a problem saving the video to {playlistName}: ویڈیو کو {playlistName} میں محفوظ کرنے میں مسئلہ پیش آیا
+  There was a problem removing the video from {playlistName}: ویڈیو کو {playlistName} سے ہٹانے میں مسئلہ پیش آیا
+  Failed to load collaborators: معاونین لوڈ نہیں ہو سکے
+  Collapse Playlist: پلے لسٹ سمیٹیں
+  Expand Playlist: پلے لسٹ پھیلائیں
+  Notify me: مجھے اطلاع دیں
+  Notification on: اطلاع آن ہے
+  Notification enabled: یہ ویڈیو شروع ہونے پر آپ کو اطلاع دی جائے گی
+  Notification cancelled: آغاز کی اطلاع منسوخ کر دی گئی
+  Notification unavailable: سسٹم کی اطلاعات دستیاب نہیں ہیں
+  Scheduled video starting: شیڈول شدہ ویڈیو شروع ہو رہی ہے
+  Live notification body: '{videoTitle} ابھی شروع ہو رہی ہے'
+  Premiere: پریمیئر
+  AI: AI
+  AI-generated content: AI سے تیار کردہ مواد
+  Collaborators: معاونین
+  Station: اسٹیشن
+  Live Chat Replay: لائیو چیٹ ری پلے
+  Show Live Chat: لائیو چیٹ دکھائیں
+  Show Live Chat Replay: لائیو چیٹ ری پلے دکھائیں
+  Close Live Chat: لائیو چیٹ بند کریں
+  Close Live Chat Replay: لائیو چیٹ ری پلے بند کریں
+  Live Chat Settings: لائیو چیٹ سیٹنگز
+  Show Live Chat Timestamps: ٹائم اسٹیمپس دکھائیں
+  Chat Filter: چیٹ فلٹر
+  Top Chat: ٹاپ چیٹ
+  All Messages: تمام پیغامات
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: لائیو چیٹ ری پلے فعال ہے۔ ویڈیو چلنے کے ساتھ چیٹ پیغامات یہاں ظاہر ہوں گے۔
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: لائیو چیٹ فی الحال Yattee سرور کے ساتھ سپورٹ نہیں ہے۔ YouTube سے براہ راست کنکشن ضروری ہے۔
+  Premiere started: پریمیئر جاری ہے۔ {timeAgo} شروع ہوا
+  Sponsor Block category:
+    hook: ہک/سلام
+    highlight: ہائی لائٹ
+    exclusive access: خصوصی رسائی
+  Sponsor Block category short:
+    intro: وقفہ
+    interaction: تعامل کی یاد دہانی
+    music offtopic: غیر موسیقی
+    filler: غیر متعلقہ باتیں
+  Player:
+    Stream Recovery:
+      DASH Fallback: 'آڈیو اسٹریم ناکام ہو گئی، DASH فارمیٹس پر منتقل ہو رہے ہیں: {error}'
+      Error Copied: ایرر کلپ بورڈ پر کاپی ہو گیا
+      Legacy Fallback: 'اسٹریم ناکام ہو گئی، پرانے فارمیٹس پر منتقل ہو رہے ہیں: {error}'
+    Caption Timing:
+      Adjust Timing: وقت ایڈجسٹ کریں…
+      Caption Timing: کیپشن کا وقت
+      Offset: آفسیٹ (سیکنڈ)
+      Hint: منفی قدریں کیپشنز پہلے دکھاتی ہیں؛ مثبت قدریں انہیں بعد میں دکھاتی ہیں۔ صرف اس ویڈیو پر لاگو ہوتا ہے۔
+      Earlier: پہلے
+      Later: بعد میں
+      Reset: ری سیٹ کریں
+    Cast: کاسٹ
+    Most Replayed: سب سے زیادہ دوبارہ چلایا گیا
+    Pull up for precise seeking: درست سیک کے لیے اوپر کھینچیں
+    Precise seeking, drag down to exit: درست سیک · باہر نکلنے کے لیے نیچے گھسیٹیں
+    Playing in Picture-in-Picture: پکچر ان پکچر میں چل رہی ہے
+    Music Mode: میوزک موڈ
+    Music Mode Description: اس ٹیب میں ویڈیوز 1× پر چلائیں اور نئی ویڈیوز شروع سے چلائیں۔ آپ کے محفوظ شدہ پلے بیک ڈیفالٹس تبدیل نہیں ہوتے۔
+    DLNA:
+      Cast: DLNA ڈیوائس پر کاسٹ کریں
+      Stop: کاسٹنگ روکیں
+      No Devices: کوئی DLNA ڈیوائس نہیں ملا
+      No MP4 Source: اس ویڈیو کے لیے کوئی مطابقت رکھنے والی MP4 اسٹریم نہیں
+      Error: ویڈیو کاسٹ نہیں ہو سکی
+    Repeat Stats:
+      Repeat Stats: دہرانے کے اعداد و شمار
+      Looping: لوپ ہو رہی ہے
+      Repeats: بار دہرایا | بار دہرایا
+      Time Spent: صرف کیا گیا وقت
+    Voice-over Translation:
+      Start: ترجمہ کریں
+      Cancel: منسوخ کریں
+      Progress: وائس اوور ترجمہ تیار ہو رہا ہے…
+      Retry: دوبارہ کوشش کریں
+      Error: وائس اوور ترجمہ ناکام ہو گیا۔ براہ کرم بعد میں دوبارہ کوشش کریں۔
+      Duration Error: وائس اوور ترجمہ صرف چار گھنٹے تک طویل ویڈیوز کے لیے دستیاب ہے۔
+    Caption Appearance:
+      Options: اختیارات
+      Sample: کیپشنز ایسے نظر آتے ہیں
+    Auto-translate: خودکار ترجمہ
+    Secondary Captions: ثانوی کیپشنز
+    Subtitle File:
+      Load: سب ٹائٹل فائل لوڈ کریں…
+      Subtitle Files: سب ٹائٹل فائلیں
+      Error: سب ٹائٹل فائل لوڈ نہیں ہو سکی۔ SRT یا WebVTT فائل منتخب کریں۔
+    Sleep Timer:
+      Sleep Timer: سلیپ ٹائمر
+      'Off': 'بند'
+      Minutes: '{minutes} منٹ'
+      End of video: ویڈیو کا اختتام
+      End of current chapter: موجودہ چیپٹر کا اختتام
+      Remaining: '{time} باقی'
+      Cancel timer: ٹائمر منسوخ کریں
+      Timer ended: سلیپ ٹائمر ختم ہو گیا
+    A-B Repeat:
+      A-B Repeat: A-B ریپیٹ
+      'On': 'آن'
+      'Off': 'بند'
+      Point A: پوائنٹ A
+      Point B: پوائنٹ B
+      Set Repeat Start: دہرانے کا آغاز سیٹ کریں
+      Set Repeat End: دہرانے کا اختتام سیٹ کریں
+      Pause Repeat: A-B ریپیٹ روکیں
+      Resume Repeat: A-B ریپیٹ دوبارہ شروع کریں
+      Adjust Point: پوائنٹ {point} ایڈجسٹ کریں، فی الحال {timestamp}
+      Clear Range: A-B ریپیٹ کی حد صاف کریں
+      End Before Start: پوائنٹ B کو پوائنٹ A کے بعد ہونا چاہیے۔
+      Outside Duration: ٹائم اسٹیمپ ویڈیو کے اندر ہونا چاہیے۔
+      Cleared: A-B ریپیٹ صاف ہو گیا
+    Seek History:
+      Seek History: سیک ہسٹری
+      Positions: '{count} مقام | {count} مقامات'
+      Nothing to undo: واپس لینے کے لیے کچھ نہیں
+      Nothing to redo: دوبارہ کرنے کے لیے کچھ نہیں
+    Zoom:
+      Zoom: زوم
+      'Off': 'بند'
+    Volume Boost:
+      Volume Boost: والیوم بوسٹ
+      'Off': 'بند'
+    Auto-generated Caption Template: '{language} (خودکار طور پر تیار کردہ)'
+    Up next in {seconds}: اگلی ویڈیو {seconds} میں
+    Resize dock: ڈاک کا سائز بدلیں
+    Play now: ابھی چلائیں
+    MusicPlaybackRateOverride: میوزک ویڈیو کا پتہ چلا، 1x پر چل رہی ہے
+    Normal: عام
+    Set Default: ڈیفالٹ سیٹ کریں
+    Hide Annotations: تشریحات چھپائیں
+    Show Annotations: تشریحات دکھائیں
+    Hide: چھپائیں
+    Show: دکھائیں
+    Scroll Mini Player:
+      Collapse Controls: کنٹرولز سمیٹیں
+      Expand Controls: کنٹرولز پھیلائیں
+      Back to Top: اوپر واپس جائیں
+      Return to Video Tab: ویڈیو ٹیب پر واپس جائیں
+      Hide: منی پلیئر چھپائیں
+      Play: چلائیں
+      Pause: روکیں
+      Drag Handle: منی پلیئر منتقل کریں
+      Rewind 10 seconds: 10 سیکنڈ پیچھے
+      Forward 10 seconds: 10 سیکنڈ آگے
+    SponsorBlock:
+      CancelCurrentSegment: سیگمنٹ بنانا منسوخ کریں
+      ClearSegments: سیگمنٹس صاف کریں
+      ClearSegmentsPrompt: کیا آپ واقعی اس ویڈیو کے تمام مسودہ SponsorBlock سیگمنٹس صاف کرنا چاہتے ہیں؟
+      CompleteSegmentsBeforeSubmitting: جمع کرانے سے پہلے ہر مسودہ سیگمنٹ مکمل کریں۔
+      CategoryLabel: کیٹیگری
+      ActionTypeLabel: سیگمنٹ کی قسم
+      DuplicateSegments: ڈوپلیکیٹ مسودہ سیگمنٹس کی اجازت نہیں ہے۔
+      EndAction: (اختتام)
+      EndActionLabel: اختتام
+      EndTimeAfterStart: سیگمنٹ کا اختتامی وقت آغاز کے وقت کے بعد ہونا چاہیے۔
+      EndTimeBeforeVideoEnd: سیگمنٹ کا اختتامی وقت ویڈیو کے دورانیے کے اندر ہونا چاہیے۔
+      EndTimeLabel: سیگمنٹ کا اختتامی وقت
+      DisableAutoSkipTemporarily: SponsorBlock کی خودکار اسکیپنگ عارضی طور پر غیر فعال کریں
+      EnableAutoSkipTemporarily: SponsorBlock کی خودکار اسکیپنگ دوبارہ فعال کریں
+      Guidelines: رہنما اصول
+      InspectSegment: معائنہ کریں
+      InvalidStartTime: سیگمنٹ کا درست آغاز کا وقت درج کریں۔
+      NoSegmentsToSubmit: جمع کرانے سے پہلے کم از کم ایک مکمل سیگمنٹ بنائیں۔
+      NowAction: (ابھی)
+      CloseInfoPanel: SponsorBlock معلومات بند کریں
+      OpenInfoPanel: SponsorBlock معلومات کھولیں
+      OpenSubmissionMenu: جمع کرانے کا مینو کھولیں
+      PreviewRequired: براہ کرم جمع کرانے سے پہلے ہر سیگمنٹ کا پیش نظارہ کریں۔
+      PreviewSegment: پیش نظارہ
+      SaveSegment: محفوظ کریں
+      SetSegmentEndNow: سیگمنٹ ابھی ختم کریں
+      StartAction: (آغاز)
+      StartSegmentNow: سیگمنٹ ابھی شروع کریں
+      SubmissionBadRequest: SponsorBlock نے جمع کرانے کی درخواست مسترد کر دی۔
+      SubmissionDuplicate: یہ پہلے ہی جمع کرایا جا چکا ہے۔
+      SubmissionFailed: SponsorBlock سیگمنٹس جمع نہیں ہو سکے۔
+      SubmissionForbidden: SponsorBlock نے جمع کرانا مسترد کر دیا۔
+      SubmissionRateLimited: SponsorBlock نے اس جمع کرانے کی شرح محدود کر دی۔
+      SubmissionSuccess: SponsorBlock سیگمنٹس جمع ہو گئے۔
+      SubmitSegment: سیگمنٹ جمع کرائیں
+      SubmitSegments: جمع کرائیں
+      StartTimeLabel: سیگمنٹ کا آغاز کا وقت
+      TimeDivider: تا
+      SkipPrompt: '{segmentCategory} اسکیپ کریں؟'
+      SkipPromptAction: اسکیپ کریں
+      SkipToHighlight: ہائی لائٹ پر جائیں؟
+      SkippedToHighlight: ہائی لائٹ پر پہنچ گئے
+      SkipToastUnskip: اسکیپ واپس لیں
+      SkipToastReskip: دوبارہ اسکیپ کریں
+      MutedSegment: '{segmentCategory} خاموش کر دیا گیا'
+      MuteToastUnmute: آواز کھولیں
+      InfoPanelLoading: سیگمنٹس ابھی لوڈ ہو رہے ہیں...
+      InfoPanelHasSegments: اس ویڈیو کے سیگمنٹس ڈیٹا بیس میں موجود ہیں!
+      InfoPanelNoSegments: کوئی سیگمنٹ نہیں ملا
+      RefreshSegments: سیگمنٹس ریفریش کریں
+      RefreshInfo: SponsorBlock معلومات ریفریش کریں
+      ContributionStatsTitle: آپ کی شراکتیں
+      ContributionStatsLoading: شراکت کے اعداد و شمار لوڈ ہو رہے ہیں...
+      ContributionStatsError: شراکت کے اعداد و شمار دستیاب نہیں ہیں۔ ریفریش کر کے دیکھیں۔
+      ContributionStatsNoUserId: شراکت کے اعداد و شمار دیکھنے کے لیے کوئی سیگمنٹ جمع کرائیں یا اپنی SponsorBlock صارف ID امپورٹ کریں۔
+      Submissions: جمع کرائے گئے
+      Segments: سیگمنٹس
+      TimeSaved: بچایا گیا وقت
+      AutoSkipEnabled: سیگمنٹس خود بخود اسکیپ کریں
+      AutoSkipOn: 'آن'
+      AutoSkipOff: 'بند'
+      WhitelistChannel: چینل کو وائٹ لسٹ کریں
+      ChannelWhitelisted: وائٹ لسٹ شدہ
+      RemoveChannelFromWhitelist: چینل کو وائٹ لسٹ سے ہٹائیں
+      MuteSegment: سیگمنٹ خاموش کریں
+      SkipSegment: سیگمنٹ اسکیپ کریں
+      CloseSegmentActions: سیگمنٹ ایکشنز بند کریں
+      FullVideo: پوری ویڈیو
+      FullVideoLabel: '{segmentCategory} · پوری ویڈیو'
+      MuteActionType: خاموش کریں
+      MutePrompt: '{segmentCategory} خاموش کریں؟'
+      SkipActionType: اسکیپ کریں
+      LockedSegment: مقفل سیگمنٹ
+      UpvoteSegment: اپ ووٹ
+      DownvoteSegment: ڈاؤن ووٹ
+      VoteFailed: SponsorBlock ووٹ جمع نہیں ہو سکا۔
+      ChangeCategory: کیٹیگری تبدیل کریں
+      CopyAndDownvote: کاپی اور ڈاؤن ووٹ کریں
+      SubmitCategoryVote: کیٹیگری ووٹ جمع کرائیں
+      CategoryVoteSuccess: کیٹیگری ووٹ جمع ہو گیا۔
+    Google Cast:
+      Position: "پلے بیک کی جگہ"
+      Invalid Authentication: ریسیور نے غلط تصدیقی جواب بھیجا۔
+      Authentication Declined: ریسیور نے تصدیق مسترد کر دی۔
+      Audio Only Receiver: ریسیور صرف آڈیو کاسٹنگ کو سپورٹ کرتا ہے۔
+      Disconnected: ریسیور منقطع ہو گیا۔
+      Timeout: ریسیور نے جواب نہیں دیا۔
+      Busy: کوئی دوسری ونڈو پہلے سے کاسٹ کر رہی ہے۔
+      Not Authorized: اس ونڈو کو فعال کر کے دوبارہ کوشش کریں۔
+      Invalid Request: کاسٹنگ کی غلط درخواست۔
+      IPv4 Required: IPv4 کنکشن ضروری ہے۔
+      Launch Failed: ریسیور شروع نہیں ہو سکا۔
+      Load Failed: ریسیور ویڈیو لوڈ نہیں کر سکا۔
+      Cancelled: کاسٹنگ منسوخ کر دی گئی۔
+      Private Not Authorized: نجی میڈیا تک رسائی منظور نہیں ہوئی۔
+      Invalid Subtitles: کاسٹنگ کے غلط سب ٹائٹلز۔
+      Discovery Failed: ریسیورز تلاش نہیں ہو سکے۔
+      Preparing Video: کاسٹنگ کے لیے ویڈیو تیار ہو رہی ہے…
+      Connecting: '{device} سے منسلک ہو رہا ہے…'
+      Starting Receiver: Cast ریسیور شروع ہو رہا ہے…
+      Loading Video: ریسیور پر ویڈیو لوڈ ہو رہی ہے…
+      Buffering: '{device} پر بفرنگ ہو رہی ہے…'
+      Allow Private Instance: اس کاسٹ کو نجی Invidious انسٹنس {instance} سے میڈیا پڑھنے کی اجازت دیں؟
+      Cast: Google Cast ڈیوائس پر کاسٹ کریں
+      Connected: '{device} پر کاسٹ ہو رہا ہے'
+      Rewind: 10 سیکنڈ پیچھے
+      Forward: 10 سیکنڈ آگے
+      Subtitles Off: سب ٹائٹلز بند
+      Return: لوکل پلے بیک پر واپس جائیں
+      No Devices: کوئی Google Cast ڈیوائس نہیں ملا
+      No Source: Google Cast کے لیے کوئی مطابقت رکھنے والی اسٹریم نہیں
+      Error: ویڈیو کاسٹ نہیں ہو سکی
+      Error With Details: 'ویڈیو کاسٹ نہیں ہو سکی: {error}'
+      Untrusted Receiver: ریسیور کا سرٹیفکیٹ قابل اعتماد نہیں ہے۔ تصدیق شدہ Google Cast ریسیور استعمال کریں۔
+    FCast:
+      Cast: FCast ریسیور پر کاسٹ کریں
+      No Devices: کوئی FCast ریسیور نہیں ملا
+      No Source: FCast کے لیے کوئی مطابقت رکھنے والی اسٹریم نہیں
+  Playlist:
+    Unavailable videos are hidden: 1 غیر دستیاب ویڈیو پوشیدہ ہے | {count} غیر دستیاب ویڈیوز پوشیدہ ہیں
+  How this was made: یہ کیسے بنایا گیا
+  Info panel source: 'ماخذ: {source}'
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} شروع نہیں ہو سکا۔ یقینی بنائیں کہ یہ انسٹال ہے، یا بیرونی پلیئر کی ترتیبات میں اس کی قابلِ اجرا فائل کا راستہ مقرر کریں۔"
+Playlist:
+  Close Playlist: پلے لسٹ بند کریں
+  Add Playlist to Queue: پلے لسٹ قطار میں شامل کریں
+  Playlist Added to Queue: پلے لسٹ قطار میں شامل کر دی گئی
+  Preload Playlist: تمام ویڈیوز پہلے سے لوڈ کریں
+  Preloading Playlist: تمام ویڈیوز پہلے سے لوڈ ہو رہی ہیں...
+  Playlist Already Preloaded: پلے لسٹ کی تمام ویڈیوز پہلے ہی لوڈ ہو چکی ہیں
+  Playlist Preload Progress: 'ویڈیوز پہلے سے لوڈ ہو رہی ہیں: {requested} میں سے {completed}'
+  Playlist Preload Complete: 'پہلے سے لوڈ شدہ ویڈیوز: {count}۔'
+  Playlist Preload Partial: '{requested} میں سے {preloaded} ویڈیوز پہلے سے لوڈ ہو گئیں۔ {failed} پہلے سے لوڈ نہیں ہو سکیں۔'
+  Playlist Preload Pagination Failed: پوری پلے لسٹ لوڈ نہیں ہو سکی، اس لیے پہلے سے لوڈ کرنا منسوخ کر دیا گیا۔
+  Unavailable videos are hidden: غیر دستیاب ویڈیوز پوشیدہ ہیں
+Change Format:
+  yt-dlp Error Template: 'yt-dlp اسٹریمز فراہم نہیں کر سکا: {error}'
+  Local Video File: لوکل ویڈیو فائل
+  Local Audio File: لوکل آڈیو فائل
+  Online Video: آن لائن ویڈیو
+  Stream Source: اسٹریم کا ماخذ
+  Stream Extraction Method: اسٹریم نکالنے کا طریقہ
+  Playback Engine: پلے بیک انجن
+  Streaming Protocol: اسٹریمنگ پروٹوکول
+  Not Available For This Video: اس ویڈیو کے لیے دستیاب نہیں
+  Protocols:
+    Progressive: پروگریسو
+  Descriptions:
+    Local File: اس ڈیوائس پر ڈاؤن لوڈ شدہ فائل سے براہ راست چلائی جاتی ہے
+    Online Video: ترتیب دیے گئے آن لائن ماخذ سے اسٹریمنگ فارمیٹس لوڈ کریں
+    Dash: موافق کوالٹی، متعدد آڈیو ٹریکس اور سب سے زیادہ ریزولوشنز
+    Legacy: ویڈیو اور آڈیو پر مشتمل ایک ہی فائل، کم ریزولوشنز تک محدود
+    Audio: صرف آڈیو، بینڈوڈتھ بچانے یا پس منظر میں سننے کے لیے مفید
+  yt-dlp Fallback Template: 'yt-dlp اسٹریمز فراہم نہیں کر سکا، اس کے بجائے بلٹ ان انجن استعمال ہو رہا ہے: {error}'
+  yt-dlp Default Clients Fallback: ترجیحی yt-dlp کلائنٹس قابل پلے اسٹریمز فراہم نہیں کر سکے، اس کے بجائے yt-dlp کے ڈیفالٹ کلائنٹس آزمائے جا رہے ہیں
+  Built-in Fallback Template: 'بلٹ ان انجن اسٹریم نہیں چلا سکا، اس کے بجائے yt-dlp آزمایا جا رہا ہے: {error}'
+Share:
+  Shared YouTube Link: شیئر کیا گیا YouTube لنک
+  Open in Player: پلیئر میں کھولیں
+  No YouTube Link: شیئر کیے گئے متن میں کوئی معاون YouTube لنک نہیں ہے۔
+  Loading Video Information: ویڈیو کی معلومات لوڈ ہو رہی ہیں…
+  Video Information Failed: ویڈیو کی معلومات لوڈ نہیں ہو سکیں۔ دوبارہ کوشش کریں یا لنک کھولیں۔
+  Share Link: لنک شیئر کریں
+  Share failed: لنک شیئر نہیں ہو سکا
+  Timestamp Link Copied: ٹائم اسٹیمپ لنک کلپ بورڈ پر کاپی ہو گیا
+Context Menu:
+  Opened in a Background Tab: پس منظر کے ٹیب میں کھولا گیا
+  Open in a Background Tab: پس منظر کے ٹیب میں کھولیں
+  Select Tab: ٹیب منتخب کریں
+  Close Tabs Before: پہلے والے ٹیبز بند کریں
+  Close Tabs After: بعد والے ٹیبز بند کریں
+  Close Other Tabs: دوسرے ٹیبز بند کریں
+  Copy {service} link without playlist: پلے لسٹ کے بغیر {service} لنک کاپی کریں
+  Context Menu: کانٹیکسٹ مینو
+  Select All: تمام منتخب کریں
+  Save Image As…: تصویر اس طرح محفوظ کریں…
+  Copy Image: تصویر کاپی کریں
+  Copy Image Address: تصویر کا پتہ کاپی کریں
+  Cancel Refresh: ریفریش منسوخ کریں
+  Reload Videos: ویڈیوز دوبارہ لوڈ کریں
+  Reload Shorts: شارٹس دوبارہ لوڈ کریں
+  Reload Live: لائیو دوبارہ لوڈ کریں
+  Reload Posts: پوسٹس دوبارہ لوڈ کریں
+  Reload All Feeds: تمام فیڈز دوبارہ لوڈ کریں
+  Reload RSS Feeds: RSS فیڈز دوبارہ لوڈ کریں
+  Close Multiple Tabs: '{count} ٹیبز بند کریں'
+  Duplicate Tab: ٹیب کی نقل بنائیں
+  Duplicate Multiple Tabs: '{count} ٹیبز کی نقل بنائیں'
+  Move Tab: ٹیب منتقل کریں
+  Move Tabs: ٹیبز منتقل کریں
+  Move Tab to Group: ٹیب کو گروپ میں منتقل کریں
+  Collapse Group: گروپ سمیٹیں
+  Expand Group: گروپ پھیلائیں
+  Move Tabs to Group: ٹیبز کو گروپ میں منتقل کریں
+  Manage Tab Groups…: ٹیب گروپس کا انتظام کریں…
+  To Beginning: شروع میں
+  To End: آخر میں
+  Close Tabs: ٹیبز بند کریں
+  To the Top: اوپر کی طرف
+  To the Left: بائیں طرف
+  To the Bottom: نیچے کی طرف
+  To the Right: دائیں طرف
+  Other Tabs: دوسرے ٹیبز
+  Copy YouTube Link: YouTube لنک کاپی کریں
+  Copy YouTube Links: YouTube لنکس کاپی کریں
+  Pin Tab: ٹیب پن کریں
+  Pin Tabs: ٹیبز پن کریں
+  Unpin Tab: ٹیب ان پن کریں
+  Unpin Tabs: ٹیبز ان پن کریں
+  Tab Color: ٹیب کا رنگ
+  Default: ڈیفالٹ
+  Purple: ارغوانی
+  Reopen Closed Tab: بند ٹیب دوبارہ کھولیں
+  Reload Tab: ٹیب دوبارہ لوڈ کریں
+  Reload Tabs: ٹیبز دوبارہ لوڈ کریں
+  Load Tab: ٹیب لوڈ کریں
+  Load Tabs: ٹیبز لوڈ کریں
+  Unload Tab: ٹیب ان لوڈ کریں
+  Unload Tabs: ٹیبز ان لوڈ کریں
+  Unload Tabs Failed: منتخب ٹیبز ان لوڈ نہیں ہو سکے۔
+  Move Tab to Window: ٹیب کو ونڈو میں منتقل کریں
+  Move Tabs to Window: ٹیبز کو ونڈو میں منتقل کریں
+  Open in a New Tab: نئے ٹیب میں کھولیں
+  Open in a New Window: نئی ونڈو میں کھولیں
+  Copy Link: لنک کاپی کریں
+  Copy Invidious Link: Invidious لنک کاپی کریں
+  Search Selection in New Tab: نئے ٹیب میں "{selection}" تلاش کریں
+  Search Selection in New Window: نئی ونڈو میں "{selection}" تلاش کریں
+  Search With: '{engine} کے ساتھ تلاش کریں'
+  Search With Multiple: اس کے ساتھ تلاش کریں...
+  Selection Too Long: انتخاب تلاش کے لیے بہت طویل ہے (> {count} حروف)
+  Background Tab: پس منظر ٹیب
+Tab Organizer:
+  Tab History: ٹیب ہسٹری
+  Current Page: موجودہ صفحہ
+  Icon Labels:
+    Folder: فولڈر
+    Bookmark: بک مارک
+    Favorites: پسندیدہ
+    Videos: ویڈیوز
+    Gaming: گیمنگ
+    Research: تحقیق
+    Art: آرٹ
+    Travel: سفر
+    Podcast: پوڈکاسٹ
+    Clock: گھڑی
+    Puzzle Piece: پزل کا ٹکڑا
+    People: لوگ
+    Chart: چارٹ
+    Calendar: کیلنڈر
+    Images: تصاویر
+    Music: موسیقی
+  Group Icon: گروپ آئیکن
+  Title: ٹیب آرگنائزر
+  Open Tab Count: '{count} کھلا ٹیب | {count} کھلے ٹیبز'
+  Search Label: ٹیبز تلاش کریں
+  Selected Count: '{count} ٹیب منتخب | {count} ٹیبز منتخب'
+  Tab Count: '{count} ٹیب | {count} ٹیبز'
+  Select All: تمام منتخب کریں
+  Select None: کوئی منتخب نہ کریں
+  Move To Group: منتخب ٹیبز کو گروپ میں منتقل کریں
+  Choose Group: گروپ منتخب کریں
+  Ungrouped: بغیر گروپ
+  Pin: پن کریں
+  Unpin: ان پن کریں
+  Load: لوڈ کریں
+  Unload: ان لوڈ کریں
+  Unload All: سب ان لوڈ کریں
+  Close All: سب بند کریں
+  Ungroup: گروپ ختم کریں
+  Group Name: گروپ کا نام
+  Color: رنگ
+  No Color: کوئی رنگ نہیں
+  Create Group: گروپ بنائیں
+  Expand Group: گروپ پھیلائیں
+  Collapse Group: گروپ سمیٹیں
+  Expand Group Label: '{name} پھیلائیں، {count} ٹیب | {name} پھیلائیں، {count} ٹیبز'
+  Rename Group: '{name} کا نام بدلیں'
+  Change Group Color: '{name} کا رنگ تبدیل کریں'
+  Move To Window: ونڈو میں منتقل کریں
+  Choose Window: ونڈو منتخب کریں
+  Select Tab: '{title} منتخب کریں'
+  Active: فعال
+  Pinned: پن شدہ
+  Unloaded: ان لوڈ شدہ
+  Playing: چل رہا ہے
+  Close Tab: '{title} بند کریں'
+  No Open Results: کوئی کھلا ٹیب اس تلاش سے مماثل نہیں۔
+  Recently Closed: حال ہی میں بند کیے گئے
+  Clear: صاف کریں
+  No Closed Results: حال ہی میں بند کیا گیا کوئی ٹیب اس تلاش سے مماثل نہیں۔
+  Drag Tab: گروپ میں منتقل کرنے کے لیے گھسیٹیں
+Chapters:
+  Open Chapters: چیپٹرز کھولیں
+  Close Chapters: چیپٹرز بند کریں
+  Copy Timestamp Link: '{timestamp} پر لنک کاپی کریں'
+  Loop Chapter: 'چیپٹر لوپ کریں: {chapter}'
+  Looping Chapter: 'چیپٹر لوپ ہو رہا ہے: {chapter}'
+  Chapter Loop Stopped: چیپٹر کا لوپ روک دیا گیا
+Comments:
+  Image unavailable: تصویر دستیاب نہیں
+  Comment Count: 1 کمنٹ | {count} کمنٹس
+  Show Comments: کمنٹس دکھائیں
+  Getting comment replies, please wait: کمنٹ کے جوابات حاصل کیے جا رہے ہیں، براہ کرم انتظار کریں
+  Reload Comments: کمنٹس دوبارہ لوڈ کریں
+  Reply Count: 1 جواب | {replyCount} جوابات
+  Comments are turned off: کمنٹس بند ہیں
+  YouTube did not provide advertised replies: YouTube نے دکھایا کہ اس کمنٹ کے جوابات ہیں، لیکن انہیں فراہم نہیں کیا۔ ہو سکتا ہے وہ حذف یا پوشیدہ کر دیے گئے ہوں، اس لیے جواب کا بٹن ہٹا دیا گیا۔
+  Pinned by you: آپ نے پن کیا
+  A reply is pinned: ایک جواب پن ہے
+  Filter loaded comments: لوڈ شدہ کمنٹس فلٹر کریں
+  Comment filters: کمنٹ فلٹرز
+  From creator: تخلیق کار کی طرف سے
+  Contains timestamps: ٹائم اسٹیمپس پر مشتمل
+  Pin comment by author: '{author} کا کمنٹ پن کریں'
+  Unpin comment by author: '{author} کا کمنٹ ان پن کریں'
+  Edited: (ترمیم شدہ)
+  Highlighted comment: نمایاں کمنٹ
+  Highlighted reply: نمایاں جواب
+  Search loaded comments: لوڈ شدہ کمنٹس میں تلاش کریں
+  Loaded comment search result count: '{total} لوڈ شدہ کمنٹس میں سے 1 | {total} لوڈ شدہ کمنٹس میں سے {count}'
+  No loaded comments match your filters: کوئی لوڈ شدہ کمنٹ آپ کے فلٹرز سے مماثل نہیں
+  YouTube comment link copied to clipboard: YouTube کمنٹ کا لنک کلپ بورڈ پر کاپی ہو گیا
+  Translate to {language}: '{language} میں ترجمہ کریں'
+  Show original: اصل دکھائیں
+  Translating comment, please wait: کمنٹ کا ترجمہ ہو رہا ہے، براہ کرم انتظار کریں
+  Comment translation failed: کمنٹ کا ترجمہ ناکام ہو گیا
+Description:
+  Title: تفصیل
+  Copy Description: تفصیل کاپی کریں
+  Description Copied: تفصیل کلپ بورڈ پر کاپی ہو گئی
+  Video Category: 'ویڈیو کیٹیگری:'
+  Video Tags: ویڈیو ٹیگز
+  Games: گیمز
+  Music: موسیقی
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "فہرستوں اور گرڈز میں ویڈیو اور پلے لسٹ کے عنوانات کو تین نقطوں کے ساتھ دو سطروں تک مختصر کرتا ہے تاکہ کارڈز زیادہ یکساں نظر آئیں۔ پورا عنوان دیکھنے کے لیے اس پر کرسر لے جائیں۔"
+    Preferred Video Codec: |
+      خودکار ان کوڈیکس کو ترجیح دیتا ہے جنہیں آپ کا ڈیوائس ہارڈ ویئر میں ڈی کوڈ کر سکتا ہے۔
+      AV1: کم سے کم ڈیٹا میں بہترین کوالٹی، لیکن ہر ویڈیو میں دستیاب نہیں ہوتا۔ ہارڈ ویئر ڈی کوڈنگ کے بغیر یہ بیٹری ختم کر سکتا ہے یا فریمز گرا سکتا ہے۔
+      VP9: کارکردگی اور مطابقت میں توازن، عموماً سب سے زیادہ ریزولوشن تک دستیاب۔
+      H.264: تقریباً ہر ڈیوائس پر ڈی کوڈ کرنا سب سے آسان، لیکن یہ زیادہ ڈیٹا استعمال کرتا ہے اور عموماً 1080p تک محدود رہتا ہے۔
+      تبدیلیاں اگلی ویڈیو پر لاگو ہوتی ہیں۔ اگر ترجیحی کوڈیک دستیاب نہ ہو تو کوئی دوسرا استعمال کیا جاتا ہے۔
+    Yattee Server: وہ yattee-server انسٹنس جس سے OpenTubeX ویڈیوز، چینلز، پلے لسٹس اور تلاش کے نتائج لوڈ کرتا ہے۔ صارف نام اور پاس ورڈ صرف اسی ڈیوائس پر محفوظ ہوتے ہیں۔
+    Proxy Videos Through Yattee Server: ویڈیو اور آڈیو اسٹریمز کو سرور کے ذریعے منتقل کرتا ہے۔ اسے آن رکھیں جب تک سرور آپ کا انٹرنیٹ کنکشن شیئر نہ کرتا ہو، کیونکہ YouTube اسٹریمز صرف اسی ایڈریس کو فراہم کرتا ہے جس نے ان کی درخواست کی ہو۔ تھمب نیلز ہمیشہ براہ راست YouTube سے لوڈ ہوتے ہیں۔
+    Enable Tabs: موجودہ صفحہ کھلا رکھتا ہے۔ دوسرے ٹیبز ایپ دوبارہ شروع ہونے تک رکھے جاتے ہیں؛ انہیں بحال کرنے کے لیے ٹیبز دوبارہ فعال کریں۔
+    Data Saver Thumbnails: ڈیٹا کا استعمال کم کرنے کے لیے کم ریزولوشن والے تھمب نیلز استعمال کریں۔
+    Use AI Translation Completions: انسانی ترجموں میں خالی جگہیں AI سے تیار کردہ متن سے پُر کریں۔ انسانی ترجموں کو ہمیشہ ترجیح دی جاتی ہے۔
+    Update Relative Timestamps: صفحہ کھلا رہنے کے دوران پوری ایپ میں نسبتی ٹائم اسٹیمپس اپ ڈیٹ کرتا ہے۔ غیر فعال ہونے پر یہ صرف صفحہ دوبارہ لوڈ کرنے یا دوبارہ کھولنے کے بعد اپ ڈیٹ ہوتے ہیں۔
+    Automatically switch stream extraction methods: اگر بلٹ ان پلے بیک ناکام ہو تو yt-dlp آزمائیں، یا اگر yt-dlp ناکام ہو تو بلٹ ان پلے بیک۔
+    Stream Extraction Method: |
+      منتخب کریں کہ OpenTubeX ویڈیو اسٹریمز کیسے حاصل کرے۔ منتخب کرنے پر yt-dlp کا دستیاب ہونا ضروری ہے۔
+      yt-dlp استعمال کرنے پر ویڈیوز کو شروع ہونے میں زیادہ وقت لگ سکتا ہے۔
+      بلٹ ان طریقہ لائیو اسٹریمز اور پریمیئرز کے لیے سیک کو سپورٹ نہیں کرتا۔
+    Avoid translation: |
+      ویڈیو کے عنوان، تفصیل اور چیپٹرز کا YouTube کا خودکار ترجمہ غیر فعال کریں۔
+      بہت زیادہ درخواستیں، جیسے فہرستوں میں ویڈیو عنوانات حاصل کرنا، عارضی طور پر
+      ایپ کی قابل اعتمادی کو متاثر کر سکتی ہیں۔
+    Always Use Backup Media Server: تفویض کردہ سرور کے بجائے YouTube کے بتائے گئے بیک اپ سرور سے ویڈیوز اسٹریم کرتا ہے، مثلاً جب آپ کے انٹرنیٹ فراہم کنندہ کا کیش اکثر سست ہو۔ ورنہ OpenTubeX صرف تب سرور تبدیل کرتا ہے جب تفویض کردہ سرور جواب نہ دے۔
+    Show Thumbnail Previews: ویڈیو تھمب نیلز پر ہوور کرنے پر متحرک پیش نظارے دکھائیں۔
+    Startup Behavior: |
+      منتخب کریں کہ OpenTubeX شروع ہونے پر کیا کرے۔
+      تمام ٹیبز لوڈ کریں ہر محفوظ ٹیب کو فوراً بحال کرتا ہے، لیکن پس منظر کے ٹیبز ویڈیوز آٹو پلے نہیں کریں گے۔
+      پہلے لوڈ شدہ ٹیبز لوڈ کریں ان ٹیبز کو دوبارہ لوڈ کرتا ہے جو OpenTubeX بند ہوتے وقت لوڈ تھے اور باقی کو ان لوڈ رکھتا ہے۔
+      آخری فعال ٹیب لوڈ کریں پچھلا سیشن بحال کرتا ہے جس میں دوسرے ٹیبز کھلے لیکن ان لوڈ ہوتے ہیں؛ وہ کلک کرنے پر لوڈ ہوتے ہیں۔
+      خالی سیشن سے شروع کریں محفوظ ٹیبز کو چھوڑ کر نئی ونڈو کھولتا ہے۔
+    Close Window With Last Tab: بند ہونے پر، آخری ٹیب بند کرنے سے اس کے بجائے نیا ٹیب کھل جاتا ہے، اس لیے ونڈو آپ کے بند کرنے تک کھلی رہتی ہے۔
+    Remember Tab Navigation History: ہر ٹیب کی پیچھے اور آگے کی نیویگیشن ہسٹری محفوظ ہوتی ہے اور OpenTubeX دوبارہ شروع ہونے پر بحال ہو جاتی ہے۔
+    Notifications: منتخب کریں کہ OpenTubeX آپ کو لائیو اسٹریمز، نئے اپ لوڈز اور خودکار ڈاؤن لوڈز کی اطلاع کیسے دے۔ سسٹم اور ایپ میں کے ساتھ، اطلاعات OpenTubeX استعمال کرتے وقت اس کے اندر اور بصورت دیگر سسٹم اطلاعات کے طور پر ظاہر ہوتی ہیں، اور گھنٹی انہیں محفوظ رکھتی ہے۔ بند اطلاعات کے اختیارات کو بھی چھپا دیتا ہے۔
+  Proxy Settings:
+    IP Block Recovery Script Path: IP بلاک کا پتہ چلنے پر چلانے کے لیے اسکرپٹ فائل کا راستہ۔ OpenTubeX اس کے مکمل ہونے کا انتظار کرتا ہے، پھر ویڈیو دوبارہ لوڈ کرتا ہے۔ اگر فال بیک فعال ہو تو یہ صرف فال بیک کے بھی ناکام ہونے پر چلتا ہے۔
+  Player Settings:
+    Enable Caption Translations: فعال ہونے پر، کیپشنز بٹن اور C شارٹ کٹ ترجیحی کیپشن زبان میں خودکار ترجمہ شدہ ٹریک کو ترجیح دیتے ہیں جب ویڈیو میں مماثل اصل ٹریک موجود نہ ہو۔
+    Use Quick Playback Speed Bar: پلیئر کنٹرولز میں دائیں جانب فوری پلے بیک اسپیڈ بار دکھاتا ہے۔ اگر فی چینل پلے بیک اسپیڈ دستی طور پر محفوظ کرنا فعال ہو تو بار میں موجودہ چینل کی اسپیڈ محفوظ کرنے کا بٹن بھی شامل ہوتا ہے۔
+    Multiply Seek Interval by Playback Rate: فعال ہونے پر، سیک کے وقفے (ایرو کیز اور J/L) موجودہ پلے بیک ریٹ سے ضرب دیے جاتے ہیں۔ غیر فعال ہونے پر سیک کے وقفے پلے بیک ریٹ سے قطع نظر یکساں رہتے ہیں۔
+    Show Playback Rate Adjusted Timestamp: فعال ہونے پر اور پلے بیک اسپیڈ 1x سے مختلف ہونے پر، پلیئر عام ٹائم اسٹیمپ کے بعد قوسین میں پلے بیک ریٹ کے مطابق ٹائم اسٹیمپس دکھاتا ہے۔
+    Use YouTube-style Shorts: سبسکرپشن اور چینل صفحات پر شارٹس کو عمودی گرڈ میں دکھاتا ہے اور YouTube طرز کا شارٹس پلیئر استعمال کرتا ہے۔
+    Loop Shorts: فعال ہونے پر شارٹس خود بخود دوبارہ شروع ہوتے ہیں۔ غیر فعال ہونے پر شارٹس آخر میں رک جاتے ہیں اور دوبارہ چلانے کا بٹن دکھاتے ہیں۔
+    Show Skip Silence Toggle: پلیئر کے سیٹنگز مینو میں خاموشی چھوڑنے کا آن/آف ٹوگل دکھاتا ہے۔
+    Enable Skip Silence by Default: نئے ٹیبز کے لیے خاموشی چھوڑنا فعال کرتا ہے۔ کسی ایک ٹیب میں اسے تبدیل کرنے سے دوسرے ٹیبز متاثر نہیں ہوتے۔
+    Enable Video Zoom: پلیئر کے سیٹنگز مینو میں زوم کنٹرول دکھاتا ہے اور اس کے کی بورڈ شارٹ کٹس اور پیننگ کنٹرولز فعال کرتا ہے۔
+    Enable Seek History: ایپ بند ہونے تک ہر ویڈیو میں یاد رکھتا ہے کہ آپ کہاں سے آگے پیچھے گئے۔ پلیئر کے سیٹنگز مینو میں سیک ہسٹری کی فہرست دکھاتا ہے اور اس کے کی بورڈ شارٹ کٹس فعال کرتا ہے۔
+    Pause on Stream Recovery: جب ویڈیو اسٹریم ناکام ہو اور پلیئر اسے دوبارہ لوڈ کرے یا کسی دوسرے فارمیٹ یا انجن پر منتقل ہو، تو پلے بیک روکیں اور ایرر کو پلیئر کے اوپر اس وقت تک رکھیں جب تک آپ اسے بند نہ کریں۔ غیر فعال ہونے پر پلے بیک جاری رہتا ہے اور ایرر مختصر طور پر نوٹیفکیشن کے طور پر ظاہر ہوتا ہے۔
+    Continue Playback When Screen Is Locked: پس منظر میں آڈیو چلتی رہتی ہے اور Android میڈیا کنٹرولز فراہم کرتا ہے۔ ایپ نظر نہ آنے پر روکنے کے لیے اسے بند کریں۔
+    Voice-over Translation: جب آپ ترجمے کی درخواست کرتے ہیں تو ویڈیو ID، دورانیہ اور منتخب زبان Yandex کی غیر سرکاری وائس اوور ترجمہ سروس کو بھیجتا ہے۔ ڈیفالٹ کے طور پر غیر فعال ہے۔
+    Hold to Double Playback Speed: موجودہ پلے بیک اسپیڈ کو عارضی طور پر دگنا کرنے کے لیے پلیئر پر اسپیس بار یا ماؤس کا بایاں بٹن دبا کر رکھیں۔
+    Ambient Mode: ویڈیو کے رنگوں کو پلیئر کے ارد گرد کے حصے میں ملا دیتا ہے۔
+    Mono Audio: بائیں اور دائیں آڈیو چینلز کو دونوں کانوں میں چلاتا ہے۔ اسے تب استعمال کریں جب کسی ویڈیو کی آواز آپ کے ہیڈ فونز کی صرف ایک جانب سے آئے۔
+    Default Volume: والیوم یاد رکھیں فعال ہونے کے دوران غیر فعال ہے۔ ہر ویڈیو کے لیے مقررہ ابتدائی والیوم سیٹ کرنے کے لیے والیوم یاد رکھیں بند کریں۔
+    Parallel Segment Loading: |
+      پلے بیک سے پہلے ایک ساتھ کتنے ویڈیو اور آڈیو سیگمنٹس لوڈ کیے جائیں۔
+      زیادہ قدریں سست یا غیر مستحکم کنکشنز پر مدد کر سکتی ہیں، لیکن زیادہ بینڈوڈتھ اور میموری استعمال کرتی ہیں۔
+      ان سے خودکار موڈ کنکشن کی رفتار کا کم اندازہ لگا کر کم کوالٹی بھی منتخب کر سکتا ہے۔
+      وہ اسٹریمز جو ایک وقت میں ایک درخواست تک محدود ہوں اس سیٹنگ کو نظر انداز کرتی ہیں۔
+    Preload Upcoming Videos: اگلی چلنے والی ویڈیوز کے yt-dlp اسٹریم URLs حاصل کر کے کیش کرتا ہے۔ دیکھنے کی قطار کو پلے لسٹس اور تجاویز پر ترجیح حاصل ہے۔
+    Upcoming Videos to Preload: آنے والی ویڈیوز کی زیادہ سے زیادہ تعداد جن کے yt-dlp اسٹریم URLs پس منظر میں حاصل کیے جاتے ہیں۔
+    Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
+    Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
+  Download Settings:
+    Download Folder: ویڈیوز اس فولڈر میں محفوظ ہوتی ہیں۔ اپنے سسٹم کا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں۔
+    Global Additional yt-dlp Arguments: ہر ڈاؤن لوڈ کے لیے yt-dlp کو دیے جانے والے اضافی کمانڈ لائن آرگیومینٹس، مثلاً --cookies-from-browser firefox۔
+    Concurrent Downloads: yt-dlp جابز کی زیادہ سے زیادہ تعداد جو ایک ساتھ چل سکتی ہیں۔
+    Bandwidth Limit: اس حد کو بیک وقت جابز میں تقسیم کر کے قطار کی مجموعی منتقلی کی شرح محدود کرتا ہے۔ کوئی حد نہ رکھنے کے لیے 0 درج کریں۔
+  External Software Settings:
+    yt-dlp Source: OpenTubeX یا تو آپ کے سسٹم پر انسٹال شدہ yt-dlp استعمال کر سکتا ہے یا yt-dlp کی اپنی کاپی ڈاؤن لوڈ اور منظم کر سکتا ہے، جو صارف ڈیٹا ڈائریکٹری میں محفوظ ہوتی ہے۔
+    yt-dlp Channel: منتخب کریں کہ OpenTubeX کون سا yt-dlp ریلیز چینل ڈاؤن لوڈ اور منظم کرے۔ زیادہ تر صارفین کے لیے Stable تجویز کیا جاتا ہے۔
+    FFmpeg Source: OpenTubeX یا تو آپ کے سسٹم پر انسٹال شدہ FFmpeg اور FFprobe استعمال کر سکتا ہے یا اپنی اسٹیٹک بلڈز ڈاؤن لوڈ اور منظم کر سکتا ہے، جو صارف ڈیٹا ڈائریکٹری میں محفوظ ہوتی ہیں۔
+    Managed Tool Updates: منتخب کریں کہ منظم ٹولز خود بخود اپ ڈیٹ ہوں، اپ ڈیٹ سے پہلے پوچھیں، یا صرف دستی بٹنوں کے ذریعے اپ ڈیٹ ہوں۔ گمشدہ ٹولز ضرورت پڑنے پر پھر بھی ڈاؤن لوڈ کیے جاتے ہیں۔
+    yt-dlp Executable Path: ڈیفالٹ کے طور پر OpenTubeX فرض کرتا ہے کہ yt-dlp کو PATH ماحولیاتی متغیر کے ذریعے تلاش کیا جا سکتا ہے۔ ضرورت ہو تو یہاں حسب ضرورت راستہ سیٹ کیا جا سکتا ہے۔
+    Cookie Source: منتخب کریں کہ تصدیق شدہ پلے بیک کے لیے yt-dlp کو Netscape کوکی فائل پڑھنی چاہیے یا کسی انسٹال شدہ براؤزر سے کوکیز۔
+    Cookie File: تصدیق شدہ پلے بیک کے لیے Netscape فارمیٹ والی کوکی فائل منتخب کریں۔
+    Browser for Cookies: براؤزر کی سپورٹ منتخب yt-dlp ایگزیکیوٹیبل سے پڑھی جاتی ہے۔ تصدیق شدہ پلے بیک کی درخواست ہونے پر OpenTubeX yt-dlp سے یہ براؤزر پڑھنے کو کہتا ہے۔
+    Browser Profile: اختیاری براؤزر پروفائل کا نام یا فولڈر۔ حال ہی میں استعمال شدہ پروفائل استعمال کرنے کے لیے خالی چھوڑیں۔
+    Always Use Cookies: ڈاؤن لوڈز، سب ٹائٹلز اور جب بھی yt-dlp اسٹریمز نکالے، ترتیب دی گئی کوکیز استعمال کریں۔ اس سے اسٹریم نکالنے کا طریقہ yt-dlp پر تبدیل نہیں ہوتا۔ yt-dlp منتخب ہونے پر صرف اکاؤنٹ والے فارمیٹس دستیاب ہو سکتے ہیں، بشمول YouTube Premium کا بہتر بٹ ریٹ اگر اکاؤنٹ کو رسائی حاصل ہو۔
+    FFmpeg Executable Path: الگ ویڈیو اور آڈیو اسٹریمز کو ملانے اور آڈیو کنورژن کے لیے FFmpeg ضروری ہے۔ ڈیفالٹ کے طور پر OpenTubeX فرض کرتا ہے کہ FFmpeg کو PATH ماحولیاتی متغیر کے ذریعے تلاش کیا جا سکتا ہے۔ ضرورت ہو تو یہاں حسب ضرورت راستہ سیٹ کیا جا سکتا ہے۔
+    Use cookies for subtitles: سب ٹائٹلز اور خودکار ترجموں کے لیے ترتیب دی گئی کوکیز استعمال کریں۔ "ہمیشہ کوکیز استعمال کریں" سے بھی فعال ہوتا ہے۔
+  Distraction Free Settings:
+    Count Watch Time From: تمام ڈیوائسز ہر اس ڈیوائس کو شمار کرتا ہے جو دیکھنے کے اعداد و شمار سنک کرتا ہے۔ یہ ڈیوائس صرف وہی شمار کرتا ہے جو آپ یہاں دیکھتے ہیں۔
+    When a Limit Is Reached: پلے بیک روکیں آپ کو 15 منٹ مزید شامل کرنے یا آج کے لیے حد نظر انداز کرنے دیتا ہے۔ سیٹنگز پاس ورڈ کے ساتھ آپ حد صرف سیٹنگز میں بڑھا سکتے ہیں۔
+    Grayscale: ویڈیوز سمیت پوری ایپ کو سرمئی رنگوں میں دکھاتا ہے، تاکہ یہ کم توجہ کھینچے۔ سونے کے وقت کے دوران سونے کے وقت کی یاد دہانی کے شیڈول کی پیروی کرتا ہے۔
+    Daily Watch Time Limit: دیکھنے کے اعداد و شمار سنک کرنے والے تمام ڈیوائسز پر آج آپ نے جو دیکھا اسے شمار کرتا ہے، بشمول شارٹس۔
+    Daily Shorts Limit: آج اس ڈیوائس پر آپ کے دیکھے گئے شارٹس کو شمار کرتا ہے۔
+    Take a Break Reminder: اتنی دیر دیکھنے کے بعد ویڈیو روک دیتا ہے۔ 10 منٹ یا اس سے زیادہ کا وقفہ گنتی دوبارہ شروع کر دیتا ہے۔
+    Bedtime Reminder: آغاز اور اختتامی وقت کے درمیان ویڈیو روکتا ہے اور آپ کو دیکھنا بند کرنے کی یاد دہانی کراتا ہے۔
+    Shorten View Counts: ویوز، کمنٹس اور کمنٹ لائکس کی وہ تعداد جو YouTube پہلے ہی گول کر چکا ہو مختصر شکل میں دکھاتا ہے، مثلاً 14,000 کے بجائے 14K۔ درست تعداد ہمیشہ مکمل دکھائی جاتی ہے۔
+  Subscription Settings:
+    Fetch Feed on Startup: فعال ہونے پر OpenTubeX آغاز پر اور نئی ونڈو کھلنے پر آپ کی سبسکرپشن فیڈ خود بخود حاصل کرے گا۔
+    Show New Content Feed: ایک نیا ٹیب دکھاتا ہے جس میں سبسکرپشن فیڈ کے وہ آئٹمز ہوتے ہیں جو پچھلی بار حاصل کرتے وقت موجود نہیں تھے۔
+    Enable RSS Feeds: سبسکرپشنز کے صفحے پر RSS یا Atom فیڈز کے آئٹمز کے ساتھ ایک RSS ٹیب دکھاتا ہے، تاکہ آپ دوسرے پلیٹ فارمز کے تخلیق کاروں کو فالو کر سکیں۔ اس کے آئٹمز yt-dlp کے ساتھ کھلتے ہیں۔
+    Show New Content Indicators: سبسکرپشن فیڈ کے ان آئٹمز کے ساتھ ایک چھوٹا نقطہ دکھاتا ہے جو پچھلی بار حاصل کرتے وقت موجود نہیں تھے۔
+    Show Scheduled Live Streams / Premieres First: آنے والی لائیو اسٹریمز اور پریمیئرز کو سبسکرپشن فیڈ کے اوپر رکھتا ہے۔ غیر فعال ہونے پر وہ شروع ہونے تک اپنے اعلان کی جگہ پر رہتے ہیں۔ غیر فعال کرنے کے بعد موجودہ شیڈول شدہ اندراجات کی اعلان کی تاریخیں حاصل کرنے کے لیے سبسکرپشن فیڈ ایک بار ریفریش کریں۔
+    Auto Refresh Interval: ایپ کھلی رہنے کے دوران OpenTubeX کتنی بار آپ کی سبسکرپشن فیڈ خود بخود ریفریش کرے۔ Android پر صفر کے علاوہ کوئی بھی وقفہ ایپ بند ہونے پر بھی اسے ریفریش کرتا ہے۔
+    Refresh Subscriptions While App Is Closed: آپ کی منتخب کردہ سیٹنگز کے ساتھ فیڈز ریفریش کرتا ہے۔ ڈیسک ٹاپ پر OpenTubeX باہر نکلنے تک سسٹم ٹرے میں رہتا ہے۔ Android کنٹرول کرتا ہے کہ پس منظر کی ریفریش کب چلے۔
+    Notify About New Uploads: ان چینلز کے لیے اس ڈیوائس پر سسٹم نوٹیفکیشنز دکھاتا ہے جن کی اطلاعات آپ نے ان کی سبسکرپشن سیٹنگز میں آن کی ہیں۔ OpenTubeX سبسکرپشنز ریفریش ہونے پر نیا مواد چیک کرتا ہے، اس لیے خودکار ریفریش کا وقفہ منتخب کریں۔ ایپ بند ہونے پر اطلاع پانے کے لیے ایپ بند ہونے پر ریفریش کرنا بھی فعال کریں۔
+    RSS Feeds Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX آپ کی RSS فیڈز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
+  Theme Settings:
+    Only Show Important Notifications: ایپ کے اندر وہ اطلاعات چھپاتا ہے جو صرف کسی کارروائی کی تصدیق کرتی ہیں یا کسی حالت کی اطلاع دیتی ہیں۔ غلطیاں، انتباہات، آپ کی ترتیب دی ہوئی یاد دہانیاں، اور ایسی اطلاعات جو کوئی کارروائی پیش کرتی ہیں، جیسے پہلے جیسا کریں، بدستور ظاہر ہوتی ہیں۔ پس منظر کے کاموں کی پیش رفت، جیسے سبسکرپشنز کو تازہ کرنا، اطلاع کے بجائے عمومی پیش رفت بار میں دکھائی جاتی ہے۔ سسٹم کی اطلاعات متاثر نہیں ہوتیں۔
+    Thumbnail Size: گرڈز اور فہرستوں میں ویڈیو تھمب نیلز کا سائز بدلتا ہے۔ مقررہ کالمز والے گرڈز یا پوری چوڑائی والا منظر ہر قطار کو بھر دیتے ہیں، اس لیے وہاں یہ صرف فہرست کے تھمب نیلز اور شارٹس کو تبدیل کرتا ہے۔ فون کے سائز کی ونڈوز گرڈ تھمب نیلز کو 100% تک محدود کرتی ہیں۔
+    Playlist Thumbnail Size: پلے لسٹ صفحات پر ویڈیو تھمب نیلز کا سائز بدلتا ہے۔ مقررہ کالمز والے گرڈز یا پوری چوڑائی والا منظر ہر قطار کو بھر دیتے ہیں، اس لیے وہاں یہ صرف فہرست کے تھمب نیلز اور شارٹس کو تبدیل کرتا ہے۔ فون کے سائز کی ونڈوز گرڈ تھمب نیلز کو 100% تک محدود کرتی ہیں۔
+    Show Progress as Notification: عمومی پروگریس بار استعمال کرنے کے بجائے پس منظر کی کارروائیوں، جیسے سبسکرپشن ریفریش اور منظم ٹولز کے ڈاؤن لوڈز، کی براہ راست پیش رفت کے ساتھ مستقل نوٹیفکیشن دکھاتا ہے۔
+    Always Show Scrollbars: اسکرول بارز کو ہر وقت نظر آنے والا رکھتا ہے۔ غیر فعال ہونے پر وہ ماؤس روکنے کے کچھ دیر بعد غائب ہو جاتے ہیں اور ماؤس دوبارہ حرکت کرتے ہی ظاہر ہو جاتے ہیں۔
+    Scroll Speed: تبدیل کرتا ہے کہ ماؤس وہیل اور ٹچ پیڈ وہیل اشارے کتنا اسکرول کریں۔
+    Visible Search Suggestions: سیٹ کرتا ہے کہ فہرست اسکرول ہونے سے پہلے سرچ بار کتنے سرچ ہسٹری اندراجات اور تجاویز دکھائے۔ فہرست کبھی ونڈو کے نچلے حصے سے آگے نہیں جاتی۔
+    Use Fixed Tab Width: افقی ٹیب بار کے ہر ٹیب کو ان کے عنوان کے مطابق سائز دینے کے بجائے یکساں چوڑائی دیتا ہے۔
+    Use Custom Title Bar: عمودی جگہ بچانے کے لیے سسٹم ٹائٹل بار کو ٹیب بار سے، یا ٹیبز اوپر نہ ہونے پر اوپری نیویگیشن سے بدل دیتا ہے۔ ونڈو کنٹرولز اس بار کے کونے میں ظاہر ہوتے ہیں۔
+    Use Grid Player Menu: ویڈیو پلیئر کے سیٹنگز مینو کو قطاروں کی فہرست کے بجائے ٹائلز کے گرڈ کی صورت میں ترتیب دیتا ہے۔
+    Compact Settings Categories: تفصیلات چھپاتا ہے اور سیٹنگز کیٹیگریز کی اونچائی کم کرتا ہے۔
+  Experimental Settings:
+    Disable Hardware Acceleration: GPU ہارڈ ویئر ایکسلریشن غیر فعال کرتا ہے۔ گرافیکل مسائل حل ہو سکتے ہیں، لیکن کارکردگی غالباً کم ہو جائے گی۔
+Yattee Server:
+  API Error (Click to copy): Yattee سرور ایرر (کاپی کرنے کے لیے کلک کریں)
+  Errors:
+    Invalid credentials: Yattee سرور نے صارف نام یا پاس ورڈ مسترد کر دیا۔ انہیں سیٹنگز → ایڈوانسڈ میں چیک کریں۔
+    Rate limited: بہت زیادہ ناکام کوششوں کے بعد Yattee سرور سائن ان کو روک رہا ہے۔ بعد میں دوبارہ کوشش کریں۔
+    Streams not relayed: Yattee سرور نے اس ویڈیو کی اسٹریمز منتقل نہیں کیں۔ جب ویڈیوز سرور کے ذریعے پراکسی ہوتی ہیں تو OpenTubeX براہ راست YouTube سے منسلک نہیں ہوتا۔
+    Not configured: سیٹنگز → ایڈوانسڈ میں اپنے Yattee سرور کا URL درج کریں۔
+    HTTPS required: Android صرف HTTPS استعمال کرنے والے Yattee سرورز سے ویڈیوز چلا سکتا ہے۔
+    Streams unavailable: Yattee سرور سے اس ویڈیو کی اسٹریمز لوڈ نہیں ہو سکیں۔ سرور چیک کرنے کے لیے سیٹنگز → ایڈوانسڈ میں کنکشن ٹیسٹ کریں استعمال کریں۔
+  Unsupported page: یہ صفحہ Yattee سرور کے ساتھ دستیاب نہیں ہے۔ اسے لوکل API سے لوڈ کرنے کے لیے “{fallbackSetting}” آن کریں۔
+  Posts unavailable: Yattee سرورز پوسٹس فراہم نہیں کرتے۔ انہیں لوکل API سے لوڈ کرنے کے لیے “{fallbackSetting}” آن کریں۔
+The playlist is at the beginning. Enable loop to continue playing: پلے لسٹ شروع میں ہے۔ چلانا جاری رکھنے کے لیے لوپ فعال کریں
+External link opening has been disabled in Settings → Privacy: بیرونی لنکس کھولنا سیٹنگز → رازداری میں غیر فعال کر دیا گیا ہے
+Screenshot Clipboard Success: اسکرین شاٹ کلپ بورڈ پر محفوظ ہو گیا
+Screenshot Clipboard Error: اسکرین شاٹ کلپ بورڈ پر کاپی کرنا ناکام ہو گیا
+KeyboardShortcutPrompt:
+  Reopen Closed Window: آخری بند ونڈو دوبارہ کھولیں
+  Edit Hint: کوئی شارٹ کٹ منتخب کریں، پھر نیا کی کمبی نیشن دبائیں۔ اسے ہٹانے کے لیے Backspace یا Delete دبائیں۔
+  Change Shortcut: '{action} کا شارٹ کٹ تبدیل کریں'
+  Press Shortcut: شارٹ کٹ دبائیں…
+  Unassigned: غیر تفویض شدہ
+  Reset Shortcut: '{action} کا شارٹ کٹ ری سیٹ کریں'
+  Reset to Defaults: ڈیفالٹس پر ری سیٹ کریں
+  Shortcut Already Assigned: شارٹ کٹ پہلے سے تفویض شدہ ہے
+  Shortcut Conflict: '{shortcut} پہلے ہی {actions} کو تفویض ہے۔ کیا آپ اسے دوبارہ تفویض کرنا چاہتے ہیں؟'
+  Reserved Shortcut Conflict: '{shortcut} {actions} کے لیے مخصوص ہے اور اسے دوبارہ تفویض نہیں کیا جا سکتا۔'
+  Reassign: دوبارہ تفویض کریں
+  Sections:
+    App:
+      Tabs: "ایپ:\_ٹیبز"
+      Search and Page: "ایپ:\_تلاش اور صفحہ"
+      Window and View: "ایپ:\_ونڈو اور منظر"
+  New Tab: نیا ٹیب بنائیں
+  Close Tab: موجودہ ٹیب بند کریں
+  Reload Tab: موجودہ ٹیب دوبارہ لوڈ کریں
+  Reopen Closed Tab: آخری بند ٹیب دوبارہ کھولیں
+  Next Tab: اگلے ٹیب پر جائیں
+  Previous Tab: پچھلے ٹیب پر جائیں
+  Switch to Tab: ٹیب 1–9 پر جائیں
+  Toggle Tab Orientation: ٹیب لے آؤٹس کے درمیان تبدیل کریں
+  Find in Page: موجودہ صفحے پر متن تلاش کریں
+  Find Next Match: اگلے نتیجے پر جائیں
+  Find Previous Match: پچھلے نتیجے پر جائیں
+  Toggle Quick Bookmark: فوری بک مارک پلے لسٹ میں شامل کریں یا اس سے ہٹائیں
+  Toggle Normal Playback Speed: 1x اسپیڈ اور پچھلی پلے بیک اسپیڈ کے درمیان ٹوگل کریں
+  Toggle Skip Silence: خاموشی چھوڑنا ٹوگل کریں
+  Set A-B Repeat Point A: A-B ریپیٹ کا پوائنٹ A سیٹ کریں
+  Set A-B Repeat Point B: A-B ریپیٹ کا پوائنٹ B سیٹ کریں
+  Clear A-B Repeat: A-B ریپیٹ صاف کریں
+  Video Zoom In: ویڈیو میں زوم ان کریں
+  Video Zoom Out: ویڈیو سے زوم آؤٹ کریں
+  Tab Switcher: ٹیب سوئچر
+  Undo Seek: آخری سیک واپس لیں
+  Redo Seek: واپس لیا گیا سیک دوبارہ کریں
+CommandPalette:
+  Title: کمانڈ پیلیٹ
+  Open: کمانڈ پیلیٹ کھولیں
+  Search Label: کمانڈز، سیٹنگز اور لوکل ویڈیوز تلاش کریں
+  Search Placeholder: کمانڈز، سیٹنگز اور لوکل ویڈیوز تلاش کریں…
+  Results: نتائج
+  No Results: کوئی مماثل نتیجہ نہیں
+  Result Count: '{count} نتیجہ ملا | {count} نتائج ملے'
+  Move: منتقل کریں
+  Run: چلائیں
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'ٹیب پر جائیں: {title}'
+  Switch Profile: 'پروفائل تبدیل کریں: {name}'
+  Open Playlist: 'پلے لسٹ کھولیں: {name}'
+  Cancel Download: 'ڈاؤن لوڈ منسوخ کریں: {title}'
+  Groups:
+    App: ایپ
+    Navigation: نیویگیشن
+    Tabs: ٹیبز
+    Local Videos: لوکل ویڈیوز
+  Unavailable:
+    Current Page: پہلے ہی اس صفحے پر ہیں
+    No History: اس سمت میں کوئی صفحہ نہیں
+    Desktop: صرف ڈیسک ٹاپ ایپ میں دستیاب
+    Build: اس بلڈ میں دستیاب نہیں
+    One Tab: پہلے کوئی اور ٹیب کھولیں
+    Active Tab: یہ فعال ٹیب ہے
+    Active Profile: یہ فعال پروفائل ہے
+    Download Finished: یہ ڈاؤن لوڈ اب نہیں چل رہا
+    Video: پہلے کوئی ویڈیو کھولیں
+Downloads:
+  Add Download: ڈاؤن لوڈ شامل کریں
+  Search Completed: مکمل ڈاؤن لوڈز کو عنوان یا چینل کے لحاظ سے تلاش کریں
+  Format: فارمیٹ
+  All Formats: تمام فارمیٹس
+  Largest First: بڑے پہلے
+  Smallest First: چھوٹے پہلے
+  No Matching Downloads: کوئی مکمل ڈاؤن لوڈ مماثل نہیں۔ کوئی مختلف تلاش یا فلٹر آزمائیں۔
+  Preparing: تیاری ہو رہی ہے…
+  Export Failed: ڈاؤن لوڈ کی گئی فائل محفوظ نہیں ہو سکی۔ قابل تحریر ڈاؤن لوڈ فولڈر منتخب کر کے دوبارہ کوشش کریں۔
+  Remove File Permanently Warning: اس سے "{title}" مستقل طور پر حذف ہو جائے گی۔
+  Download: ڈاؤن لوڈ
+  Download Video: ویڈیو ڈاؤن لوڈ کریں
+  Download Playlist: پلے لسٹ ڈاؤن لوڈ کریں
+  Downloading: ڈاؤن لوڈ ہو رہا ہے
+  Queue: قطار
+  Downloaded: ڈاؤن لوڈ شدہ
+  Canceled: منسوخ شدہ
+  Open Downloads: ڈاؤن لوڈز کھولیں
+  No Downloads: ابھی تک کوئی ڈاؤن لوڈ نہیں
+  No Downloads Description: آپ کے شروع کردہ ڈاؤن لوڈز یہاں ظاہر ہوں گے۔
+  Clear Failed Canceled Skipped And Missing: ناکام، منسوخ شدہ، چھوڑے گئے اور گمشدہ صاف کریں
+  Clear From List: فہرست سے صاف کریں
+  Show in Folder: فولڈر میں دکھائیں
+  Play Download: ڈاؤن لوڈ چلائیں
+  Retry Download: ڈاؤن لوڈ دوبارہ آزمائیں
+  Pause Download: ڈاؤن لوڈ روکیں
+  Resume Download: ڈاؤن لوڈ دوبارہ شروع کریں
+  Move Earlier: پہلے کریں
+  Move Later: بعد میں کریں
+  Pause All: سب روکیں
+  Resume All: سب دوبارہ شروع کریں
+  Retry All: تمام ناکام ڈاؤن لوڈز دوبارہ آزمائیں
+  Total Size: 'کل سائز: {size}'
+  Local File: لوکل فائل
+  Available Offline: آف لائن دستیاب
+  Remove File: فائل ہٹائیں
+  Remove File Confirmation: ڈاؤن لوڈ کی گئی فائل ہٹائیں؟
+  Remove File Warning: اس سے "{title}" آپ کے ڈیوائس کے ردی دان میں منتقل ہو جائے گی۔
+  File Not Found: ڈاؤن لوڈ کی گئی فائل نہیں مل سکی۔
+  Download Missing: ڈاؤن لوڈ دستیاب نہیں
+  Files Missing: ڈاؤن لوڈ کی گئی فائل اب فائل سسٹم پر دستیاب نہیں ہے۔ | ڈاؤن لوڈ کی گئی فائلیں اب فائل سسٹم پر دستیاب نہیں ہیں۔
+  Files Available: '{total} میں سے {available} ڈاؤن لوڈ شدہ فائلیں دستیاب ہیں۔'
+  More Files: 1 مزید فائل | {count} مزید فائلیں
+  Template Used: 'ٹیمپلیٹ: {name}'
+  Download Type: ڈاؤن لوڈ کی قسم
+  Template: ٹیمپلیٹ
+  Unsaved: غیر محفوظ شدہ
+  Media Type: میڈیا کی قسم
+  Video: ویڈیو
+  Audio: آڈیو
+  Maximum Resolution: زیادہ سے زیادہ ریزولوشن
+  Best Available: بہترین دستیاب
+  Automatic: خودکار
+  Container: کنٹینر
+  Video Codec: ویڈیو کوڈیک
+  Audio Codec: آڈیو کوڈیک
+  File Name Template: فائل نام کا ٹیمپلیٹ
+  File Name Template Help: 'دستیاب فیلڈز: {title}، {author}، {upload_date}، {id}، {playlist}، {playlist_index}، {ext}'
+  Time Range and Chapters: وقت کی حد اور چیپٹرز
+  Start Time: آغاز کا وقت
+  End Time: اختتام کا وقت
+  Split by Chapters: چیپٹرز کے لحاظ سے الگ فائلوں میں تقسیم کریں
+  Remove Segments: سیگمنٹس ہٹائیں
+  Subtitles and Metadata: سب ٹائٹلز اور میٹا ڈیٹا
+  Include Subtitles: سب ٹائٹلز شامل کریں
+  Embed Subtitles: سب ٹائٹلز میڈیا فائل میں شامل کریں
+  Subtitle Format: سب ٹائٹل فارمیٹ
+  Subtitle Languages: سب ٹائٹل زبانیں
+  Subtitle Languages Help: 'کوما سے الگ کیے گئے yt-dlp زبان سلیکٹرز، مثلاً: en.*,de.*'
+  Embed Cover Art: تھمب نیل کو کور آرٹ کے طور پر شامل کریں
+  Embed Metadata: عنوان، مصنف، تفصیل اور چیپٹرز شامل کریں
+  Additional yt-dlp Arguments: اضافی yt-dlp آرگیومینٹس
+  Custom yt-dlp Arguments: حسب ضرورت yt-dlp آرگیومینٹس
+  Template Name: ٹیمپلیٹ کا نام
+  Save Template: ٹیمپلیٹ محفوظ کریں
+  Delete Template: ٹیمپلیٹ حذف کریں
+  Template Saved: ڈاؤن لوڈ ٹیمپلیٹ "{name}" محفوظ ہو گیا
+  Template Name Exists: '"{name}" نام کا ڈاؤن لوڈ ٹیمپلیٹ پہلے سے موجود ہے۔'
+  Choose Folder: تبدیل کریں
+  Select Folder: فولڈر منتخب کریں
+  Folder Required: ڈاؤن لوڈز فعال کرنے کے لیے ڈاؤن لوڈ فولڈر منتخب کریں۔
+  System Downloads Folder: سسٹم کا ڈاؤن لوڈز فولڈر
+  Processing: پروسیسنگ ہو رہی ہے…
+  Queued: قطار میں
+  Queued Position: قطار میں، مقام {position}
+  Waiting for Unmetered Network: ان میٹرڈ نیٹ ورک کا انتظار ہے
+  Waiting for Charging: چارجر کا انتظار ہے
+  Paused: رکا ہوا
+  Pausing: موجودہ کام مکمل ہوگا، پھر قطار رک جائے گی
+  Download Complete: ڈاؤن لوڈ مکمل
+  Download Cancelled: ڈاؤن لوڈ منسوخ ہو گیا
+  Download Failed: ڈاؤن لوڈ ناکام ہو گیا
+  File Name Shortened: فائل کا نام مختصر کر دیا گیا کیونکہ ویڈیو کا عنوان بہت طویل تھا۔
+  Insufficient Disk Space: ڈسک میں کافی جگہ نہیں ہے۔ تقریباً {required} درکار ہے اور {available} دستیاب ہے۔
+  Unknown Download Size: ڈاؤن لوڈ کا سائز نامعلوم ہے۔ منزل کے فائل سسٹم پر {available} دستیاب ہے۔
+  Disk Space Check Unavailable: یہ ڈاؤن لوڈ شروع کرنے سے پہلے دستیاب ڈسک کی جگہ چیک نہیں ہو سکی۔
+  Download Failure Hint: '{issuesLink} چیک کریں، پھر سیٹنگز → ایڈوانسڈ → بیرونی سافٹ ویئر میں yt-dlp چینل کو Nightly یا Master پر تبدیل کر کے دیکھیں۔'
+  yt-dlp YouTube Issues: YouTube کے لیے yt-dlp کے حالیہ مسائل
+  Automatic Download Started: خودکار ڈاؤن لوڈ شروع ہو گیا
+  Automatic Download Started Body: '{channel} سے "{title}" پس منظر میں ڈاؤن لوڈ ہو رہی ہے۔'
+  Automatic Download Complete: خودکار ڈاؤن لوڈ مکمل ہو گیا
+  Automatic Download Failed: خودکار ڈاؤن لوڈ ناکام ہو گیا
+  Automatic Download Could Not Start: '"{title}" کا خودکار ڈاؤن لوڈ شروع نہیں ہو سکا۔'
+  Automatic Download Skipped: خودکار ڈاؤن لوڈ فلٹرز نے چھوڑ دیا
+  Cancel Download: ڈاؤن لوڈ منسوخ کریں
+  yt-dlp Not Found: yt-dlp نہیں ملا۔ اسے انسٹال کریں یا سیٹنگز → ایڈوانسڈ → بیرونی سافٹ ویئر میں اس کا راستہ سیٹ کریں۔
+  Download Complete Template: '"{title}" کا ڈاؤن لوڈ مکمل ہو گیا ہے'
+  Download Failed Template: '"{title}" کا ڈاؤن لوڈ ناکام ہو گیا ہے'
+  Templates:
+    Video Best: ویڈیو - بہترین کوالٹی
+    Video Resolution: ویڈیو - {resolution}
+    Audio Best: آڈیو - بہترین کوالٹی
+    Audio Format: آڈیو - {format}
+    Subtitles Format: سب ٹائٹلز - {format}
+  Remove File Failed: ڈاؤن لوڈ کی گئی فائل ہٹائی نہیں جا سکی۔
+Theme Discovery:
+  Discover Themes: تھیمز دریافت کریں
+  Refresh: ریفریش کریں
+  View on GitHub: GitHub پر دیکھیں
+  Load Error: تھیمز لوڈ نہیں ہو سکیں۔ ریفریش کر کے دیکھیں۔
+  Loading: لوڈ ہو رہا ہے…
+  No Themes: کوئی قابل انسٹال تھیم نہیں ملی۔
+  No Preview: اسکرین شاٹ دستیاب نہیں
+  Load More: مزید لوڈ کریں
+  Applied: لاگو شدہ
+  Apply Theme: تھیم لاگو کریں
+  Install and Apply: انسٹال اور لاگو کریں
+  Update and Apply: اپ ڈیٹ اور لاگو کریں
+Connection:
+  Offline: آف لائن
+  Reconnecting: کنکشن ٹوٹ گیا۔ دوبارہ منسلک ہونے کی کوشش ہو رہی ہے…
+  Back Online: دوبارہ آن لائن
+App Icon:
+  Restart: ایپ دوبارہ شروع کریں
+  Saved Message: آئیکن محفوظ ہو گیا۔ آپ کے لانچر کو اپ ڈیٹ ہونے میں کچھ وقت لگ سکتا ہے۔
+  Title: ایپ آئیکن
+  Error: ایپ آئیکن لوڈ یا تبدیل نہیں ہو سکا
+Tray:
+  Hide All Windows: تمام ونڈوز چھپائیں
+  Show All Windows: تمام ونڈوز دکھائیں
+Tray Icon:
+  Title: ٹرے آئیکن
+  Follow App Theme: ایپ کی تھیم کی پیروی کریں
+Form Inputs:
+  Enter Password Hint: اپنا پاس ورڈ درج کریں
+  Choose Password Hint: پاس ورڈ منتخب کریں
+  Confirm Password Hint: اپنا نیا پاس ورڈ دوبارہ درج کریں
+  Encryption Passphrase Hint: اپنا انکرپشن پاس فریز درج کریں
+  Show Password: پاس ورڈ دکھائیں
+  Hide Password: پاس ورڈ چھپائیں
+  Search Text Hint: تلاش کے الفاظ درج کریں
+  Playlist Description Hint: اس پلے لسٹ کی وضاحت کریں
+  Filename Preview: فائل نام کا پیش نظارہ
+  Enter Channels: چینلز درج کریں
+  Enter Text: متن درج کریں
+  Video URL: ویڈیو یا پلے لسٹ کا URL
+  Paste Link: ویڈیو یا پلے لسٹ کا لنک پیسٹ کریں
+  Example: مثلاً {example}
+  No Minimum: کوئی کم از کم حد نہیں
+  No Maximum: کوئی زیادہ سے زیادہ حد نہیں
+  Any Age: کوئی بھی عمر
+  Included Terms Example: مثلاً ٹیوٹوریل، ریویو
+  Excluded Terms Example: مثلاً ٹریلر، پیش نظارہ
+  Download Folder Hint: اپنا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں
+  Global Arguments Hint: ہر ڈاؤن لوڈ کے لیے اختیاری آرگیومینٹس
+  Unlimited Hint: لامحدود کے لیے 0
+  Add Argument: آرگیومینٹ شامل کریں
+  Template Name Example: مثلاً صرف آڈیو
+  Download Arguments Hint: اس ڈاؤن لوڈ کے لیے اختیاری آرگیومینٹس
+  Generated ID Hint: ID بنانے کے لیے خالی چھوڑیں
+  Default Value: 'ڈیفالٹ: {value}'
+Storage Startup Error:
+  Title: ایپ کا ڈیٹا لوڈ نہیں ہو سکا
+  Message: ڈیوائس کی اسٹوریج خالی کر کے دوبارہ کوشش کریں۔ آپ کا ڈیٹا لوڈ ہونے تک سنک رکی ہوئی ہے۔
+  Retry: دوبارہ کوشش کریں
+Native Permissions:
+  Local Network Denied: قریبی ڈیوائسز کی اجازت مسترد کر دی گئی۔
+  Local Network: اپنے لوکل نیٹ ورک پر ڈیوائسز تلاش کر کے ان پر ویڈیوز کاسٹ کریں، اور تمام ڈیوائسز پر سیٹنگز اور ڈیٹا سنک کریں۔
+Home Widgets:
+  Continue Watching: دیکھنا جاری رکھیں
+  Continue Watching Description: وہ ویڈیوز دوبارہ شروع کریں جو آپ نے دیکھنا شروع کی تھیں
+  Continue Watching Empty: جو ویڈیوز آپ دیکھنا شروع کریں گے وہ یہاں ظاہر ہوں گی
+  Quick Access: فوری رسائی
+  Quick Access Description: تلاش، سبسکرپشنز یا بعد میں دیکھیں کھولیں
+  Search: تلاش
+  Subscriptions: سبسکرپشنز
+  Watch Later: بعد میں دیکھیں
+Mobile Navigation:
+  home: ہوم
+  subscriptions: اشتراکات
+  userplaylists: پلے لسٹس
+  history: ہسٹری
+  subscribedchannels: چینلز
+  trending: ٹرینڈنگ
+  popular: مقبول
+  stats: شماریات
+  more: مزید
+Installer:
+  Create Desktop Shortcut: ڈیسک ٹاپ شارٹ کٹ بنائیں
+Invidious Fallback Warning: یہ درخواست آپ کے ترتیب دیے گئے Invidious انسٹنس کو بائی پاس کر کے براہ راست YouTube سے منسلک ہوتی ہے، جس سے آپ کا IP ایڈریس ظاہر ہو جاتا ہے۔
+Yattee Fallback Warning: یہ درخواست آپ کے ترتیب دیے گئے Yattee سرور کو بائی پاس کر کے براہ راست YouTube سے منسلک ہوتی ہے، جس سے آپ کا IP ایڈریس ظاہر ہو جاتا ہے۔
+Automatically unloaded to free memory: میموری خالی کرنے کے لیے خود بخود ان لوڈ کیا گیا
+Digital Wellbeing:
+  Watch time limit almost reached: 'آپ کی روزانہ دیکھنے کے وقت کی حد میں {duration} باقی ہیں'
+  Shorts limit almost reached: 'آپ کی روزانہ شارٹس کی حد میں {duration} باقی ہیں'
+  Daily watch time limit reached: روزانہ دیکھنے کے وقت کی حد پوری ہو گئی
+  Daily Shorts limit reached: روزانہ شارٹس کی حد پوری ہو گئی
+  Watched today: آپ نے آج {duration} دیکھا ہے۔
+  Shorts watched today: آپ نے آج {duration} شارٹس دیکھے ہیں۔
+  15 More Minutes: مزید 15 منٹ
+  Ignore for Today: آج کے لیے نظر انداز کریں
+  Time to take a break: وقفہ لینے کا وقت ہے
+  Watching for: آپ {duration} سے دیکھ رہے ہیں۔
+  Time for bed: سونے کا وقت ہو گیا ہے
+  Bedtime started at: آپ کا سونے کا وقت {time} پر شروع ہوا۔
+  Remind Me in 10 Minutes: مجھے 10 منٹ میں یاد دلائیں
+Notification Center:
+  Notifications: "اطلاعات"
+  Notifications With Unread: "اطلاعات (غیر پڑھی ہوئی: {count})"
+  Mark as Read: "پڑھا ہوا نشان زد کریں"
+  Mark All as Read: "سب کو پڑھا ہوا نشان زد کریں"
+  Clear All: "سب صاف کریں"
+  Clear: "صاف کریں"
+  Empty: "ابھی تک کوئی اطلاع نہیں"
+  Empty Hint: "لائیو اسٹریم کی یاد دہانیاں اور اطلاعات آن والے چینلز کے نئے اپ لوڈز یہاں نظر آئیں گے۔"

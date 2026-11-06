@@ -1,108 +1,221 @@
 <template>
   <FtCard class="watchVideoInfo">
     <div>
+      <!-- rendered as HTML so that the hashtags and handles in the title are clickable -->
       <h1
+        v-safer-html="titleHtml"
         class="videoTitle"
         dir="auto"
-      >
-        {{ title }}
-      </h1>
+      />
       <div
-        v-if="isUnlisted || showAiBadge"
+        v-if="isUnlisted || isAgeRestricted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
         class="videoBadges"
       >
         <div
           v-if="isUnlisted"
-          class="unlistedBadge"
+          class="videoBadge unlistedBadge"
         >
+          <FtIcon
+            :icon="['fas', 'eye-slash']"
+            aria-hidden="true"
+          />
           {{ t('Video.Unlisted') }}
         </div>
         <div
-          v-if="showAiBadge"
-          class="aiBadge"
-          :title="t('Video.AI: Content was made with AI')"
-          :aria-label="t('Video.AI: Content was made with AI')"
+          v-if="isAgeRestricted"
+          class="videoBadge ageRestrictedBadge"
         >
-          <FontAwesomeIcon :icon="['fas', 'circle-info']" />
-          <span>{{ t('Video.AI') }}</span>
+          <FtIcon
+            :icon="['fas', 'user-lock']"
+            aria-hidden="true"
+          />
+          {{ t('Video.Age Restricted Badge') }}
+        </div>
+        <div
+          v-if="hasAiGeneratedContent"
+          :aria-label="t('Video.AI-generated content')"
+          :title="t('Video.AI-generated content')"
+          class="videoBadge"
+        >
+          <FtIcon :icon="['fas', 'info-circle']" />
+          {{ t('Video.AI') }}
+        </div>
+        <div
+          v-if="sponsorBlockFullVideoCategory"
+          class="videoBadge"
+        >
+          <FtIcon :icon="['fas', 'shield-halved']" />
+          {{ t('Video.Player.SponsorBlock.FullVideoLabel', {
+            segmentCategory: translateSponsorBlockCategory(sponsorBlockFullVideoCategory)
+          }) }}
         </div>
       </div>
     </div>
     <div class="videoMetrics">
-      <div class="datePublishedAndViewCount">
-        {{ publishedString }} {{ dateString }}
-        <template
-          v-if="!hideVideoViews"
-        >
-          <span class="seperator">• </span><span class="videoViews">{{ parsedViewCount }}</span>
-        </template>
-      </div>
-      <div
-        v-if="!hideVideoLikesAndDislikes"
-        class="likeBarContainer"
+      <FtInlineMetadata
+        class="datePublishedAndViewCount"
+        icon-labels
       >
-        <div
-          class="likeSection"
-        >
-          <span class="likeCount"><FontAwesomeIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
-        </div>
-      </div>
+        <span
+          v-if="isPremiereInProgress"
+          class="publishedDate"
+        ><FtIcon
+          :icon="['fas', 'tower-broadcast']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ t('Video.Premiere started', { timeAgo: publishedTimeAgo }) }}</span>
+        <span
+          v-else-if="publishedDateText"
+          class="publishedDate"
+          :title="publishedDateText"
+        ><FtIcon
+          :icon="['fas', 'calendar-days']"
+          class="statIcon"
+          role="img"
+          :aria-label="publishedString"
+        />{{ dateString }}</span>
+        <span
+          v-if="publishedTimeAgo && !isPremiereInProgress"
+          class="publishedTimeAgo"
+        ><FtIcon
+          :icon="['fas', 'clock']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ publishedTimeAgo }}</span>
+        <span
+          v-if="parsedViewCount"
+          class="videoViews"
+        ><FtIcon
+          :icon="['fas', 'eye']"
+          class="statIcon"
+          aria-hidden="true"
+        />{{ parsedViewCount }}</span>
+        <bdi
+          v-if="category"
+          class="videoCategory"
+          :title="`${t('Description.Video Category')} ${category}`"
+        ><FtIcon
+          :icon="['fas', 'icons']"
+          class="statIcon"
+          role="img"
+          :aria-label="t('Description.Video Category')"
+        />{{ category }}</bdi>
+      </FtInlineMetadata>
+      <WatchVideoLikes
+        :like-count="likeCount"
+        :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
+      />
     </div>
     <div class="videoButtons">
       <div
         class="profileRow"
       >
-        <div
-          v-if="!hideUploader"
+        <button
+          v-if="!hideUploader && hasMultipleCollaborators"
+          type="button"
+          class="collaboratorSummary"
+          @click="showCollaboratorsPrompt = true"
+          @mousedown.middle.prevent
+          @auxclick.middle.prevent="showCollaboratorsPrompt = true"
         >
-          <component
-            :is="enableChannelLinks ? 'RouterLink' : 'div'"
-            :to="`/channel/${channelId}`"
-          >
-            <img
-              :src="channelThumbnail"
-              :class="enableChannelLinks ? '' : 'initialCursor'"
-              class="channelThumbnail"
-              alt=""
+          <span class="collaboratorSummaryThumbnails">
+            <span
+              v-for="collaborator in channelCollaborators"
+              :key="collaborator.id"
+              class="channelThumbnail collaboratorThumbnail"
             >
-          </component>
-        </div>
-        <div>
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
+                :src="collaborator.thumbnail"
+                class="collaboratorThumbnailImage"
+                alt=""
+              />
+            </span>
+          </span>
+          <span
+            class="channelName collaboratorSummaryName"
+            dir="auto"
+          >
+            {{ collaboratorSummaryName }}
+          </span>
+        </button>
+        <template v-else>
           <div
             v-if="!hideUploader"
           >
             <component
-              :is="enableChannelLinks ? 'RouterLink' : 'span'"
+              :is="enableChannelLinks ? 'RouterLink' : 'div'"
               :to="`/channel/${channelId}`"
-              :class="enableChannelLinks ? '' : 'initialCursor'"
-              class="channelName"
-              dir="auto"
+              class="channelThumbnailLink"
+              :aria-label="enableChannelLinks ? channelName : null"
+              @click="handleChannelLinkClick"
+              @auxclick="handleChannelLinkClick"
             >
-              {{ channelName }}
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
+                :src="channelThumbnail"
+                :class="enableChannelLinks ? '' : 'initialCursor'"
+                class="channelThumbnail"
+                alt=""
+              />
             </component>
           </div>
-          <FtSubscribeButton
-            v-if="!hideUnsubscribeButton"
-            :channel-id="channelId"
-            :channel-name="channelName"
-            :channel-thumbnail="channelThumbnail"
-            :subscription-count-text="subscriptionCountText"
-          />
-        </div>
+          <div>
+            <div
+              v-if="!hideUploader"
+            >
+              <component
+                :is="enableChannelLinks ? 'RouterLink' : 'span'"
+                :to="`/channel/${channelId}`"
+                :class="enableChannelLinks ? '' : 'initialCursor'"
+                class="channelName"
+                dir="auto"
+                @click="handleChannelLinkClick"
+                @auxclick="handleChannelLinkClick"
+              >
+                <FtVerifiedBadge
+                  :name="channelName"
+                  :verified="channelVerified"
+                  :artist="channelVerifiedArtist"
+                />
+              </component>
+            </div>
+            <FtSubscribeButton
+              v-if="channelId && !hideUnsubscribeButton"
+              :channel-id="channelId"
+              :channel-name="channelName"
+              :channel-thumbnail="channelThumbnail"
+              :subscription-count-text="subscriptionCountText"
+            />
+          </div>
+        </template>
+        <FtCollaboratorsPrompt
+          v-if="showCollaboratorsPrompt"
+          :collaborators="channelCollaborators"
+          @close="showCollaboratorsPrompt = false"
+        />
       </div>
-      <div class="videoOptions">
-        <span class="videoOptionsMobileRow">
+      <WatchVideoToolbar
+        :actions="toolbarActions"
+        :overflow-order="OVERFLOW_ORDER"
+        :dropdown-portal="channelSettingDropdownPortal"
+      >
+        <template #primary="{ inToolbar }">
+          <slot name="cast-action" />
           <FtIconButton
-            v-if="showPlaylists && !isUpcoming"
+            v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
             :title="t('User Playlists.Add to Playlist')"
-            :icon="['fas', 'plus']"
-            theme="base"
-            @click="togglePlaylistPrompt"
-          />
+            :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+            theme="base-no-default"
+            force-dropdown
+            mobile-sheet
+          >
+            <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+          </FtIconButton>
           <FtIconButton
-            v-if="isQuickBookmarkEnabled"
+            v-if="inToolbar('quickBookmark')"
             :title="quickBookmarkIconText"
-            :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
+            :icon="quickBookmarkIcon"
             class="quickBookmarkVideoIcon"
             :class="{
               bookmarked: isInQuickBookmarkPlaylist,
@@ -111,61 +224,195 @@
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
-            v-if="canSaveWatchedProgress && watchedProgressSavingInSemiAutoMode"
-            :title="t('Video.Save Watched Progress')"
+            v-if="inToolbar('saveProgress')"
+            :title="toolbarActions.saveProgress.label"
             :icon="['fas', 'bars-progress']"
+            theme="base-no-default"
             @click="saveWatchedProgressManually"
           />
-        </span>
-        <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="USING_ELECTRON && externalPlayer !== ''"
-            :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
+            v-if="channelSettingSaveActions.length > 0"
+            ref="channelSettingsButton"
+            :title="t('Video.Save Channel Setting')"
+            :icon="['fas', 'floppy-disk']"
+            :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
+            theme="base-no-default"
+            :dropdown-portal="channelSettingDropdownPortal"
+            dropdown-class="channelSettingsDropdown"
+            dropdown-position-x="left"
+            force-dropdown
+            :mobile-actions="channelSettingMobileActions"
+          >
+            <div
+              v-for="action in channelSettingSaveActions"
+              :key="action.value"
+              class="channelSettingRow"
+            >
+              <button
+                type="button"
+                class="channelSettingSave"
+                :disabled="action.disabled"
+                @click="saveChannelSetting(action.value)"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ action.label }}</span>
+              </button>
+              <FtIconButton
+                :disabled="!action.saved"
+                :size="14"
+                theme="base-no-default"
+                :title="t('Settings.Channel Settings.Forget Value')"
+                :icon="['fas', 'trash']"
+                @click="removeChannelSetting(action.value)"
+              />
+            </div>
+          </FtIconButton>
+          <FtIconButton
+            v-if="inToolbar('sponsorBlock')"
+            :title="sponsorBlockInfoTitle"
+            :icon="['fas', 'shield-halved']"
+            :class="{ toolbarActive: sponsorBlockPanelOpen }"
+            theme="base-no-default"
+            @click="emit('toggle-sponsorblock-info')"
+          />
+          <FtIconButton
+            v-if="inToolbar('liveChat')"
+            :title="liveChatToggleTitle"
+            :icon="['fas', 'message']"
+            :class="{ toolbarActive: liveChatOpen }"
+            theme="base-no-default"
+            :aria-pressed="liveChatOpen"
+            @click="emit('toggle-live-chat')"
+          />
+          <FtIconButton
+            v-if="inToolbar('transcript')"
+            :title="toolbarActions.transcript.label"
+            :icon="['fas', 'file-lines']"
+            :class="{ toolbarActive: transcriptOpen }"
+            theme="base-no-default"
+            @click="emit('toggle-transcript')"
+          />
+          <FtIconButton
+            v-if="inToolbar('metadataHistory')"
+            :title="toolbarActions.metadataHistory.label"
+            :icon="['fas', 'clock-rotate-left']"
+            theme="base-no-default"
+            @click="showMetadataHistory = true"
+          />
+        </template>
+        <template #secondary="{ inToolbar }">
+          <FtIconButton
+            v-if="inToolbar('externalPlayer')"
+            :title="toolbarActions.externalPlayer.label"
             :icon="['fas', 'external-link-alt']"
-            theme="secondary"
+            theme="base-no-default"
             @click="handleExternalPlayer"
           />
           <FtIconButton
-            v-if="!isUpcoming"
-            :title="t('Change Format.Change Media Formats')"
-            theme="secondary"
+            v-if="inToolbar('formats')"
+            :title="toolbarActions.formats.label"
             :icon="['fas', 'file-video']"
-            :dropdown-options="formatTypeOptions"
-            @click="changeFormat"
-          />
-          <FtIconButton
-            :title="t('Video.Reload Page')"
-            :icon="['fas', 'rotate-right']"
-            theme="secondary"
-            @click="reloadPlayer"
+            theme="base-no-default"
+            @click="openFormatPrompt"
           />
           <FtShareButton
-            v-if="!hideSharingActions"
+            v-if="!hideSharingActions && !hideShareButton"
             :id="id"
             :get-timestamp="getTimestamp"
             :playlist-id="playlistId"
+            theme="base-no-default"
           />
-        </span>
-      </div>
+        </template>
+        <template #trailing>
+          <FtButton
+            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
+            class="downloadButton"
+            :title="t('Downloads.Download Video')"
+            :aria-label="t('Downloads.Download Video')"
+            :icon="['fas', 'download']"
+            theme="secondary"
+            shape="square"
+            @click="emit('open-download')"
+          >
+            <template #label>
+              <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
+            </template>
+          </FtButton>
+        </template>
+      </WatchVideoToolbar>
     </div>
+    <WatchVideoFormatPrompt
+      v-if="showFormatPrompt"
+      :active-format="activeFormat"
+      :playback-engine="playbackEngine"
+      :playback-engine-version="playbackEngineVersion"
+      :playback-engine-selection="playbackEngineSelection"
+      :stream-type="streamType"
+      :dash-available="dashAvailable"
+      :legacy-available="legacyAvailable"
+      :audio-available="audioAvailable"
+      :local-file-playback="localFilePlayback"
+      :local-playback-downloads="localPlaybackDownloads"
+      :can-change-playback-engine="supportsYtDlp"
+      :offline="offline"
+      @change-format="changeFormat"
+      @change-playback-engine="changePlaybackEngine"
+      @use-local-source="emit('use-local-source', $event)"
+      @use-online-source="emit('use-online-source')"
+      @close="showFormatPrompt = false"
+    />
+    <WatchVideoMetadataHistory
+      v-if="metadataHistory && showMetadataHistory"
+      :history="metadataHistory"
+      @close="showMetadataHistory = false"
+    />
   </FtCard>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted } from 'vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import { ytDlp } from '../../helpers/ytDlp'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { FtIcon } from '@opentubex/icons'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtButton from '../FtButton/FtButton.vue'
+import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import FtCard from '../ft-card/ft-card.vue'
+import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
+import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
+import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
+import WatchVideoToolbar from '../WatchVideoToolbar/WatchVideoToolbar.vue'
+import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
 
-import { formatNumber, showToast, getLocalesWithFallback } from '../../helpers/utils'
+import { vSaferHtml } from '../../directives/vSaferHtml'
+
+import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
+import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
+import { translateSponsorBlockCategory } from '../../helpers/player/utils'
+import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
+import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { formatDate } from '../../helpers/dateFormat'
+
+const dateFormat = computed(() => store.getters.getDateFormat)
 
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   id: {
     type: String,
     required: true
@@ -178,13 +425,41 @@ const props = defineProps({
     type: String,
     required: true
   },
+  currentPlaybackRate: {
+    type: Number,
+    default: null
+  },
+  currentVideoQuality: {
+    type: String,
+    default: null
+  },
+  currentSubtitlesState: {
+    type: Boolean,
+    default: null
+  },
+  currentVolume: {
+    type: Number,
+    default: null
+  },
   channelName: {
     type: String,
     required: true
   },
+  channelVerified: {
+    type: Boolean,
+    default: false
+  },
+  channelVerifiedArtist: {
+    type: Boolean,
+    default: false
+  },
   channelThumbnail: {
     type: String,
     required: true
+  },
+  channelCollaborators: {
+    type: Array,
+    default: () => []
   },
   published: {
     type: Number,
@@ -209,6 +484,10 @@ const props = defineProps({
   dislikeCount: {
     type: Number,
     default: 0
+  },
+  category: {
+    type: String,
+    default: ''
   },
   getTimestamp: {
     type: Function,
@@ -243,6 +522,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  metadataHistory: {
+    type: Object,
+    default: null
+  },
   inUserPlaylist: {
     type: Boolean,
     required: true
@@ -251,32 +534,222 @@ const props = defineProps({
     type: Boolean,
     required: false
   },
-  contentDisclosures: {
-    type: Array,
+  isAgeRestricted: {
+    type: Boolean,
+    default: false
+  },
+  hasAiGeneratedContent: {
+    type: Boolean,
+    default: false
+  },
+  sponsorBlockFullVideoCategory: {
+    type: String,
     default: null
+  },
+  /** @type {import('vue').PropType<'dash' | 'legacy' | 'audio'>} */
+  activeFormat: {
+    type: String,
+    default: 'dash'
+  },
+  /** @type {import('vue').PropType<'built-in' | 'yt-dlp'>} */
+  playbackEngine: {
+    type: String,
+    default: 'built-in'
+  },
+  playbackEngineVersion: {
+    type: String,
+    default: null
+  },
+  /** @type {import('vue').PropType<'built-in' | 'yt-dlp'>} */
+  playbackEngineSelection: {
+    type: String,
+    default: 'built-in'
+  },
+  /** @type {import('vue').PropType<'sabr' | 'dash' | 'hls' | 'none'>} */
+  streamType: {
+    type: String,
+    default: 'none'
+  },
+  dashAvailable: {
+    type: Boolean,
+    default: false
+  },
+  legacyAvailable: {
+    type: Boolean,
+    default: false
+  },
+  audioAvailable: {
+    type: Boolean,
+    default: false
+  },
+  localFilePlayback: {
+    type: Boolean,
+    default: false
+  },
+  localPlaybackDownloads: {
+    type: Array,
+    default: () => []
   },
   canSaveWatchedProgress: {
     type: Boolean,
     required: true
   },
+  sponsorBlockPanelOpen: {
+    type: Boolean,
+    default: false
+  },
+  sponsorBlockAvailable: {
+    type: Boolean,
+    default: false
+  },
+  transcriptOpen: {
+    type: Boolean,
+    default: false
+  },
+  transcriptAvailable: {
+    type: Boolean,
+    default: false
+  },
+  liveChatAvailable: {
+    type: Boolean,
+    default: false
+  },
+  liveChatOpen: {
+    type: Boolean,
+    default: false
+  },
+  liveChatReplay: {
+    type: Boolean,
+    default: false
+  },
+  hideShareButton: {
+    type: Boolean,
+    default: false
+  },
+  hidePlaylistActions: {
+    type: Boolean,
+    default: false
+  },
+  hideFullscreenDockActions: {
+    type: Boolean,
+    default: false
+  },
+  channelSettingDropdownPortal: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const emit = defineEmits([
+  'open-download',
   'change-format',
+  'change-playback-engine',
+  'use-local-source',
+  'use-online-source',
   'pause-player',
   'save-watched-progress',
-  'reload-player',
+  'save-channel-playback-speed',
+  'save-channel-video-quality',
+  'save-channel-subtitles-state',
+  'save-channel-volume',
+  'toggle-sponsorblock-info',
+  'toggle-transcript',
+  'toggle-live-chat',
 ])
 
 const USING_ELECTRON = process.env.IS_ELECTRON
 
 const { locale, t } = useI18n()
+const relativeTimeNow = useRelativeTimeClock()
 
-const showAiBadge = computed(() => {
-  const LABEL_REGEX = /\b(ai|artificial intelligence|altered|synthetic)\b/i
+const showCollaboratorsPrompt = ref(false)
+const showFormatPrompt = ref(false)
+const showMetadataHistory = ref(false)
 
-  return props.contentDisclosures?.some(item => LABEL_REGEX.test(item.label)) || false
+/**
+ * Actions without menus of their own, in toolbar order. They move to the More
+ * menu when the even layout cannot fit every button.
+ */
+const toolbarActions = computed(() => ({
+  quickBookmark: {
+    visible: isQuickBookmarkEnabled.value && !props.hidePlaylistActions,
+    label: quickBookmarkIconText.value,
+    icon: quickBookmarkIcon.value,
+    run: toggleQuickBookmarked
+  },
+  saveProgress: {
+    visible: props.canSaveWatchedProgress && watchedProgressSavingInSemiAutoMode.value,
+    label: t('Video.Save Watched Progress'),
+    icon: ['fas', 'bars-progress'],
+    run: saveWatchedProgressManually
+  },
+  sponsorBlock: {
+    visible: useSponsorBlock.value && !props.isUpcoming && !props.hideFullscreenDockActions,
+    label: sponsorBlockInfoTitle.value,
+    icon: ['fas', 'shield-halved'],
+    active: props.sponsorBlockPanelOpen,
+    run: () => emit('toggle-sponsorblock-info')
+  },
+  liveChat: {
+    visible: props.liveChatAvailable && !props.hideFullscreenDockActions,
+    label: liveChatToggleTitle.value,
+    icon: ['fas', 'message'],
+    active: props.liveChatOpen,
+    run: () => emit('toggle-live-chat')
+  },
+  transcript: {
+    visible: props.transcriptAvailable && !props.isLive && !props.isUpcoming && !props.hideFullscreenDockActions,
+    label: props.transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show'),
+    icon: ['fas', 'file-lines'],
+    active: props.transcriptOpen,
+    run: () => emit('toggle-transcript')
+  },
+  metadataHistory: {
+    visible: !!props.metadataHistory,
+    label: t('Settings.Privacy Settings.Cache Video Metadata'),
+    icon: ['fas', 'clock-rotate-left'],
+    run: () => { showMetadataHistory.value = true }
+  },
+  externalPlayer: {
+    visible: !props.offline && USING_ELECTRON && externalPlayer.value !== '',
+    label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
+    icon: ['fas', 'external-link-alt'],
+    run: handleExternalPlayer
+  },
+  formats: {
+    visible: !props.isUpcoming && (!props.offline || props.localPlaybackDownloads.length > 0),
+    label: t('Change Format.Change Media Formats'),
+    icon: ['fas', 'file-video'],
+    run: openFormatPrompt
+  }
+}))
+
+// The order in which actions move to the More menu
+const OVERFLOW_ORDER = ['metadataHistory', 'saveProgress', 'externalPlayer', 'formats', 'sponsorBlock', 'transcript', 'liveChat', 'quickBookmark']
+
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const liveChatToggleTitle = computed(() => {
+  if (props.liveChatReplay) {
+    return props.liveChatOpen ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
+  }
+
+  return props.liveChatOpen ? t('Video.Close Live Chat') : t('Video.Show Live Chat')
 })
+
+watch(() => props.offline, offline => {
+  if (offline) {
+    if (props.localPlaybackDownloads.length === 0) showFormatPrompt.value = false
+  }
+})
+
+watch(() => props.metadataHistory, history => {
+  if (!history) showMetadataHistory.value = false
+})
+
+// the title is plain text, so it has to be escaped before the hashtags and handles are linked
+/** @type {import('vue').ComputedRef<string>} */
+const titleHtml = computed(() => linkifyHashtagsAndHandles(escapeHTML(props.title)))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
@@ -287,38 +760,76 @@ const hideUnsubscribeButton = computed(() => store.getters.getHideUnsubscribeBut
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideUploader = computed(() => store.getters.getHideUploader)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideVideoLikesAndDislikes = computed(() => store.getters.getHideVideoLikesAndDislikes)
+const hasMultipleCollaborators = computed(() => props.channelCollaborators.length > 1)
 
-const parsedLikeCount = computed(() => {
-  if (hideVideoLikesAndDislikes.value || props.likeCount === null) {
-    return null
+const collaboratorSummaryName = computed(() => {
+  const names = props.channelCollaborators.map(collaborator => collaborator.name).filter(Boolean)
+
+  if (names.length === 0) {
+    return props.channelName
   }
 
-  return formatNumber(props.likeCount)
+  return new Intl.ListFormat(locale.value, {
+    style: 'long',
+    type: 'conjunction'
+  }).formatToParts(names).map((part, index, parts) => {
+    return names.length > 2 && index === parts.length - 2
+      ? part.value.replace(',', '')
+      : part.value
+  }).join('')
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const useReturnYoutubeDislikes = computed(() => store.getters.getUseReturnYouTubeDislikes)
+
+/** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
 
 const parsedViewCount = computed(() => {
   if (hideVideoViews.value || props.viewCount == null) {
     return null
   }
 
-  return t('Global.Counts.View Count', { count: formatNumber(props.viewCount) }, props.viewCount)
+  return t('Global.Counts.View Count', { count: formatViewCount(props.viewCount, shortenViewCounts.value) }, props.viewCount)
+})
+
+const validPublishedDate = computed(() => {
+  if (!Number.isFinite(props.published) || props.published <= 0) return null
+
+  const date = new Date(props.published)
+  return Number.isNaN(date.getTime()) ? null : date
 })
 
 const dateString = computed(() => {
-  const locales = getLocalesWithFallback(locale.value)
-  const formatter = new Intl.DateTimeFormat(locales, { dateStyle: 'medium' })
-  const localeDateString = formatter.format(props.published)
+  if (!validPublishedDate.value) return ''
+
+  const localeDateString = formatDate(
+    validPublishedDate.value,
+    locale.value,
+    dateFormat.value,
+    { dateStyle: 'medium' }
+  )
   // replace spaces with no break spaces to make the date act as a single entity while wrapping
   return localeDateString.replaceAll(' ', '\u00A0')
 })
 
+const publishedTimeAgo = computed(() => {
+  if (!locale.value || !validPublishedDate.value || props.published > relativeTimeNow.value) {
+    return ''
+  }
+
+  return getRelativeTimeFromDate(props.published, false, true, relativeTimeNow.value)
+})
+
+const isPremiereInProgress = computed(() => {
+  return props.isLive && !props.isLiveContent
+})
+
 const publishedString = computed(() => {
-  if (props.isLive) {
+  if (props.isLive && props.isLiveContent) {
     return t('Video.Started streaming on')
   } else if (props.isLiveContent && !props.isLive) {
     return t('Video.Streamed on')
@@ -327,20 +838,13 @@ const publishedString = computed(() => {
   }
 })
 
-const formatTypeOptions = computed(() => [
-  {
-    label: t('Change Format.Use Dash Formats'),
-    value: 'dash'
-  },
-  {
-    label: t('Change Format.Use Legacy Formats'),
-    value: 'legacy'
-  },
-  {
-    label: t('Change Format.Use Audio Formats'),
-    value: 'audio'
+const publishedDateText = computed(() => {
+  if (!dateString.value) {
+    return ''
   }
-])
+
+  return `${publishedString.value} ${dateString.value}`
+})
 
 /**
  * @param {'dash' | 'legacy' | 'audio'} value
@@ -349,8 +853,23 @@ function changeFormat(value) {
   emit('change-format', value)
 }
 
-function reloadPlayer() {
-  emit('reload-player')
+async function openFormatPrompt() {
+  if (supportsYtDlp) {
+    try {
+      const downloads = await ytDlp.ytDlpListDownloads()
+      downloads.forEach(download => store.commit('upsertYtDlpDownload', download))
+    } catch (error) {
+      console.warn('Could not refresh downloads for the media format selector', error)
+    }
+  }
+  showFormatPrompt.value = true
+}
+
+/**
+ * @param {'built-in' | 'yt-dlp'} value
+ */
+function changePlaybackEngine(value) {
+  emit('change-playback-engine', value)
 }
 
 const watchedProgressSavingInSemiAutoMode = computed(() => {
@@ -362,9 +881,167 @@ function saveWatchedProgressManually() {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberHistory = computed(() => store.getters.getRememberHistory)
+const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
 
-const historyEntryExists = computed(() => store.getters.getHistoryCacheById[props.id] !== undefined)
+/** @type {import('vue').ComputedRef<boolean>} */
+const useQuickPlaybackSpeedBar = computed(() => store.getters.getUseQuickPlaybackSpeedBar)
+
+const showSaveChannelPlaybackSpeedButton = computed(() => {
+  return !props.isUpcoming &&
+    !autoUpdateChannelPlaybackSpeeds.value &&
+    !useQuickPlaybackSpeedBar.value
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoUpdateChannelVideoQualities = computed(() => store.getters.getAutoUpdateChannelVideoQualities)
+
+const showSaveChannelVideoQualityButton = computed(() => {
+  return !props.isUpcoming && !autoUpdateChannelVideoQualities.value
+})
+
+const showSaveChannelSubtitlesStateButton = computed(() => {
+  return !props.isUpcoming && !store.getters.getAutoUpdateChannelSubtitlesStates
+})
+
+const showSaveChannelVolumeButton = computed(() => {
+  return !process.env.IS_CAPACITOR &&
+    !props.isUpcoming &&
+    !store.getters.getAutoUpdateChannelVolumes
+})
+
+const channelSettingsButton = useTemplateRef('channelSettingsButton')
+
+const savedChannelSettings = computed(() => ({
+  playbackSpeed: parseChannelPreferences(
+    store.getters.getChannelPlaybackSpeeds,
+    'channelPlaybackSpeeds'
+  )[props.channelId],
+  videoQuality: parseChannelPreferences(
+    store.getters.getChannelVideoQualities,
+    'channelVideoQualities'
+  )[props.channelId],
+  subtitlesState: parseChannelPreferences(
+    store.getters.getChannelSubtitlesStates,
+    'channelSubtitlesStates'
+  )[props.channelId],
+  volume: parseChannelPreferences(
+    store.getters.getChannelVolumes,
+    'channelVolumes'
+  )[props.channelId]
+}))
+
+const currentChannelSettings = computed(() => ({
+  playbackSpeed: props.currentPlaybackRate,
+  videoQuality: props.currentVideoQuality,
+  subtitlesState: props.currentSubtitlesState,
+  volume: props.currentVolume
+}))
+
+function formatChannelSettingValue(type, value) {
+  if (type === 'playbackSpeed') {
+    return `${value}×`
+  }
+  if (type === 'videoQuality') {
+    return `${value}p`
+  }
+  if (type === 'subtitlesState') {
+    return value ? '✓' : '✕'
+  }
+  return `${Math.round(value * 100)}%`
+}
+
+function createChannelSettingSaveAction(type, visible, label, settingLabel, icon) {
+  const savedValue = savedChannelSettings.value[type]
+  const currentValue = currentChannelSettings.value[type]
+  const hasSavedValue = savedValue !== undefined
+  // Player-driven values (especially volume) stay null until initialization finishes;
+  // keep the action disabled so the parent handler cannot silently no-op.
+  const isUninitialized = currentValue === null
+  const isAlreadyCurrent = !isUninitialized && hasSavedValue && String(savedValue) === String(currentValue)
+  const disabled = isUninitialized || isAlreadyCurrent
+  const formattedValue = hasSavedValue ? formatChannelSettingValue(type, savedValue) : ''
+  let actionLabel = label
+
+  if (isAlreadyCurrent) {
+    actionLabel = t('Video.Channel Setting Already Set', { setting: settingLabel, value: formattedValue })
+  } else if (hasSavedValue) {
+    actionLabel = `${label}: ${formattedValue}`
+  }
+
+  return {
+    visible,
+    label: actionLabel,
+    settingLabel,
+    icon,
+    value: type,
+    saved: hasSavedValue,
+    disabled
+  }
+}
+
+const channelSettingSaveActions = computed(() => [
+  createChannelSettingSaveAction('playbackSpeed', showSaveChannelPlaybackSpeedButton.value,
+    t('Video.Save Channel Playback Speed'), t('Settings.Player Settings.Playback Speed'), ['fas', 'gauge']),
+  createChannelSettingSaveAction('videoQuality', showSaveChannelVideoQualityButton.value,
+    t('Video.Save Channel Video Quality'), t('Settings.Channel Settings.Video Quality'), ['fas', 'photo-film']),
+  createChannelSettingSaveAction('subtitlesState', showSaveChannelSubtitlesStateButton.value,
+    t('Video.Save Channel Subtitles State'), t('Search Listing.Label.Subtitles'),
+    ['fas', 'closed-captioning']),
+  createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
+    t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
+].filter(action => action.visible && store.getters.getEnableChannelSettings && props.channelId !== ''))
+
+// The bottom sheet has no room for trailing buttons, so saved values get their own rows.
+const channelSettingMobileActions = computed(() => [
+  ...channelSettingSaveActions.value.map(action => ({
+    label: action.label,
+    icon: action.icon,
+    enabled: !action.disabled,
+    run: () => saveChannelSetting(action.value)
+  })),
+  { type: 'separator' },
+  ...channelSettingSaveActions.value.filter(action => action.saved).map(action => ({
+    label: t('Display Label', { label: t('Settings.Channel Settings.Forget Value'), value: action.settingLabel }),
+    icon: ['fas', 'trash'],
+    run: () => removeChannelSetting(action.value)
+  }))
+])
+
+/**
+ * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
+ */
+function saveChannelSetting(setting) {
+  channelSettingsButton.value?.hideDropdown()
+  switch (setting) {
+    case 'playbackSpeed':
+      emit('save-channel-playback-speed')
+      break
+    case 'videoQuality':
+      emit('save-channel-video-quality')
+      break
+    case 'subtitlesState':
+      emit('save-channel-subtitles-state')
+      break
+    case 'volume':
+      emit('save-channel-volume')
+      break
+  }
+}
+
+/**
+ * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
+ */
+async function removeChannelSetting(setting) {
+  await removeChannelPreference(store, props.channelId, setting)
+  channelSettingsButton.value?.hideDropdown()
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock && (!props.offline || props.sponsorBlockAvailable))
+
+const sponsorBlockInfoTitle = computed(() => props.sponsorBlockPanelOpen
+  ? t('Video.Player.SponsorBlock.CloseInfoPanel')
+  : t('Video.Player.SponsorBlock.OpenInfoPanel'))
 
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)
@@ -402,67 +1079,37 @@ function handleExternalPlayer() {
   if (process.env.IS_ELECTRON) {
     window.ftElectron.openInExternalPlayer(payload)
   }
-
-  if (rememberHistory.value) {
-    // Marking as watched
-    const videoData = {
-      videoId: props.id,
-      title: props.title,
-      author: props.channelName,
-      authorId: props.channelId,
-      published: props.published,
-      description: props.description,
-      viewCount: props.viewCount,
-      lengthSeconds: props.lengthSeconds,
-      watchProgress: 0,
-      timeWatched: Date.now(),
-      isLive: false,
-      type: 'video'
-    }
-
-    store.dispatch('updateHistory', videoData)
-
-    if (!historyEntryExists.value) {
-      showToast(t('Video.Video has been marked as watched'))
-    }
-  }
 }
 
-onMounted(() => {
-  if (process.env.IS_ELECTRON || 'mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: props.title,
-      artist: props.channelName,
-      artwork: [{
-        src: props.videoThumbnail,
-        sizes: '128x128',
-        type: 'img/png'
-      }]
-    })
-  }
-})
+useMediaSessionMetadata(() => ({
+  title: props.title,
+  artist: props.channelName,
+  artworkSrc: props.videoThumbnail
+}))
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.id))
 
-function togglePlaylistPrompt() {
-  const videoData = {
-    videoId: props.id,
-    title: props.title,
-    author: props.channelName,
-    authorId: props.channelId,
-    description: props.description,
-    viewCount: props.viewCount,
-    lengthSeconds: props.lengthSeconds,
-    published: props.published,
-    premiereDate: props.premiereDate
-  }
-
-  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
-}
+// Descriptions are omitted from saved playlist entries.
+const addToPlaylistVideoData = computed(() => ({
+  videoId: props.id,
+  title: props.title,
+  author: props.channelName,
+  authorId: props.channelId,
+  lengthSeconds: props.lengthSeconds,
+  published: props.published,
+  ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
+  premiereDate: props.premiereDate
+}))
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
+const quickBookmarkThumbnail = computed(() => {
+  return getVideoThumbnailUrl(props.id, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
+})
+
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const isInQuickBookmarkPlaylist = computed(() => {
   if (!isQuickBookmarkEnabled.value) { return false }
@@ -489,7 +1136,7 @@ const quickBookmarkIconText = computed(() => {
     : t('User Playlists.Add to Favorites', translationProperties)
 })
 
-const quickBookmarkIconTheme = computed(() => isInQuickBookmarkPlaylist.value ? 'base favorite' : 'base')
+const quickBookmarkIconTheme = computed(() => isInQuickBookmarkPlaylist.value ? 'base-no-default favorite' : 'base-no-default')
 
 function toggleQuickBookmarked() {
   if (!isQuickBookmarkEnabled.value) {
@@ -504,7 +1151,7 @@ function toggleQuickBookmarked() {
   }
 }
 
-function addToQuickBookmarkPlaylist() {
+async function addToQuickBookmarkPlaylist() {
   const videoData = {
     videoId: props.id,
     title: props.title,
@@ -512,30 +1159,67 @@ function addToQuickBookmarkPlaylist() {
     authorId: props.channelId,
     lengthSeconds: props.lengthSeconds,
     published: props.published,
+    ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
     premiereDate: props.premiereDate
   }
 
-  store.dispatch('addVideo', {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const saved = await store.dispatch('addVideo', {
     _id: quickBookmarkPlaylist.value._id,
     videoData,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
+  showToast({
+    message: saved
+      ? t('Video.Video has been saved to {playlistName}', { playlistName })
+      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
+    image: quickBookmarkThumbnail.value,
+    icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
+  })
 }
 
-function removeFromQuickBookmarkPlaylist() {
-  store.dispatch('removeVideo', {
+async function removeFromQuickBookmarkPlaylist() {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const removed = await store.dispatch('removeVideo', {
     _id: quickBookmarkPlaylist.value._id,
     // Remove all playlist items with same videoId
     videoId: props.id,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
+  showToast({
+    message: removed
+      ? t('Video.Video has been removed from {playlistName}', { playlistName })
+      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+    image: quickBookmarkThumbnail.value,
+    icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+  })
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
+
+function handleChannelLinkClick(event) {
+  if (!USING_ELECTRON || !enableChannelLinks.value) {
+    return
+  }
+
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const isModifiedClick = event.type === 'click' && (event.ctrlKey || event.metaKey)
+  if (!isMiddleClick && !isModifiedClick) {
+    return
+  }
+
+  event.preventDefault()
+  openInternalPath({
+    path: `/channel/${props.channelId}`,
+    title: props.channelName,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: !isMiddleClick,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
+  })
+}
 </script>
 
 <style scoped src="./WatchVideoInfo.css" />

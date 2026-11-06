@@ -1,9 +1,23 @@
+/* stylelint-disable no-descending-specificity */
 .btn {
-  font-family: Roboto, sans-serif;
-  min-inline-size: 100px;
-  font-size: 0.9rem;
-  padding-block: 10px;
-  padding-inline: 20px;
+  --button-height: 40px;
+  --button-radius: calc(var(--button-height) / 2 * var(--ui-roundness));
+  --button-base: var(--primary-color);
+  --button-on-base: var(--text-with-main-color);
+  --button-hover: var(--primary-color-hover);
+  --button-active: var(--primary-color-active);
+  --button-container: var(--button-base);
+  --button-foreground: var(--button-on-base);
+  --button-border: transparent;
+  --button-padding-inline: 16px;
+
+  font-family: var(--app-font-family);
+  min-inline-size: 64px;
+  font-size: 14px;
+  line-height: 20px;
+  padding-block: 8px;
+  padding-inline: var(--button-padding-inline);
+  min-block-size: var(--button-height);
   block-size: fit-content;
   box-sizing: border-box;
   cursor: pointer;
@@ -11,21 +25,173 @@
   justify-content: center;
   text-align: center;
   text-decoration: none;
-  transition: 0.3s;
-  border-radius: 4px;
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects),
+    box-shadow var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial),
+    padding-inline var(--motion-fast-spatial);
+  border-radius: var(--button-radius);
   white-space: nowrap;
   font-weight: 500;
   vertical-align: middle;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin: 5px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
-  border: 2px solid;
+  border: 1px solid var(--button-border);
+  background-color: var(--button-container);
+  color: var(--button-foreground);
+}
+
+.btn.primary {
+  --button-base: var(--primary-color);
+  --button-on-base: var(--text-with-main-color);
+}
+
+.btn.secondary {
+  --button-base: var(--accent-color);
+  --button-on-base: var(--text-with-accent-color);
+  --button-hover: var(--accent-color-hover);
+  --button-active: var(--accent-color-active);
+}
+
+.btn.destructive {
+  --button-base: var(--destructive-color);
+  --button-on-base: var(--destructive-text-color);
+  --button-hover: var(--destructive-hover-color);
+  --button-active: var(--destructive-active-color);
+}
+
+.btn.variant-tonal,
+.btn.variant-filled[aria-pressed='false'] {
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 16%, var(--card-bg-color));
+  --button-foreground: var(--primary-text-color);
+}
+
+.btn.variant-outlined,
+.btn.variant-text {
+  --button-container: transparent;
+  --button-foreground: var(--primary-text-color);
+}
+
+.btn.variant-outlined {
+  --button-border: var(--secondary-text-color);
+}
+
+/* Destructive buttons stay red unless the red is their fill, so they stand
+   apart from tinted primary buttons even when the main color is red. The
+   label keeps the text color's lightness, and with it its contrast, and only
+   takes a red hue (the default destructive red's); the icon carries a
+   stronger red. Custom themes set their own label colors. */
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false']), .selected) {
+  --button-foreground: oklch(from var(--primary-text-color) l 0.08 29deg);
+}
+
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false']), .selected) > .ft-icon {
+  color: var(--destructive-icon-color, oklch(from color-mix(in oklab, var(--destructive-color) 40%, var(--primary-text-color)) l 0.18 29deg));
+}
+
+.btn.variant-elevated {
+  --button-container: var(--card-bg-color);
+  --button-foreground: var(--primary-text-color);
+
+  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+}
+
+.btn.selected {
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --button-foreground: var(--primary-text-color);
+}
+
+.btn.shape-square,
+.btn.shape-round.selected {
+  --button-radius: var(--shape-corner-medium);
+}
+
+.btn.shape-square.selected {
+  --button-radius: calc(var(--button-height) / 2 * var(--ui-roundness));
+}
+
+.btn:focus-visible {
+  border-radius: var(--button-radius);
+  outline: 2px solid var(--button-foreground);
+  outline-offset: -3px;
+}
+
+.btn:not(:disabled):is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
+}
+
+.btn:not(:disabled):active {
+  --button-radius: var(--shape-corner-small);
+
+  background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
+}
+
+/* A stronger layer would cost tonal labels contrast on their tint, so pressing
+   keeps the hover layer; the corner morph and ripple show the press. */
+.btn:is(.variant-tonal, .variant-filled[aria-pressed='false']):not(:disabled, .selected):active {
+  background-color: color-mix(in srgb, var(--button-foreground) 8%, var(--button-container));
+}
+
+/* Like other selected states, soften the tint instead of adding a text-colored layer. */
+.btn.selected:not(:disabled):is(:hover, :focus-visible, :active) {
+  background-color: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 20%, var(--card-bg-color));
+}
+
+/* Filled buttons use their color's hover and pressed shades, which keep the
+   label readable, instead of mixing the label color into the fill. Custom
+   themes use them for every variant. They may be translucent, which would
+   leave the label on the card behind, so draw them opaque. */
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active),
+.btn:is(.primary, .secondary, .destructive).variant-filled:not([aria-pressed='false'], .selected, :disabled):is(:hover, :focus-visible, :active) {
+  --button-foreground: var(--button-on-base);
+
+  background-color: rgb(from var(--button-hover) r g b / 100%);
+}
+
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active,
+.btn:is(.primary, .secondary, .destructive).variant-filled:not([aria-pressed='false'], .selected, :disabled):active {
+  background-color: rgb(from var(--button-active) r g b / 100%);
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.38;
   cursor: not-allowed;
+}
+
+.btn.size-extra-small {
+  --button-height: 32px;
+  --button-padding-inline: 12px;
+
+  padding-block: 4px;
+}
+
+.btn.size-medium {
+  --button-height: 56px;
+  --button-padding-inline: 24px;
+
+  font-size: 16px;
+}
+
+.btn.size-large {
+  --button-height: 96px;
+  --button-padding-inline: 48px;
+
+  font-size: 24px;
+  line-height: 32px;
+  gap: 12px;
+}
+
+.btn.size-extra-large {
+  --button-height: 136px;
+  --button-padding-inline: 64px;
+
+  font-size: 32px;
+  line-height: 40px;
+  gap: 16px;
 }
 
 .ripple {
@@ -48,11 +214,26 @@
   background-position: 50%;
   transform: scale(10, 10);
   opacity: 0;
-  transition: transform 0.5s, opacity 1s;
+  transition: transform var(--motion-slow-effects), opacity var(--motion-slow-effects);
 }
 
-.ripple:active::after {
+.ripple:not(:disabled):active::after {
   transform: scale(0, 0);
   opacity: 0.3;
   transition: 0s;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .btn.size-small,
+  .btn.size-extra-small {
+    --button-height: 48px;
+  }
+
+  .btn {
+    min-block-size: max(48px, var(--button-height));
+  }
+}
+
+:root[data-reduced-motion='reduce'] .ripple::after {
+  display: none;
 }

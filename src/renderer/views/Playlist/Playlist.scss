@@ -12,18 +12,29 @@
 }
 
 .alertButton {
-  padding-inline: 1em;
+  --icon-width: 1em;
+
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  padding: 10px;
   border-radius: 100%;
   border-style: none;
   background-color: transparent;
   color: var(--primary-text-color);
   font-size: 1em;
-  transition: background 0.2s ease-in;
+  line-height: 0;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .alertButton:hover {
   background-color: var(--card-bg-color);
   cursor: pointer;
+}
+
+.alertButton:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .playlistItemsCard {
@@ -35,6 +46,7 @@
 
 .playlistInfoContainer {
   box-sizing: border-box;
+  border-radius: var(--shape-corner-medium);
 
   /* This is needed to make prompt always above video entries. Value being too high would block search suggestions */
   z-index: 1;
@@ -46,35 +58,30 @@
 }
 
 .routerView {
+  // How far floating field labels extend above their outline
+  --playlist-label-outset: 7px;
+
   display: flex;
+
+  @media (any-pointer: coarse), (width <= 680px) {
+    --playlist-label-outset: 9px;
+  }
 
   &.grid {
     flex-direction: column;
 
-    &.hasNoPlaylistDescription {
-      --top-bar-push-down-adjustment-no-description: 19px;
-    }
-
-    &.playlistInEditMode {
-      --top-bar-push-down-adjustment-edit-mode: 85px;
-      --top-bar-push-down-adjustment-no-description: 11px;
-    }
-
-    &.oneOrFewer {
-      --top-bar-push-down-adjustment-one-or-fewer: -62px;
-    }
-
     .playlistInfoContainer {
       position: sticky;
-      margin-block: -35px 16px;
-      inset-block-start: calc(var(--top-bar-push-down-adjustment-default) + var(--top-bar-push-down-adjustment-edit-mode) + var(--top-bar-push-down-adjustment-no-description) + var(--top-bar-push-down-adjustment-one-or-fewer));
+      margin-block: 0 16px;
+      inset-block-start: var(--top-nav-sticky-offset);
       padding-block: 0;
       margin-inline: auto;
       padding-inline: 16px;
-      box-sizing: content-box;
-      inline-size: 85%;
+      box-sizing: border-box;
+      inline-size: 100%;
+      max-inline-size: 92dvw;
       background-color: var(--card-bg-color);
-      box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
+      backdrop-filter: var(--card-bg-blur, none);
 
       /* video progress bar has z-index 2 and this must be above it */
       z-index: 3;
@@ -86,9 +93,15 @@
     }
 
     .playlistItemsCard {
-      inline-size: 85%;
+      box-sizing: border-box;
+      inline-size: 100%;
+      max-inline-size: 92dvw;
       margin-block: 0 60px;
       margin-inline: auto;
+
+      &:has(> .alertBox) {
+        padding-block-start: 16px;
+      }
     }
   }
 
@@ -97,9 +110,10 @@
 
     .playlistInfoContainer {
       background-color: var(--card-bg-color);
-      block-size: calc(100vh - 132px);
+      backdrop-filter: var(--card-bg-blur, none);
+      block-size: calc(100vh - var(--top-nav-sticky-offset) - var(--playlist-bottom-inset, 0px) - 40px);
       inline-size: 30%;
-      inset-block-start: 96px;
+      inset-block-start: calc(var(--top-nav-sticky-offset) + 4px);
       position: sticky;
 
       .playlistInfo {
@@ -108,18 +122,249 @@
     }
 
     .playlistItemsCard {
-      inline-size: 60%;
+      flex: 1;
+      min-inline-size: 0;
       padding: 10px;
     }
   }
 }
 
+.app.bottomTabs .routerView {
+  --playlist-bottom-inset: var(--bottom-tab-bar-height);
+}
+
+.routerView.playlistInEditMode .playlistInfoContainer {
+  align-self: flex-start;
+  block-size: auto;
+  inset-block-start: 0;
+  position: relative;
+}
+
+.playlistItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 
 .playlistItem {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px minmax(0, 1fr);
   column-gap: 8px;
   align-items: center;
+
+  // The index moved into the thumbnail, so only the reorder handle needs a column.
+  &:not(.draggable) {
+    grid-template-columns: minmax(0, 1fr);
+
+    :deep(.videoIndexArea) {
+      display: none;
+    }
+  }
+
+  :deep(.ft-list-item.list) {
+    align-items: center;
+  }
+
+  :deep(.videoIndexArea) {
+    align-self: stretch;
+    block-size: auto;
+    display: grid;
+    margin-block: 0;
+    place-content: center;
+  }
+
+  :deep(.ft-list-item.list .videoThumbnail) {
+    margin-block: 0;
+    margin-inline-end: 12px;
+    // The index badge and the duration get their own columns, so a long Watched
+    // or SponsorBlock label cannot cover them.
+    grid-template-columns: max-content minmax(0, 1fr) minmax(0, max-content);
+    container: playlist-thumbnail / inline-size;
+
+    > * {
+      grid-column: 1 / -1;
+    }
+
+    .playlistIndexBadge {
+      grid-column: 1;
+    }
+
+    .videoDuration {
+      grid-column: 3;
+    }
+  }
+
+  :deep(.ft-list-item.list .thumbnailImage),
+  :deep(.ft-list-item.list .thumbnailLink),
+  :deep(.ft-list-item.list .videoThumbnail) {
+    inline-size: calc(var(--thumbnail-list-size, 336px) * 0.6);
+  }
+
+  :deep(.ft-list-item.list .thumbnailImage) {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  // The index badge takes the top-left corner, as in the watch page playlist.
+  :deep(.ft-list-item.list .videoThumbnail .videoWatched) {
+    grid-column: 2 / -1;
+    place-self: start end;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    max-inline-size: calc(100% - 4px);
+    font-size: 12px;
+    margin-block-start: 4px;
+    margin-inline-end: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // As in the watch page playlist, the label sits beside the duration so it
+  // fits inside the smallest thumbnails.
+  :deep(.ft-list-item.list .videoThumbnail .sponsorBlockVideoLabel) {
+    grid-column: 1 / 3;
+    place-self: end start;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: calc(100% - 8px);
+    margin: 4px;
+    // Clip rather than cover the duration when even the icon does not fit.
+    overflow: hidden;
+
+    > span:last-child {
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    > .ft-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  // Without hover, the external player button stays visible in the bottom-left
+  // corner, so it shares the badge's column and the label follows it.
+  @media not (hover: hover) {
+    :deep(.ft-list-item.list .videoThumbnail .externalPlayerIcon) {
+      grid-column: 1;
+    }
+
+    :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+      grid-column: 2;
+    }
+
+    // Tighten the icon-only label so it still fits beside an hours-long duration.
+    @container playlist-thumbnail (width < 140px) {
+      :deep(.ft-list-item.list .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel) {
+        margin-inline: 2px;
+        padding-inline: 3px;
+      }
+    }
+  }
+
+  // Below this width only a few letters fit beside the duration, so keep only the
+  // icon and leave the text to screen readers.
+  @container playlist-thumbnail (width < 140px) {
+    :deep(.ft-list-item.list .sponsorBlockVideoLabel > span:last-child) {
+      position: absolute;
+      overflow: hidden;
+      clip-path: inset(50%);
+      block-size: 1px;
+      inline-size: 1px;
+      white-space: nowrap;
+    }
+  }
+
+  // Small thumbnails fit two rows of desktop actions without changing their size.
+  :deep(.ft-list-item.list .videoThumbnail .playlistIcons:not(.mobileThumbnailActions)) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-inline-size: calc(100% - 8px);
+    margin: 4px;
+    opacity: 0;
+    pointer-events: none;
+
+    .iconButton {
+      // Override the shared button's inline padding for this compact toolbar.
+      padding: 3px !important;
+    }
+  }
+
+  :deep(.ft-list-item.list:has(.playlistIcons:not(.mobileThumbnailActions) .iconButton)) {
+    &:hover,
+    &:focus-within,
+    &:has(.playlistIcons .iconDropdown, .playlistIcons .iconButton[aria-expanded='true']) {
+      .playlistIcons {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      // Show controls in place of passive badges during interaction.
+      .playlistIndexBadge,
+      .videoWatched,
+      .sponsorBlockVideoLabel,
+      .videoDuration {
+        visibility: hidden;
+      }
+    }
+  }
+
+  // The external player button also appears on hover, so it replaces the labels
+  // even when it is the only thumbnail action.
+  @media (hover: hover) {
+    :deep(.ft-list-item.list:has(.externalPlayerIcon)) {
+      &:hover,
+      &:has(:focus-visible) {
+        .playlistIndexBadge,
+        .videoWatched,
+        .sponsorBlockVideoLabel,
+        .videoDuration {
+          visibility: hidden;
+        }
+      }
+    }
+  }
+
+  :deep(.ft-list-item .info) {
+    block-size: auto;
+
+    .restArea {
+      display: none;
+    }
+
+    .title {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .infoLine {
+      flex-direction: column;
+      align-items: start;
+      gap: 4px;
+      margin-block-start: 4px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .channelNameText {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .videoInfo::before {
+      content: none;
+    }
+  }
 }
 
 .playlistItem-move,
@@ -155,13 +400,30 @@
 .sortSelect {
   /* Put it on the right and align with 'More Options' dropdown button */
   margin-inline: auto 20px;
+
+  // With the card gap and item padding, match the space above the floating label
+  margin-block-end: 10px;
 }
 
-:deep(.videoThumbnail) {
-  margin-block: auto;
+// The card padding adds to the space above the label
+.routerView.list .sortSelect {
+  margin-block-end: 17px;
 }
 
 @media only screen and (width <= 850px) {
+  .playlistItem :deep(.ft-list-video) {
+    padding-block: 4px;
+  }
+
+  // Keep the first thumbnail where the default 6px item padding puts it
+  .playlistItems {
+    margin-block-start: 2px;
+  }
+
+  .playlistItem :deep(.restArea) {
+    display: none;
+  }
+
   .routerView {
     flex-direction: column;
 
@@ -176,16 +438,59 @@
         inline-size: 100%;
         // Reset margin
         margin-inline-end: 0;
+
+        // Join the stacked cards into one surface
+        border-end-start-radius: 0;
+        border-end-end-radius: 0;
       }
 
       .playlistItemsCard {
         box-sizing: border-box;
         inline-size: 100%;
+        border-start-start-radius: 0;
+        border-start-end-radius: 0;
+
+        // The sort select's own margin provides the top inset
+        &:has(> .sortSelect:first-child) {
+          padding-block-start: 0;
+        }
+      }
+
+      // Only leave room for the floating label so the gap below the search field matches the one above it.
+      .sortSelect {
+        margin-block: var(--playlist-label-outset) 0;
       }
     }
   }
 }
 
+@media only screen and (width <= 680px) {
+  .playlistItem {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 4px;
+  }
+}
+
 .message {
   color: var(--tertiary-text-color);
+}
+
+// Emphasize empty states, not error details.
+.message:not(.errorStateContent > .message) {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.playlistErrorState {
+  margin: auto;
+}
+
+.errorStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
 }

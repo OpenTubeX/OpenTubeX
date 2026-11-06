@@ -1,0 +1,313 @@
+.commandPaletteBackdrop {
+  align-items: flex-start;
+  animation: command-palette-backdrop-enter var(--motion-fast-effects);
+  background: rgb(0 0 0 / 68%);
+  backdrop-filter: var(--modal-backdrop-blur);
+  block-size: 100%;
+  box-sizing: border-box;
+  display: flex;
+  inline-size: 100%;
+  inset: 0;
+  justify-content: center;
+  padding-block: min(14vh, 120px) 24px;
+  padding-inline: 16px;
+  position: fixed;
+  z-index: 10002;
+}
+
+.playerFullWindow .commandPaletteBackdrop {
+  z-index: 1002;
+}
+
+.commandPalette {
+  animation: command-palette-enter var(--motion-default-spatial);
+  background: var(--card-bg-color);
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-medium);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 50%);
+  color: var(--primary-text-color);
+  display: flex;
+  flex-direction: column;
+  inline-size: min(680px, 100%);
+  max-block-size: min(680px, calc(100vh - min(14vh, 120px) - 48px));
+  min-block-size: 260px;
+  overflow: hidden;
+}
+
+.commandPaletteHeader {
+  align-items: center;
+  border-block-end: 1px solid var(--divider-color);
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 4px;
+  padding-block: 12px;
+  padding-inline: 14px 8px;
+}
+
+.commandPaletteClose {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  block-size: 40px;
+  inline-size: 40px;
+  justify-content: center;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commandPaletteClose:hover,
+.commandPaletteClose:focus-visible {
+  background: var(--side-nav-hover-color);
+}
+
+.commandPaletteClose:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.commandPaletteSearch {
+  align-items: center;
+  background: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-full);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  padding-inline: 16px 12px;
+}
+
+.commandPaletteSearch:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.commandPaletteSearch input {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  min-block-size: 46px;
+  min-inline-size: 0;
+  outline: 0;
+  padding: 0;
+}
+
+.commandPaletteSearch input::placeholder {
+  color: var(--secondary-text-color);
+}
+
+.commandPaletteResults {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.commandPaletteResultsContent {
+  padding-block: 6px 10px;
+}
+
+.commandPaletteGroup h3 {
+  color: var(--secondary-text-color);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-block: 12px 6px;
+  margin-inline: 0;
+  padding-inline: 20px;
+  text-transform: uppercase;
+}
+
+/* Each group's results form one segmented list: large outer corners, tight
+   inner ones. The selected result rounds fully and takes a tonal fill. */
+.commandPaletteOption {
+  align-items: center;
+  background: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  border-radius: var(--shape-corner-extra-small);
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  margin-inline: 8px;
+  min-block-size: 48px;
+  padding-block: 6px;
+  padding-inline: 12px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commandPaletteOption + .commandPaletteOption {
+  margin-block-start: 2px;
+}
+
+.commandPaletteOption:first-of-type {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.commandPaletteOption:last-of-type {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.commandPaletteOption.selected {
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  border-radius: var(--shape-corner-large-increased);
+}
+
+.commandPaletteOption:not(.disabled):active {
+  background: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+  border-radius: var(--shape-corner-medium);
+}
+
+.commandPaletteOption.disabled {
+  color: var(--secondary-text-color);
+  cursor: default;
+}
+
+.commandPaletteOptionIcon {
+  font-size: 16px;
+  justify-self: center;
+}
+
+.commandPaletteOptionIconImage {
+  block-size: 20px;
+  border-radius: 50%;
+  inline-size: 20px;
+  justify-self: center;
+  object-fit: cover;
+}
+
+.commandPaletteOptionProfileIcon {
+  block-size: 20px;
+  font-size: 12px;
+  inline-size: 20px;
+  justify-self: center;
+}
+
+.commandPaletteOptionText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.commandPaletteOptionText > span,
+.commandPaletteOptionText small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commandPaletteOptionText small {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.commandPaletteOptionMatch {
+  font-weight: 700;
+}
+
+kbd {
+  background: color-mix(in srgb, var(--card-bg-color) 78%, var(--primary-text-color));
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-extra-small);
+  color: var(--secondary-text-color);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  min-inline-size: 20px;
+  padding-block: 4px;
+  padding-inline: 6px;
+  text-align: center;
+}
+
+.commandPaletteEmpty {
+  color: var(--secondary-text-color);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-block: 48px;
+  text-align: center;
+}
+
+.commandPaletteFooter {
+  border-block-start: 1px solid var(--divider-color);
+  color: var(--secondary-text-color);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 14px;
+  padding-block: 9px;
+  padding-inline: 18px;
+}
+
+.commandPaletteFooter span {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.visuallyHidden {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+@keyframes command-palette-backdrop-enter {
+  from { opacity: 0; }
+}
+
+/* Spring curves exceed 1, which only clamps opacity. */
+@keyframes command-palette-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+
+.modal-leave-active {
+  animation: command-palette-backdrop-leave var(--motion-fast-effects) forwards;
+  pointer-events: none;
+}
+
+.modal-leave-active > .commandPalette {
+  animation: command-palette-leave var(--motion-fast-effects) forwards;
+}
+
+@keyframes command-palette-backdrop-leave {
+  to { opacity: 0; }
+}
+
+/* The backdrop fades the palette with it; fading both would compound. */
+@keyframes command-palette-leave {
+  to {
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+
+:root[data-reduced-motion='reduce'] .commandPaletteBackdrop,
+:root[data-reduced-motion='reduce'] .commandPalette {
+  animation: none;
+}
+
+@media only screen and (width <= 520px) {
+  .commandPaletteBackdrop {
+    padding-block: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px) calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
+    padding-inline: 8px;
+  }
+
+  .commandPalette {
+    max-block-size: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) - 24px);
+  }
+
+  .commandPaletteFooter {
+    display: none;
+  }
+}

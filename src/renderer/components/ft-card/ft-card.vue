@@ -1,8 +1,10 @@
 <template>
   <div
     class="ft-card"
+    :class="{ fixedBackground }"
   >
     <slot />
+    <FtFixedBackground v-if="fixedBackground" />
   </div>
 </template>
 

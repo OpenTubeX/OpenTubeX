@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_background">#FFFFFFFF</color>
+    <color name="widget_surface">#FFEFEFEF</color>
+    <color name="widget_text">#FF1F1F1F</color>
+    <color name="widget_text_secondary">#FF5F5F5F</color>
+    <color name="widget_accent">#FFE53935</color>
+    <dimen name="widget_padding">12dp</dimen>
+    <dimen name="widget_radius">16dp</dimen>
+    <dimen name="widget_inner_radius">10dp</dimen>
+
+    <style name="HomeWidgetAction">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:background">@drawable/widget_action_background</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <style name="HomeWidgetActionIcon">
+        <item name="android:layout_width">22dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="android:tint">@color/widget_accent</item>
+    </style>
+
+    <style name="HomeWidgetActionLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/widget_text</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+</resources>

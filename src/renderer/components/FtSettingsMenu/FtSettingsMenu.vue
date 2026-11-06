@@ -1,42 +1,57 @@
 <template>
   <menu
+    ref="menuElement"
     class="settingsMenu"
+    :class="{ filtered, compact: hideSettingsCategoryDescriptions }"
   >
-    <h2 class="header">
-      <FontAwesomeIcon
-        :icon="['fas', 'sliders-h']"
-        class="headingIcon"
-      />
-      {{ $t('Settings.Settings') }}
-    </h2>
-    <a
+    <li
       v-for="settingsSection in settingsSections"
-      ref="linkRefs"
       :key="settingsSection.type"
-      class="title"
-      :class="{ active: activeSection === settingsSection.type }"
-      href="javascript:;"
-      :data-section="settingsSection.type"
-      @click.stop="goToSettingsSection"
-      @keydown.enter.stop="goToSettingsSection"
+      class="titleItem"
     >
-      <div class="titleContent">
-        <div class="iconAndTitleText">
-          <FontAwesomeIcon
-            :icon="settingsSection.icon"
-            class="titleIcon"
-          />
-          {{ settingsSection.title }}
+      <button
+        ref="linkRefs"
+        class="title"
+        :class="{ active: activeSection === settingsSection.type }"
+        type="button"
+        :data-section="settingsSection.type"
+        @click.stop="goToSettingsSection"
+      >
+        <div class="titleContent">
+          <div class="iconAndTitleText">
+            <FtIcon
+              :icon="settingsSection.icon"
+              class="titleIcon"
+            />
+            <span class="titleText">{{ settingsSection.title }}</span>
+            <small
+              v-if="settingsSection.description && !hideSettingsCategoryDescriptions"
+              class="titleDescription"
+            >
+              {{ settingsSection.description }}
+            </small>
+          </div>
+          <div class="titleUnderline" />
         </div>
-        <div class="titleUnderline" />
-      </div>
-    </a>
+      </button>
+    </li>
+    <li
+      v-if="settingsSections.length === 0 && emptyMessage"
+    >
+      <p class="emptyMessage">
+        {{ emptyMessage }}
+      </p>
+    </li>
   </menu>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useTemplateRef } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { computed, useTemplateRef, watch } from 'vue'
+import store from '../../store/index'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+
+const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
 
 defineProps({
   settingsSections: {
@@ -46,6 +61,14 @@ defineProps({
   activeSection: {
     type: String,
     default: null
+  },
+  emptyMessage: {
+    type: String,
+    default: ''
+  },
+  filtered: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -59,13 +82,21 @@ function goToSettingsSection(event) {
 }
 
 const linkRefs = useTemplateRef('linkRefs')
+const menuElement = useTemplateRef('menuElement')
+
+watch(hideSettingsCategoryDescriptions, () => {
+  const menu = menuElement.value
+  if (menu?.offsetHeight) {
+    clampOverlayScrollTop(menu, menu.querySelector('.titleItem:last-of-type'))
+  }
+}, { flush: 'post' })
 
 defineExpose({
   /**
    * @param {string} name
    */
   focusLink: (name) => {
-    linkRefs.value.find((link) => link.dataset.section === name)?.focus()
+    linkRefs.value?.find((link) => link.dataset.section === name)?.focus()
   }
 })
 </script>

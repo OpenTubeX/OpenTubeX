@@ -10,6 +10,30 @@
       >
         {{ selectedText }}
       </p>
+      <FtFlexBox
+        v-if="showUnsubscribeButton"
+        class="selectionActions"
+      >
+        <FtButton
+          :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
+          :disabled="selected.size === subscriptions.length"
+          @click="selectAll"
+        />
+        <FtButton
+          :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
+          :disabled="selected.size === 0"
+          @click="selectNone"
+        />
+        <FtButton
+          :label="$t('Profile.Delete Selected')"
+          :icon="['fas', 'trash']"
+          theme="destructive"
+          :disabled="selected.size === 0"
+          @click="displayDeletePrompt"
+        />
+      </FtFlexBox>
       <FtFlexBox>
         <FtChannelBubble
           v-for="channel in subscriptions"
@@ -22,27 +46,10 @@
           @change="handleChannelToggle(channel.id)"
         />
       </FtFlexBox>
-      <FtFlexBox
-        v-if="showUnsubscribeButton"
-      >
-        <FtButton
-          :label="$t('Profile.Select All')"
-          @click="selectAll"
-        />
-        <FtButton
-          :label="$t('Profile.Select None')"
-          @click="selectNone"
-        />
-        <FtButton
-          :label="$t('Profile.Delete Selected')"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
-          @click="displayDeletePrompt"
-        />
-      </FtFlexBox>
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
+      autosize
       :label="deletePromptMessage"
       :option-names="deletePromptNames"
       :option-values="DELTE_PROMPT_VALUES"
@@ -194,7 +201,7 @@ const deletePromptMessage = computed(() => {
 
 function displayDeletePrompt() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     showDeletePrompt.value = true
   }
@@ -223,7 +230,7 @@ function handleDeletePromptClick(value) {
         }
       })
 
-      showToast(t('Profile.Profile has been updated'))
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
       selectNone()
     } else {
       /** @type {Profile} */
@@ -234,7 +241,7 @@ function handleDeletePromptClick(value) {
 
       store.dispatch('updateProfile', profile)
 
-      showToast(t('Profile.Profile has been updated'))
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
       selectNone()
     }
   }

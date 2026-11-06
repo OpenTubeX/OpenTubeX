@@ -1,0 +1,261 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+:deep(.ft-shaka-sponsorblock-button .shaka-ui-icon) {
+  font-size: 28px;
+}
+
+:deep(.ft-shaka-highlight-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-width: 0;
+  padding-inline: 8px;
+  background-color: transparent;
+  color: #fff !important;
+  opacity: 1;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 85%);
+  transition: gap 200ms ease;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button:not(.shaka-hidden) + .ft-shaka-highlight-button) {
+  margin-inline-start: 2px;
+}
+
+:deep(.ft-shaka-highlight-button .shaka-ui-icon) {
+  flex: 0 0 auto;
+  font-size: 26px;
+  color: #fff !important;
+  opacity: 1;
+}
+
+:deep(.ft-shaka-highlight-button-label) {
+  --ft-control-content-transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
+
+  max-width: 220px;
+  overflow: hidden;
+  color: #fff;
+  text-overflow: ellipsis;
+  transform: translateX(0);
+  transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
+  white-space: nowrap;
+}
+
+:deep(.ft-shaka-highlight-button-collapsed) {
+  gap: 0;
+}
+
+:deep(.ft-shaka-highlight-button-collapsed .ft-shaka-highlight-button-label),
+:deep(.ft-controls-hide-highlight-label > .ft-shaka-highlight-button .ft-shaka-highlight-button-label) {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-12px);
+}
+
+:deep(.ft-controls-hide-highlight-label > .ft-shaka-highlight-button) {
+  gap: 0;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button:not(.ft-shaka-highlight-button-collapsed)),
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button:not(.ft-shaka-highlight-button-collapsed) .ft-shaka-highlight-button-label) {
+  transition: none;
+}
+
+:deep(.ft-time-display-group) {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  inline-size: auto;
+  block-size: 48px;
+  min-inline-size: 0;
+  padding-block: 0;
+  padding-inline: 8px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-position: left center, center, right center;
+  background-size: var(--ft-control-pill-radius) var(--ft-control-pill-size), calc(100% - var(--ft-control-pill-size)) var(--ft-control-pill-size), var(--ft-control-pill-radius) var(--ft-control-pill-size);
+  cursor: pointer;
+  opacity: 1;
+}
+
+:deep(.ft-time-display-group > .ft-control-glass) {
+  inset-inline: 0;
+}
+
+:deep(.ft-time-display-group:has(> button:focus-visible)) {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+:deep(.ft-time-display-group > .shaka-current-time),
+:deep(.ft-shaka-highlight-button-label) {
+  font-family: var(--app-font-family);
+  font-size: 14px;
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.2;
+  text-rendering: geometricprecision;
+}
+
+:deep(.ft-time-display-group > .shaka-current-time) {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  block-size: 48px;
+  margin: 0;
+  border: 0;
+  background-color: transparent;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-time-display-group > .shaka-current-time),
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-shaka-highlight-button-label) {
+  font-size: 13px;
+}
+
+:deep(.ft-controls-stack-times > .shaka-spacer) {
+  min-inline-size: 0;
+  padding: 0;
+}
+
+:deep(.ft-controls-stack-times > .ft-volume-control-group > .shaka-volume-bar-container) {
+  margin-inline: 0;
+}
+
+:deep(.ft-controls-stack-times > .ft-time-display-group) {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-inline: 0;
+}
+
+:deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {
+  block-size: auto;
+  line-height: 1.2;
+}
+
+:global(.capacitorTabs .ft-controls-overflow-pip > .shaka-pip-button),
+:global(.capacitorTabs .ft-controls-overflow-captions > .caption-toggle-button) {
+  display: none;
+}
+
+:deep(.shaka-tooltips-on > .ft-shaka-highlight-button:hover::after),
+:deep(.shaka-tooltips-on > .ft-shaka-highlight-button:active::after),
+:deep(.shaka-tooltips-on > .ft-shaka-highlight-button:focus-visible::after) {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+:deep(.ft-playback-adjusted-time) {
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+:deep(.ft-playback-adjusted-time[disabled]) {
+  background-color: transparent;
+  color: var(--text-with-main-color, #fff);
+}
+
+/* This compact preset strip intentionally scrolls without a visible scrollbar. */
+:deep(.ft-quick-playback-rate-bar) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  max-width: min(70vw, 640px);
+  margin-inline-end: 0;
+  overflow-x: auto;
+  border-radius: calc(999px * var(--ui-roundness));
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 28%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 24%), inset 0 0 0 1px rgb(255 255 255 / 16%), inset 0 -2px 8px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(10px) saturate(1.15);
+  scrollbar-width: none;
+  opacity: var(--ft-controls-fade);
+  transition: opacity var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+:deep(.shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
+  width: fit-content;
+  min-width: 0;
+  max-width: none;
+  height: var(--ft-control-pill-size);
+  padding-inline: 6px;
+  flex: 0 1 auto;
+}
+
+/* Give the presets room before reserving any empty space between controls. */
+:deep(.shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar) > .shaka-spacer) {
+  flex-basis: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-quick-playback-rate-bar) {
+  /* Reserve a usable preset strip before collapsing other controls. The live
+     strip can shrink further when even the compact controls do not fit. */
+  max-width: min(70vw, 180px);
+  flex-shrink: 0;
+}
+
+:deep(.ft-quick-playback-rate-bar::-webkit-scrollbar) {
+  display: none;
+}
+
+:deep(.ft-quick-playback-rate-button) {
+  min-width: max-content;
+  min-height: 26px;
+  padding: 0 6px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(999px * var(--ui-roundness));
+  background: rgb(0 0 0 / 22%);
+  color: rgb(255 255 255 / 92%);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+:deep(.ft-quick-playback-rate-save) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+:deep(.ft-quick-playback-rate-button:active) {
+  background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
+}
+
+@media (hover: hover) {
+  :deep(.ft-quick-playback-rate-button:hover) {
+    background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
+  }
+}
+
+:deep(.ft-quick-playback-rate-button:focus-visible) {
+  outline: 2px solid rgb(255 255 255 / 60%);
+  outline-offset: 1px;
+}
+
+:deep(.ft-quick-playback-rate-button.is-current-rate) {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: #fff;
+}
+
+:deep(.ft-quick-playback-rate-button.is-current-rate:active) {
+  background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
+}
+
+@media (hover: hover) {
+  :deep(.ft-quick-playback-rate-button.is-current-rate:hover) {
+    background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), rgb(0 0 0 / 22%);
+  }
+}
+
+:deep(.ft-quick-playback-rate-button.is-channel-default-rate) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}

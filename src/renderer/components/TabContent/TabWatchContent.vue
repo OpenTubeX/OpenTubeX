@@ -1,0 +1,442 @@
+<template>
+  <div
+    ref="previewHost"
+    class="watchPreviewHost"
+    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive, watchMinimizePreview: previewActive && !previewRestoring }"
+  >
+    <div
+      v-show="isWatchRoute || previewStyle"
+      ref="watchRoot"
+      :class="{ watchDragPreview: previewStyle, watchRestorePreview: restorePreviewShown }"
+      :style="previewStyle"
+      :inert="!isWatchRoute"
+      :aria-hidden="String(!isWatchRoute)"
+    >
+      <component
+        :is="component"
+        v-if="watchRoute"
+        ref="watchView"
+        class="routerView"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, nextTick, onBeforeUnmount, provide, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { routeLocationKey, routerKey } from 'vue-router'
+import store from '../../store/index'
+import { resolveRouteComponent } from '../../router/index'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { tabLifecycleService } from '../../tabs/TabLifecycleService'
+import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
+import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
+import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+import { useRootClass } from '../../helpers/rootClasses'
+
+const props = defineProps({
+  tabId: { type: String, required: true },
+  route: { type: Object, required: true },
+  presented: Boolean
+})
+const emit = defineEmits(['preview'])
+
+const navigation = getTabNavigationService()
+const watchRoot = useTemplateRef('watchRoot')
+const previewHost = useTemplateRef('previewHost')
+const previewActive = ref(false)
+// The tab keeps positioned browsing content below the returning preview.
+watch(previewActive, active => emit('preview', active), { flush: 'sync' })
+const previewStyle = shallowRef(null)
+let previewScroll = null
+let previewOrigin = null
+let previewViewport = null
+let previewResizeObserver = null
+const previewRestoring = ref(false)
+const restorePreviewShown = computed(() => Boolean(previewStyle.value) && previewRestoring.value)
+// App lifts the route above the sidebar while the preview covers it.
+useRootClass('appWatchRestorePreview', restorePreviewShown)
+let previewReady = null
+let previewInterrupted = false
+let previewHistoryEntry = null
+const watchView = useTemplateRef('watchView')
+// Freeze the watch route while browsing, so its route watchers do not reload
+// or tear down the video when the tab moves to another page.
+const watchRoute = shallowRef(null)
+const retained = ref(false)
+const minimized = ref(false)
+const isWatchRoute = computed(() => props.route.path.startsWith('/watch/'))
+const presented = computed(() => props.presented && (isWatchRoute.value || previewActive.value))
+const detached = computed(() => retained.value && !isWatchRoute.value)
+const enabled = computed(() => store.getters.getKeepPlayingOnNavigation)
+const component = computed(() => watchRoute.value && resolveRouteComponent(watchRoute.value))
+const injectedRoute = reactive({})
+const hooks = new Set()
+let disposed = false
+let watchTitle = ''
+let watchTitleOptions
+let disposalPromise = null
+
+async function run(name, context) {
+  for (const entry of [...hooks]) {
+    try {
+      await entry[name]?.(context)
+    } catch (error) {
+      console.error(`Watch lifecycle hook "${name}" failed:`, error)
+    }
+  }
+}
+
+function dispose(context) {
+  if (disposed || !watchRoute.value) return disposalPromise
+  disposed = true
+  disposalPromise = run('beforeDispose', context)
+  return disposalPromise
+}
+
+const unregister = tabLifecycleService.register(props.tabId, {
+  async beforeNavigate(context) {
+    interruptMinimizePreview()
+    await disposalPromise
+    if (!isWatchRoute.value) return
+    // Android teleports even the scrolling mini player outside this view.
+    const player = watchView.value?.$refs.player
+    retained.value = Boolean(player) && !context.to.path.startsWith('/watch/') &&
+      (minimized.value || enabled.value)
+    if (retained.value) {
+      // Finish leaving fullscreen while Watch is still presented, so its
+      // docked panels close before the mini-player takes ownership.
+      await player.exitPresentationModes()
+      const tab = store.getters.getTabById(props.tabId)
+      const entry = tab?.history[tab.historyIndex]
+      watchTitle = entry?.title || ''
+      watchTitleOptions = { resolveHistoryEntry: entry?.titlePending !== true }
+      await run('deactivate', context)
+    } else {
+      await dispose(context)
+    }
+  },
+  async afterNavigate(context) {
+    if (isWatchRoute.value) {
+      if (retained.value && watchTitle) navigation.setTitle(props.tabId, watchTitle, watchTitleOptions)
+      retained.value = false
+      minimized.value = false
+      await run('activate', context)
+    }
+  },
+  activate: context => presented.value && run('activate', context),
+  deactivate: context => run('deactivate', context),
+  beforeReload: dispose,
+  beforeDispose: dispose
+})
+
+provide(tabLifecycleKey, {
+  register(_tabId, entry) {
+    hooks.add(entry)
+    return () => hooks.delete(entry)
+  }
+})
+provide(tabPresentedKey, presented)
+provide('isTabActive', presented)
+provide(routeLocationKey, injectedRoute)
+provide('tabRoute', injectedRoute)
+const router = navigation.createRouterFacade(props.tabId)
+const unregisterPreviewScrollGuard = router.beforeEach(() => {
+  interruptMinimizePreview()
+  preservePreviewHistoryScroll()
+})
+const watchRouter = Object.create(router)
+Object.defineProperty(watchRouter, 'currentRoute', { value: computed(() => watchRoute.value) })
+provide(routerKey, watchRouter)
+async function minimize() {
+  minimized.value = true
+  const tab = store.getters.getTabById(props.tabId)
+  if (getPreviousBrowsingRoute(tab)) {
+    await navigation.back(props.tabId)
+  } else {
+    await navigation.push(props.tabId, '/subscriptions')
+  }
+  if (isWatchRoute.value) minimized.value = false
+}
+
+function beginMinimizePreview() {
+  if (previewActive.value) return
+  previewRestoring.value = false
+  previewInterrupted = false
+  if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
+  previewViewport = null
+  previewScroll = { left: window.scrollX, top: window.scrollY }
+  const tab = store.getters.getTabById(props.tabId)
+  previewHistoryEntry = { index: tab.historyIndex, fullPath: props.route.fullPath, entry: tab.history[tab.historyIndex] }
+  const browsingScroll = getPreviousBrowsingRoute(tab)
+    ? tab.history[tab.historyIndex - 1].scroll
+    : null
+  const bounds = watchRoot.value.getBoundingClientRect()
+  // Use an explicit positioned host: Chromium versions disagree on whether
+  // inline-size query containers establish a fixed-position containing block.
+  const parentBounds = previewHost.value.getBoundingClientRect()
+  previewOrigin = {
+    left: bounds.left - (parentBounds?.left ?? 0),
+    top: bounds.top - (parentBounds?.top ?? 0)
+  }
+  previewStyle.value = {
+    left: `${previewOrigin.left}px`,
+    top: `${previewOrigin.top}px`,
+    width: `${bounds.width}px`,
+    height: `${window.innerHeight - bounds.top}px`
+  }
+  window.addEventListener('scroll', updatePreviewPosition, { passive: true })
+  previewActive.value = true
+  const scroll = previewScroll
+  // Put browsing back in document flow before restoring its viewport. The
+  // browser clamps the offset to the rendered page and positions sticky headers.
+  previewReady = nextTick(() => {
+    if (!previewActive.value || previewScroll !== scroll) return
+    window.scrollTo({ left: browsingScroll?.left ?? 0, top: browsingScroll?.top ?? 0, behavior: 'instant' })
+    updatePreviewPosition()
+  })
+  return previewReady
+}
+
+function beginRestorePreview() {
+  if (previewActive.value || !detached.value) return false
+  previewRestoring.value = true
+  previewScroll = { left: window.scrollX, top: window.scrollY }
+  const parentBounds = previewHost.value.getBoundingClientRect()
+  // The retained Watch host follows the browsing page in document flow. Use
+  // the tab's origin so a tall page cannot send the returning video offscreen.
+  const tabContent = previewHost.value.closest('.tabContent')
+  const targetBounds = tabContent?.getBoundingClientRect() ?? parentBounds
+  let targetLeft = targetBounds.left
+  let targetWidth = targetBounds.width
+  if (window.innerWidth > 680 && store.getters.getHideSideBarOnWatchPages &&
+    !document.querySelector('.app.watchSideNavOverlay')) {
+    // Returning to Watch removes the sidebar from the content layout. Give the
+    // preview that final width now, so its player does not recenter on release.
+    const sidebar = document.querySelector('.app > .sideNav')?.getBoundingClientRect()
+    if (sidebar) {
+      targetWidth += sidebar.width
+      if (sidebar.left < targetBounds.left) targetLeft -= sidebar.width
+    }
+  }
+  previewOrigin = {
+    left: window.scrollX + targetLeft - parentBounds.left,
+    top: window.scrollY + targetBounds.top - parentBounds.top
+  }
+  previewViewport = {
+    left: window.scrollX + targetLeft,
+    top: window.scrollY + targetBounds.top
+  }
+  previewStyle.value = {
+    left: `${previewOrigin.left}px`,
+    top: `${previewOrigin.top}px`,
+    width: `${targetWidth}px`,
+    height: `${window.innerHeight - targetBounds.top - window.scrollY}px`
+  }
+  watchRoot.value.style.opacity = '0'
+  watchRoot.value.firstElementChild.style.opacity = '0'
+  previewActive.value = true
+  window.addEventListener('scroll', updatePreviewPosition, { passive: true })
+  // The Watch route hides the sidebar after this tab commits it, and the
+  // browsing page reflows to the new width. Both move the host, so re-anchor
+  // the preview before that layout is painted.
+  previewResizeObserver = new ResizeObserver(updatePreviewPosition)
+  previewResizeObserver.observe(tabContent ?? previewHost.value)
+  return true
+}
+
+function updatePreviewPosition() {
+  const root = watchRoot.value
+  if (!root || !previewOrigin) return
+  if (previewRestoring.value && previewViewport) {
+    const bounds = root.getBoundingClientRect()
+    root.style.left = `${(Number.parseFloat(root.style.left) || 0) + previewViewport.left - bounds.left}px`
+    root.style.top = `${(Number.parseFloat(root.style.top) || 0) + previewViewport.top - bounds.top}px`
+    return
+  }
+  root.style.left = `${previewOrigin.left + window.scrollX - previewScroll.left}px`
+  root.style.top = `${previewOrigin.top + window.scrollY - previewScroll.top}px`
+}
+
+watch(isWatchRoute, () => {
+  if (!isWatchRoute.value && previewActive.value && !previewRestoring.value && !minimized.value) clearMinimizePreview()
+  // The retained Watch host moves when the browsing route is replaced. Keep
+  // its visible preview in place until the player returns to its inline layout.
+  if (previewRestoring.value && previewActive.value) updatePreviewPosition()
+}, { flush: 'post' })
+
+function updateMinimizePreview(progress) {
+  const root = watchRoot.value
+  if (!root) return
+  if (!previewRestoring.value) {
+    root.style.opacity = String(1 - progress)
+    return
+  }
+  // Cover the previous page first. Watch content only fades in once its
+  // background is opaque, so the two pages never show through each other.
+  const reveal = 1 - progress
+  root.style.opacity = String(Math.max(0, Math.min(1, (reveal - 0.08) / 0.22)))
+  root.firstElementChild.style.opacity = String(Math.max(0, Math.min(1, (reveal - 0.3) / 0.7)))
+}
+
+async function finishMinimizePreview(commit) {
+  if (previewRestoring.value) {
+    if (commit && !disposed) {
+      const browsingScroll = previewScroll
+      window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+      try {
+        await navigation.push(props.tabId, watchRoute.value.fullPath)
+      } finally {
+        if (isWatchRoute.value) {
+          const historyIndex = store.getters.getTabById(props.tabId).historyIndex - 1
+          store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex, scroll: browsingScroll })
+        } else {
+          window.scrollTo({ ...browsingScroll, behavior: 'instant' })
+        }
+      }
+    }
+    return
+  }
+  await previewReady
+  if (commit && !disposed && !previewInterrupted && previewActive.value && isWatchRoute.value &&
+    props.route.fullPath === previewHistoryEntry?.fullPath) {
+    const tab = store.getters.getTabById(props.tabId)
+    const historyIndex = tab.historyIndex
+    if (getPreviousBrowsingRoute(tab)) {
+      store.commit('setHistoryEntryScroll', {
+        tabId: props.tabId,
+        historyIndex: historyIndex - 1,
+        scroll: { left: window.scrollX, top: window.scrollY }
+      })
+    }
+    try {
+      await minimize()
+    } catch (error) {
+      console.error('Unable to dock player', error)
+    }
+  }
+  if (isWatchRoute.value) await clearMinimizePreview()
+}
+
+function interruptMinimizePreview() {
+  // Our own dock marks minimized before navigating; all other navigation
+  // invalidates the pending commit, even while lifecycle work is awaiting.
+  if (previewActive.value && !previewRestoring.value && !minimized.value) previewInterrupted = true
+}
+
+function preservePreviewHistoryScroll() {
+  const tab = store.getters.getTabById(props.tabId)
+  if (previewScroll && previewHistoryEntry && tab?.historyIndex === previewHistoryEntry.index && tab.history[previewHistoryEntry.index] === previewHistoryEntry.entry) {
+    // saveScroll writes browsing's preview offset into Watch. Repair it before
+    // navigation clones/trims history, or when a tab switch ends the preview.
+    store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex: previewHistoryEntry.index, scroll: previewScroll })
+  }
+}
+
+function clearMinimizePreview() {
+  preservePreviewHistoryScroll()
+  const watchScroll = previewActive.value && !previewRestoring.value && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
+  previewHistoryEntry = null
+  previewScroll = null
+  previewReady = null
+  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
+  previewActive.value = false
+  previewStyle.value = null
+  previewViewport = null
+  watchRoot.value?.style.removeProperty('opacity')
+  watchRoot.value?.firstElementChild?.style.removeProperty('opacity')
+  window.removeEventListener('scroll', updatePreviewPosition)
+  previewResizeObserver?.disconnect()
+  previewResizeObserver = null
+  if (watchScroll) {
+    return nextTick(() => {
+      if (!disposed && isWatchRoute.value && props.presented && !previewActive.value) window.scrollTo({ ...watchScroll, behavior: 'instant' })
+    })
+  }
+}
+
+async function dismiss() {
+  if (!detached.value) return
+  await dispose()
+  if (!isWatchRoute.value) {
+    retained.value = false
+    minimized.value = false
+    watchRoute.value = null
+  }
+}
+
+provide(watchNavigationKey, {
+  dismiss,
+  detached,
+  minimized,
+  minimize,
+  beginMinimizePreview,
+  beginRestorePreview,
+  updateMinimizePreview,
+  finishMinimizePreview,
+  clearMinimizePreview,
+  tabPresented: computed(() => props.presented),
+  setTitle: (title, options) => {
+    watchTitle = title
+    watchTitleOptions = options
+  },
+  returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath)
+})
+
+watch(() => props.route, route => {
+  if (route.path.startsWith('/watch/')) {
+    if (watchRoute.value?.fullPath !== route.fullPath) watchTitle = ''
+    disposed = false
+    watchRoute.value = route
+    for (const key of Object.keys(injectedRoute)) {
+      if (!(key in route)) delete injectedRoute[key]
+    }
+    Object.assign(injectedRoute, route)
+  } else if (!retained.value) {
+    watchRoute.value = null
+  }
+}, { immediate: true })
+
+watch(enabled, value => {
+  if (!value && detached.value) {
+    // Finish cleanup and unmount before a return can mount a fresh Watch.
+    disposalPromise = dispose().then(async () => {
+      retained.value = false
+      watchRoute.value = null
+      await nextTick()
+    })
+  }
+}, { flush: 'sync' })
+
+onBeforeUnmount(() => {
+  emit('preview', false)
+  clearMinimizePreview()
+  unregisterPreviewScrollGuard()
+  unregister()
+  dispose()
+})
+</script>
+
+<style scoped>
+.watchPreviewHost {
+  position: relative;
+  z-index: 1;
+}
+
+.watchMinimizePreview {
+  position: absolute;
+  inset: 0;
+}
+
+.watchDragPreview {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  overflow: clip;
+  will-change: opacity;
+}
+
+.watchRestorePreview {
+  background: var(--bg-color);
+}
+</style>

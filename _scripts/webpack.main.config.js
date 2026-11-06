@@ -1,6 +1,9 @@
 const path = require('path')
+const fs = require('fs/promises')
 const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
+const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
@@ -11,8 +14,28 @@ const config = {
   devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
+    subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
+    sqliteNodeWorker: path.join(__dirname, '../src/datastores/sqliteNodeWorker.js'),
+    backupArchiveWorker: path.join(__dirname, '../src/main/backupArchiveWorker.js'),
   },
   module: {
+    rules: [
+      {
+        include: require.resolve('dbus-native/lib/address.js'),
+        resolve: {
+          alias: {
+            // Electron uses Node sockets; Bun's optional FFI loader cannot be bundled.
+            './transport-bun$': path.join(__dirname, '../src/main/dbusNodeTransport.js')
+          }
+        }
+      },
+      {
+        // The Windows addon path is resolved at runtime. Dependencies such as
+        // font-list still need webpack to follow their static createRequire calls.
+        include: path.join(__dirname, '../src/main/desktopShare.js'),
+        parser: { createRequire: false },
+      },
+    ],
     generator: {
       json: {
         JSONParse: false
@@ -57,31 +80,84 @@ const config = {
     __filename: isDevMode
   },
   plugins: [
+    new ProcessBoundaryPlugin(),
+    {
+      apply(compiler) {
+        const directory = path.join(__dirname, 'cast-sender')
+        let preparedInputs = null
+        let inputs = []
+        const prepare = async () => {
+          inputs = (await fs.readdir(directory)).filter(file => /\.(go|mod|sum|pem|LICENSE)$/.test(file)).sort().map(file => path.join(directory, file))
+          inputs.push(path.join(__dirname, 'castSender.mjs'), path.join(__dirname, 'goBuild.mjs'))
+          const signature = (await Promise.all(inputs.map(async file => {
+            const stat = await fs.stat(file)
+            return `${file}:${stat.size}:${stat.mtimeMs}`
+          }))).join('|')
+          if (signature === preparedInputs) return
+          const { prepareCastSender } = await import(`./castSender.mjs?${encodeURIComponent(signature)}`)
+          await prepareCastSender(compiler.options.output.path)
+          preparedInputs = signature
+        }
+        compiler.hooks.afterCompile.tap('CastSender', compilation => {
+          for (const file of inputs) compilation.fileDependencies.add(file)
+          compilation.contextDependencies.add(directory)
+        })
+        compiler.hooks.beforeRun.tapPromise('CastSender', prepare)
+        compiler.hooks.watchRun.tapPromise('CastSender', prepare)
+      }
+    },
     new webpack.DefinePlugin({
-      'process.platform': `'${process.platform}'`,
-      'process.env.IS_ELECTRON_MAIN': true
+      // Do not bake process.platform here. Cross-compiling (e.g. macOS
+      // builds on Linux) would otherwise hardcode the build host OS and
+      // download the wrong managed yt-dlp/ffmpeg binaries at runtime.
+      'process.env.IS_ELECTRON_MAIN': true,
+      'process.env.SUPPORTS_LOCAL_API': true
     })
   ],
   output: {
     filename: '[name].js',
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist'),
-    copy: isDevMode
-      ? undefined
-      : [
-          {
-            from: 'static',
-            to: 'static',
-            globOptions: {
-              ignore: [
-                '**/.*',
-                'static/{locales,pwabuilder-sw.js,manifest.json}'
-              ]
-            }
-          }
-        ]
   },
   target: 'electron-main',
+}
+
+if (!isDevMode) {
+  // Ship one youtubei module for the renderer and the headless feed process.
+  // Its web adapter uses standard fetch/crypto globals, available in both.
+  config.entry.youtubei = {
+    import: 'youtubei.js/web',
+    library: { name: 'OpenTubeXYouTube', type: 'umd' }
+  }
+  config.output.globalObject = 'globalThis'
+  // youtubei's dependencies must also use browser exports: fflate's Node
+  // adapter eagerly requires worker_threads, which a renderer cannot load.
+  config.module.rules.push({
+    test: /node_modules[\\/]youtubei\.js[\\/]/,
+    resolve: { conditionNames: ['browser', 'import', 'default'] }
+  })
+  config.externals = [({ request }, callback) => {
+    callback(null, request === 'youtubei.js' ? 'commonjs ./youtubei.js' : undefined)
+  }]
+  config.plugins.push(
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, '../static'),
+          to: 'static',
+          globOptions: {
+            dot: true,
+            ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/manifest.json', '**/dashFiles/**', '**/storyboards/**'],
+          },
+        },
+        {
+          from: path.join(path.dirname(require.resolve('font-list')), 'libs/darwin/fontlist'),
+          to: 'fontlist',
+          toType: 'file'
+        },
+      ]
+    })
+  )
 }
 
 module.exports = config

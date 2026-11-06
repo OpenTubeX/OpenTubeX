@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+
+import {
+  DEVICE_LOCAL_SETTING_KEYS,
+  isSettingSyncableOnPlatform,
+} from '../../src/renderer/helpers/platformSettings.js'
+
+test('platform-specific settings stay local to every device', () => {
+  assert.deepEqual([...DEVICE_LOCAL_SETTING_KEYS], [
+    'autoPictureInPictureTriggers',
+    'autoUnloadTabs',
+    'autoUnloadMemoryThreshold',
+    'autoUnloadTabPercentage',
+    'autoUpdateChannelVolumes',
+    'channelVolumes',
+    'continuePlaybackWhenScreenIsLocked',
+    'controlBarButtons',
+    'customTitleBar',
+    'defaultVolume',
+    'displayVideoPlayButton',
+    'enableClosedAppSubscriptionRefresh',
+    'enableMobileFullscreenSeek',
+    'enableMobileFullscreenSwipe',
+    'enableMobileTabs',
+    'enablePullToRefresh',
+    'enableUploadNotifications',
+    'notificationMode',
+    'fullscreenRotationIgnoresSystemLock',
+    'hiddenPlayerMenuControls',
+    'hideToTrayOnClose',
+    'hideToTrayOnMinimize',
+    'useTrayIcon',
+    'keepPlayingOnNavigation',
+    'mobileFullscreenBrightness',
+    'mobileLeftSwipeAction',
+    'mobileRightSwipeAction',
+    'onlyShowImportantToasts',
+    'playerMenuControls',
+    'rememberTabNavigationHistory',
+    'rememberVolume',
+    'rotateFullscreenToLandscape',
+    'scrollMiniPlayerOnAllTabs',
+    'showMobileSeekPreview',
+    'showProgressBarToast',
+    'showTabPreviews',
+    'tabBarPosition',
+    'tabLoadingIndicator',
+    'verticalTabHeight',
+    'thumbnailLeftSwipeAction',
+    'thumbnailRightSwipeAction',
+    'ytDlpDownloadFolderPath',
+    'ytDlpPlaybackCookiesPath',
+    'videoVolumeMouseScroll',
+  ])
+
+  for (const settingKey of DEVICE_LOCAL_SETTING_KEYS) {
+    assert.equal(isSettingSyncableOnPlatform(settingKey), false, settingKey)
+  }
+})
+
+test('shared settings remain syncable on every platform', () => {
+  assert.equal(isSettingSyncableOnPlatform('baseTheme'), true)
+})

@@ -1,0 +1,451 @@
+import { test, expect, goTo, readDatastore } from '../../helpers/app.mjs'
+
+test.use({
+  seed: {
+    settings: {
+      unsubscriptionPopupStatus: true
+    },
+    profiles: [
+      {
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [
+          { id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Alpha Channel', thumbnail: '' },
+          { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Beta Channel', thumbnail: '' }
+        ]
+      },
+      // Enough profiles for the settings popover's profile chips to scroll
+      ...Array.from({ length: 30 }, (_, index) => ({
+        _id: `profile-${index}`,
+        name: `Profile ${index}`,
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: index === 0
+          ? [{ id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Alpha Channel', thumbnail: '' }]
+          : []
+      }))
+    ]
+  }
+})
+
+test.describe('subscribed channels', () => {
+  test('hides channels from both sidebar and subscribed-channel links', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const beta = page.locator('.channel', { hasText: 'Beta Channel' })
+    await beta.locator('.thumbnailContainer').click({ button: 'right' })
+    const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
+      .toContainEqual({ name: 'UCbbbbbbbbbbbbbbbbbbbbbb', preferredName: 'Beta Channel' })
+
+    const alpha = page.locator('.navChannel[title="Alpha Channel"]')
+    await alpha.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
+      .toContainEqual({ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Alpha Channel' })
+  })
+
+  test('lists seeded subscriptions and filters them', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    await expect(page.getByText('2 channel(s) found.')).toBeVisible()
+    await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeVisible()
+    await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
+
+    await page.getByLabel('Search Channels').fill('Beta')
+    await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
+    await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeHidden()
+  })
+
+  test('uses the default avatar when a channel thumbnail fails to load', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await page.evaluate(() => {
+      const store = window.$store
+      store.dispatch('updateSubscriptionDetails', {
+        channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+        channelName: 'Alpha Channel',
+        channelThumbnailUrl: 'data:image/png;base64,invalid'
+      })
+    })
+
+    await expect(alpha.locator('img.channelThumbnail')).toHaveCount(0)
+    const fallbackAvatar = alpha.locator('.channelThumbnail:not(img)')
+    await expect(fallbackAvatar).toBeVisible()
+    await expect(fallbackAvatar).toHaveCSS('inline-size', '120px')
+    await expect(fallbackAvatar).toHaveCSS('block-size', '120px')
+    await expect(fallbackAvatar).toHaveCSS('font-size', '120px')
+  })
+
+  test('desktop videos per day stepper stays within its bounds', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
+    const popup = page.locator('.profileDropdown')
+    const more = popup.getByRole('button', { name: 'More videos per day', exact: true })
+    const fewer = popup.getByRole('button', { name: 'Fewer videos per day', exact: true })
+    const count = popup.locator('.dailyVideoLimitCount')
+    await expect(fewer).toHaveAttribute('aria-disabled', 'true')
+    for (let step = 0; step < 29; step++) await more.click()
+    await expect(count).toHaveText('30')
+    await expect(more).toHaveAttribute('aria-disabled', 'true')
+    // The limit keeps focus on the button, so the popover stays open.
+    await expect(more).toBeFocused()
+    await expect(popup).toBeVisible()
+    await fewer.click()
+    await expect(count).toHaveText('29')
+    await expect(popup).toBeVisible()
+    expect(await popup.locator('.dailyVideoLimit').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  })
+
+  test('profile dropdown uses an overlay scrollbar', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.locator('.profileDropdownToggle').click()
+
+    const dropdown = page.locator('.profileDropdown')
+    const scroller = dropdown.locator('.profileDropdownScroller')
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    expect(await scroller.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
+
+    await alpha.locator('.profileDropdownToggle').click()
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(value => { document.body.dir = value }, direction)
+      await alpha.locator('.profileDropdownToggle').click()
+      // The opening transition scales the popover, which moves its edge until it ends.
+      await expect(dropdown).toHaveClass(/profileDropdownPositioned/)
+      await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+
+      const [triggerBox, dropdownBox] = await Promise.all([
+        alpha.locator('.buttonList').boundingBox(),
+        dropdown.boundingBox()
+      ])
+      // The popover aligns with the trigger's end, unless that would push it past the window edge.
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
+      const anchoredX = direction === 'rtl' ? triggerBox.x : triggerBox.x + triggerBox.width - dropdownBox.width
+      const expectedX = Math.min(Math.max(anchoredX, 8), viewportWidth - 8 - dropdownBox.width)
+      expect(Math.abs(dropdownBox.x - expectedX)).toBeLessThanOrEqual(1)
+      expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true)
+
+      await alpha.locator('.profileDropdownToggle').click()
+    }
+  })
+
+  test('focuses the profile dropdown and restores focus after Escape', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    const toggle = alpha.getByRole('button', { name: 'Subscription settings' })
+    await toggle.click()
+
+    const dropdown = page.locator('.profileDropdown')
+    await expect(dropdown).toBeFocused()
+
+    await page.keyboard.press('Escape')
+
+    await expect(dropdown).toBeHidden()
+    await expect(toggle).toBeFocused()
+  })
+
+  test('keeps the profile dropdown inside the viewport near a window edge', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.locator('.ftSubscribeButton').evaluate((element) => {
+      const channel = element.closest('.channel')
+      channel.style.position = 'relative'
+      const channelRect = channel.getBoundingClientRect()
+      const rect = element.getBoundingClientRect()
+      Object.assign(element.style, {
+        left: `${window.innerWidth - channelRect.left - rect.width}px`,
+        position: 'absolute',
+        top: '0'
+      })
+    })
+    await page.evaluate(() => {
+      window.__profileDropdownBaselineScrollWidth = document.documentElement.scrollWidth
+      window.__profileDropdownFrames = []
+      window.__profileDropdownFramesComplete = new Promise((resolve) => {
+        const observer = new MutationObserver(() => {
+          const dropdown = document.querySelector('.profileDropdown')
+          if (dropdown === null) return
+          observer.disconnect()
+
+          let framesRemaining = 12
+          const sample = () => {
+            const rect = dropdown.getBoundingClientRect()
+            window.__profileDropdownFrames.push({
+              left: rect.left,
+              right: rect.right,
+              visibility: getComputedStyle(dropdown).visibility
+            })
+
+            if (--framesRemaining === 0) {
+              resolve()
+            } else {
+              requestAnimationFrame(sample)
+            }
+          }
+          requestAnimationFrame(sample)
+        })
+        observer.observe(document.body, { childList: true, subtree: true })
+      })
+    })
+    await alpha.locator('.profileDropdownToggle').click()
+    await page.evaluate(() => window.__profileDropdownFramesComplete)
+
+    const dropdown = page.locator('.profileDropdown')
+    await expect(dropdown).toBeVisible()
+    expect(await page.evaluate(() => ({
+      framesFit: window.__profileDropdownFrames.every(frame => (
+        frame.visibility === 'hidden' ||
+        (frame.left >= 7.5 && frame.right <= window.innerWidth - 7.5)
+      )),
+      scrollWidthUnchanged: document.documentElement.scrollWidth ===
+        window.__profileDropdownBaselineScrollWidth
+    }))).toEqual({ framesFit: true, scrollWidthUnchanged: true })
+  })
+
+  test('keeps feed options fixed and clamps the profile list after it shortens', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.locator('.profileDropdownToggle').click()
+
+    const dropdown = page.locator('.profileDropdown')
+    const scroller = dropdown.locator('.profileDropdownScroller')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await expect(dropdown.getByText('Show in subscription feed', { exact: true })).toBeVisible()
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await page.evaluate(() => {
+      const store = window.$store
+      for (const { _id } of [...store.getters.getProfileList]) {
+        if (!['allChannels', 'profile-0'].includes(_id)) store.commit('removeProfileFromList', _id)
+      }
+    })
+
+    await expect(dropdown.getByText('Show in subscription feed', { exact: true })).toBeVisible()
+    await expect(dropdown.getByRole('group', { name: 'Profiles' }).getByRole('checkbox')).toHaveCount(2)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('edits and persists the subscription settings for a channel', async ({ app, page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+
+    const dropdown = page.locator('.profileDropdown')
+    await expect(dropdown.getByText('Show in subscription feed', { exact: true })).toBeVisible()
+
+    const feed = dropdown.getByRole('group', { name: 'Show in subscription feed' })
+    const videos = feed.getByRole('checkbox', { name: 'Videos', exact: true })
+    const shorts = feed.getByRole('checkbox', { name: 'Shorts', exact: true })
+    const live = feed.getByRole('checkbox', { name: 'Live', exact: true })
+    const posts = feed.getByRole('checkbox', { name: 'Posts', exact: true })
+    await expect(videos).toBeChecked()
+    await expect(shorts).toBeChecked()
+    await expect(live).toBeChecked()
+    await expect(posts).toBeChecked()
+    await expect(dropdown.getByRole('button', { name: 'Use global setting', exact: true })).toHaveAttribute('aria-pressed', 'true')
+
+    await shorts.click()
+    await live.click()
+    await posts.click()
+    await dropdown.locator('.dailyVideoLimitCount').click()
+    await expect(shorts).not.toBeChecked()
+    await expect(live).not.toBeChecked()
+    await expect(posts).not.toBeChecked()
+    await dropdown.getByRole('checkbox', { name: 'Profile 1', exact: true }).click()
+
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      const latestProfiles = new Map(records.map(record => [record._id, record]))
+      return ['allChannels', 'profile-0', 'profile-1'].map(profileId => {
+        // Keep polling until the channel is saved to the newly selected profile.
+        const subscription = latestProfiles.get(profileId)?.subscriptions
+          .find(channel => channel.id === 'UCaaaaaaaaaaaaaaaaaaaaaa')
+        return {
+          dailyVideoLimit: subscription?.dailyVideoLimit,
+          feedTypes: subscription?.feedTypes
+        }
+      })
+    }).toEqual([
+      { dailyVideoLimit: 1, feedTypes: ['videos'] },
+      { dailyVideoLimit: 1, feedTypes: ['videos'] },
+      { dailyVideoLimit: 1, feedTypes: ['videos'] }
+    ])
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscribedchannels')
+
+    const relaunchedAlpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await relaunchedAlpha.getByRole('button', { name: 'Subscription settings' }).click()
+    const relaunchedDropdown = page.locator('.profileDropdown')
+    const relaunchedFeed = relaunchedDropdown.getByRole('group', { name: 'Show in subscription feed' })
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Videos', exact: true })).toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Shorts', exact: true })).not.toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Live', exact: true })).not.toBeChecked()
+    await expect(relaunchedFeed.getByRole('checkbox', { name: 'Posts', exact: true })).not.toBeChecked()
+    await expect(relaunchedDropdown.locator('.dailyVideoLimitCount')).toHaveText('1')
+    await expect(relaunchedDropdown.locator('.dailyVideoLimitCount')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('a profile unsubscribe confirmation from the phone sheet can be answered', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Subscription settings', exact: true })
+    await expect(sheet).toHaveClass(/bottomSheet/)
+    await sheet.getByRole('group', { name: 'Profiles' }).getByRole('checkbox', { name: 'Profile 0', exact: true }).click()
+
+    // The modal sheet would cover the confirmation, so it closes first.
+    const confirmation = page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })
+    await expect(sheet).toHaveCount(0)
+    await page.getByRole('button', { name: 'Yes', exact: true }).click()
+    await expect(confirmation).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getProfileList
+      .find(profile => profile._id === 'profile-0').subscriptions.length)).toBe(0)
+  })
+
+  test('unsubscribing asks for confirmation and persists', async ({ app, page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.getByRole('button', { name: 'Unsubscribe' }).click()
+
+    await expect(page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })).toBeVisible()
+    await page.getByRole('button', { name: 'Yes', exact: true }).click()
+
+    await expect(alpha).toHaveCount(0)
+    await expect(page.getByText('1 channel(s) found.')).toBeVisible()
+
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      const main = records.filter((record) => record._id === 'allChannels').at(-1)
+      return main.subscriptions.map((channel) => channel.name)
+    }).toEqual(['Beta Channel'])
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscribedchannels')
+    await expect(page.getByText('1 channel(s) found.')).toBeVisible()
+    await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
+    await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toHaveCount(0)
+  })
+})
+
+test.describe('large subscribed channel lists', () => {
+  test.use({
+    seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
+      profiles: [
+        {
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: Array.from({ length: 900 }, (_, index) => ({
+            id: `UC${index.toString().padStart(22, '0')}`,
+            name: `Channel ${index.toString().padStart(3, '0')}`,
+            thumbnail: ''
+          }))
+        }
+      ]
+    }
+  })
+
+  test('renders large lists incrementally while keeping every channel searchable', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    await expect(page.getByText('900 channel(s) found.')).toBeVisible()
+    await expect(page.locator('.channel')).toHaveCount(50)
+    await expect(page.locator('.navChannel')).toHaveCount(50)
+
+    await page.locator('.sideNav .inner').evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+    })
+    await expect(page.locator('.navChannel')).toHaveCount(100)
+
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('removeChannelFromProfiles', {
+        channelId: 'UC0000000000000000000000',
+        profileIds: ['allChannels']
+      })
+    })
+    await expect(page.locator('.navChannel')).toHaveCount(50)
+
+    await page.getByLabel('Search Channels').fill('Channel 899')
+    expect(await page.locator('.count').textContent()).toContain('1 channel(s) found.')
+    await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
+
+    await page.getByLabel('Search Channels').fill('')
+    await page.getByRole('button', { name: 'Load more channels' }).click()
+    await expect(page.locator('.channel')).toHaveCount(100)
+  })
+
+  test('uses the first repeated channel search query value', async ({ page }) => {
+    const channelTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/subscribedchannels?searchQueryText=Channel%20899&searchQueryText=Channel%20898',
+      makeActive: false
+    }))
+    await page.locator(`.tab[data-tab-id="${channelTab.id}"]`).click()
+
+    await expect(page.getByLabel('Search Channels')).toHaveValue('Channel 899')
+    await expect(page.locator('.count')).toContainText('1 channel(s) found.')
+    await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
+  })
+})
+
+test.describe('subscribed channel pagination', () => {
+  const subscriptions = Array.from({ length: 123 }, (_, index) => ({
+    id: `UC${String(index).padStart(22, '0')}`,
+    name: `Channel ${String(index).padStart(3, '0')}`,
+    thumbnail: ''
+  }))
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-GB',
+        fetchSubscriptionsAutomatically: false,
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
+      profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions }]
+    }
+  })
+
+  test('keeps earlier pages when loading more and resets the limit after searching', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    const channels = page.locator('.channel')
+    const loadMore = page.getByRole('button', { name: 'Load more channels', exact: true })
+    await expect(channels).toHaveCount(50)
+    await loadMore.click()
+    await expect(channels).toHaveCount(100)
+    await expect(channels.first()).toContainText('Channel 000')
+    await loadMore.click()
+    await expect(channels).toHaveCount(123)
+    await expect(loadMore).toHaveCount(0)
+
+    const search = page.getByLabel('Search Channels')
+    await search.fill('Channel 11')
+    await expect(channels).toHaveCount(10)
+    await expect(channels.first()).toContainText('Channel 110')
+    await search.fill('')
+    await expect(channels).toHaveCount(50)
+    await expect(loadMore).toBeVisible()
+  })
+})

@@ -2,7 +2,11 @@
   position: relative;
 }
 
-.watchVideoRecommendations {
+.recommendationsScroller {
+  padding-block-start: 8px;
+}
+
+.recommendationsContent {
   display: grid;
   gap: 8px;
 }
@@ -10,4 +14,78 @@
 .VideoRecommendationsTopBar {
   display: flex;
   justify-content: space-between;
+}
+
+.VideoRecommendationsTopBar h3 {
+  letter-spacing: -0.01em;
+}
+
+.VideoRecommendationsTopBar:not(.fullscreenDockHeader) h3 {
+  /* Include the card's 3px top padding in the 20px item gap. */
+  margin-block: 17px 6px;
+}
+
+.watchVideoRecommendations:not(.fullscreenRecommendations):has(.offlineDownloadRecommendation) h3 {
+  /* Match the visible gap around 67.5px thumbnails centered in 72px rows. */
+  margin-block: 9.5px 2.25px;
+}
+
+.fullscreenRecommendations {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.fullscreenRecommendations .recommendationsScroller {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  margin-inline: 16px 4px;
+  padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
+}
+
+.offlineDownloadRecommendation {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  gap: 12px;
+  min-block-size: 72px;
+  min-inline-size: 0;
+  border-radius: var(--shape-corner-small);
+  text-decoration: none;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.offlineDownloadRecommendation:hover,
+.offlineDownloadRecommendation:focus-visible {
+  background: color-mix(in srgb, currentcolor 8%, transparent);
+}
+
+.offlineDownloadThumbnail {
+  aspect-ratio: 16 / 9;
+  background: #000;
+  inline-size: 120px;
+  border-radius: var(--shape-corner-small);
+  object-fit: cover;
+}
+
+.offlineDownloadThumbnail.blur {
+  clip-path: inset(0 round var(--shape-corner-small));
+  filter: blur(20px);
+}
+
+.offlineDownloadText {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.offlineDownloadTitle,
+.offlineDownloadAuthor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.offlineDownloadAuthor {
+  color: var(--secondary-text-color);
 }

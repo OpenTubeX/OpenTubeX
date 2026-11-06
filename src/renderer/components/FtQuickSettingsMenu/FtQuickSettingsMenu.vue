@@ -1,0 +1,1011 @@
+<template>
+  <div
+    class="quickSettings"
+    :class="{ quickSettingsPreview: preview }"
+  >
+    <span
+      v-if="preview"
+      class="previewProfileTrigger"
+      aria-hidden="true"
+      :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
+    >
+      <FtProfileIcon
+        class="profileInitial"
+        :profile="activeProfile"
+        :fallback="activeProfileInitial"
+      />
+    </span>
+    <button
+      v-else
+      ref="triggerRef"
+      type="button"
+      class="profileTrigger"
+      data-tutorial="quick-settings"
+      data-hold-menu
+      :aria-label="triggerLabel"
+      :title="triggerLabel"
+      :aria-expanded="menuOpen"
+      :aria-controls="id"
+      :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
+      @click="toggleMenu"
+      @contextmenu.stop.prevent="openProfilePanelFromContextMenu"
+      @mousedown="handleTriggerMouseDown"
+      @keydown.esc.stop="closeMenu"
+    >
+      <FtProfileIcon
+        class="profileInitial"
+        :profile="activeProfile"
+        :fallback="activeProfileInitial"
+      />
+      <FtIcon
+        v-if="musicMode"
+        class="musicModeIndicator"
+        :icon="['fas', 'headphones']"
+        aria-hidden="true"
+      />
+    </button>
+
+    <FtMobileSheet
+      v-if="menuRendered || preview"
+      :enabled="phoneLayout"
+      :open="menuOpen"
+      :title="profilePanelOpen ? t('Profile.Profile Select') : t('Settings.Quick Settings.Quick Settings')"
+      :back="profilePanelOpen"
+      @closed="handleSheetClosed"
+      @back="closeProfilePanel"
+      @close="closeMenu"
+    >
+      <template #actions>
+        <div
+          ref="quickHeaderActions"
+          class="phoneQuickHeaderActions"
+        />
+        <button
+          v-if="profilePanelOpen"
+          type="button"
+          :aria-label="t('Profile.Profile Settings')"
+          @click="openProfileSettings"
+        >
+          <FtIcon :icon="['fas', 'sliders-h']" />
+        </button>
+      </template>
+      <Transition
+        name="quick-settings-menu"
+        :css="!phoneLayout"
+        appear
+        @enter="finishTransition"
+        @leave="finishTransition"
+        @after-leave="handleMenuAfterLeave"
+      >
+        <FtCard
+          v-if="menuOpen || phoneLayout || preview"
+          :id="id"
+          ref="menuRef"
+          :fixed-background="false"
+          class="quickSettingsMenu"
+          :class="{ phoneQuickSettings: phoneLayout }"
+          :role="phoneLayout || preview ? null : 'dialog'"
+          :aria-label="t('Settings.Quick Settings.Quick Settings')"
+          tabindex="-1"
+          @focusout="handleMenuFocusOut"
+          @keydown.esc.prevent.stop="profilePanelOpen ? closeProfilePanel() : closeMenu()"
+        >
+          <template v-if="profilePanelOpen">
+            <header
+              v-if="!phoneLayout"
+              class="profilePanelHeader"
+            >
+              <button
+                type="button"
+                :aria-label="t('Back')"
+                :title="t('Back')"
+                @click="closeProfilePanel"
+              >
+                <FtIcon :icon="['fas', 'arrow-left']" />
+              </button>
+              <h2>{{ t('Profile.Profile Select') }}</h2>
+              <button
+                type="button"
+                :aria-label="t('Profile.Profile Settings')"
+                :title="t('Profile.Profile Settings')"
+                @click="openProfileSettings"
+              >
+                <FtIcon :icon="['fas', 'sliders-h']" />
+              </button>
+            </header>
+            <div
+              ref="profileScrollRef"
+              v-overlay-scrollbars
+              class="quickSettingsScroll"
+            >
+              <div
+                class="profileList"
+                role="listbox"
+                :aria-label="t('Profile.Profile Select')"
+              >
+                <button
+                  v-for="profile in profileList"
+                  :key="profile._id"
+                  type="button"
+                  class="profileOption"
+                  role="option"
+                  :aria-selected="profile._id === activeProfile._id"
+                  @click="setActiveProfile(profile)"
+                >
+                  <FtProfileIcon
+                    class="profileAvatar"
+                    :profile="profile"
+                    :fallback="profileInitials[profile._id]"
+                  />
+                  <span dir="auto">{{ translateProfileName(profile) }}</span>
+                  <FtIcon
+                    v-if="profile._id === activeProfile._id"
+                    class="activeProfileIcon"
+                    :icon="['fas', 'check']"
+                  />
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div
+              class="profileHeaderRow"
+              :inert="preview"
+            >
+              <button
+                type="button"
+                class="profileSummary"
+                @click="openProfilePanel"
+              >
+                <FtProfileIcon
+                  class="profileAvatar"
+                  :profile="activeProfile"
+                  :fallback="activeProfileInitial"
+                />
+                <span class="profileSummaryText">
+                  <strong dir="auto">{{ translateProfileName(activeProfile) }}</strong>
+                  <small>{{ IS_CAPACITOR ? t('Settings.Quick Settings.Profile Selector Touch Hint') : t('Settings.Quick Settings.Profile Selector Hint') }}</small>
+                </span>
+                <FtIcon :icon="['fas', 'angle-right']" />
+              </button>
+              <Teleport
+                :to="quickHeaderActions || 'body'"
+                :disabled="!phoneLayout || !quickHeaderActions"
+              >
+                <button
+                  type="button"
+                  class="quickSettingsShortcut commandPaletteShortcut"
+                  :aria-label="t('CommandPalette.Open')"
+                  :title="t('CommandPalette.Open')"
+                  @click="openCommandPalette"
+                >
+                  <FtIcon :icon="['fas', 'terminal']" />
+                </button>
+                <button
+                  v-if="showDownloadsShortcut"
+                  type="button"
+                  class="quickSettingsShortcut downloadsShortcut"
+                  :aria-label="t('Settings.Download Settings.Download Settings')"
+                  :title="t('Settings.Download Settings.Download Settings')"
+                  @click="openDownloads"
+                >
+                  <FtIcon :icon="['fas', 'download']" />
+                </button>
+                <button
+                  v-if="showSettingsShortcut"
+                  type="button"
+                  class="quickSettingsShortcut allSettingsShortcut"
+                  :aria-label="t('Settings.Quick Settings.All Settings')"
+                  :title="t('Settings.Quick Settings.All Settings')"
+                  @click="openSettings"
+                >
+                  <FtIcon :icon="['fas', 'cog']" />
+                </button>
+              </Teleport>
+            </div>
+
+            <div
+              ref="mainScrollRef"
+              v-overlay-scrollbars
+              class="quickSettingsScroll"
+            >
+              <div
+                ref="mainContentRef"
+                class="quickSettingsContent"
+              >
+                <section
+                  v-for="section in orderedQuickSettingSections"
+                  :key="`${section.id}-${section.settings[0].id}`"
+                  class="menuSection"
+                >
+                  <h3>
+                    <FtIcon
+                      class="menuSectionIcon"
+                      :icon="section.icon"
+                      aria-hidden="true"
+                    />
+                    <span>{{ section.label }}</span>
+                  </h3>
+                  <div
+                    v-for="setting in section.settings"
+                    :key="setting.id"
+                    class="quickSettingControl"
+                    :class="{ pairedQuickSetting: isPairedQuickSetting(section.settings, setting.id) }"
+                    :data-setting-id="setting.id"
+                  >
+                    <FtSelect
+                      v-if="setting.id === 'baseTheme'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
+                      :value="baseTheme"
+                      setting-key="baseTheme"
+                      :select-names="baseThemeNames"
+                      :select-values="baseThemeValues"
+                      :option-groups="baseThemeValues.map(baseThemeGroup)"
+                      :option-group-labels="baseThemeGroupLabels"
+                      :disabled="customThemeEditorOpen"
+                      :icon="['fas', 'palette']"
+                      @change="updateSetting('BaseTheme', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'systemLightTheme' || setting.id === 'systemDarkTheme'"
+                      class="quickSelect"
+                      :placeholder="setting.label"
+                      :value="store.state.settings[setting.id]"
+                      :setting-key="setting.id"
+                      :select-names="systemThemeOptions[setting.id].map(({ name }) => name)"
+                      :select-values="systemThemeOptions[setting.id].map(({ value }) => value)"
+                      :option-groups="systemThemeOptions[setting.id].map(({ value }) => baseThemeGroup(value))"
+                      :option-group-labels="baseThemeGroupLabels"
+                      :disabled="customThemeEditorOpen"
+                      :icon="setting.icon"
+                      @change="updateBasicQuickSetting(setting.id, $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'mainColor'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
+                      :value="mainColor"
+                      setting-key="mainColor"
+                      :select-names="colorNames"
+                      :select-values="COLOR_VALUES"
+                      :option-colors="COLOR_SWATCHES"
+                      :icon="['fas', 'palette']"
+                      icon-color="var(--primary-color)"
+                      @change="updateSetting('MainColor', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'secColor'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.Theme Settings.Secondary Color Theme')"
+                      :value="secColor"
+                      setting-key="secColor"
+                      :select-names="colorNames"
+                      :select-values="COLOR_VALUES"
+                      :option-colors="COLOR_SWATCHES"
+                      :icon="['fas', 'palette']"
+                      icon-color="var(--accent-color)"
+                      @change="updateSetting('SecColor', $event)"
+                    />
+                    <div
+                      v-else-if="setting.id === 'uiScale'"
+                      class="sliderGroup"
+                    >
+                      <FtSlider
+                        :label="t('Settings.Theme Settings.UI Scale')"
+                        :default-value="uiScale"
+                        :min-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MIN : 50"
+                        :max-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MAX : 300"
+                        :step="5"
+                        value-extension="%"
+                        @change="updateUiScale"
+                      />
+                    </div>
+                    <div
+                      v-else-if="setting.id === 'thumbnailSize' || setting.id === 'playlistThumbnailSize'"
+                      class="sliderGroup"
+                    >
+                      <FtSlider
+                        :class="setting.id === 'playlistThumbnailSize' ? 'playlistThumbnailSizeSlider' : 'thumbnailSizeSlider'"
+                        :label="setting.label"
+                        :default-value="setting.id === 'playlistThumbnailSize' ? playlistThumbnailSize : thumbnailSize"
+                        :setting-key="setting.id"
+                        :min-value="MIN_THUMBNAIL_SIZE"
+                        :max-value="setting.id === 'playlistThumbnailSize' ? maxPlaylistThumbnailSize : maxThumbnailSize"
+                        :step="THUMBNAIL_SIZE_STEP"
+                        value-extension="%"
+                        @input="previewThumbnailSize($event, setting.id)"
+                        @change="updateThumbnailSize($event, setting.id)"
+                      />
+                    </div>
+                    <FtSelect
+                      v-else-if="setting.id === 'defaultQuality'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
+                      :value="defaultQuality"
+                      setting-key="defaultQuality"
+                      :select-names="qualityNames"
+                      :select-values="qualityValues"
+                      :icon="['fas', 'photo-film']"
+                      @change="updateSetting('DefaultQuality', $event)"
+                    />
+                    <FtToggleSwitch
+                      v-else-if="setting.id === 'playNextVideo'"
+                      :label="t('Settings.Player Settings.Play Next Video')"
+                      :default-value="playNextVideo"
+                      :disabled="hideRecommendedVideos"
+                      setting-key="playNextVideo"
+                      compact
+                      @change="updateSetting('PlayNextVideo', $event)"
+                    />
+                    <FtSlider
+                      v-else-if="setting.id === 'defaultPlayback'"
+                      :label="t('Settings.Player Settings.Default Playback Rate')"
+                      :default-value="store.getters.getDefaultPlayback"
+                      setting-key="defaultPlayback"
+                      :min-value="store.getters.getVideoPlaybackRateInterval"
+                      :max-value="store.getters.getMaxVideoPlaybackRate"
+                      :step="store.getters.getVideoPlaybackRateInterval"
+                      value-extension="x"
+                      @change="updateSetting('DefaultPlayback', $event)"
+                    />
+                    <FtToggleSwitch
+                      v-else-if="setting.id === 'enableSubtitlesByDefault'"
+                      :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
+                      :default-value="enableSubtitlesByDefault"
+                      setting-key="enableSubtitlesByDefault"
+                      compact
+                      @change="updateSetting('EnableSubtitlesByDefault', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'listType'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
+                      :value="listType"
+                      setting-key="listType"
+                      :select-names="viewTypeNames"
+                      :select-values="VIEW_TYPE_VALUES"
+                      :icon="VIEW_TYPE_ICONS[listType]"
+                      @change="updateSetting('ListType', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'playlistViewType'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
+                      :value="playlistViewType"
+                      setting-key="playlistViewType"
+                      :select-names="viewTypeNames"
+                      :select-values="VIEW_TYPE_VALUES"
+                      :icon="VIEW_TYPE_ICONS[playlistViewType]"
+                      @change="updateSetting('PlaylistViewType', $event)"
+                    />
+                    <FtToggleSwitch
+                      v-else-if="setting.id === 'hideRecommendedVideos'"
+                      :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
+                      :default-value="hideRecommendedVideos"
+                      setting-key="hideRecommendedVideos"
+                      compact
+                      @change="handleHideRecommendedVideos"
+                    />
+                    <FtToggleSwitch
+                      v-else-if="setting.id === 'hideComments'"
+                      :label="t('Settings.Distraction Free Settings.Hide Comments')"
+                      :default-value="hideComments"
+                      setting-key="hideComments"
+                      compact
+                      @change="updateSetting('HideComments', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'currentLocale'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.General Settings.Locale Preference')"
+                      :value="currentLocale"
+                      setting-key="currentLocale"
+                      :select-names="localeNames"
+                      :select-values="LOCALE_VALUES"
+                      :icon="['fas', 'language']"
+                      is-locale-selector
+                      @change="updateSetting('CurrentLocale', $event)"
+                    />
+                    <FtSelect
+                      v-else-if="setting.id === 'region'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.General Settings.Region for Trending')"
+                      :value="region"
+                      setting-key="region"
+                      :select-names="regionNames"
+                      :select-values="regionValues"
+                      :icon="['fas', 'globe']"
+                      @change="updateSetting('Region', $event)"
+                    />
+                    <FtToggleSwitch
+                      v-else-if="setting.id === 'useProxy'"
+                      :label="t('Settings.Proxy Settings.Enable Tor / Proxy')"
+                      :default-value="useProxy"
+                      setting-key="useProxy"
+                      compact
+                      @change="updateProxy"
+                    />
+                    <FtQuickSettingControl
+                      v-else
+                      :definition="setting"
+                      @update="updateBasicQuickSetting"
+                    />
+                  </div>
+                </section>
+
+                <div
+                  class="menuLinks"
+                  :inert="preview"
+                >
+                  <slot
+                    name="overflow-actions"
+                    :close="closeMenu"
+                  />
+                  <button
+                    v-if="USING_ELECTRON"
+                    type="button"
+                    @click="openKeyboardShortcuts"
+                  >
+                    <FtIcon :icon="['fas', 'keyboard']" />
+                    <span>{{ t('KeyboardShortcutPrompt.Keyboard Shortcuts') }}</span>
+                    <FtIcon
+                      class="linkArrow"
+                      :icon="['fas', 'angle-right']"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    @click="openAbout"
+                  >
+                    <FtIcon :icon="['fas', 'info-circle']" />
+                    <span>{{ t('About.About') }}</span>
+                    <FtIcon
+                      class="linkArrow"
+                      :icon="['fas', 'angle-right']"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </FtCard>
+      </Transition>
+    </FtMobileSheet>
+  </div>
+</template>
+
+<script setup>
+import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../../helpers/capacitorUiScale'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtCard from '../ft-card/ft-card.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
+import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import FtSlider from '../FtSlider/FtSlider.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtQuickSettingControl from '../FtQuickSettingControl/FtQuickSettingControl.vue'
+
+import store from '../../store/index'
+import allLocales from '../../../../static/locales/activeLocales.json'
+import { localeTranslationPercentages } from '../../i18n/index'
+import { finishTransition } from '../../helpers/animationSpeed'
+import { colors } from '../../helpers/colors'
+import { OPEN_COMMAND_PALETTE_EVENT } from '../../helpers/commandPalette'
+import { useColorTranslations } from '../../composables/colors'
+import { baseThemeGroup, useBaseThemeOptions } from '../../composables/baseThemes'
+import { useThumbnailSizeSlider } from '../../composables/useThumbnailSizeSlider'
+import {
+  MIN_THUMBNAIL_SIZE,
+  THUMBNAIL_SIZE_STEP
+} from '../../constants/thumbnailSize'
+import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { getFirstCharacter } from '../../helpers/strings'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import {
+  createQuickSettingCatalog,
+  createQuickSettingSections,
+  isQuickSettingPaired,
+} from '../../helpers/quickSettings'
+import { defaultUpdaterId } from '../../store/modules/settings'
+import { switchActiveProfile, translateProfileName as getTranslatedProfileName } from '../../helpers/profileSwitching'
+import { getThemeClassification, hasFixedThemeColors } from '../../../appearanceSettings'
+
+const quickHeaderActions = useTemplateRef('quickHeaderActions')
+const props = defineProps({
+  compactHeader: { type: Boolean, default: false },
+  headerActionsOverflow: { type: Boolean, default: false },
+  // Renders the open menu inline for the interface customizer.
+  preview: { type: Boolean, default: false }
+})
+const { locale, t } = useI18n()
+const id = useId()
+const shortViewport = usePhoneLayout('(max-height: 600px)')
+const phoneLayout = computed(() => !props.preview && (props.compactHeader || shortViewport.value))
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const USING_ELECTRON = process.env.IS_ELECTRON
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+
+const menuOpen = ref(false)
+const menuRendered = ref(false)
+watch(menuOpen, open => {
+  if (open) menuRendered.value = true
+})
+watch(phoneLayout, () => {
+  if (!menuOpen.value && menuRendered.value) handleSheetClosed()
+})
+const profilePanelOpen = ref(false)
+let mouseDownOnTrigger = false
+let pointerDownInsideMenu = false
+let pendingSettingUpdateCount = 0
+/** @type {(() => void) | null} */
+let actionAfterClose = null
+const triggerRef = useTemplateRef('triggerRef')
+const menuRef = useTemplateRef('menuRef')
+const mainScrollRef = useTemplateRef('mainScrollRef')
+const mainContentRef = useTemplateRef('mainContentRef')
+const profileScrollRef = useTemplateRef('profileScrollRef')
+let mainContentResizeObserver = null
+
+const profileList = computed(() => store.getters.getProfileList)
+const activeProfile = computed(() => store.getters.getActiveProfile)
+const musicModeTabId = computed(() => store.getters.getActiveTabId ?? 'web')
+const musicMode = computed(() => store.getters.getTabMusicMode(musicModeTabId.value))
+const triggerLabel = computed(() => musicMode.value
+  ? `${t('Settings.Quick Settings.Quick Settings')} — ${t('Video.Player.Music Mode')}`
+  : t('Settings.Quick Settings.Quick Settings'))
+
+const activeProfileInitial = computed(() => activeProfile.value?.name
+  ? getFirstCharacter(translateProfileName(activeProfile.value), locale.value)
+  : '')
+const profileInitials = computed(() => profileList.value.reduce((initials, profile) => {
+  initials[profile._id] = profile?.name
+    ? getFirstCharacter(translateProfileName(profile), locale.value)
+    : ''
+  return initials
+}, {}))
+
+const customThemes = computed(() => store.getters.getCustomThemes)
+const { baseThemeValues, baseThemeNames, baseThemeGroupLabels } = useBaseThemeOptions(customThemes)
+const systemThemeOptions = computed(() => {
+  const options = { systemLightTheme: [], systemDarkTheme: [] }
+  baseThemeValues.value.forEach((value, index) => {
+    const classification = getThemeClassification(value, customThemes.value)
+    if (classification === null) return
+    const settingId = classification === 'light' ? 'systemLightTheme' : 'systemDarkTheme'
+    options[settingId].push({ name: baseThemeNames.value[index], value })
+  })
+  return options
+})
+
+const COLOR_VALUES = colors.map(color => color.name)
+const COLOR_SWATCHES = colors.map(color => color.value)
+const colorNames = useColorTranslations()
+const VIEW_TYPE_VALUES = ['grid', 'fullWidth', 'list']
+const VIEW_TYPE_ICONS = { grid: ['fas', 'grip'], fullWidth: ['fas', 'grip-lines'], list: ['fas', 'list'] }
+const viewTypeNames = computed(() => [
+  t('Settings.General Settings.Video View Type.Grid'),
+  t('Settings.General Settings.Video View Type.Full Width'),
+  t('Settings.General Settings.Video View Type.List')
+])
+const LOCALE_VALUES = ['system', ...allLocales]
+const localeNames = computed(() => [
+  t('Settings.General Settings.System Default'),
+  ...process.env.LOCALE_NAMES.map((name, index) => `${name} (${localeTranslationPercentages.value[index]}%)`)
+])
+
+const baseTheme = computed(() => store.getters.getBaseTheme)
+const usesFixedThemePalette = computed(() => hasFixedThemeColors(baseTheme.value === 'system'
+  ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+  : baseTheme.value))
+const customThemeEditorOpen = computed(() => store.getters.getCustomThemeEditorOpen)
+const mainColor = computed(() => store.getters.getMainColor)
+const secColor = computed(() => store.getters.getSecColor)
+const mainColorAvailable = computed(() => (
+  !customThemeEditorOpen.value &&
+  !usesFixedThemePalette.value
+))
+const uiScale = computed(() => store.getters.getUiScale)
+const { thumbnailSize, maxThumbnailSize } = useThumbnailSizeSlider()
+const { thumbnailSize: playlistThumbnailSize, maxThumbnailSize: maxPlaylistThumbnailSize } = useThumbnailSizeSlider('playlistThumbnailSize')
+const playNextVideo = computed(() => store.getters.getPlayNextVideo)
+const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
+const listType = computed(() => store.getters.getListType)
+const playlistViewType = computed(() => store.getters.getPlaylistViewType)
+const hideRecommendedVideos = computed(() => store.getters.getHideRecommendedVideos)
+const hideComments = computed(() => store.getters.getHideComments)
+const currentLocale = computed(() => store.getters.getCurrentLocale)
+const region = computed(() => store.getters.getRegion)
+const regionNames = computed(() => store.getters.getRegionNames)
+const regionValues = computed(() => store.getters.getRegionValues)
+const useProxy = computed(() => store.getters.getUseProxy)
+const proxyUrl = computed(() => (
+  `${store.getters.getProxyProtocol}://${store.getters.getProxyHostname}:${store.getters.getProxyPort}`
+))
+const showDownloadsShortcut = computed(() => (
+  supportsYtDlp &&
+  store.getters.getEnableDownloads &&
+  (!store.getters.getMoveDownloadsToAppHeader || props.headerActionsOverflow)
+))
+const showSettingsShortcut = computed(() => (
+  !(USING_ELECTRON || process.env.IS_CAPACITOR) || !store.getters.getMoveSettingsToAppHeader || props.headerActionsOverflow
+))
+
+const quickSettings = computed(() => store.getters.getQuickSettings)
+const quickSettingCatalog = computed(() => createQuickSettingCatalog(t, USING_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS))
+const quickSettingSectionDefinitions = computed(() => new Map(
+  createQuickSettingSections(t, USING_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS).map(section => [section.id, section])
+))
+const orderedQuickSettingSections = computed(() => {
+  const catalogById = new Map(quickSettingCatalog.value.map(setting => [setting.id, setting]))
+  const visibleSettings = quickSettings.value
+    .map(settingId => catalogById.get(settingId))
+    .filter(setting => setting != null && (
+      (!['mainColor', 'secColor'].includes(setting.id) || mainColorAvailable.value) &&
+      (!['systemLightTheme', 'systemDarkTheme'].includes(setting.id) || baseTheme.value === 'system') &&
+      (setting.id !== 'region' || regionValues.value.length > 0) &&
+      // Parental controls must not bypass the password that locks Settings.
+      (!setting.passwordProtected || store.getters.getSettingsPassword === '')
+    ))
+
+  return visibleSettings.reduce((sections, setting) => {
+    let section = sections.at(-1)
+    if (section?.id !== setting.section) {
+      const sectionDefinition = quickSettingSectionDefinitions.value.get(setting.section)
+      section = {
+        id: setting.section,
+        label: setting.id === 'useProxy'
+          ? t('Settings.Proxy Settings.Proxy Settings')
+          : sectionDefinition.label,
+        icon: sectionDefinition.icon,
+        settings: [],
+      }
+      sections.push(section)
+    }
+    section.settings.push(setting)
+    return sections
+  }, [])
+})
+
+function isPairedQuickSetting(settings, settingId) {
+  const settingIndex = settings.findIndex(setting => setting.id === settingId)
+  return isQuickSettingPaired(settings, settingIndex)
+}
+
+const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine))
+const qualityValues = computed(() => autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES)
+const qualityNames = computed(() => [
+  t('Settings.Player Settings.Default Quality.4k'),
+  t('Settings.Player Settings.Default Quality.1440p'),
+  t('Settings.Player Settings.Default Quality.1080p'),
+  t('Settings.Player Settings.Default Quality.720p'),
+  t('Settings.Player Settings.Default Quality.480p'),
+  t('Settings.Player Settings.Default Quality.360p'),
+  t('Settings.Player Settings.Default Quality.240p'),
+  t('Settings.Player Settings.Default Quality.144p'),
+  ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
+])
+const defaultQuality = computed(() => {
+  const value = store.getters.getDefaultQuality
+  return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
+})
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value
+  if (menuOpen.value) {
+    actionAfterClose = null
+    profilePanelOpen.value = false
+    nextTick(() => {
+      menuRef.value?.$el?.focus()
+      const scrollViewport = mainScrollRef.value
+      if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
+      observeMainContent()
+    })
+  }
+}
+
+function handleMenuAfterLeave() {
+  if (!menuOpen.value) {
+    if (!phoneLayout.value) menuRendered.value = false
+    profilePanelOpen.value = false
+    stopObservingMainContent()
+  }
+}
+
+function handleSheetClosed() {
+  menuRendered.value = false
+  menuOpen.value = false
+  handleMenuAfterLeave()
+  const action = actionAfterClose
+  actionAfterClose = null
+  action?.()
+}
+
+function clampMainContentScroll() {
+  const scrollViewport = mainScrollRef.value
+  const content = mainContentRef.value
+  if (scrollViewport && content) clampOverlayScrollTop(scrollViewport, content)
+}
+
+function observeMainContent() {
+  stopObservingMainContent()
+  const content = mainContentRef.value
+  if (!content) return
+  mainContentResizeObserver = new ResizeObserver(clampMainContentScroll)
+  mainContentResizeObserver.observe(content)
+  clampMainContentScroll()
+}
+
+function stopObservingMainContent() {
+  mainContentResizeObserver?.disconnect()
+  mainContentResizeObserver = null
+}
+
+function handleTriggerMouseDown(event) {
+  if (event.button === 0 && menuOpen.value) {
+    mouseDownOnTrigger = true
+  }
+}
+
+async function focusMenu() {
+  await nextTick()
+  menuRef.value?.$el?.focus()
+}
+
+function handleWindowFocus() {
+  if (menuOpen.value && !menuRef.value?.$el?.matches(':focus-within')) {
+    menuRef.value?.$el?.focus()
+  }
+}
+
+function handleWindowBlur() {
+  pointerDownInsideMenu = false
+}
+
+function handleSystemColorSchemeChange(event) {
+  return runSettingUpdate(() => {
+    systemUsesDarkTheme.value = event.matches
+  })
+}
+
+function handleDocumentPointerDown(event) {
+  pointerDownInsideMenu = event.target instanceof Node && menuRef.value?.$el?.contains(event.target)
+}
+
+function handleDocumentPointerUp() {
+  setTimeout(() => {
+    pointerDownInsideMenu = false
+  })
+}
+
+onMounted(() => {
+  window.addEventListener('focus', handleWindowFocus)
+  window.addEventListener('blur', handleWindowBlur)
+  systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
+  document.addEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.addEventListener('pointerup', handleDocumentPointerUp, true)
+  document.addEventListener('pointercancel', handleDocumentPointerUp, true)
+  if (props.preview) nextTick(observeMainContent)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', handleWindowFocus)
+  window.removeEventListener('blur', handleWindowBlur)
+  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
+  document.removeEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.removeEventListener('pointerup', handleDocumentPointerUp, true)
+  document.removeEventListener('pointercancel', handleDocumentPointerUp, true)
+  stopObservingMainContent()
+})
+
+watch(profilePanelOpen, async (profileOpen) => {
+  if (!menuOpen.value) return
+  stopObservingMainContent()
+  await nextTick()
+  const scrollViewport = profileOpen ? profileScrollRef.value : mainScrollRef.value
+  if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
+  if (!profileOpen) observeMainContent()
+})
+
+watch(mainColorAvailable, async () => {
+  await nextTick()
+  clampMainContentScroll()
+})
+
+function openProfilePanel() {
+  profilePanelOpen.value = true
+  focusMenu()
+}
+
+function openProfilePanelFromContextMenu() {
+  menuOpen.value = true
+  openProfilePanel()
+}
+
+function closeProfilePanel() {
+  profilePanelOpen.value = false
+  focusMenu()
+}
+
+function updateBasicQuickSetting(settingId, value) {
+  return runSettingUpdate(() => store.dispatch(defaultUpdaterId(settingId), value))
+}
+
+function handleMenuFocusOut(event) {
+  if (phoneLayout.value) return
+  if (event.relatedTarget === null) {
+    const controlChangedDuringClick = pointerDownInsideMenu || pendingSettingUpdateCount > 0
+    const focusTarget = event.target
+    const focusTargetLabel = focusTarget instanceof HTMLElement
+      ? focusTarget.closest('label')
+      : null
+    const associatedControl = focusTargetLabel instanceof HTMLLabelElement
+      ? focusTargetLabel.control
+      : null
+    setTimeout(() => {
+      const focusedControlWasRemoved = focusTarget instanceof Node && !focusTarget.isConnected
+      if (controlChangedDuringClick || focusedControlWasRemoved) {
+        const menu = menuRef.value?.$el
+        if (
+          focusedControlWasRemoved &&
+          associatedControl instanceof HTMLElement &&
+          associatedControl.isConnected &&
+          menu?.contains(associatedControl)
+        ) {
+          associatedControl.focus({ preventScroll: true, focusVisible: true })
+        } else if (!menu?.matches(':focus-within')) {
+          focusMenu()
+        }
+        return
+      }
+      if (document.hasFocus() && !menuRef.value?.$el.matches(':focus-within')) {
+        menuOpen.value = false
+      }
+    })
+    return
+  }
+
+  if (mouseDownOnTrigger) {
+    mouseDownOnTrigger = false
+  } else if (!menuRef.value?.$el.matches(':focus-within')) {
+    menuOpen.value = false
+  }
+}
+
+function closeMenu() {
+  actionAfterClose = null
+  menuOpen.value = false
+  triggerRef.value?.focus()
+}
+
+function closeMenuForAction() {
+  actionAfterClose = null
+  menuOpen.value = false
+}
+
+function translateProfileName(profile) {
+  return getTranslatedProfileName(profile, t)
+}
+
+function setActiveProfile(profile) {
+  switchActiveProfile(store, profile, t)
+  closeMenuForAction()
+}
+
+function openProfileSettings() {
+  closeMenuForAction()
+  if (phoneLayout.value) {
+    actionAfterClose = () => store.dispatch('showSettingsWindow', 'profile')
+    return
+  }
+  store.dispatch('showSettingsWindow', 'profile')
+}
+
+/**
+ * @param {string} setting
+ * @param {string | boolean} value
+ */
+async function updateSetting(setting, value) {
+  return runSettingUpdate(() => store.dispatch(`update${setting}`, value))
+}
+
+async function runSettingUpdate(update) {
+  const menu = menuRef.value?.$el
+  const focusTarget = document.activeElement instanceof HTMLElement && menu?.contains(document.activeElement)
+    ? document.activeElement
+    : null
+  pendingSettingUpdateCount++
+  try {
+    await update()
+  } finally {
+    await nextTick()
+    // Keep focus on another menu control chosen while the update was saving.
+    const activeElement = document.activeElement
+    const focusMovedToControl = activeElement !== focusTarget && activeElement !== menu && menu?.contains(activeElement)
+    if (!focusMovedToControl && focusTarget?.isConnected && menu?.contains(focusTarget)) {
+      focusTarget.focus({ preventScroll: true, focusVisible: true })
+    } else if (!menu?.matches(':focus-within')) {
+      await focusMenu()
+    }
+    pendingSettingUpdateCount--
+  }
+}
+
+function updateUiScale(value) {
+  return runSettingUpdate(() => store.dispatch('updateUiScale', value))
+}
+
+function updateProxy(value) {
+  return runSettingUpdate(async () => {
+    if (USING_ELECTRON) {
+      if (value) {
+        await window.ftElectron.enableProxy(proxyUrl.value)
+      } else {
+        await window.ftElectron.disableProxy()
+      }
+    }
+    await store.dispatch('updateUseProxy', value)
+  })
+}
+
+function previewThumbnailSize(value, settingKey) {
+  store.commit(settingKey === 'playlistThumbnailSize' ? 'setPlaylistThumbnailSize' : 'setThumbnailSize', value)
+}
+
+function updateThumbnailSize(value, settingKey) {
+  return runSettingUpdate(() => store.dispatch(settingKey === 'playlistThumbnailSize' ? 'updatePlaylistThumbnailSize' : 'updateThumbnailSize', value))
+}
+
+function handleHideRecommendedVideos(value) {
+  return runSettingUpdate(async () => {
+    if (value) {
+      await store.dispatch('updatePlayNextVideo', false)
+    }
+    await store.dispatch('updateHideRecommendedVideos', value)
+  })
+}
+
+function openSettings() {
+  closeMenuForAction()
+  if (phoneLayout.value) {
+    actionAfterClose = () => store.dispatch('toggleSettingsWindow')
+    return
+  }
+  store.dispatch('toggleSettingsWindow')
+}
+
+function openDownloads() {
+  closeMenuForAction()
+  store.dispatch('showSettingsWindow', 'downloads')
+}
+
+function openKeyboardShortcuts() {
+  closeMenuForAction()
+  store.dispatch('showKeyboardShortcutPrompt')
+}
+
+function openCommandPalette() {
+  if (phoneLayout.value) {
+    actionAfterClose = () => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
+    menuOpen.value = false
+    return
+  }
+  menuOpen.value = false
+  window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
+}
+
+function openAbout() {
+  closeMenuForAction()
+  store.dispatch('showSettingsWindow', 'about')
+}
+
+</script>
+
+<style scoped src="./FtQuickSettingsMenu.css" />

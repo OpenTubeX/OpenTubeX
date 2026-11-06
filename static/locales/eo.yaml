@@ -223,7 +223,7 @@ Settings:
       Blur: Nebula
     System Default: Operaciuma defaŭlto
     Fallback to Non-Preferred Backend on Failure: Retropaŝi al malpreferita interna API post malsukceso
-    Open Deep Links In New Window: Malfermi URL-ojn donitajn al FreeTube en nova fenestro
+    Open Deep Links In New Window: Malfermi URL-ojn donitajn al OpenTubeX en nova fenestro
     Minimize to system tray: Minimumigi al la taskopleto
     Auto Load Next Page:
       Label: Aŭtomate ŝargi sekvan paĝon
@@ -277,7 +277,7 @@ Settings:
     Disable Smooth Scrolling: Malŝalti glatan rulumon
     UI Scale: Interfaca skalo
     Hide Side Bar Labels: Kaŝi flankobretajn etikedojn
-    Hide FreeTube Header Logo: Kaŝi FreeTube-emblemon en kapo
+    Hide OpenTubeX Header Logo: Kaŝi OpenTubeX-emblemon en kapo
     Main Color Theme:
       Main Color Theme: Ĉefa koloro
       Red: Ruĝo
@@ -530,7 +530,7 @@ Settings:
     Playlist File: Ludlista dosiero
     Search history file: Serĉa historia dosiero
     Export Subscriptions: Elporti abonojn
-    Export FreeTube: Elporti FreeTube
+    Export OpenTubeX: Elporti OpenTubeX
     Export YouTube: Elporti YouTube
     Export NewPipe: Elporti NewPipe
     Import History: Enporti historion
@@ -570,7 +570,7 @@ Settings:
     Non-transferable setting key: 'Netransdonebla agorda ŝlosilo: {key}'
   Proxy Settings:
     Proxy Settings: Prokurilo
-    Proxy Warning: FreeTube ne provizas prokurilon, sed ĝi kapablas konektiĝi al ekstera prokurilo, ekzemple prokurilo sur via maŝino kiel Tor aŭ ekstera prokurilo kiel SOCKS5 provizita de kelkaj VPR-oj. Se ŝaltita, certigu ke via prokurilo/Tor estas ĝuste agordita, aŭ FreeTube ne povos venigi iun ajn datumon.
+    Proxy Warning: OpenTubeX ne provizas prokurilon, sed ĝi kapablas konektiĝi al ekstera prokurilo, ekzemple prokurilo sur via maŝino kiel Tor aŭ ekstera prokurilo kiel SOCKS5 provizita de kelkaj VPR-oj. Se ŝaltita, certigu ke via prokurilo/Tor estas ĝuste agordita, aŭ OpenTubeX ne povos venigi iun ajn datumon.
     Enable Tor / Proxy: Ŝalti Tor/prokurilon
     Proxy Protocol: Prokurila protokolo
     Proxy Host: Prokurila gastigo
@@ -635,7 +635,7 @@ About:
   Downloads / Changelog: Elŝutoj/Ŝanĝoprotokolo
   GitHub releases: Eldonoj sur GitHub
   Help: Helpo
-  FreeTube Wiki: FreeTube-vikio
+  OpenTubeX Wiki: OpenTubeX-vikio
   FAQ: Oftaj demandoj
   Discussions: Diskutoj
   Report a problem: Raporti problemon
@@ -647,7 +647,7 @@ About:
   room rules: ĉambroregulojn
   Translate: Traduki
   Credits: Dankoj
-  FreeTube is made possible by {creditsPageLink}: FreeTube eblas pro la helpo de {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX eblas pro la helpo de {creditsPageLink}
   these people and projects: ĉi tiuj personoj kaj projektoj
   Donate: Donaci
 Channel:
@@ -669,6 +669,7 @@ Channel:
       Oldest: Plej malnovaj
       Most Popular: Plej popularaj
     This channel has videos but none could be displayed, try fetching more: Ĉi tiu kanalo havas videaĵojn sed ne eblis montri iun ajn; provu plu venigi
+    This channel does not currently have any videos: Tiu ĉi kanalo aktuale ne havas iun ajn videaĵon
   Subscribe: Aboni
   Unsubscribe: Malaboni
   Channel has been removed from your subscriptions: La kanalo estis forigita el viaj abonoj
@@ -678,7 +679,7 @@ Channel:
   Your search results have returned 0 results: Via serĉo liveras 0 rezultojn
   This channel does not exist: Tiu ĉi kanalo ne ekzistas
   This channel does not allow searching: Tiu ĉi kanalo ne permesas serĉadon
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Tiu ĉi kanalo estas limigita de aĝo kaj ne aktuale videblas per FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Tiu ĉi kanalo estas limigita de aĝo kaj ne aktuale videblas per OpenTubeX.
   Channel Tabs: Kanalaj langetoj
   Shorts:
     This channel does not currently have any shorts: Tiu ĉi kanalo aktuale ne havas iun ajn videaĵeton
@@ -710,16 +711,16 @@ Channel:
     View Full Post: Vidi tutan afiŝon
     Reveal Answers: Montri respondojn
     Hide Answers: Kaŝi respondojn
-    Video hidden by FreeTube: Videaĵo kaŝita de FreeTube
+    Video hidden by OpenTubeX: Videaĵo kaŝita de OpenTubeX
   View All: Montri ĉion
   Shows:
     Shows: Serioj
     This channel does not currently have any shows: Tiu ĉi kanalo aktuale ne havas iun ajn serion
 Video:
   IP block: YouTube blokis vian IP-adreson por spekti videaĵojn, aŭ tiu ĉi videaĵo eble montras enhavon kun infanoj, ke bezonas ensaluton. Se via IP-adreso estis blokita, provu ŝanĝiĝi de VPN aŭ prokurilo.
-  MembersOnly: Videaĵoj nur por membroj ne spekteblas per FreeTube ĉar ili postulas ensaluton de Google kaj pagitan membrecon de la publikiganta kanalo.
-  AgeRestricted: Videaĵoj limigitaj de aĝo ne spekteblas per FreeTube ĉar ili postulas ensaluton de Google kaj konton de YouTube kun konfirmita aĝo.
-  DRMProtected: Videaĵoj protektitaj de DRM ne spekteblas per FreeTube, ĉar ili postulas proprietajn fermitkodajn komponaĵojn. Se vi volas spekti ĉi tiun videaĵon, bonvolu spekti ĝin per la oficiala retejo de YouTube en retumilo kiu subtenas DRM.
+  MembersOnly: Videaĵoj nur por membroj ne spekteblas per OpenTubeX ĉar ili postulas ensaluton de Google kaj pagitan membrecon de la publikiganta kanalo.
+  AgeRestricted: Videaĵoj limigitaj de aĝo ne spekteblas per OpenTubeX ĉar ili postulas ensaluton de Google kaj konton de YouTube kun konfirmita aĝo.
+  DRMProtected: Videaĵoj protektitaj de DRM ne spekteblas per OpenTubeX, ĉar ili postulas proprietajn fermitkodajn komponaĵojn. Se vi volas spekti ĉi tiun videaĵon, bonvolu spekti ĝin per la oficiala retejo de YouTube en retumilo kiu subtenas DRM.
   More Options: Pli da opcioj
   Mark As Watched: Marki kiel spektita
   Remove From History: Forigi el historio
@@ -828,7 +829,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Restanta tempo de komenca anonco: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Restanta tempo de atendo por SABR: {remindingTimeSeconds}s'
-  Private: Privataj videaĵoj ne spekteblas per FreeTube, ĉar ili postulas ensaluton de Google kaj la videaĵo devas aparteni al la uzanto.
+  Private: Privataj videaĵoj ne spekteblas per OpenTubeX, ĉar ili postulas ensaluton de Google kaj la videaĵo devas aparteni al la uzanto.
   Collapse Playlist: Faldi ludliston
   Expand Playlist: Malfaldi ludliston
   Station: Stacio
@@ -1028,7 +1029,7 @@ Comments:
   Top comments: Plej bonaj komentoj
   Newest first: Plej novaj unue
   View {replyCount} replies: Vidi 1 respondon | Vidi {replyCount} respondojn
-  Hide Replies: Kaŝi respondon | Kaŝi respondojn
+  Hide {replyCount} replies: Kaŝi 1 respondon | Kaŝi {replyCount} respondojn
   View 1 reply from {channelName}: Vidi 1 respondon de {channelName}
   View {replyCount} replies from {channelName} and others: Vidi {replyCount} respondojn de {channelName} kaj aliaj
   Show More Replies: Montri pli da respondoj
@@ -1047,15 +1048,15 @@ Description:
   Collapse Description: Montri malpli
 Tooltips:
   General Settings:
-    Preferred API Backend: Elektu la internan API ke FreeTube uzas por akiri datumojn. La loka API estas integrita elĉerpilo. La API de Invidious bezonas Invidious-servilon al kiu konektiĝi.
-    Fallback to Non-Preferred Backend on Failure: Kiam via prefera API havas problemon, FreeTube aŭtomate klopodos uzi la nepreferitan API kiel retropaŝo kiam ŝaltita.
-    Thumbnail Preference: Ĉiuj bildetoj en FreeTube estos anstataŭigitaj de bildo de la videaĵo, nebuligitaj, aŭ kaŝitaj anstataŭ la defaŭltaj bildetoj.
-    Invidious Instance: La Invidious-servilo al kiu FreeTube konektiĝos por API-vokoj. Ŝanĝoj al tiu ĉi agordo nur afektas la aktualan fenestron, krom se vi difinas tiun ĉi servilon kiel la defaŭlta.
+    Preferred API Backend: Elektu la internan API ke OpenTubeX uzas por akiri datumojn. La loka API estas integrita elĉerpilo. La API de Invidious bezonas Invidious-servilon al kiu konektiĝi.
+    Fallback to Non-Preferred Backend on Failure: Kiam via prefera API havas problemon, OpenTubeX aŭtomate klopodos uzi la nepreferitan API kiel retropaŝo kiam ŝaltita.
+    Thumbnail Preference: Ĉiuj bildetoj en OpenTubeX estos anstataŭigitaj de bildo de la videaĵo, nebuligitaj, aŭ kaŝitaj anstataŭ la defaŭltaj bildetoj.
+    Invidious Instance: La Invidious-servilo al kiu OpenTubeX konektiĝos por API-vokoj.
     Region for Trending: La regiono de tendencoj permesas al vi elekti la landon kies plej popularaj videaĵoj estos montrataj.
     External Link Handling: |
-      Elektu la defaŭltan agon kiam ligilo kiu ne malfermeblas per FreeTube estas alklakita.
-      Defaŭlte, FreeTube malfermos la alklakitan ligilon per via defaŭlta retumilo.
-    Open Deep Links In New Window: URL-oj donataj al FreeTube, ekzemple de retumilaj etendaĵoj de alidirekto aŭ de komandliniaj argumentoj, estos malfermitaj en nova fenestro.
+      Elektu la defaŭltan agon kiam ligilo kiu ne malfermeblas per OpenTubeX estas alklakita.
+      Defaŭlte, OpenTubeX malfermos la alklakitan ligilon per via defaŭlta retumilo.
+    Open Deep Links In New Window: URL-oj donataj al OpenTubeX, ekzemple de retumilaj etendaĵoj de alidirekto aŭ de komandliniaj argumentoj, estos malfermitaj en nova fenestro.
   Player Settings:
     Proxy Videos Through Invidious: Konektiĝos al Invidious por servi videaĵojn anstataŭ konektiĝi rekte al YouTube.
     Default Media Format: Difinas la videaĵoformojn uzatajn por la ludado. DASH-aj formoj ofertas pli altajn kvalitojn. Heredaĵaj formoj estas limigitaj al 360p maksimume sed uzas malpli da kapacito. Aŭdiaj formoj nur enhavas sonon.
@@ -1063,7 +1064,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Rulumi por salti tra la videaĵo, kiel MPV.
   External Player Settings:
     External Player: 'Elekti eksteran ludilon montros sur la bildeto ikonon por malfermi la videaĵon (aŭ ludliston, se subtenita) per la ekstera ludilo. Averto: agordoj de Invidious de afektas eksterajn ludilojn.'
-    Custom External Player Executable: Defaŭlte, FreeTube supozas, ke la elektita ekstera ludilo troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
+    Custom External Player Executable: Defaŭlte, OpenTubeX supozas, ke la elektita ekstera ludilo troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
     Ignore Warnings: Kaŝi avertojn kiam la aktuala ekstera ludilo ne subtenas donatan agon (ekz. inversigi ludliston, ktp.).
     Ignore Default Arguments: Ne sendu defaŭltajn argumentojn al la ekstera ludilo krom la URL de la videaĵo (ekz. ludrapido, URL de ludlisto, ktp.). Laŭmendaj argumentoj ankoraŭ estos donataj.
     Custom External Player Arguments: Iuj ajn laŭmendaj komandliniaj argumentoj, ke vi volas doni al la ekstera ludilo.
@@ -1071,11 +1072,11 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Enigi kanalan identigilon por kaŝi ĉiujn videaĵojn, ludlistojn kaj la kanalon mem en serĉoj, tendencoj, plej popularaj kaj rekomenditaj videaĵoj. La identigilo devas kongrui ekzakte kaj estas usklecodistinga.
     Hide Subscriptions Live: Tiu ĉi agordo estas regita de la ĉiea agordo "{appWideSetting}" en la sekcio "{subsection}" de "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Enigu vorton, vortparton aŭ frazon (usklecodistinga) por kaŝi ĉiujn videaĵojn, ludlistojn kaj kanalojn kies originaj titoloj enhavas ĝin ĉie en FreeTube, krom historio, viaj ludlistoj kaj videaĵoj en ludlistoj.
+    Hide Videos, Playlists and Channels Containing Text: Enigu vorton, vortparton aŭ frazon (usklecodistinga) por kaŝi ĉiujn videaĵojn, ludlistojn kaj kanalojn kies originaj titoloj enhavas ĝin ĉie en OpenTubeX, krom historio, viaj ludlistoj kaj videaĵoj en ludlistoj.
     Hide Videos on Watch: Kaŝas spektitajn videaĵojn en la langetoj de videaĵoj, videaĵetoj kaj tujelsendoj sur la paĝo de abonoj kaj kanalaj paĝoj. Tio ĉi ne afektas la hejman langeton en kanalaj paĝoj
   Subscription Settings:
-    Fetch Feeds from RSS: Dum ŝaltita, FreeTube uzos RSS anstataŭ sian defaŭltan metodon por venigi viajn abonfluojn. RSS pli rapidas kaj evitas IP-blokojn, sed ne provizas kelkajn informojn kiel la daŭroj de videaĵoj, la stato de tujelsendoj aŭ afiŝoj
-    Fetch Automatically: Dum ŝaltita, FreeTube aŭtomate venigos viajn abonfluojn je startigo kaj kiam nova fenestro malfermiĝas.
+    Fetch Feeds from RSS: Dum ŝaltita, OpenTubeX uzos RSS anstataŭ sian defaŭltan metodon por venigi viajn abonfluojn. RSS pli rapidas kaj evitas IP-blokojn, sed ne provizas kelkajn informojn kiel la daŭroj de videaĵoj, la stato de tujelsendoj aŭ afiŝoj
+    Fetch Automatically: Dum ŝaltita, OpenTubeX aŭtomate venigos viajn abonfluojn je startigo kaj kiam nova fenestro malfermiĝas.
   Experimental Settings:
     Replace HTTP Cache: Malŝaltas la HTTP-kaŝmemoron de Electron en la disko kaj ŝaltas laŭmendan bildkaŝmemoron en ĉefmemoro. La uzata memoro pligrandiĝos.
     Disable Hardware Acceleration: Malŝaltas la aparatan plirapidigon de la grafika procezoro. Tio ĉi povus korekti grafikajn problemojn, sed la rendimento verŝajne malrapidiĝos.

@@ -1,0 +1,28 @@
+OpenTubeX is a YouTube client for watching videos without ads or a Google account. Your subscriptions, playlists, history and settings stay on your device unless you turn on sync.
+
+<b>Your feed</b>
+<ul>
+<li>Subscribe to channels without an account, and import or export your subscriptions.</li>
+<li>Group subscriptions into profiles. For each channel, choose whether its videos, Shorts, live streams or posts appear.</li>
+<li>Hide parts of the app you don't want to see, or show only family-friendly content.</li>
+<li>Optional recommendations rank unwatched videos on your device, based on what you watch and the feedback you give.</li>
+</ul>
+
+<b>Playback</b>
+<ul>
+<li>Save speed and quality preferences for each channel.</li>
+<li>Skip sponsored segments with SponsorBlock and replace clickbait titles and thumbnails with DeArrow.</li>
+<li>Keep watching in the mini player or picture-in-picture while you browse.</li>
+<li>Download videos and audio with the bundled yt-dlp.</li>
+</ul>
+
+<b>Your library</b>
+<ul>
+<li>Keep your data on your device, or sync it between devices. Sync can be end-to-end encrypted on a compatible server.</li>
+<li>Search your watch history and see your watch time by day and week.</li>
+<li>Pick or create a theme, rearrange the navigation and build your own Home page.</li>
+</ul>
+
+OpenTubeX loads data directly from YouTube with its built-in extractor, or through an Invidious instance you choose. YouTube or the Invidious operator can still see your requests. Use a VPN or Tor to hide your IP address.
+
+OpenTubeX is in beta. Report bugs and suggest features at https://github.com/OpenTubeX/OpenTubeX/issues

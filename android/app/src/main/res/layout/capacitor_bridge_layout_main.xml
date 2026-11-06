@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.opentubex.app.PullToRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- The page never scrolls sideways, but content can end a fraction of a
+             pixel past the viewport at scaled sizes. Blink rounds that away, yet
+             Android counts it as horizontal range and flashes a horizontal
+             scrollbar along the bottom edge while the page scrolls. -->
+        <org.opentubex.app.SubscriptionRefreshWebView
+            android:id="@+id/webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+    </org.opentubex.app.PullToRefreshLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

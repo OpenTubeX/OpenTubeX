@@ -1,0 +1,98 @@
+.captionSettings {
+  user-select: none;
+}
+
+/* Lays out the sample like Shaka's caption region, inset 5% of the height and width.
+   Percentage padding resolves against the width, so the block padding is 5% of the fixed height. */
+.captionPreview {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  block-size: 240px;
+  padding-block: 12px;
+  padding-inline: 5%;
+  margin-block-end: 1rem;
+  border-radius: var(--shape-corner-medium);
+  background: linear-gradient(135deg, #576574, #222f3e);
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.captionPreview span {
+  max-inline-size: 100%;
+  border-radius: var(--shape-corner-extra-small);
+  box-decoration-break: clone;
+}
+
+.captionRow-top {
+  justify-content: flex-start;
+}
+
+.captionRow-center {
+  justify-content: center;
+}
+
+.captionRow-bottom {
+  justify-content: flex-end;
+}
+
+.captionColumn-left {
+  align-items: flex-start;
+}
+
+.captionColumn-center {
+  align-items: center;
+}
+
+.captionColumn-right {
+  align-items: flex-end;
+}
+
+.captionControls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 16px;
+  margin-block-end: 1rem;
+}
+
+.captionControl {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: var(--form-control-height);
+  padding-block: 0;
+  padding-inline: 0.75rem;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+}
+
+.captionControl :deep(.pure-material-slider) {
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.captionControl :deep(.select) {
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+.captionActions {
+  display: flex;
+  justify-content: center;
+  padding-block-start: 0.25rem;
+}
+
+@container settings-content (width <= 1100px) {
+  .captionControls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container settings-content (width <= 680px) {
+  .captionControls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

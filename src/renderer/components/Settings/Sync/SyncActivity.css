@@ -1,0 +1,253 @@
+.syncActivity {
+  container-type: inline-size;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-extra-large);
+  box-sizing: border-box;
+  margin-block-start: 1.25rem;
+  margin-inline: auto;
+  max-inline-size: 64rem;
+  padding: 1.25rem;
+}
+
+.activityHeader {
+  align-items: center;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-block-end: 1.25rem;
+}
+
+.activityClear {
+  margin-inline: 0;
+  max-inline-size: 100%;
+}
+
+.activityMeasure {
+  position: absolute;
+  inline-size: max-content;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.activityStacked {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.activityStacked .activityClear {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: center;
+  white-space: normal;
+}
+
+.activityStacked .activityAction {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+@container (width <= 26rem) {
+  .activityTitle .activityIcon {
+    display: none;
+  }
+}
+
+.activityScroller {
+  margin-block-end: 1rem;
+  overflow-y: auto;
+}
+
+.activityExpanded {
+  margin-inline-end: -0.5rem;
+  max-block-size: min(24rem, 50vh);
+  overscroll-behavior-y: contain;
+  padding-inline-end: calc(var(--scrollbar-track-width) + 0.5rem);
+}
+
+/* Entries form one segmented group: large outer corners, tight inner ones. */
+.activityList {
+  display: grid;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activityList li {
+  align-items: center;
+  background-color: var(--card-bg-color);
+  border-radius: var(--shape-corner-extra-small);
+  display: grid;
+  gap: 0.125rem 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-block: 0.875rem;
+  padding-inline: 1rem 1.25rem;
+}
+
+.activityList li:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.activityList li:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.activityList li:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.activityEntryIcon {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  block-size: 2.5rem;
+  border-radius: 50%;
+  color: var(--primary-color);
+  display: inline-flex;
+  font-size: 1.125rem;
+  grid-row: span 2;
+  inline-size: 2.5rem;
+  justify-content: center;
+}
+
+.activityPreview {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+}
+
+.activityPreview:focus-within {
+  mask-image: none;
+}
+
+/* The radius is half the minimum height rather than full, so the press morph
+   is smooth. */
+.activityDisclosure {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  border: 0;
+  border-radius: calc(22px * var(--ui-roundness));
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 500;
+  gap: 0.5rem;
+  margin-inline: auto;
+  min-block-size: 44px;
+  padding-block: 0.625rem;
+  padding-inline: 1.5rem 1.25rem;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+}
+
+.activityDisclosure:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+}
+
+.activityDisclosure:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.activityDisclosure:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.activityDisclosure :deep(.ft-icon) {
+  transition: transform var(--motion-default-spatial);
+}
+
+.activityDisclosure[aria-expanded='true'] :deep(.ft-icon) {
+  transform: rotate(180deg);
+}
+
+.activityList p {
+  line-height: 1.4;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.activityList time {
+  color: var(--secondary-text-color);
+  font-size: 0.8125rem;
+}
+
+.activityHeader h3 {
+  position: relative;
+  overflow: hidden;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.activitySetting {
+  background: none;
+  border: 0;
+  color: var(--primary-color);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.activitySetting:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+.activitySetting:hover {
+  color: var(--primary-text-color);
+}
+
+@media only screen and (width <= 700px) {
+  .syncActivity {
+    padding: 1rem;
+  }
+}
+
+.activityTitle {
+  align-items: center;
+  display: flex;
+  gap: 0.875rem;
+  min-inline-size: 0;
+}
+
+/* Expressive cookie shape. */
+.activityIcon {
+  position: relative;
+  align-items: center;
+  block-size: 2.75rem;
+  color: var(--text-with-main-color);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  inline-size: 2.75rem;
+  isolation: isolate;
+  justify-content: center;
+}
+
+.activityIcon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary-color);
+  clip-path: var(--shape-cookie-9);
+  content: '';
+}
+
+.activityAction :deep(.iconButton) {
+  box-sizing: border-box;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+
+
+@media only screen and (width <= 480px) {
+  .activityIcon {
+    display: none;
+  }
+}

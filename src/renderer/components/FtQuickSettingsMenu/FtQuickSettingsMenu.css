@@ -1,0 +1,569 @@
+.quickSettings {
+  display: flex;
+  position: relative;
+}
+
+.app.topTabs .quickSettings {
+  --quick-settings-viewport-offset: var(--top-tab-bar-height);
+}
+
+.app.bottomTabs .quickSettings {
+  --quick-settings-viewport-offset: var(--bottom-tab-bar-height);
+}
+
+.profileTrigger,
+.previewProfileTrigger {
+  position: relative;
+  align-items: center;
+  border: 0;
+  border-radius: 50%;
+  block-size: 40px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 20px;
+  inline-size: 40px;
+  justify-content: center;
+  padding: 0;
+}
+
+.musicModeIndicator {
+  background-color: var(--card-bg-color);
+  border-radius: 50%;
+  color: var(--primary-text-color);
+  inline-size: 16px;
+  block-size: 16px;
+  padding: 3px;
+  position: absolute;
+  inset-inline-end: -4px;
+  inset-block-end: -4px;
+  pointer-events: none;
+}
+
+.profileTrigger:hover,
+.profileTrigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--side-nav-hover-color);
+}
+
+.profileInitial {
+  block-size: 100%;
+  inline-size: 100%;
+  line-height: 1;
+  user-select: none;
+}
+
+.profileHeaderRow {
+  display: grid;
+  grid-auto-columns: 44px;
+  grid-auto-flow: column;
+  grid-template-columns: minmax(0, 1fr);
+  padding-block: 4px;
+  padding-inline: 8px;
+}
+
+.profileSummary {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font-family: inherit;
+  gap: 12px;
+  grid-template-columns: 40px 1fr 12px;
+  inline-size: 100%;
+  padding-block: 6px;
+  padding-inline: 12px;
+  text-align: start;
+}
+
+.quickSettingsShortcut {
+  align-items: center;
+  align-self: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  block-size: 36px;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: inline-flex;
+  inline-size: 36px;
+  justify-content: center;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.profileAvatar {
+  align-items: center;
+  block-size: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  inline-size: 40px;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+
+.profileSummaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.profileSummaryText strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileSummaryText small {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.profilePanelHeader {
+  align-items: center;
+  border-block-end: 1px solid var(--divider-color);
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  padding-block: 6px;
+  padding-inline: 8px;
+}
+
+.profilePanelHeader h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-align: center;
+}
+
+.profilePanelHeader button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: inline-flex;
+  block-size: 36px;
+  inline-size: 36px;
+  justify-content: center;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.profileList {
+  padding-block: 4px;
+  padding-inline: 8px;
+}
+
+.profileOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 12px;
+  grid-template-columns: 40px 1fr 20px;
+  inline-size: 100%;
+  min-block-size: 54px;
+  padding-block: 7px;
+  padding-inline: 12px;
+  text-align: start;
+}
+
+.activeProfileIcon {
+  color: var(--accent-color);
+}
+
+.profileOption[aria-selected='true'],
+.profileOption[aria-selected='true']:is(:hover, :focus-visible) {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.profileOption[aria-selected='true'] .activeProfileIcon {
+  color: inherit;
+}
+
+.ft-card.quickSettingsMenu {
+  border-radius: var(--shape-corner-large);
+}
+
+.quickSettingsMenu {
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 55%), 0 3px 10px rgb(0 0 0 / 45%);
+  display: flex;
+  flex-direction: column;
+  inset-block-start: 48px;
+  inset-inline-end: 0;
+  margin: 0;
+  max-block-size: calc(100vh - 76px - var(--quick-settings-viewport-offset, calc(0 * 1px)));
+  inline-size: min(440px, calc(100vw - var(--scrollbar-track-width) - 20px));
+  line-height: normal;
+  overscroll-behavior: contain;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  text-align: start;
+  transform-origin: top right;
+}
+
+.quickSettingsScroll {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+.quick-settings-menu-enter-active {
+  transition:
+    opacity var(--motion-default-effects),
+    transform var(--motion-default-spatial);
+}
+
+.quick-settings-menu-leave-active {
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects);
+}
+
+.quick-settings-menu-enter-from,
+.quick-settings-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.92);
+}
+
+:root[data-reduced-motion='reduce'] .quick-settings-menu-enter-active,
+:root[data-reduced-motion='reduce'] .quick-settings-menu-leave-active {
+  transition: none;
+}
+
+.menuSection {
+  --quick-settings-label-overhang: 7px;
+  --quick-settings-row-gap: 16px;
+
+  border-block-start: 1px solid var(--divider-color);
+  gap: var(--quick-settings-row-gap) 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-block: 10px 16px;
+  padding-inline: 12px;
+}
+
+.menuSection h3 {
+  align-items: center;
+  color: var(--secondary-text-color);
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  grid-column: 1 / -1;
+  line-height: 1.2;
+  margin-block: 0;
+  margin-inline: 0;
+  text-transform: uppercase;
+}
+
+.menuSectionIcon {
+  block-size: 14px;
+  flex: 0 0 auto;
+  inline-size: 14px;
+}
+
+.quickSettingControl {
+  grid-column: 1 / -1;
+}
+
+.quickSettingControl.pairedQuickSetting {
+  grid-column: auto;
+}
+
+.quickSettingControl:first-of-type,
+.quickSettingsMenu:not(.phoneQuickSettings) .pairedQuickSetting:first-of-type + .pairedQuickSetting {
+  /* Keep the first caption seven pixels below its section heading. */
+  margin-block-start: calc(7px - var(--quick-settings-row-gap));
+}
+
+.quickSettingControl:has(.quickSelect) {
+  /* Include the floating label in the row's footprint. */
+  padding-block-start: var(--quick-settings-label-overhang);
+}
+
+.menuSection :deep(.pure-material-slider),
+.menuSection :deep(.switch-ctn) {
+  margin-block: 0;
+  inline-size: 100%;
+}
+
+.menuSection :deep(.quickSelect) {
+  /* stylelint-disable length-zero-no-unit */
+  --select-indicator-space: 0px;
+  --select-reset-space: 0px;
+  /* stylelint-enable length-zero-no-unit */
+
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+.menuSection :deep(.quickSelect:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
+  --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+}
+
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator):has(.changedSettingIndicator)) {
+  --select-indicator-space: calc(14px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+}
+
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator)) {
+  --select-sync-space: 1em;
+}
+
+.menuSection :deep(.quickSelect:has(.changedSettingIndicator)) {
+  --select-reset-space: 1em;
+}
+
+.menuSection :deep(.quickSelect .changedSettingIndicatorPlaceholder) {
+  display: none;
+}
+
+.menuSection :deep(.pure-material-slider) {
+  margin-inline: 0;
+  padding: 0;
+
+  /* Leave clearance for native input hit testing at fractional zoom. */
+  row-gap: 2px;
+}
+
+.menuSection :deep(.sliderControl) {
+  --quick-settings-slider-input-height: 36px;
+
+  /* Count the visible handle while keeping the input below its caption. */
+  margin-block-end: max(-8px, calc((var(--slider-handle-height) - var(--quick-settings-slider-input-height)) / 2));
+}
+
+.menuSection :deep(.sliderControl .input) {
+  block-size: var(--quick-settings-slider-input-height);
+}
+
+/* Align the visible track, which has a built-in six-pixel inset. */
+.menuSection :deep(.switch-ctn) {
+  margin-inline-start: -6px;
+}
+
+.sliderGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.sliderGroup :deep(.pure-material-slider) {
+  display: grid;
+}
+
+.sliderGroup :deep(.sliderControl) {
+  --quick-settings-slider-input-height: 24px;
+  --slider-track-height: 8px;
+  --slider-handle-height: 20px;
+  --slider-handle-gap: 3px;
+  --slider-stop-size: 2px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .menuSection {
+    --quick-settings-label-overhang: 9px;
+  }
+
+  .menuSection :deep(.sliderControl) {
+    --quick-settings-slider-input-height: 48px;
+  }
+
+  .sliderGroup :deep(.sliderControl) {
+    --slider-track-height: 16px;
+    --slider-handle-height: 44px;
+    --slider-handle-gap: 6px;
+    --slider-stop-size: 4px;
+  }
+}
+
+.menuSection :deep(.switch-label) {
+  padding-block: 6px;
+}
+
+@media (any-pointer: coarse) {
+  .menuSection {
+    /* Leave room for both switches' invisible touch padding. */
+    --quick-settings-row-gap: max(16px, calc(max(48px, var(--switch-touch-height)) - var(--switch-track-height)));
+  }
+
+  .menuSection :deep(.switch-ctn) {
+    --quick-settings-switch-padding: calc((max(48px, var(--switch-touch-height)) - var(--switch-track-height)) / 2);
+
+    /* Keep the grid gap between visible controls while preserving touch targets. */
+    margin-block: calc(-1 * var(--quick-settings-switch-padding));
+  }
+
+  .menuSection :deep(.switch-label) {
+    padding-block: var(--quick-settings-switch-padding);
+  }
+}
+
+/* Compact mouse-only switches in both popup and full-screen layouts. */
+@media (any-pointer: fine) and (not (any-pointer: coarse)) {
+  .menuSection :deep(.switch-input) {
+    block-size: var(--switch-touch-height);
+  }
+
+  .menuSection :deep(.switch-label) {
+    min-block-size: var(--switch-track-height);
+    padding-block: 0;
+  }
+}
+
+.menuLinks {
+  border-block-start: 1px solid var(--divider-color);
+  padding-block: 4px;
+  padding-inline: 8px;
+}
+
+.menuLinks button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 14px;
+  grid-template-columns: 20px 1fr 12px;
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding-block: 6px;
+  padding-inline: 12px;
+  text-align: start;
+}
+
+/* Menu rows are rounded items inset from the card edge, like M3 menus. */
+.profileSummary,
+.profileOption,
+.menuLinks button {
+  border-radius: var(--shape-corner-medium);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.profileSummary:hover,
+.profileSummary:focus-visible,
+.quickSettingsShortcut:hover,
+.quickSettingsShortcut:focus-visible,
+.profileOption:hover,
+.profileOption:focus-visible,
+.profilePanelHeader button:hover,
+.profilePanelHeader button:focus-visible,
+.menuLinks button:hover,
+.menuLinks button:focus-visible {
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--primary-text-color);
+}
+
+.profileSummary:active,
+.profileOption:active,
+.menuLinks button:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.quickSettingsShortcut:active,
+.profilePanelHeader button:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.linkArrow {
+  color: var(--secondary-text-color);
+}
+
+@media only screen and (width <= 680px) {
+  .quickSettingsMenu {
+    inset-inline-end: -3px;
+    max-block-size: calc(100vh - 72px - var(--quick-settings-viewport-offset, calc(0 * 1px)));
+  }
+}
+
+@media only screen and (width <= 400px) {
+  .quickSettingControl.pairedQuickSetting {
+    grid-column: 1 / -1;
+  }
+}
+
+.quickSettingsMenu.phoneQuickSettings {
+  position: relative;
+  inset: auto;
+  flex: 1;
+  min-block-size: 0;
+  max-block-size: none;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.phoneQuickSettings .menuSection {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.phoneQuickSettings .quickSettingControl {
+  grid-column: 1;
+}
+
+.phoneQuickSettings .profileHeaderRow {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.phoneQuickSettings .profileSummary {
+  flex: 1 0 100%;
+}
+
+.phoneQuickSettings :is(.quickSettingsShortcut, .profilePanelHeader button) {
+  inline-size: var(--phone-touch-target, 48px);
+  block-size: var(--phone-touch-target, 48px);
+}
+
+.phoneQuickSettings .menuSection :deep(.select-text) {
+  block-size: max(var(--form-control-height), var(--phone-touch-target, 48px));
+}
+
+.phoneQuickSettings :deep(.sliderControl) {
+  --quick-settings-slider-input-height: var(--phone-touch-target, 48px);
+  --slider-track-height: 16px;
+  --slider-handle-height: 44px;
+  --slider-handle-gap: 6px;
+  --slider-stop-size: 4px;
+}
+
+.phoneQuickHeaderActions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.phoneQuickHeaderActions .quickSettingsShortcut {
+  display: grid;
+  place-items: center;
+  inline-size: var(--phone-touch-target, 48px);
+  block-size: var(--phone-touch-target, 48px);
+  padding: 0;
+  font-size: 20px;
+}
+
+/* The interface customizer shows the open menu below its trigger, sized to the preview. */
+.quickSettingsPreview {
+  align-items: flex-start;
+  block-size: 100%;
+  justify-content: flex-end;
+}
+
+.quickSettingsPreview .quickSettingsMenu {
+  inline-size: min(440px, 100%);
+  max-block-size: calc(100% - 48px);
+}

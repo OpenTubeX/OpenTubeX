@@ -4,106 +4,140 @@
     :class="{ [theme]: true }"
   >
     <div
+      v-if="!editMode"
       class="playlistThumbnail"
     >
       <router-link
         v-if="firstVideoIdExists"
         :to="{
-          path: `/watch/${firstVideoId}`,
+          path: `/watch/${startVideo.videoId}`,
           query: {
             playlistId: id,
             playlistType: videoPlaylistType,
-            playlistItemId: firstVideoPlaylistItemId,
+            playlistItemId: startVideo.playlistItemId,
           },
         }"
         tabindex="-1"
+        @click="pickShuffledStartVideo"
       >
-        <img
+        <FtRetryImage
           :src="thumbnail"
           alt=""
           :class="{ blur: blurThumbnails }"
-        >
+        />
       </router-link>
-      <img
+      <FtRetryImage
         v-else
         :src="thumbnail"
         alt=""
         :class="{ blur: blurThumbnails }"
-      >
+      />
     </div>
 
-    <div class="playlistStats">
-      <template
-        v-if="editMode"
-      >
+    <div
+      v-if="editMode"
+      class="editForm"
+    >
+      <div class="editFields">
         <FtInput
           ref="playlistTitleInput"
           class="inputElement"
-          :placeholder="$t('User Playlists.Playlist Name')"
+          :label="$t('User Playlists.Playlist Name')"
+          :icon="['fas', 'list']"
+          :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
           :show-action-button="false"
-          :show-label="false"
           :value="newTitle"
           :maxlength="255"
           @input="handlePlaylistNameInput"
           @keydown.enter="savePlaylistInfo"
         />
-        <FtFlexBox v-if="inputPlaylistNameBlank">
-          <p>
-            {{ $t('User Playlists.SinglePlaylistView.Toast["Playlist name cannot be empty. Please input a name."]') }}
-          </p>
-        </FtFlexBox>
-        <FtFlexBox v-if="inputPlaylistWithNameExists">
-          <p>
-            {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
-          </p>
-        </FtFlexBox>
-      </template>
-      <template
-        v-else
-      >
+        <p
+          v-if="inputPlaylistNameBlank"
+          class="editError"
+        >
+          {{ $t('User Playlists.SinglePlaylistView.Toast["Playlist name cannot be empty. Please input a name."]') }}
+        </p>
+        <p
+          v-if="inputPlaylistWithNameExists"
+          class="editError"
+        >
+          {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
+        </p>
+        <FtInput
+          class="inputElement descriptionInput"
+          :label="$t('User Playlists.Playlist Description')"
+          :icon="['fas', 'file-lines']"
+          :placeholder="$t('Form Inputs.Playlist Description Hint')"
+          :show-action-button="false"
+          :value="newDescription"
+          @input="(input) => newDescription = input"
+          @keydown.enter="savePlaylistInfo"
+        />
+        <div class="editToggles">
+          <FtToggleSwitch
+            :label="$t('User Playlists.Add new videos to the top (custom order)')"
+            :default-value="newAddVideosToTop"
+            @change="newAddVideosToTop = $event"
+          />
+          <FtToggleSwitch
+            :label="t('User Playlists.Shuffle videos by default')"
+            :default-value="newShuffleByDefault"
+            @change="newShuffleByDefault = $event"
+          />
+        </div>
+      </div>
+      <div class="editPickers">
+        <FtPlaylistThumbnailPicker
+          v-model="newCustomThumbnail"
+          :default-thumbnail="defaultThumbnail"
+          @loading="thumbnailLoading = $event"
+        />
+        <FtQuickBookmarkIconPicker
+          v-model="newQuickBookmarkIcon"
+        />
+      </div>
+    </div>
+    <template v-else>
+      <div class="playlistStats">
         <h2
           class="playlistTitle"
           dir="auto"
         >
           {{ title }}
         </h2>
-        <p
-          v-if="!isUnviewable"
-        >
+        <p>
           {{ t('Global.Counts.Video Count', { count: parsedVideoCount }, videoCount) }}
-          <template v-if="!hideViews && !isUserPlaylist">
+          <template v-if="!hideViews && !isUserPlaylist && viewCount >= 0">
             - {{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}
           </template>
-          -
-          <template v-if="infoSource !== 'local'">
-            {{ $t("Playlist.Last Updated On") }}
+          <template v-if="lastUpdated">
+            -
+            <template v-if="infoSource !== 'local'">
+              {{ $t("Playlist.Last Updated On") }}
+            </template>
+            {{ lastUpdated }}
           </template>
-          {{ lastUpdated }}
           <template v-if="durationFormatted !== ''">
             <br>
             {{ $t('User Playlists.TotalTimePlaylist', { duration: durationFormatted }) }}
           </template>
         </p>
-      </template>
-    </div>
+        <p v-if="isUserPlaylist && selectedUserPlaylist?.sourcePlaylistId">
+          <router-link :to="`/playlist/${selectedUserPlaylist.sourcePlaylistId}`">
+            {{ t('User Playlists.Source Playlist') }}
+          </router-link>
+        </p>
+      </div>
 
-    <FtInput
-      v-if="editMode"
-      class="inputElement descriptionInput"
-      :placeholder="$t('User Playlists.Playlist Description')"
-      :show-action-button="false"
-      :show-label="false"
-      :value="newDescription"
-      @input="(input) => newDescription = input"
-      @keydown.enter="savePlaylistInfo"
-    />
-    <p
-      v-else
-      class="playlistDescription"
-      dir="auto"
-    >
-      {{ description }}
-    </p>
+      <p
+        v-if="description"
+        v-overlay-scrollbars
+        class="playlistDescription"
+        dir="auto"
+      >
+        {{ description }}
+      </p>
+    </template>
 
     <hr class="playlistInfoSeparator">
 
@@ -116,12 +150,13 @@
         class="playlistChannel"
         :to="`/channel/${channelId}`"
       >
-        <img
+        <FtRetryImage
           v-if="channelThumbnail"
+          :fallback-icon="['fas', 'circle-user']"
           class="channelThumbnail"
           :src="channelThumbnail"
           alt=""
-        >
+        />
         <h3
           class="channelName"
           dir="auto"
@@ -130,107 +165,116 @@
         </h3>
       </component>
 
-      <div class="playlistOptionsAndSearch">
-        <div class="playlistOptions">
-          <template
-            v-if="editMode"
-          >
-            <FtIconButton
-              :title="$t('User Playlists.Save Changes')"
-              :disabled="playlistPersistenceDisabled"
+      <div class="playlistOptionsWrapper">
+        <FtButtonGroup class="playlistOptions">
+          <template v-if="editMode">
+            <FtButton
+              class="actionButton"
+              :label="t('User Playlists.Save Changes')"
               :icon="['fas', 'save']"
-              theme="secondary"
+              :disabled="playlistPersistenceDisabled"
+              theme="primary"
               @click="savePlaylistInfo"
             />
-            <FtIconButton
-              :title="$t('User Playlists.Cancel')"
+            <FtButton
+              class="actionButton"
+              :label="t('User Playlists.Cancel')"
               :icon="['fas', 'times']"
               theme="secondary"
+              variant="outlined"
               @click="exitEditMode"
             />
           </template>
-          <template
-            v-else-if="isUserPlaylist"
-          >
-            <FtIconButton
-              :title="markedAsQuickBookmarkTarget ? $t('User Playlists.Quick Bookmark Enabled') : $t('User Playlists.Enable Quick Bookmark With This Playlist')"
-              :icon="markedAsQuickBookmarkTarget ? ['fas', 'bookmark'] : ['far', 'bookmark']"
-              :disabled="markedAsQuickBookmarkTarget"
-              :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
-              @disabled-click="handleQuickBookmarkEnabledDisabledClick"
-              @click="enableQuickBookmarkForThisPlaylist"
-            />
-            <FtIconButton
-              :title="$t('User Playlists.Edit Playlist Info')"
+          <template v-else>
+            <FtButton
+              v-if="isUserPlaylist"
+              class="actionButton"
+              :title="t('User Playlists.Edit Playlist Info')"
+              :label="t('User Playlists.Edit')"
               :icon="['fas', 'edit']"
               theme="secondary"
               @click="enterEditMode"
             />
+            <FtButton
+              v-else-if="showPlaylists"
+              class="actionButton"
+              :title="isPlaylistBookmarked ? t('User Playlists.Remove Saved Playlist') : t('User Playlists.Save Playlist')"
+              :label="t('User Playlists.Save')"
+              :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
+              :selected="isPlaylistBookmarked"
+              :disabled="playlistBookmarkPending"
+              theme="secondary"
+              @click="emit('toggle-playlist-bookmark')"
+            />
+            <FtButton
+              v-if="videoCount > 0"
+              class="actionButton"
+              :title="t('Playlist.Add Playlist to Queue')"
+              :disabled="snapshotPending"
+              :aria-busy="queueSnapshotPending"
+              theme="secondary"
+              @click="addPlaylistToQueue"
+            >
+              <FtIcon
+                :icon="queueSnapshotPending ? ['fas', 'sync'] : ['fas', 'add-to-queue']"
+                :spin="queueSnapshotPending"
+                aria-hidden="true"
+              />
+              {{ t('Video.Add to Queue') }}
+            </FtButton>
+            <FtButton
+              v-if="supportsYtDlp && enableDownloads && videoCount > 0"
+              class="actionButton"
+              :title="t('Downloads.Download Playlist')"
+              :label="t('Downloads.Download')"
+              :icon="['fas', 'download']"
+              theme="secondary"
+              @click="showDownloadPrompt = true"
+            />
+            <FtButton
+              v-if="deadVideoScanRunning"
+              class="actionButton"
+              aria-busy="true"
+              theme="secondary"
+              @click="deadVideoScanController?.abort()"
+            >
+              <FtIcon
+                :icon="['fas', 'sync']"
+                spin
+                aria-hidden="true"
+              />
+              {{ `${t('User Playlists.Cancel')} (${deadVideoProgress.checked}/${deadVideoProgress.total})` }}
+            </FtButton>
+            <FtShareButton
+              v-if="sharePlaylistButtonVisible"
+              :id="id"
+              class="sharePlaylistIcon"
+              :dropdown-position-y="description ? 'top' : 'bottom'"
+              share-target-type="Playlist"
+            />
+            <FtButton
+              v-if="moreMenuItems.some(item => item.type !== 'separator')"
+              ref="moreOptionsButton"
+              class="actionButton"
+              :title="t('Video.More Options')"
+              aria-haspopup="menu"
+              :aria-busy="menuSnapshotPending"
+              theme="secondary"
+              @click="openMoreOptionsMenu"
+            >
+              <FtIcon
+                :icon="menuSnapshotPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
+                :spin="menuSnapshotPending"
+                aria-hidden="true"
+              />
+              {{ t('More') }}
+            </FtButton>
           </template>
-          <FtIconButton
-            v-if="videoCount > 0 && showPlaylists && !editMode"
-            :title="$t('User Playlists.Copy Playlist')"
-            :icon="['fas', 'copy']"
-            theme="secondary"
-            @click="toggleCopyVideosPrompt"
-          />
-          <FtIconButton
-            v-if="exportPlaylistButtonVisible"
-            :title="$t('User Playlists.Export Playlist')"
-            :icon="['fas', 'file-arrow-down']"
-            theme="secondary"
-            @click="showExportPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistDuplicateItemCount > 0"
-            :title="$t('User Playlists.Remove Duplicate Videos')"
-            :icon="['fas', 'users-slash']"
-            theme="destructive"
-            @click="showRemoveDuplicateVideosPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistAnyVideoWatched"
-            :title="$t('User Playlists.Remove Watched Videos')"
-            :icon="['fas', 'eye-slash']"
-            theme="destructive"
-            @click="showRemoveVideosOnWatchPrompt = true"
-          />
-          <FtIconButton
-            v-if="deletePlaylistButtonVisible"
-            :disabled="markedAsQuickBookmarkTarget"
-            :title="!markedAsQuickBookmarkTarget ? $t('User Playlists.Delete Playlist') : playlistDeletionDisabledLabel"
-            :icon="['fas', 'trash']"
-            theme="destructive"
-            @disabled-click="handlePlaylistDeleteDisabledClick"
-            @click="showDeletePlaylistPrompt = true"
-          />
-          <FtShareButton
-            v-if="sharePlaylistButtonVisible"
-            :id="id"
-            class="sharePlaylistIcon"
-            :dropdown-position-y="description ? 'top' : 'bottom'"
-            share-target-type="Playlist"
-          />
-        </div>
-        <div
-          v-if="searchVideoModeAllowed"
-          class="searchInputsRow"
-        >
-          <FtInput
-            ref="searchInput"
-            class="inputElement"
-            :placeholder="$t('User Playlists.SinglePlaylistView.Search for Videos')"
-            :show-clear-text-button="true"
-            :show-action-button="false"
-            :value="query"
-            :maxlength="255"
-            @input="updateQueryDebounced"
-            @clear="updateQueryDebounced('')"
-          />
-        </div>
+        </FtButtonGroup>
       </div>
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
+        autosize
         :label="$t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -239,6 +283,7 @@
       />
       <FtPrompt
         v-if="showRemoveVideosOnWatchPrompt"
+        autosize
         :label="removeVideosOnWatchPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -246,7 +291,17 @@
         @click="handleRemoveVideosOnWatchPromptAnswer"
       />
       <FtPrompt
+        v-if="showRemoveDeadVideosPrompt"
+        autosize
+        :label="t('User Playlists.Remove Unavailable Videos Confirmation', { count: deadVideoItemIds.size, uncertain: deadVideoProgress.uncertain })"
+        :option-names="deletePlaylistPromptNames"
+        :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
+        is-first-option-destructive
+        @click="handleRemoveDeadVideosPromptAnswer"
+      />
+      <FtPrompt
         v-if="showRemoveDuplicateVideosPrompt"
+        autosize
         :label="removeDuplicateVideosPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -255,37 +310,83 @@
       />
       <FtPrompt
         v-if="showExportPrompt"
+        autosize
         :label="t('Settings.Data Settings.Select Export Type')"
         :option-names="exportNames"
         :option-values="EXPORT_VALUES"
         @click="handleExport"
+      />
+      <WatchVideoDownloadPrompt
+        v-if="enableDownloads && showDownloadPrompt"
+        :playlist-id="isUserPlaylist ? '' : id"
+        :playlist-key="id"
+        :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
+        :is-playlist="true"
+        :title="title"
+        :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
+        @close="showDownloadPrompt = false"
+      />
+    </div>
+    <div
+      v-if="searchVideoModeAllowed"
+      class="searchInputsRow"
+    >
+      <FtInput
+        ref="searchInput"
+        class="inputElement"
+        input-type="search"
+        :label="$t('User Playlists.SinglePlaylistView.Search for Videos')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
+        :show-action-button="false"
+        :value="query"
+        :maxlength="255"
+        @input="updateQueryDebounced"
       />
     </div>
   </div>
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { FtIcon } from '@opentubex/icons'
 
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtButton from '../FtButton/FtButton.vue'
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtPlaylistThumbnailPicker from '../FtPlaylistThumbnailPicker.vue'
+import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
   ctrlFHandler,
   debounce,
+  formatDurationAsTimestamp,
   formatNumber,
+  formatViewCount,
   showToast,
   getTodayDateStrLocalTimezone,
   writeFileWithPicker,
   deepCopy,
 } from '../../helpers/utils'
+import { getPlaylistSnapshot } from '../../helpers/api/playlist-snapshot'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { createLocalPlaylistAvailabilityChecker } from '../../helpers/api/local'
+import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
+import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
+import { isHistoryEntryWatched } from '../../helpers/history'
+import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -361,10 +462,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  isUnviewable: {
-    type: Boolean,
-    default: false,
-  },
   moreVideoDataAvailable: {
     type: Boolean,
     required: true,
@@ -377,35 +474,59 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  isPlaylistBookmarked: {
+    type: Boolean,
+    required: true,
+  },
+  playlistBookmarkPending: {
+    type: Boolean,
+    required: true,
+  },
+  preloadAvailable: {
+    type: Boolean,
+    default: false,
+  },
+  preloadPending: {
+    type: Boolean,
+    default: false,
+  },
+  preloadComplete: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close'])
+const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist'])
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const query = ref('')
 const editMode = ref(false)
 const showDeletePlaylistPrompt = ref(false)
 const showRemoveVideosOnWatchPrompt = ref(false)
+const showRemoveDeadVideosPrompt = ref(false)
+const deadVideoScanRunning = ref(false)
+const deadVideoProgress = ref({ checked: 0, total: 0, uncertain: 0 })
+const deadVideoItemIds = ref(new Set())
+let deadVideoScanController
 const showRemoveDuplicateVideosPrompt = ref(false)
 const showExportPrompt = ref(false)
+const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
+const newAddVideosToTop = ref(false)
+const newShuffleByDefault = ref(false)
+const newQuickBookmarkIcon = ref('bookmark')
+const newCustomThumbnail = ref('')
+const thumbnailLoading = ref(false)
 
 if (props.videoCount > 0) {
   query.value = props.searchQueryText
 }
 
 const durationFormatted = computed(() => {
-  const total = props.totalPlaylistDuration
-
-  const duration = {
-    hours: Math.floor(total / 3600),
-    minutes: Math.floor((total % 3600) / 60),
-    seconds: total % 60,
-  }
-
-  let formatted = new Intl.DurationFormat([locale.value, 'en'], { style: 'short' }).format(duration)
+  let formatted = formatDurationAsTimestamp(props.totalPlaylistDuration)
 
   if (props.moreVideoDataAvailable && !isUserPlaylist.value) {
     formatted += '+'
@@ -433,7 +554,7 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -450,12 +571,20 @@ const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
 const firstVideoIdExists = computed(() => props.firstVideoId !== '')
 
-const parsedViewCount = computed(() => formatNumber(props.viewCount))
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+const parsedViewCount = computed(() => formatViewCount(props.viewCount, shortenViewCounts.value))
 const parsedVideoCount = computed(() => formatNumber(props.videoCount))
 
 /** @type {import('vue').ComputedRef<string>} */
 const thumbnail = computed(() => {
-  if (thumbnailPreference.value === 'hidden' || !firstVideoIdExists.value) {
+  if (thumbnailPreference.value === 'hidden') return thumbnailPlaceholder
+  return (isUserPlaylist.value && selectedUserPlaylist.value?.customThumbnail) || defaultThumbnail.value
+})
+
+const defaultThumbnail = computed(() => {
+  if (!firstVideoIdExists.value) {
     return thumbnailPlaceholder
   }
 
@@ -475,12 +604,33 @@ const thumbnail = computed(() => {
     case 'end':
       return `${baseUrl}/vi/${props.firstVideoId}/mq3.jpg`
     default:
-      return `${baseUrl}/vi/${props.firstVideoId}/mqdefault.jpg`
+      return `${baseUrl}/vi/${props.firstVideoId}/maxresdefault.jpg`
   }
 })
 
 const isUserPlaylist = computed(() => props.infoSource === 'user')
 const videoPlaylistType = computed(() => isUserPlaylist.value ? 'user' : '')
+
+const shuffledStartVideo = ref(null)
+
+// Playlists that shuffle by default start on a random video instead of the first one.
+// The shown videos exclude removals that can still be undone. Each click picks the
+// next start after the link has navigated, so returning to this page or opening the
+// link again does not repeat the same video.
+function pickShuffledStartVideo() {
+  const videos = isUserPlaylist.value && selectedUserPlaylist.value?.shuffleByDefault === true
+    ? props.videos
+    : []
+  shuffledStartVideo.value = videos.length > 0 ? videos[Math.floor(Math.random() * videos.length)] : null
+}
+
+watch(() => props.videos, pickShuffledStartVideo, { immediate: true })
+watch(() => selectedUserPlaylist.value?.shuffleByDefault, pickShuffledStartVideo)
+
+const startVideo = computed(() => shuffledStartVideo.value ?? {
+  videoId: props.firstVideoId,
+  playlistItemId: props.firstVideoPlaylistItemId,
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistAnyVideoWatched = computed(() => {
@@ -488,7 +638,7 @@ const userPlaylistAnyVideoWatched = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.some((video) => {
-    return historyCacheById_[video.videoId] !== undefined
+    return isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 })
 
@@ -506,14 +656,6 @@ const userPlaylistDuplicateItemCount = computed(() => {
   return selectedUserPlaylist.value.videos.length - userPlaylistUniqueVideosCount.value
 })
 
-const exportPlaylistButtonVisible = computed(() => {
-  return isUserPlaylist.value && !editMode.value && props.videoCount > 0
-})
-
-const deletePlaylistButtonVisible = computed(() => {
-  return isUserPlaylist.value && !editMode.value && !selectedUserPlaylist.value.protected
-})
-
 const sharePlaylistButtonVisible = computed(() => {
   return !isUserPlaylist.value && !hideSharingActions.value
 })
@@ -523,14 +665,103 @@ const quickBookmarkPlaylist = computed(() => {
   return store.getters.getQuickBookmarkPlaylist
 })
 
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
+
 const markedAsQuickBookmarkTarget = computed(() => {
   return selectedUserPlaylist.value &&
     quickBookmarkPlaylist.value &&
     quickBookmarkPlaylist.value._id === selectedUserPlaylist.value._id
 })
 
-const playlistDeletionDisabledLabel = computed(() => {
-  return t('User Playlists["Cannot delete the quick bookmark target playlist."]')
+const pinnedPlaylistIds = computed(() => store.getters.getPinnedPlaylistIds)
+const isPinnedToNavigation = computed(() => pinnedPlaylistIds.value.includes(props.id))
+
+function togglePinnedToNavigation() {
+  store.dispatch('updatePinnedPlaylistIds', isPinnedToNavigation.value
+    ? pinnedPlaylistIds.value.filter(id => id !== props.id)
+    : [...pinnedPlaylistIds.value, props.id])
+}
+
+const SEPARATOR = { type: 'separator' }
+
+/**
+ * Less frequent actions for the overflow menu, grouped by separators. The menu
+ * drops leading, trailing, and repeated separators.
+ * @type {import('vue').ComputedRef<object[]>}
+ */
+const moreMenuItems = computed(() => {
+  const items = []
+  const hasVideos = props.videoCount > 0
+
+  if (isUserPlaylist.value) {
+    items.push({
+      label: isPinnedToNavigation.value ? t('User Playlists.Unpin from Navigation') : t('User Playlists.Pin to Navigation'),
+      icon: ['fas', isPinnedToNavigation.value ? 'thumbtack-slash' : 'thumbtack'],
+      run: togglePinnedToNavigation,
+    }, {
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist'),
+      icon: markedAsQuickBookmarkTarget.value ? quickBookmarkIcon.value : ['far', 'bookmark'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: enableQuickBookmarkForThisPlaylist,
+    }, SEPARATOR)
+  }
+
+  if (hasVideos && showPlaylists.value) {
+    items.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], enabled: !snapshotPending.value, run: toggleCopyVideosPrompt })
+  }
+  if (isUserPlaylist.value && selectedUserPlaylist.value?.sourcePlaylistId) {
+    items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !snapshotPending.value, run: addMissingVideos })
+  }
+  if (isUserPlaylist.value && hasVideos) {
+    items.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'file-export'], run: () => { showExportPrompt.value = true } })
+  }
+  if (props.preloadAvailable && hasVideos) {
+    items.push({
+      label: props.preloadPending
+        ? t('Playlist.Preloading Playlist')
+        : props.preloadComplete
+          ? t('Playlist.Playlist Already Preloaded')
+          : t('Playlist.Preload Playlist'),
+      icon: ['fas', 'forward'],
+      enabled: !props.preloadPending && !props.preloadComplete,
+      run: () => emit('preload-playlist'),
+    })
+  }
+  items.push(SEPARATOR)
+
+  if (userPlaylistDuplicateItemCount.value > 0) {
+    items.push({ label: t('User Playlists.Remove Duplicate Videos'), icon: ['fas', 'users-slash'], run: () => { showRemoveDuplicateVideosPrompt.value = true } })
+  }
+  if (userPlaylistAnyVideoWatched.value) {
+    items.push({ label: t('User Playlists.Remove Watched Videos'), icon: ['fas', 'eye-slash'], run: () => { showRemoveVideosOnWatchPrompt.value = true } })
+  }
+  // While the scan runs, its progress and cancel button are in the action row.
+  if (isUserPlaylist.value && hasVideos && !deadVideoScanRunning.value) {
+    items.push({ label: t('User Playlists.Remove Unavailable Videos'), icon: ['fas', 'link-slash'], run: scanDeadVideos })
+  }
+  items.push(SEPARATOR)
+
+  if (isUserPlaylist.value && !selectedUserPlaylist.value.protected) {
+    items.push({
+      // The quick bookmark target cannot be deleted, so explain why in place of the label.
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists["Cannot delete the quick bookmark target playlist."]') : t('User Playlists.Delete Playlist'),
+      icon: ['fas', 'trash'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: () => { showDeletePlaylistPrompt.value = true },
+    })
+  }
+
+  return items.map(item => ({ enabled: true, ...item }))
+})
+
+const moreOptionsButton = useTemplateRef('moreOptionsButton')
+
+function openMoreOptionsMenu() {
+  openButtonMenu(moreOptionsButton.value.$el, moreMenuItems, props.title)
+}
+
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreMenuItems }))
 })
 
 const inputPlaylistNameBlank = computed(() => newTitle.value.trim() === '')
@@ -546,12 +777,17 @@ const inputPlaylistWithNameExists = computed(() => {
 })
 
 const playlistPersistenceDisabled = computed(() => {
-  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value
+  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value || thumbnailLoading.value
 })
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
+watch(showRemoveDeadVideosPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
+watch(showDownloadPrompt, handlePromptToggle)
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 
 /**
  * @param {boolean} shown
@@ -577,20 +813,110 @@ function handlePlaylistNameInput(input) {
   newTitle.value = input.trim()
 }
 
-function toggleCopyVideosPrompt(force = false) {
-  if (props.moreVideoDataAvailable && !isUserPlaylist.value && !force) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Some videos in the playlist are not loaded yet. Click here to copy anyway."]'), 5000, () => {
-      toggleCopyVideosPrompt(true)
+const snapshotPending = ref(false)
+// Copying and adding missing videos start from the menu, so the More button shows their progress.
+const queueSnapshotPending = ref(false)
+const menuSnapshotPending = computed(() => snapshotPending.value && !queueSnapshotPending.value)
+let snapshotController
+
+function cancelSnapshot() {
+  snapshotController?.abort()
+}
+
+watch(() => props.id, cancelSnapshot)
+onBeforeUnmount(cancelSnapshot)
+
+async function loadSnapshot(id) {
+  snapshotController = new AbortController()
+  snapshotPending.value = true
+  try {
+    const snapshot = await getPlaylistSnapshot(id, {
+      backend: backendPreference.value,
+      fallback: store.getters.getBackendFallback,
+      signal: snapshotController.signal,
     })
-    return
+    // YouTube playlists follow the channels' members-only settings
+    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+    return { ...snapshot, videos: snapshot.videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds })) }
+  } catch (error) {
+    if (!snapshotController.signal.aborted) {
+      console.error(error)
+      showToast({
+        message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
+    return null
+  } finally {
+    snapshotPending.value = false
   }
+}
+
+async function toggleCopyVideosPrompt() {
+  if (snapshotPending.value) return
+  const id = props.id
+  const defaults = {
+    title: props.channelName === '' ? props.title : `${props.title} | ${props.channelName}`,
+    description: props.description,
+    sourcePlaylistId: isUserPlaylist.value ? selectedUserPlaylist.value?.sourcePlaylistId : id,
+  }
+  const snapshot = isUserPlaylist.value ? { videos: props.videos } : await loadSnapshot(id)
+  if (!snapshot) return
 
   store.dispatch('showAddToPlaylistPromptForManyVideos', {
-    videos: props.videos,
-    newPlaylistDefaultProperties: {
-      title: props.channelName === '' ? props.title : `${props.title} | ${props.channelName}`,
-    },
+    videos: snapshot.videos,
+    newPlaylistDefaultProperties: defaults,
   })
+}
+
+async function addPlaylistToQueue() {
+  if (snapshotPending.value) return
+  // Queue user playlists in their displayed sort order.
+  let videos = props.sortedVideos
+  if (!isUserPlaylist.value) {
+    queueSnapshotPending.value = true
+    const snapshot = await loadSnapshot(props.id)
+    queueSnapshotPending.value = false
+    // Leaving the playlist while it loads cancels the action.
+    if (!snapshot || snapshotController.signal.aborted) return
+    videos = snapshot.videos
+  }
+  if (videos.length === 0) return
+
+  store.commit('addVideosToWatchQueue', { videos: deepCopy(videos) })
+  showToast({ message: t('Playlist.Playlist Added to Queue'), icon: ['fas', 'queue'] })
+}
+
+async function addMissingVideos() {
+  if (snapshotPending.value) return
+  const id = props.id
+  const sourceId = selectedUserPlaylist.value?.sourcePlaylistId
+  if (!sourceId) return
+  const snapshot = await loadSnapshot(sourceId)
+  if (!snapshot) return
+
+  snapshotPending.value = true
+  try {
+    snapshotController.signal.throwIfAborted()
+    // Insert the snapshot as one ordered, deduplicated batch so a concurrent
+    // preference change cannot split the refresh between the two ends.
+    const saved = await store.dispatch('addVideos', { _id: id, videos: snapshot.videos, deduplicate: true })
+    if (!saved) throw new Error('Could not add source playlist videos')
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
+      icon: ['fas', 'check'],
+    })
+  } catch (error) {
+    if (!snapshotController.signal.aborted) {
+      console.error(error)
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
+  } finally {
+    snapshotPending.value = false
+  }
 }
 
 async function savePlaylistInfo() {
@@ -601,17 +927,25 @@ async function savePlaylistInfo() {
     playlistName: newTitle.value,
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
-    videos: deepCopy(selectedUserPlaylist.value.videos),
+    addVideosToTop: newAddVideosToTop.value,
+    shuffleByDefault: newShuffleByDefault.value,
+    quickBookmarkIcon: newQuickBookmarkIcon.value,
+    customThumbnail: newCustomThumbnail.value,
     _id: props.id,
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'))
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  } finally {
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
+      icon: ['fas', 'check'],
+    })
     exitEditMode()
+  } catch (e) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    console.error(e)
   }
 }
 
@@ -620,6 +954,11 @@ const playlistTitleInput = useTemplateRef('playlistTitleInput')
 function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
+  newAddVideosToTop.value = selectedUserPlaylist.value.addVideosToTop === true
+  newShuffleByDefault.value = selectedUserPlaylist.value.shuffleByDefault === true
+  newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
+  newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
+  thumbnailLoading.value = false
   editMode.value = true
 
   emit('enter-edit-mode')
@@ -627,14 +966,6 @@ function enterEditMode() {
   nextTick(() => {
     playlistTitleInput.value.focus()
   })
-}
-
-function handleQuickBookmarkEnabledDisabledClick() {
-  showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'))
-}
-
-function handlePlaylistDeleteDisabledClick() {
-  showToast(playlistDeletionDisabledLabel.value)
 }
 
 const EXPORT_VALUES = [
@@ -645,7 +976,7 @@ const EXPORT_VALUES = [
 ]
 
 const exportNames = computed(() => [
-  `${t('Settings.Data Settings.Export FreeTube')} (.db)`,
+  `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`,
   `${t('Settings.Data Settings.Export YouTube')} (.csv)`,
   `${t('User Playlists.Export list of URLs')} (.txt)`,
   t('Close')
@@ -699,11 +1030,14 @@ async function exportAsFreeTubeDatabase() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -734,11 +1068,14 @@ async function exportAsYouTubeCsv() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -763,16 +1100,20 @@ async function exportAsListOfUrls() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
 function exitEditMode() {
   editMode.value = false
+  thumbnailLoading.value = false
 
   emit('exit-edit-mode')
 }
@@ -790,7 +1131,7 @@ const userPlaylistWatchedVideoCount = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.reduce((count, video) => {
-    return historyCacheById_[video.videoId] !== undefined ? count + 1 : count
+    return isHistoryEntryWatched(historyCacheById_[video.videoId]) ? count + 1 : count
   }, 0)
 })
 
@@ -809,6 +1150,65 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
     userPlaylistDuplicateItemCount.value
   )
 })
+
+async function scanDeadVideos() {
+  if (deadVideoScanRunning.value) return
+  const playlistId = props.id
+  const videos = [...selectedUserPlaylist.value.videos]
+  deadVideoScanController = new AbortController()
+  const signal = deadVideoScanController.signal
+  deadVideoScanRunning.value = true
+  deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
+  try {
+    const useLocal = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(store.getters.getBackendPreference)
+    const checkLocal = useLocal ? await createLocalPlaylistAvailabilityChecker(signal) : null
+    const result = await findDeadPlaylistItems(videos, async (videoId, scanSignal) => {
+      const timeoutSignal = AbortSignal.any([scanSignal, AbortSignal.timeout(20_000)])
+      if (checkLocal) {
+        const response = await checkLocal(videoId, timeoutSignal)
+        return isUnavailablePlayerResponse(response, videoId)
+      }
+      return isUnavailableInvidiousResponse(await getInvidiousPlaylistAvailability(videoId, timeoutSignal), videoId)
+    }, signal, progress => { deadVideoProgress.value = progress })
+    if (props.id !== playlistId) return
+    deadVideoItemIds.value = result.itemIds
+    if (result.itemIds.size > 0) {
+      showRemoveDeadVideosPrompt.value = true
+    } else {
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+        icon: ['fas', 'check'],
+      })
+    }
+  } catch (error) {
+    if (!signal.aborted) {
+      console.error(error)
+      showToast({ message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"), icon: ['fas', 'circle-exclamation'] })
+    }
+  } finally {
+    if (deadVideoScanController?.signal === signal) {
+      deadVideoScanRunning.value = false
+      deadVideoScanController = null
+    }
+  }
+}
+
+async function handleRemoveDeadVideosPromptAnswer(option) {
+  showRemoveDeadVideosPrompt.value = false
+  if (option !== 'delete') return
+  const playlist = selectedUserPlaylist.value
+  const videos = playlist.videos.filter(video => !deadVideoItemIds.value.has(video.playlistItemId))
+  const removed = playlist.videos.length - videos.length
+  if (removed === 0) return
+  const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
+  showToast({
+    message: saved
+      ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
+      : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+    icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+  })
+  deadVideoItemIds.value = new Set()
+}
 
 /**
  * @param {'delete' | 'cancel' | null} option
@@ -829,24 +1229,30 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
 
   const removedVideosCount = userPlaylistDuplicateItemCount.value
   if (removedVideosCount === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
   const playlist = {
-    playlistName: props.title,
-    protected: selectedUserPlaylist.value.protected,
-    description: props.description,
+    ...selectedUserPlaylist.value,
     videos: deepCopy(newVideoItems),
-    _id: props.id,
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-      videoCount: removedVideosCount
-    }, removedVideosCount))
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+        videoCount: removedVideosCount
+      }, removedVideosCount),
+      icon: ['fas', 'trash'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -860,30 +1266,36 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
 
   const historyCacheById_ = historyCacheById.value
   const videosToWatch = selectedUserPlaylist.value.videos.filter((video) => {
-    return !Object.hasOwn(historyCacheById_, video.videoId)
+    return !isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 
   const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length
 
   if (removedVideosCount === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
   const playlist = {
-    playlistName: props.title,
-    protected: selectedUserPlaylist.value.protected,
-    description: props.description,
+    ...selectedUserPlaylist.value,
     videos: deepCopy(videosToWatch),
-    _id: props.id
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-      videoCount: removedVideosCount
-    }, removedVideosCount))
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+        videoCount: removedVideosCount
+      }, removedVideosCount),
+      icon: ['fas', 'trash'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -898,17 +1310,23 @@ function handleDeletePlaylistPromptAnswer(option) {
   if (option !== 'delete') { return }
 
   if (selectedUserPlaylist.value.protected) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is protected and cannot be removed."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is protected and cannot be removed."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
   } else {
     store.dispatch('removePlaylist', props.id)
     router.push(
       {
-        path: '/userPlaylists'
+        path: '/userplaylists'
       }
     )
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Playlist {playlistName} has been deleted."]', {
-      playlistName: props.title
-    }))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Playlist {playlistName} has been deleted."]', {
+        playlistName: props.title
+      }),
+      icon: ['fas', 'trash'],
+    })
   }
 }
 
@@ -917,23 +1335,28 @@ function enableQuickBookmarkForThisPlaylist() {
 
   store.dispatch('updateQuickBookmarkTargetPlaylistId', props.id)
   if (currentQuickBookmarkTargetPlaylist != null) {
-    showToast(
-      t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
         oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
       }),
-      5000,
-      () => {
+      time: 5000,
+      action: () => {
         store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
           }),
-          5000,
-        )
+          time: 5000,
+          icon: ['fas', 'undo'],
+        })
       },
-    )
+      icon: ['fas', 'bookmark'],
+    })
   } else {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'),
+      icon: ['fas', 'bookmark'],
+    })
   }
 }
 
@@ -956,7 +1379,15 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  deadVideoScanController?.abort()
   document.removeEventListener('keydown', keyboardShortcutHandler)
+})
+
+watch(() => props.id, () => {
+  exitEditMode()
+  deadVideoScanController?.abort()
+  showRemoveDeadVideosPrompt.value = false
+  deadVideoItemIds.value = new Set()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

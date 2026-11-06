@@ -1,46 +1,105 @@
-@mixin top-nav-is-colored {
-  @at-root {
-    .topNavBarColor &,
-    .topNavBarColor#{&} {
-      @content;
-    }
-  }
-}
-
 .topNav {
-  align-content: center;
-  align-items: center;
   background-color: var(--card-bg-color);
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
-  display: flex;
-  block-size: 60px;
+  box-shadow: none;
+  block-size: var(--top-nav-height, 60px);
   inset-inline: 0;
-  line-height: 60px;
+  line-height: var(--top-nav-height, 60px);
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: var(--app-safe-area-inset-top, 0);
   inline-size: 100%;
-  z-index: 4;
 
-  @media only screen and (width >= 961px) {
-    display: grid;
-    grid-template-columns: 1fr 440px 1fr;
+  // Open thumbnail dropdowns raise their list item above the vertical tab bar.
+  // Keep scrolling list content below the sticky navigation while they are open.
+  z-index: 7;
+
+  /* Center the layout against the top nav's own width, which shrinks beside
+     the vertical tab bar. */
+  container: top-nav / inline-size;
+
+  .app.capacitorTabs & {
+    touch-action: pan-y;
   }
 
-  @include top-nav-is-colored {
-    background-color: var(--primary-color);
+  .app.capacitorPhoneLayout &:where(:has(.capacitorPhoneTabSwitcherButton)) {
+    touch-action: none;
+
+    @supports (touch-action: pan-down) {
+      /* An upward finger movement scrolls down; downward pulls open tabs. */
+      touch-action: pan-down;
+    }
   }
 
   @media only screen and (width <= 680px) {
     position: fixed;
-
-    &:has(+ .sideNav + .routerView .floatingRefreshSection) {
-      box-shadow: none;
-    }
   }
 }
 
-.menuButton {
+.topNavInner {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.topNav:not(.phoneLayout) .topNavInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(440px, max(0px, calc(100% - 2 * var(--header-side-space)))) minmax(0, 1fr);
+}
+
+/* The window controls sit at physical window edges. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.customTitleBar:not(.topTabs, .verticalTabsLeft) .topNavInner {
+  box-sizing: border-box;
+  padding-left: var(--title-bar-inset-left);
+}
+
+.app.customTitleBar:not(.topTabs, .verticalTabsRight) .topNavInner {
+  box-sizing: border-box;
+  padding-right: var(--title-bar-inset-right);
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+.phoneLayout .logoText {
+  display: none;
+}
+
+/* Only the top tab bar sits above the navigation. */
+.app.topTabs .topNav {
+  inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px));
+
   @media only screen and (width <= 680px) {
+    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px));
+  }
+}
+
+/* The vertical tab bar sits beside the content instead of above it */
+.app.verticalTabs .topNav {
+  inset-block-start: var(--app-safe-area-inset-top, 0);
+
+  @media only screen and (width <= 680px) {
+    inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
+  }
+}
+
+/* These settings name physical window edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+@media only screen and (width <= 680px) {
+  .app.verticalTabsLeft .topNav {
+    left: var(--vertical-tab-bar-width, 220px);
+    right: 0;
+  }
+
+  .app.verticalTabsRight .topNav {
+    left: 0;
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+@media only screen and (width <= 680px) {
+  /* Beat .navButton { display: inline-flex } from the icon-pack styles. */
+  .menuButton.navButton {
     display: none;
   }
 }
@@ -55,64 +114,85 @@
 }
 
 .navButton {
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  // Half of the 40px button, so the press morph starts moving at once.
+  border-radius: calc(20px * var(--ui-roundness));
   border-style: none;
   background-color: transparent;
   color: var(--primary-text-color);
   cursor: pointer;
   font-size: 20px;
-  line-height: 1em;
+  line-height: 0;
   padding: 10px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.navButton :deep(.ft-icon) {
+  display: block;
+  vertical-align: 0;
 }
 
 .navButton,
 :deep(.ftIconButton:not(.arrowDisabled) .iconButton) {
   &:hover {
-    background-color: var(--side-nav-hover-color);
-    color: var(--side-nav-hover-text-color);
-    transition: background 0.2s ease-in;
+    background-color: var(--header-button-hover-color);
+    color: var(--header-button-hover-text-color);
   }
 
   &:active {
-    background-color: var(--tertiary-text-color);
-    color: var(--side-nav-active-text-color);
-    transition: background 0.2s ease-in;
+    background-color: var(--header-button-pressed-color);
+    color: var(--header-button-pressed-text-color);
+    border-radius: var(--shape-corner-medium);
   }
+}
+
+.downloadsButton,
+.settingsButton {
+  position: relative;
+
+  &.active {
+    color: var(--primary-color);
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  }
+}
+
+.minimizedUtilityButton {
+  color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.downloadsButton.active:hover,
+.settingsButton.active:hover,
+.minimizedUtilityButton:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
 }
 
 .navIcon {
   inline-size: 1em;
 }
 
-.topNavBarColor .navButton,
-.topNavBarColor :deep(.ftIconButton:not(.arrowDisabled) .iconButton) {
-  color: var(--text-with-main-color);
-
-  &:hover {
-    background-color: var(--primary-color-hover);
-  }
-
-  &:active {
-    background-color: var(--primary-color-active);
-  }
-}
-
-
 .navFilterButton {
   $effect-distance: 20px;
 
-  margin-inline-start: $effect-distance;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 39px;
+  margin-block: 0;
+  margin-inline: 3px;
+  padding: 10px;
+  border-radius: 100%;
+  font-size: 1em;
+  line-height: 1em;
+  transform: translateY(-50%);
+  z-index: 1;
 
   &.filterChanged {
     /* stylelint-disable-next-line declaration-property-value-no-unknown */
     box-shadow: 0 0 $effect-distance var(--primary-color);
     color: var(--primary-color);
-
-    @include top-nav-is-colored {
-      box-shadow: 0 0 $effect-distance var(--text-with-main-color);
-      color: var(--text-with-main-color);
-    }
   }
 }
 
@@ -125,6 +205,7 @@
 
   &.profiles {
     justify-content: flex-end;
+    margin-inline: auto calc(var(--scrollbar-track-width) + 6px);
   }
 
   .navSearchButton {
@@ -133,36 +214,23 @@
     }
   }
 
-  .navNewWindowButton {
-    @media only screen and (width <= 680px) {
-      display: none;
-    }
-  }
-
   .logo {
     align-items: center;
+    border-radius: var(--shape-corner-large-increased);
     cursor: pointer;
     display: flex;
     padding-block: 0;
-    padding-inline: 10px 25px;
+    padding-inline: 10px;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
     &:hover {
-      background-color: var(--side-nav-hover-color);
-      color: var(--side-nav-hover-text-color);
-      transition: background 0.2s ease-in;
-
-      @include top-nav-is-colored {
-        background-color: var(--primary-color-hover);
-      }
+      background-color: var(--header-button-hover-color);
+      color: var(--header-button-hover-text-color);
     }
 
     &:active {
-      background-color: var(--tertiary-text-color);
-      transition: background 0.2s ease-in;
-
-      @include top-nav-is-colored {
-        background-color: var(--primary-color-active);
-      }
+      background-color: var(--header-button-pressed-color);
+      border-radius: var(--shape-corner-medium);
     }
 
     .logoIcon {
@@ -172,55 +240,399 @@
       background-size: 25px;
       block-size: 25px;
       inline-size: 25px;
-
-      @include top-nav-is-colored {
-        background-image: var(--logo-icon-bar-color);
-      }
     }
 
     .logoText {
       background-image: var(--logo-text);
-      background-position: right top;
+      background-position: right center;
       background-repeat: no-repeat;
       background-size: 100px;
       block-size: 40px;
       margin-inline-start: 5px;
       position: relative;
-      inset-block-start: -3px;
+      inset-block-start: 1px;
       inline-size: 100px;
 
       @media only screen and (width <= 680px) {
         display: none;
       }
+    }
+  }
+}
 
-      @include top-nav-is-colored {
-        background-image: var(--logo-text-bar-color);
+.phoneLayout .profiles {
+  gap: 4px;
+}
+
+.topNav:not(.phoneLayout) .side {
+  inline-size: max-content;
+  justify-self: start;
+
+  &.profiles {
+    justify-self: end;
+  }
+}
+
+.compactLogo:not(.phoneLayout) .logoText {
+  display: none;
+}
+
+.middle {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 440px;
+
+  .searchContainer {
+    align-items: flex-start;
+    display: flex;
+    position: relative;
+
+
+    .searchInput {
+      flex: 1;
+      min-inline-size: 0;
+
+      :deep(.ft-input) {
+        padding-inline-end: 84px;
       }
     }
   }
 }
 
-.middle {
-  flex: 1;
-  max-inline-size: 440px;
+// Show the configured number of suggestion rows, but stay inside the window.
+.searchInput :deep(.list) {
+  max-block-size: min(
+    calc(var(--visible-search-suggestions) * var(--search-option-row-size)),
+    calc(100dvh - var(--top-nav-sticky-offset, 60px) - 20px)
+  );
+}
 
-  .searchContainer {
-    align-items: center;
+
+.syncIndicator {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+// Phone search occupies the header's own row, including in native landscape.
+.phoneLayout {
+  .profiles > .navButton,
+  .profiles > .notificationCenter :deep(.iconButton),
+  .profiles :deep(.profileTrigger) {
+    box-sizing: border-box;
+    flex: 0 0 48px;
+    inline-size: 48px;
+    block-size: 48px;
+    padding: 0;
+  }
+
+  .pinnedSearchTrigger {
     display: flex;
+    align-items: center;
+    gap: 12px;
+    inline-size: 100%;
+    min-block-size: 48px;
+    padding-inline: 12px;
+    border: 0;
 
-    @media only screen and (width <= 680px) {
-      background-color: var(--side-nav-color);
-      inset-inline: 0;
-      position: fixed;
-      inset-block-start: 60px;
+    // Half of the 48px bar, so the press morph starts moving at once.
+    border-radius: calc(24px * var(--ui-roundness));
+    background-color: var(--search-bar-color);
+    box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+    color: var(--primary-text-color);
+    font: inherit;
+    font-size: 14px;
+    line-height: normal;
+    text-align: start;
+    cursor: pointer;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
-      @include top-nav-is-colored {
-        background-color: var(--primary-color-hover);
-      }
+    &:hover,
+    &:focus-visible {
+      background-color: var(--header-button-hover-color);
+      color: var(--header-button-hover-text-color);
+    }
+
+    &:active {
+      background-color: var(--header-button-pressed-color);
+      color: var(--header-button-pressed-text-color);
+      border-radius: var(--shape-corner-medium);
+    }
+
+    .ft-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+
+    .pinnedSearchLabel {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .profiles .navSearchButton {
+    display: inline-flex;
+  }
+
+  .middle {
+    display: none;
+  }
+
+  &.phoneSearchOpen {
+    .side {
+      display: none;
+    }
+
+    .middle {
+      display: block;
+      max-inline-size: none;
+      min-inline-size: 0;
+      margin-inline: 16px;
+    }
+
+    .searchContainer {
+      align-items: center;
+      background-color: var(--search-bar-color);
+      border-radius: var(--shape-corner-full);
+      box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+    }
+
+    .closeMobileSearch {
+      flex: 0 0 48px;
+      block-size: 48px;
+      padding: 0;
     }
 
     .searchInput {
+      min-inline-size: 0;
+      position: static;
+
+      // Anchor suggestions to the whole search bar, including the close button.
+      :deep(.list) {
+        inset-inline: 0;
+        inset-block-start: 100%;
+      }
+
+      :deep(.inputWrapper),
+      :deep(.ft-input) {
+        block-size: 48px;
+      }
+
+      :deep(.ft-input) {
+        padding-inline: 8px 96px;
+        background-color: transparent;
+        box-shadow: none;
+      }
+
+      :deep(.inputAction),
+      .navFilterButton {
+        box-sizing: border-box;
+        inline-size: 48px;
+        block-size: 48px;
+        margin: 0;
+        padding: 0;
+      }
+
+      :deep(.inputAction) {
+        inset-inline-end: 0;
+      }
+
+      .navFilterButton {
+        inset-inline-end: 48px;
+      }
+    }
+  }
+
+  &.phoneSearchPinned {
+    .side:first-child {
+      display: none;
+    }
+
+    .middle {
+      display: block;
+      flex: 1;
+      min-inline-size: 0;
+      max-inline-size: none;
+      margin: 0;
+    }
+  }
+}
+
+.app.capacitorTabs .phoneLayout {
+  .topNavInner {
+    display: flex;
+    padding-inline: 12px;
+    box-sizing: border-box;
+    gap: 4px;
+  }
+
+  .side {
+    margin: 0;
+    gap: 4px;
+    min-inline-size: 0;
+
+    &:first-child {
       flex: 1;
     }
+  }
+
+  .navBackButton,
+  .navForwardButton,
+  .menuButton {
+    display: none;
+  }
+
+  .logo {
+    min-inline-size: 0;
+    min-block-size: 48px;
+    padding-inline: 4px;
+  }
+
+  .logoIcon {
+    flex-shrink: 0;
+  }
+
+  .logoText {
+    display: block;
+    flex: 0 0 100px;
+    min-inline-size: 0;
+    background-position: left center;
+    background-size: contain;
+  }
+
+  .navButton {
+    flex: 0 0 48px;
+    inline-size: 48px;
+    block-size: 48px;
+    padding: 0;
+  }
+
+  &.phoneSearchOpen {
+    .topNavInner {
+      padding-inline: 0;
+    }
+  }
+}
+
+.app.capacitorTabletLayout .phoneLayout {
+  .navBackButton,
+  .navForwardButton {
+    display: flex;
+    flex: 0 0 48px;
+
+    :deep(.iconButton) {
+      box-sizing: border-box;
+      inline-size: 48px;
+      block-size: 48px;
+    }
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  &.phoneSearchPinned {
+    .side:first-child {
+      display: flex;
+      flex: 0 0 auto;
+    }
+
+    .logo {
+      display: none;
+    }
+  }
+}
+
+.app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+  container: phone-logo / inline-size;
+  // Together with the header's 4px gap, leave 8px before the next control.
+  padding-inline-end: 4px;
+}
+
+// The pinned search starts at the header's edge padding, so match it before the actions.
+.app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout.phoneSearchPinned .topNavInner {
+  gap: 12px;
+
+  // Icon-only actions have no background, and their 20px glyph already sits
+  // 14px inside the 48px target, so the target itself supplies the space.
+  &:has(> .profiles > :first-child:not(.quickSettings)) {
+    gap: 0;
+  }
+}
+
+@container phone-logo (width < 138px) {
+  // The full logo needs its 25px icon, 100px name, 5px internal gap and 8px padding.
+  .app.capacitorTabs .phoneLayout .logoText {
+    display: none;
+  }
+}
+
+.phoneOverflowAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 20px;
+  border: 0;
+  background: transparent;
+  color: var(--primary-text-color);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  .phoneOverflowIcon {
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
+  transition: background-color var(--motion-fast-effects);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--side-nav-hover-color);
+  }
+}
+
+@container top-nav (width < 350px) {
+  .app.capacitorTabs .phoneLayout {
+    .topNavInner {
+      padding-inline: 8px;
+      gap: 0;
+    }
+
+    .side {
+      gap: 0;
+    }
+
+    &.phoneSearchOpen .topNavInner {
+      padding-inline: 0;
+    }
+  }
+
+  .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+    padding-inline-end: 8px;
+  }
+
+  .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout.phoneSearchPinned .topNavInner:not(:has(> .profiles > :first-child:not(.quickSettings))) {
+    gap: 8px;
+  }
+}
+
+.syncIndicator :deep(.ft-icon__glyph) {
+  animation: sync-rotation 2s linear infinite;
+}
+
+@keyframes sync-rotation {
+  to { transform: rotate(360deg); }
+}
+
+/* Without top tabs, the navigation replaces the system title bar. */
+.app.customTitleBar:not(.topTabs) .topNav {
+  -webkit-app-region: drag;
+
+  .topNavInner > * > * {
+    -webkit-app-region: no-drag;
   }
 }

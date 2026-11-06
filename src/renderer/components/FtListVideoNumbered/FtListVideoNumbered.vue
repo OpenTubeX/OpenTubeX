@@ -1,14 +1,20 @@
 <template>
   <div
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    ref="row"
+    v-first-visible="windowed || visible ? false : onFirstVisible"
+    :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
     :class="{
       placeholder: !visible,
       draggable: canBecomeDraggable,
+      pointerDragging,
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
-    :draggable="canBecomeDraggable"
+    :draggable="canBecomeDraggable && !pointerDragging"
+    :data-playlist-drag-item="canBecomeDraggable ? '' : null"
+    :data-video-id="data.videoId"
+    :data-playlist-item-id="playlistItemId"
+    @pointerdown.capture="canBecomeDraggable && startPointerDrag($event, videoData)"
+    @keydown="canBecomeDraggable && moveWithKeyboard($event, videoData)"
     v-on="canBecomeDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -16,42 +22,47 @@
     >
       <p
         class="videoIndexArea"
+        :role="canBecomeDraggable ? 'button' : null"
+        :tabindex="canBecomeDraggable ? 0 : null"
+        :aria-label="canBecomeDraggable ? t('User Playlists.Reorder Hint') : null"
+        :title="canBecomeDraggable ? t('User Playlists.Reorder Hint') : null"
+        :aria-keyshortcuts="canBecomeDraggable ? 'ArrowUp ArrowDown Home End' : null"
       >
-        <FontAwesomeIcon
+        <FtIcon
           v-if="isCurrentVideo"
           class="videoIndexIcon"
           :icon="['fas', 'play']"
         />
 
-        <template
-          v-else
-        >
-          <FontAwesomeIcon
-            v-if="canBecomeDraggable"
-            class="grabBar"
-            :icon="['fas', 'fa-bars']"
-          />
-
-          <span
-            class="videoIndex"
-          >
-            {{ videoIndex + 1 }}
-          </span>
-        </template>
+        <FtIcon
+          v-else-if="canBecomeDraggable"
+          class="grabBar"
+          :icon="['fas', 'bars']"
+        />
+        <FtIcon
+          v-if="downloadAvailable"
+          class="downloadAvailableIcon"
+          :icon="['fas', 'download']"
+          :title="t('Downloads.Available Offline')"
+        />
       </p>
       <FtListVideo
+        ref="listVideo"
         :data="data"
         :playlist-id="playlistId"
         :playlist-type="playlistType"
         :playlist-index="playlistIndex"
+        :thumbnail-index="videoIndex"
         :playlist-reverse="playlistReverse"
         :playlist-shuffle="playlistShuffle"
         :playlist-loop="playlistLoop"
         :playlist-item-id="playlistItemId"
+        :download-id="downloadId"
         force-list-type="list"
         :appearance="appearance"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
         :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+        :playlist-row-menu="showPlaylistItemMenu"
         :can-move-video-up="canMoveVideoUp"
         :can-move-video-down="canMoveVideoDown"
         :can-remove-from-playlist="canRemoveFromPlaylist"
@@ -62,18 +73,36 @@
         @move-video-to-the-bottom="moveVideoToTheBottom"
         @remove-from-playlist="removeFromPlaylist"
       />
+      <FtIconButton
+        v-if="showPlaylistItemMenu"
+        ref="playlistItemMenuButton"
+        class="playlistItemMenu"
+        :title="t('Video.More Options')"
+        theme="base-no-default"
+        :size="18"
+        :padding="touchLayout ? 15 : 6"
+        @click="openPlaylistItemMenu"
+      />
     </template>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, watch } from 'vue'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { FtIcon } from '@opentubex/icons'
+import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import { handleDragAndDrop } from '../../helpers/dragAndDrop'
+import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
+import { vFirstVisible } from '../../helpers/firstVisible'
+import { observeNestedWindowedListItem, observeWindowedListItem } from '../../helpers/windowedList'
+import store from '../../store/index'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { openButtonMenu } from '../../helpers/buttonMenu'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 const props = defineProps({
   data: {
@@ -107,6 +136,10 @@ const props = defineProps({
   playlistItemId: {
     type: String,
     default: null,
+  },
+  downloadId: {
+    type: String,
+    default: '',
   },
   appearance: {
     type: String,
@@ -150,9 +183,13 @@ const props = defineProps({
   },
   videoIndex: {
     type: Number,
-    default: -1
+    default: null
   },
   isCurrentVideo: {
+    type: Boolean,
+    default: false
+  },
+  nestedScroller: {
     type: Boolean,
     default: false
   }
@@ -170,10 +207,42 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 const visible = ref(props.initialVisibleState)
+const { t } = useI18n()
+const downloadAvailable = computed(() => {
+  if (!props.downloadId) return false
+  const download = store.getters.getYtDlpDownloads[props.downloadId]
+  return download?.files?.some(file => file.videoId === props.data.videoId && file.available !== false) ?? false
+})
 
 const inUserPlaylist = props.playlistType === 'user'
+const showPlaylistItemMenu = computed(() => inUserPlaylist && props.appearance === 'watchPlaylistItem')
+const touchLayout = usePhoneLayout('(width <= 600px), (pointer: coarse)')
+const playlistItemMenuButton = useTemplateRef('playlistItemMenuButton')
+const listVideo = useTemplateRef('listVideo')
+const playlistItemMenuItems = computed(() => [
+  ...(store.getters.getHidePlaylists
+    ? []
+    : [{ label: t('User Playlists.Add to Playlist'), icon: ['fac', 'playlist-add'], enabled: true, run: () => listVideo.value.openAddToPlaylistPrompt() }]),
+  { label: t('User Playlists.Move Video Up'), icon: ['fas', 'arrow-up'], enabled: props.canMoveVideoUp, run: () => moveVideoUp(props.data.videoId, props.playlistItemId) },
+  { label: t('User Playlists.Move Video Down'), icon: ['fas', 'arrow-down'], enabled: props.canMoveVideoDown, run: () => moveVideoDown(props.data.videoId, props.playlistItemId) },
+  { label: t('User Playlists.Remove from Playlist'), icon: ['fas', 'trash'], enabled: props.canRemoveFromPlaylist, run: () => removeFromPlaylist(props.data.videoId, props.playlistItemId) },
+])
+
+function openPlaylistItemMenu() {
+  openButtonMenu(playlistItemMenuButton.value.$el.querySelector('button'), playlistItemMenuItems, props.data.title)
+}
+
+function closePlaylistItemMenu() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: playlistItemMenuItems }))
+}
+
+watch(visible, isVisible => {
+  if (!isVisible) closePlaylistItemMenu()
+})
+onBeforeUnmount(closePlaylistItemMenu)
+
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag } = handleDragAndDrop(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -196,16 +265,88 @@ if (!props.initialVisibleState) {
   })
 }
 
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible) {
-    visible.value = isVisible
+// Long playlists release distant rows to measured shells. Mounted rows would
+// otherwise accumulate while scrolling and slow down every style update.
+const windowed = process.env.IS_CAPACITOR || process.env.IS_ELECTRON
+const row = useTemplateRef('row')
+const shellHeight = ref(0)
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+if (windowed) {
+  let windowItem = null
+  watch(row, element => {
+    windowItem?.dispose()
+    windowItem = null
+    if (!element) return
+    const observe = props.nestedScroller ? observeNestedWindowedListItem : observeWindowedListItem
+    windowItem = observe(element, {
+      mount: onFirstVisible,
+      unmount: height => { shellHeight.value = height; visible.value = false },
+      isMounted: () => visible.value,
+      isProtected: () => props.isVideoDragging || pointerDragging.value ||
+        element.contains(document.activeElement) ||
+        !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
+    })
+  }, { flush: 'post' })
+  // Two-line titles and list thumbnail sizes change row heights without the
+  // width change that remeasures shells.
+  watch(
+    [() => store.getters.getLimitTitlesToTwoLines, () => store.state.settings[thumbnailSizeSetting]],
+    () => windowItem?.remeasure(),
+    { flush: 'post' }
+  )
+  onBeforeUnmount(() => windowItem?.dispose())
+}
 
-    if (stopWatchingInitialVisibleState) {
-      stopWatchingInitialVisibleState()
-      stopWatchingInitialVisibleState = null
+async function onFirstVisible() {
+  if (visible.value) return
+
+  // A slow renderer can report a row after its list already scrolled past it,
+  // for example after centering the current video. Without native scroll
+  // anchoring (phone panels disable it), the growing row would push the visible
+  // rows down, so keep them in place ourselves.
+  const element = row.value
+  const scroller = element?.parentElement
+  const placeholderBounds = scroller != null && getComputedStyle(scroller).overflowAnchor === 'none'
+    ? element.getBoundingClientRect()
+    : null
+  const aboveViewport = placeholderBounds != null &&
+    placeholderBounds.bottom <= scroller.getBoundingClientRect().top
+  // Rows that mount together, such as after a title setting change, share one
+  // adjustment from the offset before any of them grew or shrank. Adding each
+  // change to the current offset would count a shrink twice once the browser
+  // has already clamped the offset to the shorter range.
+  let batch = null
+  if (aboveViewport) {
+    batch = mountBatches.get(scroller)
+    if (!batch) {
+      // The browser rounds the offset to whole device pixels. Continue from the
+      // previous adjustment's exact offset so the rounding does not add up.
+      const previous = adjustedScrollTops.get(scroller)
+      const scrollTop = previous !== undefined && Math.abs(previous - scroller.scrollTop) < 1
+        ? previous
+        : scroller.scrollTop
+      batch = { scrollTop, growth: 0, pending: 0 }
+      mountBatches.set(scroller, batch)
+    }
+    batch.pending++
+  }
+
+  visible.value = true
+
+  if (stopWatchingInitialVisibleState) {
+    stopWatchingInitialVisibleState()
+    stopWatchingInitialVisibleState = null
+  }
+
+  if (batch) {
+    await nextTick()
+    batch.growth += element.getBoundingClientRect().height - placeholderBounds.height
+    if (--batch.pending === 0) {
+      mountBatches.delete(scroller)
+      if (batch.growth !== 0) {
+        adjustedScrollTops.set(scroller, batch.scrollTop + batch.growth)
+        restoreOverlayScrollTop(scroller, batch.scrollTop + batch.growth)
+      }
     }
   }
 }
@@ -268,6 +409,14 @@ const videoData = {
 function removeFromPlaylist(videoId, playlistItemId) {
   emit('remove-from-playlist', videoId, playlistItemId)
 }
+</script>
+
+<script>
+// Shared by every row, so rows that mount together adjust their list once.
+/** @type {WeakMap<HTMLElement, { scrollTop: number, growth: number, pending: number }>} */
+const mountBatches = new WeakMap()
+/** @type {WeakMap<HTMLElement, number>} */
+const adjustedScrollTops = new WeakMap()
 </script>
 
 <style scoped src="./FtListVideoNumbered.css" />

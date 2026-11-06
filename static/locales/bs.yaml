@@ -231,7 +231,7 @@ Settings:
       Blur: Zamućenje
     Region for Trending: 'Regija za trendove'
         #! List countries
-    Open Deep Links In New Window: Otvori URL-ove proslijeđene FreeTube-u u novom prozoru
+    Open Deep Links In New Window: Otvori URL-ove proslijeđene OpenTubeX-u u novom prozoru
     Minimize to system tray: Minimiziraj u sistemsku traku
     Auto Load Next Page:
       Label: Automatsko učitavanje sljedeće stranice
@@ -256,7 +256,7 @@ Settings:
     Disable Smooth Scrolling: Onemogući glatko skrolovanje
     UI Scale: UI Skala
     Hide Side Bar Labels: Sakrij oznake bočne trake
-    Hide FreeTube Header Logo: Sakrij logotip zaglavlja FreeTube-a
+    Hide OpenTubeX Header Logo: Sakrij logotip zaglavlja OpenTubeX-a
     Base Theme:
       Base Theme: Osnovna tema
       Black: Crno
@@ -459,7 +459,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: Pretplata
     Fetch Feeds from RSS: Dohvati napajanja sa RSS-a
-    Fetch Automatically: Automatsko dohvaćanje napajanja
     'Limit the number of videos displayed for each channel': Ograničite broj prikazanih videa za svaki kanal
     To: Na
     Confirm Before Unsubscribing: Potvrdi prije odjave
@@ -520,7 +519,7 @@ Settings:
     Playlist File: Datoteka popisa za reprodukciju
     Search history file: Datoteka historije pretraživanja
     Export Subscriptions: Izvoz pretplata
-    Export FreeTube: Izvoz FreeTube-a
+    Export OpenTubeX: Izvoz OpenTubeX-a
     Export YouTube: Izvoz s YouTubea
     Export NewPipe: Izvoz NewPipe
     Import History: Historija uvoza

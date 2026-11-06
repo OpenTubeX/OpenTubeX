@@ -2,13 +2,38 @@ dedupePeers: true
 
 # https://pnpm.io/next/settings#allowbuilds
 allowBuilds:
-  '@parcel/watcher': false # Only required when you want to build @parcel/watcher from source
+  '@parcel/watcher': true
+  electron: true
   electron-winstaller: false # We build NSIS installers on Windows, not squirrel ones
   lefthook: true # Installing git hooks
   unrs-resolver: false # Works around an npm specific optional dependencies bug, so we don't need it with pnpm
 
 overrides:
+  glob@>=9.0.0 <14.0.2: ^14.0.3
+  js-yaml@>=4.0.0 <4.3.2: ^4.3.2
   uuid@<11.1.1: '>=11.1.1'
+  yauzl: '>=3.3.1'
 
 minimumReleaseAgeExclude:
-- "youtubei.js"
+  - "youtubei.js"
+  - eslint-plugin-jsdoc@65.3.12
+  - postcss@8.5.31
+  - serialize-javascript@7.1.4
+  - '@vot.js/core@3.2.0'
+  - '@vot.js/shared@3.2.0'
+  - dbus-native@0.16.3
+  - sass@1.108.0
+
+patchedDependencies:
+  '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
+  '@capacitor/android': patches/@capacitor__android.patch
+  '@capacitor/barcode-scanner@3.1.2': patches/@capacitor__barcode-scanner@3.1.2.patch
+  '@capacitor/share@8.0.3': patches/@capacitor__share@8.0.3.patch
+  '@capawesome/capacitor-app-shortcuts@8.0.2': patches/@capawesome__capacitor-app-shortcuts@8.0.2.patch
+  '@capawesome/capacitor-clipboard@0.1.2': patches/@capawesome__capacitor-clipboard@0.1.2.patch
+  '@material/material-color-utilities@0.4.0': patches/@material__material-color-utilities@0.4.0.patch
+  '@sqlite.org/sqlite-wasm@3.53.4-build2': patches/@sqlite.org__sqlite-wasm@3.53.4-build2.patch
+  '@vue/runtime-dom@3.5.44': patches/@vue__runtime-dom@3.5.44.patch
+  shaka-player@5.3.3: patches/shaka-player@5.3.3.patch
+  vue-sonner@2.0.9: patches/vue-sonner@2.0.9.patch
+  youtubei.js@18.3.0: patches/youtubei.js@18.3.0.patch

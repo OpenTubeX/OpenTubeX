@@ -1,14 +1,33 @@
 .buttonList {
+  /* Filled until subscribed, then tonal like FtButton's tonal variant. */
+  --subscribe-container: var(--primary-color);
+  --subscribe-on-container: var(--text-with-main-color);
+  --subscribe-hover: var(--primary-color-hover);
+  --subscribe-active: var(--primary-color-active);
+  --subscribe-divider: var(--divider-color);
+  --subscribe-radius: calc(20px * var(--ui-roundness));
+
   margin: 5px;
-  margin-block-end: 10px;
-  border-radius: 4px;
+  border-radius: var(--subscribe-radius);
   block-size: fit-content;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
   display: flex;
   flex-wrap: nowrap;
 
   /* addresses odd clipping behavior when adjusting window size */
-  background-color: var(--primary-color);
+  background-color: var(--subscribe-container);
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+}
+
+.buttonList.subscribed {
+  --subscribe-container: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --subscribe-on-container: var(--primary-text-color);
+  --subscribe-hover: color-mix(in srgb, var(--primary-text-color) 8%, var(--subscribe-container));
+  --subscribe-active: color-mix(in srgb, var(--primary-text-color) 12%, var(--subscribe-container));
+}
+
+/* Pressing any segment morphs the whole group's outer corners. */
+.buttonList:has(> :is(.subscribeButton, .notificationBell, .profileDropdownToggle):not(:disabled):active) {
+  --subscribe-radius: var(--shape-corner-medium);
 }
 
 .ftSubscribeButton {
@@ -22,11 +41,63 @@
   white-space: initial;
 }
 
+.subscribeButton.justToggled {
+  animation: subscribe-pop var(--motion-fast-spatial);
+}
+
+.subscribeButton.justToggled :deep(svg) {
+  animation: subscribe-check-pop var(--motion-fast-spatial);
+}
+
+/* The spring easing provides the overshoot. */
+@keyframes subscribe-pop {
+  from {
+    transform: scale(0.9);
+  }
+}
+
+@keyframes subscribe-check-pop {
+  from {
+    transform: scale(0);
+  }
+}
+
+.profile-dropdown-enter-active {
+  transition: opacity var(--motion-default-effects), transform var(--motion-default-spatial);
+}
+
+.profile-dropdown-leave-active {
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-effects);
+}
+
+.profile-dropdown-enter-from,
+.profile-dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-5px) scale(0.98);
+}
+
+.profileDropdownOpensAbove.profile-dropdown-enter-from,
+.profileDropdownOpensAbove.profile-dropdown-leave-to {
+  transform: translateY(5px) scale(0.98);
+}
+
 .subscribeButton,
+.notificationBell,
 .profileDropdownToggle {
   align-self: center;
   margin-block: 0;
   margin-inline: 0;
+}
+
+/* Outrank FtButton's own radius and press morph. */
+.buttonList > .subscribeButton,
+.buttonList > .subscribeButton:not(:disabled):active {
+  --button-radius: var(--subscribe-radius);
+}
+
+.notificationBell,
+.profileDropdownToggle {
+  border-radius: var(--subscribe-radius);
 }
 
 .profileDropdownToggle {
@@ -36,16 +107,72 @@
   display: inline-block;
   min-inline-size: 1em;
   padding-inline: 10px;
-  box-sizing: content-box;
+  box-sizing: border-box;
+}
+
+.notificationBell,
+.profileDropdownToggleButton {
+  background-color: var(--subscribe-container);
+  border: 1px solid var(--subscribe-container);
+  color: var(--subscribe-on-container);
+  cursor: pointer;
+  font: 500 0.9rem var(--app-font-family);
+  transition:
+    background-color var(--motion-default-effects),
+    border-color var(--motion-default-effects),
+    color var(--motion-default-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.notificationBell {
+  align-items: center;
+  border-radius: 0;
+  display: inline-flex;
+  font-size: 18px;
+  justify-content: center;
+  min-block-size: 40px;
+  padding-block: 5px;
+  padding-inline: 6px;
+}
+
+.notificationBell:is(:hover, :focus-visible),
+.profileDropdownToggleButton:is(:hover, :focus-visible) {
+  background-color: var(--subscribe-hover);
+  border-color: var(--subscribe-hover);
+}
+
+.notificationBell:active,
+.profileDropdownToggleButton:active {
+  background-color: var(--subscribe-active);
+  border-color: var(--subscribe-active);
+}
+
+.buttonList > .notificationBell {
+  border-inline-end: 1px solid var(--subscribe-divider);
+}
+
+.profileDropdownToggleButton::before {
+  content: '';
+  inline-size: 7px;
+  block-size: 7px;
+  border-inline-end: 2px solid currentcolor;
+  border-block-end: 2px solid currentcolor;
+  display: inline-block;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--motion-default-spatial);
+}
+
+.profileDropdownToggleButton.dropdownOpened::before {
+  transform: translateY(2px) rotate(225deg);
 }
 
 .subscribeButton.hasProfileDropdownToggle {
   min-inline-size: 100px;
   padding-inline: 5px;
-  border-inline-end: 2px solid var(--primary-color-active) !important;
+  border-inline-end: 1px solid var(--subscribe-divider) !important;
   border-start-end-radius: 0;
   border-end-end-radius: 0;
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
 .subscribeButton.hasProfileDropdownToggle,
@@ -54,86 +181,119 @@
   padding-inline: 6px;
   box-shadow: none;
   flex: auto;
-  block-size: 2em;
+  min-block-size: 40px;
+  block-size: auto;
 }
 
-.subscribeButton.dropdownOpened,
-.profileDropdownToggle.dropdownOpened {
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
+@media (any-pointer: coarse), (width <= 680px) {
+  .buttonList:not(:has(> :is(.subscribeButton, .notificationBell, .profileDropdownToggle):not(:disabled):active)) {
+    --subscribe-radius: calc(24px * var(--ui-roundness));
+  }
+
+  .notificationBell,
+  .profileDropdownToggle {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  .notificationBell {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+    min-block-size: 48px;
+  }
+
+  .subscribeButton.hasProfileDropdownToggle,
+  .profileDropdownToggle {
+    min-block-size: 48px;
+  }
 }
 
 .profileDropdown {
-  background-color: var(--side-nav-color);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
-  color: var(--secondary-text-color);
-  display: inline;
-  font-size: 12px;
-  max-block-size: 200px;
-  margin-block: -10px 0;
-  margin-inline: 5px 0;
-  overflow-y: scroll;
-  position: absolute;
-  text-align: center;
+  backdrop-filter: var(--card-bg-blur, none);
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+  border-radius: var(--shape-corner-large);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+
+  /* Grows past the base width, when the viewport allows, to keep the feed type chips in one row.
+     Unlike fit-content, max-content does not shrink toward the viewport edge the popover sits at. */
+  inline-size: max-content;
+  min-inline-size: min(340px, calc(100vw - 16px));
+  max-inline-size: min(440px, calc(100vw - 16px));
+  max-block-size: min(540px, 70vh);
+  overflow: hidden;
+  padding: 5px;
+  position: fixed;
+  text-align: start;
+  transform-origin: top right;
   user-select: none;
-  z-index: 3;
-
-  /* accounts for parent's left and right margins */
-  inline-size: calc(100% - 10px);
+  visibility: hidden;
+  z-index: 1001;
 }
 
-.profileList {
-  list-style-type: none;
-  margin: 0;
-  padding-inline: 0;
+.profileDropdownPositioned {
+  visibility: visible;
 }
 
-.profile {
-  cursor: pointer;
-  display: flex;
-  gap: 0.5em;
-  padding-inline-start: 0.5em;
-  block-size: 50px;
-  align-items: center;
-  transition: background 0.2s ease-out;
+/* Inside the phone bottom sheet, which provides the surface and the scrolling limit */
+.profileDropdown.profileSheet {
+  position: static;
+  visibility: visible;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  inline-size: auto;
+  min-inline-size: 0;
+  max-inline-size: none;
+  max-block-size: none;
+  padding-block: 0 12px;
+  padding-inline: 12px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  font-size: 1rem;
 }
 
-.profile:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
+.profileDropdownOpensAbove {
+  transform-origin: bottom right;
 }
 
-.colorOption {
-  inline-size: 40px;
-  block-size: 40px;
-  cursor: pointer;
-  align-items: center;
-  display: flex;
-  justify-content: center;
+.profileDropdownAnchoredLeftEdge {
+  transform-origin: top left;
+}
+
+.profileDropdownAnchoredLeftEdge.profileDropdownOpensAbove {
+  transform-origin: bottom left;
+}
+
+.feedTypePreferences {
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+.profileChipIcon {
+  inline-size: 18px;
+  block-size: 18px;
   flex-shrink: 0;
   border-radius: 50%;
+  font-size: 9px;
 }
 
-.initial {
-  font-size: 20px;
-  line-height: 1em;
-  text-align: center;
-  user-select: none;
+/* The profile and group chips give up their space first and keep at least one row. */
+.profileDropdownScroller {
+  /* Long profile and group lists wrap instead of widening the popover. */
+  contain: inline-size;
+  flex-shrink: 1000;
+  min-block-size: 46px;
+  overflow-y: auto;
 }
 
-.profileName {
-  padding-inline-end: 1em;
-  text-align: start;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.profile.subscribed {
-  background-color: var(--primary-color);
-}
-
-.profile.subscribed > .profileName {
-  color: var(--text-with-main-color);
+.feedTypePreferences + .profileDropdownScroller {
+  border-block-start: 1px solid var(--divider-color);
 }

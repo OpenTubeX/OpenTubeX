@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="notification_channel_media_playback_name">Medienwiedergabe</string>
+    <string name="notification_channel_media_playback_description">Wiedergabesteuerung während der Medienwiedergabe</string>
+    <string name="notification_channel_subscription_refresh_name">Abonnement-Aktualisierung</string>
+    <string name="notification_channel_subscription_refresh_description">Fortschritt von Abonnement-Aktualisierungen im Hintergrund</string>
+    <string name="notification_channel_live_reminders_name">Livestream-Erinnerungen</string>
+    <string name="notification_channel_live_reminders_description">Benachrichtigungen beim Start geplanter Livestreams</string>
+    <string name="media_play">Wiedergeben</string>
+    <string name="media_pause">Pausieren</string>
+    <string name="media_stop">Beenden</string>
+    <string name="media_previous">Zurück</string>
+    <string name="media_next">Weiter</string>
+    <string name="media_rewind">Zurückspulen</string>
+    <string name="media_fast_forward">Vorspulen</string>
+    <string name="notification_channel_downloads_name">Downloads</string>
+    <string name="notification_channel_downloads_description">Fortschritt von Video- und Audiodownloads</string>
+    <string name="notification_channel_new_uploads_name">Neue Uploads</string>
+    <string name="notification_channel_new_uploads_description">Benachrichtigungen, wenn abonnierte Kanäle neue Inhalte veröffentlichen</string>
+</resources>

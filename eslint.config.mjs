@@ -284,6 +284,13 @@ export default defineConfig([
       'object-shorthand': 'off',
       'vue/multi-word-component-names': 'off',
 
+      // `v-safer-html` fills the element with sanitized HTML, just like `v-html` does,
+      // and `FtVerifiedBadge` renders the name it is given
+      'vuejs-accessibility/heading-has-content': ['error', {
+        accessibleChildren: ['FtVerifiedBadge'],
+        accessibleDirectives: ['safer-html'],
+      }],
+
       'vuejs-accessibility/label-has-for': ['error', {
         required: {
           some: ['nesting', 'id'],
@@ -323,7 +330,8 @@ export default defineConfig([
 
       'vue/no-unused-emit-declarations': 'error',
       'vue/prefer-use-template-ref': 'error',
-      'vue/no-undef-directives': 'error',
+      // v-overlay-scrollbars is registered globally in main.js
+      'vue/no-undef-directives': ['error', { ignore: ['overlay-scrollbars'] }],
 
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-property-names': 'error',
@@ -444,5 +452,36 @@ export default defineConfig([
       'unicorn/prefer-date-now': 'error',
       'unicorn/prefer-array-index-of': 'error',
     }
+  },
+  {
+    files: ['e2e/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    settings: {
+      'vue-i18n': {
+        localeDir: `./static/locales/{${activeLocales.join(',')}}.yaml`,
+        messageSyntaxVersion: '^11.0.0',
+      },
+    },
+    rules: {
+      '@stylistic/space-before-function-paren': 'off',
+      '@stylistic/comma-dangle': ['error', 'only-multiline'],
+    },
+  },
+  {
+    // The main process, preload and shared modules have no import cycles; keep
+    // it that way. The renderer still has some, so it is not checked yet.
+    // _scripts/ProcessBoundaryPlugin.js keeps renderer-only code out of them.
+    name: 'process-boundaries',
+    files: ['src/main/**/*.js', 'src/preload/**/*.js', 'src/datastores/**/*.js', 'src/*.js'],
+    rules: {
+      'import-x/no-cycle': ['error', { ignoreExternal: true }],
+    },
   }
 ])

@@ -1,0 +1,96 @@
+name: Update AppImage tools
+
+# Dependabot cannot track the Anylinux build image that build.yml and release.yml
+# run, so this opens a PR when the image changes.
+# Editing a workflow needs UPSTREAM_SYNC_TOKEN's Workflows write access.
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appimage-tools
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          persist-credentials: false
+
+      - name: Update the pinned image digest
+        id: update
+        run: |
+          set -euo pipefail
+          file=.github/workflows/release.yml
+
+          image=ghcr.io/pkgforge-dev/archlinux:latest
+          images=(.github/workflows/build.yml "$file")
+          if grep -nP "${image//./\\.}(?!@sha256:[0-9a-f]{64}(?=\s|$))" "${images[@]}"; then
+            echo "::error::Pin every $image reference above by digest."
+            exit 1
+          fi
+          current=$(grep -ohP "${image//./\\.}@sha256:\K[0-9a-f]{64}" "${images[@]}" | sort -u)
+          latest=$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}')
+          latest=${latest#sha256:}
+          if [[ ! "$current" =~ ^[0-9a-f]{64}$ || ! "$latest" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Cannot update $image from ${current:-nothing} to ${latest:-nothing}."
+            exit 1
+          fi
+          if [[ "$current" != "$latest" ]]; then
+            sed -i "s|$image@sha256:$current|$image@sha256:$latest|g" "${images[@]}"
+            echo "- \`$image\` digest \`${latest:0:12}\` (from \`${current:0:12}\`)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
+            {
+              echo 'changes<<EOF'
+              cat "$RUNNER_TEMP/changes.md"
+              echo EOF
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Select release milestone
+        id: milestone
+        if: steps.update.outputs.changes
+        run: |
+          milestone=$(gh api --paginate "repos/$GITHUB_REPOSITORY/milestones?state=open&per_page=100" |
+            jq -s '[.[][] | select(.title | test("[0-9]+\\.[0-9]+"))] |
+              sort_by(.title | capture("(?<version>[0-9]+(?:\\.[0-9]+)+)").version |
+                split(".") | map(tonumber)) | .[0].number // empty')
+          echo "number=$milestone" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update pull request
+        if: steps.update.outputs.changes
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: appimage-tools
+          delete-branch: true
+          milestone: ${{ steps.milestone.outputs.number }}
+          commit-message: "ci(release): update AppImage tools"
+          title: "ci(release): update AppImage tools"
+          body: |
+            Updates the Anylinux build image in `build.yml` and `release.yml`:
+
+            ${{ steps.update.outputs.changes }}
+
+            The image digest comes from its registry manifest.
+
+            ## Release note
+            - [x] No release note needed

@@ -4,14 +4,17 @@
     class="bubblePadding"
     :aria-labelledby="id"
     :to="`/channel/${channelId}`"
+    :data-tab-title="channelName"
   >
-    <img
-      v-if="channelThumbnail != null"
+    <FtRetryImage
+      v-if="channelThumbnail != null && !thumbnailLoadFailed"
+      :fallback-icon="['fas', 'circle-user']"
       class="bubble"
       :src="channelThumbnail"
       alt=""
-    >
-    <FontAwesomeIcon
+      @error="handleThumbnailError"
+    />
+    <FtIcon
       v-else
       :icon="['fas', 'circle-user']"
       class="bubble"
@@ -34,16 +37,24 @@
     @click="handleClick"
     @keydown.space.enter.prevent="handleClick"
   >
-    <img
+    <FtRetryImage
+      v-if="channelThumbnail != null && !thumbnailLoadFailed"
+      :fallback-icon="['fas', 'circle-user']"
       class="bubble"
       :src="channelThumbnail"
       alt=""
-    >
+      @error="handleThumbnailError"
+    />
+    <FtIcon
+      v-else
+      :icon="['fas', 'circle-user']"
+      class="bubble"
+    />
     <div
       v-if="selected"
       class="bubble selected"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'check']"
         class="icon"
       />
@@ -59,8 +70,9 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useId } from 'vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import { FtIcon } from '@opentubex/icons'
+import { ref, useId, watch } from 'vue'
 
 const props = defineProps({
   channelId: {
@@ -86,11 +98,20 @@ const props = defineProps({
 })
 
 const id = useId()
+const thumbnailLoadFailed = ref(false)
+
+watch(() => props.channelThumbnail, () => {
+  thumbnailLoadFailed.value = false
+})
 
 const emit = defineEmits(['change'])
 
 function handleClick() {
   emit('change', !props.selected)
+}
+
+function handleThumbnailError() {
+  thumbnailLoadFailed.value = true
 }
 </script>
 

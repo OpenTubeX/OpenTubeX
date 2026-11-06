@@ -1,0 +1,117 @@
+import { readFile } from 'node:fs/promises'
+import { gunzipSync } from 'node:zlib'
+import { abortUnmockedRequest, test, expect, goTo } from '../../helpers/app.mjs'
+import { parseBackgroundFeed } from '../../../src/renderer/helpers/api/background-feed-parser.js'
+
+const channelCount = 40
+const channels = Array.from({ length: channelCount }, (_, index) => ({
+  id: `UC${String(index).padStart(22, '0')}`, name: `Channel ${index}`, thumbnail: ''
+}))
+
+const seed = {
+  settings: {
+    fetchSubscriptionsAutomatically: false,
+    useRssFeeds: false,
+    backendPreference: 'local',
+    backendFallback: false,
+    reducedMotion: 'off',
+    uiScale: 95,
+    showNewSubscriptionFeed: true,
+    hideSubscriptionsShorts: true,
+    hideSubscriptionsLive: true,
+    hideSubscriptionsCommunity: true
+  },
+  profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: channels }]
+}
+
+const body = gunzipSync(await readFile(new URL('../../fixtures/innertube/channel/shows-channel-info-and-videos/browse-43cf009333cb.0.json.gz', import.meta.url))).toString('utf8')
+// The first fetch establishes a baseline rather than marking old uploads new.
+// Seed previously new entries before launch to exercise visible New-feed cards.
+const [entry] = parseBackgroundFeed({ backgroundFormat: 'local', data: JSON.parse(body) }, 'videos', channels[0].id, '')
+const subscriptionCache = channels.map((channel, index) => ({
+  _id: channel.id,
+  videos: [{ ...entry, authorId: channel.id, videoId: `${String(index).padStart(2, '0')}${entry.videoId.slice(2)}`, isNewInSubscriptionFeed: true }],
+  videosTimestamp: '2026-01-01T00:00:00.000Z'
+}))
+
+for (const feed of ['videos', 'new']) {
+  test.describe(`${feed} feed`, () => {
+    test.use({ seed: { ...seed, subscriptionCache: feed === 'new' ? subscriptionCache : [] } })
+
+    test(`keeps input tasks responsive during a large ${feed} subscription refresh on a slower CPU`, { tag: '@performance' }, async ({ page }, testInfo) => {
+      await page.route(/^https?:\/\//, abortUnmockedRequest)
+      await page.route('**/youtubei/v1/browse**', route => {
+        const index = Number(JSON.parse(route.request().postData()).browseId.slice(2))
+        // Each channel must have distinct videos: duplicate Vue keys would measure
+        // an invalid list instead of the normal subscription refresh.
+        const response = JSON.parse(body, (key, value) => key === 'videoId' || key === 'contentId'
+          ? `${String(index).padStart(2, '0')}${value.slice(2)}`
+          : value)
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) })
+      })
+      await goTo(page, 'subscriptions')
+      if (feed === 'new') {
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
+      }
+      const cdp = await page.context().newCDPSession(page)
+      await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+      if (process.env.OPENTUBEX_REFRESH_CPU_PROFILE) {
+        await cdp.send('Profiler.enable')
+        await cdp.send('Profiler.start')
+      }
+      await page.evaluate(() => {
+        window.__refreshLongTasks = []
+        window.__refreshCompletedAt = null
+        window.__refreshEnterStyleReads = 0
+        window.__refreshGetComputedStyle = window.getComputedStyle
+        window.getComputedStyle = function (element, ...args) {
+          if (element.classList.contains('feed-enter-active')) window.__refreshEnterStyleReads++
+          return window.__refreshGetComputedStyle.call(this, element, ...args)
+        }
+        window.addEventListener('opentubex-subscription-refresh-completed', () => {
+          window.__refreshCompletedAt = performance.now()
+        }, { once: true })
+        window.__refreshObserver = new PerformanceObserver(list => {
+          window.__refreshLongTasks.push(...list.getEntries().map(entry => ({ startTime: entry.startTime, duration: entry.duration })))
+        })
+        window.__refreshObserver.observe({ type: 'longtask' })
+      })
+      await page.getByRole('button', { name: feed === 'new' ? /Refresh New content/ : /Refresh Videos/ }).click()
+      await expect.poll(() => page.evaluate(() => {
+        const store = window.$store
+        return Object.values(store.getters.getVideoCache).filter(cache => cache.videos.length === 30).length
+      }), { timeout: 30_000 }).toBe(channelCount)
+      await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
+      await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
+      const metrics = await page.evaluate(() => {
+        window.__refreshLongTasks.push(...window.__refreshObserver.takeRecords().map(entry => ({ startTime: entry.startTime, duration: entry.duration })))
+        window.__refreshObserver.disconnect()
+        window.getComputedStyle = window.__refreshGetComputedStyle
+        const completedAt = window.__refreshCompletedAt
+        // The completion task can also publish cards. Only include its portion
+        // inside the refresh, as well as all preceding refresh tasks.
+        const durations = window.__refreshLongTasks.map(entry => Math.max(0, Math.min(entry.duration, completedAt - entry.startTime)))
+        return {
+          completedAt,
+          enterStyleReads: window.__refreshEnterStyleReads,
+          durations,
+          blockingMs: durations.reduce((total, duration) => total + Math.max(0, duration - 50), 0)
+        }
+      })
+      if (process.env.OPENTUBEX_REFRESH_CPU_PROFILE) {
+        const { profile } = await cdp.send('Profiler.stop')
+        await testInfo.attach('refresh CPU profile', { body: JSON.stringify(profile), contentType: 'application/json' })
+      }
+      await cdp.detach()
+      await testInfo.attach('subscription refresh responsiveness', { body: JSON.stringify(metrics), contentType: 'application/json' })
+      expect(metrics.completedAt).not.toBeNull()
+      // Known feed durations avoid a forced style read for each entering card.
+      expect(metrics.enterStyleReads, JSON.stringify(metrics)).toBe(0)
+      // Measure input blocking while fetching, including any incremental card
+      // redraws. Final publication after completion is outside this interval.
+      // Gross bound only; tighter wall-clock budgets are too noisy on shared runners.
+      expect(metrics.blockingMs, JSON.stringify(metrics)).toBeLessThan(7500)
+    })
+  })
+}

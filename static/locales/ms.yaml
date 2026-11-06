@@ -310,7 +310,7 @@ Settings:
     Disable Smooth Scrolling: ''
     UI Scale: ''
     Hide Side Bar Labels: ''
-    Hide FreeTube Header Logo: ''
+    Hide OpenTubeX Header Logo: ''
     Base Theme:
       Base Theme: ''
       Black: ''
@@ -514,7 +514,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
     'Limit the number of videos displayed for each channel': ''
     To: ''
     Confirm Before Unsubscribing: ''
@@ -575,7 +574,7 @@ Settings:
     Playlist File: ''
     Search history file: ''
     Export Subscriptions: ''
-    Export FreeTube: ''
+    Export OpenTubeX: ''
     Export YouTube: ''
     Export NewPipe: ''
     Import History: ''
@@ -625,7 +624,7 @@ Settings:
     SponsorBlock Settings: ''
     Enable SponsorBlock: ''
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': ''
-    Notify when sponsor segment is skipped: ''
+    Notify when sponsor segment is skipped: Tunjukkan Makluman Setelah Segmen Dilangkau
     UseDeArrowTitles: ''
     UseDeArrowThumbnails: ''
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': ''
@@ -663,7 +662,7 @@ About:
   Downloads / Changelog: ''
   GitHub releases: ''
   Help: ''
-  FreeTube Wiki: ''
+  OpenTubeX Wiki: ''
   FAQ: ''
   Discussions: ''
   Report a problem: ''
@@ -730,7 +729,7 @@ Channel:
   Your search results have returned 0 results: ''
   This channel does not exist: ''
   This channel does not allow searching: ''
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: ''
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ''
   Channel Tabs: ''
   Videos:
     Videos: ''
@@ -738,6 +737,7 @@ Channel:
       Newest: ''
       Oldest: ''
       Most Popular: ''
+    This channel does not currently have any videos: ''
   Shorts:
     This channel does not currently have any shorts: ''
   Live:
@@ -778,7 +778,7 @@ Channel:
     View Full Post: ''
     Reveal Answers: ''
     Hide Answers: ''
-    Video hidden by FreeTube: ''
+    Video hidden by OpenTubeX: ''
 Video:
   IP block: ''
   MembersOnly: ''
@@ -838,14 +838,20 @@ Video:
     Show Original Details: ''
     Show Modified Details: ''
   Sponsor Block category:
-    sponsor: ''
-    intro: ''
-    outro: ''
-    self-promotion: ''
-    interaction: ''
-    music offtopic: ''
+    sponsor: Penaja
+    intro: Intermission / Pengenalan Animasi
+    outro: Kad Akhir / Kredit
+    self-promotion: Promosi Tanpa Bayaran / Diri
+    interaction: Peringatan Interaksi (Langgan)
+    music offtopic: 'Muzik: Bahagian Bukan Muzik'
     recap: ''
     filler: ''
+    highlight: Sorotan
+    exclusive access: Akses Eksklusif
+  Sponsor Block category short:
+    intro: Selang
+    interaction: Peringatan Interaksi
+    music offtopic: Bukan Muzik
   External Player:
     OpenInTemplate: ''
     video: ''
@@ -888,7 +894,7 @@ Video:
       CodecsVideoAudioNoItags: ''
     You appear to be offline: ''
     Playback will resume automatically when your connection comes back: ''
-    Skipped segment: ''
+    Skipped segment: '{segmentCategory} Melangkau'
 #& Playlists
 Playlist:
   #& About
@@ -999,7 +1005,6 @@ Tooltips:
     Hide Videos on Watch: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

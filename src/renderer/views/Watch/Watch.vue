@@ -1,236 +1,1360 @@
 <template>
   <div
+    ref="videoLayout"
     class="videoLayout"
     :class="{
+      ambientModeActive,
       isLoading,
-      useTheatreMode: useTheatreMode && !isLoading,
-      noSidebar: !theatrePossible
+      shortsPlayerActive: customShortsPlayerActive,
+      useTheatreMode: isLoading
+        ? (loadingTheatreMode ?? (defaultViewingMode === 'theatre'))
+        : useTheatreMode,
+      noSidebar: !theatrePossible && !sidebarPanelLeaving
     }"
   >
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
+    <!-- Suppress the compatibility click after dragging; keyboard navigation is handled on the document. -->
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
       class="videoArea"
+      :style="customShortsPlayerActive
+        ? {
+          '--shorts-aspect-ratio': videoAspectRatio,
+          '--shorts-player-width': `${shortsPlayerWidth}px`,
+          '--shorts-player-height': `${shortsPlayerHeight}px`
+        }
+        : undefined"
+      @wheel="shortsNavigation.handleWheel"
+      @pointerdown.capture="shortsNavigation.handlePointerDown"
+      @pointermove.capture="shortsNavigation.handlePointerMove"
+      @pointerup.capture="shortsNavigation.handlePointerUp"
+      @pointercancel.capture="shortsNavigation.handlePointerCancel"
+      @lostpointercapture="shortsNavigation.handlePointerCancel"
+      @click.capture="shortsNavigation.handleClick"
     >
       <div class="videoAreaMargin">
-        <ft-shaka-video-player
-          v-if="!isLoading && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
-          ref="player"
-          :manifest-src="manifestSrc"
-          :manifest-mime-type="manifestMimeType"
-          :sabr-data="sabrData"
-          :legacy-formats="legacyFormats"
-          :start-time="startTimeSeconds"
-          :captions="captions"
-          :hls-audio-metadata="hlsAudioMetadata"
-          :storyboard-src="videoStoryboardSrc"
-          :format="activeFormat"
-          :thumbnail="thumbnail"
-          :video-id="videoId"
-          :channel-id="channelId"
-          :chapters="videoChapters"
-          :current-chapter-index="videoCurrentChapterIndex"
-          :chapters-src="chaptersSrc"
-          :title="videoTitle"
-          :theatre-possible="theatrePossible"
-          :use-theatre-mode="useTheatreMode"
-          :autoplay-possible="autoplayPossible"
-          :autoplay-enabled="autoplayEnabled"
-          :watching-playlist="watchingPlaylist"
-          :vr-projection="vrProjection"
-          :start-in-fullscreen="startNextVideoInFullscreen"
-          :start-in-fullwindow="startNextVideoInFullwindow"
-          :start-in-pip="startNextVideoInPip"
-          :current-playback-rate="currentPlaybackRate"
-          :delay-load-until-unix="adEndTimeUnixMs"
-          class="videoPlayer"
-          @error="handlePlayerError"
-          @loaded="handleVideoLoaded"
-          @timeupdate="updateCurrentChapter"
-          @ended="handleVideoEnded"
-          @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
-          @toggle-autoplay="toggleAutoplay"
-          @playback-rate-updated="updatePlaybackRate"
-          @skip-to-next="handleSkipToNext"
-          @skip-to-prev="handleSkipToPrev"
-          @player-reload-requested="onSabrReloadRequested"
-        />
         <div
-          v-if="!isLoading && (isUpcoming || errorMessage)"
-          class="videoPlayer"
+          ref="shortsSwipeViewport"
+          class="shortsSwipeViewport"
+          :class="{
+            shortsSwipeActive: shortsNavigation.state.pointer?.dragging || shortsNavigation.state.settling,
+            shortsSwipeExpanded: shortsNavigation.state.presentationTarget !== null
+          }"
+          :style="{
+            '--shorts-swipe-offset': `${shortsNavigation.state.offset}px`,
+            '--shorts-swipe-preview-offset': `${shortsNavigation.state.offset + shortsNavigation.state.direction * shortsNavigation.state.height}px`
+          }"
         >
-          <img
-            v-if="!isUpcoming || playabilityStatus !== 'OK'"
-            :src="thumbnail"
-            class="videoThumbnail"
-            alt=""
-          >
           <div
-            v-if="isUpcoming"
-            class="premiereDate"
-            :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
+            v-if="isLoading && customShortsPlayerActive"
+            class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
+            data-tab-loading-indicator
           >
-            <font-awesome-icon
-              :icon="['fas', 'satellite-dish']"
-              class="premiereIcon"
+            <FtRetryImage
+              v-if="shortsNavigation.state.transitionPreview"
+              :src="shortsNavigation.state.transitionPreview"
+              class="shortsTransitionPreview"
+              :class="{
+                shortsTransitionNext: shortsNavigation.state.transitionDirection > 0,
+                shortsTransitionPrevious: shortsNavigation.state.transitionDirection < 0
+              }"
+              alt=""
             />
-            <p
-              v-if="upcomingTimestamp !== null"
-              class="premiereText"
-            >
-              <span
-                class="premiereTextTimeLeft"
-              >
-                {{ $t("Video.Premieres") }} {{ upcomingTimeLeft }}
-              </span>
-              <br>
-              <span
-                class="premiereTextTimestamp"
-              >
-                {{ upcomingTimestamp }}
-              </span>
-            </p>
-            <p
+            <div
               v-else
-              class="premiereText"
+              class="shortsSkeleton"
+              aria-hidden="true"
             >
-              {{ $t("Video.Starting soon, please refresh the page to check again") }}
-            </p>
+              <div class="shortsSkeletonControls">
+                <div class="shortsSkeletonControlGroup">
+                  <span class="ft-shimmer" />
+                  <span class="shortsSkeletonVolume ft-shimmer" />
+                </div>
+                <div class="shortsSkeletonControlGroup">
+                  <span class="ft-shimmer" />
+                  <span class="ft-shimmer" />
+                </div>
+              </div>
+              <span class="shortsSkeletonSeek ft-shimmer" />
+            </div>
           </div>
           <div
-            v-else-if="errorMessage"
-            class="errorContainer"
+            v-else-if="isLoading"
+            class="videoPlayer videoPlayerPlaceholder ft-shimmer"
+            data-tab-loading-indicator
+          />
+          <div
+            v-else-if="(ytDlpStreamsPending || (vrStreamsPending && !isYtDlpPlaybackRequested())) && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
+            class="videoPlayer videoPlayerPlaceholder streamPlaceholder"
+            :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
+            data-tab-loading-indicator
+          >
+            <FtRetryImage
+              v-if="thumbnail"
+              :src="thumbnail"
+              class="videoThumbnail"
+              alt=""
+            />
+            <div class="streamPlaceholderOverlay">
+              <ft-loader
+                inline
+                class="streamPlaceholderSpinner"
+              />
+              <span class="streamPlaceholderText">{{ ytDlpStreamsPending ? $t("Video.Fetching Streams") : $t("Theme Discovery.Loading") }}</span>
+            </div>
+          </div>
+          <KeepAlive
+            :key="customShortsPlayerActive ? 'shorts' : 'watch'"
+            :max="customShortsPlayerActive ? 4 : 1"
+            :include="customShortsPlayerActive ? undefined : []"
+          >
+            <ft-shaka-video-player
+              v-if="playerReady && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
+              :key="customShortsPlayerActive ? `short:${videoId}:${shortsPlayerReloads[videoId] ?? 0}` : `watch:${playerLoadGeneration}`"
+              ref="player"
+              :manifest-src="manifestSrc"
+              :manifest-mime-type="manifestMimeType"
+              :playback-engine="activePlaybackEngine"
+              :sabr-data="sabrData"
+              :legacy-formats="legacyFormats"
+              :playback-source-key="playbackSourceKey"
+              :local-file-playback="localFilePlayback"
+              :start-time="startTimeSeconds"
+              :captions="captions"
+              :caption-translations="captionTranslations"
+              :storyboard-src="videoStoryboardSrc"
+              :annotations="videoAnnotations"
+              :hide-annotations="hideEndScreenAnnotations"
+              :end-screen-recommendations="endScreenRecommendations"
+              :format="activeFormat"
+              :thumbnail="thumbnail"
+              :video-id="videoId"
+              :playlist-id="playlistId"
+              :chapters="videoChapters"
+              :popularity-markers="videoPopularity"
+              :current-chapter-index="videoCurrentChapterIndex"
+              :chapters-kind="videoChaptersKind"
+              :chapters-src="chaptersSrc"
+              :title="videoTitle"
+              :channel-name="channelName"
+              :channel-thumbnail="channelThumbnail"
+              :artist="musicPlayerArtist"
+              :music-media-type="musicMediaType"
+              :theatre-possible="theatreTogglePossible"
+              :use-theatre-mode="useTheatreMode"
+              :autoplay-possible="autoplayPossible"
+              :autoplay-enabled="autoplayEnabled"
+              :autoplay-requested="queuedPlaybackVideoId === videoId"
+              :autoplay-countdown="autoplayCountdown"
+              :auto-open-chapters="autoOpenChapters"
+              :sidebar-chapters-open="showSidebarChapters"
+              :watching-playlist="watchingPlaylist"
+              :can-skip-next="canSkipToNextVideo"
+              :can-skip-previous="canSkipToPreviousVideo"
+              :vr-projection="vrProjection"
+              :start-in-fullscreen="startNextVideoInFullscreen"
+              :start-in-fullwindow="startNextVideoInFullwindow"
+              :start-in-pip="startNextVideoInPip"
+              :auto-picture-in-picture-state="nextVideoAutoPictureInPictureState"
+              :start-with-docked-panels="startNextVideoWithDockedPanels"
+              :queue-available="$store.getters.getWatchQueueLength > 0 && (isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
+              :recommendations-available="fullscreenRecommendationsAvailable"
+              :download-available="downloadAvailable"
+              :channel-id="channelId"
+              :playlist-video-data="addToPlaylistVideoData"
+              :published="videoPublished"
+              :is-live="isLive"
+              :is-live-dvr-enabled="isLiveDvrEnabled"
+              :is-upcoming="isUpcoming"
+              :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
+              :sponsor-block-info-open="showSidebarSponsorBlock"
+              :video-is-music="isMusicVideo"
+              :current-playback-rate="currentPlaybackRate"
+              :current-video-quality="currentVideoQuality"
+              :delay-load-until-unix="adEndTimeUnixMs"
+              :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
+              :comments-available="commentsAvailable"
+              :offline="isOffline"
+              :live-chat-available="liveChatAvailable"
+              :quick-bookmark-enabled="isQuickBookmarkEnabled"
+              :quick-bookmarked="isCurrentVideoQuickBookmarked"
+              :quick-bookmark-title="quickBookmarkIconText"
+              :quick-bookmark-icon="quickBookmarkIcon"
+              :paid-promotion="showPaidPromotion"
+              :paid-promotion-duration-ms="paidPromotionDurationMs"
+              :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
+              :suppress-autoplay-after-sabr-reload="suppressAutoplayAfterSabrReload"
+              :sabr-reload-state="sabrReloadState"
+              :stream-recovery-notice="streamRecoveryNotice"
+              :pause-for-stream-recovery="streamRecoveryNotice !== null && streamRecoveryPausesPlayback"
+              :shorts-player="customShortsPlayerActive"
+              :shorts-phone-panels="shortsPhonePanelsEnabled"
+              :shorts-metadata-open="shortsMetadataOpen"
+              :shorts-aspect-ratio="videoAspectRatio"
+              :video-aspect-ratio="videoAspectRatio"
+              class="videoPlayer"
+              @error="handlePlayerError"
+              @loaded="handleVideoLoaded"
+              @timeupdate="handleTimeUpdate"
+              @play="handleVideoPlay"
+              @terminal-outro-started="handleTerminalOutroStarted"
+              @ended="handlePlayerEnded"
+              @pause="handleVideoPause"
+              @seeking="handlePlayerSeeking"
+              @toggle-theatre-mode="toggleTheatreMode"
+              @toggle-autoplay="toggleAutoplay"
+              @autoplay-cancel="abortAutoplayCountdown"
+              @autoplay-play-now="playNextVideoNow"
+              @playback-rate-updated="updatePlaybackRate"
+              @playback-rate-user-set="handlePlaybackRateUserSet"
+              @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+              @video-quality-updated="updateVideoQuality"
+              @video-quality-user-set="handleVideoQualityUserSet"
+              @subtitles-state-updated="updateSubtitlesState"
+              @subtitles-state-user-set="handleSubtitlesStateUserSet"
+              @volume-updated="updateVolume"
+              @volume-user-set="handleVolumeUserSet"
+              @skip-to-next="handleSkipToNext"
+              @skip-to-prev="handleSkipToPrev"
+              @player-reload-requested="onPlayerReloadRequested"
+              @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
+              @stream-recovery-notice-dismiss="streamRecoveryNotice = null"
+              @dock-panel-change="handleDockPanelChange"
+              @toggle-transcript="toggleTranscript"
+              @open-download="openVideoDownloadPrompt"
+              @toggle-quick-bookmark="toggleCurrentVideoQuickBookmarked"
+              @chapters-overlay-change="handleChaptersOverlayChange"
+              @chapter-thumbnails-change="handleChapterThumbnailsChange"
+              @looped-chapter-change="videoLoopedChapterIndex = $event"
+              @sponsorblock-info-change="handleSponsorBlockInfoChange"
+              @toggle-shorts-metadata="toggleShortsMetadata"
+              @open-phone-panel="openShortsPhonePanel"
+            >
+              <template #shorts-fullscreen-metadata>
+                <div class="shortsFullscreenMetadataContent">
+                  <FtPaidPromotionBadge
+                    v-if="showPaidPromotion"
+                    class="shortsPaidPromotion"
+                  />
+                  <div class="shortsFullscreenChannelRow">
+                    <component
+                      :is="disableChannelLinks ? 'span' : 'router-link'"
+                      v-if="!hideUploader && channelId"
+                      class="shortsFullscreenChannel"
+                      :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
+                      @click="openShortsChannel"
+                      @auxclick="openShortsChannel"
+                    >
+                      <FtRetryImage
+                        v-if="channelThumbnail"
+                        :fallback-icon="['fas', 'circle-user']"
+                        :src="channelThumbnail"
+                        class="shortsFullscreenChannelThumbnail"
+                        alt=""
+                      />
+                      <span dir="auto">{{ channelName }}</span>
+                      <FtVerifiedBadge
+                        :verified="channelVerified"
+                        :artist="channelVerifiedArtist"
+                      />
+                    </component>
+                    <FtSubscribeButton
+                      v-if="!hideUnsubscribeButton"
+                      :channel-id="channelId"
+                      :channel-name="channelName"
+                      :channel-thumbnail="channelThumbnail"
+                      :subscription-count-text="channelSubscriptionCountText"
+                    />
+                  </div>
+                  <h1 class="shortsFullscreenTitle">
+                    <button
+                      type="button"
+                      class="shortsFullscreenTitleButton"
+                      dir="auto"
+                      :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
+                      :aria-expanded="fullscreenMetadataOpen"
+                      @click="toggleShortsMetadata"
+                    >
+                      {{ videoTitle }}
+                    </button>
+                  </h1>
+                </div>
+              </template>
+            </ft-shaka-video-player>
+          </KeepAlive>
+          <Teleport
+            :to="shortsNavigation.state.presentationTarget || 'body'"
+            :disabled="shortsNavigation.state.presentationTarget === null"
           >
             <div
-              class="errorWrapper"
+              v-if="shortsNavigation.state.preview"
+              class="shortsSwipePreview"
+              aria-hidden="true"
             >
-              <font-awesome-icon
-                :icon="customErrorIcon || ['fas', 'exclamation-circle']"
-                aria-hidden="true"
-                class="errorIcon"
+              <FtRetryImage
+                :src="shortsNavigation.state.preview"
+                alt=""
+              />
+            </div>
+          </Teleport>
+          <div
+            v-if="!isLoading && (isUpcoming || errorMessage)"
+            class="videoPlayer"
+            :class="{ videoPlayerError: errorMessage }"
+          >
+            <FtRetryImage
+              v-if="!isUpcoming || playabilityStatus !== 'OK'"
+              :src="thumbnail"
+              class="videoThumbnail"
+              alt=""
+            />
+            <div
+              v-if="isUpcoming"
+              class="premiereDate"
+              :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
+            >
+              <ft-icon
+                :icon="['fas', 'satellite-dish']"
+                class="premiereIcon"
               />
               <p
-                class="errorMessage"
+                v-if="upcomingTimestamp !== null && !hasScheduledPremiereStarted"
+                class="premiereText"
               >
-                {{ errorMessage }}
+                <span
+                  class="premiereTextTimeLeft"
+                >
+                  {{ $t("Video.Premieres") }} {{ displayedUpcomingTimeLeft }}
+                </span>
+                <br>
+                <span
+                  class="premiereTextTimestamp"
+                >
+                  {{ upcomingTimestamp }}
+                </span>
               </p>
+              <p
+                v-else
+                class="premiereText"
+              >
+                {{ $t("Video.Starting soon, please refresh the page to check again") }}
+              </p>
+              <button
+                v-if="canToggleLiveReminder"
+                type="button"
+                class="liveReminderButton"
+                :class="{ active: liveReminderActive }"
+                :disabled="liveReminderLoading"
+                :aria-pressed="liveReminderActive"
+                @click="toggleLiveReminder"
+              >
+                <ft-icon :icon="['fas', 'calendar-days']" />
+                {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
+              </button>
+            </div>
+            <div
+              v-else-if="errorMessage"
+              ref="errorContainer"
+              v-overlay-scrollbars
+              class="errorContainer"
+            >
+              <div
+                class="errorWrapper"
+              >
+                <ft-icon
+                  :icon="customErrorIcon || ['fas', 'exclamation-circle']"
+                  aria-hidden="true"
+                  class="errorIcon"
+                />
+                <div class="errorContent">
+                  <p
+                    class="errorMessage"
+                  >
+                    {{ errorMessage }}
+                  </p>
+                  <p
+                    v-if="restrictedPlaybackError !== null && !hasConfiguredRestrictedPlaybackAuthentication"
+                    class="restrictedPlaybackHint"
+                  >
+                    {{ $t('Video.Configure Restricted Playback Cookies Hint') }}
+                  </p>
+                  <div
+                    v-if="canTryRestrictedPlaybackWithCookies || canRetryWithOtherPlaybackEngine"
+                    class="errorActions"
+                  >
+                    <FtButton
+                      v-if="canTryRestrictedPlaybackWithCookies"
+                      class="errorActionButton"
+                      :label="$t('Video.Try With Configured Cookies')"
+                      :icon="['fas', 'cookie']"
+                      :text-color="null"
+                      :background-color="null"
+                      @click="tryRestrictedPlaybackWithCookies"
+                    />
+                    <FtButton
+                      v-if="canRetryWithOtherPlaybackEngine"
+                      class="errorActionButton"
+                      :label="retryWithOtherPlaybackEngineLabel"
+                      :icon="['fas', 'sync']"
+                      :text-color="null"
+                      :background-color="null"
+                      @click="retryWithOtherPlaybackEngine"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="customShortsPlayerActive"
+          class="shortsExternalMetadata"
+          :class="{ shortsMetadataSkeleton: isLoading }"
+        >
+          <template v-if="isLoading">
+            <div class="shortsSkeletonChannelRow">
+              <span class="shortsSkeletonAvatar ft-shimmer" />
+              <span class="shortsSkeletonChannel ft-shimmer" />
+              <span class="shortsSkeletonSubscribe ft-shimmer" />
+            </div>
+            <span class="shortsSkeletonTitle ft-shimmer" />
+          </template>
+          <template v-else>
+            <FtPaidPromotionBadge
+              v-if="showPaidPromotion"
+              class="shortsPaidPromotion"
+            />
+            <div
+              class="shortsChannelRow"
+            >
+              <component
+                :is="disableChannelLinks ? 'span' : 'router-link'"
+                v-if="!hideUploader && channelId"
+                class="shortsExternalChannel"
+                :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
+                @click="openShortsChannel"
+                @auxclick="openShortsChannel"
+              >
+                <FtRetryImage
+                  v-if="channelThumbnail"
+                  :fallback-icon="['fas', 'circle-user']"
+                  :src="channelThumbnail"
+                  class="shortsExternalChannelThumbnail"
+                  alt=""
+                />
+                <span dir="auto">{{ channelName }}</span>
+                <FtVerifiedBadge
+                  :verified="channelVerified"
+                  :artist="channelVerifiedArtist"
+                />
+              </component>
+              <FtSubscribeButton
+                v-if="!hideUnsubscribeButton"
+                :channel-id="channelId"
+                :channel-name="channelName"
+                :channel-thumbnail="channelThumbnail"
+                :subscription-count-text="channelSubscriptionCountText"
+              />
+            </div>
+          </template>
+          <h1
+            v-if="!isLoading"
+            class="shortsExternalTitle"
+          >
+            <button
+              type="button"
+              class="shortsExternalTitleButton"
+              dir="auto"
+              :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
+              :aria-expanded="shortsMetadataOpen"
+              @click="toggleShortsMetadata"
+            >
+              {{ videoTitle }}
+            </button>
+          </h1>
+          <RouterLink
+            v-if="!isLoading && shortsLinkedVideo?.videoId"
+            class="shortsLinkedVideo"
+            :to="`/watch/${shortsLinkedVideo.videoId}`"
+            :title="shortsLinkedVideo.title"
+            @click="openShortsLinkedVideo"
+            @auxclick="openShortsLinkedVideo"
+          >
+            <ft-icon :icon="['fas', 'play']" />
+            <span dir="auto">{{ shortsLinkedVideo.title }}</span>
+          </RouterLink>
+        </div>
+        <div
+          v-if="customShortsPlayerActive"
+          ref="shortsActionRail"
+          v-overlay-scrollbars
+          class="shortsActionRail"
+          :class="{ shortsActionRailSkeleton: isLoading }"
+        >
+          <div
+            v-if="hasPreviousSubscriptionShort || hasNextSubscriptionShort"
+            class="shortsNavigation"
+          >
+            <button
+              type="button"
+              class="shortsNavigationButton"
+              :disabled="!hasPreviousSubscriptionShort"
+              :aria-label="$t('Video.Previous')"
+              :title="$t('Video.Previous')"
+              @click="shortsNavigation.navigate(-1)"
+            >
+              <ft-icon :icon="['fas', 'arrow-up']" />
+            </button>
+            <button
+              type="button"
+              class="shortsNavigationButton"
+              :disabled="!hasNextSubscriptionShort"
+              :aria-label="$t('Video.Next')"
+              :title="$t('Video.Next')"
+              @click="shortsNavigation.navigate(1)"
+            >
+              <ft-icon :icon="['fas', 'arrow-down']" />
+            </button>
+          </div>
+          <template v-if="isLoading">
+            <div
+              v-for="index in shortsActionSkeletonCount"
+              :key="index"
+              class="shortsAction shortsActionSkeleton"
+            >
+              <span class="ft-shimmer" />
+            </div>
+            <span class="shortsSkeletonSound ft-shimmer" />
+          </template>
+          <div
+            v-if="!isLoading"
+            class="shortsAction shortsComponentAction shortsMetadataAction"
+            :class="{ active: shortsMetadataOpen }"
+          >
+            <FtIconButton
+              :title="$t('Video.Metadata')"
+              :icon="['fas', 'circle-info']"
+              :aria-expanded="shortsMetadataOpen"
+              theme="base"
+              @click="toggleShortsMetadata"
+            />
+            <span>{{ $t('Video.Metadata') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && commentsAvailable"
+            class="shortsAction shortsComponentAction shortsCommentsAction"
+            :class="{ active: shortsCommentsOpen }"
+          >
+            <FtIconButton
+              :title="shortsCommentsText"
+              :icon="['fas', 'comment-alt']"
+              :aria-pressed="shortsCommentsOpen"
+              theme="base"
+              @click="toggleShortsComments"
+            />
+            <span>{{ shortsCommentsText }}</span>
+          </div>
+          <div
+            v-if="!isLoading && !isLive && !isUpcoming && transcriptAvailable"
+            class="shortsAction shortsComponentAction"
+            :class="{ active: showTranscript }"
+          >
+            <FtIconButton
+              :title="showTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :icon="['fas', 'file-lines']"
+              :aria-pressed="showTranscript"
+              theme="base"
+              @click="toggleTranscript"
+            />
+            <span>{{ $t('Video.Transcript.Title') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && useSponsorBlock && !isUpcoming"
+            class="shortsAction shortsComponentAction"
+            :class="{ active: showSidebarSponsorBlock }"
+          >
+            <FtIconButton
+              :title="$t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :icon="['fas', 'shield-halved']"
+              :aria-pressed="showSidebarSponsorBlock"
+              theme="base"
+              @click="toggleSponsorBlockInfo"
+            />
+            <span>{{ $t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && !hideSharingActions"
+            class="shortsAction shortsComponentAction"
+          >
+            <FtShareButton
+              :id="videoId"
+              :get-timestamp="getTimestamp"
+              :playlist-id="playlistId"
+              dropdown-position-y="top"
+            />
+            <span>{{ $t('Share.Share Video') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && showPlaylists && !isUpcoming"
+            class="shortsAction shortsComponentAction"
+          >
+            <FtIconButton
+              :title="$t('User Playlists.Add to Playlist')"
+              :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+              force-dropdown
+              dropdown-portal
+              mobile-sheet
+              dropdown-position-x="left"
+              dropdown-position-y="top"
+            >
+              <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+            </FtIconButton>
+            <span>{{ $t('User Playlists.Add to Playlist') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && isQuickBookmarkEnabled"
+            class="shortsAction shortsComponentAction shortsQuickBookmark"
+            :class="{ shortsQuickBookmarked: isCurrentVideoQuickBookmarked }"
+          >
+            <FtIconButton
+              :title="quickBookmarkIconText"
+              :icon="quickBookmarkIcon"
+              :theme="isCurrentVideoQuickBookmarked ? 'favorite' : 'base'"
+              @click="toggleCurrentVideoQuickBookmarked"
+            />
+            <span>{{ quickBookmarkIconText }}</span>
+          </div>
+          <component
+            :is="disableChannelLinks ? 'span' : 'router-link'"
+            v-if="!isLoading && channelId && channelThumbnail"
+            class="shortsSoundThumbnail"
+            :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
+            :title="channelName"
+            @click="openShortsChannel"
+            @auxclick="openShortsChannel"
+          >
+            <FtRetryImage
+              :fallback-icon="['fas', 'circle-user']"
+              :src="channelThumbnail"
+              alt=""
+            />
+          </component>
+        </div>
+        <button
+          v-if="customShortsPlayerActive && nextSubscriptionShortThumbnail"
+          type="button"
+          class="shortsNextPreview"
+          :style="{ '--shorts-next-thumbnail': `url(${nextSubscriptionShortThumbnail})` }"
+          :aria-label="$t('Video.Next')"
+          @click="shortsNavigation.navigate(1)"
+        />
+      </div>
+      <div
+        v-if="customShortsPlayerActive"
+        ref="shortsCommentsTarget"
+        class="shortsCommentsPanel"
+        :class="{ shortsCommentsPanelOpen }"
+      />
+      <FtPhonePanel
+        :enabled="shortsPhonePanelsEnabled"
+        :open="mobilePanel === 'metadata'"
+        :title="$t('Video.Metadata')"
+        @close="closeShortsPhonePanel"
+      >
+        <div
+          v-if="customShortsPlayerActive"
+          class="shortsAuxPanel"
+          :class="{ shortsAuxPanelOpen, shortsPhoneSheetContent: shortsPhonePanelsEnabled }"
+        >
+          <div
+            v-if="shortsMetadataOpen && !shortsPhonePanelsEnabled"
+            class="shortsAuxPanelHeader"
+          >
+            <h2>
+              <ft-icon :icon="['fas', 'circle-info']" />
+              {{ $t('Video.Metadata') }}
+            </h2>
+            <button
+              type="button"
+              class="shortsAuxPanelClose"
+              :aria-label="$t('Video.Close Metadata')"
+              :title="$t('Video.Close Metadata')"
+              @click="toggleShortsMetadata"
+            >
+              <ft-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <div
+            ref="shortsAuxPanelTarget"
+            v-overlay-scrollbars="!shortsPhonePanelsEnabled"
+            class="shortsAuxPanelTarget"
+          >
+            <watch-video-info
+              v-if="shortsMetadataOpen && !isLoading"
+              :id="videoId"
+              :title="videoTitle"
+              :channel-id="channelId"
+              :channel-name="channelName"
+              :channel-verified="channelVerified"
+              :channel-verified-artist="channelVerifiedArtist"
+              :channel-thumbnail="channelThumbnail"
+              :channel-collaborators="channelCollaborators"
+              :published="videoPublished"
+              :premiere-date="premiereDate"
+              :subscription-count-text="channelSubscriptionCountText"
+              :offline="isOffline"
+              :like-count="videoLikeCount"
+              :dislike-count="videoDislikeCount"
+              :category="videoCategory"
+              :view-count="videoViewCount"
+              :get-timestamp="getTimestamp"
+              :is-live-content="isLiveContent"
+              :is-live="isLive"
+              :is-upcoming="isUpcoming"
+              :playlist-id="playlistId"
+              :get-playlist-state="getPlaylistState"
+              :length-seconds="videoLengthSeconds"
+              :video-thumbnail="thumbnail"
+              :metadata-history="videoMetadataHistory"
+              :in-user-playlist="!!selectedUserPlaylist"
+              :is-unlisted="isUnlisted"
+              :is-age-restricted="isFamilyFriendly === false"
+              :has-ai-generated-content="hasAiGeneratedContent"
+              :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
+              :active-format="activeFormat"
+              :playback-engine="activePlaybackEngine"
+              :playback-engine-version="activePlaybackEngineVersion"
+              :playback-engine-selection="playbackEngineSelection"
+              :stream-type="playbackStreamType"
+              :dash-available="dashFormatAvailable"
+              :legacy-available="legacyFormatAvailable"
+              :audio-available="audioFormatAvailable"
+              :local-file-playback="localFilePlayback"
+              :local-playback-downloads="localPlaybackDownloads"
+              :can-save-watched-progress="canSaveWatchProgress"
+              :current-playback-rate="currentPlaybackRate"
+              :current-video-quality="currentVideoQuality"
+              :current-subtitles-state="currentSubtitlesState"
+              :current-volume="currentVolume"
+              :sponsor-block-panel-open="showSidebarSponsorBlock"
+              :sponsor-block-available="useSponsorBlock"
+              :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
+              :transcript-available="transcriptAvailable"
+              channel-setting-dropdown-portal
+              hide-share-button
+              hide-playlist-actions
+              hide-fullscreen-dock-actions
+              class="watchVideo"
+              @change-format="handleFormatChange"
+              @change-playback-engine="handlePlaybackEngineChange"
+              @use-local-source="useLocalPlaybackSource"
+              @use-online-source="useOnlinePlaybackSource"
+              @pause-player="pausePlayer"
+              @open-download="openVideoDownloadPrompt"
+              @save-watched-progress="handleWatchProgressManualSave"
+              @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+              @save-channel-video-quality="handleChannelVideoQualityManualSave"
+              @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
+              @save-channel-volume="handleChannelVolumeManualSave"
+            />
+            <WatchVideoInfoPanels
+              v-if="shortsMetadataOpen && !isLoading && infoPanels"
+              :panels="infoPanels"
+              class="watchVideo"
+            />
+            <watch-video-description
+              v-if="shortsMetadataOpen && !isLoading && videoDescriptionMode !== 'hide'"
+              :description="videoDescription"
+              :description-html="videoDescriptionHtml"
+              :tags="videoTags"
+              :license="license"
+              :content-disclosures="contentDisclosures"
+              :games="videoGames"
+              :music-tracks="videoMusicTracks"
+              always-expanded
+              class="watchVideo"
+              @timestamp-event="changeTimestamp"
+            />
+            <WatchVideoSummary
+              v-if="shortsMetadataOpen && !isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length"
+              :key="videoId"
+              :paragraphs="videoSummary"
+              :expanded="aiVideoSummaryMode === 'expanded'"
+              class="watchVideo"
+              @toggle="clampShortsAuxPanelScroll"
+            />
+            <watch-video-sponsor-block
+              v-if="showSidebarSponsorBlock && !isLoading && !shortsPhonePanelsEnabled"
+              class="watchVideoSideBar watchVideoSponsorBlock"
+              :offline="isOffline"
+              :loading="sponsorBlockInfoLoading"
+              :pending-uuid="sponsorBlockInfoPendingUuid"
+              :segments="sponsorBlockInfoSegments"
+              :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+              :contribution-stats="sponsorBlockContributionStats"
+              :contribution-stats-error="sponsorBlockContributionStatsError"
+              :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
+              :contribution-stats-loading="sponsorBlockContributionStatsLoading"
+              :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+              :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+              :can-whitelist-channel="Boolean(channelId)"
+              :current-time="liveChatCurrentTime"
+              @close="closeSidebarSponsorBlock"
+              @refresh="refreshSponsorBlockInfo"
+              @skip="skipSponsorBlockInfoSegment"
+              @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+              @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+              @vote="voteOnSponsorBlockInfoSegment"
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+            />
+            <watch-video-transcript
+              v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && !shortsPhonePanelsEnabled"
+              v-show="showTranscript"
+              :captions="captions"
+              :offline="isOffline"
+              :current-time="showTranscript ? currentTime : liveChatCurrentTime"
+              :preferred-caption-index="preferredTranscriptCaptionIndex"
+              :video-title="videoTitle"
+              class="watchVideoSideBar watchVideoTranscript"
+              @loaded="transcriptLoaded = $event"
+              @close="closeTranscript"
+              @timestamp-event="playTranscriptSegment"
+            />
+            <div
+              ref="shortsAuxPanelContentEnd"
+              class="shortsAuxPanelContentEnd"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      </FtPhonePanel>
+    </div>
+    <ft-age-restricted
+      v-if="(!isLoading && isFamilyFriendly === false && showFamilyFriendlyOnly)"
+      class="ageRestricted"
+    />
+    <div
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
+      class="infoArea"
+    >
+      <WatchVideoInfoSkeleton
+        v-if="isLoading"
+        class="watchVideo"
+      />
+      <Teleport
+        :to="fullscreenMetadataTarget || 'body'"
+        :disabled="!fullscreenMetadataOpen"
+      >
+        <watch-video-info
+          v-if="!isLoading && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          :id="videoId"
+          :title="videoTitle"
+          :channel-id="channelId"
+          :channel-name="channelName"
+          :channel-verified="channelVerified"
+          :channel-verified-artist="channelVerifiedArtist"
+          :channel-thumbnail="channelThumbnail"
+          :channel-collaborators="channelCollaborators"
+          :published="videoPublished"
+          :premiere-date="premiereDate"
+          :subscription-count-text="channelSubscriptionCountText"
+          :offline="isOffline"
+          :like-count="videoLikeCount"
+          :dislike-count="videoDislikeCount"
+          :category="videoCategory"
+          :view-count="videoViewCount"
+          :get-timestamp="getTimestamp"
+          :is-live-content="isLiveContent"
+          :is-live="isLive"
+          :is-upcoming="isUpcoming"
+          :playlist-id="playlistId"
+          :get-playlist-state="getPlaylistState"
+          :length-seconds="videoLengthSeconds"
+          :video-thumbnail="thumbnail"
+          :metadata-history="videoMetadataHistory"
+          :in-user-playlist="!!selectedUserPlaylist"
+          :is-unlisted="isUnlisted"
+          :is-age-restricted="isFamilyFriendly === false"
+          :has-ai-generated-content="hasAiGeneratedContent"
+          :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
+          :active-format="activeFormat"
+          :playback-engine="activePlaybackEngine"
+          :playback-engine-version="activePlaybackEngineVersion"
+          :playback-engine-selection="playbackEngineSelection"
+          :stream-type="playbackStreamType"
+          :dash-available="dashFormatAvailable"
+          :legacy-available="legacyFormatAvailable"
+          :audio-available="audioFormatAvailable"
+          :local-file-playback="localFilePlayback"
+          :local-playback-downloads="localPlaybackDownloads"
+          :can-save-watched-progress="canSaveWatchProgress"
+          :current-playback-rate="currentPlaybackRate"
+          :current-video-quality="currentVideoQuality"
+          :current-subtitles-state="currentSubtitlesState"
+          :current-volume="currentVolume"
+          :sponsor-block-panel-open="phonePanelsEnabled ? mobilePanel === 'sponsorBlock' : showSidebarSponsorBlock"
+          :sponsor-block-available="useSponsorBlock"
+          :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
+          :transcript-available="transcriptAvailable"
+          :live-chat-available="liveChatAvailable"
+          :live-chat-open="phonePanelsEnabled ? mobilePanel === 'chat' : showLiveChat"
+          :live-chat-replay="liveChatIsReplay"
+          :hide-share-button="fullscreenMetadataOpen"
+          :hide-playlist-actions="fullscreenMetadataOpen"
+          :hide-fullscreen-dock-actions="fullscreenMetadataOpen"
+          class="watchVideo"
+          :class="{ theatreWatchVideo: useTheatreMode }"
+          @change-format="handleFormatChange"
+          @change-playback-engine="handlePlaybackEngineChange"
+          @use-local-source="useLocalPlaybackSource"
+          @use-online-source="useOnlinePlaybackSource"
+          @pause-player="pausePlayer"
+          @open-download="openVideoDownloadPrompt"
+          @save-watched-progress="handleWatchProgressManualSave"
+          @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+          @save-channel-video-quality="handleChannelVideoQualityManualSave"
+          @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
+          @save-channel-volume="handleChannelVolumeManualSave"
+          @toggle-sponsorblock-info="toggleSponsorBlockInfo"
+          @toggle-transcript="toggleTranscript"
+          @toggle-live-chat="toggleLiveChat"
+        >
+          <template
+            v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (supportsChromecast && $store.getters.getShowChromecastButton) || (supportsChromecast && $store.getters.getShowFcastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            #cast-action
+          >
+            <WatchCast
+              ref="chromecast"
+              :key="`cast-${videoId}`"
+              :video-id="videoId"
+              :google-cast-enabled="supportsChromecast && $store.getters.getShowChromecastButton"
+              :fcast-enabled="supportsChromecast && $store.getters.getShowFcastButton"
+              :dlna-enabled="$store.getters.getShowDlnaCastButton"
+              :formats="legacyFormats"
+              :manifest-url="manifestSrc"
+              :manifest-type="manifestMimeType"
+              :captions="captions"
+              :subtitles-enabled="currentSubtitlesState"
+              :is-live="isLive"
+              :title="videoTitle"
+              :get-player="() => $refs.player"
+              :get-source="() => getChromecastSource()"
+              @dlna-change="dlnaCastActive = $event"
+              @casting-change="handleChromecastChange"
+              @playback-state="handleChromecastState"
+              @ended="handlePlayerEnded"
+            />
+          </template>
+        </watch-video-info>
+        <WatchVideoInfoPanels
+          v-if="!isLoading && infoPanels && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          :panels="infoPanels"
+          class="watchVideo"
+        />
+        <button
+          v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
+          type="button"
+          class="phonePanelButton phonePanelCard phoneQueueButton watchVideo"
+          @click="openPhonePanel('queue')"
+          @keydown.space.stop
+          @keyup.space.stop
+        >
+          <ft-icon
+            :icon="['fas', 'queue']"
+            aria-hidden="true"
+          />
+          <span class="phoneCommentsLabel">
+            <span>{{ $t('Video.Queue') }}</span>
+            <span
+              class="phoneQueuePreview"
+              dir="auto"
+            >{{ $store.getters.getNextQueuedVideo.title }}</span>
+          </span>
+          <ft-icon
+            :icon="['fas', 'angle-down']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          v-if="phonePanelsEnabled && watchingPlaylist && !isLoading"
+          type="button"
+          class="phonePanelButton phonePanelCard phonePlaylistButton watchVideo"
+          aria-haspopup="dialog"
+          :aria-expanded="mobilePanel === 'playlist'"
+          @click="openPhonePanel('playlist')"
+          @keydown.space.stop
+          @keyup.space.stop
+        >
+          <ft-icon
+            :icon="['fas', 'list']"
+            aria-hidden="true"
+          />
+          <span class="phoneCommentsLabel">{{ $t('Playlist.Playlist') }}</span>
+          <ft-icon
+            :icon="['fas', 'angle-down']"
+            aria-hidden="true"
+          />
+        </button>
+        <PhoneCommentsButton
+          v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
+          :key="videoId"
+          :comments="commentPreviews"
+          :panel-open="mobilePanel === 'comments'"
+          class="watchVideo"
+          @open="openPhonePanel('comments')"
+        />
+        <PhoneDescriptionButton
+          v-if="phonePanelsEnabled && !isLoading && videoDescriptionMode !== 'hide'"
+          :description="videoDescription"
+          :description-html="videoDescriptionHtml"
+          :tags="videoTags"
+          :license="license"
+          :content-disclosures="contentDisclosures"
+          :games="videoGames"
+          :music-tracks="videoMusicTracks"
+          :panel-open="mobilePanel === 'description'"
+          class="watchVideo phoneDescriptionPreview"
+          @open="openPhonePanel('description')"
+        />
+        <FtPhonePanel
+          :enabled="phonePanelsEnabled"
+          :open="mobilePanel === 'description'"
+          class="phoneDescriptionPanel"
+          :title="$t('Description.Title')"
+          @close="mobilePanel = null"
+        >
+          <watch-video-description
+            v-if="!isLoading && videoDescriptionMode !== 'hide' && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+            :description="videoDescription"
+            :description-html="videoDescriptionHtml"
+            :tags="videoTags"
+            :license="license"
+            :content-disclosures="contentDisclosures"
+            :games="videoGames"
+            :music-tracks="videoMusicTracks"
+            :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
+            :expanded="videoDescriptionMode === 'expanded'"
+            class="watchVideo"
+            :class="{ theatreWatchVideo: useTheatreMode }"
+            @timestamp-event="changeTimestamp"
+          />
+        </FtPhonePanel>
+        <WatchVideoSummary
+          v-if="!isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          :key="videoId"
+          :paragraphs="videoSummary"
+          :expanded="aiVideoSummaryMode === 'expanded'"
+          :phone="phonePanelsEnabled"
+          class="watchVideo"
+        />
+      </Teleport>
+    </div>
+    <div
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
+      class="sidebarArea"
+    >
+      <div
+        v-if="isLoading && watchingPlaylist"
+        class="playlistSkeleton watchVideoSideBar watchVideoPlaylist"
+        aria-hidden="true"
+      >
+        <div class="skeletonLine skeletonPlaylistTitle ft-shimmer" />
+        <div class="skeletonLine skeletonPlaylistMeta ft-shimmer" />
+        <div class="skeletonPlaylistProgress ft-shimmer" />
+        <div class="skeletonPlaylistButtons">
+          <div
+            v-for="n in 3"
+            :key="n"
+            class="skeletonPlaylistButton ft-shimmer"
+          />
+        </div>
+        <div class="skeletonPlaylistItems">
+          <div
+            v-for="n in 4"
+            :key="n"
+            class="skeletonPlaylistItem"
+          >
+            <div class="skeletonPlaylistIndex ft-shimmer" />
+            <div class="skeletonPlaylistThumbnail ft-shimmer" />
+            <div class="skeletonPlaylistDetails">
+              <div class="skeletonPlaylistDetailLine ft-shimmer" />
+              <div class="skeletonPlaylistDetailLine short ft-shimmer" />
+              <div class="skeletonPlaylistDetailLine shorter ft-shimmer" />
             </div>
           </div>
         </div>
       </div>
+      <div
+        v-if="isLoading && !hideRecommendedVideos"
+        class="recommendationsSkeleton"
+        aria-hidden="true"
+      >
+        <div
+          v-for="n in 5"
+          :key="n"
+          class="skeletonRecommendation"
+        >
+          <div class="skeletonRecommendationThumbnail ft-shimmer" />
+          <div class="skeletonRecommendationDetails">
+            <div class="skeletonLine ft-shimmer" />
+            <div class="skeletonLine short ft-shimmer" />
+          </div>
+        </div>
+      </div>
+      <WatchSidebarPanel
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'chapters'"
+        :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+        transition="chapters-panel"
+        @close="closeSidebarChapters"
+        @leaving="sidebarPanelLeaving = $event"
+      >
+        <WatchVideoChaptersPanel
+          v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
+          class="watchVideoSideBar"
+          :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+          :chapters="videoChapters"
+          :chapter-thumbnails="videoChapterThumbnails"
+          :current-chapter-index="videoCurrentChapterIndex"
+          :fallback-thumbnail="thumbnail"
+          :looped-chapter-index="videoLoopedChapterIndex"
+          @close="closeSidebarChapters"
+          @copy-timestamp="copyChapterTimestamp"
+          @loop-chapter="$refs.player?.toggleChapterLoop($event)"
+          @timestamp-event="changeTimestamp"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenSponsorBlockOpen && !shortsPhonePanelsEnabled ? fullscreenSponsorBlockTarget : null"
+        :phone-enabled="(phonePanelsEnabled && !fullscreenSponsorBlockOpen) || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'sponsorBlock'"
+        :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+        custom-header
+        @close="fullscreenSponsorBlockOpen ? mobilePanel = null : closeSidebarSponsorBlock()"
+        @leaving="sidebarPanelLeaving = $event"
+      >
+        <watch-video-sponsor-block
+          v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
+          class="watchVideoSideBar watchVideoSponsorBlock"
+          :offline="isOffline"
+          :loading="sponsorBlockInfoLoading"
+          :pending-uuid="sponsorBlockInfoPendingUuid"
+          :segments="sponsorBlockInfoSegments"
+          :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+          :contribution-stats="sponsorBlockContributionStats"
+          :contribution-stats-error="sponsorBlockContributionStatsError"
+          :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
+          :contribution-stats-loading="sponsorBlockContributionStatsLoading"
+          :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+          :can-whitelist-channel="Boolean(channelId)"
+          :current-time="liveChatCurrentTime"
+          @close="closeSidebarSponsorBlock"
+          @refresh="refreshSponsorBlockInfo"
+          @skip="skipSponsorBlockInfoSegment"
+          @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+          @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+          @vote="voteOnSponsorBlockInfoSegment"
+          @category-vote="changeSponsorBlockInfoSegmentCategory"
+          @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenTranscriptOpen && !shortsPhonePanelsEnabled ? fullscreenTranscriptTarget : null"
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'transcript'"
+        :title="$t('Video.Transcript.Title')"
+        custom-header
+        @close="closeTranscript"
+        @leaving="sidebarPanelLeaving = $event"
+      >
+        <watch-video-transcript
+          v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
+          v-show="showTranscript"
+          :captions="captions"
+          :offline="isOffline"
+          :current-time="showTranscript ? currentTime : liveChatCurrentTime"
+          :preferred-caption-index="preferredTranscriptCaptionIndex"
+          :video-title="videoTitle"
+          :fullscreen-overlay="fullscreenTranscriptOpen"
+          class="watchVideoSideBar watchVideoTranscript"
+          @loaded="transcriptLoaded = $event"
+          @close="closeTranscript"
+          @timestamp-event="playTranscriptSegment"
+        />
+      </WatchSidebarPanel>
+      <WatchSidebarPanel
+        :dock-target="fullscreenLiveChatOpen && !shortsPhonePanelsEnabled ? fullscreenLiveChatTarget : null"
+        :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+        :phone-open="mobilePanel === 'chat'"
+        :title="liveChatIsReplay ? $t('Video.Live Chat Replay') : $t('Video.Live Chat')"
+        custom-header
+        @close="closeLiveChat"
+        @leaving="sidebarPanelLeaving = $event"
+      >
+        <watch-video-live-chat
+          v-if="!isLoading && (showLiveChat || (isOffline && liveChatLoaded))"
+          v-show="showLiveChat"
+          :offline="isOffline"
+          :live-chat="liveChat"
+          :video-id="videoId"
+          :channel-id="channelId"
+          :current-time="liveChatCurrentTime"
+          :seek-request="liveChatSeekRequest"
+          :fullscreen-overlay="fullscreenLiveChatOpen"
+          class="watchVideoSideBar watchVideoPlaylist phoneLiveChat"
+          :class="{ theatrePlaylist: useTheatreMode }"
+          @loaded="liveChatLoaded = $event"
+          @close="closeLiveChat"
+        />
+      </WatchSidebarPanel>
+      <Teleport
+        :to="fullscreenQueueTarget || 'body'"
+        :disabled="!fullscreenQueueOpen"
+      >
+        <FtPhonePanel
+          :enabled="phonePanelsEnabled && !fullscreenQueueOpen"
+          :open="mobilePanel === 'queue'"
+          custom-header
+          fill
+          :title="$t('Video.Queue')"
+          @close="mobilePanel = null"
+        >
+          <watch-video-queue
+            v-if="$store.getters.getWatchQueueLength > 0"
+            ref="watchVideoQueue"
+            :fullscreen-overlay="fullscreenQueueOpen"
+            class="watchVideoSideBar watchVideoQueue"
+            @close="closeFullscreenQueue"
+            @pause-player="pausePlayer"
+          />
+        </FtPhonePanel>
+      </Teleport>
+      <Teleport
+        :to="fullscreenPlaylistTarget || 'body'"
+        :disabled="!fullscreenPlaylistOpen || shortsPhonePanelsEnabled"
+      >
+        <FtPhonePanel
+          :enabled="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
+          :open="mobilePanel === 'playlist'"
+          :title="$t('Playlist.Playlist')"
+          custom-header
+          fill
+          @close="closeShortsPhonePanel"
+        >
+          <watch-video-playlist
+            v-if="watchingPlaylist"
+            v-show="!isLoading"
+            ref="watchVideoPlaylist"
+            :watch-view-loading="isLoading"
+            :auto-skip-unavailable="skipUnavailablePlaylistVideo && $store.getters.getSkipUnavailablePlaylistVideos"
+            :playlist-id="playlistId"
+            :playlist-type="playlistType"
+            :video-id="videoId"
+            :playlist-item-id="playlistItemId"
+            :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
+            :fullscreen-overlay="fullscreenPlaylistOpen"
+            :phone-panel="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
+            class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
+            :class="{ theatrePlaylist: useTheatreMode }"
+            @close="closeFullscreenPlaylist"
+            @pause-player="pausePlayer"
+            @restart-current-video="restartCurrentVideo"
+            @skip-availability-change="handlePlaylistSkipAvailabilityChange"
+            @unavailable-video-skipped="handleUnavailablePlaylistVideoSkipped"
+            @upcoming-videos-change="handleUpcomingPlaylistVideosChange"
+          />
+        </FtPhonePanel>
+      </Teleport>
+      <Teleport
+        :to="fullscreenRecommendationsTarget || 'body'"
+        :disabled="!fullscreenRecommendationsOpen"
+      >
+        <watch-video-recommendations
+          v-if="!isLoading && !hideRecommendedVideos && displayedRecommendations.length > 0"
+          ref="watchVideoRecommendations"
+          :fullscreen-overlay="fullscreenRecommendationsOpen"
+          :data="displayedRecommendations"
+          :offline="isOffline"
+          class="watchVideoSideBar watchVideoRecommendations"
+          :class="{
+            theatreRecommendations: useTheatreMode,
+            watchVideoRecommendationsLowerCard: watchingPlaylist || isLive,
+            watchVideoRecommendationsNoCard: !watchingPlaylist || !isLive
+          }"
+          @close="closeFullscreenRecommendations"
+          @pause-player="pausePlayer"
+        />
+      </Teleport>
     </div>
-    <ft-age-restricted
-      v-if="(!isLoading && !isFamilyFriendly && showFamilyFriendlyOnly)"
-      class="ageRestricted"
+    <div
+      v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
+      class="commentsArea"
+    >
+      <Teleport
+        :to="fullscreenCommentsTarget || (shortsCommentsOpen ? $refs.shortsCommentsTarget : null) || 'body'"
+        :disabled="shortsPhonePanelsEnabled || (!fullscreenCommentsOpen && !shortsCommentsOpen)"
+      >
+        <FtPhonePanel
+          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
+          :open="mobilePanel === 'comments'"
+          fill
+          custom-header
+          :title="$t('Comments.Comments')"
+          @close="shortsPhonePanelsEnabled ? closeShortsPhonePanel() : mobilePanel = null"
+        >
+          <div
+            v-if="isLoading && commentsAvailable"
+            class="watchVideo commentsSkeleton"
+            :class="{ theatreWatchVideo: useTheatreMode }"
+            aria-hidden="true"
+          >
+            <div class="skeletonLine skeletonCommentsTitle ft-shimmer" />
+            <div
+              v-for="n in 4"
+              :key="n"
+              class="skeletonComment"
+            >
+              <div class="skeletonCommentAvatar ft-shimmer" />
+              <div class="skeletonCommentDetails">
+                <div class="skeletonLine skeletonCommentAuthor ft-shimmer" />
+                <div class="skeletonLine ft-shimmer" />
+                <div class="skeletonLine short ft-shimmer" />
+              </div>
+            </div>
+          </div>
+          <CommentSection
+            v-if="!isLoading && commentsAvailable"
+            :id="videoId"
+            class="watchVideo"
+            :class="{ theatreWatchVideo: useTheatreMode }"
+            :channel-thumbnail="channelThumbnail"
+            :channel-name="channelName"
+            :offline="isOffline"
+            :comments-disabled="commentsDisabled"
+            :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
+            :highlighted-comment-id="tabRoute.query.commentId"
+            @loaded="commentsLoaded = $event"
+            @preview-comments="commentPreviews = $event"
+            @close-comments="closeFullscreenComments"
+            @timestamp-event="changeTimestamp"
+          />
+        </FtPhonePanel>
+      </Teleport>
+    </div>
+    <WatchVideoDownloadPrompt
+      v-if="showDownloadPrompt && downloadAvailable"
+      :video-id="videoId"
+      :title="videoTitle"
+      :thumbnail="thumbnail"
+      @close="showDownloadPrompt = false"
     />
-    <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
-      class="infoArea"
-    >
-      <watch-video-info
-        v-if="!isLoading"
-        :id="videoId"
-        :title="videoTitle"
-        :channel-id="channelId"
-        :channel-name="channelName"
-        :channel-thumbnail="channelThumbnail"
-        :published="videoPublished"
-        :premiere-date="premiereDate"
-        :subscription-count-text="channelSubscriptionCountText"
-        :like-count="videoLikeCount"
-        :dislike-count="videoDislikeCount"
-        :view-count="videoViewCount"
-        :get-timestamp="getTimestamp"
-        :is-live-content="isLiveContent"
-        :is-live="isLive"
-        :is-upcoming="isUpcoming"
-        :playlist-id="playlistId"
-        :get-playlist-state="getPlaylistState"
-        :length-seconds="videoLengthSeconds"
-        :video-thumbnail="thumbnail"
-        :in-user-playlist="!!selectedUserPlaylist"
-        :is-unlisted="isUnlisted"
-        :content-disclosures="contentDisclosures"
-        :can-save-watched-progress="canSaveWatchProgress"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @change-format="handleFormatChange"
-        @pause-player="pausePlayer"
-        @save-watched-progress="handleWatchProgressManualSave"
-        @reload-player="onManualReloadRequested"
-      />
-      <watch-video-chapters
-        v-if="!hideChapters && !isLoading && videoChapters.length > 0"
-        :chapters="videoChapters"
-        :current-chapter-index="videoCurrentChapterIndex"
-        :kind="videoChaptersKind"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @timestamp-event="changeTimestamp"
-      />
-      <watch-video-description
-        v-if="!isLoading && !hideVideoDescription"
-        :description="videoDescription"
-        :description-html="videoDescriptionHtml"
-        :license="license"
-        :content-disclosures="contentDisclosures"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @timestamp-event="changeTimestamp"
-      />
-      <CommentSection
-        v-if="!isLoading && !isLive && !hideComments"
-        :id="videoId"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        :channel-thumbnail="channelThumbnail"
-        :channel-name="channelName"
-        :video-player-ready="videoPlayerLoaded"
-        @timestamp-event="changeTimestamp"
-      />
-    </div>
-    <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
-      class="sidebarArea"
-    >
-      <watch-video-live-chat
-        v-if="!isLoading && !hideLiveChat && (isLive || isUpcoming)"
-        :live-chat="liveChat"
-        :video-id="videoId"
-        :channel-id="channelId"
-        class="watchVideoSideBar watchVideoPlaylist"
-        :class="{ theatrePlaylist: useTheatreMode }"
-      />
-      <watch-video-playlist
-        v-if="watchingPlaylist"
-        v-show="!isLoading"
-        ref="watchVideoPlaylist"
-        :watch-view-loading="isLoading"
-        :playlist-id="playlistId"
-        :playlist-type="playlistType"
-        :video-id="videoId"
-        :playlist-item-id="playlistItemId"
-        class="watchVideoSideBar watchVideoPlaylist"
-        :class="{ theatrePlaylist: useTheatreMode }"
-        @pause-player="pausePlayer"
-      />
-      <watch-video-recommendations
-        v-if="!isLoading && !hideRecommendedVideos"
-        :data="recommendedVideos"
-        class="watchVideoSideBar watchVideoRecommendations"
-        :class="{
-          theatreRecommendations: useTheatreMode,
-          watchVideoRecommendationsLowerCard: watchingPlaylist || isLive,
-          watchVideoRecommendationsNoCard: !watchingPlaylist || !isLive
-        }"
-        @pause-player="pausePlayer"
-      />
-    </div>
   </div>
 </template>
 
 <script src="./Watch.js" />
 <style scoped src="./Watch.scss" lang="scss" />
+<style scoped src="../../components/phonePanelCard.css" />
