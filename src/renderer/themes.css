@@ -2630,7 +2630,9 @@ a:visited {
 
   /* Filled controls carry white text in the light theme. */
   --signal-accent-fill: rgb(from oklch(from var(--signal-accent-color) min(l, 0.5) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
-  --seekbar-played-color: color-mix(in srgb, var(--signal-accent-color) 20%, #e4e1df);
+
+  /* The seekbar sits on video, so dark accents are lifted to stay apart from its track. */
+  --seekbar-played-color: color-mix(in srgb, rgb(from oklch(from var(--signal-accent-color) max(l, 0.62) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)) 65%, #e4e1df);
   --bg-glows:
     radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-accent), transparent 55%),
     radial-gradient(ellipse 60% 45% at 90% 20%, var(--bg-glow-ink), transparent 50%),
@@ -2666,6 +2668,7 @@ a:visited {
   --accent-color-opacity3: rgb(from var(--accent-color) r g b / 16%);
   --accent-color-opacity4: rgb(from var(--accent-color) r g b / 24%);
   --accent-color-visited: var(--secondary-text-color);
+  --accent-color-light: var(--accent-color-hover);
   --selection-background-color: var(--signal-accent-fill);
   --selection-text-color: #fff;
   --favorite-icon-color: var(--accent-color);
@@ -2717,7 +2720,6 @@ a:visited {
   --accent-color: var(--signal-accent-fill);
   --accent-color-hover: var(--primary-color-hover);
   --accent-color-active: var(--primary-color-active);
-  --accent-color-light: color-mix(in srgb, var(--signal-accent-fill) 12%, #fff);
   --text-with-accent-color: #fff;
   --scrollbar-color: color-mix(in srgb, var(--signal-accent-fill) 42%, #737373);
   --scrollbar-color-active: #1a1a1a;
@@ -2756,7 +2758,6 @@ a:visited {
   --selection-text-color: #111;
   --accent-color-hover: rgb(from oklch(from var(--accent-color) min(calc(l + 0.06), 0.92) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --accent-color-active: rgb(from oklch(from var(--accent-color) calc(l - 0.05) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
-  --accent-color-light: color-mix(in srgb, var(--accent-color) 12%, #171717);
   --text-with-accent-color: #111;
   --scrollbar-color: color-mix(in srgb, var(--accent-color) 42%, #7a7a7a);
   --scrollbar-color-active: var(--accent-color-hover);

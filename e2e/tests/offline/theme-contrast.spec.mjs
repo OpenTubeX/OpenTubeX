@@ -135,7 +135,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
   test.describe(`${theme} control contrast at ${scale}%`, () => {
     test.use({ seed: { settings: { baseTheme: theme, currentLocale: 'en-US', uiScale: scale } } })
 
-    test('seekbar progress keeps a subtle accent tint and SponsorBlock categories remain visible', async ({ app, page }) => {
+    test('seekbar progress leans toward the accent and SponsorBlock categories remain visible', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       // An aborted label lookup would queue later SponsorBlock requests behind
       // network recovery. A 404 is the API's normal "no labels" response.
@@ -182,11 +182,10 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         ]
       })
       const [played, unplayed, ...markers] = await sampleColors(app, bar, points)
-      // The default red accent tints the neutral progress fill.
-      expect(played[0] - played[1], `red progress: ${played}`).toBeGreaterThanOrEqual(10)
-      expect(played[0] - played[2], `red progress: ${played}`).toBeGreaterThanOrEqual(10)
-      expect(Math.min(...played), `soft red progress: ${played}`).toBeGreaterThanOrEqual(180)
-      expect(Math.max(...played), `retain marker colors: ${played}`).toBeLessThanOrEqual(235)
+      // The default red accent dominates the softened progress fill.
+      expect(played[0] - played[1], `red progress: ${played}`).toBeGreaterThanOrEqual(90)
+      expect(played[0] - played[2], `red progress: ${played}`).toBeGreaterThanOrEqual(90)
+      expect(Math.max(...played), `retain marker colors: ${played}`).toBeLessThanOrEqual(245)
       expect(Math.max(...played.map((value, index) => Math.abs(value - unplayed[index])))).toBeGreaterThanOrEqual(20)
       for (const [index, marker] of markers.entries()) {
         expect(Math.max(...marker.map((value, channel) => Math.abs(value - played[channel]))),

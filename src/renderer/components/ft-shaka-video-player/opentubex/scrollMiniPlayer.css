@@ -245,8 +245,9 @@
   content: '';
 }
 
+/* The bar sits on the card, not on video, so it skips the player's seekbar color. */
 .mobileMiniBarProgress > div {
-  background: var(--seekbar-played-color, var(--primary-color));
+  background: var(--primary-color);
   transform-origin: left top;
 }
 
@@ -293,7 +294,7 @@
   border: 0;
   border-radius: 50%;
   appearance: none;
-  background: var(--seekbar-played-color, var(--primary-color));
+  background: var(--primary-color);
   opacity: 0;
 }
 
@@ -302,7 +303,7 @@
   block-size: 16px;
   border: 0;
   border-radius: 50%;
-  background: var(--seekbar-played-color, var(--primary-color));
+  background: var(--primary-color);
   opacity: 0;
 }
 
