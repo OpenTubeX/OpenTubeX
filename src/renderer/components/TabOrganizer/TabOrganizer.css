@@ -274,18 +274,13 @@
   outline-color: var(--primary-color);
 }
 
-.tabGroupHeader,
-.recentlyClosed > header,
-.syncedTabsHeader {
+/* The header checkbox lines up with the rows' checkbox column. */
+.tabGroupHeader {
   align-items: center;
   display: flex;
   gap: 8px;
   min-block-size: 48px;
   padding-inline: 8px;
-}
-
-/* The header checkbox lines up with the rows' checkbox column. */
-.tabGroupHeader {
   padding-inline-start: 40px;
   position: relative;
 }
@@ -298,10 +293,17 @@
 
 .recentlyClosed h3,
 .syncedTabsHeader h3 {
+  align-items: center;
+  display: flex;
   font-size: 18px;
   font-weight: 600;
+  gap: 10px;
   letter-spacing: -0.01em;
   margin: 0;
+}
+
+.syncedTabsHeader h3 {
+  margin-inline-end: 8px;
 }
 
 .tabGroupCount {
@@ -725,22 +727,12 @@
   color: var(--text-with-main-color);
 }
 
-.syncedTabsSection,
-.recentlyClosed {
-  margin-block-start: 28px;
-}
-
-.recentlyClosed > header {
-  justify-content: space-between;
-}
-
-.recentlyClosed > header,
-.syncedTabsHeader {
-  padding-inline: 8px 0;
-}
-
 .closedTabRow {
   grid-template-columns: 36px minmax(0, 1fr) auto;
+}
+
+.recentlyClosed > header button {
+  margin-inline-start: auto;
 }
 
 .closedTabRow > button,
@@ -754,24 +746,20 @@
   text-align: center;
 }
 
-.syncedTabsHeader h3 {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-}
-
-.syncedTabsIcon {
+.sectionIcon {
   color: var(--primary-color);
+  flex-shrink: 0;
 }
 
 .syncedSessionTabs {
   --material-tab-font-size: 13px;
 
   display: flex;
+  flex: 1 1 160px;
   flex-wrap: wrap;
   gap: 4px;
-  padding-block: 4px;
-  padding-inline: 0;
+  min-inline-size: 0;
+  padding: 0;
 }
 
 .syncedSessionTab strong {
@@ -779,24 +767,24 @@
   overflow-wrap: anywhere;
 }
 
-.syncedSessionPanels {
-  padding-block-start: 8px;
-}
-
-.syncedSessionCard {
-  background: color-mix(in srgb, var(--primary-color) 6%, var(--card-bg-color));
+.syncedTabsSection,
+.recentlyClosed {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color));
   border-radius: var(--shape-corner-extra-large);
+  margin-block-start: 28px;
   min-inline-size: 0;
   padding: 16px;
 }
 
-.syncedSessionHeader,
+.syncedTabsHeader,
+.recentlyClosed > header,
 .syncedSessionActions {
   align-items: center;
   display: flex;
 }
 
-.syncedSessionHeader {
+.syncedTabsHeader,
+.recentlyClosed > header {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: space-between;
@@ -804,11 +792,8 @@
   padding-inline-start: 4px;
 }
 
-.syncedSessionName {
+.recentlyClosed h3 {
   flex: 1 1 160px;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
@@ -835,12 +820,8 @@
   display: inline-flex;
 }
 
-.syncedTabList > li {
-  background-color: var(--card-bg-color);
-}
-
 .tabOrganizer .syncedTabTarget {
-  --organizer-button-height: 56px;
+  --organizer-button-height: 68px;
   --organizer-button-container: transparent;
 
   border-radius: inherit;
@@ -923,12 +904,9 @@
     padding-block-end: 8px;
   }
 
-  .syncedSessionHeader {
-    align-items: stretch;
-  }
-
   .syncedSessionActions {
     inline-size: 100%;
+    justify-content: flex-end;
   }
 }
 

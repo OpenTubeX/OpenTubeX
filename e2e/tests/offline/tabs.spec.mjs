@@ -3371,7 +3371,7 @@ test.describe('tab organizer', () => {
     await expect(renamedMobileTab).toBeFocused()
     await expect(syncedSet).toContainText('Synced watch tab')
 
-    const deleteSet = syncedSet.getByRole('button', { name: 'Delete: Travel phone · 2 tabs' })
+    const deleteSet = syncedSection.getByRole('button', { name: 'Delete: Travel phone · 2 tabs' })
     await deleteSet.click()
     let confirmation = page.getByRole('dialog', { name: 'Delete' })
     await expect(confirmation).toContainText('Travel phone · 2 tabs')
