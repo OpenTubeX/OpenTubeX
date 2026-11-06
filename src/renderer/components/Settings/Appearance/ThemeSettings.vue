@@ -25,24 +25,6 @@
         :icon="['fas', 'icons']"
         @change="updateIconPack"
       />
-      <FtSelect
-        size-to-content
-        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
-        :value="toastPosition"
-        setting-key="toastPosition"
-        :select-names="toastPositionNames"
-        :select-values="TOAST_POSITION_VALUES"
-        :icon="['fas', 'message']"
-        @change="updateToastPosition"
-      />
-      <div class="testToastAction">
-        <FtButton
-          class="testToastButton"
-          :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
-          :icon="['fas', 'message']"
-          @click="showTestToast"
-        />
-      </div>
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
@@ -198,7 +180,6 @@ import { colors } from '../../../helpers/colors'
 import { androidDynamicColors } from '../../../helpers/dynamicColors.js'
 import { useColorTranslations } from '../../../composables/colors'
 import { baseThemeGroup, useBaseThemeOptions } from '../../../composables/baseThemes'
-import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../../constants/toastPosition'
 import { showToast } from '../../../helpers/utils'
 import { ICON_PACKS } from '../../../icons/iconPackState'
 import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../../../helpers/appFont'
@@ -375,36 +356,6 @@ function updateSecColor(value) {
   store.dispatch('updateSecColor', value)
 }
 
-const toastPositionNames = computed(() => [
-  t('Settings.Theme Settings.Toast Position.Bottom Left'),
-  t('Settings.Theme Settings.Toast Position.Bottom Center'),
-  t('Settings.Theme Settings.Toast Position.Bottom Right'),
-  t('Settings.Theme Settings.Toast Position.Top Left'),
-  t('Settings.Theme Settings.Toast Position.Top Center'),
-  t('Settings.Theme Settings.Toast Position.Top Right')
-])
-
-/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
-const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
-let toastPositionUpdatePromise = Promise.resolve()
-
-/**
- * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
- */
-function updateToastPosition(value) {
-  toastPositionUpdatePromise = toastPositionUpdatePromise
-    .then(() => store.dispatch('updateToastPosition', value))
-}
-
-async function showTestToast() {
-  await toastPositionUpdatePromise
-  showToast({
-    message: t('Settings.Theme Settings.Toast Position.Test Toast'),
-    icon: ['fas', 'message'],
-    important: true
-  })
-}
-
 onMounted(() => {
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
@@ -435,20 +386,5 @@ onUnmounted(() => {
 .customThemeActions,
 .appIconActions {
   margin-block-start: 24px;
-}
-
-.testToastAction {
-  display: flex;
-  justify-content: center;
-}
-
-.testToastButton {
-  margin-block: var(--settings-control-margin);
-}
-
-@container settings-content (width <= 580px) {
-  .testToastAction {
-    inline-size: 100%;
-  }
 }
 </style>
