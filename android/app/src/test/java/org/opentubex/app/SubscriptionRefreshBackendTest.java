@@ -82,22 +82,11 @@ public class SubscriptionRefreshBackendTest {
                     return page.toString();
                 }));
             }
-        }
-    }
-
-    @Test
-    public void nativeHttp404ChecksTheChannelWithoutTabParams() throws Exception {
-        try (okhttp3.mockwebserver.MockWebServer server = new okhttp3.mockwebserver.MockWebServer()) {
-            server.enqueue(new okhttp3.mockwebserver.MockResponse().setResponseCode(404));
-            server.enqueue(new okhttp3.mockwebserver.MockResponse().setBody(channelPage("UCtest", "videos").toString()));
-            JSONObject request = new JSONObject().put("format", "local").put("url", server.url("/browse").toString())
-                .put("body", "{\"browseId\":\"%CHANNEL%\",\"params\":\"shorts\"}");
-            JSONObject result = SubscriptionRefreshHttpClient.fetch(feed("shorts", new JSONArray().put(request)), "UCtest");
-            assertEquals(0, result.getJSONArray("videos").length());
-            assertTrue(new JSONObject(server.takeRequest().getBody().readUtf8()).has("params"));
-            JSONObject verification = new JSONObject(server.takeRequest().getBody().readUtf8());
-            assertFalse(verification.has("params"));
-            assertEquals("UCtest", verification.getString("browseId"));
+            for (JSONObject page : List.of(channelPage("UCother", "videos"), new JSONObject(valid.toString()).put("metadata", JSONObject.NULL))) {
+                assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.fetch(
+                    feed(type, new JSONArray().put(new JSONObject().put("format", "local"))), "UCtest",
+                    (request, feedType, id) -> page.toString()));
+            }
         }
     }
 

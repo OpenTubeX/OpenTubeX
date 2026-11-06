@@ -60,11 +60,12 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
     // A request for a missing tab can redirect to the channel's Videos or Home tab.
     if (format === 'local' && channelHasNoFeed(data, feedType, channelId)) return emptyFeed(feedType)
     const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
-    const selectedContent = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer.content : null
-    if (!selectedContent || typeof selectedContent !== 'object' || Array.isArray(selectedContent) ||
+    const selected = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer : null
+    const path = format === 'local' && OPTIONAL_TAB_PATHS[feedType]
+    if (!selected?.content || typeof selected.content !== 'object' || Array.isArray(selected.content) ||
+        (path && !selected.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith(path)) ||
         data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
     if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
-      const selected = tabs.find(tab => tab.tabRenderer?.selected)?.tabRenderer
       if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) throw new Error('Topic channel requires its uploads playlist')
     }
     return { backgroundFormat: format, data }

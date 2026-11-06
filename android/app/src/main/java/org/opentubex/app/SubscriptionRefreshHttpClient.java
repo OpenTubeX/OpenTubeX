@@ -53,7 +53,7 @@ final class SubscriptionRefreshHttpClient {
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
                     if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
-                    if (!hasSelectedContentTab(response.optJSONObject("contents")) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
+                    if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
                         throw new IOException("Channel unavailable");
                     }
                     JSONObject metadata = response.optJSONObject("metadata");
@@ -143,7 +143,7 @@ final class SubscriptionRefreshHttpClient {
         return hasChannelTab;
     }
 
-    private static boolean hasSelectedContentTab(JSONObject contents) {
+    private static boolean hasSelectedContentTab(JSONObject contents, String path) {
         if (contents == null) return false;
         JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
         Object tabs = browse == null ? null : browse.opt("tabs");
@@ -156,7 +156,10 @@ final class SubscriptionRefreshHttpClient {
         for (int i = 0; i < items.length(); i++) {
             JSONObject item = items.optJSONObject(i);
             JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
-            if (tab != null && Boolean.TRUE.equals(tab.opt("selected"))) return tab.optJSONObject("content") != null;
+            if (tab != null && Boolean.TRUE.equals(tab.opt("selected"))) {
+                Object url = find(tab.opt("endpoint"), "url");
+                return tab.optJSONObject("content") != null && (path == null || (url instanceof String && ((String) url).endsWith(path)));
+            }
         }
         return false;
     }

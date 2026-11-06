@@ -111,6 +111,12 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
         return JSON.stringify(page)
       }))
     }
+    for (const page of [channelPage('UCother', ['/@channel/videos']), { ...valid, metadata: undefined }]) {
+      await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+        if (request.format !== 'local') throw new Error('HTTP 404')
+        return JSON.stringify(page)
+      }))
+    }
   })
 }
 
@@ -230,7 +236,7 @@ test('empty Live pages follow continuations before saving a result', async () =>
     bodies.push(body)
     return JSON.stringify(body.continuation
       ? { onResponseReceivedActions: [{ videoRenderer: { videoId: 'live' } }] }
-      : { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } } }] } } })
+      : { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { ...channelPage('UCtest', ['/@channel/streams']).contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer, content: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } } }] } } })
   })
   assert.equal(bodies.length, 2)
   assert.equal(bodies[1].continuation, 'next')
