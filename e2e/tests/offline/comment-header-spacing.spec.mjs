@@ -1,6 +1,6 @@
 import { test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { emptyCommentsResponse, mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { emptyCommentsResponse, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function resizeViewport(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
@@ -11,6 +11,40 @@ async function resizeViewport(app, page, width, uiScale) {
 
 test.describe('comment header spacing', { tag: '@scale' }, () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+  test('matches transcript button spacing in the phone sheet header', async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    await openMockedVideo(page)
+    await resizeViewport(app, page, 450, uiScale)
+    const watch = await watchViewHandle(page)
+    const sheet = page.locator('.mobileSheet[open]')
+    const header = sheet.locator('.mobileSheetHeader')
+    const buttonBounds = () => header.locator('button:visible').evaluateAll(buttons => buttons.map(button => {
+      const { x, width, height } = button.getBoundingClientRect()
+      return { x, width, height }
+    }))
+
+    await watch.evaluate(view => view.openPhonePanel('transcript'))
+    await expect(sheet.locator('.transcriptHeader')).toBeVisible()
+    const transcript = await buttonBounds()
+    const buttonSize = transcript[0].width
+    const buttonStep = transcript[1].x - transcript[0].x
+    const closeGap = transcript.at(-1).x - transcript.at(-2).x - transcript.at(-2).width
+    await header.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+
+    await watch.evaluate(view => view.openPhonePanel('comments'))
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect(header.locator('button:visible')).toHaveCount(5)
+    await expect.poll(async () => {
+      const comments = await buttonBounds()
+      return Math.max(
+        ...comments.flatMap(button => [Math.abs(button.width - buttonSize), Math.abs(button.height - buttonSize)]),
+        ...comments.slice(1, -1).map((button, index) => Math.abs(button.x - comments[index].x - buttonStep)),
+        Math.abs(comments.at(-1).x - comments.at(-2).x - comments.at(-2).width - closeGap)
+      )
+    }).toBeLessThanOrEqual(1)
+  })
 
   test('keeps comments directly below the header at wide and narrow widths', async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)

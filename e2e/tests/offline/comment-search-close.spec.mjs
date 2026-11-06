@@ -81,10 +81,11 @@ test('keeps the phone comments header on one row', { tag: '@scale' }, async ({ a
       const center = title.top + title.height / 2
       const controls = [...sheetHeader.querySelectorAll('button')].map(button => button.getBoundingClientRect())
       const bounds = sheetHeader.getBoundingClientRect()
-      const centers = controls.map(button => button.left + button.width / 2)
+      const centers = controls.slice(0, -1).map(button => button.left + button.width / 2)
       const spacing = centers.slice(1).map((center, index) => center - centers[index])
       return controls.every(button => Math.abs(button.top + button.height / 2 - center) <= 1 && button.right <= bounds.right && button.left >= bounds.left) &&
-        Math.max(...spacing) - Math.min(...spacing) <= 1
+        Math.max(...spacing) - Math.min(...spacing) <= 1 &&
+        Math.abs(controls.at(-1).left - controls.at(-2).right - 8) <= 1
     })).toBe(true)
   }
 })
