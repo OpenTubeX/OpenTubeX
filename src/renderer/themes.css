@@ -3242,7 +3242,6 @@ a:visited {
   .buttonList.subscribed {
     --subscribe-container: var(--md-sys-color-secondary-container);
     --subscribe-on-container: var(--md-sys-color-on-secondary-container);
-    --subscribe-divider: color-mix(in srgb, var(--md-sys-color-on-secondary-container) 16%, var(--md-sys-color-secondary-container));
   }
 
   .btn.variant-elevated:not(.selected) {

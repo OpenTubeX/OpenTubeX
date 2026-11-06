@@ -4,7 +4,7 @@
   --subscribe-on-container: var(--text-with-main-color);
   --subscribe-hover: var(--primary-color-hover);
   --subscribe-active: var(--primary-color-active);
-  --subscribe-divider: var(--primary-color-active);
+  --subscribe-divider: var(--divider-color);
   --subscribe-radius: calc(20px * var(--ui-roundness));
 
   margin: 5px;
@@ -23,7 +23,6 @@
   --subscribe-on-container: var(--primary-text-color);
   --subscribe-hover: color-mix(in srgb, var(--primary-text-color) 8%, var(--subscribe-container));
   --subscribe-active: color-mix(in srgb, var(--primary-text-color) 12%, var(--subscribe-container));
-  --subscribe-divider: color-mix(in srgb, var(--primary-color) 32%, var(--card-bg-color));
 }
 
 /* Pressing any segment morphs the whole group's outer corners. */
@@ -127,7 +126,6 @@
 
 .notificationBell {
   align-items: center;
-  border-inline-end: 2px solid var(--subscribe-divider);
   border-radius: 0;
   display: inline-flex;
   font-size: 18px;
@@ -149,6 +147,10 @@
   border-color: var(--subscribe-active);
 }
 
+.buttonList > .notificationBell {
+  border-inline-end: 1px solid var(--subscribe-divider);
+}
+
 .profileDropdownToggleButton::before {
   content: '';
   inline-size: 7px;
@@ -167,7 +169,7 @@
 .subscribeButton.hasProfileDropdownToggle {
   min-inline-size: 100px;
   padding-inline: 5px;
-  border-inline-end: 2px solid var(--subscribe-divider) !important;
+  border-inline-end: 1px solid var(--subscribe-divider) !important;
   border-start-end-radius: 0;
   border-end-end-radius: 0;
   box-sizing: border-box;
