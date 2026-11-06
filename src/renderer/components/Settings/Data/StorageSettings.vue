@@ -4,11 +4,11 @@
     :aria-busy="isRefreshing || cleanupInProgress"
   >
     <FtSettingsSection
+      v-if="SUPPORTS_STORAGE_USAGE"
       :title="t('Settings.Storage Settings.Storage')"
       hide-title
     >
       <figure
-        v-if="SUPPORTS_STORAGE_USAGE"
         class="storageBreakdown"
         :aria-label="chartAriaLabel"
       >
