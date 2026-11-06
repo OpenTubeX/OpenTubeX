@@ -1,5 +1,130 @@
 import { test, expect, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 
+test.describe('recently closed card', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', fetchSubscriptionsAutomatically: false } } })
+
+  for (const iconPack of ['material', 'remix']) {
+    test(`matches tab row styling and device spacing with ${iconPack} icons`, async ({ app, page, uiScale }) => {
+      await page.evaluate(async pack => {
+        const store = window.$store
+        await store.dispatch('updateIconPack', pack)
+        store.commit('setSyncServerEnabled', true)
+        store.commit('setSyncServerToken', 'e2e-token')
+        store.commit('setSyncServerPrivacyMode', 'enhanced')
+        store.commit('setSyncServerSyncSessions', true)
+        store.commit('setSyncServerSharedTabs', false)
+        store.commit('setSyncServerOtherDeviceSessions', [{
+          syncDeviceId: 'phone-e2e',
+          syncPlatform: 'mobile',
+          sessionId: 'phone-session',
+          tabs: [
+            { id: 'phone-tab', title: 'Subscriptions', url: '/subscriptions' },
+            { id: 'phone-playlists', title: 'Playlists', url: '/userplaylists' },
+          ],
+        }])
+        for (const title of ['Music', 'Travel', 'Science']) {
+          const tab = await window.ftElectron.tabs.create({ route: '/subscriptions', title, makeActive: false, lazyLoad: true })
+          await window.ftElectron.tabs.close(tab.id)
+        }
+        await window.ftElectron.tabs.create({ route: '/userplaylists', title: 'Open research', makeActive: false, lazyLoad: true })
+      }, iconPack)
+      await page.locator('.tabOrganizerButton').click()
+      const organizer = page.getByRole('dialog', { name: 'Tab Organizer', exact: true })
+      const recent = organizer.locator('.recentlyClosed')
+      const heading = recent.getByRole('heading', { name: 'Recently Closed', exact: true })
+      const clear = recent.getByRole('button', { name: 'Clear', exact: true })
+      const rows = recent.locator('.closedTabRow')
+      const scroller = organizer.locator('.tabOrganizerScroll')
+      const deviceHeader = organizer.locator('.syncedTabsHeader')
+      await expect(deviceHeader.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
+      await expect(deviceHeader.getByRole('tablist')).toBeVisible()
+      await expect(deviceHeader.getByRole('button', { name: 'Open all tabs', exact: true })).toBeVisible()
+      await expect(organizer.getByRole('tabpanel').getByRole('heading')).toHaveCount(0)
+
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        for (const width of [1600, 375]) {
+          await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+            BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 })
+          }, Math.round(width * uiScale / 100))
+          await expect.poll(async () => Math.abs(await page.evaluate(() => innerWidth) - width)).toBeLessThanOrEqual(1)
+          if (width === 1600) {
+            await expect.poll(() => deviceHeader.evaluate(header => {
+              const centers = [...header.children].map(child => {
+                const bounds = child.getBoundingClientRect()
+                return bounds.top + bounds.height / 2
+              })
+              return Math.max(...centers) - Math.min(...centers)
+            })).toBeLessThanOrEqual(1)
+          }
+          await page.mouse.move(0, 0)
+          await expect.poll(() => organizer.evaluate(element => {
+            const recent = element.querySelector('.recentlyClosed')
+            const device = element.querySelector('.syncedTabsSection')
+            const metrics = (card, button, rows) => {
+              const style = getComputedStyle(card)
+              const bounds = card.getBoundingClientRect()
+              const action = card.querySelector(button).getBoundingClientRect()
+              const header = card.querySelector('header').getBoundingClientRect()
+              const row = card.querySelector(rows)
+              return {
+                background: style.backgroundColor,
+                radius: style.borderRadius,
+                padding: style.padding,
+                buttonInset: Math.round(bounds.right - action.right),
+                listGap: Math.round(row.getBoundingClientRect().top - header.bottom),
+                rowBackground: getComputedStyle(row).backgroundColor,
+              }
+            }
+            return {
+              recent: metrics(recent, '.dangerButton', 'li'),
+              device: metrics(device, '.syncedSessionActions', 'li'),
+            }
+          }).then(({ recent, device }) => Object.fromEntries(Object.entries(recent)
+            .filter(([key, value]) => value !== device[key])))).toEqual({})
+          await expect.poll(() => organizer.evaluate(element => {
+            const topRow = element.querySelector('.tabGroup .tabOrganizerRow')
+            const rowStyle = row => {
+              const style = getComputedStyle(row)
+              return {
+                background: style.backgroundColor,
+                corners: style.borderRadius,
+                height: Math.round(row.getBoundingClientRect().height),
+              }
+            }
+            return {
+              sectionSurfacesVisible: ['.recentlyClosed', '.syncedTabsSection'].every(selector => {
+                const background = getComputedStyle(element.querySelector(selector)).backgroundColor
+                return background !== 'rgba(0, 0, 0, 0)' && background !== getComputedStyle(element).backgroundColor && background !== getComputedStyle(topRow).backgroundColor
+              }),
+              rowsMatch: ['.closedTabRow', '.syncedTabList > li'].every(selector => JSON.stringify(rowStyle(element.querySelector(selector))) === JSON.stringify(rowStyle(topRow))),
+            }
+          })).toEqual({ sectionSurfacesVisible: true, rowsMatch: true })
+          await expect(heading.locator('[data-icon="clock-rotate-left"] svg')).toBeVisible()
+          await expect(heading.locator('[data-icon]')).toHaveAttribute('data-icon-pack', iconPack)
+          await expect(heading.locator('[data-icon]')).toHaveAttribute('aria-hidden', 'true')
+          await clear.scrollIntoViewIfNeeded()
+          await expect(clear).toBeInViewport()
+          await expect.poll(() => organizer.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+          await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await expectScrollAtRenderedEnd(scroller)
+        }
+      }
+
+      await rows.first().getByRole('button', { name: 'Restore', exact: true }).click()
+      await expect(rows).toHaveCount(2)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await clear.click()
+      await expect(rows).toHaveCount(0)
+      await expect(clear).toBeDisabled()
+      await expect(recent.getByText('No recently closed tabs match this search.')).toBeVisible()
+      await expectScrollAtRenderedEnd(scroller)
+    })
+  }
+})
+
 async function failNextTabRequest(app, channel) {
   await app.electronApp.evaluate(({ ipcMain }, channel) => {
     const original = ipcMain._invokeHandlers.get(channel)

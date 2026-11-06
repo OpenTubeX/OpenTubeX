@@ -448,130 +448,129 @@
                 <header class="syncedTabsHeader">
                   <h3>
                     <FtIcon
-                      class="syncedTabsIcon"
+                      class="sectionIcon"
                       :icon="['fas', 'layer-group']"
                       aria-hidden="true"
                     />
                     {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
                   </h3>
-                </header>
-                <FtTabs
-                  class="syncedSessionTabs"
-                  role="tablist"
-                  :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
-                >
-                  <button
-                    v-for="(session, index) in visibleOtherDeviceSessions"
-                    :id="syncedSessionTabId(index)"
-                    :key="`${session.syncDeviceId}:${session.sessionId}`"
-                    type="button"
-                    class="syncedSessionTab"
-                    :class="{ selected: activeOtherDeviceSessionKey === otherDeviceSessionKey(session) }"
-                    role="tab"
-                    :aria-controls="syncedSessionPanelId"
-                    :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
-                    :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
-                    @click="selectOtherDeviceSession(session)"
-                    @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
-                    @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
-                    @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
-                    @keydown.end.prevent="selectOtherDeviceSessionAt(visibleOtherDeviceSessions.length - 1, true)"
+                  <FtTabs
+                    class="syncedSessionTabs"
+                    role="tablist"
+                    :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
                   >
-                    <span class="syncedSessionIcon">
+                    <button
+                      v-for="(session, index) in visibleOtherDeviceSessions"
+                      :id="syncedSessionTabId(index)"
+                      :key="`${session.syncDeviceId}:${session.sessionId}`"
+                      type="button"
+                      class="syncedSessionTab"
+                      :class="{ selected: activeOtherDeviceSessionKey === otherDeviceSessionKey(session) }"
+                      role="tab"
+                      :aria-controls="syncedSessionPanelId"
+                      :aria-selected="activeOtherDeviceSessionKey === otherDeviceSessionKey(session)"
+                      :tabindex="activeOtherDeviceSessionKey === otherDeviceSessionKey(session) ? 0 : -1"
+                      @click="selectOtherDeviceSession(session)"
+                      @keydown.left.prevent="selectOtherDeviceSessionAt(index - 1, true)"
+                      @keydown.right.prevent="selectOtherDeviceSessionAt(index + 1, true)"
+                      @keydown.home.prevent="selectOtherDeviceSessionAt(0, true)"
+                      @keydown.end.prevent="selectOtherDeviceSessionAt(visibleOtherDeviceSessions.length - 1, true)"
+                    >
+                      <span class="syncedSessionIcon">
+                        <FtIcon
+                          :icon="session.syncPlatform === 'mobile' ? ['fas', 'smartphone'] : ['fas', 'display']"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
+                    </button>
+                  </FtTabs>
+                  <div
+                    v-if="activeOtherDeviceSession"
+                    class="syncedSessionActions"
+                  >
+                    <button
+                      type="button"
+                      class="syncedSessionActionButton"
+                      @click="sessionToOpen = activeOtherDeviceSession"
+                    >
                       <FtIcon
-                        :icon="session.syncPlatform === 'mobile' ? ['fas', 'smartphone'] : ['fas', 'display']"
+                        :icon="['fas', 'folder-open']"
                         aria-hidden="true"
                       />
-                    </span>
-                    <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
-                  </button>
-                </FtTabs>
-                <div class="syncedSessionPanels">
-                  <article
-                    v-if="activeOtherDeviceSession"
-                    :id="syncedSessionPanelId"
-                    :key="activeOtherDeviceSessionKey"
-                    class="syncedSessionCard"
-                    role="tabpanel"
-                    :aria-labelledby="activeOtherDeviceSessionTabId"
-                  >
-                    <header class="syncedSessionHeader">
-                      <h4
-                        class="syncedSessionName"
-                        dir="auto"
+                      {{ t('Settings.Sync Settings.Open All Tabs') }}
+                    </button>
+                    <button
+                      type="button"
+                      class="syncedSessionActionButton dangerButton"
+                      :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
+                      :title="t('Delete')"
+                      @click="sessionToDelete = activeOtherDeviceSession"
+                    >
+                      <FtIcon
+                        :icon="['fas', 'trash']"
+                        aria-hidden="true"
+                      />
+                      {{ t('Delete') }}
+                    </button>
+                  </div>
+                </header>
+                <article
+                  v-if="activeOtherDeviceSession"
+                  :id="syncedSessionPanelId"
+                  :key="activeOtherDeviceSessionKey"
+                  role="tabpanel"
+                  :aria-labelledby="activeOtherDeviceSessionTabId"
+                >
+                  <ul class="syncedTabList">
+                    <li
+                      v-for="tab in activeOtherDeviceSession.visibleTabs"
+                      :key="tab.id"
+                    >
+                      <button
+                        type="button"
+                        class="syncedTabTarget"
+                        @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
                       >
-                        {{ activeOtherDeviceName }}
-                      </h4>
-                      <div class="syncedSessionActions">
-                        <button
-                          type="button"
-                          class="syncedSessionActionButton"
-                          @click="sessionToOpen = activeOtherDeviceSession"
-                        >
+                        <span class="tabIcon">
+                          <FtRetryImage
+                            v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
+                            :fallback-icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
+                            :src="usableTabAvatarUrl(syncedTabPreview(tab))"
+                            alt=""
+                            @error="handleTabAvatarError(syncedTabPreview(tab))"
+                          />
                           <FtIcon
-                            :icon="['fas', 'folder-open']"
+                            v-else
+                            :icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
                             aria-hidden="true"
                           />
-                          {{ t('Settings.Sync Settings.Open All Tabs') }}
-                        </button>
-                        <button
-                          type="button"
-                          class="syncedSessionActionButton dangerButton"
-                          :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
-                          :title="t('Delete')"
-                          @click="sessionToDelete = activeOtherDeviceSession"
-                        >
-                          <FtIcon
-                            :icon="['fas', 'trash']"
-                            aria-hidden="true"
-                          />
-                          {{ t('Delete') }}
-                        </button>
-                      </div>
-                    </header>
-                    <ul class="syncedTabList">
-                      <li
-                        v-for="tab in activeOtherDeviceSession.visibleTabs"
-                        :key="tab.id"
-                      >
-                        <button
-                          type="button"
-                          class="syncedTabTarget"
-                          @click="openOtherDeviceSession({ ...activeOtherDeviceSession, tabs: [tab] })"
-                        >
-                          <span class="tabIcon">
-                            <FtRetryImage
-                              v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
-                              :fallback-icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
-                              :src="usableTabAvatarUrl(syncedTabPreview(tab))"
-                              alt=""
-                              @error="handleTabAvatarError(syncedTabPreview(tab))"
-                            />
-                            <FtIcon
-                              v-else
-                              :icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
-                              aria-hidden="true"
-                            />
-                          </span>
-                          <span class="syncedTabIdentity">
-                            <span dir="auto">{{ formatTabTitle(tab.title || getSyncTabRoute(tab.url)) }}</span>
-                            <small>{{ getSyncTabRoute(tab.url) }}</small>
-                          </span>
-                          <FtIcon
-                            class="syncedTabOpenIcon"
-                            :icon="['fas', 'arrow-up-right-from-square']"
-                            aria-hidden="true"
-                          />
-                        </button>
-                      </li>
-                    </ul>
-                  </article>
-                </div>
+                        </span>
+                        <span class="syncedTabIdentity">
+                          <span dir="auto">{{ formatTabTitle(tab.title || getSyncTabRoute(tab.url)) }}</span>
+                          <small>{{ getSyncTabRoute(tab.url) }}</small>
+                        </span>
+                        <FtIcon
+                          class="syncedTabOpenIcon"
+                          :icon="['fas', 'arrow-up-right-from-square']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  </ul>
+                </article>
               </section>
 
               <section class="recentlyClosed">
                 <header>
-                  <h3>{{ t('Tab Organizer.Recently Closed') }}</h3>
+                  <h3>
+                    <FtIcon
+                      class="sectionIcon"
+                      :icon="['fas', 'clock-rotate-left']"
+                      aria-hidden="true"
+                    />
+                    {{ t('Tab Organizer.Recently Closed') }}
+                  </h3>
                   <button
                     type="button"
                     class="dangerButton"
@@ -822,11 +821,6 @@ const activeOtherDeviceSession = computed(() => (
   visibleOtherDeviceSessions.value.find(session => (
     otherDeviceSessionKey(session) === selectedOtherDeviceSessionKey.value
   )) ?? visibleOtherDeviceSessions.value[0] ?? null
-))
-const activeOtherDeviceName = computed(() => activeOtherDeviceSession.value?.syncDeviceName?.trim() || (
-  activeOtherDeviceSession.value?.syncPlatform === 'mobile'
-    ? t('Settings.Sync Settings.Mobile Device')
-    : t('Settings.Sync Settings.Desktop Device')
 ))
 useChannelTabAvatars(computed(() => showSyncedTabs.value
   ? activeOtherDeviceSession.value?.visibleTabs ?? []
