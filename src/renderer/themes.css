@@ -88,7 +88,7 @@ body {
   --red-500: #f44336;
   --destructive-color: #f44336;
   --destructive-text-color: rgb(from var(--destructive-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
-  --destructive-hover-color: #e53935;
+  --destructive-hover-color: #d32f2f;
   --destructive-active-color: #c62828;
 
   /* Error text keeps most of the text color's lightness, so it stays readable

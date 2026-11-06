@@ -107,7 +107,8 @@
 }
 
 .videoOptions :deep(.downloadButton) {
-  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --download-tint: 24%;
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) var(--download-tint), var(--card-bg-color));
 
   min-block-size: 40px;
   margin: 0;
@@ -121,6 +122,11 @@
     whenever the even toolbar measures itself again.
   */
   transition-property: background-color, border-color, box-shadow, border-radius;
+}
+
+/* Soften the tint under FtButton's state layer to keep tonal labels readable. */
+.videoOptions :deep(.downloadButton:not(:disabled):is(:hover, :focus-visible, :active)) {
+  --download-tint: 16%;
 }
 
 .videoOptions.even:not(.measuring) :deep(.downloadButton) {

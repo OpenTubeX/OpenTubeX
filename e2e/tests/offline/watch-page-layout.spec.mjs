@@ -987,3 +987,49 @@ test('watch toolbar icons use the theme foreground', async ({ app, page, attachS
     await toolbar.screenshot({ path: test.info().outputPath(`watch-toolbar-${theme}.png`) })
   }
 })
+
+test('download labels keep their contrast through hover and press', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const button = page.locator(`${activeTab} .watchVideoInfo .downloadButton`)
+  for (const theme of ['catppuccinLatte', 'light', 'dark']) {
+    for (const accent of ['Red', 'Blue']) {
+      await page.evaluate(async ({ theme, accent }) => {
+        await window.$store.dispatch('updateBaseTheme', theme)
+        await window.$store.dispatch('updateSecColor', accent)
+      }, { theme, accent })
+      await button.scrollIntoViewIfNeeded()
+      for (const state of ['rest', 'hover', 'pressed']) {
+        if (state === 'rest') await page.mouse.move(0, 0)
+        else await button.hover()
+        if (state === 'pressed') await page.mouse.down()
+        try {
+          await button.evaluate(element => {
+            getComputedStyle(element).getPropertyValue('background-color')
+            return Promise.all(element.getAnimations().map(animation => animation.finished))
+          })
+          const ratio = await button.evaluate(element => {
+            const context = new OffscreenCanvas(1, 1).getContext('2d')
+            const luminance = color => {
+              context.fillStyle = color
+              context.fillRect(0, 0, 1, 1)
+              return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+                .map(value => value / 255)
+                .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+                .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
+            }
+            const style = getComputedStyle(element)
+            const colors = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a)
+            return (colors[0] + 0.05) / (colors[1] + 0.05)
+          })
+          expect(ratio, `${theme} ${accent} ${state}`).toBeGreaterThanOrEqual(4.5)
+        } finally {
+          if (state === 'pressed') {
+            await page.mouse.move(0, 0)
+            await page.mouse.up()
+          }
+        }
+      }
+    }
+  }
+})
