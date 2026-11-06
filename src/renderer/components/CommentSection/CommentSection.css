@@ -929,7 +929,7 @@
 }
 
 .phoneCommentHeader h3 {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   overflow: hidden;
 }
 
@@ -957,6 +957,7 @@
   flex-wrap: wrap;
   min-inline-size: 0;
   gap: 0;
+  margin-inline-start: auto;
 }
 
 .phoneCommentHeader .commentFilterMenuAnchor {

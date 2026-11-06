@@ -87,6 +87,7 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
     const sheet = page.locator('.mobileSheet[open]')
     const header = sheet.locator('.mobileSheetHeader')
     await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect.poll(() => header.locator('.commentHeaderTitle').evaluate(title => title.scrollWidth - title.clientWidth)).toBeLessThanOrEqual(1)
     await expect.poll(() => header.evaluate(header => {
       const bounds = header.getBoundingClientRect()
       const minimumSize = parseFloat(getComputedStyle(header).getPropertyValue('--phone-touch-target'))
