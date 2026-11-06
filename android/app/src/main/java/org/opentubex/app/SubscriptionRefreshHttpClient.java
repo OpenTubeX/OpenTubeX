@@ -33,11 +33,12 @@ final class SubscriptionRefreshHttpClient {
         if (feed.requests == null) throw new IOException("Open the app to update background refresh settings");
         Exception lastError = null;
         for (int index = 0; index < feed.requests.length(); index++) {
-            if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
+            checkInterrupted();
             JSONObject request = feed.requests.getJSONObject(index);
             try {
                 String format = request.getString("format");
                 String responseText = fetcher.fetch(request, feed.type, channelId);
+                checkInterrupted();
                 if (format.equals("rss")) {
                     if (!responseText.matches("(?s).*<feed[\\s>].*") || !responseText.contains("</feed>")) {
                         throw new IOException("Invalid subscription RSS response");
@@ -76,6 +77,7 @@ final class SubscriptionRefreshHttpClient {
                             body.put("continuation", token);
                             next.put("body", body.toString());
                             page = new JSONObject(fetcher.fetch(next, feed.type, channelId));
+                            checkInterrupted();
                             if (page.has("error")) throw new IOException("Live feed continuation failed");
                             payload.put("continuation", page);
                         }
@@ -87,23 +89,30 @@ final class SubscriptionRefreshHttpClient {
                 }
                 return response;
             } catch (IOException | JSONException error) {
+                checkInterrupted();
                 lastError = error;
                 if (request.optString("format").equals("local") && optionalTabPath(feed.type) != null && "HTTP 404".equals(error.getMessage())) {
                     try {
-                        if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
+                        checkInterrupted();
                         JSONObject channelRequest = new JSONObject(request.toString());
                         JSONObject body = new JSONObject(request.getString("body"));
                         body.remove("params");
                         channelRequest.put("body", body.toString());
                         JSONObject page = new JSONObject(fetcher.fetch(channelRequest, feed.type, channelId));
+                        checkInterrupted();
                         if (channelHasNoFeed(page, feed.type, channelId)) return emptyFeed(feed.type);
                     } catch (IOException | JSONException ignored) {
+                        checkInterrupted();
                         // An unverified channel is still a failure; try the next configured source.
                     }
                 }
             }
         }
         throw new IOException("Background subscription requests failed", lastError);
+    }
+
+    private static void checkInterrupted() throws IOException {
+        if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
     }
 
     private static String optionalTabPath(String type) {
@@ -128,8 +137,11 @@ final class SubscriptionRefreshHttpClient {
         JSONObject contents = response.optJSONObject("contents");
         if (contents == null) return false;
         JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
-        if (browse == null) browse = contents.optJSONObject("singleColumnBrowseResultsRenderer");
         org.json.JSONArray tabs = browse == null ? null : browse.optJSONArray("tabs");
+        if (tabs == null) {
+            browse = contents.optJSONObject("singleColumnBrowseResultsRenderer");
+            tabs = browse == null ? null : browse.optJSONArray("tabs");
+        }
         if (tabs == null) return false;
         boolean hasChannelTab = false;
         for (int index = 0; index < tabs.length(); index++) {

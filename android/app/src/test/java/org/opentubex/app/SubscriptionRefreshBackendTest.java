@@ -51,14 +51,41 @@ public class SubscriptionRefreshBackendTest {
     @Test
     public void redirectedOptionalTabsDoNotImportRegularVideos() throws Exception {
         for (String type : List.of("shorts", "live", "posts")) {
-            for (String layout : List.of("twoColumnBrowseResultsRenderer", "singleColumnBrowseResultsRenderer")) {
+            for (String layout : List.of("twoColumnBrowseResultsRenderer", "singleColumnBrowseResultsRenderer", "mixed")) {
                 JSONObject page = channelPage("UCtest", "videos");
                 JSONObject contents = page.getJSONObject("contents");
-                contents.put(layout, contents.remove("twoColumnBrowseResultsRenderer"));
+                contents.put(layout.equals("mixed") ? "singleColumnBrowseResultsRenderer" : layout, contents.remove("twoColumnBrowseResultsRenderer"));
+                if (layout.equals("mixed")) contents.put("twoColumnBrowseResultsRenderer", new JSONObject());
                 JSONObject result = SubscriptionRefreshHttpClient.fetch(
                     feed(type, new JSONArray().put(new JSONObject().put("format", "local"))), "UCtest",
                     (request, feedType, id) -> page.toString());
                 assertEquals(0, result.getJSONArray(type.equals("posts") ? "comments" : "videos").length());
+            }
+        }
+    }
+
+    @Test
+    public void interruptedVerificationPreservesCancellationInsteadOfReturningDataOrHttpFailure() throws Exception {
+        for (boolean beforeVerification : List.of(true, false)) {
+            JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local")
+                .put("body", "{\"browseId\":\"%CHANNEL%\",\"params\":\"shorts\"}"));
+            String page = channelPage("UCtest", "videos").toString();
+            int[] calls = {0};
+            try {
+                IOException error = assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.fetch(feed("shorts", requests), "UCtest", (request, type, id) -> {
+                    calls[0]++;
+                    if (new JSONObject(request.getString("body")).has("params")) {
+                        if (beforeVerification) Thread.currentThread().interrupt();
+                        throw new IOException("HTTP 404");
+                    }
+                    Thread.currentThread().interrupt();
+                    return page;
+                }));
+                assertEquals("Refresh cancelled", error.getMessage());
+                assertEquals(beforeVerification ? 1 : 2, calls[0]);
+                assertTrue(Thread.currentThread().isInterrupted());
+            } finally {
+                Thread.interrupted();
             }
         }
     }
