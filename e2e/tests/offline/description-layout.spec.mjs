@@ -8,6 +8,18 @@ async function openHistoryEntry(page) {
   await expect(page.locator('.videoDescription').visible()).toBeVisible({ timeout: 30_000 })
 }
 
+async function expectContentPaddingAboveFooter(card) {
+  const layout = await card.evaluate(element => {
+    const contentEnd = element.querySelector('.descriptionContentEnd')
+    const content = contentEnd.previousElementSibling.getBoundingClientRect()
+    const viewport = element.querySelector('.descriptionScroll').getBoundingClientRect()
+    const footer = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+    return { padding: viewport.bottom - content.bottom, footerGap: footer.top - viewport.bottom }
+  })
+  expect(Math.abs(layout.padding - 16), 'Content has 16px of padding inside the scroll viewport').toBeLessThanOrEqual(1)
+  expect(Math.abs(layout.footerGap), 'The fade viewport meets the footer divider').toBeLessThanOrEqual(1)
+}
+
 test.describe('description layout', () => {
   test.use({
     seed: {
@@ -62,6 +74,7 @@ test.describe('description layout', () => {
       await card.locator(':scope > .descriptionStatus').click()
       await expect(card).not.toHaveClass(/short/)
       await expect(card.locator(selector)).toHaveText(text)
+      await expectContentPaddingAboveFooter(card)
       // Removing expanded metadata must clear controls and the old scroll range.
       await view.evaluate((component, metadata) => {
         for (const [key, value] of Object.entries(metadata)) {
@@ -74,6 +87,8 @@ test.describe('description layout', () => {
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(0)
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await expect(scroller).not.toHaveClass(/descriptionFadeBottom/)
+      await expectContentPaddingAboveFooter(card)
       await view.evaluate(component => {
         Object.assign(component, { videoTags: [], videoGames: [], videoMusicTracks: [], license: null, contentDisclosures: [] })
       })
