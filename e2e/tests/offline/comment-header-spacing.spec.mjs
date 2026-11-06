@@ -12,7 +12,7 @@ async function resizeViewport(app, page, width, uiScale) {
 test.describe('comment header spacing', { tag: '@scale' }, () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-  test('matches transcript button spacing in the phone sheet header', async ({ app, page, uiScale }) => {
+  test('matches transcript button spacing and preserves phone header highlights', async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
     await openMockedVideo(page)
     await resizeViewport(app, page, 450, uiScale)
@@ -44,6 +44,15 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
         Math.abs(comments.at(-1).x - comments.at(-2).x - comments.at(-2).width - closeGap)
       )
     }).toBeLessThanOrEqual(1)
+
+    const reload = header.getByRole('button', { name: 'Reload Comments', exact: true })
+    await reload.hover()
+    await expect(reload).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await header.getByRole('button', { name: 'Filter loaded comments', exact: true }).focus()
+    await page.keyboard.press('Tab')
+    const sort = header.getByRole('button', { name: 'Sort by', exact: true })
+    await expect(sort).toBeFocused()
+    await expect(sort).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   })
 
   test('keeps comments directly below the header at wide and narrow widths', async ({ app, page, uiScale }) => {
