@@ -675,7 +675,8 @@ test.describe('manual comment loading', () => {
     await expect.poll(() => page.locator('.commentTools .ft-input-component').evaluate(element => {
       const parent = element.parentElement
       const style = getComputedStyle(parent)
-      return Math.abs(parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - element.getBoundingClientRect().width)
+      const close = parent.querySelector('.commentSearchClose').getBoundingClientRect()
+      return Math.abs(parent.clientWidth - parseFloat(style.columnGap) - close.width - element.getBoundingClientRect().width)
     })).toBeLessThanOrEqual(1)
     await commentSearchInput.fill('honored')
 

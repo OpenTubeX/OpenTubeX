@@ -13,8 +13,15 @@
         :class="{ phoneCommentHeader: phonePanelHeader }"
       >
         <h3>
-          <FtIcon :icon="['fas', 'comment']" />
-          {{ commentsTitle }}
+          <FtIcon
+            v-if="!phonePanelHeader"
+            :icon="['fas', 'comment']"
+            aria-hidden="true"
+          />
+          <span
+            class="commentHeaderTitle"
+            :title="commentsTitle"
+          >{{ commentsTitle }}</span>
         </h3>
         <div
           class="fullscreenCommentActions"
@@ -114,13 +121,11 @@
       </h3>
       <div
         class="commentHeaderActions"
-        :class="{ commentHeaderActionsEmpty: !canSortComments }"
       >
         <CommentFilterMenu
           v-if="canUseCommentTools"
           ref="commentFilterMenu"
           :open="commentFilterMenuOpen"
-          :aligned="canSortComments"
           :channel-thumbnail="channelThumbnail"
           :creator-comments-only="creatorCommentsOnly"
           :timestamp-comments-only="timestampCommentsOnly"
@@ -134,10 +139,9 @@
           :title="$t('Comments.Reload Comments')"
           :disabled="offline"
           :icon="['fas', 'sync']"
-          :size="12"
+          :size="14"
           :padding="8"
           class="reloadComments"
-          :class="{ reloadCommentsAligned: canSortComments }"
           @click="reloadCommentData"
         />
         <FtSelect
@@ -158,15 +162,30 @@
       class="commentTools"
       @keydown.esc.stop.prevent="closeCommentSearch"
     >
-      <FtInput
-        input-type="search"
-        :label="$t('Comments.Search loaded comments')"
-        :icon="['fas', 'search']"
-        :placeholder="$t('Form Inputs.Search Text Hint')"
-        :show-action-button="false"
-        :value="commentSearchQuery"
-        @input="updateCommentSearchQuery"
-      />
+      <div class="commentSearchRow">
+        <FtInput
+          input-type="search"
+          :label="$t('Comments.Search loaded comments')"
+          :icon="['fas', 'search']"
+          :placeholder="$t('Form Inputs.Search Text Hint')"
+          :show-action-button="false"
+          :value="commentSearchQuery"
+          @input="updateCommentSearchQuery"
+        />
+        <button
+          type="button"
+          class="commentSearchClose"
+          :class="fullscreenOverlay ? 'fullscreenCommentAction' : 'commentHeaderIconAction'"
+          :aria-label="$t('Close')"
+          :title="$t('Close')"
+          @click="closeCommentSearch"
+        >
+          <FtIcon
+            :icon="['fas', 'xmark']"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
       <p
         v-if="hasActiveCommentFilters"
         class="commentFilterCount"

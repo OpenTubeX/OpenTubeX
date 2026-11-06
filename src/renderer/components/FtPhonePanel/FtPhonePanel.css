@@ -106,7 +106,7 @@
   padding: 0;
 }
 
-.phonePanelHeaderContent :deep(:is(button, a):not([role='checkbox'], .commentSortOption)),
+.phonePanelHeaderContent :deep(:is(button, a):not([role='checkbox'], .commentSortOption, .fullscreenCommentAction)),
 .phonePanelHeaderContent :deep(.commentTitleAction) {
   display: inline-flex;
   align-items: center;
