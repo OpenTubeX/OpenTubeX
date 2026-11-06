@@ -1,13 +1,13 @@
 <template>
   <div
     class="commentFilterMenuAnchor"
-    :class="{ commentHeaderIconActionAligned: aligned }"
     @focusout="handleFocusout"
     @keydown.esc.stop.prevent="closeAndFocusTrigger"
   >
     <button
       ref="trigger"
       type="button"
+      class="commentFilterTrigger"
       :class="[
         fullscreen ? 'fullscreenCommentAction' : 'commentHeaderIconAction',
         { active: hasActiveFilters }
@@ -18,7 +18,10 @@
       :aria-expanded="String(open)"
       @click="emit('update:open', !open)"
     >
-      <FtIcon :icon="['fas', 'filter']" />
+      <FtIcon
+        :icon="['fas', 'filter']"
+        aria-hidden="true"
+      />
     </button>
     <!-- Phones show the filters in a bottom sheet. -->
     <component
@@ -126,10 +129,6 @@ const props = defineProps({
     required: true
   },
   fullscreen: {
-    type: Boolean,
-    default: false
-  },
-  aligned: {
     type: Boolean,
     default: false
   },

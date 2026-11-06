@@ -309,7 +309,7 @@
 }
 
 .noCommentActions :deep(.select) {
-  margin-block-start: 0;
+  margin-block: 0;
 }
 
 :global(.capacitorPhoneLayout .noComments) {
@@ -324,7 +324,7 @@
 
 .commentsTitle {
   margin: 0;
-  padding-block: 12px;
+  padding-block: 0;
   letter-spacing: -0.01em;
   display: flex;
   flex-wrap: wrap;
@@ -337,36 +337,32 @@
 .commentHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  column-gap: 16px;
+  gap: 16px;
+  padding-block-start: 16px;
 }
 
 .commentHeaderActions {
   display: flex;
   min-inline-size: 0;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   margin-inline-start: auto;
 }
 
-.commentHeaderActionsEmpty {
-  margin-block-start: 12px;
-  margin-inline-end: 8px;
+.commentHeaderActions :deep(.select) {
+  /* Toolbar controls share a row instead of the spacing between form fields. */
+  margin-block: 0;
 }
 
-.commentHeaderActions :deep(.select),
-.noCommentActions :deep(.select) {
-  /* Toolbar controls do not need the spacing between form rows. */
-  margin-block-end: 0;
-}
 
 .commentHeaderIconAction {
   display: inline-flex;
-  inline-size: 32px;
-  block-size: 32px;
-  flex: 0 0 32px;
+  inline-size: 36px;
+  block-size: 36px;
+  flex: 0 0 36px;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -375,7 +371,7 @@
   border: 0;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
@@ -398,12 +394,30 @@
   border-radius: var(--shape-corner-medium);
 }
 
-.commentHeaderIconActionAligned {
-  margin-block-start: calc(30px + (var(--form-control-height) - 32px) / 2);
+.commentTools {
+  --input-bottom-spacing: 0;
+
+  padding-block: 8px;
 }
 
-.commentTools {
-  padding-block: 8px;
+.commentSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commentSearchRow :deep(.ft-input-component) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.commentSearchClose {
+  flex: 0 0 36px;
+}
+
+.card:where(:not(.fullscreenCommentCard, .phoneCommentCard)) > .commentTools {
+  max-inline-size: 480px;
+  padding-block: 16px 0;
 }
 
 .fullscreenCommentCard > .commentTools {
@@ -444,7 +458,8 @@
 
 @container comments (width <= 520px) {
   .commentHeaderActions {
-    flex: 1 0 100%;
+    flex: 1 1 100%;
+    justify-content: flex-start;
   }
 
   .commentFilterMenu:not(.fullscreenCommentFilterMenu) {
@@ -463,17 +478,13 @@
 }
 
 .reloadComments :deep(.iconButton) {
-  inline-size: 32px;
-  block-size: 32px;
+  inline-size: 36px;
+  block-size: 36px;
 
   /* FtIconButton's inline padding scales independently of authored CSS at
      non-100% Electron zoom factors. Keep this toolbar control a fixed size. */
   /* stylelint-disable-next-line declaration-no-important */
   padding: 0 !important;
-}
-
-.reloadCommentsAligned {
-  margin-block-start: calc(30px + (var(--form-control-height) - 32px) / 2);
 }
 
 .comment {
@@ -909,17 +920,41 @@
   flex: 1;
   block-size: auto;
   padding: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 8px;
+  min-inline-size: 0;
   background: transparent;
   color: var(--primary-text-color);
   border: 0;
+}
+
+.phoneCommentHeader h3 {
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.phoneCommentHeader .commentHeaderTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phoneCommentHeader .fullscreenCommentAction {
   color: inherit;
 }
 
+.phoneCommentHeader .commentFilterTrigger.active {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.phoneCommentHeader .commentFilterTrigger.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
 .phoneCommentHeader .fullscreenCommentActions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
   gap: 0;
 }
 
