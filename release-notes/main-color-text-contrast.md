@@ -2,7 +2,7 @@
 category: fix
 ---
 
-Labels and icons on buttons, selected controls, and accent-colored highlights are now easier to read, including on hover and when pressed, with main and secondary colors such as Light Blue, Red, Pink, Green, and several Solarized, Gruvbox, Everforest, Catppuccin, and Dracula colors.
+Buttons, selected controls, and accent-colored highlights are now easier to read with light main and secondary colors, such as Light Blue, Pink, and Green.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/9d3052ac-9fb2-434b-9e93-23bd0404b9e0">

@@ -3,7 +3,7 @@ category: improvement
 platforms: [desktop]
 ---
 
-Right-clicking a collapsed tab group now opens a menu to expand it, close its tabs, or ungroup them. Every context menu uses compact rows and works with the arrow keys, and closing a window's last tabs from a menu asks for confirmation like closing the window.
+Right-clicking a collapsed tab group now opens a menu to expand it, close its tabs, or ungroup them.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3af25a45-bdc3-45bd-9d8a-b3a73e188c0c">

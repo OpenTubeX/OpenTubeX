@@ -8,8 +8,8 @@ Preserve every heading and comment in this template.
 
 ## Release notes and media
 
-Release notes are files in `release-notes/`; follow `release-notes/README.md`. Add a note in the same pull request as the change, or check "No release note needed".
-Before adding a note, read the pending notes in `release-notes/`. They cover everything since the latest release. When this change fixes or extends a change described there, update that note's wording and images in this pull request instead of adding a new one, and check "No release note needed" if it still fits.
+Release notes are files in `release-notes/`; follow `release-notes/README.md`. Most pull requests need no note: add one only when the change meets that file's "When to add a note" bar, and otherwise check "No release note needed". Do not add a note just because a change is user-visible.
+Before adding a note, read the pending notes in `release-notes/`. They cover everything since the latest release. When this change fixes or extends a change described there, update that note's wording and images in this pull request instead of adding a new one, and check "No release note needed" if it still fits. Do not edit a pending note just to mention a small follow-up.
 For a noteworthy visible change, add media when it makes the change easier to understand. Prefer a still image unless motion is the point. Recordings must end up as animated WebP because release notes accept images, not video attachments.
 After implementing a visible change, proactively capture the result and show the local media to the user for approval before uploading it or updating the pull request.
 Request every media or release-note approval through your harness's structured question tool (for example, `AskUserQuestion` in Claude Code), with the local media shown first and options such as uploading, recapturing, or omitting it. Never ask for that approval in a plain chat message; fall back to one only when no such tool exists.

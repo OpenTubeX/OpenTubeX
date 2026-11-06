@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Videos from other sites now open and close their side panels with the same animation as the watch page, offer a transcript when they have captions, and use sheets for the chat and description on phones.
+Videos from other sites now work more like YouTube videos, with transcripts when they have captions and the same side panels and phone sheets.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/1bac3b0e-1f4b-47ea-aa6a-4191f966066b">

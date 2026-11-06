@@ -18,8 +18,8 @@
 <!-- Please write a clear and concise description of what the pull request does. -->
 
 ## Release note
-<!-- User-facing changes need a release note file. See release-notes/README.md. -->
-<!-- Check the box if the change needs no note, for example because users won't notice it or an unreleased change's note still covers it. -->
+<!-- Changes most users will notice need a release note file. See release-notes/README.md for when to add one. -->
+<!-- Check the box if the change needs no note, for example because it is minor polish, a fix for a rare case, or an unreleased change's note still covers it. -->
 - [ ] No release note needed
 
 ## Screenshots

@@ -1,9 +1,8 @@
 ---
 category: improvement
-platforms: [desktop]
 ---
 
-Context menus now follow Material 3, with a tonal surface and icons and hover states in your main color, and they grow out from the pointer when they open and fade out when they close, smoothly even when the app is busy.
+Menus, tooltips, and dialogs now follow Material 3, with accent-colored icons and smooth open and close animations. Dialogs and bottom sheets also blur the page behind them.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/4337bcd7-0a6b-46d0-abc9-1b84041a4b00">
