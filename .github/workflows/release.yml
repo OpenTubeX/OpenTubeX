@@ -198,7 +198,7 @@ jobs:
       shell: bash
       run: |
         for attempt in {1..5}; do
-          if pnpm run build; then
+          if pnpm run pack && pnpm run build-release x64; then
             exit 0
           fi
           if (( attempt == 5 )); then

@@ -22,8 +22,10 @@
   },
   "scripts": {
     "build": "pnpm run pack && pnpm run build-release",
+    "build:x64": "pnpm run pack && pnpm run build-release:x64",
     "build:arm64": "pnpm run pack && pnpm run build-release:arm64",
     "build-release": "node _scripts/build.mjs",
+    "build-release:x64": "node _scripts/build.mjs x64",
     "build-release:arm64": "node _scripts/build.mjs arm64",
     "clean": "node _scripts/clean.mjs",
     "debug": "node _scripts/dev-runner.js --remote-debug",
