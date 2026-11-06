@@ -157,14 +157,3 @@
     object-fit: contain;
   }
 }
-
-/* Continue the comments toolbar through the sheet's close button. */
-.mobileSheetHeader:has(:deep(.phoneCommentHeader)) {
-  gap: 0;
-  padding-inline-end: 16px;
-}
-
-.mobileSheetHeader:has(:deep(.phoneCommentHeader)) > button {
-  min-inline-size: 36px;
-  min-block-size: 36px;
-}

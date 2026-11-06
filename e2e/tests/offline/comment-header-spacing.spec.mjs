@@ -1,6 +1,6 @@
 import { test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { emptyCommentsResponse, mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { emptyCommentsResponse, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function resizeViewport(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
@@ -11,6 +11,49 @@ async function resizeViewport(app, page, width, uiScale) {
 
 test.describe('comment header spacing', { tag: '@scale' }, () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+  test('matches transcript button spacing and preserves phone header highlights', async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    await openMockedVideo(page)
+    await resizeViewport(app, page, 450, uiScale)
+    const watch = await watchViewHandle(page)
+    const sheet = page.locator('.mobileSheet[open]')
+    const header = sheet.locator('.mobileSheetHeader')
+    const buttonBounds = () => header.locator('button:visible').evaluateAll(buttons => buttons.map(button => {
+      const { x, width, height } = button.getBoundingClientRect()
+      return { x, width, height }
+    }))
+
+    await watch.evaluate(view => view.openPhonePanel('transcript'))
+    await expect(sheet.locator('.transcriptHeader')).toBeVisible()
+    const transcript = await buttonBounds()
+    const buttonSize = transcript[0].width
+    const buttonStep = transcript[1].x - transcript[0].x
+    const closeGap = transcript.at(-1).x - transcript.at(-2).x - transcript.at(-2).width
+    await header.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+
+    await watch.evaluate(view => view.openPhonePanel('comments'))
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect(header.locator('button:visible')).toHaveCount(5)
+    await expect.poll(async () => {
+      const comments = await buttonBounds()
+      return Math.max(
+        ...comments.flatMap(button => [Math.abs(button.width - buttonSize), Math.abs(button.height - buttonSize)]),
+        ...comments.slice(1, -1).map((button, index) => Math.abs(button.x - comments[index].x - buttonStep)),
+        Math.abs(comments.at(-1).x - comments.at(-2).x - comments.at(-2).width - closeGap)
+      )
+    }).toBeLessThanOrEqual(1)
+
+    const reload = header.getByRole('button', { name: 'Reload Comments', exact: true })
+    await reload.hover()
+    await expect(reload).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await header.getByRole('button', { name: 'Filter loaded comments', exact: true }).focus()
+    await page.keyboard.press('Tab')
+    const sort = header.getByRole('button', { name: 'Sort by', exact: true })
+    await expect(sort).toBeFocused()
+    await expect(sort).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  })
 
   test('keeps comments directly below the header at wide and narrow widths', async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
@@ -29,6 +72,33 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
         return avatar.getBoundingClientRect().top - contentBottom
       })).toBeCloseTo(15, 0)
     }
+  })
+
+  test('keeps Close clickable when phone header actions need to wrap', async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await app.electronApp.evaluate(({ BrowserWindow }, uiScale) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setMinimumSize(0, 0)
+      window.setContentSize(340, Math.round(900 * uiScale / 100))
+    }, uiScale)
+    await expect.poll(() => page.evaluate(() => innerWidth)).toBeLessThanOrEqual(360)
+    await (await watchViewHandle(page)).evaluate(view => view.openPhonePanel('comments'))
+    const sheet = page.locator('.mobileSheet[open]')
+    const header = sheet.locator('.mobileSheetHeader')
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect.poll(() => header.locator('.commentHeaderTitle').evaluate(title => title.scrollWidth - title.clientWidth)).toBeLessThanOrEqual(1)
+    await expect.poll(() => header.evaluate(header => {
+      const bounds = header.getBoundingClientRect()
+      const minimumSize = parseFloat(getComputedStyle(header).getPropertyValue('--phone-touch-target'))
+      const buttons = [...header.querySelectorAll('button')].map(button => button.getBoundingClientRect())
+      return buttons.every((button, index) => button.width >= minimumSize - 1 && button.height >= minimumSize - 1 &&
+        button.left >= bounds.left && button.right <= bounds.right &&
+        buttons.slice(index + 1).every(other => button.right <= other.left + 1 || other.right <= button.left + 1 ||
+          button.bottom <= other.top + 1 || other.bottom <= button.top + 1))
+    })).toBe(true)
+    await header.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
   })
 
   test('aligns the toolbar and bounds search without overflowing narrow cards', async ({ app, page, uiScale }) => {
