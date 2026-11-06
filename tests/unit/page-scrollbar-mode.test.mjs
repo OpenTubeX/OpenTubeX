@@ -45,18 +45,21 @@ test('desktop initializes the themed page scrollbar as before', () => {
   assert.equal(documentElement.hasAttribute('data-overlayscrollbars-initialize'), true)
 })
 
-test('page scrollbar visibility follows overlapping fullscreen and full-window states', () => {
+test('page scrollbar visibility follows overlapping fullscreen, full-window, and maximized settings states', () => {
   let mutation
   let disconnected = false
   const classes = new Set()
+  const rootClasses = new Set()
   const body = { classList: { contains: name => classes.has(name) } }
+  const documentElement = { classList: { contains: name => rootClasses.has(name) } }
+  const observed = []
   const pageDocument = Object.assign(new EventTarget(), {
-    body, fullscreenElement: null,
+    body, documentElement, fullscreenElement: null,
     defaultView: {
       MutationObserver: class {
         constructor(callback) { mutation = callback }
         observe(target, options) {
-          assert.equal(target, body)
+          observed.push(target)
           assert.deepEqual(options, { attributes: true, attributeFilter: ['class'] })
         }
         disconnect() { disconnected = true }
@@ -79,8 +82,17 @@ test('page scrollbar visibility follows overlapping fullscreen and full-window s
   classes.add('playerFullWindow')
   mutation()
   assert.deepEqual(changes, [false, true, false, true], 'Rotation fullscreen uses the body class without native fullscreen')
+  rootClasses.add('appSettingsMaximized')
+  mutation()
+  classes.delete('playerFullWindow')
+  mutation()
+  assert.deepEqual(changes, [false, true, false, true], 'Maximized settings keeps the native page scrollbar hidden after fullscreen exits')
+  rootClasses.delete('appSettingsMaximized')
+  mutation()
+  assert.deepEqual(changes, [false, true, false, true, false], 'Closing or restoring settings restores the native page scrollbar')
+  assert.deepEqual(observed, [body, documentElement])
   stop()
   assert.equal(disconnected, true)
   pageDocument.dispatchEvent(new Event('fullscreenchange'))
-  assert.deepEqual(changes, [false, true, false, true])
+  assert.deepEqual(changes, [false, true, false, true, false])
 })

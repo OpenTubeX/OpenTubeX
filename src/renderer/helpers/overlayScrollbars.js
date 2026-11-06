@@ -677,7 +677,7 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   if (useNativePageScrollbar) {
     observePageScrollbarVisibility(document, hidden => {
       setAndroidPageScrollbarsHidden(hidden).catch(error => {
-        console.warn('Could not update Android fullscreen scrollbar visibility', error)
+        console.warn('Could not update Android page scrollbar visibility', error)
       })
     })
   }
