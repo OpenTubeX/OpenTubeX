@@ -70,9 +70,10 @@ body {
 
   /* Match calculateColorLuminance's perceived-brightness threshold: white on
      medium/dark fills, black on light fills. The channel names resolve inside
-     each relative rgb(), so nested palettes use their own fill. round() keeps
-     the result black or white even at the threshold. */
-  --fill-text-channel: calc(255 * round(up, clamp(0, 127.5 - r * 0.299 - g * 0.587 - b * 0.114, 1), 1));
+     each relative rgb(), so nested palettes use their own fill. Older WebViews
+     lack round(); a steep clamp produces black or white for 8-bit colors,
+     with a transition of one millionth of a brightness unit. */
+  --fill-text-channel: calc(255 * clamp(0, (127.5 - r * 0.299 - g * 0.587 - b * 0.114) * 1000000, 1));
   --accent-color: rgb(var(--accent-color-rgb));
   --accent-color-opacity1: rgb(var(--accent-color-rgb) / 4%);
   --accent-color-opacity2: rgb(var(--accent-color-rgb) / 12%);
@@ -3334,4 +3335,11 @@ a:visited {
   .lightsOffOverlay
 ) {
   -webkit-app-region: no-drag;
+}
+
+/* Keep the exact threshold for fractional color channels where supported. */
+@supports (color: rgb(from red round(up, r, 1) g b)) {
+  body {
+    --fill-text-channel: calc(255 * round(up, clamp(0, 127.5 - r * 0.299 - g * 0.587 - b * 0.114, 1), 1));
+  }
 }
