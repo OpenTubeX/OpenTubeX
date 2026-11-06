@@ -239,7 +239,7 @@ test('closing the release notes restores the update notification', async ({ page
   await expect(notification).toBeVisible()
 })
 
-test('a single update shows its version once and renders the release notes', async ({ page, attachScreenshot }) => {
+test('a single update shows its version once and renders the release notes', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
   await showUpdatePrompt(page, [
     release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
   ])
@@ -247,6 +247,19 @@ test('a single update shows its version once and renders the release notes', asy
   await expect(page.locator('.changeLogTitle')).toHaveText(`Update to OpenTubeX ${newestUpdateVersion}`)
   // The title already names the release, so the notes must not repeat it.
   await expect(page.locator('.changeLogText h2')).toHaveCount(0)
+
+  for (const viewport of [
+    { width: 1200, height: 800 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport)
+    await expect.poll(() => page.locator('.promptCard').evaluate(element => {
+      const card = element.getBoundingClientRect()
+      const content = element.querySelector('.changeLogContent').getBoundingClientRect()
+      return Math.max(content.left - card.left, card.right - content.right)
+    }), { message: 'release notes have a single side gutter' }).toBeLessThanOrEqual(17)
+  }
 
   await attachScreenshot('update prompt')
 

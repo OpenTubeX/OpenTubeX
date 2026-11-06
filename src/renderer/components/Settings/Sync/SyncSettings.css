@@ -7,6 +7,7 @@
 .privacyHint,
 .privacyPolicy,
 .serverCheckStatus,
+.sharedTabsWarning,
 .error {
   text-align: center;
 }
@@ -150,7 +151,6 @@
 
 .deleteAccountContent {
   box-sizing: border-box;
-  padding-inline: 1rem;
 }
 
 .deleteAccountContent :deep(.ft-input-component) {

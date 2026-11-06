@@ -54,13 +54,11 @@
 }
 
 .addSubscribedChannelPicker {
-  padding-inline: 12px;
   text-align: start;
 }
 
 .addSubscribedChannelHeader {
   flex: none;
-  padding-inline: 12px;
 }
 
 .addSubscribedChannelHeading {

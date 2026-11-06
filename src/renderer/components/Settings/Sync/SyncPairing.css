@@ -3,7 +3,6 @@
   margin-inline: auto;
   max-inline-size: 38rem;
   padding-block-end: 1rem;
-  padding-inline: 1rem;
   text-align: center;
 }
 
@@ -28,7 +27,6 @@
   border-block-start: 1px solid var(--divider-color);
   justify-content: center;
   padding-block-start: 0.75rem;
-  padding-inline: 1rem;
 }
 
 .pairingQr {

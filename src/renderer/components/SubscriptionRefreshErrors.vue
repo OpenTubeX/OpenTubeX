@@ -56,7 +56,6 @@ function copyDetails() {
 
 <style scoped>
 .refreshErrors {
-  padding-inline: 16px;
   overflow-wrap: anywhere;
 }
 

@@ -323,7 +323,9 @@
         theme="readable-width"
         @click="showSharedTabsPrompt = false"
       >
-        <p>{{ t('Settings.Sync Settings.Shared Tabs Warning') }}</p>
+        <p class="sharedTabsWarning">
+          {{ t('Settings.Sync Settings.Shared Tabs Warning') }}
+        </p>
         <FtFlexBox class="actions">
           <FtButton
             :label="t('Cancel')"
