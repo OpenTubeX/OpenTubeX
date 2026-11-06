@@ -22,6 +22,7 @@ minimumReleaseAgeExclude:
   - '@vot.js/core@3.2.0'
   - '@vot.js/shared@3.2.0'
   - dbus-native@0.16.3
+  - sass@1.108.0
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
