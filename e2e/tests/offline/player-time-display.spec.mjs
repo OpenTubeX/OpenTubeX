@@ -157,8 +157,9 @@ test('player controls, overlays, tooltips and captions follow the app font in bo
       expect(typography.timestamp.fontFamily).toBe(appFont)
       await expect(player).toHaveCSS('font-family', appFont)
       await expect(caption).toHaveCSS('font-family', appFont)
-      // Shaka recreates cues after resizing; create and measure inline-font ruby text together.
-      const captionFonts = await caption.evaluate(element => {
+      // Shaka replaces cues after resizing, so resolve and measure the cue in one evaluation.
+      const captionFonts = await player.evaluate(container => {
+        const element = container.querySelector('.shaka-text-container [translate="no"]')
         const originalFont = element.style.fontFamily
         element.style.fontFamily = 'serif'
         const ruby = document.createElement('ruby')
