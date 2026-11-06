@@ -7,7 +7,7 @@ function fixture() {
   const state = {
     sources: [{ iid: 1, title: 'Report', description: 'Description', state: 'opened', confidential: false,
       imported: false, author: { id: 1, username: 'reporter' }, web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/issues/1' }],
-    targets: [], mergeRequests: [], notes: [], comments: [], writes: [], releases: [], downloads: {},
+    targets: [], notes: [], comments: [], writes: [], releases: [], downloads: {},
   }
   let id = 100
   const copy = value => structuredClone(value)
@@ -15,7 +15,7 @@ function fixture() {
     const route = path.split('?')[0]
     if (method !== 'GET') state.writes.push({ side, route, method, body })
     if (side === 'gl' && route === 'user') return { id: 99 }
-    if (side === 'gl' && route.endsWith('/merge_requests')) return copy(state.mergeRequests)
+    assert.ok(!route.includes('/merge_requests'), 'Issue sync must not query GitLab merge requests')
     const commentRoute = side === 'gl' ? route.includes('/notes') : route.includes('/comments')
     const items = commentRoute ? (side === 'gl' ? state.notes : state.comments) : (side === 'gl' ? state.sources : state.targets)
     const match = route.match(/\/(?:issues|notes|comments)\/(\d+)$/)
@@ -70,6 +70,28 @@ test('creates a linked issue, mirrors comments both ways and makes repeat runs a
   state.comments.push({ id: 20, body: 'GitHub response', user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
   assert.equal(state.notes.length, 3)
+  assert.match(state.notes[2].body, /GitHub response/)
+  state.writes = []
+  await sync(client)
+  assert.deepEqual(state.writes, [])
+})
+
+test('syncs issues and comments without querying GitLab merge requests', async () => {
+  const { state, client } = fixture()
+  const gl = client.gl
+  client.gl = async (path, method, body) => {
+    if (path.split('?')[0].endsWith('/merge_requests')) {
+      throw new Error('GitLab merge requests: HTTP 403')
+    }
+    return gl(path, method, body)
+  }
+  state.sources[0].description = 'See !12 and https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12#note_20'
+  state.notes.push({ id: 10, body: 'See OpenTubeX!12', author: { id: 1, username: 'reporter' } })
+  assert.equal(await sync(client), 1)
+  assert.ok(state.targets[0].body.endsWith('See [GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12) and [GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12#note_20)'))
+  assert.ok(state.comments[0].body.endsWith('See [GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12)'))
+  state.comments.push({ id: 20, body: 'GitHub response', user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  assert.equal(await sync(client), 1)
   assert.match(state.notes[2].body, /GitHub response/)
   state.writes = []
   await sync(client)
@@ -236,29 +258,25 @@ test('GitHub references mirrored back to GitLab keep their actual issue and PR U
   assert.deepEqual(state.writes, [])
 })
 
-test('matches imported issues and merge requests by unique titles, never by equal numbers', async () => {
+test('matches imported issues by unique issue titles, never by equal numbers or PR titles', async () => {
   const { state, client } = fixture()
   state.sources.push({ ...state.sources[0], iid: 538, title: 'Imported issue', imported: true, imported_from: 'github',
     web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/work_items/538' })
-  state.mergeRequests.push({ iid: 12, title: 'Imported PR', imported_from: 'github',
-    web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12' })
   state.targets.push(
     { number: 900, title: 'Imported issue', user: { login: 'reporter' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/issues/900' },
-    { number: 538, title: 'Imported PR', pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/538' })
+    { number: 538, title: 'Imported issue', pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/538' })
   state.sources[0].description = 'See #538 and !12'
   await sync(client)
   const target = state.targets.find(item => item.user.login === 'github-actions[bot]')
-  assert.ok(target.body.endsWith('See [Imported issue](https://gitlab.com/opentubex/OpenTubeX/-/work_items/538) ([GitHub #900](https://github.com/OpenTubeX/OpenTubeX/issues/900)) and [Imported PR](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12) ([GitHub #538](https://github.com/OpenTubeX/OpenTubeX/pull/538))'))
+  assert.ok(target.body.endsWith('See [Imported issue](https://gitlab.com/opentubex/OpenTubeX/-/work_items/538) ([GitHub #900](https://github.com/OpenTubeX/OpenTubeX/issues/900)) and [GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12)'))
   state.comments.push({ id: 20, body: 'See #900 and #538', user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
-  assert.ok(state.notes[1].body.endsWith('See [Imported issue](https://github.com/OpenTubeX/OpenTubeX/issues/900) ([GitLab #538](https://gitlab.com/opentubex/OpenTubeX/-/work_items/538)) and [Imported PR](https://github.com/OpenTubeX/OpenTubeX/pull/538) ([GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12))'))
+  assert.ok(state.notes[1].body.endsWith('See [Imported issue](https://github.com/OpenTubeX/OpenTubeX/issues/900) ([GitLab #538](https://gitlab.com/opentubex/OpenTubeX/-/work_items/538)) and [Imported issue](https://github.com/OpenTubeX/OpenTubeX/pull/538)'))
 })
 
 test('GitLab project-only references resolve locally without reinterpreting GitHub or foreign prose', async () => {
   const { state, client } = fixture()
-  const request = { iid: 12, title: 'Imported PR', imported_from: 'github', web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12' }
-  const pull = { number: 900, title: request.title, pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
-  state.mergeRequests.push(request)
+  const pull = { number: 900, title: 'Imported PR', pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
   state.targets.push(pull)
   const preserved = ['`OpenTubeX#1 OpenTubeX!12`', 'other/OpenTubeX#1 other/OpenTubeX!12', 'otherproject#1 NotOpenTubeX#1',
     'https://example.org/OpenTubeX#1', '[OpenTubeX#1](https://example.org)'].join('\n\n')
@@ -267,20 +285,18 @@ test('GitLab project-only references resolve locally without reinterpreting GitH
   state.notes.push({ id: 10, body: gitlabBody, author: { id: 1, username: 'reporter' } })
   await sync(client)
   const target = state.targets.find(item => item.user.login === 'github-actions[bot]')
-  const expected = `See [Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url})) and [Imported PR](${request.web_url}) ([GitHub #900](${pull.html_url})).\n\n${preserved}`
+  const expected = `See [Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url})) and [GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12).\n\n${preserved}`
   assert.ok(target.body.endsWith(expected))
   assert.ok(state.comments[0].body.endsWith(expected))
   const githubOnly = 'OpenTubeX#1 OpenTubeX!12'
   state.comments.push({ id: 20, body: `See #${target.number} and #900.\n\n${githubOnly}\n\n${preserved}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
-  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}) ([GitLab !12](${request.web_url})).\n\n${githubOnly}\n\n${preserved}`))
+  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}).\n\n${githubOnly}\n\n${preserved}`))
 })
 
 test('GitHub GH-number references map issues and PRs while GitLab and literal text stay intact', async () => {
   const { state, client } = fixture()
-  const request = { iid: 12, title: 'Imported PR', imported_from: 'github', web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12' }
-  const pull = { number: 900, title: request.title, pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
-  state.mergeRequests.push(request)
+  const pull = { number: 900, title: 'Imported PR', pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
   state.targets.push(pull)
   const preserved = ['`GH-101 GH-900`', '```\nGH-101\n```', '\\GH-101', 'https://example.org/GH-101', '/search?q=GH-101', '[GH-101](https://example.org)', 'XGH-101 GH-101suffix OTHER-GH-101 GH-101@example.org'].join('\n\n')
   const gitlabBody = `See GH-101 and GH-900.\n\n${preserved}`
@@ -292,7 +308,7 @@ test('GitHub GH-number references map issues and PRs while GitLab and literal te
   assert.ok(state.comments[0].body.endsWith(gitlabBody))
   state.comments.push({ id: 20, body: `See GH-${target.number} and GH-900.\n\n${preserved}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
-  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}) ([GitLab !12](${request.web_url})).\n\n${preserved}`))
+  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}).\n\n${preserved}`))
 })
 
 test('omits missing, confidential, and ambiguous counterparts without leaking private titles', async () => {
@@ -372,19 +388,18 @@ test('explicit local links retain comment fragments and escape title Markdown', 
   assert.ok(state.notes[1].body.includes(`([GitLab #1](${state.sources[0].web_url}))`))
 })
 
-test('public merge-request lookups do not require additional sync token permissions', async t => {
+test('GitLab issue requests authenticate with the sync token', async t => {
   const requests = []
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     requests.push({ url, options })
     return { ok: true, json: async () => [] }
   })
   const client = createClient('test-token')
-  await client.gl('projects/opentubex%2FOpenTubeX/merge_requests?scope=all&state=all')
   await client.gl('projects/opentubex%2FOpenTubeX/issues?scope=all&state=all')
   await client.gl('user')
-  assert.equal(requests[0].options.headers['PRIVATE-TOKEN'], undefined)
-  assert.equal(requests[1].options.headers['PRIVATE-TOKEN'], 'test-token')
-  assert.equal(requests[2].options.headers['PRIVATE-TOKEN'], 'test-token')
+  await client.gl('projects/opentubex%2FOpenTubeX/issues/1/notes', 'POST', { body: 'Reply' })
+  assert.equal(requests.length, 3)
+  for (const { options } of requests) assert.equal(options.headers['PRIVATE-TOKEN'], 'test-token')
 })
 
 test('generated title links display named and numeric entity syntax literally', async () => {

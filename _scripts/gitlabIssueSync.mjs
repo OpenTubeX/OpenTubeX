@@ -146,11 +146,8 @@ function commentBody(comment, side, issue, references, mirrored) {
   return gitlab ? githubBody(header, body) : `${header}\n\n${body}`
 }
 
-function referenceResolver(sources, targets, mergeRequests) {
+function referenceResolver(sources, targets) {
   const gitlab = new Map(sources.filter(issue => issue.confidential === false).map(issue => [`#${issue.iid}`, issue]))
-  for (const request of mergeRequests) {
-    if (!request.confidential) gitlab.set(`!${request.iid}`, request)
-  }
   const gitlabReferences = new Map([...gitlab].map(([reference, item]) => [item.web_url, reference]))
   const github = new Map(targets.map(issue => [`#${issue.number}`, issue]))
   const counterparts = new Map()
@@ -163,13 +160,12 @@ function referenceResolver(sources, targets, mergeRequests) {
     const source = !target.pull_request && target.user.login === githubBot && gitlab.get(`#${markedId(target.body, 'issue')}`)
     if (source) pair(source, target)
   }
-  // GitLab's importer renumbers issues and merge requests. A unique title of
-  // the same item type is evidence of a match; equal numbers are not.
-  for (const [reference, source] of gitlab) {
+  // GitLab's importer renumbers issues. A unique issue title is evidence of
+  // a match; equal numbers are not.
+  for (const source of gitlab.values()) {
     if (source.imported_from !== 'github') continue
-    const request = reference.startsWith('!')
-    const matches = targets.filter(target => Boolean(target.pull_request) === request && target.title === source.title)
-    const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
+    const matches = targets.filter(target => !target.pull_request && target.title === source.title)
+    const originals = [...gitlab.values()].filter(item => item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
   const link = (value, url, title = null) => serialize({
@@ -285,15 +281,9 @@ export function createClient(token, mediaToken) {
   }
   return {
     async gl(path, method = 'GET', body) {
-      const headers = { 'Content-Type': 'application/json' }
-      // Public MR metadata needs no authentication; keep the existing Work Item
-      // sync token usable without adding Merge Request permissions.
-      if (method !== 'GET' || path.split('?')[0] !== `projects/${encodeURIComponent(project)}/merge_requests`) {
-        headers['PRIVATE-TOKEN'] = token
-      }
       const response = await fetch(`https://gitlab.com/api/v4/${path}`, {
         method,
-        headers,
+        headers: { 'Content-Type': 'application/json', 'PRIVATE-TOKEN': token },
         body: body ? JSON.stringify(body) : undefined,
         redirect: 'error',
         signal: AbortSignal.timeout(30000),
@@ -351,8 +341,8 @@ export async function sync(client) {
   const bot = await client.gl('user')
   const sources = await list(client, 'gl', `${glBase}?scope=all&state=all&order_by=created_at&sort=asc`)
   const allTargets = await list(client, 'gh', `${ghBase}?state=all&sort=created&direction=asc`)
-  const mergeRequests = await list(client, 'gl', `projects/${encodeURIComponent(project)}/merge_requests?scope=all&state=all`)
-  const references = referenceResolver(sources, allTargets, mergeRequests)
+  // Merge-request references use direct links; issue sync needs no MR API access.
+  const references = referenceResolver(sources, allTargets)
   const targets = allTargets
     .filter(issue => !issue.pull_request && issue.user.login === githubBot)
   let synced = 0
