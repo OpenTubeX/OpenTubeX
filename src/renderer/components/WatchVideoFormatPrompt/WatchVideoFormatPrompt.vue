@@ -35,7 +35,11 @@
         <p class="sectionLabel">
           {{ t('Change Format.Stream Extraction Method') }}
         </p>
-        <div class="engineOptions">
+        <div
+          class="engineOptions"
+          role="group"
+          :aria-label="t('Change Format.Stream Extraction Method')"
+        >
           <button
             v-for="engine in engines"
             :key="engine.value"
@@ -45,12 +49,13 @@
             :aria-pressed="engine.value === playbackEngineSelection"
             @click="selectPlaybackEngine(engine.value)"
           >
-            {{ engine.label }}
             <FtIcon
               v-if="engine.value === playbackEngineSelection"
               class="engineOptionCheck"
               :icon="['fas', 'check']"
+              aria-hidden="true"
             />
+            {{ engine.label }}
           </button>
         </div>
       </div>
@@ -358,67 +363,84 @@ function selectPlaybackEngine(value) {
 .sectionLabel {
   color: var(--tertiary-text-color);
   font-size: 12px;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.4px;
   margin-block: 0;
-  text-transform: uppercase;
 }
 
-/* A connected button group: tight inner corners, and the selected option
-   rounds fully. */
+/* Classic segments share one outline, with rounding only at the outer ends. */
 .engineOptions {
+  border: 1px solid var(--md-sys-color-outline, var(--border-color));
+  border-radius: var(--shape-corner-large-increased);
   display: grid;
-  gap: 2px;
+  gap: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: clip;
 }
 
 .engineOption {
   align-items: center;
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  background-color: transparent;
   border: 0;
-  border-radius: var(--shape-corner-extra-small);
+  border-radius: 0;
   color: inherit;
   cursor: pointer;
   display: flex;
   font: inherit;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   gap: 8px;
   justify-content: center;
-  min-block-size: 42px;
-  padding-block: 10px;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  min-block-size: 38px;
+  padding-block: 8px;
   padding-inline: 12px;
   transition:
     background-color var(--motion-default-effects),
-    color var(--motion-default-effects),
-    border-radius var(--motion-fast-spatial);
+    color var(--motion-default-effects);
 }
 
-.engineOption:first-child {
-  border-start-start-radius: var(--shape-corner-large-increased);
-  border-end-start-radius: var(--shape-corner-large-increased);
-}
-
-.engineOption:last-child {
-  border-start-end-radius: var(--shape-corner-large-increased);
-  border-end-end-radius: var(--shape-corner-large-increased);
+.engineOption + .engineOption {
+  border-inline-start: 1px solid var(--md-sys-color-outline, var(--border-color));
 }
 
 .engineOption:hover,
 .engineOption:focus-visible {
-  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+  background-color: color-mix(in srgb, currentcolor 8%, transparent);
+}
+
+.engineOption:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
 }
 
 .engineOption.active {
-  border-radius: var(--shape-corner-large-increased);
-  background-color: var(--selected-container-color);
-  color: var(--on-selected-container-color);
+  background-color: var(--md-sys-color-secondary-container, var(--selected-container-color));
+  color: var(--md-sys-color-on-secondary-container, var(--on-selected-container-color));
 }
 
 .engineOption.active:is(:hover, :focus-visible) {
-  background-color: var(--selected-container-hover-color);
+  background-color: color-mix(in srgb, currentcolor 8%, var(--md-sys-color-secondary-container, var(--selected-container-color)));
 }
 
 .engineOption:active {
-  border-radius: var(--shape-corner-small);
+  background-color: color-mix(in srgb, currentcolor 12%, transparent);
+}
+
+.engineOption.active:active {
+  background-color: color-mix(in srgb, currentcolor 12%, var(--md-sys-color-secondary-container, var(--selected-container-color)));
+}
+
+.engineOptionCheck {
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .engineOption {
+    min-block-size: 46px;
+  }
 }
 
 /* The formats form one segmented list: large outer corners, tight inner ones. */
