@@ -1,7 +1,4 @@
 Highlights
-• Focus settings have a new Digital Wellbeing tab with a grayscale mode, daily watch time and Shorts limits, break reminders, and a bedtime reminder that can silence upload notifications.
-
-More improvements
-• The Playlists icon in the navigation, tabs, and page headings is now outlined to match the other navigation icons.
-• Subscription groups can now have an icon, shown beside the group's name in the group tabs and the subscribe button's group list.
+• The app takes on Material 3 Expressive, with rounder corners, tinted buttons and selections, springier motion, and bolder titles. Custom themes keep working.
+• A bell in the top bar keeps your live stream reminders, new uploads, and automatic downloads, which appear in the app instead of as system notifications while you use OpenTubeX. A new setting in General switches notifications to system only or off.
 …and more
