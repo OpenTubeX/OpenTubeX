@@ -134,9 +134,6 @@
 
 .historyActionButton {
   min-inline-size: 0;
-  padding-block: 6px;
-  padding-inline: 10px;
-  font-size: 0.8rem;
   margin: 0;
 }
 
@@ -147,19 +144,15 @@
 @media only screen and (width <= 800px) {
   .headingActions {
     min-inline-size: 0;
-    flex-wrap: nowrap;
     align-items: stretch;
     gap: 6px;
   }
 
   .headingActions > .historyActionButton {
     block-size: auto;
-    flex: 1 1 auto;
+    flex: 1 0 auto;
+    max-inline-size: 100%;
     min-block-size: var(--phone-touch-target, 48px);
-    padding-inline: 4px;
-    font-size: 0.75rem;
-    gap: 4px;
-    white-space: nowrap;
   }
 
   .historyFullActionLabel {
@@ -178,37 +171,15 @@
   }
 }
 
-@media only screen and (width <= 360px) {
-  .headingActions {
-    gap: 4px;
-  }
-
-  .headingActions > .historyActionButton {
-    padding-inline: 2px;
-    font-size: 0.6875rem;
-    gap: 2px;
-  }
-}
-
-@media only screen and (width <= 300px) {
-  .headingActions {
-    gap: 1px;
-  }
-
-  .headingActions > .historyActionButton {
-    padding-inline: 0;
-    font-size: 0.625rem;
-    gap: 1px;
-  }
-}
-
 @container route (width <= 220px) {
   .headingActions {
+    flex-wrap: nowrap;
     overflow-inline: auto;
   }
 
   .headingActions > .historyActionButton {
     flex: 0 0 auto;
+    max-inline-size: none;
   }
 }
 
