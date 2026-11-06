@@ -4,6 +4,8 @@ const CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 const now = Date.now()
 const posts = [
   { postId: 'post-with-comments', postText: 'A community update', voteCount: 2200, commentCount: 123 },
+  { postId: 'post-with-one-comment', postText: 'An update with one comment', voteCount: 3, commentCount: 1 },
+  { postId: 'post-with-zero-comments', postText: 'An update without comments', voteCount: 3, commentCount: 0 },
   { postId: 'post-without-count', postText: 'Another community update', voteCount: 3, commentCount: null }
 ].map(post => ({
   ...post,
@@ -22,7 +24,8 @@ test.use({
       hideSubscriptionsCommunity: false,
       hideSharingActions: true,
       useRssFeeds: false,
-      listType: 'list'
+      listType: 'list',
+      reducedMotion: 'on'
     },
     profiles: [{
       _id: 'allChannels',
@@ -44,6 +47,51 @@ async function openPosts(page) {
   await page.locator('[data-subscription-feed-tab="posts"]').click()
   await expect(page.locator('.ft-list-post')).toHaveCount(posts.length)
 }
+
+test('leaves a small gap below the subscriptions header', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  await openPosts(page)
+  for (const width of [1280, 375]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setContentSize(size.width, size.height), {
+      width: Math.round(width * uiScale / 100), height: Math.round(850 * uiScale / 100)
+    })
+    await expect.poll(() => page.evaluate(() => Math.round(innerWidth))).toBeCloseTo(width, -1)
+    await expect.poll(() => page.locator('.ft-list-post').first().evaluate(element => {
+      return element.getBoundingClientRect().top - document.querySelector('.subscriptionsHeader').getBoundingClientRect().bottom
+    })).toBeGreaterThanOrEqual(5.5)
+  }
+})
+
+test('shows single and zero comment counts without claiming unknown counts are one', async ({ page }) => {
+  await openPosts(page)
+  for (const [index, count] of [[0, '123'], [1, '1'], [2, '0'], [3, '']]) {
+    const countLabel = page.locator('.ft-list-post .commentCount').nth(index)
+    await expect(countLabel).toHaveText(count)
+    await expect(countLabel).toHaveAttribute('title', count === '' ? 'View Full Post' : `${count} comment${count === '1' ? '' : 's'}`)
+  }
+})
+
+test('gives the comments link the same hover and focus colors as the options button', async ({ page }) => {
+  await openPosts(page)
+  const post = page.locator('.ft-list-post').first()
+  const comments = post.locator('.commentsLink')
+  const options = post.locator('.optionsButton button')
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await options.hover()
+    await expect.poll(() => options.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
+    const background = await options.evaluate(element => getComputedStyle(element).backgroundColor)
+    const color = await options.evaluate(element => getComputedStyle(element).color)
+    await comments.hover()
+    await expect(comments).toHaveCSS('background-color', background)
+    await expect(comments).toHaveCSS('color', color)
+    await page.mouse.move(0, 0)
+    await options.focus()
+    await page.keyboard.press('Shift+Tab')
+    await expect(comments).toBeFocused()
+    await expect(comments).toHaveCSS('background-color', background)
+  }
+})
 
 test('post counts have matching contrast and evenly spaced actions', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   await openPosts(page)

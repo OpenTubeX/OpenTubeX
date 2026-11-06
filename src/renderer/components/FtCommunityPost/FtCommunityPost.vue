@@ -162,8 +162,8 @@
       >
         <span
           class="commentCount"
-          :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-          :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
+          :title="commentCountLabel"
+          :aria-label="commentCountLabel"
         >
           <FtIcon
             class="comment-count-icon"
@@ -362,6 +362,10 @@ const formattedCommentCount = computed(() => {
   if (props.singlePost) return formatNumber(commentCount)
   return formatNumber(commentCount, isRoundedNumber(commentCount) ? { notation: 'compact' } : undefined)
 })
+
+const commentCountLabel = computed(() => commentCount == null
+  ? t('Channel.Posts.View Full Post')
+  : t('Global.Counts.Comment Count', { count: formattedCommentCount.value }, commentCount))
 
 const formattedVoteCount = computed(() => {
   return formatNumber(voteCount, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)

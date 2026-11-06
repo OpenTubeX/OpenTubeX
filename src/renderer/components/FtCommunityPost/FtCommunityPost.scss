@@ -89,9 +89,24 @@
 }
 
 .commentsLink {
+  align-items: center;
+  display: inline-flex;
+  min-block-size: 38px;
+  border-radius: calc(19px * var(--ui-roundness));
   color: var(--primary-text-color);
   text-decoration: none;
   font-weight: bold;
+  transition: background-color var(--motion-default-effects), border-radius var(--motion-fast-spatial);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+  }
+
+  &:active {
+    border-radius: var(--shape-corner-medium);
+  }
 }
 
 .bottomSection {
@@ -137,9 +152,12 @@
     }
 
     .commentsLink {
-      align-items: center;
-      display: inline-flex;
       min-block-size: 48px;
+      border-radius: calc(24px * var(--ui-roundness));
+
+      &:active {
+        border-radius: var(--shape-corner-medium);
+      }
     }
 
     .shareButton :deep(.iconButton) {

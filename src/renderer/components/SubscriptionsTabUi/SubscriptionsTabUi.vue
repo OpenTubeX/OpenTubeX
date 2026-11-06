@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ communityPosts: isCommunity }">
     <FtLoader
       v-if="displayIsLoading && activeVideoList.length === 0 && isCommunity"
     />
