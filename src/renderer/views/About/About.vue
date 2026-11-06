@@ -121,6 +121,7 @@ const chunks = computed(() => [
     icon: ['fas', 'question-circle'],
     title: t('About.Help'),
     content: [
+      `<a href="https://opentubex.org/docs/">${t('About.Documentation')}</a>`,
       `<a href="https://github.com/OpenTubeX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`,
     ].join(' / '),
   },
