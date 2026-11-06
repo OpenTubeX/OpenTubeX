@@ -297,6 +297,21 @@
   color: var(--primary-color);
 }
 
+/* The loader stacks on the icon so refreshing never changes the tab width. */
+.tabIcon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.tabIcon > .subscriptionIcon,
+.tabIcon > .tabLoadingIndicator {
+  grid-area: 1 / 1;
+}
+
+.tabIcon.loading .subscriptionIcon {
+  visibility: hidden;
+}
+
 .newFeedTabs {
   --material-tab-padding-inline: 15px;
 
@@ -519,6 +534,7 @@
 
 @media only screen and (width <= 480px) {
   .tabs .subscriptionIcon,
+  .tabs .tabIcon:not(.loading),
   .newFeedTabs .subscriptionIcon {
     display: none;
   }

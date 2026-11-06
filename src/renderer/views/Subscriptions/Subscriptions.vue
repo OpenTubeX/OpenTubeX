@@ -60,20 +60,25 @@
                   @keydown.space.enter.prevent="changeTab('videos')"
                   @keydown.left.right="switchTab($event, 'videos')"
                 >
-                  <FtIcon
-                    :icon="['fa', 'video']"
-                    class="subscriptionIcon"
-                  />
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: refreshingFeedTab === 'videos' }"
+                  >
+                    <FtIcon
+                      :icon="['fa', 'video']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="refreshingFeedTab === 'videos'"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
                   <span
                     class="tabLabel"
                     :data-label="$t('Global.Videos')"
                   ><span>{{ $t("Global.Videos") }}</span></span>
-                  <FtLoader
-                    v-if="refreshingFeedTab === 'videos'"
-                    class="tabLoadingIndicator"
-                    inline
-                    size="16px"
-                  />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
@@ -90,20 +95,25 @@
                   @keydown.space.enter.prevent="changeTab('shorts')"
                   @keydown.left.right="switchTab($event, 'shorts')"
                 >
-                  <FtIcon
-                    :icon="['fa', 'clapperboard']"
-                    class="subscriptionIcon"
-                  />
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: refreshingFeedTab === 'shorts' }"
+                  >
+                    <FtIcon
+                      :icon="['fa', 'clapperboard']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="refreshingFeedTab === 'shorts'"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
                   <span
                     class="tabLabel"
                     :data-label="$t('Global.Shorts')"
                   ><span>{{ $t("Global.Shorts") }}</span></span>
-                  <FtLoader
-                    v-if="refreshingFeedTab === 'shorts'"
-                    class="tabLoadingIndicator"
-                    inline
-                    size="16px"
-                  />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
@@ -120,20 +130,25 @@
                   @keydown.space.enter.prevent="changeTab('live')"
                   @keydown.left.right="switchTab($event, 'live')"
                 >
-                  <FtIcon
-                    :icon="['fa', 'tower-broadcast']"
-                    class="subscriptionIcon"
-                  />
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: refreshingFeedTab === 'live' }"
+                  >
+                    <FtIcon
+                      :icon="['fa', 'tower-broadcast']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="refreshingFeedTab === 'live'"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
                   <span
                     class="tabLabel"
                     :data-label="$t('Global.Live')"
                   ><span>{{ $t("Global.Live") }}</span></span>
-                  <FtLoader
-                    v-if="refreshingFeedTab === 'live'"
-                    class="tabLoadingIndicator"
-                    inline
-                    size="16px"
-                  />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
@@ -150,20 +165,25 @@
                   @keydown.space.enter.prevent="changeTab('community')"
                   @keydown.left.right="switchTab($event, 'community')"
                 >
-                  <FtIcon
-                    :icon="['fa', 'message']"
-                    class="subscriptionIcon"
-                  />
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: refreshingFeedTab === 'posts' }"
+                  >
+                    <FtIcon
+                      :icon="['fa', 'message']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="refreshingFeedTab === 'posts'"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
                   <span
                     class="tabLabel"
                     :data-label="$t('Global.Posts')"
                   ><span>{{ $t("Global.Posts") }}</span></span>
-                  <FtLoader
-                    v-if="refreshingFeedTab === 'posts'"
-                    class="tabLoadingIndicator"
-                    inline
-                    size="16px"
-                  />
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
@@ -205,20 +225,25 @@
                   @keydown.space.enter.prevent="changeTab('feeds')"
                   @keydown.left.right="switchTab($event, 'feeds')"
                 >
-                  <FtIcon
-                    :icon="['fas', 'rss']"
-                    class="subscriptionIcon"
-                  />
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: rssFeedsRefreshing }"
+                  >
+                    <FtIcon
+                      :icon="['fas', 'rss']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="rssFeedsRefreshing"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
                   <span
                     class="tabLabel"
                     :data-label="$t('Subscriptions.RSS Feeds.Tab')"
                   ><span>{{ $t("Subscriptions.RSS Feeds.Tab") }}</span></span>
-                  <FtLoader
-                    v-if="rssFeedsRefreshing"
-                    class="tabLoadingIndicator"
-                    inline
-                    size="16px"
-                  />
                 </div>
               </FtTabs>
             </div>
