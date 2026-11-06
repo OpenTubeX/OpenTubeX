@@ -58,6 +58,68 @@ test('malformed responses try the next source instead of saving an empty success
   await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async () => '<html>error</html>'))
 })
 
+function channelPage(id, urls, layout = 'twoColumnBrowseResultsRenderer') {
+  return {
+    metadata: { channelMetadataRenderer: { externalId: id } },
+    contents: { [layout]: { tabs: urls.map((url, index) => ({ tabRenderer: {
+      selected: index === 0,
+      ...(index === 0 ? { content: { videoRenderer: { videoId: 'regular-video' } } } : {}),
+      endpoint: { commandMetadata: { webCommandMetadata: { url } } }
+    } })) } }
+  }
+}
+
+for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', posts: 'posts' })) {
+  for (const useRss of [true, false]) {
+    test(`background ${feed} refresh accepts a confirmed missing tab, RSS=${useRss}`, async () => {
+      const requests = createBackgroundSubscriptionRequests({ useRss })
+      const page = channelPage('UCtest', ['/@channel/videos'])
+      const result = await fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+        if (request.format !== 'local') throw new Error('HTTP 404')
+        return JSON.stringify(page)
+      })
+      assert.deepEqual(result, feed === 'posts' ? { comments: [] } : { videos: [] })
+    })
+  }
+
+  test(`background ${feed} HTTP 404 verifies the channel before treating its tab as absent`, async () => {
+    const requests = createBackgroundSubscriptionRequests({ useRss: false })
+    const calls = []
+    const result = await fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+      calls.push(request)
+      if (request.format !== 'local' || JSON.parse(request.body).params) throw new Error('HTTP 404')
+      return JSON.stringify(channelPage('UCtest', ['/@channel/videos']))
+    })
+    assert.deepEqual(result, feed === 'posts' ? { comments: [] } : { videos: [] })
+    assert.equal(calls.length, 2)
+    assert.equal(JSON.parse(calls[1].body).browseId, 'UCtest')
+  })
+
+  test(`background ${feed} errors stay errors for present tabs and unverified channels`, async () => {
+    const requests = createBackgroundSubscriptionRequests({ useRss: false })
+    const valid = channelPage('UCtest', ['/@channel/videos'])
+    for (const page of [
+      channelPage('UCtest', [`/@channel/${path}`]),
+      channelPage('UCother', ['/@channel/videos']),
+      { ...valid, alerts: [{ alertRenderer: { type: 'ERROR' } }] },
+      { error: { code: 404 } },
+      {},
+      { ...valid, contents: { twoColumnBrowseResultsRenderer: { tabs: [] } } }
+    ]) {
+      await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+        if (request.format !== 'local' || JSON.parse(request.body).params) throw new Error('HTTP 404')
+        return JSON.stringify(page)
+      }))
+    }
+    for (const page of [channelPage('UCother', ['/@channel/videos']), { ...valid, metadata: undefined }]) {
+      await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+        if (request.format !== 'local') throw new Error('HTTP 404')
+        return JSON.stringify(page)
+      }))
+    }
+  })
+}
+
 function configuration(interval = 100) {
   return { intervals: { videos: interval }, profiles: [
     { id: 'all', channels: { videos: ['UC1', 'UC2'] } },
@@ -174,7 +236,7 @@ test('empty Live pages follow continuations before saving a result', async () =>
     bodies.push(body)
     return JSON.stringify(body.continuation
       ? { onResponseReceivedActions: [{ videoRenderer: { videoId: 'live' } }] }
-      : { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } } }] } } })
+      : { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { ...channelPage('UCtest', ['/@channel/streams']).contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer, content: { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'next' } } } } } }] } } })
   })
   assert.equal(bodies.length, 2)
   assert.equal(bodies[1].continuation, 'next')

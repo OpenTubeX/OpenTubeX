@@ -33,11 +33,12 @@ final class SubscriptionRefreshHttpClient {
         if (feed.requests == null) throw new IOException("Open the app to update background refresh settings");
         Exception lastError = null;
         for (int index = 0; index < feed.requests.length(); index++) {
-            if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
+            checkInterrupted();
             JSONObject request = feed.requests.getJSONObject(index);
             try {
                 String format = request.getString("format");
                 String responseText = fetcher.fetch(request, feed.type, channelId);
+                checkInterrupted();
                 if (format.equals("rss")) {
                     if (!responseText.matches("(?s).*<feed[\\s>].*") || !responseText.contains("</feed>")) {
                         throw new IOException("Invalid subscription RSS response");
@@ -52,7 +53,8 @@ final class SubscriptionRefreshHttpClient {
                     throw new IOException("Subscription API returned an error");
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
-                    if (!hasSelectedContentTab(response.optJSONObject("contents")) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
+                    if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
+                    if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
                         throw new IOException("Channel unavailable");
                     }
                     JSONObject metadata = response.optJSONObject("metadata");
@@ -75,6 +77,7 @@ final class SubscriptionRefreshHttpClient {
                             body.put("continuation", token);
                             next.put("body", body.toString());
                             page = new JSONObject(fetcher.fetch(next, feed.type, channelId));
+                            checkInterrupted();
                             if (page.has("error")) throw new IOException("Live feed continuation failed");
                             payload.put("continuation", page);
                         }
@@ -86,13 +89,73 @@ final class SubscriptionRefreshHttpClient {
                 }
                 return response;
             } catch (IOException | JSONException error) {
+                checkInterrupted();
                 lastError = error;
+                if (request.optString("format").equals("local") && optionalTabPath(feed.type) != null && "HTTP 404".equals(error.getMessage())) {
+                    try {
+                        checkInterrupted();
+                        JSONObject channelRequest = new JSONObject(request.toString());
+                        JSONObject body = new JSONObject(request.getString("body"));
+                        body.remove("params");
+                        channelRequest.put("body", body.toString());
+                        JSONObject page = new JSONObject(fetcher.fetch(channelRequest, feed.type, channelId));
+                        checkInterrupted();
+                        if (channelHasNoFeed(page, feed.type, channelId)) return emptyFeed(feed.type);
+                    } catch (IOException | JSONException ignored) {
+                        checkInterrupted();
+                        // An unverified channel is still a failure; try the next configured source.
+                    }
+                }
             }
         }
         throw new IOException("Background subscription requests failed", lastError);
     }
 
-    private static boolean hasSelectedContentTab(JSONObject contents) {
+    private static void checkInterrupted() throws IOException {
+        if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
+    }
+
+    private static String optionalTabPath(String type) {
+        switch (type) {
+            case "shorts": return "/shorts";
+            case "live": return "/streams";
+            case "posts": return "/posts";
+            default: return null;
+        }
+    }
+
+    private static JSONObject emptyFeed(String type) throws JSONException {
+        return new JSONObject().put(type.equals("posts") ? "comments" : "videos", new org.json.JSONArray());
+    }
+
+    private static boolean channelHasNoFeed(JSONObject response, String type, String channelId) {
+        String path = optionalTabPath(type);
+        JSONObject metadata = response.optJSONObject("metadata");
+        JSONObject channel = metadata == null ? null : metadata.optJSONObject("channelMetadataRenderer");
+        if (path == null || response.has("error") || response.optString("alerts").contains("\"type\":\"ERROR\"") ||
+            channel == null || !channel.optString("externalId").equals(channelId)) return false;
+        JSONObject contents = response.optJSONObject("contents");
+        if (contents == null) return false;
+        JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
+        org.json.JSONArray tabs = browse == null ? null : browse.optJSONArray("tabs");
+        if (tabs == null) {
+            browse = contents.optJSONObject("singleColumnBrowseResultsRenderer");
+            tabs = browse == null ? null : browse.optJSONArray("tabs");
+        }
+        if (tabs == null) return false;
+        boolean hasChannelTab = false;
+        for (int index = 0; index < tabs.length(); index++) {
+            JSONObject item = tabs.optJSONObject(index);
+            JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
+            Object url = tab == null ? null : find(tab.opt("endpoint"), "url");
+            if (!(url instanceof String)) continue;
+            if (((String) url).endsWith(path)) return false;
+            if (((String) url).matches(".*/(featured|videos|shorts|streams|posts|playlists)$")) hasChannelTab = true;
+        }
+        return hasChannelTab;
+    }
+
+    private static boolean hasSelectedContentTab(JSONObject contents, String path) {
         if (contents == null) return false;
         JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
         Object tabs = browse == null ? null : browse.opt("tabs");
@@ -105,7 +168,10 @@ final class SubscriptionRefreshHttpClient {
         for (int i = 0; i < items.length(); i++) {
             JSONObject item = items.optJSONObject(i);
             JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
-            if (tab != null && Boolean.TRUE.equals(tab.opt("selected"))) return tab.optJSONObject("content") != null;
+            if (tab != null && Boolean.TRUE.equals(tab.opt("selected"))) {
+                Object url = find(tab.opt("endpoint"), "url");
+                return tab.optJSONObject("content") != null && (path == null || (url instanceof String && ((String) url).endsWith(path)));
+            }
         }
         return false;
     }
