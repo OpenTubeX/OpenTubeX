@@ -796,6 +796,7 @@ test.describe('custom theme editor', () => {
     await page.getByRole('button', { name: 'Import from clipboard' }).click()
     await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#112233b3')
     await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect(page.locator('.customThemeEditor')).toBeHidden()
     const [saved] = await page.evaluate(() => window.ftElectron.loadCustomTheme())
     expect(saved.colors.background).toBe('#11223300')
     expect(saved.colors.watchedThumbnailOverlay).toBe('#112233b3')
