@@ -107,6 +107,8 @@
 }
 
 .videoOptions :deep(.downloadButton) {
+  --button-container: color-mix(in srgb, oklch(from var(--button-base) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+
   min-block-size: 40px;
   margin: 0;
   margin-inline-start: 4px;

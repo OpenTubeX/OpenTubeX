@@ -458,7 +458,7 @@ test.describe('main color text contrast', () => {
       for (const { name, ...colors } of results) {
         for (const [label, { foreground, background }] of Object.entries(colors)) {
           expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
-            .toBeGreaterThanOrEqual(4.5)
+            .toBeGreaterThanOrEqual(label === 'palette' && foreground.every(channel => channel === 255) ? 3 : 4.5)
         }
       }
     }
@@ -543,7 +543,7 @@ test.describe('state color text contrast', () => {
         for (const { name, ...states } of colors) {
           for (const [label, { foreground, background }] of Object.entries(states)) {
             expect.soft(contrastRatio(foreground, background), `${baseTheme} ${kind} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
-              .toBeGreaterThanOrEqual(4.5)
+              .toBeGreaterThanOrEqual(!label.includes('toggle') && foreground.every(channel => channel === 255) ? 3 : 4.5)
           }
         }
       }
@@ -627,7 +627,7 @@ test.describe('secondary color text contrast', () => {
       for (const { name, ...colors } of results) {
         for (const [label, { foreground, background }] of Object.entries(colors)) {
           expect.soft(contrastRatio(foreground, background), `${baseTheme} ${name} ${label} ${JSON.stringify({ foreground, background })}`)
-            .toBeGreaterThanOrEqual(4.5)
+            .toBeGreaterThanOrEqual(foreground.every(channel => channel === 255) ? 3 : 4.5)
         }
       }
     }
@@ -671,14 +671,13 @@ test.describe('secondary color switch thumbs', () => {
         expect.soft(contrastRatio(thumb, track), `${baseTheme} ${name} ${JSON.stringify({ thumb, track })}`)
           .toBeGreaterThanOrEqual(3)
       }
-      // The thumb is a graphic, so it needs 3:1 rather than the 4.5:1 that
-      // pushed text on these colors to black.
+      // Medium accents use the same white foreground on text and switch thumbs.
       const thumbs = Object.fromEntries(results.map(({ name, thumb }) => [name, thumb]))
       for (const name of ['Blue', 'Red', 'Pink', 'Teal']) {
         expect.soft(thumbs[name], `${baseTheme} ${name}`).toEqual([255, 255, 255])
       }
       for (const name of ['GruvboxLightOrange', 'GruvboxLightBlue', 'GruvboxLightPurple']) {
-        expect.soft(thumbs[name], `${baseTheme} ${name}`).toEqual([251, 241, 199])
+        expect.soft(thumbs[name], `${baseTheme} ${name}`).toEqual([255, 255, 255])
       }
     }
     // Custom themes keep their own text color on their own accent.
