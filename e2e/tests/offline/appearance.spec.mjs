@@ -1876,10 +1876,12 @@ test.describe('Tally themes', () => {
         await window.$store.dispatch('updateSignalAccentColor', color)
       }, [theme, color])
       await expect(page.locator('body')).toHaveCSS('--signal-accent', color)
-      const [accent, background, primary, onPrimary] = await Promise.all(
-        ['var(--accent-color)', 'var(--bg-color)', 'var(--primary-color)', 'var(--text-with-main-color)']
+      const [accent, background, primary, onPrimary, accentLight, onAccent] = await Promise.all(
+        ['var(--accent-color)', 'var(--bg-color)', 'var(--primary-color)', 'var(--text-with-main-color)', 'var(--accent-color-light)', 'var(--text-with-accent-color)']
           .map(value => resolvedColor(page, value)))
       expect(contrastRatio(accent, background), `${theme} ${color} accent text`).toBeGreaterThanOrEqual(4.5)
+      // The live chat's scroll-to-bottom button fills with this on hover.
+      expect(contrastRatio(accentLight, onAccent), `${theme} ${color} hovered accent fill`).toBeGreaterThanOrEqual(4.5)
       // The primary color is both a fill and the text color of selected items.
       expect(contrastRatio(primary, onPrimary), `${theme} ${color} filled control text`).toBeGreaterThanOrEqual(4.5)
       expect(contrastRatio(primary, background), `${theme} ${color} selected label`).toBeGreaterThanOrEqual(4.5)
