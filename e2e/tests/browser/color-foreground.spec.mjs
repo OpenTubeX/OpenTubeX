@@ -2,10 +2,12 @@ import { readFile } from 'node:fs/promises'
 import { test, expect } from '@playwright/test'
 
 const themeCss = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+const exactThresholdStart = themeCss.indexOf('/* Keep the exact threshold')
+expect(exactThresholdStart, 'the exact-threshold override must exist before removing it').toBeGreaterThanOrEqual(0)
 
 for (const supportsRound of [true, false]) {
   test.describe(supportsRound ? 'native rounding' : 'without CSS round()', () => {
-    const css = supportsRound ? themeCss : themeCss.slice(0, themeCss.indexOf('/* Keep the exact threshold'))
+    const css = supportsRound ? themeCss : themeCss.slice(0, exactThresholdStart)
 
     test('solid fills prefer white on medium colors and dark text on light colors', async ({ page }) => {
       await page.setContent(`<style>${css}</style><div id="primary" style="color:var(--text-with-main-color)"></div><div id="secondary" style="color:var(--text-with-accent-color)"></div>`)
