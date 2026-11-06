@@ -1,3 +1,4 @@
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
 async function waitForToastsToSettle(page) {
@@ -186,6 +187,51 @@ test.describe('settings', () => {
 
     await expect(holder).toHaveClass(/position-top-right/)
     await expect(holder.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
+  })
+
+  test('keeps a reset after position changes made during a pending save', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateToastPosition', 'top-left'))
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="appearance"]').click()
+    const setting = page.locator('[data-section="appearance"] .select').filter({ hasText: 'Toast Position' })
+    const select = setting.locator('select')
+    await app.electronApp.evaluate(({ ipcMain }, { channel, upsert }) => {
+      const original = ipcMain._invokeHandlers.get(channel)
+      let holdNextWrite = true
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, async (event, request) => {
+        if (holdNextWrite && request.action === upsert && request.data?._id === 'toastPosition') {
+          holdNextWrite = false
+          await new Promise(resolve => { globalThis.__releaseToastPositionSave = resolve })
+        }
+        return original(event, request)
+      })
+    }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT })
+    await page.evaluate(() => {
+      window.__toastPositionUpdatesFinished = 0
+      window.$store.subscribeAction({
+        after(action) {
+          if (action.type === 'updateToastPosition') window.__toastPositionUpdatesFinished++
+        }
+      })
+    })
+
+    await select.selectOption('top-right')
+    await expect.poll(() => app.electronApp.evaluate(() =>
+      typeof globalThis.__releaseToastPositionSave === 'function'
+    )).toBe(true)
+    try {
+      await select.selectOption('bottom-right')
+      await setting.getByRole('button', { name: 'Reset this setting to its default' }).click()
+    } finally {
+      await app.electronApp.evaluate(() => globalThis.__releaseToastPositionSave())
+    }
+    await expect.poll(() => page.evaluate(() => window.__toastPositionUpdatesFinished)).toBe(3)
+    await expect(select).toHaveValue('bottom-center')
+    await expect(setting.getByRole('button', { name: 'Reset this setting to its default' })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Test toast', exact: true }).click()
+    await expect(page.locator('.toast-holder')).toHaveClass(/position-bottom-center/)
+    await expect(page.locator('.toast', { hasText: 'Test toast' })).toBeVisible()
   })
 
   test('only shows important notifications when enabled', async ({ page }) => {

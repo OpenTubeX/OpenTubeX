@@ -452,8 +452,7 @@ let toastPositionUpdatePromise = Promise.resolve()
  * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
  */
 function updateToastPosition(value) {
-  toastPositionUpdatePromise = toastPositionUpdatePromise
-    .then(() => store.dispatch('updateToastPosition', value))
+  toastPositionUpdatePromise = store.dispatch('updateToastPosition', value)
 }
 
 async function showTestToast() {
