@@ -391,7 +391,7 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
-  test('fades collapsed description content at the bottom of the card', async ({ app, page }) => {
+  test('fades collapsed description content directly into the footer divider', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const watchComponent = await page.evaluateHandle(findWatchComponent)
@@ -410,35 +410,31 @@ test.describe('watch page', () => {
 
     const card = page.locator(`${activeTab} .videoDescription`)
     const scroller = card.locator('.descriptionScroll')
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await expect(card).toContainClass('short')
-      const layout = await scroller.evaluate(element => {
-        const card = element.closest('.videoDescription').getBoundingClientRect()
-        const viewport = element.getBoundingClientRect()
-        const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
-        const line = document.createElement('span')
-        line.style.display = 'block'
-        line.style.height = '1lh'
-        element.append(line)
-        const lineHeight = line.getBoundingClientRect().height
-        line.remove()
-        return {
-          footerGap: more.top - viewport.bottom,
-          footerBottomGap: card.bottom - more.bottom,
-          mask: getComputedStyle(element).maskImage,
-          visibleLines: viewport.height / lineHeight,
-        }
-      })
-      expect(layout.visibleLines).toBeCloseTo(5, 1)
-      // The footer sits below the faded text instead of covering it.
-      expect(layout.footerGap).toBeCloseTo(12, 0)
-      expect(layout.footerBottomGap).toBeCloseTo(0, 0)
-      expect(layout.mask).toMatch(
-        /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
-      )
-    }
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await expect(card).toContainClass('short')
+    const layout = await scroller.evaluate(element => {
+      const card = element.closest('.videoDescription').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+      const line = document.createElement('span')
+      line.style.display = 'block'
+      line.style.height = '1lh'
+      element.append(line)
+      const lineHeight = line.getBoundingClientRect().height
+      line.remove()
+      return {
+        footerGap: more.top - viewport.bottom,
+        footerBottomGap: card.bottom - more.bottom,
+        mask: getComputedStyle(element).maskImage,
+        visibleLines: viewport.height / lineHeight,
+      }
+    })
+    expect(layout.visibleLines).toBeCloseTo(5, 1)
+    // The fade reaches the divider without leaving a blank strip above it.
+    expect(layout.footerGap).toBeCloseTo(0, 0)
+    expect(layout.footerBottomGap).toBeCloseTo(0, 0)
+    expect(layout.mask).toMatch(
+      /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
+    )
     await watchComponent.dispose()
   })
 

@@ -131,6 +131,10 @@
   outline-offset: -3px;
 }
 
+.videoDescription.short .descriptionStatus {
+  margin-block-start: 0;
+}
+
 .videoDescription.short .description {
   /* Measure overflow in the text separately from the collapsed card. */
   min-block-size: 1lh;
