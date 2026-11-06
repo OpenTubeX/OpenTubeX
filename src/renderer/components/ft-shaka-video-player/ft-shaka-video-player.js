@@ -10887,6 +10887,8 @@ export default defineComponent({
       return player.retryStreaming()
     }
 
+    let playerDestruction = null
+
     /**
      * Vue's lifecycle hooks are synchonous, so if we destroy the player in {@linkcode onBeforeUnmount},
      * it won't be finished in time, as the player destruction is asynchronous.
@@ -10900,7 +10902,14 @@ export default defineComponent({
      *   dockedPanels: import('./opentubex/dockedPanels').DockedPanel[]
      * }>}
      */
-    async function destroyPlayer() {
+    function destroyPlayer() {
+      // Watch cleanup and unmount can overlap. Share the teardown and its saved
+      // UI state so no caller touches Shaka's proxy after its sender is released.
+      playerDestruction ??= destroyPlayerRuntime()
+      return playerDestruction
+    }
+
+    async function destroyPlayerRuntime() {
       foregroundLoadAbortController?.abort()
       clearSabrBackoffTimer()
       repeatStatsTracker?.destroy()
