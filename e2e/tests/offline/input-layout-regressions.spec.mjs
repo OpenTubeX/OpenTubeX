@@ -86,15 +86,14 @@ test.describe('input layout regressions', { tag: '@scale' }, () => {
     await captureAppFramebuffer(app, testInfo, 'tab-organizer-narrow')
   })
 
-  test('Storage section headings use the shared vertical spacing', async ({ app, page }, testInfo) => {
+  test('Storage section cards use the shared vertical spacing', async ({ app, page }, testInfo) => {
     const storage = await goToSettingsSection(page, 'storage')
     for (const width of [1100, 360]) {
       await storage.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
-      const gaps = await storage.evaluate(element => [...element.querySelectorAll('.storageSettings > .settingsSection')].slice(2).map(section => {
+      const gaps = await storage.evaluate(element => [...element.querySelectorAll('.storageSettings > .settingsSection')].slice(1).map(section => {
         const previous = section.previousElementSibling
-        const cards = [...previous.querySelectorAll('.storageItem')]
-        return section.querySelector('.sectionTitle').getBoundingClientRect().top -
-          Math.max(...cards.map(card => card.getBoundingClientRect().bottom))
+        return section.querySelector('.sectionBody').getBoundingClientRect().top -
+          previous.querySelector('.sectionBody').getBoundingClientRect().bottom
       }))
       expect(gaps.length).toBeGreaterThan(0)
       for (const gap of gaps) expect.soft(gap).toBeCloseTo(20, 0)
