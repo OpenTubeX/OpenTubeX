@@ -105,15 +105,21 @@ test.describe('recently closed card', { tag: '@scale' }, () => {
           await expect(heading.locator('[data-icon="clock-rotate-left"] svg')).toBeVisible()
           await expect(heading.locator('[data-icon]')).toHaveAttribute('data-icon-pack', iconPack)
           await expect(heading.locator('[data-icon]')).toHaveAttribute('aria-hidden', 'true')
-          await clear.scrollIntoViewIfNeeded()
-          await expect(clear).toBeInViewport()
+          await expect.poll(() => clear.evaluate(button => {
+            const bounds = button.getBoundingClientRect()
+            const header = button.closest('header').getBoundingClientRect()
+            return Math.max(header.left - bounds.left, bounds.right - header.right,
+              header.top - bounds.top, bounds.bottom - header.bottom)
+          }), { message: 'Clear stays within its section header' }).toBeLessThanOrEqual(1)
           await expect.poll(() => organizer.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
           await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
           await expectScrollAtRenderedEnd(scroller)
         }
       }
 
-      await rows.first().getByRole('button', { name: 'Restore', exact: true }).click()
+      const restoredRow = rows.filter({ hasText: 'Music' })
+      await restoredRow.getByRole('button', { name: 'Restore', exact: true }).click()
+      await expect(restoredRow).toHaveCount(0)
       await expect(rows).toHaveCount(2)
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await clear.click()
