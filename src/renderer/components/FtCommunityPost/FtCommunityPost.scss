@@ -95,7 +95,7 @@
 }
 
 .bottomSection {
-  color: var(--tertiary-text-color);
+  color: var(--primary-text-color);
   display: flex;
   align-items: center;
   font-size: 15px;
@@ -120,17 +120,29 @@
     font-weight: 600;
   }
 
-  .likeCount {
-    margin-inline: 5px 6px;
-  }
-
-  .shareButton {
-    margin-inline-start: 10px;
+  .likeCount,
+  .commentsLink {
+    padding-inline: 10px;
   }
 
   .optionsButton {
     opacity: 1;
-    margin-inline-start: 8px;
+  }
+
+  @media (pointer: coarse), (width <= 680px) {
+    .likeCount,
+    .commentsLink {
+      // Match the space around a 20px icon in a 48px touch target.
+      padding-inline: 14px;
+    }
+
+    .shareButton :deep(.iconButton) {
+      min-inline-size: 48px;
+    }
+
+    .shareButton :deep(.icon) {
+      font-size: 20px;
+    }
   }
 }
 
