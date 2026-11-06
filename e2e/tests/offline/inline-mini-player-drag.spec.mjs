@@ -1719,6 +1719,39 @@ test('bottom bar progress follows a moving live seek window while paused', async
   await expect(forward).toBeEnabled()
 })
 
+test('bottom bar progress stays distinct from its track with a pale Tally accent', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+    window.scrollTo(0, 1200)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  const progress = player.locator('.mobileMiniBarProgress')
+  for (const theme of ['openTubeXLight', 'openTubeXDark']) {
+    // A gray accent close to the light track's own color.
+    await page.evaluate(async theme => {
+      await window.$store.dispatch('updateBaseTheme', theme)
+      await window.$store.dispatch('updateSignalAccentColor', '#c7c8c7')
+    }, theme)
+    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    const { fill, track } = await progress.evaluate(element => {
+      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
+      return {
+        fill: rgb(getComputedStyle(element.querySelector(':scope > div')).backgroundColor),
+        track: rgb(getComputedStyle(element, '::before').backgroundColor)
+      }
+    })
+    const luminance = color => color.map(value => value / 255)
+      .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
+    const [low, high] = [luminance(fill), luminance(track)].sort((a, b) => a - b)
+    expect((high + 0.05) / (low + 0.05), `${theme} ${JSON.stringify({ fill, track })}`).toBeGreaterThanOrEqual(3)
+  }
+})
+
 async function checkBottomBarPlaybackControls({ app, page, uiScale }, testInfo) {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(() => {
