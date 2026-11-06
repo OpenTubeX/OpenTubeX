@@ -24,6 +24,37 @@ test.use({
   }
 })
 
+test('keeps storage content inset from the top and bottom of its cards', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialBlack'))
+  const storage = await goToSettingsSection(page, 'storage')
+  for (const width of [375, 1600]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+    }, { width, uiScale })
+    await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+    await expect.poll(() => storage.locator('.sectionBody').evaluateAll(elements => elements.map(element => {
+      const bounds = element.getBoundingClientRect()
+      const children = [...element.children].map(child => child.getBoundingClientRect())
+      return {
+        top: Math.round(Math.min(...children.map(child => child.top)) - bounds.top),
+        bottom: Math.round(bounds.bottom - Math.max(...children.map(child => child.bottom)))
+      }
+    }))).toEqual(Array.from({ length: await storage.locator('.sectionBody').count() }, () => ({ top: 20, bottom: 20 })))
+    if (width === 375 && uiScale === 100) {
+      for (const toast of await page.locator('[data-sonner-toast]').all()) {
+        await toast.focus()
+        await page.keyboard.press('Escape')
+      }
+      await expect(page.locator('.toast')).toHaveCount(0)
+      await storage.locator('.storageBreakdown').scrollIntoViewIfNeeded()
+      await page.screenshot({ path: testInfo.outputPath('mobile-storage-chart-spacing.png') })
+      await storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..').evaluate(element => element.scrollIntoView({ block: 'start' }))
+      await page.screenshot({ path: testInfo.outputPath('mobile-storage-card-spacing.png') })
+    }
+  }
+})
+
 test('keeps retention label transparent and its indicators inside the card', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.evaluate(async () => {
