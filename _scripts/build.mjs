@@ -6,29 +6,24 @@ import { withWindowsPortable } from './windowsPortable.mjs'
 import { prepareCastSender } from './castSender.mjs'
 
 const args = process.argv
+const targetArch = args[2] ?? process.arch
+if (targetArch !== 'x64' && targetArch !== 'arm64') {
+  throw new Error(`Unsupported build architecture: ${targetArch}`)
+}
+const arch = Arch[targetArch]
 
 let buildRequests
 const platform = process.platform
-await prepareCastSender('dist', platform, args[2] === 'arm64' ? 'arm64' : 'x64')
+await prepareCastSender('dist', platform, targetArch)
 
 if (platform === 'darwin') {
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
-  }
-
   buildRequests = [{
     targets: Platform.MAC.createTarget(['DMG', 'zip', '7z'], arch),
     config
   }]
 } else if (platform === 'win32') {
-  await prepareWindowsShare(args[2] === 'arm64' ? 'arm64' : 'x64')
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
-  } else {
+  await prepareWindowsShare(targetArch)
+  if (targetArch === 'x64') {
     await prepareWindowsInterposer()
   }
   buildRequests = [
@@ -38,16 +33,10 @@ if (platform === 'darwin') {
     },
     {
       targets: Platform.WINDOWS.createTarget(['zip', '7z'], arch),
-      config: withWindowsPortable(config, arch === Arch.arm64 ? 'arm64' : 'x64')
+      config: withWindowsPortable(config, targetArch)
     }
   ]
 } else if (platform === 'linux') {
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
-  }
-
   buildRequests = [{
     targets: Platform.LINUX.createTarget(['deb', 'zip', '7z', 'rpm', 'AppImage', 'pacman'], arch),
     config
