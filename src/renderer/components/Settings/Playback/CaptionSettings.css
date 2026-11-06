@@ -64,8 +64,6 @@
   padding-block: 0;
   padding-inline: 0.75rem;
   border-radius: var(--shape-corner-extra-small);
-  background-color: var(--card-bg-color);
-  backdrop-filter: var(--card-bg-blur, none);
 }
 
 .captionControl :deep(.pure-material-slider) {
