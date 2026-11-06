@@ -31,7 +31,7 @@ test('iOS fullscreen and caption bindings are restored once during player teardo
   const unmount = source.split('    onBeforeUnmount(() => {')
     .find(body => body.trimStart().startsWith('sponsorBlockRequestGeneration++'))
     .split('      clearTimeout(paidPromotionTimer)')[0]
-  const destroy = source.split('    async function destroyPlayer() {')[1].split('      ignoreErrors = true')[0]
+  const destroy = source.split('    async function destroyPlayerRuntime() {')[1].split('      ignoreErrors = true')[0]
   let restores = 0
   let captionRestores = 0
   const context = {

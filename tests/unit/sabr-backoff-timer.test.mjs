@@ -241,7 +241,7 @@ test('late SABR callbacks cannot start a countdown after playback ends', () => {
 })
 
 test('destroying the player aborts SABR backoff before waiting for Shaka', async () => {
-  const start = source.indexOf('    async function destroyPlayer() {')
+  const start = source.indexOf('    let playerDestruction = null')
   const destroySource = source.slice(start, source.indexOf('\n    expose({', start))
   const calls = []
   const noop = () => {}
