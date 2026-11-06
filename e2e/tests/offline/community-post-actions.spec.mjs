@@ -60,6 +60,12 @@ test('post counts have matching contrast and evenly spaced actions', { tag: '@sc
         await page.evaluate(value => window.$store.dispatch('updateHideSharingActions', value), hideSharingActions)
         for (const post of await page.locator('.ft-list-post').all()) {
           const footer = post.locator('.bottomSection')
+          if (width <= 680) {
+            const touchTargets = footer.locator('.commentsLink, .shareButton button, .optionsButton button')
+            for (const target of await touchTargets.all()) {
+              expect.soft(await target.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48 - 0.01)
+            }
+          }
           const color = await footer.locator('.commentCount').evaluate(element => getComputedStyle(element).color)
           expect.soft(await footer.locator('.likeCount').evaluate(element => getComputedStyle(element).color)).toBe(color)
           const gaps = await footer.evaluate(element => {

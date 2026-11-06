@@ -136,7 +136,14 @@
       padding-inline: 14px;
     }
 
+    .commentsLink {
+      align-items: center;
+      display: inline-flex;
+      min-block-size: 48px;
+    }
+
     .shareButton :deep(.iconButton) {
+      min-block-size: 48px;
       min-inline-size: 48px;
     }
 
