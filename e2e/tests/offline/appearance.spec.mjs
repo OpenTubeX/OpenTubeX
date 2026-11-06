@@ -756,7 +756,9 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
     await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#66339980')
     expect(await page.evaluate(() => window.ftElectron.loadCustomTheme())).toEqual([])
+    // Closing the editor confirms its asynchronous save has finished.
     await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect(page.locator('.customThemeEditor')).toBeHidden()
     const saved = await page.evaluate(() => window.ftElectron.loadCustomTheme())
     expect(saved).toHaveLength(1)
     expect(saved[0].id).not.toBe(theme.id)
@@ -772,6 +774,7 @@ test.describe('custom theme editor', () => {
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await importButton.click()
     await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect(page.locator('.customThemeEditor')).toBeHidden()
     const importedAgain = await page.evaluate(() => window.ftElectron.loadCustomTheme())
     expect(importedAgain).toHaveLength(2)
     expect(new Set(importedAgain.map(({ id }) => id)).size).toBe(2)
