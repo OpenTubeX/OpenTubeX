@@ -521,7 +521,7 @@ test.describe('browsing scroll during mobile minimize', () => {
   })
 
   for (const trigger of ['remove', 'replace', 'search locale change', 'resize', 'responsive']) {
-    test(`minimize clamps history after ${trigger} reduces its scroll range`, async ({ app, page }) => {
+    test(`minimize clamps history after ${trigger} reduces its scroll range`, { tag: '@scale' }, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await setWindowSize(app, page, { width: 480, height: 850 })
       const history = page.locator('.tabContent > .routerView').first()
@@ -562,7 +562,8 @@ test.describe('browsing scroll during mobile minimize', () => {
         })
         await expect(history.locator('.historySearchLoader')).toHaveCount(0)
       } else {
-        await setWindowSize(app, page, trigger === 'resize' ? { width: 481, height: 1200 } : { width: 400, height: 900 })
+        // Narrower History controls can grow taller, so the viewport must grow enough to shorten the range.
+        await setWindowSize(app, page, { width: trigger === 'resize' ? 481 : 400, height: 1200 })
       }
       const player = page.locator('.ftVideoPlayer')
       const cdp = await page.context().newCDPSession(page)
