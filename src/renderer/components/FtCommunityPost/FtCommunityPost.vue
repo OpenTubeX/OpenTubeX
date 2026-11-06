@@ -152,7 +152,7 @@
           aria-hidden="true"
         /> {{ formattedVoteCount }}</span>
       <router-link
-        v-if="!singlePost"
+        v-if="!singlePost && !hideComments"
         :to="{
           path: `/post/${postId}`,
           query: authorId ? { authorId } : undefined
@@ -161,7 +161,6 @@
         :aria-label="$t('Channel.Posts.View Full Post')"
       >
         <span
-          v-if="!hideComments"
           class="commentCount"
           :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
           :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
@@ -215,6 +214,7 @@ import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
+  copyToClipboard,
   createWebURL,
   formatNumber,
   getRelativeTimeFromDate,
@@ -294,6 +294,11 @@ const dropdownOptions = computed(() => {
   if (props.embedded) {
     return options
   }
+  options.push({
+    label: t('Context Menu.Copy YouTube Link'),
+    value: 'copyYoutubeLink',
+    icon: ['fab', 'youtube']
+  })
   if (showMarkAsSeen.value) {
     options.push({
       label: t('Subscriptions.Mark As Seen'),
@@ -312,6 +317,11 @@ const dropdownOptions = computed(() => {
  */
 function handleOptionsClick(option) {
   switch (option) {
+    case 'copyYoutubeLink':
+      copyToClipboard(`https://www.youtube.com/post/${postId}`, {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+      break
     case 'markAsSeen':
       if (showMarkAsSeen.value && props.data.postId) {
         store.dispatch('markSubscriptionPostAsSeen', props.data.postId)
