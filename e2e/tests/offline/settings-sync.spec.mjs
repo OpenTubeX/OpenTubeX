@@ -995,7 +995,8 @@ test.describe('tabs from other synced devices', () => {
     }
   })
 
-  test('confirms before replacing other devices’ tabs with this device tab set', async ({ page }) => {
+  test('confirms before replacing other devices’ tabs with this device tab set', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
     await page.route('https://sync.opentubex.org/**', route => route.fulfill({
       json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
     }))
@@ -1009,6 +1010,34 @@ test.describe('tabs from other synced devices', () => {
     const dialog = page.getByRole('dialog', { name: 'Use one shared tab set across devices' })
     await expect(dialog).toContainText('The open tabs on this device become the shared set.')
     await expect(dialog).toContainText('tabs from different devices are not combined')
+    await expect(dialog.locator(':scope > p')).toHaveCSS('text-align', 'center')
+
+    for (const viewport of [
+      { width: 1280, height: 800 },
+      { width: 820, height: 650 },
+      { width: 390, height: 844 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport)
+      await expect.poll(() => dialog.evaluate(element => {
+        const card = element.getBoundingClientRect()
+        return Math.min(...[...element.querySelectorAll(':scope > h2, :scope > p, :scope > .actions')]
+          .flatMap(child => {
+            const rect = child.getBoundingClientRect()
+            return [rect.left - card.left, card.right - rect.right]
+          }))
+      }), { message: `dialog content has side padding at ${viewport.width}×${viewport.height}` }).toBeGreaterThanOrEqual(11)
+      await expect.poll(() => dialog.evaluate(element => {
+        const card = element.getBoundingClientRect()
+        const text = element.querySelector('p').getBoundingClientRect()
+        return Math.abs((text.left - card.left) - (card.right - text.right))
+      }), { message: 'dialog text has equal left and right padding' }).toBeLessThanOrEqual(1)
+      await expect.poll(() => dialog.evaluate(element => element.scrollWidth - element.clientWidth))
+        .toBeLessThanOrEqual(1)
+      await expect(dialog).toBeInViewport({ ratio: 1 })
+      if (viewport.width === 820) await attachScreenshot('shared tabs confirmation with padded content')
+    }
+
     await dialog.getByRole('button', { name: 'Cancel' }).click()
     await expect(dialog).toHaveCount(0)
     await expect(toggle).not.toBeChecked()
