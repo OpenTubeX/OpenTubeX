@@ -215,6 +215,20 @@ test.describe('single history entry', () => {
 })
 
 test.describe('watch history', () => {
+  test('history actions use the standard button font size at every width', { tag: '@scale' }, async ({ app, page }) => {
+    await goTo(page, 'history')
+    const standardButton = page.locator('.historyFilterToggle')
+    const actions = page.locator('.headingActions .historyActionButton')
+    await expect(actions).toHaveCount(3)
+    for (const width of [1500, 732, 375, 320]) {
+      await setWindowSize(app, page, { width, height: width > 800 ? 950 : 1200 - width })
+      const fontSize = await standardButton.evaluate(button => getComputedStyle(button).fontSize)
+      for (const button of await actions.all()) {
+        await expect(button).toHaveCSS('font-size', fontSize)
+      }
+    }
+  })
+
   for (const preference of ['on', 'system']) {
     test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: preference === 'system' ? 'reduce' : 'no-preference' })
@@ -357,7 +371,7 @@ test.describe('watch history', () => {
     }
   })
 
-  test('history actions and labels stay on one line without clipping at narrow widths', { tag: '@scale' }, async ({ app, page }) => {
+  test('history actions keep readable labels without clipping at narrow widths', { tag: '@scale' }, async ({ app, page }) => {
     await goTo(page, 'history')
     const actions = page.locator('.headingActions')
     await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete', 'Repair History', 'Mark All As Watched'])
@@ -394,7 +408,9 @@ test.describe('watch history', () => {
               range.selectNodeContents(textNode)
               if ([...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length > 1) return false
             }
-            return Math.abs(rect.top - first.top) < 1 && Math.abs(rect.height - first.height) < 1 && rect.height >= 48 &&
+            // Whole buttons may wrap; their labels keep the standard size and stay on one line.
+            return Math.abs(rect.height - first.height) < 1 && rect.height >= 48 &&
+              rect.top >= bounds.top - 1 && rect.bottom <= bounds.bottom + 1 &&
               rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1 && contentFits
           })
         })).toBe(true)
@@ -415,15 +431,15 @@ test.describe('watch history', () => {
       for (const width of [320, 375]) {
         await setWindowSize(app, page, { width, height: 1200 - width })
         await expect.poll(() => actions.evaluate(element => {
-          const row = element.closest('.headingRow').getBoundingClientRect()
+          const row = element.getBoundingClientRect()
           const buttons = [...element.querySelectorAll('button')]
-          const first = buttons[0].getBoundingClientRect()
           return buttons.length === 3 && buttons.every(button => {
             const rect = button.getBoundingClientRect()
             const label = button.querySelector('.historyCompactActionLabel')
             const labelRect = label.getBoundingClientRect()
             const icon = button.querySelector('svg').getBoundingClientRect()
-            return Math.abs(rect.top - first.top) < 1 && rect.height >= 48 &&
+            return rect.height >= 48 &&
+              rect.top >= row.top - 1 && rect.bottom <= row.bottom + 1 &&
               rect.left >= row.left - 1 && rect.right <= row.right + 1 &&
               label.textContent.trim().length > 0 && labelRect.width >= Math.min(20, label.scrollWidth - 1) &&
               labelRect.left >= rect.left - 1 && labelRect.right <= rect.right + 1 &&
