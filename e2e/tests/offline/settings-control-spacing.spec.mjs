@@ -364,7 +364,7 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
   test('a stacked toast position puts its test button on a separate row', async ({ app, page, uiScale }, testInfo) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const content = page.locator('.settingsContent')
-    const row = appearance.locator('.themeSelectRow').first()
+    const row = appearance.locator('.themeSelectRow').filter({ hasText: 'Toast Position' })
     for (const width of [650, 540, 500, 400, 650]) {
       await content.evaluate(element => { element.scrollTop = element.scrollHeight })
       await resize(app, page, width === 400 ? 480 : 1600, uiScale)
@@ -373,13 +373,15 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
         const selects = [...element.querySelectorAll('.select-text')].map(select => select.getBoundingClientRect())
         const button = element.querySelector('.testToastButton').getBoundingClientRect()
         return {
-          columns: selects.filter(select => Math.abs(select.top - selects[0].top) < 1).length,
+          horizontalGap: button.left - selects.at(-1).right,
           gap: button.top - selects.at(-1).bottom,
           center: button.left + button.width / 2 - element.getBoundingClientRect().left - element.getBoundingClientRect().width / 2
         }
       })
-      expect(geometry.columns).toBe(width === 650 ? 2 : 1)
-      if (width <= 540) {
+      if (width === 650) {
+        expect(geometry.gap).toBeLessThan(0)
+        expect(geometry.horizontalGap).toBeGreaterThanOrEqual(12)
+      } else {
         expect.soft(geometry.gap).toBeCloseTo(20, 1)
         expect.soft(Math.abs(geometry.center)).toBeLessThanOrEqual(1)
       }

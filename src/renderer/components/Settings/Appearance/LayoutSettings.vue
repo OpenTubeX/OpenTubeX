@@ -315,6 +315,26 @@
     <h4 class="groupTitle">
       {{ t('Settings.Theme Settings.Sections.Notifications') }}
     </h4>
+    <FtFlexBox class="themeSelectRow">
+      <FtSelect
+        size-to-content
+        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
+        :value="toastPosition"
+        setting-key="toastPosition"
+        :select-names="toastPositionNames"
+        :select-values="TOAST_POSITION_VALUES"
+        :icon="['fas', 'message']"
+        @change="updateToastPosition"
+      />
+      <div class="testToastAction">
+        <FtButton
+          class="testToastButton"
+          :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+          :icon="['fas', 'message']"
+          @click="showTestToast"
+        />
+      </div>
+    </FtFlexBox>
     <div class="appearanceSwitchGrid switchFlowGrid">
       <FtToggleSwitch
         :label="$t('Settings.Theme Settings.Show Toast Timeout Indicator')"
@@ -388,6 +408,7 @@ import {
   normalizeScrollbarThumbWidth,
   SCROLLBAR_THUMB_WIDTH_STEP
 } from '../../../constants/scrollbar'
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../../constants/toastPosition'
 import { setAnimationSpeed } from '../../../helpers/animationSpeed'
 import {
   MAX_SCROLL_SPEED,
@@ -413,6 +434,36 @@ const capacitorLayoutModeNames = computed(() => [
   t('Settings.General Settings.Mobile Layout.Phone'),
   t('Settings.General Settings.Mobile Layout.Tablet')
 ])
+
+const toastPositionNames = computed(() => [
+  t('Settings.Theme Settings.Toast Position.Bottom Left'),
+  t('Settings.Theme Settings.Toast Position.Bottom Center'),
+  t('Settings.Theme Settings.Toast Position.Bottom Right'),
+  t('Settings.Theme Settings.Toast Position.Top Left'),
+  t('Settings.Theme Settings.Toast Position.Top Center'),
+  t('Settings.Theme Settings.Toast Position.Top Right')
+])
+
+/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
+const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
+let toastPositionUpdatePromise = Promise.resolve()
+
+/**
+ * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
+ */
+function updateToastPosition(value) {
+  toastPositionUpdatePromise = toastPositionUpdatePromise
+    .then(() => store.dispatch('updateToastPosition', value))
+}
+
+async function showTestToast() {
+  await toastPositionUpdatePromise
+  showToast({
+    message: t('Settings.Theme Settings.Toast Position.Test Toast'),
+    icon: ['fas', 'message'],
+    important: true
+  })
+}
 
 const tabBarPositionNames = computed(() => [
   t('Settings.Theme Settings.Tab Layout.Horizontal Top'),
@@ -785,5 +836,20 @@ function handleRestartPrompt(value) {
 <style scoped>
 .groupTitle:not(:first-child) {
   margin-block-start: 1.5em;
+}
+
+.testToastAction {
+  display: flex;
+  justify-content: center;
+}
+
+.testToastButton {
+  margin-block: var(--settings-control-margin);
+}
+
+@container settings-content (width <= 580px) {
+  .testToastAction {
+    inline-size: 100%;
+  }
 }
 </style>

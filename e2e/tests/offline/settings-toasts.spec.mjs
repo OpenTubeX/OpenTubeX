@@ -170,14 +170,17 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="appearance"]').click()
 
-    const themeSection = page.locator('[data-section="appearance"]')
-    const toastPositionRow = themeSection.locator('.themeSelectRow')
+    const layoutSection = page.locator('[data-section="appearance"] .settingsSection')
+      .filter({ has: page.getByRole('heading', { name: 'Layout', exact: true }) })
+    const toastPositionRow = layoutSection.locator('.themeSelectRow')
       .filter({ hasText: 'Toast Position' })
     const positionSelect = toastPositionRow.locator('.select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     const holder = page.locator('.toast-holder')
 
+    await expect(toastPositionRow.locator('xpath=preceding-sibling::*[1]'))
+      .toHaveText('Notifications')
     await positionSelect.selectOption('top-right')
     await toastPositionRow.getByRole('button', { name: 'Test toast' }).click()
 
@@ -367,8 +370,9 @@ test.describe('settings', () => {
       app.style.setProperty('--top-tab-bar-height', '48px')
     })
 
-    const themeSection = page.locator('[data-section="appearance"]')
-    const toastPositionRow = themeSection.locator('.themeSelectRow')
+    const layoutSection = page.locator('[data-section="appearance"] .settingsSection')
+      .filter({ has: page.getByRole('heading', { name: 'Layout', exact: true }) })
+    const toastPositionRow = layoutSection.locator('.themeSelectRow')
       .filter({ hasText: 'Toast Position' })
     await toastPositionRow.locator('.select')
       .filter({ hasText: 'Toast Position' })
