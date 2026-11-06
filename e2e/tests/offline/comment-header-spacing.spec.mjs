@@ -74,6 +74,32 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
     }
   })
 
+  test('keeps Close clickable when phone header actions need to wrap', async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await app.electronApp.evaluate(({ BrowserWindow }, uiScale) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setMinimumSize(0, 0)
+      window.setContentSize(340, Math.round(900 * uiScale / 100))
+    }, uiScale)
+    await expect.poll(() => page.evaluate(() => innerWidth)).toBeLessThanOrEqual(360)
+    await (await watchViewHandle(page)).evaluate(view => view.openPhonePanel('comments'))
+    const sheet = page.locator('.mobileSheet[open]')
+    const header = sheet.locator('.mobileSheetHeader')
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect.poll(() => header.evaluate(header => {
+      const bounds = header.getBoundingClientRect()
+      const minimumSize = parseFloat(getComputedStyle(header).getPropertyValue('--phone-touch-target'))
+      const buttons = [...header.querySelectorAll('button')].map(button => button.getBoundingClientRect())
+      return buttons.every((button, index) => button.width >= minimumSize - 1 && button.height >= minimumSize - 1 &&
+        button.left >= bounds.left && button.right <= bounds.right &&
+        buttons.slice(index + 1).every(other => button.right <= other.left + 1 || other.right <= button.left + 1 ||
+          button.bottom <= other.top + 1 || other.bottom <= button.top + 1))
+    })).toBe(true)
+    await header.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+  })
+
   test('aligns the toolbar and bounds search without overflowing narrow cards', async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
