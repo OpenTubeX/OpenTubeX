@@ -616,7 +616,7 @@ for (const historyEnabled of [false, true]) {
         const upload = requests.find(request => request.method === 'PUT')
         assert.ok(!upload.body.includes('videos.example.test'))
         const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
-        assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/local', 'https://videos.example.test/remote'])
+        assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/remote', 'https://videos.example.test/local'])
       }
     })
   }

@@ -215,7 +215,9 @@ function parseSyncedPositions(entries) {
  */
 export function mergeExternalMediaPositions(local, remote, previous, cutoff) {
   const merged = new Map()
-  for (const url of new Set([...local.keys(), ...remote.keys()])) {
+  // Keep the server's order: localStorage enumeration differs across devices,
+  // and changing only the collection order would trigger another sync upload.
+  for (const url of new Set([...remote.keys(), ...local.keys()])) {
     const localPosition = local.get(url)
     const remotePosition = remote.get(url)
     const synced = Object.hasOwn(previous, url) ? previous[url] : null

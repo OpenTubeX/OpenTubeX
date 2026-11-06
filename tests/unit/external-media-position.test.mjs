@@ -198,7 +198,7 @@ test('syncing removes positions another device removed and uploads local removal
   assert.equal(getExternalMediaPosition(savedAgain, 30), 9)
   assert.equal(getExternalMediaPosition(`${url}?new=1`, 30), 6)
   assert.deepEqual(baseline, { [savedAgain]: 3000, [`${url}?new=1`]: 2000 })
-  assert.deepEqual(client.uploaded.map(entry => entry.url), [savedAgain, `${url}?new=1`])
+  assert.deepEqual(client.uploaded.map(entry => entry.url), [`${url}?new=1`, savedAgain])
 })
 
 test('syncing drops positions older than history retention on both sides', async () => {
@@ -211,7 +211,7 @@ test('syncing drops positions older than history retention on both sides', async
   ])
   await syncExternalMediaPositions(client, {}, 1)
   assert.equal(getExternalMediaPosition(`${url}?old=1`, 30), null)
-  assert.deepEqual(client.uploaded.map(entry => entry.url), [url, `${url}?recent=1`])
+  assert.deepEqual(client.uploaded.map(entry => entry.url), [`${url}?recent=1`, url])
 })
 
 test('syncing replaces a damaged saved position instead of removing it everywhere', async () => {
@@ -300,4 +300,30 @@ test('syncing fails without uploading when saved positions cannot be read', asyn
     assert.equal(client.uploaded, null)
     mock.restoreAll()
   }
+})
+
+test('two devices with different storage order stop uploading unchanged positions', async () => {
+  const positions = [
+    { url, seconds: 12, duration: 30, updatedAt: 1000 },
+    { url: `${url}?other=1`, seconds: 0, watched: true, updatedAt: 2000 },
+  ]
+  let remote = positions
+  let uploads = 0
+  const client = {
+    async getExternalMediaPositions() { return structuredClone(remote) },
+    async putExternalMediaPositions(entries) {
+      // Match the encrypted collection upload boundary: order changes upload too.
+      if (JSON.stringify(entries) !== JSON.stringify(remote)) uploads++
+      remote = structuredClone(entries)
+    },
+  }
+  for (const device of [positions.toReversed(), positions, positions.toReversed(), positions]) {
+    storage.clear()
+    for (const { url: mediaUrl, ...position } of device) {
+      localStorage.setItem(`externalMediaPosition:${mediaUrl}`, JSON.stringify(position))
+    }
+    await syncExternalMediaPositions(client, Object.fromEntries(positions.map(p => [p.url, p.updatedAt])), 0)
+  }
+  assert.equal(uploads, 0, 'unchanged positions must not bounce between device storage orders')
+  assert.deepEqual(remote, positions)
 })
