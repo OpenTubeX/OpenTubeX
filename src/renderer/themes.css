@@ -2630,7 +2630,9 @@ a:visited {
 
   /* Filled controls carry white text in the light theme. */
   --signal-accent-fill: rgb(from oklch(from var(--signal-accent-color) min(l, 0.5) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
-  --seekbar-played-color: color-mix(in srgb, var(--signal-accent-color) 65%, #e4e1df);
+
+  /* The seekbar sits on video, so dark accents are lifted to stay apart from its track. */
+  --seekbar-played-color: color-mix(in srgb, rgb(from oklch(from var(--signal-accent-color) max(l, 0.62) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)) 65%, #e4e1df);
   --bg-glows:
     radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-accent), transparent 55%),
     radial-gradient(ellipse 60% 45% at 90% 20%, var(--bg-glow-ink), transparent 50%),
