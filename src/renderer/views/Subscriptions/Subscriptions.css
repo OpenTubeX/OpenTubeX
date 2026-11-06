@@ -538,4 +538,11 @@
   .newFeedTabs .subscriptionIcon {
     display: none;
   }
+
+  /* Without icons, the spinner sits in a corner so labels keep their space. */
+  .tabs .tabIcon.loading {
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-end: 2px;
+  }
 }

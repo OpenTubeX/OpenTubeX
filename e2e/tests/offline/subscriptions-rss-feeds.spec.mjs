@@ -472,35 +472,43 @@ test.describe('with followed feeds', () => {
     await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
   })
 
-  test('replaces the tab icon with the refresh indicator without resizing the tab @scale', async ({ page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    const tab = page.locator('[data-rss-feeds-tab]')
-    await tab.click()
-    await expect(page.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
-    const idleBox = await tab.boundingBox()
+  // Phones hide tab icons, so the spinner must not take space from the label there.
+  for (const [layout, size] of [['desktop', null], ['phone', { width: 360, height: 740 }]]) {
+    test(`shows the refresh indicator without resizing the tab on ${layout} @scale`, async ({ app, page }) => {
+      if (size) await setWindowSize(app, page, size)
+      await mockFeeds(page)
+      await goTo(page, 'subscriptions')
+      const tab = page.locator('[data-rss-feeds-tab]')
+      const label = tab.locator('.tabLabel')
+      await tab.click()
+      await expect(page.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
+      const idleTab = await tab.boundingBox()
+      const idleLabel = await label.boundingBox()
 
-    let release
-    const held = new Promise(resolve => { release = resolve })
-    await page.route(RSS_URL, async route => {
-      await held
-      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+      let release
+      const held = new Promise(resolve => { release = resolve })
+      await page.route(RSS_URL, async route => {
+        await held
+        await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+      })
+      await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
+      const loader = tab.locator('.tabLoadingIndicator')
+      await expect(loader).toBeVisible()
+      await expect(tab.locator('.subscriptionIcon')).toBeHidden()
+
+      expect((await tab.boundingBox()).width).toBeCloseTo(idleTab.width, 1)
+      expect((await label.boundingBox()).width).toBeCloseTo(idleLabel.width, 1)
+      if (!size) {
+        const iconBox = await tab.locator('.tabIcon').boundingBox()
+        const loaderBox = await loader.boundingBox()
+        expect(loaderBox.x + loaderBox.width / 2).toBeCloseTo(iconBox.x + iconBox.width / 2, 1)
+      }
+
+      release()
+      await expect(loader).toHaveCount(0)
+      if (!size) await expect(tab.locator('.subscriptionIcon')).toBeVisible()
     })
-    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
-    const loader = tab.locator('.tabLoadingIndicator')
-    await expect(loader).toBeVisible()
-    await expect(tab.locator('.subscriptionIcon')).toBeHidden()
-
-    const loadingBox = await tab.boundingBox()
-    expect(loadingBox.width).toBeCloseTo(idleBox.width, 1)
-    const iconBox = await tab.locator('.tabIcon').boundingBox()
-    const loaderBox = await loader.boundingBox()
-    expect(loaderBox.x + loaderBox.width / 2).toBeCloseTo(iconBox.x + iconBox.width / 2, 1)
-
-    release()
-    await expect(loader).toHaveCount(0)
-    await expect(tab.locator('.subscriptionIcon')).toBeVisible()
-  })
+  }
 
   test('keeps a feed added while another refresh is running', async ({ page }) => {
     await mockFeeds(page)
