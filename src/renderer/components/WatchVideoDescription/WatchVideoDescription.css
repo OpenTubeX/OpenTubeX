@@ -151,8 +151,8 @@
   display: block;
 }
 
-.videoDescription.short .descriptionContentEnd {
-  /* Keep short content clear of the bottom fade. */
+.videoDescription:has(.descriptionStatus) .descriptionContentEnd {
+  /* Keep the last content clear of the footer and bottom fade. */
   block-size: 16px;
 }
 
