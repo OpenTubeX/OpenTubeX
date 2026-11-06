@@ -405,12 +405,8 @@ function selectPlaybackEngine(value) {
   border-inline-start: 1px solid var(--md-sys-color-outline, var(--border-color));
 }
 
-.engineOption:hover,
 .engineOption:focus-visible {
   background-color: color-mix(in srgb, currentcolor 8%, transparent);
-}
-
-.engineOption:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
 }
@@ -420,8 +416,18 @@ function selectPlaybackEngine(value) {
   color: var(--md-sys-color-on-secondary-container, var(--on-selected-container-color));
 }
 
-.engineOption.active:is(:hover, :focus-visible) {
+.engineOption.active:focus-visible {
   background-color: color-mix(in srgb, currentcolor 8%, var(--md-sys-color-secondary-container, var(--selected-container-color)));
+}
+
+@media (hover: hover) {
+  .engineOption:hover {
+    background-color: color-mix(in srgb, currentcolor 8%, transparent);
+  }
+
+  .engineOption.active:hover {
+    background-color: color-mix(in srgb, currentcolor 8%, var(--md-sys-color-secondary-container, var(--selected-container-color)));
+  }
 }
 
 .engineOption:active {
@@ -439,7 +445,7 @@ function selectPlaybackEngine(value) {
 
 @media (any-pointer: coarse), (width <= 680px) {
   .engineOption {
-    min-block-size: 46px;
+    min-block-size: var(--phone-touch-target, 48px);
   }
 }
 

@@ -50,7 +50,12 @@ test('stream extraction choices keep one outline and a straight shared seam', { 
         await expect(active).toHaveText(selected === 'yt-dlp' ? 'yt-dlp' : 'Built-in')
         await expect(inactive).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
         await expect(active.locator('.engineOptionCheck')).toHaveAttribute('aria-hidden', 'true')
-        expect(await active.evaluate(button => button.firstElementChild.classList.contains('engineOptionCheck'))).toBe(true)
+        await expect(active.locator(':scope > :first-child')).toHaveClass(/engineOptionCheck/)
+        if (width === 400) {
+          for (const option of [active, inactive]) {
+            expect(await option.evaluate(button => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48)
+          }
+        }
 
         const geometry = await group.evaluate(element => {
           const [first, last] = element.children
