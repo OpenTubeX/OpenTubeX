@@ -52,6 +52,7 @@ final class SubscriptionRefreshHttpClient {
                     throw new IOException("Subscription API returned an error");
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
+                    if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
                     if (!hasSelectedContentTab(response.optJSONObject("contents")) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
                         throw new IOException("Channel unavailable");
                     }
@@ -87,9 +88,59 @@ final class SubscriptionRefreshHttpClient {
                 return response;
             } catch (IOException | JSONException error) {
                 lastError = error;
+                if (request.optString("format").equals("local") && optionalTabPath(feed.type) != null && "HTTP 404".equals(error.getMessage())) {
+                    try {
+                        if (Thread.currentThread().isInterrupted()) throw new IOException("Refresh cancelled");
+                        JSONObject channelRequest = new JSONObject(request.toString());
+                        JSONObject body = new JSONObject(request.getString("body"));
+                        body.remove("params");
+                        channelRequest.put("body", body.toString());
+                        JSONObject page = new JSONObject(fetcher.fetch(channelRequest, feed.type, channelId));
+                        if (channelHasNoFeed(page, feed.type, channelId)) return emptyFeed(feed.type);
+                    } catch (IOException | JSONException ignored) {
+                        // An unverified channel is still a failure; try the next configured source.
+                    }
+                }
             }
         }
         throw new IOException("Background subscription requests failed", lastError);
+    }
+
+    private static String optionalTabPath(String type) {
+        switch (type) {
+            case "shorts": return "/shorts";
+            case "live": return "/streams";
+            case "posts": return "/posts";
+            default: return null;
+        }
+    }
+
+    private static JSONObject emptyFeed(String type) throws JSONException {
+        return new JSONObject().put(type.equals("posts") ? "comments" : "videos", new org.json.JSONArray());
+    }
+
+    private static boolean channelHasNoFeed(JSONObject response, String type, String channelId) {
+        String path = optionalTabPath(type);
+        JSONObject metadata = response.optJSONObject("metadata");
+        JSONObject channel = metadata == null ? null : metadata.optJSONObject("channelMetadataRenderer");
+        if (path == null || response.has("error") || response.optString("alerts").contains("\"type\":\"ERROR\"") ||
+            channel == null || !channel.optString("externalId").equals(channelId)) return false;
+        JSONObject contents = response.optJSONObject("contents");
+        if (contents == null) return false;
+        JSONObject browse = contents.optJSONObject("twoColumnBrowseResultsRenderer");
+        if (browse == null) browse = contents.optJSONObject("singleColumnBrowseResultsRenderer");
+        org.json.JSONArray tabs = browse == null ? null : browse.optJSONArray("tabs");
+        if (tabs == null) return false;
+        boolean hasChannelTab = false;
+        for (int index = 0; index < tabs.length(); index++) {
+            JSONObject item = tabs.optJSONObject(index);
+            JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
+            Object url = tab == null ? null : find(tab.opt("endpoint"), "url");
+            if (!(url instanceof String)) continue;
+            if (((String) url).endsWith(path)) return false;
+            if (((String) url).matches(".*/(featured|videos|shorts|streams|posts|playlists)$")) hasChannelTab = true;
+        }
+        return hasChannelTab;
     }
 
     private static boolean hasSelectedContentTab(JSONObject contents) {

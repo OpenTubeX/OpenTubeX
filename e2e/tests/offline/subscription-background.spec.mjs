@@ -127,6 +127,44 @@ test('normalizes Local API responses with every renderer closed', async ({ app, 
   await quit
 })
 
+for (const responseKind of ['redirected tab', 'HTTP 404']) {
+  test(`completes background Shorts refresh for a missing tab answered with ${responseKind}`, async ({ app, page }) => {
+    // Recorded channel with Videos and Posts, but no Shorts tab.
+    const response = JSON.parse(gunzipSync(await readFile(new URL('../../fixtures/innertube/trending/shows-trending-videos-and-switches-categories/browse-7893961fa8c4.0.json.gz', import.meta.url))))
+    response.metadata.channelMetadataRenderer.externalId = channelId
+    await app.electronApp.evaluate(({ net }, { body, responseKind }) => {
+      const originalFetch = net.fetch
+      net.fetch = (url, options) => {
+        if (String(url).startsWith('https://www.youtube.com/feeds/videos.xml')) return Promise.resolve(new Response('', { status: 404 }))
+        if (String(url).startsWith('https://www.youtube.com/youtubei/v1/browse')) {
+          const request = JSON.parse(options.body)
+          const missing = request.browseId.startsWith('VL') || (request.params && responseKind === 'HTTP 404')
+          return Promise.resolve(new Response(missing ? '' : body, { status: missing ? 404 : 200 }))
+        }
+        return originalFetch(url, options)
+      }
+    }, { body: JSON.stringify(response), responseKind })
+    await configureBackground(app, page, {
+      enabled: true,
+      intervals: { shorts: 1 },
+      profiles: [{ id: 'allChannels', channels: { shorts: [channelId] } }],
+      requests: createBackgroundSubscriptionRequests({ backend: 'local', useRss: true })
+    })
+    await app.electronApp.evaluate(({ BrowserWindow }) => { for (const window of BrowserWindow.getAllWindows()) window.destroy() })
+    const directory = path.join(app.userDataDir, 'background-subscription-results')
+    let results
+    await expect.poll(async () => {
+      results = await Promise.all((await readdir(directory)).filter(file => file.endsWith('.json')).map(async file => JSON.parse(await readFile(path.join(directory, file), 'utf8'))))
+      return results.some(result => result.kind === 'completion' && result.feedType === 'shorts')
+    }).toBe(true)
+    const saved = results.find(result => result.kind === 'channel' && result.feedType === 'shorts')
+    expect(saved.payload).toEqual({ backgroundFormat: 'entries', entries: [] })
+    const quit = app.electronApp.waitForEvent('close')
+    await app.electronApp.evaluate(({ app }) => { app.quit() })
+    await quit
+  })
+}
+
 test('restored windows wait for the shared import lock and recover when its owner closes', async ({ app, page }) => {
   await page.evaluate(() => {
     navigator.locks.request('opentubex-background-subscription-import', () => new Promise(() => {}))

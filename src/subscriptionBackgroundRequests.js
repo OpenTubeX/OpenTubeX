@@ -1,6 +1,7 @@
 const TABS = { videos: 'EgZ2aWRlb3PyBgQKAjoA', shorts: 'EgZzaG9ydHPyBgUKA5oBAA%3D%3D', live: 'EgdzdHJlYW1z8gYECgJ6AA%3D%3D', posts: 'EgVwb3N0c_IGBAoCSgA%3D' }
 const RESOURCES = { videos: 'videos', shorts: 'shorts', live: 'streams', posts: 'community' }
 const PLAYLIST_PREFIXES = { videos: 'UULF', shorts: 'UUSH', live: 'UULV' }
+const OPTIONAL_TAB_PATHS = { shorts: '/shorts', live: '/streams', posts: '/posts' }
 
 /** The same ordered requests are used by Electron and Android native jobs. */
 export function createBackgroundSubscriptionRequests({ backend = 'local', useRss = true, fallback = false, instanceUrl = '', authorization = null, clientVersion, region = 'US' }) {
@@ -31,7 +32,21 @@ export function resolveBackgroundSubscriptionRequest(plan, feedType, channelId) 
   return { ...plan, url: replace(plan.url), ...(plan.body ? { body: replace(plan.body) } : {}) }
 }
 
-export function parseBackgroundSubscriptionResponse(format, text, feedType) {
+function channelHasNoFeed(data, feedType, channelId) {
+  const path = OPTIONAL_TAB_PATHS[feedType]
+  if (!path || !channelId || data.error || data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR') ||
+      data.metadata?.channelMetadataRenderer?.externalId !== channelId) return false
+  const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
+  if (!Array.isArray(tabs)) return false
+  const urls = tabs.map(tab => tab.tabRenderer?.endpoint?.commandMetadata?.webCommandMetadata?.url).filter(url => typeof url === 'string')
+  return urls.some(url => /\/(featured|videos|shorts|streams|posts|playlists)$/.test(url)) && !urls.some(url => url.endsWith(path))
+}
+
+function emptyFeed(feedType) {
+  return feedType === 'posts' ? { comments: [] } : { videos: [] }
+}
+
+export function parseBackgroundSubscriptionResponse(format, text, feedType, channelId) {
   if (format === 'rss') {
     if (!/<feed[\s>]/.test(text) || !text.includes('</feed>')) throw new Error('Invalid subscription RSS response')
     return { backgroundFormat: 'rss', text }
@@ -42,6 +57,8 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType) {
     throw new Error('Subscription API returned an error')
   }
   if (format === 'local' || format === 'localPlaylist') {
+    // A request for a missing tab can redirect to the channel's Videos or Home tab.
+    if (format === 'local' && channelHasNoFeed(data, feedType, channelId)) return emptyFeed(feedType)
     const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
     const selectedContent = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer.content : null
     if (!selectedContent || typeof selectedContent !== 'object' || Array.isArray(selectedContent) ||
@@ -62,8 +79,8 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
     signal.throwIfAborted()
     try {
       const request = resolveBackgroundSubscriptionRequest(plan, feedType, channelId)
-      const payload = parseBackgroundSubscriptionResponse(plan.format, await fetchText(request, signal), feedType)
-      if (plan.format === 'local' && feedType === 'live') {
+      const payload = parseBackgroundSubscriptionResponse(plan.format, await fetchText(request, signal), feedType, channelId)
+      if (payload.backgroundFormat === 'local' && feedType === 'live') {
         let page = payload.data
         for (let count = 0; ; count++) {
           const token = getEmptyLiveContinuation(page)
@@ -79,8 +96,22 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
       return await normalize(payload)
     } catch (error) {
       lastError = error
+      if (plan.format === 'local' && OPTIONAL_TAB_PATHS[feedType] && error.message === 'HTTP 404') {
+        try {
+          signal.throwIfAborted()
+          const request = resolveBackgroundSubscriptionRequest(plan, feedType, channelId)
+          const body = JSON.parse(request.body)
+          delete body.params
+          const page = JSON.parse(await fetchText({ ...request, body: JSON.stringify(body) }, signal))
+          signal.throwIfAborted()
+          if (channelHasNoFeed(page, feedType, channelId)) return await normalize(emptyFeed(feedType))
+        } catch {
+          // An unverified channel is still a failure; keep trying the configured sources.
+        }
+      }
     }
   }
+  signal.throwIfAborted()
   throw lastError ?? new Error('No background subscription backend configured')
 }
 

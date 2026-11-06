@@ -10,12 +10,95 @@ import org.junit.Test;
 
 public class SubscriptionRefreshBackendTest {
     private SubscriptionRefreshConfiguration.Feed feed(JSONArray requests) throws Exception {
+        return feed("videos", requests);
+    }
+
+    private SubscriptionRefreshConfiguration.Feed feed(String type, JSONArray requests) throws Exception {
         JSONObject configuration = new JSONObject()
-            .put("intervals", new JSONObject().put("videos", 1800000))
-            .put("requests", new JSONObject().put("videos", requests))
+            .put("intervals", new JSONObject().put(type, 1800000))
+            .put("requests", new JSONObject().put(type, requests))
             .put("profiles", new JSONArray().put(new JSONObject().put("id", "all")
-                .put("channels", new JSONObject().put("videos", new JSONArray().put("UCtest")))));
+                .put("channels", new JSONObject().put(type, new JSONArray().put("UCtest")))));
         return SubscriptionRefreshConfiguration.parseFeeds(configuration).get(0);
+    }
+
+    private JSONObject channelPage(String channelId, String path) throws Exception {
+        JSONObject tab = new JSONObject().put("selected", true)
+            .put("content", new JSONObject().put("videoRenderer", new JSONObject().put("videoId", "regular-video")))
+            .put("endpoint", new JSONObject().put("commandMetadata", new JSONObject()
+                .put("webCommandMetadata", new JSONObject().put("url", "/@channel/" + path))));
+        return new JSONObject().put("metadata", new JSONObject().put("channelMetadataRenderer", new JSONObject().put("externalId", channelId)))
+            .put("contents", new JSONObject().put("twoColumnBrowseResultsRenderer", new JSONObject()
+                .put("tabs", new JSONArray().put(new JSONObject().put("tabRenderer", tab)))));
+    }
+
+    @Test
+    public void channelWithoutShortsDoesNotFailItsBackgroundRefresh() throws Exception {
+        JSONArray requests = new JSONArray()
+            .put(new JSONObject().put("format", "rss"))
+            .put(new JSONObject().put("format", "localPlaylist"))
+            .put(new JSONObject().put("format", "local").put("body", "{\"browseId\":\"%CHANNEL%\",\"params\":\"shorts\"}"));
+        String page = channelPage("UCtest", "videos").toString();
+        JSONObject result = SubscriptionRefreshHttpClient.fetch(feed("shorts", requests), "UCtest", (request, type, id) -> {
+            if (!request.optString("format").equals("local") || new JSONObject(request.getString("body")).has("params")) {
+                throw new IOException("HTTP 404");
+            }
+            return page;
+        });
+        assertEquals(0, result.getJSONArray("videos").length());
+    }
+
+    @Test
+    public void redirectedOptionalTabsDoNotImportRegularVideos() throws Exception {
+        for (String type : List.of("shorts", "live", "posts")) {
+            for (String layout : List.of("twoColumnBrowseResultsRenderer", "singleColumnBrowseResultsRenderer")) {
+                JSONObject page = channelPage("UCtest", "videos");
+                JSONObject contents = page.getJSONObject("contents");
+                contents.put(layout, contents.remove("twoColumnBrowseResultsRenderer"));
+                JSONObject result = SubscriptionRefreshHttpClient.fetch(
+                    feed(type, new JSONArray().put(new JSONObject().put("format", "local"))), "UCtest",
+                    (request, feedType, id) -> page.toString());
+                assertEquals(0, result.getJSONArray(type.equals("posts") ? "comments" : "videos").length());
+            }
+        }
+    }
+
+    @Test
+    public void missingTabVerificationDoesNotHideRealFailures() throws Exception {
+        for (String type : List.of("shorts", "live", "posts")) {
+            JSONObject valid = channelPage("UCtest", "videos");
+            for (JSONObject page : List.of(
+                channelPage("UCtest", type.equals("live") ? "streams" : type),
+                channelPage("UCother", "videos"),
+                new JSONObject(valid.toString()).put("alerts", new JSONArray().put(new JSONObject()
+                    .put("alertRenderer", new JSONObject().put("type", "ERROR")))),
+                new JSONObject(),
+                new JSONObject(valid.toString()).put("contents", new JSONObject())
+            )) {
+                JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local")
+                    .put("body", "{\"browseId\":\"%CHANNEL%\",\"params\":\"tab\"}"));
+                assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.fetch(feed(type, requests), "UCtest", (request, feedType, id) -> {
+                    if (new JSONObject(request.getString("body")).has("params")) throw new IOException("HTTP 404");
+                    return page.toString();
+                }));
+            }
+        }
+    }
+
+    @Test
+    public void nativeHttp404ChecksTheChannelWithoutTabParams() throws Exception {
+        try (okhttp3.mockwebserver.MockWebServer server = new okhttp3.mockwebserver.MockWebServer()) {
+            server.enqueue(new okhttp3.mockwebserver.MockResponse().setResponseCode(404));
+            server.enqueue(new okhttp3.mockwebserver.MockResponse().setBody(channelPage("UCtest", "videos").toString()));
+            JSONObject request = new JSONObject().put("format", "local").put("url", server.url("/browse").toString())
+                .put("body", "{\"browseId\":\"%CHANNEL%\",\"params\":\"shorts\"}");
+            JSONObject result = SubscriptionRefreshHttpClient.fetch(feed("shorts", new JSONArray().put(request)), "UCtest");
+            assertEquals(0, result.getJSONArray("videos").length());
+            assertTrue(new JSONObject(server.takeRequest().getBody().readUtf8()).has("params"));
+            JSONObject verification = new JSONObject(server.takeRequest().getBody().readUtf8());
+            assertFalse(verification.has("params"));
+            assertEquals("UCtest", verification.getString("browseId"));
+        }
     }
 
     @Test
