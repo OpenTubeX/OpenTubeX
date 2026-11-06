@@ -99,7 +99,7 @@
   justify-content: center;
   gap: 6px;
   min-block-size: 40px;
-  margin-block: 12px -16px;
+  margin-block: 0 -16px;
   margin-inline: -16px;
   padding-block: 8px;
   padding-inline: 16px;
@@ -129,10 +129,6 @@
 .descriptionStatus:focus-visible {
   outline: 2px solid var(--primary-text-color);
   outline-offset: -3px;
-}
-
-.videoDescription.short .descriptionStatus {
-  margin-block-start: 0;
 }
 
 .videoDescription.short .description {

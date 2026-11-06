@@ -391,7 +391,7 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
-  test('fades collapsed description content directly into the footer divider', { tag: '@scale' }, async ({ app, page }) => {
+  test('fades description content directly into the footer divider', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const watchComponent = await page.evaluateHandle(findWatchComponent)
@@ -399,7 +399,7 @@ test.describe('watch page', () => {
       const view = component.proxy
       view.isLoading = true
       await view.$nextTick()
-      view.videoDescription = Array(12).fill('A long description line').join('\n')
+      view.videoDescription = Array(30).fill('A long description line').join('\n')
       view.videoDescriptionHtml = ''
       view.videoTags = []
       view.videoGames = []
@@ -435,6 +435,28 @@ test.describe('watch page', () => {
     expect(layout.mask).toMatch(
       /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
     )
+
+    const footer = card.locator(':scope > .descriptionStatus')
+    const footerGap = () => footer.evaluate(element =>
+      element.getBoundingClientRect().top - element.parentElement.querySelector('.descriptionScroll').getBoundingClientRect().bottom
+    )
+    await footer.click()
+    await expect(footer).toHaveAccessibleName('Show less')
+    await expect(scroller).toHaveClass(/descriptionFadeBottom/)
+    expect(await footerGap()).toBeCloseTo(0, 0)
+
+    await scroller.evaluate(element => { element.scrollTop = (element.scrollHeight - element.clientHeight) / 2 })
+    await expect(scroller).toHaveClass(/descriptionFadeTop/)
+    await expect(scroller).toHaveClass(/descriptionFadeBottom/)
+    expect(await footerGap()).toBeCloseTo(0, 0)
+
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(scroller).not.toHaveClass(/descriptionFadeBottom/)
+    expect(await footerGap()).toBeCloseTo(0, 0)
+
+    await footer.click()
+    await expect(card).toContainClass('short')
+    expect(await footerGap()).toBeCloseTo(0, 0)
     await watchComponent.dispose()
   })
 
