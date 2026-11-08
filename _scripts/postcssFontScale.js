@@ -14,7 +14,7 @@ function scale(declaration) {
 }
 
 /**
- * Multiplies every px and rem `font-size` and `line-height` in the app's own
+ * Multiplies every px and rem `font-size`, `line-height`, and tab label size in the app's own
  * stylesheets by the Font Size setting (`--font-scale`). em, percentage, and
  * unitless values follow the font size already. Keywords, values that read a
  * variable (such as caption sizes), and third-party styles stay as they are.
@@ -25,7 +25,9 @@ const fontScale = () => ({
   postcssPlugin: 'opentubex-font-scale',
   Declaration: {
     'font-size': scale,
-    'line-height': scale
+    'line-height': scale,
+    // FtTabs reads its label size from this property.
+    '--material-tab-font-size': scale
   }
 })
 fontScale.postcss = true

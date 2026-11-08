@@ -24,6 +24,10 @@ test('scales px and rem font sizes and line heights in app styles', async () => 
     await transform('.a { line-height: 20px; } .b { line-height: 1.5; } .c { line-height: var(--height, 60px); }'),
     '.a { line-height: calc(20px * var(--font-scale, 1)); } .b { line-height: 1.5; } .c { line-height: var(--height, 60px); }'
   )
+  assert.equal(
+    await transform('.a { --material-tab-font-size: 15px; } .b { --material-tab-font-size: 0.9em; }'),
+    '.a { --material-tab-font-size: calc(15px * var(--font-scale, 1)); } .b { --material-tab-font-size: 0.9em; }'
+  )
 })
 
 test('leaves relative, keyword, and variable font sizes alone', async () => {
