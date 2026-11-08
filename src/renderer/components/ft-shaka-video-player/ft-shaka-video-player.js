@@ -3636,12 +3636,13 @@ export default defineComponent({
       getSwipeAction: side => process.env.IS_CAPACITOR
         ? store.getters[side === 'left' ? 'getMobileLeftSwipeAction' : 'getMobileRightSwipeAction']
         : 'disabled',
+      getAnimationSpeedMultiplier: () => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
       adjustments: mobileAdjustments,
       miniPlayerDrag: {
         canDismiss: () => mobileMiniBarCanDismiss.value && !mobileMiniBarControlsDisabled.value,
         dismiss: () => dismissCrossTabMiniPlayer(),
         dismissDuration: () => isReducedMotionEnabled() ? 0 : 140 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
-        begin: restoring => beginScrollMiniPlayerDrag(restoring),
+        begin: (restoring, startTime) => beginScrollMiniPlayerDrag(restoring, startTime),
         move: (x, y) => moveScrollMiniPlayerDrag(x, y),
         finish: commit => finishScrollMiniPlayerDrag(commit),
         restore: () => restoreScrollMiniPlayerFromTap(),

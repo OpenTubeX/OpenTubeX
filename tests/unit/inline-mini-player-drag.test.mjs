@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scrollMiniPlayer.js'
+import { COLLAPSE_SPRING, createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/ft-shaka-video-player/opentubex/spring.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
 const morphSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/scrollMiniPlayerMorph.js', import.meta.url), 'utf8')
@@ -164,6 +165,8 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
   let haptics = 0
   let updates = 0
   const stash = { value: 'left' }
+  const clock = { now: 0 }
+  const springs = []
   const scrollMiniPlayerActive = { value: restoring }
   let destination = null
   const frames = new Map()
@@ -186,8 +189,15 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
     usesMobileMiniBar: () => mobile,
-    performance: { now: () => 0 },
+    performance: { now: () => clock.now },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
+    COLLAPSE_SPRING,
+    EXPAND_SPRING,
+    createSpring: (...args) => {
+      springs.push(args)
+      return createSpring(...args)
+    },
+    createVelocityTracker,
     getAnimationSpeedMultiplier: () => 1,
     store: { getters: { getAnimationSpeed: 1 } },
     watchNavigation: {
@@ -235,7 +245,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     animateScrollMiniPlayerLayout: (...args) => { animations.push(args) },
     console,
   })
-  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated, haptics: () => haptics, updates: () => updates }
+  return { methods, style, frames, animations, stash, clock, springs, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated, haptics: () => haptics, updates: () => updates }
 }
 
 test('drag batches pointer samples into one transform without reading layout per move', () => {
@@ -396,6 +406,20 @@ test('drag cannot overshoot the saved mini-player endpoint', () => {
   assert.equal(f.style.transform, endpoint)
 })
 
+test('a quick upward flick continues at its speed toward the measured Watch slot', async () => {
+  const f = fixture({ restoring: true })
+  f.methods.beginScrollMiniPlayerDrag(true)
+  // The only move arrives before the drag has measured the inline slot.
+  f.clock.now = 20
+  f.methods.moveScrollMiniPlayerDrag(0, -24)
+  const finished = f.methods.finishScrollMiniPlayerDrag(true)
+  await new Promise(resolve => setImmediate(resolve))
+  const [, , velocity] = f.springs.at(-1)
+  assert.ok(Math.abs(velocity - 24 / 20 / 490.75) < 1e-9)
+  f.methods.cancelScrollMiniPlayerDrag()
+  await finished
+})
+
 test('return keeps the preview in place until the player reaches the inline endpoint', async () => {
   const f = fixture({ restoring: true })
   f.methods.beginScrollMiniPlayerDrag(true)
@@ -414,7 +438,7 @@ test('return keeps the preview in place until the player reaches the inline endp
   assert.equal(f.deactivated(), false)
   frame = f.frames.get(1)
   f.frames.delete(1)
-  frame(300)
+  frame(1000)
   await finished
   assert.equal(f.deactivated(), true)
   assert.equal(f.style.transform, undefined)

@@ -1,6 +1,17 @@
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 
+// A vertical swipe of this distance commits on release, even without a fling.
+const MOBILE_SWIPE_COMMIT_DISTANCE = 64
+// The video follows the finger up to the commit distance, then resists, approaching
+// this much further travel.
+const MOBILE_FULLSCREEN_SWIPE_OVERSHOOT = 60
+const MOBILE_FULLSCREEN_SWIPE_MAX_OFFSET = MOBILE_SWIPE_COMMIT_DISTANCE + MOBILE_FULLSCREEN_SWIPE_OVERSHOOT
+// How much the video grows toward fullscreen, or shrinks out of it, at the maximum offset.
+const MOBILE_FULLSCREEN_SWIPE_MAX_SCALE = 0.05
+// Matches the spring that returns a cancelled swipe in App.css.
+const MOBILE_FULLSCREEN_SWIPE_SETTLE_MS = 400
+
 export function isCapacitorMobilePlayer() {
   return document.querySelector('.app')?.classList.contains('capacitorTabs') === true
 }
@@ -20,6 +31,7 @@ export function useMobileFullscreenGestures({
   isShortsPlayer,
   seekOnDoubleTap,
   getSwipeAction = () => 'disabled',
+  getAnimationSpeedMultiplier = () => 1,
   adjustments,
   miniPlayerDrag,
   setFullscreenMetadata,
@@ -42,14 +54,19 @@ export function useMobileFullscreenGestures({
         '--mobile-mini-dismiss-duration': mobileMiniPlayerDismissSettling.value ? '140ms' : '0ms',
       }
     }
-    return mobileFullscreenSwiping.value || mobileFullscreenSwipeSettling.value
-      ? { '--mobile-fullscreen-swipe-offset': `${mobileFullscreenSwipeOffset.value}px` }
-      : undefined
+    if (!mobileFullscreenSwiping.value && !mobileFullscreenSwipeSettling.value) return undefined
+    const offset = mobileFullscreenSwipeOffset.value
+    // Upward swipes enter fullscreen and downward swipes leave it.
+    const scale = 1 - offset / MOBILE_FULLSCREEN_SWIPE_MAX_OFFSET * MOBILE_FULLSCREEN_SWIPE_MAX_SCALE
+    return {
+      '--mobile-fullscreen-swipe-offset': `${offset}px`,
+      '--mobile-fullscreen-swipe-scale': String(scale),
+    }
   })
   /** @type {number | null} */
   let mobileMiniPlayerDismissTimer = null
   let mobileMiniPlayerDismissSequence = 0
-  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, returnTarget: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
+  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, returnTarget: boolean, minimizing?: boolean, dismissing?: boolean, pastCommit?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
@@ -233,7 +250,7 @@ export function useMobileFullscreenGestures({
     if (!mobileFullscreenGesture.fullscreen && !mobileFullscreenGesture.shorts && mobileFullscreenGesture.action === 'disabled' &&
       (mobileFullscreenGesture.minimizing || (dragDistance >= 8 && dragDistance > Math.abs(deltaX)))) {
       if (!mobileFullscreenGesture.minimizing) {
-        if (!miniPlayerDrag?.begin(mobileFullscreenGesture.restoring)) return false
+        if (!miniPlayerDrag?.begin(mobileFullscreenGesture.restoring, mobileFullscreenGesture.startTime)) return false
         mobileFullscreenGesture.minimizing = true
         getContainer()?.setPointerCapture(event.pointerId)
       }
@@ -291,8 +308,19 @@ export function useMobileFullscreenGestures({
     }
 
     mobileFullscreenGesture.distance = directionalDistance
-    mobileFullscreenSwipeOffset.value = (mobileFullscreenGesture.fullscreen ? 1 : -1) *
-      Math.min(96, directionalDistance * 0.65)
+    const pastCommit = directionalDistance >= MOBILE_SWIPE_COMMIT_DISTANCE
+    if (pastCommit !== Boolean(mobileFullscreenGesture.pastCommit)) {
+      // Tick whenever releasing would start, or no longer start, the toggle.
+      mobileFullscreenGesture.pastCommit = pastCommit
+      lightHaptic()
+    }
+    // Track the finger up to the commit distance, then resist without a hard stop.
+    // Moving back past the start returns the video to rest instead of reversing it.
+    const distance = Math.max(0, directionalDistance)
+    const overshoot = Math.max(0, distance - MOBILE_SWIPE_COMMIT_DISTANCE)
+    const offset = Math.min(distance, MOBILE_SWIPE_COMMIT_DISTANCE) +
+      MOBILE_FULLSCREEN_SWIPE_OVERSHOOT * overshoot / (MOBILE_FULLSCREEN_SWIPE_OVERSHOOT + overshoot)
+    mobileFullscreenSwipeOffset.value = (mobileFullscreenGesture.fullscreen ? 1 : -1) * offset
     event.preventDefault()
     event.stopPropagation()
     return true
@@ -348,7 +376,7 @@ export function useMobileFullscreenGestures({
     // Event times keep a busy main thread from slowing a measured fling.
     const elapsed = Math.max(1, event.timeStamp - gesture.startTime)
     // A short swipe still commits when it is flung.
-    const swipeCommitted = gesture.distance >= 64 || (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
+    const swipeCommitted = gesture.distance >= MOBILE_SWIPE_COMMIT_DISTANCE || (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
     // Restore taps on the bar here rather than through its click. A finger that
     // drifts a few pixels starts a drag, and a tap that stops a page fling
     // reaches the bar without Chromium dispatching a click at all.
@@ -418,7 +446,8 @@ export function useMobileFullscreenGestures({
     mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
     mobileControlSuppressClickUntil = performance.now() + 350
 
-    settleMobileFullscreenGesture(swipeCommitted, gesture.fullscreen)
+    // The commit tick already confirmed a swipe released past the commit distance.
+    settleMobileFullscreenGesture(swipeCommitted, gesture.fullscreen, !gesture.pastCommit)
     return true
   }
 
@@ -440,16 +469,17 @@ export function useMobileFullscreenGestures({
     window.addEventListener('pointerdown', remove, true)
   }
 
-  function settleMobileFullscreenGesture(shouldToggle, wasFullscreen) {
+  function settleMobileFullscreenGesture(shouldToggle, wasFullscreen, haptic = true) {
     const sequence = ++mobileFullscreenSettleSequence
     clearTimeout(mobileFullscreenSettleTimer)
     mobileFullscreenSwiping.value = false
     mobileFullscreenSwipeSettling.value = true
-    mobileFullscreenSwipeOffset.value = shouldToggle ? (wasFullscreen ? 96 : -96) : 0
-
     // A committed swipe hands off to the system animation immediately.
     // Only canceled gestures need to animate back to their starting position.
-    const settleDuration = shouldToggle || document.documentElement.dataset.reducedMotion === 'reduce' ? 0 : 140
+    if (!shouldToggle) mobileFullscreenSwipeOffset.value = 0
+    const settleDuration = shouldToggle || document.documentElement.dataset.reducedMotion === 'reduce'
+      ? 0
+      : MOBILE_FULLSCREEN_SWIPE_SETTLE_MS / getAnimationSpeedMultiplier()
     mobileFullscreenSettleTimer = window.setTimeout(async () => {
       mobileFullscreenSettleTimer = null
       mobileFullscreenSwipeOffset.value = 0
@@ -466,7 +496,7 @@ export function useMobileFullscreenGestures({
             // Restart Shaka's touchmove-stopped idle timer with the fullscreen
             // delay, without invoking the surface-tap handler on its child.
             getContainer()?.dispatchEvent(new Event('touchend'))
-            lightHaptic()
+            if (haptic) lightHaptic()
           }
         } catch (error) {
           console.warn('Fullscreen gesture failed', error)

@@ -12,7 +12,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, animationSpeed = 1, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element, requestAnimationFrame: globalThis.requestAnimationFrame }
   const frames = []
@@ -22,6 +22,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
   globalThis.window = { setTimeout: (...args) => setTimeout(...args) }
   const surface = new ElementStub()
   const calls = []
+  const dragStartTimes = []
   const captures = new Set()
   const container = Object.assign(new EventTarget(), {
     getBoundingClientRect: () => ({ left: 10, width, height }),
@@ -52,10 +53,15 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
         isScrollMiniPlayerActive: () => mini,
         isShortsPlayer: () => shorts,
         getSwipeAction: side => side === 'left' ? left : right,
+        getAnimationSpeedMultiplier: () => animationSpeed,
         miniPlayerDrag: {
           canDismiss: dismissible,
           dismiss: () => calls.push('dismiss'),
-          begin: () => { if (minimize) calls.push('drag-begin'); return minimize },
+          begin: (restoring, startTime) => {
+            dragStartTimes.push(startTime)
+            if (minimize) calls.push('drag-begin')
+            return minimize
+          },
           move: (x, y) => calls.push(['drag-move', x, y]),
           finish: commit => calls.push(['drag-finish', commit]),
           cancel() {},
@@ -84,7 +90,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
       preventDefault() { this.prevented = true }, stopPropagation() {}, stopImmediatePropagation() {}, ...extra }
   }
   const paint = () => frames.splice(0).forEach(callback => callback())
-  return { gestures, calls, event, captures, container, unmount, paint }
+  return { gestures, calls, event, captures, container, unmount, paint, dragStartTimes }
 }
 
 test('Shorts vertical swipes stay available for feed navigation', t => {
@@ -168,6 +174,55 @@ test('center swipes retain fullscreen and disabled sides allow fullscreen swipes
     g.cancelMobileFullscreenGesture()
   }
   assert.deepEqual(calls, [])
+})
+
+test('fullscreen swipes follow the finger to the commit point, then resist, and preview the destination size', t => {
+  const { gestures: g, event } = fixture(t)
+  for (const fullscreen of [false, true]) {
+    const { gestures: swipe, event: swipeEvent } = fullscreen ? fixture(t, { fullscreen: () => true }) : { gestures: g, event }
+    const direction = fullscreen ? 1 : -1
+    swipe.startMobileFullscreenGesture(swipeEvent(210, 300))
+    const samples = [20, 64, 120, 240, 480].map(distance => {
+      swipe.moveMobileFullscreenGesture(swipeEvent(210, 300 + direction * distance))
+      const style = swipe.mobileFullscreenSwipeStyle.value
+      return { distance, offset: Number.parseFloat(style['--mobile-fullscreen-swipe-offset']) * direction, scale: Number(style['--mobile-fullscreen-swipe-scale']) }
+    })
+    // The video tracks the finger exactly until releasing would commit.
+    assert.equal(samples[0].offset, 20)
+    assert.equal(samples[1].offset, 64)
+    // Past it, every further pixel still moves the video, with growing resistance and no hard stop.
+    for (let i = 2; i < samples.length; i++) {
+      assert.ok(samples[i].offset > samples[i - 1].offset + 1)
+      assert.ok(samples[i].offset / samples[i].distance < samples[i - 1].offset / samples[i - 1].distance)
+    }
+    assert.ok(samples.at(-1).offset < 124)
+    // Entering fullscreen grows the video, leaving it shrinks the video.
+    for (const { scale } of samples) assert.ok(fullscreen ? scale < 1 && scale > 0.95 : scale > 1 && scale < 1.05)
+    if (fullscreen) {
+      // Moving back up past the start leaves the video at rest instead of enlarging it.
+      swipe.moveMobileFullscreenGesture(swipeEvent(210, 300 - 248))
+      const reversed = swipe.mobileFullscreenSwipeStyle.value
+      assert.equal(Math.abs(Number.parseFloat(reversed['--mobile-fullscreen-swipe-offset'])), 0)
+      assert.equal(reversed['--mobile-fullscreen-swipe-scale'], '1')
+    }
+    swipe.cancelMobileFullscreenGesture()
+  }
+})
+
+test('a cancelled fullscreen swipe springs back for the configured animation speed', async t => {
+  const { gestures: g, event, calls } = fixture(t, { reducedMotion: false, animationSpeed: 0.5 })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  g.startMobileFullscreenGesture(event(210, 150))
+  g.moveMobileFullscreenGesture(event(210, 130))
+  g.finishMobileFullscreenGesture(event(210, 130, { timeStamp: 10_000 }))
+  assert.equal(g.mobileFullscreenSwipeSettling.value, true)
+  assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-fullscreen-swipe-offset'], '0px')
+  assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-fullscreen-swipe-scale'], '1')
+  t.mock.timers.tick(799)
+  assert.equal(g.mobileFullscreenSwipeSettling.value, true, 'Half speed doubles the 400 ms spring')
+  t.mock.timers.tick(1)
+  assert.equal(g.mobileFullscreenSwipeSettling.value, false)
+  assert.equal(calls.includes('fullscreen'), false)
 })
 
 test('committed fullscreen swipe starts after painting without a settle delay', async t => {
@@ -504,9 +559,11 @@ for (const [placement, x] of [['toolbar', 50], ['center', 210]]) {
 
 for (const fullscreenSwipe of [true, false]) {
   test(`center drag minimizes independently of fullscreen swipe setting (${fullscreenSwipe})`, t => {
-    const { gestures: g, event, calls, captures } = fixture(t, { minimize: true, fullscreenSwipe })
-    g.startMobileFullscreenGesture(event(210, 150))
-    assert.equal(g.moveMobileFullscreenGesture(event(212, 190)), true)
+    const { gestures: g, event, calls, captures, dragStartTimes } = fixture(t, { minimize: true, fullscreenSwipe })
+    g.startMobileFullscreenGesture(event(210, 150, { timeStamp: 1000 }))
+    assert.equal(g.moveMobileFullscreenGesture(event(212, 190, { timeStamp: 1016 })), true)
+    // The drag measures its progress, and so its release speed, from where the finger went down.
+    assert.deepEqual(dragStartTimes, [1000])
     assert.equal(g.moveMobileFullscreenGesture(event(214, 260)), true)
     assert.equal(g.finishMobileFullscreenGesture(event(214, 260)), true)
     assert.deepEqual(calls, ['drag-begin', ['drag-move', 2, 40], ['drag-move', 4, 110], ['drag-finish', true]])
