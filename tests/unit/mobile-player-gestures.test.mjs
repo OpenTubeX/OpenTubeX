@@ -198,6 +198,13 @@ test('fullscreen swipes follow the finger to the commit point, then resist, and 
     assert.ok(samples.at(-1).offset < 124)
     // Entering fullscreen grows the video, leaving it shrinks the video.
     for (const { scale } of samples) assert.ok(fullscreen ? scale < 1 && scale > 0.95 : scale > 1 && scale < 1.05)
+    if (fullscreen) {
+      // Moving back up past the start leaves the video at rest instead of enlarging it.
+      swipe.moveMobileFullscreenGesture(swipeEvent(210, 300 - 248))
+      const reversed = swipe.mobileFullscreenSwipeStyle.value
+      assert.equal(Math.abs(Number.parseFloat(reversed['--mobile-fullscreen-swipe-offset'])), 0)
+      assert.equal(reversed['--mobile-fullscreen-swipe-scale'], '1')
+    }
     swipe.cancelMobileFullscreenGesture()
   }
 })

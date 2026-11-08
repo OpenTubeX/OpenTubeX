@@ -315,8 +315,10 @@ export function useMobileFullscreenGestures({
       lightHaptic()
     }
     // Track the finger up to the commit distance, then resist without a hard stop.
-    const overshoot = Math.max(0, directionalDistance - MOBILE_SWIPE_COMMIT_DISTANCE)
-    const offset = Math.min(directionalDistance, MOBILE_SWIPE_COMMIT_DISTANCE) +
+    // Moving back past the start returns the video to rest instead of reversing it.
+    const distance = Math.max(0, directionalDistance)
+    const overshoot = Math.max(0, distance - MOBILE_SWIPE_COMMIT_DISTANCE)
+    const offset = Math.min(distance, MOBILE_SWIPE_COMMIT_DISTANCE) +
       MOBILE_FULLSCREEN_SWIPE_OVERSHOOT * overshoot / (MOBILE_FULLSCREEN_SWIPE_OVERSHOOT + overshoot)
     mobileFullscreenSwipeOffset.value = (mobileFullscreenGesture.fullscreen ? 1 : -1) * offset
     event.preventDefault()
