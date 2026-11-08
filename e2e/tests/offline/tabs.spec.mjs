@@ -2039,6 +2039,7 @@ test.describe('tab bar', () => {
 
     await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
     await expect(pinnedTab).toHaveClass(/pinned/)
+    await expectTabStripSettled(page)
     await pinnedTab.hover()
 
     const pinnedCloseBox = await pinnedTab.locator('.closeButton').boundingBox()
@@ -2838,6 +2839,8 @@ test.describe('vertical tab height', () => {
  * @param {import('@playwright/test').Page} page
  */
 async function expectActiveTabInView(page) {
+  // A collapsing group's active tab stays active while it closes.
+  await expectTabStripSettled(page)
   await expect.poll(() => page.locator('.tabBar .tabBarReorderItem.active').evaluate(tab => {
     const container = tab.closest('.tabsContainer')
     const viewport = container.getBoundingClientRect()
