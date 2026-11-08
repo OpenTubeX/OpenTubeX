@@ -12,6 +12,7 @@ async function runBuild(platform, hostArch, targetArch) {
   const requests = []
   const castTargets = []
   const shareArchitectures = []
+  const macosNativeArchitectures = []
   let interposerPreparations = 0
   const createTarget = (formats, arch) => ({ formats: Array.from(formats), arch })
   const argv = ['node', 'build.mjs']
@@ -28,13 +29,14 @@ async function runBuild(platform, hostArch, targetArch) {
     config: {},
     prepareCastSender: async (...args) => castTargets.push(args),
     prepareWindowsShare: async arch => shareArchitectures.push(arch),
+    prepareMacosNative: async arch => macosNativeArchitectures.push(arch),
     prepareWindowsInterposer: async () => { interposerPreparations++ },
     withWindowsPortable: (_config, arch) => ({ portableArch: arch }),
     build: async request => { requests.push(request); return [] },
     console: { log () {} }
   })
 
-  return { requests, castTargets, shareArchitectures, interposerPreparations }
+  return { requests, castTargets, shareArchitectures, macosNativeArchitectures, interposerPreparations }
 }
 
 for (const platform of ['linux', 'darwin', 'win32']) {
@@ -50,6 +52,7 @@ for (const platform of ['linux', 'darwin', 'win32']) {
         assert.equal(result.requests.length, platform === 'win32' ? 2 : 1)
         assert.ok(result.requests.every(request => request.targets.arch === expectedArch))
         assert.ok(result.requests.every(request => request.publish === 'never'))
+        assert.deepEqual(result.macosNativeArchitectures, platform === 'darwin' ? [expectedArch] : [])
         if (platform === 'win32') {
           assert.deepEqual(result.shareArchitectures, [expectedArch])
           assert.equal(result.interposerPreparations, expectedArch === 'x64' ? 1 : 0)

@@ -65,11 +65,18 @@ import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { setupStorageIpc } from './storage'
 import {
   createKdeWaylandWindowStateBackend,
+  isKdePlasmaDesktop,
   isWaylandPlatform as detectWaylandPlatform,
   monitorKdeWaylandWindowState,
   shouldMonitorKdeWaylandWindowState,
 } from './kdeWaylandWindowState'
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
+import {
+  createNativePictureInPictureBounds,
+  createPictureInPictureBoundsStore,
+  loadMacosNative
+} from './pictureInPictureBounds'
+import { startKwinPictureInPictureBounds } from './kwinPictureInPictureBounds'
 import { createUploadNotifier } from './uploadNotifications'
 import { createNotificationHistory, createNotifier } from './notificationHistory'
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
@@ -611,6 +618,40 @@ function runApp() {
   supportsAutoPictureInPictureMinimize.then(supported => { isTrayOnMinimizeSupported = supported })
 
   const userDataPath = app.getPath('userData')
+  const pictureInPictureBoundsStore = createPictureInPictureBoundsStore(path.join(userDataPath, 'picture-in-picture-bounds.json'))
+  const usesKwinPictureInPictureBounds = process.platform === 'linux' && isKdePlasmaDesktop(process.env)
+  const closeKwinPictureInPictureBounds = usesKwinPictureInPictureBounds
+    ? startKwinPictureInPictureBounds({ store: pictureInPictureBoundsStore })
+    : Promise.resolve(null)
+  if (!usesKwinPictureInPictureBounds) {
+    try {
+      const development = process.env.NODE_ENV === 'development'
+      const native = process.platform === 'win32'
+        ? loadWindowsShare(__dirname, development)
+        : process.platform === 'darwin' ? loadMacosNative(__dirname, development) : null
+      if (native !== null) {
+        const pictureInPictureBounds = createNativePictureInPictureBounds({
+          native,
+          store: pictureInPictureBoundsStore,
+          getWorkAreas: () => screen.getAllDisplays().map(display => display.workArea),
+          getExcludedHandles: () => BrowserWindow.getAllWindows().map(window => window.getNativeWindowHandle()),
+          // Windows reports physical pixels
+          ...(process.platform === 'win32' && {
+            toNative: rect => screen.dipToScreenRect(null, rect),
+            fromNative: rect => screen.screenToDipRect(null, rect)
+          })
+        })
+        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_SHOWN, event => {
+          pictureInPictureBounds.shown(event.sender).catch(error => {
+            console.error('Failed to restore the Picture-in-Picture bounds', error)
+          })
+        })
+        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_HIDDEN, event => pictureInPictureBounds.hidden(event.sender))
+      }
+    } catch (error) {
+      console.error('Failed to load the Picture-in-Picture window integration', error)
+    }
+  }
   const notificationHistory = createNotificationHistory({
     file: path.join(userDataPath, 'notification-history.json'),
     onChange: entries => sendToAppWindows(IpcChannels.NOTIFICATION_HISTORY_UPDATED, entries)
@@ -3864,6 +3905,9 @@ function runApp() {
 
       await Promise.allSettled([
         trayIconWrite,
+        // A script left in KWin would act on a later process with the same ID
+        closeKwinPictureInPictureBounds.then(close => close?.())
+          .finally(() => pictureInPictureBoundsStore.settled()),
         // Queue requests run in order, so a read waits for pending queue writes
         updateWatchQueue({}),
         baseHandlers.compactAllDatastores(),

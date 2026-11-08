@@ -1,6 +1,7 @@
 import { Arch, build, Platform } from 'electron-builder'
 import config from './ebuilder.config.mjs'
 import { prepareWindowsShare } from './windowsShare.mjs'
+import { prepareMacosNative } from './macosNative.mjs'
 import { prepareWindowsInterposer } from './windowsInterposer.mjs'
 import { withWindowsPortable } from './windowsPortable.mjs'
 import { prepareCastSender } from './castSender.mjs'
@@ -17,6 +18,7 @@ const platform = process.platform
 await prepareCastSender('dist', platform, targetArch)
 
 if (platform === 'darwin') {
+  await prepareMacosNative(targetArch)
   buildRequests = [{
     targets: Platform.MAC.createTarget(['DMG', 'zip', '7z'], arch),
     config

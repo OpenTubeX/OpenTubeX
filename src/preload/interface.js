@@ -11,6 +11,13 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
   document.body.dataset.systemTheme = shouldUseDarkColors ? 'dark' : 'light'
 })
 
+// Picture-in-Picture events bubble, so this covers every video. The main
+// process restores and saves the window's bounds, which Electron does not expose.
+if (process.platform === 'win32' || process.platform === 'darwin') {
+  document.addEventListener('enterpictureinpicture', () => ipcRenderer.send(IpcChannels.PICTURE_IN_PICTURE_SHOWN))
+  document.addEventListener('leavepictureinpicture', () => ipcRenderer.send(IpcChannels.PICTURE_IN_PICTURE_HIDDEN))
+}
+
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()

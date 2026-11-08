@@ -5,6 +5,7 @@
 #include <winrt/Windows.Foundation.h>
 #include <cstring>
 #include <map>
+#include <set>
 #include <string>
 
 using namespace winrt;
@@ -98,13 +99,139 @@ static napi_value LockForeground(napi_env env, napi_callback_info info) {
     return result;
 }
 
+static HWND ReadHandle(napi_env env, napi_value value) {
+    int64_t handle = 0;
+    if (napi_get_value_int64(env, value, &handle) != napi_ok) throw hresult_invalid_argument(L"Invalid window handle");
+    return reinterpret_cast<HWND>(static_cast<intptr_t>(handle));
+}
+
+static napi_value CreateRect(napi_env env, RECT const& rect) {
+    napi_value result;
+    napi_create_object(env, &result);
+    const std::pair<const char*, LONG> values[] = {
+        {"x", rect.left}, {"y", rect.top}, {"width", rect.right - rect.left}, {"height", rect.bottom - rect.top}
+    };
+    for (auto const& [name, number] : values) {
+        napi_value value;
+        napi_create_int32(env, number, &value);
+        napi_set_named_property(env, result, name, value);
+    }
+    return result;
+}
+
+static int32_t ReadInt(napi_env env, napi_value object, const char* name) {
+    napi_value value;
+    int32_t number = 0;
+    if (napi_get_named_property(env, object, name, &value) != napi_ok || napi_get_value_int32(env, value, &number) != napi_ok) {
+        throw hresult_invalid_argument(L"Invalid window bounds");
+    }
+    return number;
+}
+
+static bool IsOwnWindow(HWND window) {
+    DWORD process = 0;
+    GetWindowThreadProcessId(window, &process);
+    return process == GetCurrentProcessId() && IsWindow(window);
+}
+
+// Chromium's Picture-in-Picture window is this process's only topmost window
+// besides small ones such as tooltips. Its title is translated.
+static napi_value FindPictureInPictureWindow(napi_env env, napi_callback_info info) {
+    try {
+        size_t count = 1;
+        napi_value list;
+        napi_get_cb_info(env, info, &count, &list, nullptr, nullptr);
+        uint32_t length = 0;
+        if (count != 1 || napi_get_array_length(env, list, &length) != napi_ok) throw hresult_invalid_argument();
+        struct Search {
+            std::set<HWND> excluded;
+            HWND match = nullptr;
+            LONG area = 0;
+        } search;
+        for (uint32_t index = 0; index < length; index++) {
+            napi_value item;
+            napi_get_element(env, list, index, &item);
+            search.excluded.insert(ReadWindow(env, item));
+        }
+        EnumWindows([](HWND window, LPARAM parameter) -> BOOL {
+            auto& search = *reinterpret_cast<Search*>(parameter);
+            RECT rect;
+            if (search.excluded.contains(window) || !IsOwnWindow(window) || !IsWindowVisible(window) ||
+                !(GetWindowLongPtrW(window, GWL_EXSTYLE) & WS_EX_TOPMOST) || !GetWindowRect(window, &rect)) {
+                return TRUE;
+            }
+            LONG area = (rect.right - rect.left) * (rect.bottom - rect.top);
+            if (area > search.area) {
+                search.match = window;
+                search.area = area;
+            }
+            return TRUE;
+        }, reinterpret_cast<LPARAM>(&search));
+        napi_value result;
+        if (search.match == nullptr) {
+            napi_get_null(env, &result);
+        } else {
+            napi_create_int64(env, static_cast<int64_t>(reinterpret_cast<intptr_t>(search.match)), &result);
+        }
+        return result;
+    } catch (hresult_error const& error) {
+        napi_throw_error(env, nullptr, to_string(error.message()).c_str());
+        return nullptr;
+    }
+}
+
+static napi_value GetWindowBounds(napi_env env, napi_callback_info info) {
+    try {
+        size_t count = 1;
+        napi_value arg;
+        napi_get_cb_info(env, info, &count, &arg, nullptr, nullptr);
+        if (count != 1) throw hresult_invalid_argument();
+        HWND window = ReadHandle(env, arg);
+        RECT rect;
+        if (!IsOwnWindow(window) || !GetWindowRect(window, &rect)) {
+            napi_value result;
+            napi_get_null(env, &result);
+            return result;
+        }
+        return CreateRect(env, rect);
+    } catch (hresult_error const& error) {
+        napi_throw_error(env, nullptr, to_string(error.message()).c_str());
+        return nullptr;
+    }
+}
+
+static napi_value SetWindowBounds(napi_env env, napi_callback_info info) {
+    try {
+        size_t count = 2;
+        napi_value args[2];
+        napi_get_cb_info(env, info, &count, args, nullptr, nullptr);
+        if (count != 2) throw hresult_invalid_argument();
+        HWND window = ReadHandle(env, args[0]);
+        bool moved = IsOwnWindow(window) && SetWindowPos(
+            window, nullptr,
+            ReadInt(env, args[1], "x"), ReadInt(env, args[1], "y"),
+            ReadInt(env, args[1], "width"), ReadInt(env, args[1], "height"),
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER
+        );
+        napi_value result;
+        napi_get_boolean(env, moved, &result);
+        return result;
+    } catch (hresult_error const& error) {
+        napi_throw_error(env, nullptr, to_string(error.message()).c_str());
+        return nullptr;
+    }
+}
+
 NAPI_MODULE_INIT() {
     const napi_property_descriptor methods[] = {
         {"share", nullptr, Share, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"close", nullptr, Close, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"lockForeground", nullptr, LockForeground, nullptr, nullptr, nullptr, napi_default, nullptr}
+        {"lockForeground", nullptr, LockForeground, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"findPictureInPictureWindow", nullptr, FindPictureInPictureWindow, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"getWindowBounds", nullptr, GetWindowBounds, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"setWindowBounds", nullptr, SetWindowBounds, nullptr, nullptr, nullptr, napi_default, nullptr}
     };
-    napi_define_properties(env, exports, 3, methods);
+    napi_define_properties(env, exports, sizeof(methods) / sizeof(methods[0]), methods);
     napi_add_env_cleanup_hook(env, [](void*) { requests.clear(); }, nullptr);
     return exports;
 }

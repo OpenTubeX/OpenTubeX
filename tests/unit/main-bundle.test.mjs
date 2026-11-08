@@ -11,7 +11,7 @@ import config from '../../_scripts/webpack.main.config.js'
 
 const require = createRequire(import.meta.url)
 
-test('main bundling includes font-list dependencies and preserves the runtime Windows addon loader', async t => {
+test('main bundling includes font-list dependencies and preserves the runtime native addon loaders', async t => {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-main-bundle-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const compiler = webpack({
@@ -20,7 +20,8 @@ test('main bundling includes font-list dependencies and preserves the runtime Wi
     devtool: false,
     entry: {
       fonts: path.join(path.dirname(require.resolve('font-list')), 'index.mjs'),
-      share: path.resolve(import.meta.dirname, '../../src/main/desktopShare.js')
+      share: path.resolve(import.meta.dirname, '../../src/main/desktopShare.js'),
+      pictureInPicture: path.resolve(import.meta.dirname, '../../src/main/pictureInPictureBounds.js')
     },
     plugins: [],
     optimization: { minimize: false },
@@ -36,6 +37,9 @@ test('main bundling includes font-list dependencies and preserves the runtime Wi
   const { loadWindowsShare } = require(path.join(directory, 'share.js'))
   assert.throws(() => loadWindowsShare(directory, false), error =>
     error.code === 'MODULE_NOT_FOUND' && error.message.includes(path.join(directory, 'windows_share.node')))
+  const { loadMacosNative } = require(path.join(directory, 'pictureInPicture.js'))
+  assert.throws(() => loadMacosNative(directory, false), error =>
+    error.code === 'MODULE_NOT_FOUND' && error.message.includes(path.join(directory, 'macos_native.node')))
 })
 
 test('main D-Bus bundling excludes Bun loaders and preserves Node socket connections', async t => {

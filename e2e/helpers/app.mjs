@@ -255,6 +255,11 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     ...options.env,
   }
   delete env.WAYLAND_DISPLAY
+  // On Plasma, the app loads KWin scripts into the user's session, which does
+  // not manage the test's private display.
+  for (const name of ['KDE_FULL_SESSION', 'XDG_CURRENT_DESKTOP', 'XDG_SESSION_DESKTOP', 'DESKTOP_SESSION']) {
+    delete env[name]
+  }
   // Cursor/agent shells may set this, which makes Electron act as Node and
   // reject Chromium launch flags used by Playwright.
   delete env.ELECTRON_RUN_AS_NODE

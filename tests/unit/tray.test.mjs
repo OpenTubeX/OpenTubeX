@@ -353,6 +353,8 @@ test('quit waits for the queued tray icon cache write', async () => {
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     uploadNotifier: { settle: async () => {} },
+    closeKwinPictureInPictureBounds: Promise.resolve(null),
+    pictureInPictureBoundsStore: { settled: async () => {} },
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
   vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
@@ -381,6 +383,8 @@ test('quit waits for pending watch queue writes', async () => {
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     uploadNotifier: { settle: async () => {} },
+    closeKwinPictureInPictureBounds: Promise.resolve(null),
+    pictureInPictureBoundsStore: { settled: async () => {} },
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
   vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
@@ -406,6 +410,8 @@ test('quit waits for the session write of a window closed just before', async ()
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     uploadNotifier: { settle: async () => {} },
+    closeKwinPictureInPictureBounds: Promise.resolve(null),
+    pictureInPictureBoundsStore: { settled: async () => {} },
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
   vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
