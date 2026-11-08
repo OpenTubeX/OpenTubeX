@@ -907,11 +907,8 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     let local = localById.get(id)
     let remote = remoteById.get(id)
     // A playlist missing on one side is new there or restored from a kept
-    // deletion. Its videos are all additions, not deletions, also when a
-    // retry finds a restoration that stopped halfway.
-    const previousVideos = local && remote && !options.deletions?.playlists?.kept?.includes(id)
-      ? previous[id]?.videos
-      : []
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredPlaylist = !local || !remote || options.deletions?.playlists?.kept?.includes(id)
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
     const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
     if (metadata.custom_thumbnail) {
@@ -956,9 +953,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
       remoteVideosById.keys(),
-      previousVideos,
+      previous[id]?.videos,
       {
         ...options,
+        restored: restoredPlaylist,
         collection: 'playlistVideos',
         scope: id,
         scopeName: metadata.title,
@@ -1225,11 +1223,8 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const local = localById.get(id)
     let remote = remoteById.get(id)
     // A profile missing on one side is new there or restored from a kept
-    // deletion. Its channels are all additions, not deletions, also when a
-    // retry finds a restoration that stopped halfway.
-    const previousChannels = local && remote && !options.deletions?.profiles?.kept?.includes(id)
-      ? previous[id]?.channels
-      : []
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredProfile = !local || !remote || options.deletions?.profiles?.kept?.includes(id)
     const oldMetadata = previous[id]?.metadata
     const localMetadata = local ? profileMetadata(local, oldMetadata) : null
     const remoteMetadata = remote
@@ -1260,9 +1255,10 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const mergedChannelIds = mergeIds(
       localChannelIds,
       remoteChannelIds,
-      previousChannels,
+      previous[id]?.channels,
       {
         ...options,
+        restored: restoredProfile,
         collection: 'profileChannels',
         scope: id,
         scopeName: metadata.title,

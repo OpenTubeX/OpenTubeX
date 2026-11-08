@@ -540,3 +540,20 @@ test('retrying an interrupted playlist restoration keeps its videos', async () =
   assert.deepEqual(Array.from((await adapter.getPlaylist(playlist._id)).videos, item => item.id), [video.videoId])
   assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, item => item.videoId), [video.videoId])
 })
+
+test('a video removed while a playlist restoration is pending stays removed', async () => {
+  // The playlist was restored on the server, then the user removed its video before the sync succeeded.
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylist({ id: playlist._id, title: playlist.playlistName, description: '' })
+  await adapter.addPlaylistVideos(playlist._id, [syncVideoToRemote(video)])
+  const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [{ ...structuredClone(playlist), videos: [] }] } },
+    dispatch: async () => assert.fail('Unexpected local change'),
+  }
+  await context.syncPlaylists(adapter, store, previous, {
+    deletions: { playlists: { kept: [playlist._id] }, [`playlistVideos:${playlist._id}`]: { confirmed: [video.videoId] } },
+  })
+  assert.deepEqual(Array.from((await adapter.getPlaylist(playlist._id)).videos), [])
+})

@@ -21,6 +21,8 @@ const NESTED_COLLECTIONS = new Set(['playlistVideos', 'profileChannels'])
  * @param {Iterable<string>} [previousIds] The IDs both sides had after the last sync
  * @param {object} [options]
  * @param {boolean} [options.allowDataLoss] Applies every deletion without asking
+ * @param {boolean} [options.restored] The list's parent is being restored on one side.
+ *   Missing items are additions there, except deletions the user confirmed.
  * @param {string} [options.collection]
  * @param {string | null} [options.scope] The playlist or profile ID of a nested list
  * @param {string | null} [options.scopeName]
@@ -32,15 +34,15 @@ export function mergeIds(
   localIds,
   remoteIds,
   previousIds = [],
-  { allowDataLoss = false, collection = 'data', scope = null, scopeName = null, deletions, getItemName = () => null } = {}
+  { allowDataLoss = false, restored = false, collection = 'data', scope = null, scopeName = null, deletions, getItemName = () => null } = {}
 ) {
-  const local = new Set(localIds)
-  const remote = new Set(remoteIds)
-  const previous = new Set(previousIds)
-  const allIds = new Set([...local, ...remote, ...previous])
   const decision = deletions?.[syncDeletionKey(collection, scope)]
   const confirmed = new Set(decision?.confirmed)
   const kept = new Set(decision?.kept)
+  const local = new Set(localIds)
+  const remote = new Set(remoteIds)
+  const previous = new Set(restored ? Array.from(previousIds).filter(id => confirmed.has(id)) : previousIds)
+  const allIds = new Set([...local, ...remote, ...previous])
 
   const merged = new Set(Array.from(allIds).filter(id => {
     if (!previous.has(id) || kept.has(id)) {
