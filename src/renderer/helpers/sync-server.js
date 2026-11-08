@@ -906,6 +906,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
+    // A playlist missing on one side is new there or restored from a kept
+    // deletion. Its videos are all additions, not deletions.
+    const previousVideos = local && remote ? previous[id]?.videos : []
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
     const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
     if (metadata.custom_thumbnail) {
@@ -950,7 +953,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
       remoteVideosById.keys(),
-      previous[id]?.videos,
+      previousVideos,
       {
         ...options,
         collection: 'playlistVideos',
@@ -1218,6 +1221,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
   for (const id of mergedIds) {
     const local = localById.get(id)
     let remote = remoteById.get(id)
+    // A profile missing on one side is new there or restored from a kept
+    // deletion. Its channels are all additions, not deletions.
+    const previousChannels = local && remote ? previous[id]?.channels : []
     const oldMetadata = previous[id]?.metadata
     const localMetadata = local ? profileMetadata(local, oldMetadata) : null
     const remoteMetadata = remote
@@ -1248,7 +1254,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const mergedChannelIds = mergeIds(
       localChannelIds,
       remoteChannelIds,
-      previous[id]?.channels,
+      previousChannels,
       {
         ...options,
         collection: 'profileChannels',

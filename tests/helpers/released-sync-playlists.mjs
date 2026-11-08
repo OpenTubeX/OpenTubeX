@@ -1,7 +1,18 @@
 // Frozen playlist conversion and merge from released v0.36.0-beta (7bf2e2d23).
 // Test-only reference for mixed-version encrypted sync; keep the functions unchanged.
 import { randomUUID as generateRandomUniqueId } from 'node:crypto'
-import { SyncServerDataLossError } from '../../src/renderer/helpers/sync-server-errors.js'
+
+// The released error class, which took positional arguments.
+class SyncServerDataLossError extends Error {
+  constructor(collection, deleted, previous, items) {
+    super(`Sync stopped because it would delete ${deleted} of ${previous} previously synced ${collection} items`)
+    this.name = 'SyncServerDataLossError'
+    this.collection = collection
+    this.deleted = deleted
+    this.previous = previous
+    this.items = items
+  }
+}
 
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//

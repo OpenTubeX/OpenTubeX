@@ -477,3 +477,47 @@ test('an unchanged playlist baseline does not rewrite the saved sync snapshot', 
   await persist(playlist._id, { remoteId: playlist._id, metadata: { ...metadata, title: 'Renamed' }, applied: true, videos: [video.videoId] })
   assert.equal(writes, 1)
 })
+
+for (const lostOn of ['server', 'device']) {
+  test(`keeping a playlist the ${lostOn} lost restores it with its videos`, async () => {
+    const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+    const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+    if (lostOn === 'device') {
+      await adapter.createPlaylist({ id: playlist._id, title: playlist.playlistName, description: '' })
+      await adapter.addPlaylistVideos(playlist._id, [syncVideoToRemote(video)])
+    }
+    const store = {
+      ...playlistBaseline(previous),
+      state: { playlists: { playlists: lostOn === 'server' ? [structuredClone(playlist)] : [] } },
+      dispatch: async (action, value) => {
+        if (action === 'addPlaylist') store.state.playlists.playlists.push(value)
+        else if (action === 'updatePlaylistFromSync') store.state.playlists.playlists = [value.playlist]
+        else assert.fail(`Unexpected ${action}`)
+        return true
+      },
+    }
+    await context.syncPlaylists(adapter, store, previous, { deletions: { playlists: { kept: [playlist._id] } } })
+    const [remote] = await adapter.getPlaylists()
+    assert.deepEqual(Array.from((await adapter.getPlaylist(remote.id)).videos, item => item.id), [video.videoId])
+    assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, item => item.videoId), [video.videoId])
+  })
+}
+
+test('keeping a profile the server lost restores its channels', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const previous = { [profile._id]: { metadata: { title: profile.name, bgColor: '#000000', textColor: '#FFFFFF' }, channels: [channel.id] } }
+  const store = {
+    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }, structuredClone(profile)] } },
+    dispatch: async (action, value) => {
+      assert.notEqual(action, 'removeProfile')
+      if (action === 'updateProfileSubscriptionsFromSync') {
+        store.state.profiles.profileList.find(item => item._id === value.profileId).subscriptions = value.subscriptions
+      }
+      return true
+    },
+  }
+  await context.syncProfiles(adapter, store, previous, { deletions: { profiles: { kept: [profile._id] } } })
+  const [group] = await adapter.getSubscriptionGroups()
+  assert.deepEqual(Array.from(group.channels, item => item.id), [channel.id])
+  assert.deepEqual(Array.from(store.state.profiles.profileList[1].subscriptions, item => item.id), [channel.id])
+})
