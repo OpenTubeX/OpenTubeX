@@ -1672,6 +1672,8 @@ Video:
     Previous Version: پچھلا {number}
     Empty: (خالی)
   Fetching Streams: yt-dlp کے ذریعے اسٹریمز حاصل کی جا رہی ہیں…
+  Waiting For Connection: "سرور تک رسائی نہیں ہو سکی۔ خودکار طور پر دوبارہ کوشش کی جا رہی ہے…"
+  Retry Now: "ابھی دوبارہ کوشش کریں"
   Transcript:
     Title: ٹرانسکرپٹ
     Search: ٹرانسکرپٹ میں تلاش کریں

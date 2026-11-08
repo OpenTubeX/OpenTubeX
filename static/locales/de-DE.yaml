@@ -2586,6 +2586,8 @@ Video:
     Previous Version: Vorherige Version {number}
     Empty: (leer)
   Fetching Streams: Streams werden mit yt-dlp abgerufen…
+  Waiting For Connection: Der Server ist nicht erreichbar. Es wird automatisch erneut versucht…
+  Retry Now: Jetzt erneut versuchen
   Reloading video after streaming URL error: Video wird nach einem Fehler der Streaming-URL neu geladen
   Save Channel Subtitles State: Untertitelstatus für den Kanal speichern
   Channel Subtitles State Saved: Untertitelstatus für den Kanal gespeichert

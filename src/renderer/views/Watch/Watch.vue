@@ -77,12 +77,41 @@
               </div>
               <span class="shortsSkeletonSeek ft-shimmer" />
             </div>
+            <div
+              v-if="waitingForConnection"
+              class="connectionWaitNotice"
+              role="status"
+            >
+              <span>{{ $t('Video.Waiting For Connection') }}</span>
+              <FtButton
+                :label="$t('Video.Retry Now')"
+                :icon="['fas', 'sync']"
+                background-color="var(--primary-color)"
+                text-color="var(--text-with-main-color)"
+                @click="retryWaitingRequests"
+              />
+            </div>
           </div>
           <div
             v-else-if="isLoading"
             class="videoPlayer videoPlayerPlaceholder ft-shimmer"
             data-tab-loading-indicator
-          />
+          >
+            <div
+              v-if="waitingForConnection"
+              class="connectionWaitNotice"
+              role="status"
+            >
+              <span>{{ $t('Video.Waiting For Connection') }}</span>
+              <FtButton
+                :label="$t('Video.Retry Now')"
+                :icon="['fas', 'sync']"
+                background-color="var(--primary-color)"
+                text-color="var(--text-with-main-color)"
+                @click="retryWaitingRequests"
+              />
+            </div>
+          </div>
           <div
             v-else-if="(ytDlpStreamsPending || (vrStreamsPending && !isYtDlpPlaybackRequested())) && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
             class="videoPlayer videoPlayerPlaceholder streamPlaceholder"

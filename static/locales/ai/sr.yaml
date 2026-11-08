@@ -1644,6 +1644,8 @@ Video:
     Previous Version: Претходна верзија {number}
     Empty: (празно)
   Fetching Streams: Преузимање стримова помоћу yt-dlp-а…
+  Waiting For Connection: "Сервер није доступан. Аутоматски поновни покушај…"
+  Retry Now: "Покушај поново сада"
   Transcript:
     Title: Транскрипт
     Search: Претражи транскрипт

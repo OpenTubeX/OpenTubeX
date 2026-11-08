@@ -1618,6 +1618,8 @@ Video:
     Previous Version: Versiunea anterioară {number}
     Empty: (gol)
   Fetching Streams: Se preiau fluxurile cu yt-dlp…
+  Waiting For Connection: "Serverul nu poate fi accesat. Se reîncearcă automat…"
+  Retry Now: "Reîncearcă acum"
   Transcript:
     Title: Transcriere
     Search: Caută în transcriere

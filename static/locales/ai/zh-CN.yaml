@@ -1582,6 +1582,8 @@ Video:
     Previous Version: 上一个版本 {number}
     Empty: （空）
   Fetching Streams: 正在使用 yt-dlp 获取视频流…
+  Waiting For Connection: "无法连接到服务器。正在自动重试…"
+  Retry Now: "立即重试"
   Transcript:
     Title: 字幕文本
     Search: 搜索字幕文本

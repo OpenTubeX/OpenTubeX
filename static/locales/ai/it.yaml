@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Precedente {number}
     Empty: (vuoto)
   Fetching Streams: Recupero dei flussi con yt-dlp…
+  Waiting For Connection: "Impossibile raggiungere il server. Nuovo tentativo automatico in corso…"
+  Retry Now: "Riprova ora"
   Transcript:
     Title: Trascrizione
     Search: Cerca nella trascrizione

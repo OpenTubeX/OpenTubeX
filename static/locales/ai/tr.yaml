@@ -1582,6 +1582,8 @@ Video:
     Previous Version: 'Önceki {number}'
     Empty: (boş)
   Fetching Streams: Akışlar yt-dlp ile getiriliyor…
+  Waiting For Connection: "Sunucuya ulaşılamadı. Otomatik olarak yeniden deneniyor…"
+  Retry Now: "Şimdi yeniden dene"
   Transcript:
     Title: Döküm
     Search: Dökümde ara

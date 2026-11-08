@@ -1585,6 +1585,8 @@ Video:
     Previous Version: Əvvəlki {number}
     Empty: (boş)
   Fetching Streams: Yayımlar yt-dlp ilə alınır…
+  Waiting For Connection: "Serverə qoşulmaq mümkün olmadı. Avtomatik olaraq yenidən cəhd edilir…"
+  Retry Now: "İndi yenidən cəhd et"
   Transcript:
     Title: Transkript
     Search: Transkriptdə axtar

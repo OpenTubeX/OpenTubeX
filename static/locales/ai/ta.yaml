@@ -1631,6 +1631,8 @@ Video:
     Previous Version: முந்தையது {number}
     Empty: (காலி)
   Fetching Streams: yt-dlp மூலம் ஸ்ட்ரீம்கள் பெறப்படுகின்றன…
+  Waiting For Connection: "சேவையகத்தை அணுக முடியவில்லை. தானாக மீண்டும் முயல்கிறது…"
+  Retry Now: "இப்போது மீண்டும் முயல்"
   Transcript:
     Title: உரைநகல்
     Search: உரைநகலில் தேடு

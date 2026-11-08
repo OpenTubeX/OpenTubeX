@@ -1581,6 +1581,8 @@ Video:
     Previous Version: Version précédente {number}
     Empty: (vide)
   Fetching Streams: Récupération des flux avec yt-dlp…
+  Waiting For Connection: "Impossible de joindre le serveur. Nouvelle tentative automatique…"
+  Retry Now: "Réessayer maintenant"
   Transcript:
     Title: Transcription
     Search: Rechercher dans la transcription

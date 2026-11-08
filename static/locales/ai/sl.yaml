@@ -1964,6 +1964,8 @@ Video:
     Previous Version: Prejšnja različica {number}
     Empty: (prazno)
   Fetching Streams: Pridobivanje tokov z yt-dlp…
+  Waiting For Connection: "Strežnika ni mogoče doseči. Samodejno ponovno poskušanje…"
+  Retry Now: "Poskusi znova zdaj"
   Transcript:
     Title: Prepis
     Search: Išči po prepisu

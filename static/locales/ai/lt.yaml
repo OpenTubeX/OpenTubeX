@@ -1911,6 +1911,8 @@ Video:
     Previous Version: Ankstesnė versija {number}
     Empty: (tuščia)
   Fetching Streams: Gaunami srautai naudojant yt-dlp…
+  Waiting For Connection: "Nepavyko pasiekti serverio. Automatiškai bandoma dar kartą…"
+  Retry Now: "Bandyti dabar"
   Transcript:
     Title: Nuorašas
     Search: Ieškoti nuoraše

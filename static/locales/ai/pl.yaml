@@ -1032,6 +1032,8 @@ Video:
     Previous Version: Poprzednia wersja {number}
     Empty: (puste)
   Fetching Streams: Pobieranie strumieni za pomocą yt-dlp…
+  Waiting For Connection: "Nie można połączyć się z serwerem. Ponawianie automatyczne…"
+  Retry Now: "Ponów teraz"
   Retry With Built-in Extraction: Spróbuj ponownie za pomocą wbudowanego mechanizmu
   Retry With yt-dlp Extraction: Spróbuj ponownie za pomocą yt-dlp
   Reloading video after streaming URL error: Ponowne wczytywanie filmu po błędzie adresu URL strumienia

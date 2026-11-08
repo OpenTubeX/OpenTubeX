@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Eelmine {number}
     Empty: (tühi)
   Fetching Streams: Voogude hankimine yt-dlp abil…
+  Waiting For Connection: "Serveriga ei õnnestunud ühendust saada. Proovin automaatselt uuesti…"
+  Retry Now: "Proovi kohe uuesti"
   Transcript:
     Title: Transkriptsioon
     Search: Otsi transkriptsioonist

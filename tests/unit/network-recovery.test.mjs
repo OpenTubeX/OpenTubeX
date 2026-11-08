@@ -678,3 +678,48 @@ test('with a blocked probe, healthy responses do not wake a failed service befor
   controller.abort()
   assert.equal(await pending, 'AbortError')
 })
+
+test('waiting origins are reported and Retry now ends the backoff of a waiting probe', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const events = new EventTarget()
+  const waiting = []
+  const recovery = createNetworkRecovery({ eventTarget: events, isOnline: () => true, onWaitingChange: origins => waiting.push(origins) })
+  t.after(() => recovery.dispose())
+  let fail = true
+  let calls = 0
+  const request = recovery.run('https://www.youtube.com', async () => { calls++; if (fail) throw new TypeError('Failed to fetch'); return 'ok' })
+  await flush()
+  assert.equal(calls, 1)
+  assert.deepEqual(recovery.waitingOrigins, ['https://www.youtube.com'])
+  assert.deepEqual(waiting, [['https://www.youtube.com']])
+  recovery.retryNow()
+  await flush()
+  assert.equal(calls, 2, 'Retry now must not wait for the 5 s backoff')
+  fail = false
+  recovery.retryNow()
+  await flush()
+  assert.equal(await request, 'ok')
+  assert.equal(calls, 3)
+  assert.deepEqual(recovery.waitingOrigins, [])
+  assert.deepEqual(waiting.at(-1), [])
+})
+
+test('Retry now during a probe attempt skips the next backoff', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const recovery = createNetworkRecovery({ eventTarget: new EventTarget(), isOnline: () => true })
+  t.after(() => recovery.dispose())
+  const attempts = []
+  const request = recovery.run('https://www.youtube.com', () => new Promise((resolve, reject) => attempts.push({ resolve, reject })))
+  await flush()
+  attempts[0].reject(new TypeError('Failed to fetch'))
+  await flush()
+  t.mock.timers.tick(5000)
+  await flush()
+  assert.equal(attempts.length, 2)
+  recovery.retryNow()
+  attempts[1].reject(new TypeError('Failed to fetch'))
+  await flush()
+  assert.equal(attempts.length, 3, 'the attempt after Retry now starts without its 10 s backoff')
+  attempts[2].resolve('ok')
+  assert.equal(await request, 'ok')
+})

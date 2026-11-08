@@ -1889,6 +1889,8 @@ Video:
     Previous Version: '이전 버전 {number}'
     Empty: (비어 있음)
   Fetching Streams: yt-dlp로 스트림 가져오는 중…
+  Waiting For Connection: "서버에 연결할 수 없습니다. 자동으로 다시 시도하는 중…"
+  Retry Now: "지금 다시 시도"
   Transcript:
     Title: 스크립트
     Search: 스크립트 검색

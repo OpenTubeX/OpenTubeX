@@ -1603,6 +1603,8 @@ Video:
     Previous Version: Prethodna verzija {number}
     Empty: (prazno)
   Fetching Streams: Dohvaćanje tokova putem yt-dlp-a…
+  Waiting For Connection: "Poslužitelj nije dostupan. Automatski ponovni pokušaj…"
+  Retry Now: "Pokušaj ponovo sada"
   Transcript:
     Title: Prijepis
     Search: Pretraži prijepis

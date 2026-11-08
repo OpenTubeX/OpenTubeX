@@ -1625,6 +1625,8 @@ Video:
     Previous Version: Edellinen {number}
     Empty: (tyhjä)
   Fetching Streams: Haetaan mediavirtoja yt-dlp:llä…
+  Waiting For Connection: "Palvelimeen ei saatu yhteyttä. Yritetään automaattisesti uudelleen…"
+  Retry Now: "Yritä nyt uudelleen"
   Transcript:
     Title: Litterointi
     Search: Hae litteroinnista

@@ -1650,6 +1650,8 @@ Video:
     Previous Version: Tidligere {number}
     Empty: (tom)
   Fetching Streams: Henter streams med yt-dlp…
+  Waiting For Connection: "Kunne ikke nå serveren. Prøver automatisk igen…"
+  Retry Now: "Prøv igen nu"
   Transcript:
     Title: Transskription
     Search: Søg i transskriptionen

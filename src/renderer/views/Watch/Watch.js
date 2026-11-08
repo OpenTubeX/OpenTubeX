@@ -6,7 +6,7 @@ import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/Phon
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isVerticalTabBarPosition } from '../../constants/tabBarPosition'
 import { holdRootClass } from '../../helpers/rootClasses'
-import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
+import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWaitingOrigins, retryWaitingRequests } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { probeHlsManifest } from '../../helpers/player/hlsManifest'
@@ -368,6 +368,7 @@ export default defineComponent({
       downloadedPlaybackWithoutMetadata: false,
       downloadedMetadataLoading: false,
       isOffline: getConnectionState() === 'offline',
+      waitingOrigins: getWaitingOrigins(),
       thumbnail: '',
       videoId: '',
       videoTitle: '',
@@ -791,6 +792,16 @@ export default defineComponent({
     },
     apiServerUrl: function () {
       return this.$store.getters.getApiServerUrl
+    },
+    /** The page is loading, but its YouTube or API server requests wait to retry. */
+    waitingForConnection: function () {
+      if (!this.isLoading || this.isOffline) return false
+      let apiOrigin = null
+      try {
+        apiOrigin = new URL(this.apiServerUrl).origin
+      } catch {}
+      return this.waitingOrigins.some(origin => origin === apiOrigin ||
+        /^https:\/\/([^/]+\.)?(youtube\.com|googleapis\.com)$/.test(origin))
     },
     proxyVideos: function () {
       return this.$store.getters.getProxyVideos
@@ -1570,7 +1581,9 @@ export default defineComponent({
   },
   mounted: function () {
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
+    connectionEvents.addEventListener('waiting', this.updateWaitingOrigins)
     this.isOffline = getConnectionState() === 'offline'
+    this.waitingOrigins = getWaitingOrigins()
     this.shortsNavigation.addListeners()
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
@@ -1605,6 +1618,7 @@ export default defineComponent({
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
+    connectionEvents.removeEventListener('waiting', this.updateWaitingOrigins)
     clearTimeout(this.downloadedPlaybackFallbackTimer)
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
@@ -1659,6 +1673,10 @@ export default defineComponent({
       this.shortsCommentsOpen = false
       this.mobilePanel = null
     },
+    updateWaitingOrigins({ detail }) {
+      this.waitingOrigins = detail
+    },
+    retryWaitingRequests,
     handleDownloadConnectionChange({ detail }) {
       this.isOffline = detail === 'offline'
       if (this.isOffline && !this.watchingPlaylist) this.abortAutoplayCountdown(true)

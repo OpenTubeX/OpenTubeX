@@ -1582,6 +1582,8 @@ Video:
     Previous Version: "Stumm kent {number}"
     Empty: "(goullo)"
   Fetching Streams: "Oc'h adtapout ar gwazhioù gant yt-dlp…"
+  Waiting For Connection: "N'eus ket bet tu da dizhout ar servijer. Klasket a vez en-dro ent emgefreek…"
+  Retry Now: "Klask en-dro bremañ"
   Transcript:
     Title: "Treuzskrivadur"
     Search: "Klask en treuzskrivadur"

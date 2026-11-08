@@ -70,6 +70,36 @@ test('resumes watch metadata interrupted by a brief disconnect', async ({ app, p
   await expect(page.locator('.videoTitle')).toContainText('Me at the zoo')
 })
 
+test('offers Retry now while watch metadata waits to reconnect to YouTube', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let failing = true
+  let attempts = 0
+  let retried = false
+  await page.route('https://www.youtube.com/watch?**', route => {
+    if (!failing) {
+      retried = true
+      return route.fallback()
+    }
+    attempts++
+    return route.abort('connectionreset')
+  })
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+  const notice = skeleton.locator('.connectionWaitNotice')
+  await expect(notice).toHaveText(/Couldn't reach the server/)
+  await expect(page.locator('.connectionStatus')).toHaveCount(0)
+  // After the second failure, the next attempt waits 10 s.
+  await expect.poll(() => attempts, { timeout: 15000 }).toBe(2)
+  failing = false
+  await notice.getByRole('button', { name: 'Retry now' }).click()
+  await expect.poll(() => retried, { timeout: 5000 }).toBe(true)
+  await expect(notice).toHaveCount(0)
+  await expect(skeleton).toHaveCount(0)
+  await waitForPlayback(page)
+  await expect(page.locator('.videoTitle')).toContainText('Me at the zoo')
+})
+
 for (const width of [1600, 480]) {
   test(`keeps loaded watch content after losing connectivity at ${width}px`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'], commentTimestamp: true })

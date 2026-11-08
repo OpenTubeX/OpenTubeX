@@ -2435,6 +2435,8 @@ Video:
     Previous Version: 'Previous {number}'
     Empty: (empty)
   Fetching Streams: Fetching streams with yt-dlp…
+  Waiting For Connection: "Couldn't reach the server. Trying again automatically…"
+  Retry Now: Retry now
   Transcript:
     Title: Transcript
     Search: Search transcript

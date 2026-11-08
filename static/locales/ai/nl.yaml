@@ -1628,6 +1628,8 @@ Video:
     Previous Version: Vorige {number}
     Empty: (leeg)
   Fetching Streams: Streams ophalen met yt-dlp…
+  Waiting For Connection: "Kan de server niet bereiken. Automatisch opnieuw proberen…"
+  Retry Now: "Nu opnieuw proberen"
   Transcript:
     Title: Transcript
     Search: Transcript doorzoeken

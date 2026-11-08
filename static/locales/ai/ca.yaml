@@ -1998,6 +1998,8 @@ Video:
     Previous Version: Anterior {number}
     Empty: (buit)
   Fetching Streams: S'estan obtenint els fluxos amb yt-dlp…
+  Waiting For Connection: "No s'ha pogut connectar amb el servidor. S'està tornant a provar automàticament…"
+  Retry Now: "Torna-ho a provar ara"
   Transcript:
     Title: Transcripció
     Search: Cerca a la transcripció

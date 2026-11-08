@@ -43,6 +43,29 @@
   min-inline-size: 0;
 }
 
+// Centered over the loading placeholder, which positions its skeleton absolutely.
+.connectionWaitNotice {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  box-sizing: border-box;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - 24px);
+  block-size: fit-content;
+  margin: auto;
+  padding-block: 8px;
+  padding-inline: 20px 8px;
+  border-radius: var(--shape-corner-large-increased);
+  background-color: rgb(0 0 0 / 90%);
+  color: #fff;
+  text-align: center;
+}
+
 .ageRestricted {
   @include single-column-template;
 

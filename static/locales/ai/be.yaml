@@ -1657,6 +1657,8 @@ Video:
     Previous Version: Папярэдняя версія {number}
     Empty: (пуста)
   Fetching Streams: Атрыманне патокаў праз yt-dlp…
+  Waiting For Connection: "Не ўдалося звязацца з серверам. Аўтаматычная паўторная спроба…"
+  Retry Now: "Паўтарыць зараз"
   Transcript:
     Title: Расшыфроўка
     Search: Шукаць у расшыфроўцы
