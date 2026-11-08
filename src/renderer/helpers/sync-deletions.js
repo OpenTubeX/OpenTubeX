@@ -191,7 +191,9 @@ export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, decis
     store.subscribeAction({
       before: action => {
         const family = SYNC_DELETION_ACTIONS.get(action.type)
-        if (family && !isRemoteDispatch()) {
+        // Comparing the lists costs a scan of them, which only sync needs.
+        const settings = store.state.settings
+        if (family && settings?.syncServerEnabled && settings.syncServerToken && !isRemoteDispatch()) {
           before.set(action, { family, lists: syncedIdLists(store.state, family, mainProfileId) })
         }
       },

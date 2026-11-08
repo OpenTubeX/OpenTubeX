@@ -31,7 +31,7 @@ let remoteDepth = 0
 
 function trackedStore (state) {
   const decisions = createSyncDeletionDecisions()
-  const store = createStore(state)
+  const store = createStore({ settings: { syncServerEnabled: true, syncServerToken: 'token' }, ...state })
   trackLocalSyncDeletions({ isRemoteDispatch: () => remoteDepth > 0, mainProfileId: MAIN_PROFILE_ID, decisions })(store)
   return { store, decisions }
 }
@@ -135,4 +135,13 @@ test('items already missing on both sides do not count as deletions', () => {
   const previous = Array.from({ length: 20 }, (_, index) => `item-${index}`)
   const remaining = previous.slice(10)
   assert.deepEqual(Array.from(mergeIds(remaining, remaining, previous)), remaining)
+})
+
+test('deletions are not tracked while sync is off', async () => {
+  const { store, decisions } = trackedStore({
+    settings: { syncServerEnabled: false, syncServerToken: '' },
+    history: { historyCacheSorted: [{ videoId: 'only' }] },
+  })
+  await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
+  assert.deepEqual(decisions.snapshot(), {})
 })
