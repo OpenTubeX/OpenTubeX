@@ -427,6 +427,7 @@
         :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size }, allFeedsActiveSubscriptionIds.size)]"
         :option-names="[$t('Yes'), $t('No')]"
         :option-values="['refresh', 'cancel']"
+        :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
         autosize
         @click="handleAllFeedsRefreshWarning"
       />

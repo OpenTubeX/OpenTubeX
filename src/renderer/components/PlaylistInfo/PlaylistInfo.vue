@@ -325,6 +325,7 @@
         :extra-labels="[t('Playlist.Preload Playlist Warning')]"
         :option-names="[t('Yes'), t('No')]"
         :option-values="['preload', 'cancel']"
+        :option-icons="[['fas', 'forward'], ['fas', 'xmark']]"
         @click="handlePreloadPlaylistPromptAnswer"
       />
       <FtPrompt
