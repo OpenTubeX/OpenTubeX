@@ -22,7 +22,7 @@ function visible({ hidden = false, appearance = 'result' } = {}) {
   })
 }
 
-function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator.jpg' }], fetchChannel = async () => null) {
+function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator.jpg' }], fetchChannel = async () => null, backend = 'local') {
   let pending
   let refresh
   let unmount
@@ -33,8 +33,9 @@ function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator
     ref: value => ({ value }),
     watch: (_sources, fn) => { refresh = fn; pending = fn() },
     onBeforeUnmount: fn => { unmount = fn },
-    store: { getters: { getBackendPreference: 'local', getSubscribedChannelsById: new Map() } },
+    store: { getters: { getBackendPreference: backend, getSubscribedChannelsById: new Map() } },
     getResultAuthorThumbnailUrl,
+    youtubeImageUrlToInvidious: url => url,
     getCachedChannelInfo: () => null,
     fetchChannelInfo: fetchChannel,
     isCollaborativeVideoAuthor,
@@ -175,3 +176,17 @@ test('an unflagged collaboration byline still loads every avatar when a primary 
   await f.pending
   assert.equal(f.avatar.channelThumbnails.value.length, 3)
 })
+
+for (const backend of ['invidious', 'yattee']) {
+  test(`${backend} results never look collaborators up on YouTube`, async () => {
+    // Yattee servers leave the channel ID of collaborations empty
+    const f = resolve({ videoId: 'collab', author: 'Creator One and Creator Two', authorId: null }, undefined, undefined, backend)
+    await f.pending
+    assert.deepEqual(f.calls, [])
+    assert.deepEqual(Array.from(f.avatar.channelThumbnails.value), [null])
+
+    const supplied = resolve({ videoId: 'collab', collaborators }, undefined, undefined, backend)
+    await supplied.pending
+    assert.equal(supplied.avatar.channelThumbnails.value.length, 3)
+  })
+}
