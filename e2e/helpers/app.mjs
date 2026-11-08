@@ -179,6 +179,60 @@ export async function expectScrollAtRenderedEnd(scroller) {
   })).toBeLessThanOrEqual(2)
 }
 
+export async function scrollPageToEnd(page) {
+  await expect.poll(() => page.evaluate(() => {
+    document.activeElement?.blur()
+    // Layout can settle after the first scroll. Retry the action and measure
+    // the rendered end instead of mixing rounded dimensions at fractional zoom.
+    window.scrollTo(0, document.documentElement.scrollHeight)
+    const content = document.querySelector('.app > .routerView')
+    const marginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+    const remaining = Math.max(-window.scrollY, content.getBoundingClientRect().bottom + marginBottom - viewportHeight)
+    return Math.abs(remaining) * window.devicePixelRatio
+  })).toBeLessThanOrEqual(1)
+}
+
+export async function expectPageScrollWithinRenderedRange(page) {
+  await expect.poll(() => page.evaluate(() => {
+    const content = document.querySelector('.app > .routerView')
+    const contentBox = content.getBoundingClientRect()
+    // Negative margins do not shorten the element's scrollable overflow box.
+    const contentMarginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
+    const renderedMaximumScrollY = Math.max(
+      0,
+      contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
+    )
+    const documentMaximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
+    const track = scrollbar?.querySelector('.os-scrollbar-track')
+    const handle = scrollbar?.querySelector('.os-scrollbar-handle')
+    let scrollbarMatchesOverflow = scrollbar?.classList.contains('os-scrollbar-unusable') === true
+
+    if (documentMaximumScrollY > 1 && track && handle) {
+      const trackBox = track.getBoundingClientRect()
+      const handleBox = handle.getBoundingClientRect()
+      const trackRange = trackBox.height - handleBox.height
+      const expectedHandleOffset = window.scrollY / documentMaximumScrollY * trackRange
+      const handleOffset = handleBox.top - trackBox.top
+      scrollbarMatchesOverflow =
+        scrollbar.classList.contains('os-scrollbar-visible') &&
+        !scrollbar.classList.contains('os-scrollbar-unusable') &&
+        Math.abs(handleOffset - expectedHandleOffset) <= 1
+    }
+
+    return {
+      documentRangeMatchesContent: Math.abs(documentMaximumScrollY - renderedMaximumScrollY) <= 1,
+      scrollWithinRenderedRange: window.scrollY <= renderedMaximumScrollY + 1,
+      scrollbarMatchesOverflow
+    }
+  })).toEqual({
+    documentRangeMatchesContent: true,
+    scrollWithinRenderedRange: true,
+    scrollbarMatchesOverflow: true
+  })
+}
+
 /**
  * Creates an isolated userData directory, optionally seeded with
  * settings and datastore documents.

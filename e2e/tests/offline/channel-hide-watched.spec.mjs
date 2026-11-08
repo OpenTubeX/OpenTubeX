@@ -1,8 +1,12 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, scrollPageToEnd, expectPageScrollWithinRenderedRange } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const OTHER_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 const SINGLE_VIDEO_CHANNEL_ID = 'UCcccccccccccccccccccccc'
+const LONG_CHANNEL_ID = 'UCdddddddddddddddddddddd'
+// Every other video of the long channel is watched.
+const LONG_CHANNEL_VIDEO_IDS = Array.from({ length: 40 }, (_, index) => `long${String(index).padStart(7, '0')}`)
+const LONG_CHANNEL_WATCHED_IDS = LONG_CHANNEL_VIDEO_IDS.filter((_, index) => index % 2 === 0)
 
 const video = (videoId, title, authorId) => ({
   type: 'video',
@@ -46,25 +50,34 @@ test.use({
     },
     history: [
       historyEntry('watched0001', 'Watched video', CHANNEL_ID),
-      historyEntry('watched0002', 'Other watched video', OTHER_CHANNEL_ID)
+      historyEntry('watched0002', 'Other watched video', OTHER_CHANNEL_ID),
+      ...LONG_CHANNEL_WATCHED_IDS.map(videoId => historyEntry(videoId, videoId, LONG_CHANNEL_ID))
     ]
   }
 })
 
+function channelVideos(channelId) {
+  switch (channelId) {
+    case LONG_CHANNEL_ID: return LONG_CHANNEL_VIDEO_IDS.map(videoId => video(videoId, videoId, channelId))
+    case SINGLE_VIDEO_CHANNEL_ID: return [video('single00001', 'Only video', channelId)]
+    case CHANNEL_ID: return [
+      video('watched0001', 'Watched video', channelId),
+      video('unwatched01', 'Unwatched video', channelId)
+    ]
+    default: return [
+      video('watched0002', 'Other Watched video', channelId),
+      video('unwatched02', 'Other Unwatched video', channelId)
+    ]
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('https://invidious.test/api/v1/channels/**', route => {
     const [, , , , channelId, tab] = new URL(route.request().url()).pathname.split('/')
-    const prefix = channelId === CHANNEL_ID ? '' : 'Other '
-    const watchedId = channelId === CHANNEL_ID ? 'watched0001' : 'watched0002'
     return route.fulfill({
       json: tab
         ? {
-            videos: channelId === SINGLE_VIDEO_CHANNEL_ID
-              ? [video('single00001', 'Only video', channelId)]
-              : [
-                  video(watchedId, `${prefix}Watched video`, channelId),
-                  video(channelId === CHANNEL_ID ? 'unwatched01' : 'unwatched02', `${prefix}Unwatched video`, channelId)
-                ],
+            videos: channelVideos(channelId),
             continuation: null
           }
         : {
@@ -148,4 +161,18 @@ test('the switch is hidden like the sort select when the channel has a single vi
   const channel = await openChannel(page, SINGLE_VIDEO_CHANNEL_ID)
   await expect(channel.titles).toHaveText(['Only video'])
   await expect(channel.toggle).toHaveCount(0)
+})
+
+test('hiding watched videos from the bottom of a long channel keeps a valid scroll position', { tag: '@scale' }, async ({ page }) => {
+  const channel = await openChannel(page, LONG_CHANNEL_ID)
+  // Cards outside the first screen render lazily, so count the list items.
+  const items = page.locator('.channelContent:visible #videoPanel [data-feed-item-key]')
+  await expect(items).toHaveCount(LONG_CHANNEL_VIDEO_IDS.length)
+
+  await scrollPageToEnd(page)
+  // A focused switch toggles with Space without scrolling back to it.
+  await channel.toggle.evaluate(element => element.click())
+  await expect(channel.toggle).toBeChecked()
+  await expect(items).toHaveCount(LONG_CHANNEL_VIDEO_IDS.length - LONG_CHANNEL_WATCHED_IDS.length)
+  await expectPageScrollWithinRenderedRange(page)
 })
