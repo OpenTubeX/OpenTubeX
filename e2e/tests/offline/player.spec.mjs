@@ -2420,7 +2420,7 @@ test.describe('scroll mini player', () => {
     expect(animations[1].zIndex).toBe('150')
   })
 
-  test('expands the mini player on double-click', async ({ app, page }) => {
+  test('expands the mini player on double-click', { tag: '@scale' }, async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
     const player = page.locator('.ftVideoPlayer')
