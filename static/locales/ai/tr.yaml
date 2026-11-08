@@ -748,7 +748,7 @@ Settings:
       Disabled: Devre dışı
       Brightness: Parlaklık
       Volume: Ses düzeyi
-      Hint: Videonun bir yanında yukarı veya aşağı kaydırın.
+      Hint: Tam ekranda videonun bir yanında yukarı veya aşağı kaydırın.
       Unavailable: Oynatma kontrolleri ayarlanamadı.
     yt-dlp Streaming: "yt-dlp Akışı"
     Continue Playback When Screen Is Locked: 'Ekran kilitliyken oynatmaya devam et'

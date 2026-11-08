@@ -755,7 +755,7 @@ Settings:
       Disabled: Desactivado
       Brightness: Brillo
       Volume: Volume
-      Hint: Desliza cara arriba ou abaixo nun lado do vídeo.
+      Hint: Desliza cara arriba ou abaixo nun lado do vídeo en pantalla completa.
       Unavailable: Non se puideron axustar os controis de reprodución.
     yt-dlp Streaming: "Transmisión con yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar a reprodución coa pantalla bloqueada'

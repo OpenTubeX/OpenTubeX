@@ -748,7 +748,7 @@ Settings:
       Disabled: Óvirkt
       Brightness: Birtustig
       Volume: Hljóðstyrkur
-      Hint: Strjúktu upp eða niður við hlið myndskeiðsins.
+      Hint: Strjúktu upp eða niður við hlið myndskeiðsins á öllum skjánum.
       Unavailable: Ekki tókst að stilla spilunarstýringar.
     yt-dlp Streaming: "yt-dlp-streymi"
     Continue Playback When Screen Is Locked: 'Halda spilun áfram þegar skjárinn er læstur'

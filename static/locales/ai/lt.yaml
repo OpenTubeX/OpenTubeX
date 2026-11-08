@@ -937,7 +937,7 @@ Settings:
       Disabled: Išjungta
       Brightness: Ryškumas
       Volume: Garsumas
-      Hint: Braukite aukštyn arba žemyn vaizdo įrašo šone.
+      Hint: Viso ekrano režimu braukite aukštyn arba žemyn vaizdo įrašo šone.
       Unavailable: Nepavyko sureguliuoti atkūrimo valdiklių.
     yt-dlp Streaming: "yt-dlp srautinis perdavimas"
     Continue Playback When Screen Is Locked: 'Tęsti atkūrimą, kai ekranas užrakintas'

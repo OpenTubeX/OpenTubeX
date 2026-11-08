@@ -3543,10 +3543,6 @@ export default defineComponent({
       ].some(className => target.classList.contains(className))
     }
 
-    const mobileSideSwipesEnabled = computed(() => process.env.IS_CAPACITOR && (
-      ['brightness', 'volume', 'speed'].includes(store.getters.getMobileLeftSwipeAction) ||
-      ['brightness', 'volume', 'speed'].includes(store.getters.getMobileRightSwipeAction)
-    ))
     const mobileAdjustments = createMobilePlayerAdjustments({
       getPlaybackRateOptions: () => ({ maximum: maxVideoPlaybackRate.value, step: videoPlaybackRateInterval.value }),
       async read(action) {
@@ -11197,7 +11193,6 @@ export default defineComponent({
       fullscreenDockResizing,
       fullscreenDockReordering,
       enableMobileFullscreenSwipe,
-      mobileSideSwipesEnabled,
       mobileFullscreenSwiping,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,

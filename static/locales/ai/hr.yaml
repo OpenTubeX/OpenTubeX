@@ -753,7 +753,7 @@ Settings:
       Disabled: Onemogućeno
       Brightness: Svjetlina
       Volume: Glasnoća
-      Hint: Povucite gore ili dolje uz rub videozapisa.
+      Hint: Na cijelom zaslonu povucite gore ili dolje uz rub videozapisa.
       Unavailable: Nije moguće prilagoditi kontrole reprodukcije.
     yt-dlp Streaming: "yt-dlp strujanje"
     Continue Playback When Screen Is Locked: 'Nastavi reprodukciju kada je zaslon zaključan'

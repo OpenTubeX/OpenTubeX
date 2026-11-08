@@ -437,7 +437,7 @@ Settings:
       Disabled: Wyłączone
       Brightness: Jasność
       Volume: Głośność
-      Hint: Przesuń w górę lub w dół z boku filmu.
+      Hint: W trybie pełnoekranowym przesuń w górę lub w dół z boku filmu.
       Unavailable: Nie udało się dostosować sterowania odtwarzaniem.
     yt-dlp Streaming: "Strumieniowanie yt-dlp"
     Continue Playback When Screen Is Locked: 'Kontynuuj odtwarzanie przy zablokowanym ekranie'

@@ -947,7 +947,7 @@ Settings:
       Disabled: Onemogočeno
       Brightness: Svetlost
       Volume: Glasnost
-      Hint: Podrsajte navzgor ali navzdol ob strani videoposnetka.
+      Hint: V celozaslonskem načinu podrsajte navzgor ali navzdol ob strani videoposnetka.
       Unavailable: Kontrolnikov predvajanja ni bilo mogoče prilagoditi.
     yt-dlp Streaming: "Pretakanje z yt-dlp"
     Continue Playback When Screen Is Locked: 'Nadaljuj predvajanje, ko je zaslon zaklenjen'

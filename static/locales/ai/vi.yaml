@@ -748,7 +748,7 @@ Settings:
       Disabled: Tắt
       Brightness: Độ sáng
       Volume: Âm lượng
-      Hint: Vuốt lên hoặc xuống ở một bên video.
+      Hint: Vuốt lên hoặc xuống ở một bên video khi xem toàn màn hình.
       Unavailable: Không thể điều chỉnh các điều khiển phát lại.
     yt-dlp Streaming: "Phát trực tuyến bằng yt-dlp"
     Continue Playback When Screen Is Locked: 'Tiếp tục phát khi màn hình bị khóa'

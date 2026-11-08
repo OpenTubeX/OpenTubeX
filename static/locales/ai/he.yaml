@@ -755,7 +755,7 @@ Settings:
       Disabled: מושבת
       Brightness: בהירות
       Volume: עוצמת קול
-      Hint: יש להחליק למעלה או למטה באחד מצדי הסרטון.
+      Hint: במסך מלא, יש להחליק למעלה או למטה באחד מצדי הסרטון.
       Unavailable: לא ניתן לכוונן את פקדי הניגון.
     yt-dlp Streaming: "הזרמת yt-dlp"
     Continue Playback When Screen Is Locked: 'המשך הפעלה כשהמסך נעול'

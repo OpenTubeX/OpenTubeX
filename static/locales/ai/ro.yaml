@@ -751,7 +751,7 @@ Settings:
       Disabled: Dezactivat
       Brightness: Luminozitate
       Volume: Volum
-      Hint: Glisează în sus sau în jos pe o parte a videoclipului.
+      Hint: Glisează în sus sau în jos pe o parte a videoclipului pe ecran complet.
       Unavailable: Nu s-au putut ajusta comenzile de redare.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuă redarea când ecranul este blocat'

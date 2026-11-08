@@ -717,7 +717,7 @@ Settings:
       Disabled: Desativado
       Brightness: Brilho
       Volume: Volume
-      Hint: Deslize para cima ou para baixo em um dos lados do vídeo.
+      Hint: Deslize para cima ou para baixo em um dos lados do vídeo em tela cheia.
       Unavailable: Não foi possível ajustar os controles de reprodução.
     yt-dlp Streaming: "Streaming do yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar a reprodução com a tela bloqueada'

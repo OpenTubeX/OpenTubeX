@@ -755,7 +755,7 @@ Settings:
       Disabled: معطّل
       Brightness: السطوع
       Volume: مستوى الصوت
-      Hint: اسحب لأعلى أو لأسفل على أحد جانبي الفيديو.
+      Hint: اسحب لأعلى أو لأسفل على أحد جانبي الفيديو في وضع ملء الشاشة.
       Unavailable: تعذّر ضبط عناصر التحكم في التشغيل.
     yt-dlp Streaming: "بث yt-dlp"
     Continue Playback When Screen Is Locked: 'متابعة التشغيل عند قفل الشاشة'

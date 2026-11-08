@@ -1185,7 +1185,7 @@ Settings:
       Disabled: Disabled
       Brightness: Brightness
       Volume: Volume
-      Hint: Swipe up or down on either side of the video.
+      Hint: Swipe up or down on either side of the video in fullscreen.
       Unavailable: Could not adjust playback controls.
     Player Settings: Player
     yt-dlp Streaming: yt-dlp Streaming

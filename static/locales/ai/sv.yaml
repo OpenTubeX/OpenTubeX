@@ -748,7 +748,7 @@ Settings:
       Disabled: Inaktiverat
       Brightness: Ljusstyrka
       Volume: Volym
-      Hint: Svep uppåt eller nedåt på ena sidan av videon.
+      Hint: Svep uppåt eller nedåt på ena sidan av videon i helskärm.
       Unavailable: Kunde inte justera uppspelningskontrollerna.
     yt-dlp Streaming: "yt-dlp-strömning"
     Continue Playback When Screen Is Locked: 'Fortsätt uppspelningen när skärmen är låst'

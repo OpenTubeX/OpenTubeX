@@ -496,8 +496,8 @@
 
 /* Downward drags still dock the player when fullscreen swipes are disabled.
    Leave upward gestures to page scrolling unless another player gesture owns them. */
-.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .mobileSideSwipesEnabled, .videoZoomTouchEnabled)),
-.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .mobileSideSwipesEnabled, .videoZoomTouchEnabled) .ft-quick-playback-rate-bar) {
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled)),
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled) .ft-quick-playback-rate-bar) {
   touch-action: pan-x pan-down;
 }
 

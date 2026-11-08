@@ -151,14 +151,17 @@ export function useMobileFullscreenGestures({
     const side = tapDirection < 0 ? 'left' : tapDirection > 0 ? 'right' : null
     const restoring = isScrollMiniPlayerActive()
     const shorts = isShortsPlayer()
-    const action = side && !restoring && !shorts ? getSwipeAction(side) : 'disabled'
+    const fullscreen = isFullscreenActive()
+    // Side swipes adjust only in fullscreen, so the inline player keeps its
+    // vertical swipes for entering fullscreen and docking across its width.
+    const action = side && fullscreen && !restoring && !shorts ? getSwipeAction(side) : 'disabled'
     mobileFullscreenGesture = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
       startTime: event.timeStamp,
       surfaceTap,
-      fullscreen: isFullscreenActive(),
+      fullscreen,
       restoring,
       returnTarget: restoring && event.target instanceof Element && event.target.closest('.mobileMiniBarReturn:enabled') !== null,
       shorts,
@@ -171,7 +174,7 @@ export function useMobileFullscreenGestures({
       height: Math.max(1, bounds?.height ?? 1),
       width: Math.max(1, bounds?.width ?? 1),
       seeking: false,
-      seekState: surfaceTap && isSeekSwipeEnabled() && isFullscreenActive() && !shorts && !restoring && !getControls()?.anySettingsMenusAreOpen()
+      seekState: surfaceTap && isSeekSwipeEnabled() && fullscreen && !shorts && !restoring && !getControls()?.anySettingsMenusAreOpen()
         ? getSeekState()
         : null,
     }
