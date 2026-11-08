@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import dbus from 'dbus-native'
 import { EventEmitter } from 'node:events'
-import { readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import test from 'node:test'
 import vm from 'node:vm'
 
@@ -87,6 +89,7 @@ test('extracts KWin runner handles and validates D-Bus window state', () => {
   const windowInfo = {
     caption: 'Subscriptions - OpenTubeX',
     height: 832,
+    desktopFile: 'opentubex',
     minimized: true,
     pid: 1234,
     uuid: '{01234567-89ab-cdef-0123-456789abcdef}',
@@ -99,15 +102,19 @@ test('extracts KWin runner handles and validates D-Bus window state', () => {
   assert.deepEqual(normalizeKwinWindowInfo(windowInfo), {
     uuid: '{01234567-89ab-cdef-0123-456789abcdef}',
     caption: 'Subscriptions - OpenTubeX',
+    desktopFile: 'opentubex',
     height: 832,
     minimized: true,
     pid: 1234,
     width: 1200,
   })
+  const { desktopFile, ...withoutDesktopFile } = windowInfo
+  assert.equal(normalizeKwinWindowInfo(withoutDesktopFile)?.desktopFile, '')
 })
 
 test('rejects malformed D-Bus window state and runner matches', () => {
   assert.equal(normalizeKwinWindowInfo({ minimized: true }), null)
+  assert.equal(normalizeKwinWindowInfo({ ...windowInfo(), desktopFile: 1 }), null)
   assert.deepEqual(extractKwinWindowHandles([['invalid-id'], null]), [])
 })
 
@@ -705,4 +712,61 @@ test('closing ends a pending reporter reload retry without waiting for it', { ti
   await new Promise(resolve => setImmediate(resolve))
   await backend.close()
   assert.equal(loads, 2)
+})
+
+test('inside Flatpak, the backend writes its script where KWin can read it and finds windows by app ID', async t => {
+  const runtime = await mkdtemp(path.join(tmpdir(), 'opentubex-runtime-'))
+  t.after(() => rm(runtime, { force: true, recursive: true }))
+  const shared = path.join(runtime, 'app', 'org.opentubex.OpenTubeX')
+  await mkdir(shared, { recursive: true })
+  const originalSessionBus = dbus.sessionBus
+  const bus = new EventEmitter()
+  bus.name = ':1.10'
+  bus.connection = new EventEmitter()
+  let reportInterface
+  const loads = []
+  const unloads = []
+  const windows = {
+    // KWin reports host PIDs, which the sandbox cannot see
+    '{00000000-0000-0000-0000-000000000001}': windowInfo({ uuid: '{00000000-0000-0000-0000-000000000001}', pid: 9001, desktopFile: 'org.opentubex.OpenTubeX' }),
+    '{00000000-0000-0000-0000-000000000002}': windowInfo({ uuid: '{00000000-0000-0000-0000-000000000002}', pid: 2, desktopFile: 'opentubex' }),
+  }
+  const scripting = {
+    unloadScript: async name => { unloads.push(name) },
+    start: async () => { reportInterface.ReportActiveWindow('window', false, 'org.opentubex.OpenTubeX') },
+  }
+  const service = {
+    getInterface: async objectPath => {
+      if (objectPath === '/KWin') return { getWindowInfo: async uuid => windows[uuid] }
+      if (objectPath === '/WindowsRunner') return { Match: async () => Object.keys(windows).map(uuid => [`0_${uuid}`]) }
+      return scripting
+    },
+  }
+  bus.getService = () => service
+  bus.invoke = async ({ body }) => {
+    loads.push(body)
+    return 1
+  }
+  bus.exportInterface = implementation => { reportInterface = implementation }
+  bus.unexportInterface = () => {}
+  bus.close = async () => {}
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+
+  const environment = { FLATPAK_ID: 'org.opentubex.OpenTubeX', XDG_RUNTIME_DIR: runtime }
+  const backend = await createKdeWaylandWindowStateBackend([], environment)
+  assert.notEqual(backend, null)
+  const [[file, pluginName]] = loads
+  assert.equal(path.dirname(path.dirname(file)), shared)
+  assert.equal(pluginName, 'opentubex-active-window-org.opentubex.OpenTubeX')
+  assert.deepEqual(unloads, [pluginName])
+  assert.match(await readFile(file, 'utf8'), /ReportActiveWindow/)
+
+  const owner = { processId: null, flatpakId: 'org.opentubex.OpenTubeX' }
+  assert.deepEqual((await backend.queryWindows(owner)).map(window => window.pid), [9001])
+  assert.deepEqual((await backend.queryWindows({ processId: 2, flatpakId: null })).map(window => window.pid), [2])
+
+  await backend.close()
+  assert.deepEqual(await readdir(shared), [])
+  assert.deepEqual(unloads, [pluginName, pluginName])
 })

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import path from 'node:path'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 
 import {
@@ -10,7 +10,9 @@ import {
   fitPictureInPictureBounds,
   normalizePictureInPictureBounds
 } from '../../src/main/pictureInPictureBounds.js'
-import { createKwinPictureInPictureScript } from '../../src/main/kwinPictureInPictureBounds.js'
+import dbus from 'dbus-native'
+import { EventEmitter } from 'node:events'
+import { createKwinPictureInPictureScript, startKwinPictureInPictureBounds } from '../../src/main/kwinPictureInPictureBounds.js'
 
 const display = { x: 0, y: 0, width: 1920, height: 1040 }
 
@@ -159,19 +161,26 @@ test('leaves a window alone without saved bounds or a match', async t => {
   assert.deepEqual(stored, [])
 })
 
-function runKwinScript(saved, windows) {
+function runKwinScript(saved, windows, owner = { processId: 42, flatpakId: null }) {
   const reports = []
   const added = []
   const workspace = {
     screens: [{}],
     currentDesktop: {},
     clientArea: () => ({ ...display }),
-    windowList: () => windows.filter(window => window.listed),
+    windowList: () => [...windows, ...added.windows].filter(window => window.listed),
     windowAdded: { connect: listener => added.push(listener) }
   }
-  const source = createKwinPictureInPictureScript({ processId: 42, destination: ':1.5', saved })
+  added.windows = []
+  const source = createKwinPictureInPictureScript({ owner, destination: ':1.5', saved })
   new Function('workspace', 'KWin', 'callDBus', source)(workspace, { MaximizeArea: 2 }, (...args) => reports.push(args))
-  return { reports, add: window => added.forEach(listener => listener(window)) }
+  return {
+    reports,
+    add: window => {
+      added.windows.push(window)
+      added.forEach(listener => listener(window))
+    }
+  }
 }
 
 function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalWindow = true, listed = false } = {}) {
@@ -239,4 +248,80 @@ test('the KWin script reports finished moves and reuses them in the session', ()
   const second = kwinWindow()
   add(second)
   assert.deepEqual(second.assignments.at(-1), { x: 100, y: 120, width: 480, height: 270 })
+})
+
+test('inside Flatpak, the KWin script finds the Picture-in-Picture window by its main window\'s host PID', () => {
+  // The sandbox hides the host PID, so the script cannot match process.pid
+  const owner = { processId: null, flatpakId: 'org.opentubex.OpenTubeX' }
+  const main = kwinWindow({ pid: 9001, desktopFileName: 'org.opentubex.OpenTubeX', listed: true })
+  const pip = kwinWindow({ pid: 9001 })
+  // Another app's window without an app ID, and one with the same PID as the
+  // sandbox sees itself
+  const other = kwinWindow({ pid: 7 })
+  const sandboxPid = kwinWindow({ pid: 2 })
+  const { add } = runKwinScript({ x: 40, y: 50, width: 640, height: 360 }, [main], owner)
+  for (const window of [other, sandboxPid, pip]) add(window)
+
+  for (const window of [main, other, sandboxPid]) assert.deepEqual(window.assignments, [])
+  assert.deepEqual(pip.assignments.at(-1), { x: 40, y: 50, width: 640, height: 360 })
+})
+
+/** A session bus whose KWin accepts or rejects the script. */
+function fakeKwinBus(t, { scriptId = 1 } = {}) {
+  const originalSessionBus = dbus.sessionBus
+  const calls = []
+  const bus = { name: ':1.20', connection: new EventEmitter() }
+  const scripting = {
+    unloadScript: async name => { calls.push(['unloadScript', name]) },
+    start: async () => { calls.push(['start']) }
+  }
+  bus.getService = () => ({ getInterface: async () => scripting })
+  bus.exportInterface = () => {}
+  bus.invoke = async ({ member, body }) => {
+    calls.push([member, ...body, await readFile(body[0], 'utf8')])
+    return scriptId
+  }
+  bus.close = async () => { calls.push(['close']) }
+  dbus.sessionBus = () => bus
+  t.after(() => { dbus.sessionBus = originalSessionBus })
+  return calls
+}
+
+test('inside Flatpak, the KWin script is written where the host can read it and removed on close', async t => {
+  const runtime = await mkdtemp(path.join(tmpdir(), 'opentubex-runtime-'))
+  t.after(() => rm(runtime, { force: true, recursive: true }))
+  const shared = path.join(runtime, 'app', 'org.opentubex.OpenTubeX')
+  await mkdir(shared, { recursive: true })
+  const calls = fakeKwinBus(t)
+  const store = { load: async () => null, save: () => {} }
+
+  const close = await startKwinPictureInPictureBounds({
+    store,
+    environment: { FLATPAK_ID: 'org.opentubex.OpenTubeX', XDG_RUNTIME_DIR: runtime }
+  })
+  assert.notEqual(close, null)
+  const [, file, pluginName, source] = calls.find(([member]) => member === 'loadScript')
+  assert.equal(path.dirname(path.dirname(file)), shared)
+  assert.equal(pluginName, 'opentubex-picture-in-picture-org.opentubex.OpenTubeX')
+  assert.match(source, /other\.desktopFileName === "org\.opentubex\.OpenTubeX"/)
+  assert.doesNotMatch(source, /window\.pid === \d/)
+  assert.deepEqual(calls[0], ['unloadScript', pluginName])
+
+  await close()
+  assert.deepEqual(await readdir(shared), [])
+  assert.deepEqual(calls.slice(-2), [['unloadScript', pluginName], ['close']])
+})
+
+test('outside Flatpak, the KWin script matches the process ID and is removed when KWin rejects it', async t => {
+  const calls = fakeKwinBus(t, { scriptId: -1 })
+  const store = { load: async () => null, save: () => {} }
+
+  assert.equal(await startKwinPictureInPictureBounds({ store, environment: {} }), null)
+  const [, file, pluginName, source] = calls.find(([member]) => member === 'loadScript')
+  assert.equal(path.dirname(path.dirname(file)), tmpdir())
+  assert.equal(pluginName, `opentubex-picture-in-picture-${process.pid}`)
+  assert.match(source, new RegExp(`window\\.pid === ${process.pid}`))
+  await assert.rejects(readFile(file), { code: 'ENOENT' })
+  await assert.rejects(readdir(path.dirname(file)), { code: 'ENOENT' })
+  assert.deepEqual(calls.at(-1), ['close'])
 })
