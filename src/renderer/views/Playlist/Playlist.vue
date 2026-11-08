@@ -294,7 +294,7 @@ import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD } from '../..
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
-import { useGridReorder } from '../../composables/useGridReorder'
+import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 
 provide(thumbnailSizeSettingKey, 'playlistThumbnailSize')
 const playlistPage = useTemplateRef('playlistPage')
@@ -1498,12 +1498,14 @@ let draggedOrderSave = null
 
 /**
  * @param {string} playlistItemId
- * @param {number} index
+ * @param {string[]} order
  */
-function moveDraggedVideo(playlistItemId, index) {
+function moveDraggedVideo(playlistItemId, order) {
   const items = shownPlaylistItems.value.slice()
   const from = items.findIndex(video => video.playlistItemId === playlistItemId)
-  if (from === -1 || from === index) return
+  // The grid leaves out videos hidden by preferences, which keep their places.
+  const index = droppedIndex(items.map(video => video.playlistItemId), playlistItemId, order)
+  if (from === -1 || index === -1 || from === index) return
   items.splice(index, 0, ...items.splice(from, 1))
   // Show the new order right away, while the saved one is updated.
   tempShownPlaylistItems.value = items

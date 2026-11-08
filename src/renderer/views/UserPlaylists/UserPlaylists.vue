@@ -273,7 +273,7 @@ import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS as SORT_BY_OPTIONS } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
-import { useGridReorder } from '../../composables/useGridReorder'
+import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 
 const { locale, t } = useI18n()
 const { tabId } = useTabContext()
@@ -365,7 +365,7 @@ const { draggedId: draggedPlaylistId, onPointerDown: startPlaylistDrag } = useGr
   itemSelector: '[data-playlist-drag-item]',
   handleSelector: '.grabBar',
   getId: item => item.dataset.videoId,
-  commit: (id, index) => movePlaylist(id, () => index)
+  commit: (id, order) => movePlaylist(id, () => droppedIndex(allPlaylists.value.map(playlistKey), id, order))
 })
 
 const showRepairPrompt = ref(false)

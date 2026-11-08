@@ -300,7 +300,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getPlaylistSkipAvailability, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
-import { useGridReorder } from '../../composables/useGridReorder'
+import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 
 const props = defineProps({
   playlistId: {
@@ -598,9 +598,9 @@ const { draggedId: draggedPlaylistItemId, onPointerDown: startVideoDrag } = useG
   itemSelector: '[data-playlist-drag-item]',
   handleSelector: '.videoIndexArea',
   getId: item => item.dataset.playlistItemId,
-  commit: (playlistItemId, index) => {
+  commit: (playlistItemId, order) => {
     const video = playlistItems.value.find(item => item.playlistItemId === playlistItemId)
-    if (video) moveVideo(video.videoId, playlistItemId, () => index)
+    if (video) moveVideo(video.videoId, playlistItemId, () => droppedIndex(playlistItems.value.map(item => item.playlistItemId), playlistItemId, order))
   }
 })
 

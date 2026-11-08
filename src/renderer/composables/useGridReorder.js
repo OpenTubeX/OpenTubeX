@@ -22,7 +22,7 @@ const SCROLL_SPEED = 900
  * @param {string} options.itemSelector Matches the list's reorderable children
  * @param {string} options.handleSelector
  * @param {(item: HTMLElement) => string} options.getId
- * @param {(id: string, index: number) => void} options.commit Must render the new order on the next tick
+ * @param {(id: string, order: string[]) => void} options.commit Receives the rendered items' new order and must render it on the next tick
  */
 export function useGridReorder({ itemSelector, handleSelector, getId, commit }) {
   /** @type {import('vue').Ref<string | null>} Set while a card is dragged or settles */
@@ -175,12 +175,18 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     applyOffsets([left - source.left, top - source.top])
   }
 
+  function proposedOrder() {
+    const { ids, sourceIndex, targetIndex } = session
+    const order = ids.filter((_, index) => index !== sourceIndex)
+    order.splice(targetIndex, 0, ids[sourceIndex])
+    return order
+  }
+
   /** @param {[number, number] | null} draggedOffset Null places the dragged card in its target slot */
   function applyOffsets(draggedOffset) {
-    const { items, ids, indexById, slots, sourceIndex, targetIndex } = session
+    const { items, ids, indexById, slots, sourceIndex } = session
     const draggedItemId = ids[sourceIndex]
-    const order = ids.filter(id => id !== draggedItemId)
-    order.splice(targetIndex, 0, draggedItemId)
+    const order = proposedOrder()
     const offsets = new Map()
     if (session.linear) {
       const rects = slots.map((slot, index) => ({ id: ids[index], start: slot.top, size: slot.height }))
@@ -249,7 +255,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     await Promise.allSettled(active.items.flatMap(element => element.getAnimations().map(animation => animation.finished)))
     if (session !== active) return
     if (active.targetIndex !== active.sourceIndex) {
-      commit(active.ids[active.sourceIndex], active.targetIndex)
+      commit(active.ids[active.sourceIndex], proposedOrder())
       await nextTick()
     }
     // The cards already show the new order, so clearing their offsets after
@@ -308,6 +314,22 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   onBeforeUnmount(finish)
 
   return { draggedId, onPointerDown }
+}
+
+/**
+ * Where a dropped item goes in the full list, which can hold items the list
+ * does not render: right after the item rendered before it, or right before
+ * the one rendered after it when it was dropped first.
+ * @param {string[]} ids The full list's order
+ * @param {string} id
+ * @param {string[]} order The rendered items' new order
+ * @returns {number} The item's new index, or -1 when its neighbors are missing
+ */
+export function droppedIndex(ids, id, order) {
+  const rest = ids.filter(other => other !== id)
+  const position = order.indexOf(id)
+  const index = position > 0 ? rest.indexOf(order[position - 1]) + 1 : rest.indexOf(order[1])
+  return position > 0 && index === 0 ? -1 : index
 }
 
 /**

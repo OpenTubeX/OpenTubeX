@@ -1164,6 +1164,55 @@ test.describe('switching between pinned playlists', () => {
   })
 })
 
+test.describe('custom playlist order with hidden videos', () => {
+  const video = (index, extra = {}) => ({
+    videoId: `hiddenorder${index}`,
+    title: `Hidden order video ${index}`,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    lengthSeconds: 120,
+    published: Date.now() - 86_400_000,
+    timeAdded: Date.now() - index,
+    playlistItemId: `hidden-order-item-${index}`,
+    type: 'video',
+    ...extra
+  })
+
+  test.use({
+    seed: {
+      settings: { userPlaylistSortOrder: 'custom', playlistViewType: 'grid', hideLiveStreams: true },
+      playlists: [{
+        _id: 'hidden-order-playlist',
+        playlistName: 'Hidden order playlist',
+        protected: false,
+        description: '',
+        videos: [video(1), video(2, { isUpcoming: true }), video(3), video(4)],
+        createdAt: Date.now() - 86_400_000,
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('drops a grid video next to the video shown before it', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Hidden order playlist').click()
+    const cards = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    // The upcoming video is hidden, so the grid shows videos 1, 3 and 4.
+    await expect(cards.locator('.h3Title')).toHaveText(['Hidden order video 1', 'Hidden order video 3', 'Hidden order video 4'])
+    const handle = await cards.first().locator('.grabBar').boundingBox()
+    const first = await cards.first().boundingBox()
+    const last = await cards.last().boundingBox()
+    const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(start.x + last.x - first.x, start.y + last.y - first.y, { steps: 8 })
+    await page.mouse.up()
+    await expect(cards.locator('.h3Title')).toHaveText(['Hidden order video 3', 'Hidden order video 4', 'Hidden order video 1'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('hidden-order-playlist').videos.map(video => video.videoId)))
+      .toEqual(['hiddenorder2', 'hiddenorder3', 'hiddenorder4', 'hiddenorder1'])
+  })
+})
+
 test.describe('custom playlist order', () => {
   test.use({
     seed: {
