@@ -1203,7 +1203,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
     await expect(warning).toBeVisible()
-    await expect(warning).toContainText('2 of 2 previously synced subscriptions')
+    await expect(warning).toContainText('2 of 2 previously synced items in Subscriptions')
 
     const profiles = readDatastore(app.userDataDir, 'profiles')
     expect(profiles).toContain(channelId)
