@@ -13,7 +13,7 @@ test('PO token generation preserves replacement sequences in YouTube JSON argume
   let received
   let closed = false
   const generate = vm.runInNewContext(`${source}
-    theSession = { async closeAllConnections() {}, async clearData() {} };
+    theSession = { async setProxy() {}, async closeAllConnections() {}, async clearData() {} };
     cachedScript = 'capture(FT_PARAMS)';
     attest
   `, {
@@ -47,6 +47,7 @@ const pending = 'p'.repeat(124)
  */
 function load({ attest, mint = () => attested, validForSecs = 600, clearData = async () => {} }) {
   const views = []
+  const proxies = []
   let cleanups = 0
   class WebContentsView {
     constructor() {
@@ -75,7 +76,7 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
     setPermissionCheckHandler() {},
     setPermissionRequestHandler() {},
     setUserAgent() {},
-    async setProxy() {},
+    async setProxy(config) { proxies.push(config) },
     webRequest: { onBeforeSendHeaders() {}, onHeadersReceived() {}, onBeforeRequest() {} },
     async closeAllConnections() {},
     async clearData() {
@@ -103,8 +104,8 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
     Date,
     console,
   })
-  const generate = () => generatePoToken('videoId', '{}', '{}', '{}', undefined)
-  return { generate, views, cleanups: () => cleanups }
+  const generate = proxyUrl => generatePoToken('videoId', '{}', '{}', '{}', proxyUrl)
+  return { generate, views, proxies, cleanups: () => cleanups }
 }
 
 test('later tokens reuse the attestation', async () => {
@@ -214,4 +215,12 @@ test('the BotGuard view never asks Electron whether it is focused', async () => 
   await generate()
   assert.equal(views[0].closed, false)
   assert.equal(views[0].webContents.isFocused(), false)
+})
+
+test('disabling the proxy restores the default route for the next attestation', async () => {
+  const { generate, views, proxies } = load({ attest: () => attested })
+  await generate('socks5://127.0.0.1:9050')
+  await generate(undefined)
+  assert.equal(views.length, 2, 'a proxy change replaces the attestation')
+  assert.deepEqual(JSON.parse(JSON.stringify(proxies)), [{ proxyRules: 'socks5://127.0.0.1:9050' }, { mode: 'system' }])
 })

@@ -2517,7 +2517,7 @@ function runApp() {
       return
     }
 
-    session.defaultSession.setProxy({})
+    session.defaultSession.setProxy({ mode: 'system' })
     proxyUrl = undefined
     session.defaultSession.closeAllConnections()
   })
