@@ -619,12 +619,11 @@ function runApp() {
 
   const userDataPath = app.getPath('userData')
   const pictureInPictureBoundsStore = createPictureInPictureBoundsStore(path.join(userDataPath, 'picture-in-picture-bounds.json'))
-  if (process.platform === 'linux' && isKdePlasmaDesktop(process.env)) {
-    const closeKwinPictureInPictureBounds = startKwinPictureInPictureBounds({ store: pictureInPictureBoundsStore })
-    app.once('will-quit', () => {
-      closeKwinPictureInPictureBounds.then(close => close?.()).catch(() => {})
-    })
-  } else {
+  const usesKwinPictureInPictureBounds = process.platform === 'linux' && isKdePlasmaDesktop(process.env)
+  const closeKwinPictureInPictureBounds = usesKwinPictureInPictureBounds
+    ? startKwinPictureInPictureBounds({ store: pictureInPictureBoundsStore })
+    : Promise.resolve(null)
+  if (!usesKwinPictureInPictureBounds) {
     try {
       const development = process.env.NODE_ENV === 'development'
       const native = process.platform === 'win32'
@@ -3906,6 +3905,8 @@ function runApp() {
 
       await Promise.allSettled([
         trayIconWrite,
+        // A script left in KWin would act on a later process with the same ID
+        closeKwinPictureInPictureBounds.then(close => close?.()),
         // Queue requests run in order, so a read waits for pending queue writes
         updateWatchQueue({}),
         baseHandlers.compactAllDatastores(),
