@@ -53,7 +53,7 @@ for (const filename of ['recover & calc.bat', 'recover%PATH%.cmd', 'recover!PATH
 for (const [extension, executable, expectedArgs] of [
   ['bat', 'cmd.exe', ['/d', '/v:off', '/s', '/c', '""C:\\My Scripts\\recover.bat""']],
   ['cmd', 'cmd.exe', ['/d', '/v:off', '/s', '/c', '""C:\\My Scripts\\recover.cmd""']],
-  ['ps1', 'WindowsPowerShell\\v1.0\\powershell.exe', ['-NoProfile', '-NonInteractive', '-File', 'C:\\My Scripts\\recover.ps1']],
+  ['ps1', 'WindowsPowerShell\\v1.0\\powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'C:\\My Scripts\\recover.ps1']],
   ['vbs', 'cscript.exe', ['//Nologo', 'C:\\My Scripts\\recover.vbs']],
   ['exe', null, []]
 ]) {
