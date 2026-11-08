@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Sincronizzazione completata
     Sync failed: "Sincronizzazione non riuscita: {error}"
     Data Loss Confirmation: Confermare la sincronizzazione distruttiva?
-    Data Loss Warning: Lo stato del server eliminerebbe {deleted} dei {previous} elementi di {collection} sincronizzati in precedenza. Potrebbe indicare una migrazione o un ripristino del server non riuscito. Continua solo se l'eliminazione è intenzionale e disponi di un backup.
+    Data Loss Warning: La sincronizzazione eliminerebbe {deleted} dei {previous} elementi sincronizzati in precedenza in «{collection}» su tutti i dispositivi. Se non li hai eliminati tu, ad esempio perché il server è stato reimpostato, conservali per ripristinarli ovunque.
+    Keep Deleted Items: Conserva elementi
     Confirm Data Loss: Elimina e continua
     Use Shared Tabs: 'Usa un unico gruppo di schede condiviso tra i dispositivi'
     Shared Tabs Warning: 'Le schede aperte su questo dispositivo diventano il gruppo condiviso. Quando si sincronizzano, gli altri dispositivi sostituiscono le proprie schede aperte con questo gruppo; le schede di dispositivi diversi non vengono unite.'

@@ -1637,7 +1637,8 @@ Settings:
     Sync completed: Sinchronizavimas baigtas
     Sync failed: "Sinchronizuoti nepavyko: {error}"
     Data Loss Confirmation: Patvirtinti duomenis naikinantį sinchronizavimą?
-    Data Loss Warning: Pagal serverio būseną būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų rinkinio „{collection}“ elementų. Tai gali reikšti nepavykusį serverio perkėlimą arba atkūrimą. Tęskite tik jei šiuos duomenis ketinate ištrinti ir turite atsarginę kopiją.
+    Data Loss Warning: Sinchronizuojant visuose įrenginiuose būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų elementų rinkinyje „{collection}“. Jei jų neištrynėte patys, pavyzdžiui, nes serveris buvo atkurtas, palikite juos, kad jie būtų atkurti visur.
+    Keep Deleted Items: Palikti elementus
     Confirm Data Loss: Ištrinti ir tęsti
     Use Shared Tabs: 'Naudoti vieną bendrą kortelių rinkinį visuose įrenginiuose'
     Shared Tabs Warning: 'Šiame įrenginyje atvertos kortelės taps bendru rinkiniu. Sinchronizuojant kiti įrenginiai pakeis savo atvertas korteles šiuo rinkiniu; skirtingų įrenginių kortelės nesujungiamos.'

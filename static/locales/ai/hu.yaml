@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Szinkronizálás befejezve
     Sync failed: 'A szinkronizálás sikertelen: {error}'
     Data Loss Confirmation: Jóváhagyja az adatvesztéssel járó szinkronizálást?
-    Data Loss Warning: A kiszolgáló állapota {deleted} elemet törölne a korábban szinkronizált {previous} {collection} elemből. Ez sikertelen kiszolgáló-migrációra vagy alaphelyzetbe állításra utalhat. Csak akkor folytassa, ha a törlés szándékos, és rendelkezik biztonsági másolattal.
+    Data Loss Warning: A szinkronizálás minden eszközön törölne {deleted} elemet a(z) „{collection}” {previous} korábban szinkronizált eleme közül. Ha nem Ön törölte őket, például mert a kiszolgálót alaphelyzetbe állították, tartsa meg őket, hogy mindenhol visszaálljanak.
+    Keep Deleted Items: Elemek megtartása
     Confirm Data Loss: Törlés és folytatás
     Use Shared Tabs: 'Egy közös lapkészlet használata minden eszközön'
     Shared Tabs Warning: 'Az ezen az eszközön nyitott lapok alkotják majd a megosztott készletet. A többi eszköz szinkronizáláskor erre a készletre cseréli a nyitott lapjait; a különböző eszközök lapjai nem egyesülnek.'

@@ -1487,7 +1487,8 @@ Settings:
     Sync completed: Sincronización completada
     Sync failed: 'Error de sincronización: {error}'
     Data Loss Confirmation: ¿Confirmar sincronización destructiva?
-    Data Loss Warning: El estado del servidor eliminaría {deleted} de {previous} elementos de {collection} sincronizados anteriormente. Esto puede indicar que una migración o un restablecimiento del servidor ha fallado. Continuá solo si querés eliminar esos datos y tenés una copia de seguridad.
+    Data Loss Warning: La sincronización eliminaría {deleted} de {previous} elementos sincronizados anteriormente en “{collection}” en todos los dispositivos. Si no los eliminaste vos, por ejemplo porque se restableció el servidor, conservalos para restaurarlos en todas partes.
+    Keep Deleted Items: Conservar elementos
     Confirm Data Loss: Eliminar y continuar
     Use Shared Tabs: 'Usar un único conjunto de pestañas compartido entre dispositivos'
     Shared Tabs Warning: 'Las pestañas abiertas en este dispositivo pasan a ser el conjunto compartido. Cuando se sincronizan, los demás dispositivos reemplazan sus pestañas abiertas por este conjunto; las pestañas de distintos dispositivos no se combinan.'

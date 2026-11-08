@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Synkroniseringen er fullført
     Sync failed: "Synkronisering mislyktes: {error}"
     Data Loss Confirmation: Vil du bekrefte synkronisering som sletter data?
-    Data Loss Warning: Tilstanden på serveren vil slette {deleted} av {previous} tidligere synkroniserte elementer i {collection}. Dette kan tyde på en mislykket servermigrering eller tilbakestilling. Fortsett bare hvis slettingen er tilsiktet og du har en sikkerhetskopi.
+    Data Loss Warning: Synkroniseringen vil slette {deleted} av {previous} tidligere synkroniserte elementer i «{collection}» på alle enheter. Hvis du ikke slettet dem selv, for eksempel fordi serveren ble tilbakestilt, beholder du dem for å gjenopprette dem overalt.
+    Keep Deleted Items: Behold elementer
     Confirm Data Loss: Slett og fortsett
     Use Shared Tabs: 'Bruk ett delt fanesett på tvers av enheter'
     Shared Tabs Warning: 'De åpne fanene på denne enheten blir det delte fanesettet. Andre enheter erstatter sine åpne faner med dette settet når de synkroniserer; faner fra ulike enheter slås ikke sammen.'

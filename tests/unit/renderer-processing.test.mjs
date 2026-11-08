@@ -323,7 +323,7 @@ test('a stale data-loss error is retried, while continuous history edits stop af
   const context = syncContext(async (operation, input) => {
     if (++attempts === 1) {
       history.historyRevision++
-      throw new SyncServerDataLossError('history', 1, 1, [])
+      throw new SyncServerDataLossError({ collection: 'history', deleted: 1, previous: 1, items: [] })
     }
     return executeBackgroundJob(operation, input)
   })

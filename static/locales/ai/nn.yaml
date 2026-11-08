@@ -1543,7 +1543,8 @@ Settings:
     Sync completed: Synkroniseringa er fullført
     Sync failed: "Synkronisering mislukkast: {error}"
     Data Loss Confirmation: Vil du stadfesta synkronisering med sletting?
-    Data Loss Warning: Tilstanden på tenaren vil sletta {deleted} av {previous} tidlegare synkroniserte element i {collection}. Dette kan tyda på at ei tenarflytting eller nullstilling mislykkast. Hald berre fram dersom slettinga er tilsikta og du har ein tryggleikskopi.
+    Data Loss Warning: Synkroniseringa vil sletta {deleted} av {previous} tidlegare synkroniserte element i «{collection}» på alle einingar. Dersom du ikkje sletta dei sjølv, til dømes fordi tenaren vart nullstilt, behald dei for å gjenoppretta dei overalt.
+    Keep Deleted Items: Behald element
     Confirm Data Loss: Slett og hald fram
     Use Shared Tabs: 'Bruk eitt delt fanesett på tvers av einingar'
     Shared Tabs Warning: 'Dei opne fanene på denne eininga blir det delte fanesettet. Andre einingar erstattar dei opne fanene sine med dette settet når dei synkroniserer; faner frå ulike einingar blir ikkje slått saman.'

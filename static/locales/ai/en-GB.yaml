@@ -1364,7 +1364,8 @@ Settings:
     Sync completed: Sync completed
     Sync failed: 'Sync failed: {error}'
     Data Loss Confirmation: Confirm destructive sync?
-    Data Loss Warning: The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.
+    Data Loss Warning: Sync would delete {deleted} of {previous} previously synced items in {collection} on all devices. If you did not delete them, for example because the server was reset, keep them to restore them everywhere.
+    Keep Deleted Items: Keep items
     Confirm Data Loss: Delete and continue
     Use Shared Tabs: 'Use one shared tab set across devices'
     Shared Tabs Warning: 'The open tabs on this device become the shared set. Other devices replace their open tabs with this set when they sync; tabs from different devices are not combined.'

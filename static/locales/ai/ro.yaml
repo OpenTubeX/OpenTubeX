@@ -1395,7 +1395,8 @@ Settings:
     Sync completed: Sincronizarea s-a încheiat
     Sync failed: "Sincronizarea a eșuat: {error}"
     Data Loss Confirmation: Confirmați sincronizarea distructivă?
-    Data Loss Warning: Starea serverului ar șterge {deleted} din cele {previous} elemente {collection} sincronizate anterior. Acest lucru poate indica o migrare sau resetare nereușită a serverului. Continuați numai dacă ștergerea este intenționată și aveți o copie de rezervă.
+    Data Loss Warning: Sincronizarea ar șterge {deleted} din cele {previous} elemente sincronizate anterior în „{collection}” pe toate dispozitivele. Dacă nu le-ați șters dumneavoastră, de exemplu pentru că serverul a fost resetat, păstrați-le pentru a le restaura peste tot.
+    Keep Deleted Items: Păstrează elementele
     Confirm Data Loss: Șterge și continuă
     Use Shared Tabs: 'Folosește un singur set de file partajat între dispozitive'
     Shared Tabs Warning: 'Filele deschise pe acest dispozitiv devin setul partajat. Celelalte dispozitive își înlocuiesc filele deschise cu acest set când se sincronizează; filele de pe dispozitive diferite nu sunt combinate.'

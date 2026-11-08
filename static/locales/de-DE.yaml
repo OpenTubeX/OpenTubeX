@@ -1996,9 +1996,10 @@ Settings:
     Sync failed: 'Synchronisierung fehlgeschlagen: {error}'
     Data Loss Confirmation: Destruktive Synchronisierung bestätigen?
     Data Loss Warning: >-
-      Der Serverstatus würde {deleted} von {previous} zuvor synchronisierten Elementen der Kategorie „{collection}“
-      löschen. Dies kann auf eine fehlgeschlagene Servermigration oder Zurücksetzung hindeuten. Fahre nur fort, wenn diese
-      Löschung beabsichtigt ist und du eine Sicherung hast.
+      Die Synchronisierung würde {deleted} von {previous} zuvor synchronisierten Elementen in „{collection}“ auf allen
+      Geräten löschen. Wenn du sie nicht gelöscht hast, zum Beispiel weil der Server zurückgesetzt wurde, behalte sie, um
+      sie überall wiederherzustellen.
+    Keep Deleted Items: Elemente behalten
     Confirm Data Loss: Löschen und fortfahren
     Server Update Required: "Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen."
   Search Settings: Einstellungen durchsuchen

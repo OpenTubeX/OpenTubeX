@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: 同期が完了しました
     Sync failed: "同期に失敗しました: {error}"
     Data Loss Confirmation: データを削除する同期を確認しますか？
-    Data Loss Warning: サーバーの状態に合わせると、以前に同期した{collection}の{previous}件中{deleted}件が削除されます。サーバーの移行失敗やリセットが原因の可能性があります。意図した削除であり、バックアップがある場合のみ続行してください。
+    Data Loss Warning: 同期すると、以前に同期した「{collection}」の{previous}件中{deleted}件がすべてのデバイスで削除されます。サーバーがリセットされたなど、自分で削除していない場合は、項目を保持してすべてのデバイスに復元してください。
+    Keep Deleted Items: 項目を保持
     Confirm Data Loss: 削除して続行
     Use Shared Tabs: 'すべてのデバイスで1つのタブセットを共有する'
     Shared Tabs Warning: 'このデバイスで開いているタブが共有タブセットになります。他のデバイスは同期時に開いているタブをこのセットで置き換えます。異なるデバイスのタブは統合されません。'

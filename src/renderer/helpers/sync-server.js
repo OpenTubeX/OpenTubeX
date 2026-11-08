@@ -23,6 +23,7 @@ import {
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
+  syncServerResponseErrorMessage,
 } from './sync-server-errors'
 import { getSyncableSettingKeys, isSettingSyncEnabled } from '../store/modules/settings'
 import { deepCopy } from './utils'
@@ -160,7 +161,7 @@ export class SyncServerClient {
       const text = await response.text()
 
       if (!response.ok) {
-        throw new SyncServerError(text || `Sync server returned ${response.status}`, response.status)
+        throw new SyncServerError(syncServerResponseErrorMessage(response.status, text), response.status)
       }
 
       if (!text) return null
@@ -832,7 +833,7 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
     ...options,
-    collection: 'saved playlists',
+    collection: 'playlistBookmarks',
     getItemName: id => localById.get(id)?.playlist.title || remoteById.get(id)?.playlist.title,
   })
 
@@ -905,6 +906,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
+    // A playlist missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredPlaylist = !local || !remote || options.deletions?.playlists?.kept?.includes(id)
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
     const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
     if (metadata.custom_thumbnail) {
@@ -952,7 +956,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       previous[id]?.videos,
       {
         ...options,
-        collection: `videos in playlist ${metadata.title}`,
+        restored: restoredPlaylist,
+        collection: 'playlistVideos',
+        scope: id,
+        scopeName: metadata.title,
         getItemName: videoId => localVideosById.get(videoId)?.title || remoteVideosById.get(videoId)?.title,
       }
     )
@@ -1215,6 +1222,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
   for (const id of mergedIds) {
     const local = localById.get(id)
     let remote = remoteById.get(id)
+    // A profile missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredProfile = !local || !remote || options.deletions?.profiles?.kept?.includes(id)
     const oldMetadata = previous[id]?.metadata
     const localMetadata = local ? profileMetadata(local, oldMetadata) : null
     const remoteMetadata = remote
@@ -1248,7 +1258,10 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
       previous[id]?.channels,
       {
         ...options,
-        collection: `channels in profile ${metadata.title}`,
+        restored: restoredProfile,
+        collection: 'profileChannels',
+        scope: id,
+        scopeName: metadata.title,
         getItemName: channelId => subscriptionsById.get(channelId)?.name ||
           local?.subscriptions.find(channel => channel.id === channelId)?.name ||
           remote.channels.find(channel => channel.id === channelId)?.name,

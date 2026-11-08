@@ -1349,7 +1349,8 @@ Settings:
     Sync completed: Sincronização concluída
     Sync failed: "Falha na sincronização: {error}"
     Data Loss Confirmation: Confirmar sincronização destrutiva?
-    Data Loss Warning: O estado do servidor excluiria {deleted} dos {previous} itens de {collection} sincronizados anteriormente. Isto pode indicar uma falha na migração ou reposição do servidor. Continue apenas se esta excluição for intencional e tiver uma backup.
+    Data Loss Warning: A sincronização excluiria {deleted} dos {previous} itens sincronizados anteriormente em “{collection}” em todos os dispositivos. Se você não os excluiu, por exemplo porque o servidor foi redefinido, mantenha-os para restaurá-los em todos os lugares.
+    Keep Deleted Items: Manter itens
     Confirm Data Loss: Excluir e continuar
     Use Shared Tabs: 'Usar um único conjunto de abas compartilhado entre dispositivos'
     Shared Tabs Warning: 'As abas abertas neste dispositivo se tornam o conjunto compartilhado. Ao sincronizar, os outros dispositivos substituem suas abas abertas por esse conjunto; as abas de dispositivos diferentes não são combinadas.'

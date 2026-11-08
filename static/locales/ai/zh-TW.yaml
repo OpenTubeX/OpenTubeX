@@ -1381,7 +1381,8 @@ Settings:
     Sync completed: 同步完成
     Sync failed: '同步失敗：{error}'
     Data Loss Confirmation: 要確認執行會刪除資料的同步嗎？
-    Data Loss Warning: 伺服器目前的狀態會刪除先前同步的 {previous} 個 {collection} 項目中的 {deleted} 個。這可能表示伺服器移轉或重設失敗。只有在您確定要刪除且已有備份時才可繼續。
+    Data Loss Warning: 同步將在所有裝置上刪除「{collection}」中先前同步的 {previous} 個項目中的 {deleted} 個。如果這些項目不是您刪除的（例如伺服器已被重設），請保留它們以在所有裝置上還原。
+    Keep Deleted Items: 保留項目
     Confirm Data Loss: 刪除並繼續
     Use Shared Tabs: '在各裝置上使用同一組共用分頁'
     Shared Tabs Warning: '此裝置上開啟的分頁會成為共用分頁組。其他裝置同步時會以這組分頁取代其目前開啟的分頁；不同裝置的分頁不會合併。'

@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: 同步完成
     Sync failed: '同步失败：{error}'
     Data Loss Confirmation: 要执行会删除数据的同步吗？
-    Data Loss Warning: 服务器状态会删除之前同步的 {previous} 个 {collection} 项目中的 {deleted} 个。这可能表示服务器迁移失败或服务器已重置。仅当您有备份且确实要删除这些项目时才继续。
+    Data Loss Warning: 同步将在所有设备上删除“{collection}”中之前同步的 {previous} 个项目中的 {deleted} 个。如果这些项目不是您删除的（例如服务器已被重置），请保留它们以在所有设备上恢复。
+    Keep Deleted Items: 保留项目
     Confirm Data Loss: 删除并继续
     Use Shared Tabs: '在各设备上使用同一组共享标签页'
     Shared Tabs Warning: '此设备上打开的标签页将成为共享标签页组。其他设备同步时会用这组标签页替换其当前打开的标签页；不同设备的标签页不会合并。'

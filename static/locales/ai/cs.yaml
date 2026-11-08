@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Synchronizace dokončena
     Sync failed: 'Synchronizace se nezdařila: {error}'
     Data Loss Confirmation: Potvrdit synchronizaci s mazáním dat?
-    Data Loss Warning: Stav serveru by smazal {deleted} z {previous} dříve synchronizovaných položek kolekce {collection}. Může to znamenat, že se nezdařil převod nebo obnovení serveru. Pokračujte jen v případě, že je smazání záměrné a máte zálohu.
+    Data Loss Warning: Synchronizace by na všech zařízeních smazala {deleted} z {previous} dříve synchronizovaných položek v „{collection}“. Pokud jste je nesmazali vy, například protože byl server obnoven do výchozího stavu, ponechte si je, aby se všude obnovily.
+    Keep Deleted Items: Ponechat položky
     Confirm Data Loss: Smazat a pokračovat
     Use Shared Tabs: 'Používat jednu sdílenou sadu karet na všech zařízeních'
     Shared Tabs Warning: 'Otevřené karty v tomto zařízení se stanou sdílenou sadou. Ostatní zařízení při synchronizaci nahradí své otevřené karty touto sadou; karty z různých zařízení se nesloučí.'

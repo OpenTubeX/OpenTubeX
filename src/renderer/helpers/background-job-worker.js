@@ -29,10 +29,7 @@ self.addEventListener('message', async ({ data }) => {
       error: {
         name: error.name,
         message: error.message,
-        collection: error.collection,
-        deleted: error.deleted,
-        previous: error.previous,
-        items: error.items,
+        details: error.name === 'SyncServerDataLossError' ? error.details : undefined,
       }
     })
   }

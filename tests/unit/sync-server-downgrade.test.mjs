@@ -1,6 +1,7 @@
 import { toRaw } from 'vue'
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline } from '../../src/renderer/helpers/sync-history-merge.js'
 import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
+import { createSyncDeletionDecisions, syncDeletionKey } from '../../src/renderer/helpers/sync-deletions.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
@@ -142,6 +143,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     MAIN_PROFILE_ID: 'main',
     // Without recorded mutations, every sync merges the whole history.
     historyChanges: createHistoryChangeTracker(),
+    syncDeletions: createSyncDeletionDecisions(),
+    syncDeletionKey,
     deepCopy: structuredClone,
     createSyncServerRequestHeaders,
     CUSTOM_THEMES_SYNC_KEY,
@@ -867,6 +870,56 @@ test('manual sync can present its confirmation without a duplicate notification'
   assert.equal(f.notifications.length, 0)
 })
 
+
+for (const choice of ['keep', 'delete']) {
+  test(`reviewing blocked deletions with ${choice} applies the choice once and resumes automatic sync`, async () => {
+    const f = fixture({
+      syncServerPrivacyMode: 'legacy',
+      syncServerPrivacyKey: '',
+      syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
+    })
+    await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
+    // Sync settings reviews the deletions of a background sync when it opens.
+    assert.deepEqual(structuredClone(f.context.state.syncServerPendingDeletion), {
+      collection: 'subscriptions',
+      scope: null,
+      scopeName: null,
+      deleted: 1,
+      previous: 1,
+      items: [{ id: 'private-channel', name: 'Private subscription' }],
+    })
+
+    await f.actions.resolveSyncServerDeletion(f.context, choice)
+    assert.equal(f.context.state.syncServerPendingDeletion, null)
+    assert.equal(f.settings.syncServerAutoSync, true)
+    const subscriptions = Array.from(f.context.rootState.profiles.profileList[0].subscriptions, channel => channel.id)
+    assert.deepEqual(subscriptions, choice === 'keep' ? ['private-channel'] : [])
+    assert.equal(f.requests.some(({ method, url }) => method === 'PUT' && url.includes('/subscriptions/')), choice === 'keep')
+    assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).subscriptions, choice === 'keep' ? ['private-channel'] : [])
+
+    // The choice covered only that sync. The mock server lost the channel
+    // again, which needs a new review.
+    if (choice === 'keep') {
+      await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
+    } else {
+      await f.actions.syncWithSyncServer(f.context)
+    }
+  })
+}
+
+test('dismissing the deletion review keeps sync paused', async () => {
+  const f = fixture({
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
+    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
+  await f.actions.dismissSyncServerDeletion(f.context)
+  assert.equal(f.context.state.syncServerPendingDeletion, null)
+  assert.equal(f.settings.syncServerAutoSync, false)
+  assert.equal(await f.actions.resolveSyncServerDeletion(f.context, 'delete'), null)
+  assert.equal(f.context.rootState.profiles.profileList[0].subscriptions.length, 1)
+})
 
 for (const previouslyEnabled of [true, false]) {
   test(`successful confirmation restores automatic sync only when previously enabled: ${previouslyEnabled}`, async () => {

@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Eşitleme tamamlandı
     Sync failed: 'Eşitleme başarısız: {error}'
     Data Loss Confirmation: Veri silen eşitleme onaylansın mı?
-    Data Loss Warning: Sunucunun durumu, daha önce eşitlenen {previous} {collection} öğesinden {deleted} tanesini silecek. Bu durum, başarısız bir sunucu geçişine veya sıfırlamasına işaret edebilir. Yalnızca silme işlemi bilerek yapılıyorsa ve yedeğiniz varsa devam edin.
+    Data Loss Warning: Eşitleme, “{collection}” içinde daha önce eşitlenen {previous} öğeden {deleted} tanesini tüm cihazlarda silecek. Bunları siz silmediyseniz, örneğin sunucu sıfırlandığı için, her yerde geri yüklemek üzere saklayın.
+    Keep Deleted Items: Öğeleri sakla
     Confirm Data Loss: Sil ve devam et
     Use Shared Tabs: 'Cihazlar arasında tek bir ortak sekme grubu kullan'
     Shared Tabs Warning: 'Bu cihazda açık olan sekmeler paylaşılan küme olur. Diğer cihazlar eşitlendiklerinde açık sekmelerini bu kümeyle değiştirir; farklı cihazların sekmeleri birleştirilmez.'

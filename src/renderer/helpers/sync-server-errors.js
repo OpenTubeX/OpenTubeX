@@ -35,16 +35,48 @@ export class SyncServerCancelledError extends Error {
 export class SyncServerTabRevocationPendingError extends Error {}
 
 export class SyncServerDataLossError extends Error {
-  constructor(collection, deleted, previous, items) {
+  /**
+   * @param {object} details
+   * @param {string} details.collection
+   * @param {string | null} [details.scope] The playlist or profile ID of a nested list
+   * @param {string | null} [details.scopeName]
+   * @param {number} details.deleted
+   * @param {number} details.previous
+   * @param {{ id: string, name: string }[]} details.items
+   */
+  constructor({ collection, scope = null, scopeName = null, deleted, previous, items }) {
     super(
-      `Sync stopped because it would delete ${deleted} of ${previous} previously synced ${collection} items`
+      `Sync stopped because it would delete ${deleted} of ${previous} previously synced ${scopeName ?? collection} items`
     )
     this.name = 'SyncServerDataLossError'
     this.collection = collection
+    this.scope = scope
+    this.scopeName = scopeName
     this.deleted = deleted
     this.previous = previous
     this.items = items
   }
+
+  /** The details the review prompt needs, without the error itself. */
+  get details() {
+    const { collection, scope, scopeName, deleted, previous, items } = this
+    return { collection, scope, scopeName, deleted, previous, items }
+  }
+}
+
+/**
+ * The message for a failed sync server response. The server answers with
+ * short plain text, but proxies in front of it, such as Cloudflare, answer
+ * gateway errors with whole HTML or JSON pages.
+ * @param {number} status
+ * @param {string} body
+ */
+export function syncServerResponseErrorMessage(status, body) {
+  const text = body.trim()
+  if (text && text.length <= 300 && !/^[<{[]/.test(text)) return text
+  return status >= 500
+    ? `Sync server is temporarily unavailable (HTTP ${status}). Sync will try again later.`
+    : `Sync server returned HTTP ${status}`
 }
 
 export const SYNC_SERVER_SESSION_EXPIRED_MESSAGE =

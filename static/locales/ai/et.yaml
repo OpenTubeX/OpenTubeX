@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Sünkroonimine on lõpetatud
     Sync failed: 'Sünkroonimine nurjus: {error}'
     Data Loss Confirmation: Kas kinnitada andmeid kustutav sünkroonimine?
-    Data Loss Warning: Serveri olek kustutaks varem sünkroonitud kogu {collection} üksustest {deleted}/{previous}. See võib viidata serveri nurjunud migreerimisele või lähtestamisele. Jätkake ainult siis, kui kustutamine on tahtlik ja teil on varukoopia.
+    Data Loss Warning: Sünkroonimine kustutaks kõigis seadmetes kogust „{collection}“ {deleted} üksust {previous} varem sünkroonitud üksusest. Kui te ei kustutanud neid ise, näiteks seetõttu, et server lähtestati, säilitage need, et need kõikjal taastada.
+    Keep Deleted Items: Säilita üksused
     Confirm Data Loss: Kustuta ja jätka
     Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
     Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'

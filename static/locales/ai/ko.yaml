@@ -1624,7 +1624,8 @@ Settings:
     Sync completed: 동기화를 완료했습니다
     Sync failed: "동기화 실패: {error}"
     Data Loss Confirmation: 데이터가 삭제되는 동기화를 확인하시겠습니까?
-    Data Loss Warning: 서버 상태에 따라 이전에 동기화된 {collection} 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버 이전이나 초기화에 실패한 경우일 수 있습니다. 의도한 삭제이며 백업이 있는 경우에만 계속하세요.
+    Data Loss Warning: 동기화하면 모든 기기에서 이전에 동기화된 ‘{collection}’ 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버가 초기화된 경우처럼 직접 삭제하지 않았다면 항목을 유지하여 모든 곳에 복원하세요.
+    Keep Deleted Items: 항목 유지
     Confirm Data Loss: 삭제하고 계속
     Use Shared Tabs: '기기 간에 하나의 탭 모음 공유'
     Shared Tabs Warning: '이 기기에 열려 있는 탭이 공유 탭 모음이 됩니다. 다른 기기는 동기화할 때 열려 있는 탭을 이 모음으로 대체하며, 서로 다른 기기의 탭은 합쳐지지 않습니다.'

@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: "Echu eo ar goubredañ"
     Sync failed: "C'hwitet eo ar goubredañ: {error}"
     Data Loss Confirmation: "Kadarnaat ar goubredañ distrujus?"
-    Data Loss Warning: "Stad ar servijer a zilamfe {deleted} diwar {previous} elfenn {collection} bet goubredet a-raok. Gallout a ra talvezout eo c'hwitet un treuzkas pe un adderaouekaat ar servijer. Kendalc'hit hepken ma fell deoc'h dilemel anezho hag ez eus un eiladenn-gwarediñ ganeoc'h."
+    Data Loss Warning: "Ar goubredañ a zilamfe {deleted} diwar {previous} elfenn bet goubredet a-raok e «{collection}» war an holl drevnadoù. Ma n'ho peus ket dilamet anezho, da skouer peogwir eo bet adderaouekaet ar servijer, mirit anezho evit o adsevel e pep lec'h."
+    Keep Deleted Items: "Mirout an elfennoù"
     Confirm Data Loss: "Dilemel ha kenderc'hel"
     Use Shared Tabs: 'Arverañ an hevelep strollad ivinelloù war an holl drevnadoù'
     Shared Tabs Warning: 'An ivinelloù digor war an trevnad-mañ a zeu da vezañ an hollad rannet. Pa vez sinkronet an trevnadoù all, e vez erlec’hiet o ivinelloù digor gant an hollad-se; ne vez ket kendeuzet ivinelloù an trevnadoù disheñvel.'
