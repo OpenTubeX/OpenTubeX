@@ -758,7 +758,7 @@ test('keeps background comment loading local to the loaded watch page', async ({
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
     const store = window.$store
-    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+    store.commit('setAutoLoadComments', false)
   })
   await openMockedVideo(page)
 
@@ -785,7 +785,7 @@ test('keeps background comment loading local to the loaded watch page', async ({
     await expect(watchContent).toHaveAttribute('aria-hidden', 'true')
     await page.evaluate(() => {
       const store = window.$store
-      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+      store.commit('setAutoLoadComments', true)
     })
     await expect.poll(() => commentRequestStarted).toBe(true)
     await expect(watchContent.locator('.commentsArea .commentLoader')).toHaveCount(1)

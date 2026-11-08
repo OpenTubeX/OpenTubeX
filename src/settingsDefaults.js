@@ -490,6 +490,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     subscribedChannelsSortBy: 'name_ascending',
     subscribedChannelsCustomOrder: [],
     generalAutoLoadMorePaginatedItemsEnabled: true,
+    autoLoadComments: true,
     enablePullToRefresh: true,
     useTrayIcon: true,
     trayIconPreset: 'default',

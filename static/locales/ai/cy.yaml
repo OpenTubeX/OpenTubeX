@@ -500,6 +500,11 @@ Settings:
       System and In-App: System ac yn yr ap
       System Only: System yn unig
       Off: I ffwrdd
+    Auto Load Next Page:
+      Lists Tooltip: Llwytho tudalennau ychwanegol o ffrydiau, canlyniadau chwilio a rhestrau eraill yn awtomatig.
+    Auto Load Comments:
+      Label: Llwytho Sylwadau yn Awtomatig
+      Tooltip: Llwytho sylwadau a thudalennau sylwadau ychwanegol yn awtomatig pan fyddwch yn sgrolio atynt.
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.

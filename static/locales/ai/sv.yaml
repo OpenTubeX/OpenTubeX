@@ -499,6 +499,11 @@ Settings:
       System and In-App: System och i appen
       System Only: Endast system
       Off: Av
+    Auto Load Next Page:
+      Lists Tooltip: Ladda ytterligare sidor av flöden, sökresultat och andra listor automatiskt.
+    Auto Load Comments:
+      Label: Ladda kommentarer automatiskt
+      Tooltip: Ladda kommentarer och ytterligare kommentarsidor automatiskt när du rullar till dem.
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.

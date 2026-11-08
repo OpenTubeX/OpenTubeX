@@ -51,6 +51,27 @@ test('prefers an explicit live chat replay visibility choice', () => {
   })
 })
 
+test('copies the former Auto Load Next Page choice to comments', () => {
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: false }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: false,
+  })
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: true }), {
+    generalAutoLoadMorePaginatedItemsEnabled: true,
+    autoLoadComments: true,
+  })
+})
+
+test('prefers an explicit Auto Load Comments choice', () => {
+  assert.deepEqual(migrateLegacySettings({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  })
+})
+
 test('migrates the legacy vertical tab bar preference to the left layout', () => {
   assert.deepEqual(migrateLegacySettings({ useVerticalTabBar: true }), {
     tabBarPosition: 'left',

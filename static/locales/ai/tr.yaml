@@ -499,6 +499,11 @@ Settings:
       System and In-App: Sistem ve uygulama içi
       System Only: Yalnızca sistem
       Off: Kapalı
+    Auto Load Next Page:
+      Lists Tooltip: Akışların, arama sonuçlarının ve diğer listelerin ek sayfalarını otomatik olarak yükle.
+    Auto Load Comments:
+      Label: Yorumları Otomatik Yükle
+      Tooltip: Yorumlara ve ek yorum sayfalarına kaydırdığınızda bunları otomatik olarak yükle.
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.

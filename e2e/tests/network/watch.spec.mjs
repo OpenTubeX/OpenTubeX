@@ -102,10 +102,10 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
-function disableAutomaticPagination(page) {
+function disableAutomaticCommentLoading(page) {
   return page.evaluate(() => {
     const store = window.$store
-    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+    store.commit('setAutoLoadComments', false)
   })
 }
 
@@ -192,7 +192,7 @@ test.describe('background watch tab', () => {
   test.use({
     seed: {
       settings: {
-        generalAutoLoadMorePaginatedItemsEnabled: true
+        autoLoadComments: true
       }
     }
   })
@@ -368,7 +368,7 @@ test.describe('watch page', () => {
     })
     await page.evaluate(() => {
       const store = window.$store
-      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+      store.commit('setAutoLoadComments', true)
     })
     const initialCommentCount = await commentCards.count()
     await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
@@ -658,7 +658,7 @@ test.describe('watch page', () => {
   })
 
   test('comments load on request', async ({ app, page }) => {
-    await disableAutomaticPagination(page)
+    await disableAutomaticCommentLoading(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -742,7 +742,7 @@ test.describe('watch page', () => {
 
     await page.evaluate(() => {
       const store = window.$store
-      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+      store.commit('setAutoLoadComments', true)
     })
     await expect(page.getByRole('status', { name: 'Load More Comments' })).toHaveCount(0)
 
@@ -1421,7 +1421,7 @@ test.describe('watch page', () => {
 
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page }) => {
-    await disableAutomaticPagination(page)
+    await disableAutomaticCommentLoading(page)
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')

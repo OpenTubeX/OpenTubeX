@@ -58,8 +58,16 @@
         :default-value="generalAutoLoadMorePaginatedItemsEnabled"
         setting-key="generalAutoLoadMorePaginatedItemsEnabled"
         :compact="true"
-        :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
+        :tooltip="t('Settings.General Settings.Auto Load Next Page.Lists Tooltip')"
         @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.General Settings.Auto Load Comments.Label')"
+        :default-value="store.getters.getAutoLoadComments"
+        setting-key="autoLoadComments"
+        :compact="true"
+        :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
+        @change="store.dispatch('updateAutoLoadComments', $event)"
       />
       <FtToggleSwitch
         v-if="USING_ELECTRON"

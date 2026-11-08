@@ -1095,6 +1095,17 @@ const customActions = {
         await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
       }
 
+      // Auto Load Next Page used to control comments too, so they keep its value.
+      // Saving it settles the choice, so a later change to Auto Load Next Page is
+      // not copied. Not dispatched, so it does not count as an edit for sync.
+      if (!userSettings.some(entry => entry._id === 'autoLoadComments')) {
+        const autoLoadComments = userSettings.find(
+          entry => entry._id === 'generalAutoLoadMorePaginatedItemsEnabled'
+        )?.value !== false
+        commit('setAutoLoadComments', autoLoadComments)
+        await DBSettingHandlers.upsert('autoLoadComments', autoLoadComments)
+      }
+
       if (legacyHideAiVideoSummariesEntry) {
         if (!hasAiVideoSummaryModeSetting) {
           commit('setAiVideoSummaryMode', legacyHideAiVideoSummariesEntry.value === true ? 'hide' : 'collapsed')

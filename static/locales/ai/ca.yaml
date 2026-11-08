@@ -558,7 +558,7 @@ Settings:
     Remember Tab Navigation History: Recorda l'historial de navegació de les pestanyes
     Auto Load Next Page:
       Label: Carrega automàticament la pàgina següent
-      Tooltip: Carrega automàticament més pàgines i comentaris.
+      Lists Tooltip: Carrega automàticament més pàgines de subscripcions, resultats de cerca i altres llistes.
     New Tab Position:
       New Tab Position: Posició de les pestanyes noves
       At the end: Al final
@@ -641,6 +641,9 @@ Settings:
       System and In-App: Sistema i a l’aplicació
       System Only: Només sistema
       Off: Desactivades
+    Auto Load Comments:
+      Label: Carrega automàticament els comentaris
+      Tooltip: Carrega automàticament els comentaris i les pàgines addicionals de comentaris quan us desplaceu fins a ells.
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.

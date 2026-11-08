@@ -665,6 +665,11 @@ Settings:
       System and In-App: Stelsel en in die app
       System Only: Slegs stelsel
       Off: Af
+    Auto Load Next Page:
+      Lists Tooltip: Laai bykomende blaaie van feeds, soekresultate en ander lyste outomaties.
+    Auto Load Comments:
+      Label: Laai kommentaar outomaties
+      Tooltip: Laai kommentaar en bykomende kommentaarblaaie outomaties wanneer jy daarheen blaai.
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekskieslys-soektog
     Description: Kies watter soekenjins verskyn wanneer u regs op geselekteerde teks klik. Soektogte word in u verstekblaaier oopgemaak.

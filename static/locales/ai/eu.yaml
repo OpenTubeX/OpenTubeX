@@ -499,6 +499,11 @@ Settings:
       System and In-App: Sistema eta aplikazioan
       System Only: Sistema soilik
       Off: Desaktibatuta
+    Auto Load Next Page:
+      Lists Tooltip: Kargatu automatikoki jarioen, bilaketa-emaitzen eta beste zerrenda batzuen orri gehigarriak.
+    Auto Load Comments:
+      Label: Kargatu iruzkinak automatikoki
+      Tooltip: Kargatu iruzkinak eta iruzkin-orri gehigarriak automatikoki haietara korritzean.
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.

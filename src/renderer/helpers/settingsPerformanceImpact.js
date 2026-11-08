@@ -28,6 +28,8 @@ const SETTING_PERFORMANCE_IMPACTS = new Map([
   ['showNewSubscriptionFeedIndicators', { level: 'moderate', resources: ['Network'] }],
   // keeps loading pages as you scroll, so the list in memory never stops growing
   ['generalAutoLoadMorePaginatedItemsEnabled', { level: 'moderate', resources: ['Memory', 'Network'] }],
+  // keeps loading comment pages as you scroll
+  ['autoLoadComments', { level: 'moderate', resources: ['Memory', 'Network'] }],
   // re-renders every visible timestamp on a timer
   ['updateRelativeTimestamps', { level: 'moderate', resources: ['CPU'] }],
   // screenshots of the tabs are captured and cached on disk

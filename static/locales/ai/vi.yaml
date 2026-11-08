@@ -499,6 +499,11 @@ Settings:
       System and In-App: Hệ thống và trong ứng dụng
       System Only: Chỉ hệ thống
       Off: Tắt
+    Auto Load Next Page:
+      Lists Tooltip: Tự động tải thêm các trang của nguồn cấp, kết quả tìm kiếm và các danh sách khác.
+    Auto Load Comments:
+      Label: Tự động tải bình luận
+      Tooltip: Tự động tải bình luận và các trang bình luận bổ sung khi bạn cuộn đến.
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.

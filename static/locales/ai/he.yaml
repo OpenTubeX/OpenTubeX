@@ -504,6 +504,11 @@ Settings:
       System and In-App: מערכת ובתוך האפליקציה
       System Only: מערכת בלבד
       Off: כבויות
+    Auto Load Next Page:
+      Lists Tooltip: טעינת עמודים נוספים של פידים, תוצאות חיפוש ורשימות אחרות אוטומטית.
+    Auto Load Comments:
+      Label: טעינת תגובות אוטומטית
+      Tooltip: טעינת תגובות ועמודי תגובות נוספים אוטומטית בעת גלילה אליהם.
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.

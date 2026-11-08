@@ -499,6 +499,11 @@ Settings:
       System and In-App: システムとアプリ内
       System Only: システムのみ
       Off: オフ
+    Auto Load Next Page:
+      Lists Tooltip: フィード、検索結果、その他のリストの追加ページを自動で読み込みます。
+    Auto Load Comments:
+      Label: コメントを自動で読み込む
+      Tooltip: スクロールして到達したときに、コメントと追加のコメントページを自動で読み込みます。
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。

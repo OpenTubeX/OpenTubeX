@@ -511,6 +511,11 @@ Settings:
       System and In-App: System og i appen
       System Only: Kun system
       Off: Fra
+    Auto Load Next Page:
+      Lists Tooltip: Indlæs flere sider af feeds, søgeresultater og andre lister automatisk.
+    Auto Load Comments:
+      Label: Auto-indlæs kommentarer
+      Tooltip: Indlæs kommentarer og flere kommentarsider automatisk, når du ruller hen til dem.
   Context Menu Search Settings:
     Context Menu Search Settings: Søgning i genvejsmenuen
     Description: Vælg, hvilke søgemaskiner der vises, når du højreklikker på markeret tekst. Søgninger åbnes i din standardbrowser.

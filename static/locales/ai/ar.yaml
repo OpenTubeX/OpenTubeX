@@ -504,6 +504,11 @@ Settings:
       System and In-App: "النظام وداخل التطبيق"
       System Only: "النظام فقط"
       Off: "إيقاف"
+    Auto Load Next Page:
+      Lists Tooltip: حمّل صفحات إضافية من الخلاصات ونتائج البحث والقوائم الأخرى تلقائيًا.
+    Auto Load Comments:
+      Label: تحميل التعليقات تلقائيًا
+      Tooltip: حمّل التعليقات وصفحات التعليقات الإضافية تلقائيًا عند التمرير إليها.
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.

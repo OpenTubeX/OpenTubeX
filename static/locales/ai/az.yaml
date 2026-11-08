@@ -501,6 +501,11 @@ Settings:
       System and In-App: Sistem və tətbiqdaxili
       System Only: Yalnız sistem
       Off: Söndürülüb
+    Auto Load Next Page:
+      Lists Tooltip: Lentlərin, axtarış nəticələrinin və digər siyahıların əlavə səhifələrini avtomatik yüklə.
+    Auto Load Comments:
+      Label: Şərhləri Avtomatik Yüklə
+      Tooltip: Şərhləri və əlavə şərh səhifələrini onlara sürüşdürdükdə avtomatik yüklə.
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekst menyusunda axtarış
     Description: Seçilmiş mətnə sağ kliklədikdə görünəcək axtarış sistemlərini seçin. Axtarışlar ilkin brauzerinizdə açılır.

@@ -1,5 +1,6 @@
 const GENERAL_EVERYDAY_KEYS = new Set([
   'Avoid translation',
+  'Auto Load Comments',
   'Auto Load Next Page',
   'General Settings',
   'Check for Updates',

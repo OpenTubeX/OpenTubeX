@@ -523,6 +523,11 @@ Settings:
       System and In-App: سیستم و داخل برنامه
       System Only: فقط سیستم
       Off: خاموش
+    Auto Load Next Page:
+      Lists Tooltip: صفحه‌های بیشتر فیدها، نتایج جستجو و فهرست‌های دیگر را به‌طور خودکار بارگذاری کن.
+    Auto Load Comments:
+      Label: بارگذاری خودکار نظرات
+      Tooltip: نظرات و صفحه‌های بیشتر نظرات را هنگام پیمایش به آن‌ها به‌طور خودکار بارگذاری کن.
   Context Menu Search Settings:
     Context Menu Search Settings: جست‌وجوی منوی زمینه
     Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.

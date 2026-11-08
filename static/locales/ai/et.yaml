@@ -499,6 +499,11 @@ Settings:
       System and In-App: Süsteem ja rakenduses
       System Only: Ainult süsteem
       Off: Väljas
+    Auto Load Next Page:
+      Lists Tooltip: Laadi voogude, otsingutulemuste ja muude loendite lisalehed automaatselt.
+    Auto Load Comments:
+      Label: Laadi kommentaarid automaatselt
+      Tooltip: Laadi kommentaarid ja täiendavad kommentaarilehed automaatselt, kui nendeni kerid.
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.

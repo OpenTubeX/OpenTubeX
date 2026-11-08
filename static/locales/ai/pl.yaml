@@ -276,6 +276,11 @@ Settings:
       System and In-App: Systemowe i w aplikacji
       System Only: Tylko systemowe
       Off: Wyłączone
+    Auto Load Next Page:
+      Lists Tooltip: Wczytuj automatycznie kolejne strony subskrypcji, wyników wyszukiwania i innych list.
+    Auto Load Comments:
+      Label: Automatyczne wczytywanie komentarzy
+      Tooltip: Wczytuj komentarze i kolejne strony komentarzy automatycznie po przewinięciu do nich.
   Theme Settings:
     Sections:
       Interface: "Interfejs"

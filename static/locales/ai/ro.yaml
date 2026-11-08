@@ -500,6 +500,11 @@ Settings:
       System and In-App: Sistem și în aplicație
       System Only: Doar sistem
       Off: Dezactivate
+    Auto Load Next Page:
+      Lists Tooltip: Încarcă automat pagini suplimentare de fluxuri, rezultate ale căutării și alte liste.
+    Auto Load Comments:
+      Label: Încarcă automat comentariile
+      Tooltip: Încarcă automat comentariile și paginile suplimentare de comentarii când derulezi până la ele.
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.

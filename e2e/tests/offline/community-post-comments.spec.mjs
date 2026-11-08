@@ -102,7 +102,7 @@ test('Hide Comments controls post comments without hiding the post', async ({ pa
 test.describe('subscribed comment authors', () => {
   test.use({
     seed: {
-      settings: { backendPreference: 'invidious', fetchSubscriptionsAutomatically: false, generalAutoLoadMorePaginatedItemsEnabled: true },
+      settings: { backendPreference: 'invidious', fetchSubscriptionsAutomatically: false, autoLoadComments: true },
       profiles: [{
         _id: 'allChannels',
         name: 'All Channels',
