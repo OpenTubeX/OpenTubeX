@@ -83,7 +83,7 @@
   gap: 10px;
   justify-content: space-between;
   align-items: center;
-  align-self: flex-end;
+  align-self: center;
 }
 
 .infoActionsContainer:empty {
@@ -128,10 +128,11 @@
 .tabs {
   position: relative;
   display: flex;
-  flex-wrap: nowrap;
   flex: 1 1 66%;
   min-inline-size: 0;
-  overflow: auto hidden;
+
+  /* Tabs that do not fit move to the More menu, so the row never scrolls. */
+  overflow: clip;
 }
 
 .tabsContent {
@@ -140,9 +141,18 @@
 
   position: relative;
   display: flex;
-  flex: none;
-  inline-size: max-content;
-  min-inline-size: 100%;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+}
+
+/* Out of the row and the accessibility tree, but still measured. */
+.tabsContent > .tab.overflowedTab {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .tab {
@@ -173,20 +183,44 @@
   display: none;
 }
 
-.tabLabel {
+.tabLabel,
+.moreTabLabel,
+.moreTabSelected {
   display: inline-grid;
   white-space: nowrap;
 }
 
-.tabLabel::after {
+.tabLabel::after,
+.moreTabSelected::after {
   content: attr(data-label);
   grid-area: 1 / 1;
   font-weight: bold;
   visibility: hidden;
 }
 
-.tabLabel > span {
+.tabLabel > span,
+.moreTabSelected > span {
   grid-area: 1 / 1;
+}
+
+/* Each label keeps its own width, which the layout measures. */
+.moreTabLabel > span {
+  grid-area: 1 / 1;
+  justify-self: center;
+}
+
+.moreTabTextHidden {
+  visibility: hidden;
+}
+
+.moreTabIcon {
+  flex: none;
+  font-size: 12px;
+}
+
+/* Outrank the primary color of tab icons; this one belongs to the label. */
+.tabsContent > .tab.moreTab > .moreTabIcon {
+  color: inherit;
 }
 
 .selectedTab {
@@ -230,25 +264,18 @@
 
   .channelSearchToggle {
     display: block;
-    flex: none;
-    align-self: center;
-  }
-
-  .tabs {
-    flex: 1 1 0;
   }
 
   .tabsContent {
     --material-tab-font-size: 0.9em;
-    --material-tab-padding-inline: 4px;
+    --material-tab-padding-inline: 12px;
     --material-tab-min-height: 48px;
   }
 
   .tab {
-    flex: 1 0 auto;
     min-block-size: 48px;
     padding-block: 4px;
-    padding-inline: 4px;
+    padding-inline: 12px;
     font-size: 0.9em;
   }
 }
@@ -259,15 +286,22 @@
   }
 
   .infoActionsContainer {
-    flex-direction: row-reverse;
-    justify-content: left;
+    justify-content: flex-start;
     align-self: stretch;
+    gap: 8px;
   }
-}
 
-@media only screen and (300px < width <=680px) {
-  .infoActionsContainer:has(> .shareIcon):has(> .ftSubscribeButton) {
-    justify-content: space-between;
+  /* Lead with Subscribe; Search wraps last when the row is too narrow. */
+  .pinButton {
+    order: 1;
+  }
+
+  .shareIcon {
+    order: 2;
+  }
+
+  .channelSearchToggle {
+    order: 3;
   }
 }
 
@@ -280,12 +314,13 @@
     justify-content: center;
   }
 
-  .clineContainer {
+  .lineContainer {
     padding-inline-start: 0;
   }
 
   .thumbnailContainer {
     flex-direction: column;
+    gap: 10px;
   }
 
   .thumbnailContainer,
@@ -293,6 +328,5 @@
     flex-wrap: wrap;
     align-items: center;
     text-align: center;
-    gap: 10px;
   }
 }

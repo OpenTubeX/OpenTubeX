@@ -555,7 +555,7 @@ for (const width of [1600, 480]) {
   test.describe(`input alignment at ${width}px`, { tag: '@scale' }, () => {
     test.use({ seed: async ({ uiScale }, use) => use({ settings: { currentLocale: 'en-US', baseTheme: uiScale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width: Math.round(width * uiScale / 100), height: 900, maximized: false } } }) })
 
-    test('centers channel share, pin and subscription buttons on the same row', async ({ app, page, uiScale }, testInfo) => {
+    test('centers channel subscription, pin, share and search buttons on the same row', async ({ app, page, uiScale }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await page.evaluate(async () => {
         const store = window.$store
@@ -601,22 +601,43 @@ for (const width of [1600, 480]) {
             await expect.poll(() => row.evaluate(element => {
               const share = element.querySelector('.shareButton .iconButton').getBoundingClientRect()
               const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
-              const pin = element.querySelector(':scope > .ftIconButton:not(.shareIcon) .iconButton').getBoundingClientRect()
+              const pin = element.querySelector('.pinButton .iconButton').getBoundingClientRect()
               const center = subscribe.top + subscribe.height / 2
               return Math.max(Math.abs(share.top + share.height / 2 - center), Math.abs(pin.top + pin.height / 2 - center))
             }), { message: `${label}, Pin and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
+            if (viewportWidth > 680) {
+              // Beside the avatar, the actions share its center line.
+              await expect.poll(() => row.evaluate(element => {
+                const avatar = element.closest('.info').querySelector('.thumbnail').getBoundingClientRect()
+                const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
+                return Math.abs(avatar.top + avatar.height / 2 - subscribe.top - subscribe.height / 2)
+              }), { message: `${label} centered on the avatar in ${direction}` }).toBeLessThanOrEqual(1)
+            }
+            // Unsubscribe's extra controls only fit at 375px without its label.
+            await expect(subscribe).toHaveClass(label === 'Unsubscribe' && viewportWidth < 400 ? /\bcompact\b/ : /^(?!.*\bcompact\b)/)
+            await expect(subscribe).toHaveAccessibleName(label)
             if (viewportWidth <= 680) {
+              // Subscribe leads, followed by Pin, Share and Search at even gaps.
               await expect.poll(() => row.evaluate((element, direction) => {
                 const row = element.getBoundingClientRect()
-                const share = element.querySelector('.shareIcon').getBoundingClientRect()
-                const subscribe = element.querySelector('.ftSubscribeButton').getBoundingClientRect()
-                return direction === 'ltr'
-                  ? Math.max(Math.abs(share.right - row.right), Math.abs(subscribe.left - row.left))
-                  : Math.max(Math.abs(share.left - row.left), Math.abs(subscribe.right - row.right))
-              }, direction), { message: `${label} and Share at opposite row edges in ${direction}` }).toBeLessThanOrEqual(1)
+                const actions = ['.ftSubscribeButton', '.pinButton', '.shareIcon', '.channelSearchToggle']
+                  .map(selector => element.querySelector(selector).getBoundingClientRect())
+                const ltr = direction === 'ltr'
+                const gaps = actions.slice(1).map((action, index) => Math.round(ltr ? action.left - actions[index].right : actions[index].left - action.right))
+                const start = ltr ? actions[0].left - row.left : row.right - actions[0].right
+                const end = ltr ? row.right - actions.at(-1).right : actions.at(-1).left - row.left
+                return { gaps, aligned: Math.abs(Math.round(window.innerWidth <= 400 ? start - end : start)) }
+              }, direction), { message: `${label}, Pin, Share and Search in order in ${direction}` }).toEqual({ gaps: [8, 8, 8], aligned: 0 })
             }
           }
           if (label === 'Subscribe') await subscribe.click()
+        }
+        if (viewportWidth === 375) {
+          // The label returns as soon as the row has room for it again.
+          await setWindowSize(app, page, { width: Math.round(395 * uiScale / 100), height: 820 })
+          await expect(subscribe).not.toHaveClass(/\bcompact\b/)
+          await setWindowSize(app, page, { width: Math.round(375 * uiScale / 100), height: 800 })
+          await expect(subscribe).toHaveClass(/\bcompact\b/)
         }
         if (uiScale === 100) {
           await page.evaluate(() => { document.body.dir = 'ltr' })
@@ -634,14 +655,15 @@ for (const width of [1600, 480]) {
               const store = window.$store
               await store.dispatch(setting, true)
             }, setting)
-            await expect(row.locator(':scope > *')).toHaveCount(2)
+            await expect(row.locator(':scope > *')).toHaveCount(3)
             await expect(row.getByRole('button', { name: 'Pin to Navigation', exact: true })).toBeVisible()
             await expect.poll(() => row.evaluate((element, remainingAction) => {
               const row = element.getBoundingClientRect()
               const action = element.querySelector(remainingAction).getBoundingClientRect()
-              const pin = element.querySelector(':scope > .ftIconButton:not(.shareIcon)').getBoundingClientRect()
-              const left = Math.min(action.left, pin.left)
-              const right = Math.max(action.right, pin.right)
+              const pin = element.querySelector('.pinButton').getBoundingClientRect()
+              const actions = [...element.children].map(child => child.getBoundingClientRect())
+              const left = Math.min(...actions.map(rect => rect.left))
+              const right = Math.max(...actions.map(rect => rect.right))
               return Math.max(
                 Math.abs(action.top + action.height / 2 - pin.top - pin.height / 2),
                 window.innerWidth <= 400 ? Math.abs((left + right) / 2 - row.left - row.width / 2) : Math.abs(left - row.left)
@@ -662,7 +684,7 @@ for (const width of [1600, 480]) {
               await expect.poll(() => row.evaluate(element => {
                 const row = element.getBoundingClientRect()
                 const actions = [...element.children]
-                if (actions.length !== 3) return false
+                if (actions.length !== 4) return false
                 const lines = []
                 for (const action of actions) {
                   const rect = action.getBoundingClientRect()
