@@ -67,6 +67,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isAppHidden } from '../../helpers/appVisibility'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { motionTiming } from '../../helpers/motionTiming'
 import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../../helpers/androidBackGesture'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import { updateMobileSheetRootClass } from '../../helpers/rootClasses'
@@ -158,23 +159,6 @@ let resumePlayback = null
 let openingSequence = 0
 let presentationSuspended = false
 let backAnimation = null
-
-/**
- * Reads a spring motion token from themes.css as Web Animations timing. WebViews
- * without linear() easing support keep the given fallback.
- * @param {string} token
- * @param {number} fallbackDuration
- * @param {string} fallbackEasing
- * @returns {{ duration: number, easing: string }}
- */
-function motionTiming(token, fallbackDuration, fallbackEasing) {
-  if (isReducedMotionEnabled()) return { duration: 0, easing: 'linear' }
-  const [, duration, easing] = getComputedStyle(document.body).getPropertyValue(token).trim().match(/^([\d.]+)ms\s+(.+)$/) ?? []
-  if (duration === undefined || !CSS.supports('transition-timing-function', easing)) {
-    return { duration: fallbackDuration, easing: fallbackEasing }
-  }
-  return { duration: Number(duration), easing }
-}
 
 function cancelBackGesture() {
   backAnimation?.cancel()

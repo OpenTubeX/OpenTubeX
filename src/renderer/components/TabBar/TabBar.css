@@ -52,6 +52,9 @@
   inline-size: max-content;
   min-inline-size: 100%;
   gap: 2px;
+
+  /* Opening tabs stretch to their content-based size. */
+  interpolate-size: allow-keywords;
 }
 
 /* The scrollbar's track and hit areas reach past the gap, so the tab row
@@ -386,4 +389,10 @@
   inset-inline: 0;
   block-size: 16px;
   -webkit-app-region: no-drag;
+}
+
+/* Wraps each strip item for its open and close transitions without adding a
+   layout box. */
+.tabStripItem {
+  display: contents;
 }

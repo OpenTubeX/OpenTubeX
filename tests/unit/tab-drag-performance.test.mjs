@@ -52,6 +52,7 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
     dropZoneRef: { value: container },
     buildStripItems: items => items,
     clearTabSelection() {}, setTabSelection() {}, cancelScrollAnimation() {},
+    stripTransition: { finishAll() {} },
     performance: { now: () => now },
     isElectron: false,
     document: { body: { classList: { add() {}, remove() {} } } },

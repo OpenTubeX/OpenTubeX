@@ -19,6 +19,7 @@ test('restored phone panels mount their contents before they are opened', async 
     const isAppHidden = () => false
     const applyAnimationSpeed = animation => animation
     const isReducedMotionEnabled = () => true
+    const motionTiming = () => ({ duration: 0, easing: 'linear' })
     const lockBodyScroll = () => {}
     const unlockBodyScroll = () => {}
     const updateMobileSheetRootClass = () => {}

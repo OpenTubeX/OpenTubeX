@@ -74,6 +74,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
       disconnect() { activeObservers.clear() }
     },
     applyAnimationSpeed: animation => animation, lockBodyScroll() {}, unlockBodyScroll() {},
+    motionTiming: (_token, duration, easing) => reducedMotion ? { duration: 0, easing: 'linear' } : { duration, easing },
     matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1, getPropertyValue: () => '' })
   }
   scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };', context))

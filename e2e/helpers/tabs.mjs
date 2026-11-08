@@ -82,3 +82,14 @@ export async function selectChannelTab(page, id) {
   await expect(more).toHaveAttribute('aria-selected', 'true')
   await expect(more).toContainText(label)
 }
+
+/**
+ * Waits for tab strip items to finish opening and closing. Their Web
+ * Animations change tab sizes and positions; the endless CSS animations of
+ * loading indicators do not.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function expectTabStripSettled(page) {
+  await expect.poll(() => page.locator('.tabBar .tabsContent').evaluate(content => content.getAnimations({ subtree: true })
+    .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)).length)).toBe(0)
+}
