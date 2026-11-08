@@ -931,6 +931,7 @@ Settings:
     Enable Skip Silence by Default: Hopp over stille parti som standard
     Enable Video Zoom: Slå på videozoom
     Enable Seek History: Slå på hopphistorikk
+    Show Seek Bar Filmstrip: "Vis filmstripe for tidslinja"
     Voice-over Translation:
       Title: Taleomsetjing
       Attribution: (levert av Yandex)
@@ -2464,6 +2465,7 @@ Tooltips:
     Enable Skip Silence by Default: Hoppar som standard over stille parti i nye faner. Endringar i éi fane påverkar ikkje andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spelaren og slår på hurtigtastane og panoreringskontrollane.
     Enable Seek History: Hugsar kvar du hoppa frå i kvar video til appen vert lukka. Viser hopphistorikklista i innstillingsmenyen til avspelaren og slår på snøggtastane for ho.
+    Show Seek Bar Filmstrip: "Når du dreg knappen på tidslinja, vert ei stripe med bilete rundt staden du hamnar vist, og dreg du opp på henne, spolar du nøyaktig. Når dette er av, viser draging eitt enkelt miniatyrbilete, som når du held peikaren over."
     Voice-over Translation: Sender video-ID-en, lengda og det valde språket til den uoffisielle Yandex-tenesta for stemmeomsetjing når du ber om ei omsetjing. Av som standard.
     Hold to Double Playback Speed: Hald inne mellomromstasten eller venstre museknapp over spelaren for å doble den gjeldande avspelingsfarten mellombels.
     Ambient Mode: Tonar videofargane inn i området rundt spelaren.

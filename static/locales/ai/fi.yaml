@@ -847,6 +847,7 @@ Settings:
     Enable Skip Silence by Default: Ota hiljaisuuden ohitus oletuksena käyttöön
     Enable Video Zoom: Ota videon zoomaus käyttöön
     Enable Seek History: Ota siirtymähistoria käyttöön
+    Show Seek Bar Filmstrip: "Näytä hakupalkin filminauha"
     Voice-over Translation:
       Title: Päällepuhuttu käännös
       Attribution: (Yandexin tarjoama)
@@ -2207,6 +2208,7 @@ Tooltips:
     Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
     Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
     Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.
+    Show Seek Bar Filmstrip: "Hakupalkin liukusäätimen vetäminen näyttää kuvanauhan kohdasta, johon olet siirtymässä, ja vetämällä ylös sen päälle voit siirtyä tarkasti. Kun asetus on pois käytöstä, vetäminen näyttää yhden pikkukuvan kuten osoittimen viennissä palkin päälle."
     Voice-over Translation: Lähettää videon tunnuksen, keston ja valitun kielen epäviralliseen Yandexin selostuskäännöspalveluun, kun pyydät käännöstä. Oletusarvoisesti pois käytöstä.
     Hold to Double Playback Speed: Voit kaksinkertaistaa nykyisen toistonopeuden tilapäisesti pitämällä välilyöntiä tai soittimen päällä olevaa hiiren ykköspainiketta painettuna.
     Ambient Mode: Sulauttaa videon värit soitinta ympäröivään alueeseen.

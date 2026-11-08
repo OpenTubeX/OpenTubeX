@@ -999,6 +999,7 @@ Settings:
     Enable Skip Silence by Default: Aktiveer Slaan stilte oor by verstek
     Enable Video Zoom: Aktiveer videozoem
     Enable Seek History: Aktiveer spoelgeskiedenis
+    Show Seek Bar Filmstrip: "Wys soekbalk-filmstrook"
     Pause on Stream Recovery: Pouseer by stroomherstel
     Continue Playback When Screen Is Locked: Speel voort wanneer die skerm gesluit is
     Voice-over Translation:
@@ -2405,6 +2406,7 @@ Tooltips:
     Enable Skip Silence by Default: Aktiveer die oorslaan van stilte vir nuwe oortjies. As u dit in een oortjie verander, raak dit nie ander oortjies nie.
     Enable Video Zoom: Wys die zoemkontrole in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie en panneerkontroles daarvan.
     Enable Seek History: Onthou waarvandaan u in elke video gespring het totdat die toep sluit. Wys die spoelgeskiedenislys in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie daarvan.
+    Show Seek Bar Filmstrip: "As jy die soekbalk se knop sleep, wys dit 'n strook rame rondom waar jy gaan land, en as jy daarop optrek, spoel jy presies. Wanneer gedeaktiveer, wys sleep 'n enkele duimnael, soos wanneer jy daaroor beweeg."
     Pause on Stream Recovery: Wanneer die videostroom misluk en die speler dit herlaai of na ’n ander formaat of enjin oorskakel, pouseer afspeel en hou die fout bo-aan die speler totdat u dit toemaak. Wanneer gedeaktiveer, gaan afspeel voort en verskyn die fout kortliks as ’n kennisgewing.
     Continue Playback When Screen Is Locked: Hou oudio in die agtergrond aan die speel en verskaf Android-mediakontroles. Skakel dit af om te pouseer wanneer die toep nie meer sigbaar is nie.
     Voice-over Translation: Stuur die video-ID, duur en gekose taal na die nie-amptelike Yandex-stemoorvertaaldiens wanneer u ’n vertaling versoek. By verstek gedeaktiveer.

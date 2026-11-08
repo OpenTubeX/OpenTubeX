@@ -839,6 +839,7 @@ Settings:
     Enable Skip Silence by Default: Galluogi hepgor distawrwydd yn ddiofyn
     Enable Video Zoom: Galluogi chwyddo fideo
     Enable Seek History: Galluogi hanes neidio
+    Show Seek Bar Filmstrip: "Dangos stribed ffilm y bar chwilio"
     Voice-over Translation:
       Title: Cyfieithu troslais
       Attribution: (wedi'i bweru gan Yandex)
@@ -2188,6 +2189,7 @@ Tooltips:
     Enable Skip Silence by Default: Mae'n galluogi hepgor distawrwydd ar gyfer tabiau newydd. Nid yw ei newid mewn un tab yn effeithio ar dabiau eraill.
     Enable Video Zoom: Mae'n dangos y rheolydd Chwyddo yn newislen gosodiadau'r chwaraewr ac yn galluogi ei lwybrau byr bysellfwrdd a'i reolyddion padellu.
     Enable Seek History: Yn cofio o ble y neidioch chi ym mhob fideo nes i'r ap gau. Yn dangos y rhestr hanes neidio yn newislen gosodiadau'r chwaraewr ac yn galluogi ei llwybrau byr bysellfwrdd.
+    Show Seek Bar Filmstrip: "Mae llusgo bwlyn y bar chwilio’n dangos stribed o fframiau o amgylch lle byddwch chi’n glanio, ac mae tynnu i fyny arno’n chwilio’n fanwl. Pan fydd wedi’i analluogi, mae llusgo’n dangos un mân-lun, fel wrth hofran."
     Voice-over Translation: Mae'n anfon ID, hyd ac iaith ddewisol y fideo i wasanaeth cyfieithu troslais answyddogol Yandex pan fyddwch yn gofyn am gyfieithiad. Mae wedi'i analluogi yn ddiofyn.
     Hold to Double Playback Speed: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i ddyblu'r cyflymder chwarae presennol dros dro.
     Ambient Mode: Mae'n cyfuno lliwiau'r fideo â'r ardal o amgylch y chwaraewr.

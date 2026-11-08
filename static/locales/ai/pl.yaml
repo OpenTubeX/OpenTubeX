@@ -435,6 +435,7 @@ Settings:
       Buffer Before Playing: Bufor przed odtwarzaniem
       Buffer Before Playing Tooltip: 'Jaka część filmu musi zostać wczytana, zanim odtwarzanie się rozpocznie lub zostanie wznowione po zatrzymaniu. Domyślnie: {value}'
     Enable Seek History: Włącz historię przewijania
+    Show Seek Bar Filmstrip: "Pokazuj pasek klatek paska przewijania"
     Quality Limit on Metered Networks:
       Quality Limit on Metered Networks: "Limit jakości w sieciach z pomiarem użycia danych"
       No Limit: "Bez limitu"
@@ -1391,6 +1392,7 @@ Tooltips:
     Enable Skip Silence by Default: Włącza pomijanie ciszy na nowych kartach. Zmiana na jednej karcie nie wpływa na pozostałe.
     Enable Video Zoom: Wyświetla opcję powiększenia w menu ustawień odtwarzacza oraz włącza jej skróty klawiszowe i sterowanie przesuwaniem obrazu.
     Enable Seek History: Zapamiętuje, skąd przeskoczono w każdym filmie, do czasu zamknięcia aplikacji. Wyświetla listę historii przewijania w menu ustawień odtwarzacza i włącza jej skróty klawiszowe.
+    Show Seek Bar Filmstrip: "Przeciąganie suwaka paska przewijania pokazuje pasek klatek wokół miejsca docelowego, a przeciągnięcie w górę na niego pozwala precyzyjnie przewijać. Po wyłączeniu przeciąganie pokazuje jedną miniaturę, jak po najechaniu kursorem."
     Voice-over Translation: Po wybraniu tłumaczenia wysyła identyfikator i czas trwania filmu oraz wybrany język do nieoficjalnej usługi tłumaczenia lektorskiego Yandex. Funkcja jest domyślnie wyłączona.
     Parallel Segment Loading: |
       Liczba segmentów obrazu i dźwięku wczytywanych jednocześnie przed odtwarzaniem.

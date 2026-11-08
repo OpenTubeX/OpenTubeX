@@ -1,5 +1,6 @@
 import shaka from 'shaka-player'
 import i18n from '../../../i18n/index'
+import store from '../../../store/index'
 import { updateSponsorBlockSeekBarState } from '../../../helpers/player/sponsorBlockSeekBar'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
@@ -58,6 +59,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
         this.showSeekPreview()
       } else {
         this.hideSeekPreview()
+        // Without the filmstrip, the swipe's single thumbnail stays up.
+        if (wasPreviewing) this.hidePreviewTime()
       }
     })
     this.eventManager.listen(this.player, 'unloading', () => this.hideSeekPreview())
@@ -114,7 +117,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.applyPreciseSeek()
     super.onChange()
     // A tap only seeks; dragging the thumb shows the filmstrip.
-    if (this.dragStartValue !== null && !this.filmstripShown) {
+    if (this.dragStartValue !== null && !this.filmstripShown && store.getters.getShowSeekBarFilmstrip) {
       const range = Number(this.bar.max) - Number(this.bar.min)
       const distance = Math.abs(this.getValue() - this.dragStartValue) / range * this.bar.getBoundingClientRect().width
       this.filmstripShown = distance >= DRAG_THRESHOLD
@@ -255,8 +258,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     const hover = new MouseEvent('mousemove')
     Object.defineProperty(hover, 'clientX', { value: this.getThumbClientX(time + 0.001) })
     this.bar.dispatchEvent(hover)
-    this.filmstripShown = true
-    this.filmstrip.show(time)
+    if (store.getters.getShowSeekBarFilmstrip) {
+      this.filmstripShown = true
+      this.filmstrip.show(time)
+    }
     this.controls.dispatchEvent(new shaka.util.FakeEvent('seekbarvaluechange', { time }))
   }
 

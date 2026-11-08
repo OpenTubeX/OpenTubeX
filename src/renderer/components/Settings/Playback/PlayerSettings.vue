@@ -316,6 +316,14 @@
         @change="store.dispatch('updateShowLightsOffToggle', $event)"
       />
       <FtToggleSwitch
+        :label="t('Settings.Player Settings.Show Seek Bar Filmstrip')"
+        :compact="true"
+        :default-value="store.getters.getShowSeekBarFilmstrip"
+        setting-key="showSeekBarFilmstrip"
+        :tooltip="t('Tooltips.Player Settings.Show Seek Bar Filmstrip')"
+        @change="store.dispatch('updateShowSeekBarFilmstrip', $event)"
+      />
+      <FtToggleSwitch
         v-if="!IS_CAPACITOR"
         :label="t('Settings.Player Settings.Display Play Button In Video Player')"
         :compact="true"

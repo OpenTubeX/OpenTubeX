@@ -838,6 +838,7 @@ Settings:
     Enable Skip Silence by Default: Sleppa þögn sjálfgefið
     Enable Video Zoom: Virkja aðdrátt í myndbandi
     Enable Seek History: Virkja stökkferil
+    Show Seek Bar Filmstrip: "Sýna myndræmu leitarstiku"
     Voice-over Translation:
       Title: Talsetningarþýðing
       Attribution: (með tækni frá Yandex)
@@ -2173,6 +2174,7 @@ Tooltips:
     Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.
+    Show Seek Bar Filmstrip: "Þegar sleði leitarstikunnar er dreginn birtist ræma af römmum í kringum staðinn sem þú lendir á og ef þú dregur upp á hana spólarðu nákvæmlega. Þegar slökkt er á þessu sýnir dráttur eina smámynd, eins og þegar bendli er haldið yfir."
     Voice-over Translation: Sendir auðkenni og lengd myndbandsins ásamt völdu tungumáli til óopinberrar talsetningarþjónustu Yandex þegar beðið er um þýðingu. Sjálfgefið er slökkt á þessu.
     Hold to Double Playback Speed: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að tvöfalda núverandi spilunarhraða tímabundið.
     Ambient Mode: Blandar litum myndbandsins inn í svæðið umhverfis spilarann.

@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder dre ziouer"
     Enable Video Zoom: "Gweredekaat zoum ar video"
     Enable Seek History: Gweredekaat roll istor al lammoù
+    Show Seek Bar Filmstrip: "Diskouez stribed skeudennoù ar varrenn glask"
     Voice-over Translation:
       Title: "Treiñ ar vouezh"
       Attribution: "(kaset en-dro gant Yandex)"
@@ -2161,6 +2162,7 @@ Tooltips:
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
+    Show Seek Bar Filmstrip: "Riklañ bouton ar varrenn glask a ziskouez ur stribed skeudennoù tro-dro d'al lec'h ma tizhot, ha tennañ war-laez warnañ a glask resis. Pa vez diweredekaet, riklañ a ziskouez ur skeudennig hepken, evel pa dremenit a-us dezhi."
     Voice-over Translation: "Kas naoudi ar video, e badelezh hag ar yezh diuzet da wazerezh troidigezh ar vouezh dieub Yandex pa c'houlennit un droidigezh. Diweredekaet eo dre ziouer."
     Hold to Double Playback Speed: "Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit daougementiñ an tizh lenn bremanel evit ur pennad."
     Ambient Mode: "Meskañ livioù ar video gant an takad tro-dro d'al lenner."

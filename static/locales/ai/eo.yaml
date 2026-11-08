@@ -862,6 +862,7 @@ Settings:
     Enable Skip Silence by Default: Defaŭlte ŝalti silento-saltadon
     Enable Video Zoom: Ŝalti videaĵan zomon
     Enable Seek History: Ŝalti historion de saltoj
+    Show Seek Bar Filmstrip: "Montri filmstrion de la serĉbreto"
     Pause on Stream Recovery: Paŭzigi je restariĝo de fluo
     Continue Playback When Screen Is Locked: Daŭrigi ludadon kiam la ekrano estas ŝlosita
     Voice-over Translation:
@@ -2196,6 +2197,7 @@ Tooltips:
     Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
     Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
     Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.
+    Show Seek Bar Filmstrip: "Treni la tenilon de la serĉbreto montras strion de kadroj ĉirkaŭ la loko, kien vi saltos, kaj tiri supren sur ĝin ebligas precizan saltadon. Se malŝaltita, trenado montras unu bildeton, kiel dum ŝvebado."
     Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
     Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
     Voice-over Translation: Sendas la identigilon, daŭron kaj elektitan lingvon de la videaĵo al la neoficiala voĉtraduka servo de Yandex kiam vi petas tradukon. Defaŭlte malŝaltita.

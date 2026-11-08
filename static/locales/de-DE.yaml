@@ -1154,6 +1154,7 @@ Settings:
     Loop Shorts: Shorts wiederholen
     Enable Video Zoom: Videozoom aktivieren
     Enable Seek History: Sprungverlauf aktivieren
+    Show Seek Bar Filmstrip: Filmstreifen der Zeitleiste anzeigen
     Pause on Stream Recovery: Bei Stream-Wiederherstellung pausieren
     Voice-over Translation:
       Title: Voice-over-Übersetzung
@@ -2942,6 +2943,9 @@ Tooltips:
     Enable Video Zoom: >-
       Zeigt die Zoomsteuerung im Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel und
       Schwenksteuerungen.
+    Show Seek Bar Filmstrip: >-
+      Beim Ziehen des Reglers der Zeitleiste erscheint ein Streifen mit Bildern rund um die Zielstelle. Ziehst du nach oben auf
+      den Streifen, spulst du genauer. Wenn deaktiviert, zeigt das Ziehen ein einzelnes Vorschaubild wie beim Darüberfahren.
     Enable Seek History: >-
       Merkt sich bis zum Schließen der App, von wo du in jedem Video weggesprungen bist. Zeigt den Sprungverlauf im
       Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel.
