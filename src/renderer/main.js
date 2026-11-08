@@ -22,6 +22,7 @@ import './helpers/overlayScrollbars.css'
 import 'vue-sonner/style.css'
 import './helpers/anchoredPosition.css'
 import './helpers/titleTooltips.css'
+import './helpers/gridReorder.css'
 
 import { FtIcon, FtIconLayers } from './icons/iconComponents'
 

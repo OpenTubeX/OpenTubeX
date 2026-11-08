@@ -6,16 +6,11 @@
     :class="{
       placeholder: !visible,
       draggable: canBecomeDraggable,
-      pointerDragging,
-      draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
-    :draggable="canBecomeDraggable && !pointerDragging"
     :data-playlist-drag-item="canBecomeDraggable ? '' : null"
     :data-video-id="data.videoId"
     :data-playlist-item-id="playlistItemId"
-    @pointerdown.capture="canBecomeDraggable && startPointerDrag($event, videoData)"
     @keydown="canBecomeDraggable && moveWithKeyboard($event, videoData)"
-    v-on="canBecomeDraggable ? draggableEventHandlers : {}"
   >
     <template
       v-if="visible"
@@ -169,10 +164,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  draggedVideo: {
-    type: Object,
-    default: () => ({ videoId: null, playlistItemId: null }),
-  },
   isSortOrderCustom: {
     type: Boolean,
     default: null
@@ -196,15 +187,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'move-dragged-video',
   'move-video-down',
   'move-video-up',
   'move-video-to-the-top',
   'move-video-to-the-bottom',
   'pause-player',
-  'remove-from-playlist',
-  'drag-video',
-  'drag-video-end'
+  'remove-from-playlist'
 ])
 const visible = ref(props.initialVisibleState)
 const { t } = useI18n()
@@ -242,18 +230,8 @@ watch(visible, isVisible => {
 onBeforeUnmount(closePlaylistItemMenu)
 
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
-const draggableEventHandlers = {
-  dragstart: onDragVideo,
-  dragover: event => event.preventDefault(),
-  dragenter: () => {
-    if (props.isVideoDragging) {
-      moveDraggedVideo(videoData, props.draggedVideo)
-    }
-  },
-  dragend: afterDrag,
-  drop: event => event.preventDefault(),
-}
+// The list drags its rows with useGridReorder; rows only take keyboard moves here.
+const { moveWithKeyboard } = usePlaylistDrag(emit)
 
 let stopWatchingInitialVisibleState = null
 
@@ -282,7 +260,7 @@ if (windowed) {
       mount: onFirstVisible,
       unmount: height => { shellHeight.value = height; visible.value = false },
       isMounted: () => visible.value,
-      isProtected: () => props.isVideoDragging || pointerDragging.value ||
+      isProtected: () => props.isVideoDragging ||
         element.contains(document.activeElement) ||
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
@@ -390,13 +368,6 @@ function moveVideoToTheTop(videoId, playlistItemId) {
  */
 function moveVideoToTheBottom(videoId, playlistItemId) {
   emit('move-video-to-the-bottom', videoId, playlistItemId)
-}
-
-function onDragVideo(event) {
-  // Only allow dragging via the drag bar
-  if (!event.target.classList.contains('draggable')) { return }
-
-  dragVideo(event, videoData)
 }
 
 /** @import { VideoData } from '../../helpers/dragAndDrop' */

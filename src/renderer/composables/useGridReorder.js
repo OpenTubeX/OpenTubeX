@@ -15,13 +15,14 @@ const SCROLL_SPEED = 900
  * pointer cannot change the target. The order is committed once the dropped
  * card has settled into its slot; Escape cancels the drag.
  *
- * Bind `onPointerDown` as a capturing pointerdown listener on the list.
+ * Bind `onPointerDown` as a capturing pointerdown listener on the list. The
+ * classes it sets are styled in helpers/gridReorder.css.
  *
  * @param {object} options
  * @param {string} options.itemSelector Matches the list's reorderable children
  * @param {string} options.handleSelector
  * @param {(item: HTMLElement) => string} options.getId
- * @param {(id: string, index: number) => void} options.commit Must render the new order on the next tick
+ * @param {(id: string, order: string[]) => void} options.commit Receives the rendered items' new order and must render it on the next tick
  */
 export function useGridReorder({ itemSelector, handleSelector, getId, commit }) {
   /** @type {import('vue').Ref<string | null>} Set while a card is dragged or settles */
@@ -33,9 +34,11 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   /** @param {PointerEvent} event */
   function onPointerDown(event) {
     if (session || !event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-    const list = /** @type {HTMLElement} */ (event.currentTarget)
     const item = event.target.closest(handleSelector)?.closest(itemSelector)
-    if (!item || item.parentElement !== list) return
+    // Overlay scrollbars can wrap the rows in their own elements inside the bound list.
+    const list = item?.parentElement
+    const host = /** @type {Element} */ (event.currentTarget)
+    if (!list || !host.contains(list)) return
     // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
     event.preventDefault()
     event.stopPropagation()
@@ -69,12 +72,13 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     const ids = items.map(getId)
     Object.assign(session, { started: true, items, ids, indexById: new Map(ids.map((id, index) => [id, index])), sourceIndex })
     measure()
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const source = session.slots[sourceIndex]
     // Keep the card's grab point under the pointer.
     session.grabX = session.startX - origin.left - source.left
     session.grabY = session.startY - origin.top - source.top
-    let scroller = list.parentElement
+    // The list can scroll itself, like the watch page playlist.
+    let scroller = list
     while (scroller && !/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
     session.scroller = scroller ?? document.scrollingElement
     // Cards that render or reflow during the drag move the slots.
@@ -83,8 +87,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
       update()
     })
     items.forEach(element => session.observer.observe(element))
-    // The measured cards no longer match a list that another window changed.
-    session.mutationObserver = new MutationObserver(cancel)
+    session.mutationObserver = new MutationObserver(addItems)
     session.mutationObserver.observe(list, { childList: true })
     document.addEventListener('scroll', update, { capture: true, passive: true })
     document.addEventListener('keydown', cancelFromKeyboard, true)
@@ -94,10 +97,29 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     draggedId.value = session.ids[sourceIndex]
   }
 
+  /**
+   * Takes in the items a next page appends. Any other change, such as another
+   * window removing an item, no longer matches the measured items.
+   * @param {MutationRecord[]} records
+   */
+  function addItems(records) {
+    if (session.dropping) return
+    const items = [...session.list.children].filter(element => element.matches(itemSelector))
+    if (records.some(record => record.removedNodes.length > 0) || session.items.some((element, index) => items[index] !== element)) {
+      cancel()
+      return
+    }
+    const ids = items.map(getId)
+    items.slice(session.items.length).forEach(element => session.observer.observe(element))
+    Object.assign(session, { items, ids, indexById: new Map(ids.map((id, index) => [id, index])) })
+    measure()
+    update()
+  }
+
   /** Layout positions relative to the list, without any translation applied to the cards. */
   function measure() {
     const { list, items } = session
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const slots = items.map(element => {
       const bounds = element.getBoundingClientRect()
       const [x, y] = currentTranslation(element)
@@ -132,7 +154,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     if (!session?.started || session.dropping) return
     const { list, slots, sourceIndex, bounds } = session
     const source = slots[sourceIndex]
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const left = clamp(session.x - origin.left - session.grabX, bounds.left, bounds.right - source.width)
     const top = clamp(session.y - origin.top - session.grabY, bounds.top, bounds.bottom - source.height)
 
@@ -153,12 +175,18 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     applyOffsets([left - source.left, top - source.top])
   }
 
+  function proposedOrder() {
+    const { ids, sourceIndex, targetIndex } = session
+    const order = ids.filter((_, index) => index !== sourceIndex)
+    order.splice(targetIndex, 0, ids[sourceIndex])
+    return order
+  }
+
   /** @param {[number, number] | null} draggedOffset Null places the dragged card in its target slot */
   function applyOffsets(draggedOffset) {
-    const { items, ids, indexById, slots, sourceIndex, targetIndex } = session
+    const { items, ids, indexById, slots, sourceIndex } = session
     const draggedItemId = ids[sourceIndex]
-    const order = ids.filter(id => id !== draggedItemId)
-    order.splice(targetIndex, 0, draggedItemId)
+    const order = proposedOrder()
     const offsets = new Map()
     if (session.linear) {
       const rects = slots.map((slot, index) => ({ id: ids[index], start: slot.top, size: slot.height }))
@@ -227,7 +255,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     await Promise.allSettled(active.items.flatMap(element => element.getAnimations().map(animation => animation.finished)))
     if (session !== active) return
     if (active.targetIndex !== active.sourceIndex) {
-      commit(active.ids[active.sourceIndex], active.targetIndex)
+      commit(active.ids[active.sourceIndex], proposedOrder())
       await nextTick()
     }
     // The cards already show the new order, so clearing their offsets after
@@ -286,6 +314,31 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   onBeforeUnmount(finish)
 
   return { draggedId, onPointerDown }
+}
+
+/**
+ * Where a dropped item goes in the full list, which can hold items the list
+ * does not render: right after the item rendered before it, or right before
+ * the one rendered after it when it was dropped first.
+ * @param {string[]} ids The full list's order
+ * @param {string} id
+ * @param {string[]} order The rendered items' new order
+ * @returns {number} The item's new index, or -1 when its neighbors are missing
+ */
+export function droppedIndex(ids, id, order) {
+  const rest = ids.filter(other => other !== id)
+  const position = order.indexOf(id)
+  const index = position > 0 ? rest.indexOf(order[position - 1]) + 1 : rest.indexOf(order[1])
+  return position > 0 && index === 0 ? -1 : index
+}
+
+/**
+ * Where the list's content starts on screen, so positions stay put when the list scrolls itself.
+ * @param {Element} list
+ */
+function contentOrigin(list) {
+  const bounds = list.getBoundingClientRect()
+  return { left: bounds.left - list.scrollLeft, top: bounds.top - list.scrollTop }
 }
 
 /** @param {Element} element */

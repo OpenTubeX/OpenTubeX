@@ -579,6 +579,55 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await watch.dispose()
 })
 
+test('drags watch playlist videos while the other rows slide aside', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  // Keep the playlist beside the video at every UI scale, so the page itself does not scroll.
+  if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+  const watch = await openPlaylist(app, page)
+  const rows = page.locator('.watchVideoPlaylist .playlistItem')
+  const titles = rows.locator('.h3Title')
+  const handle = await rows.nth(1).locator('.videoIndexArea').boundingBox()
+  const first = await rows.first().boundingBox()
+  const second = await rows.nth(1).boundingBox()
+  const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(start.x, start.y + first.y - second.y, { steps: 8 })
+  await expect(rows.nth(1)).toHaveClass(/reorderDragged/)
+  // The rows keep their DOM order and slide aside until the drop.
+  await expect(titles.first()).toHaveText('Playlist video 1')
+  await expect.poll(async () => (await rows.first().boundingBox()).y).toBeCloseTo(second.y + second.height - first.height, 0)
+  await page.mouse.up()
+  await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+  await expect(titles.first()).toHaveText('Playlist video 2')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.slice(0, 3).map(video => video.title)))
+    .toEqual(['Playlist video 2', 'Playlist video 1', 'Playlist video 3'])
+  await watch.dispose()
+})
+
+test('scrolls the watch playlist while a dragged video nears its edge', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  // Keep the playlist beside the video at every UI scale, so the page itself does not scroll.
+  if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+  const watch = await openPlaylist(app, page)
+  const panel = page.locator('.watchVideoPlaylist .playlistItemsWrapper')
+  const rows = page.locator('.watchVideoPlaylist .playlistItem')
+  const handle = await rows.nth(1).locator('.videoIndexArea').boundingBox()
+  const bounds = await panel.boundingBox()
+  const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(start.x, bounds.y + bounds.height - 4, { steps: 8 })
+  await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBeGreaterThan(200)
+  // The dragged row stays under the pointer while the panel scrolls.
+  const dragged = await page.locator('.reorderDragged').boundingBox()
+  expect(dragged.y + dragged.height).toBeGreaterThan(bounds.y + bounds.height - dragged.height)
+  await page.mouse.up()
+  await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+  const storedIndex = () => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.findIndex(video => video.title === 'Playlist video 2'))
+  await expect.poll(storedIndex).toBeGreaterThan(3)
+  await expect(rows.nth(await storedIndex()).locator('.h3Title')).toHaveText('Playlist video 2')
+  await watch.dispose()
+})
+
 test('playlist saves retain available view counts across restart', async ({ app, page }) => {
   await openPlaylist(app, page)
   await page.evaluate(async () => {

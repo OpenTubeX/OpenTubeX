@@ -248,7 +248,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, nextTick, ref, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -273,7 +273,7 @@ import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS as SORT_BY_OPTIONS } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
-import { useGridReorder } from '../../composables/useGridReorder'
+import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
 
 const { locale, t } = useI18n()
 const { tabId } = useTabContext()
@@ -357,14 +357,15 @@ async function movePlaylist(id, getTargetIndex) {
   // Show the move before the setting is saved, so repeated keys build on it.
   tempCustomOrder.value = ids
   await store.dispatch('updateUserPlaylistsCustomOrder', ids)
-  if (tempCustomOrder.value === ids) tempCustomOrder.value = null
+  // The ref holds a reactive copy, so compare the original array.
+  if (toRaw(tempCustomOrder.value) === ids) tempCustomOrder.value = null
 }
 
 const { draggedId: draggedPlaylistId, onPointerDown: startPlaylistDrag } = useGridReorder({
   itemSelector: '[data-playlist-drag-item]',
   handleSelector: '.grabBar',
   getId: item => item.dataset.videoId,
-  commit: (id, index) => movePlaylist(id, () => index)
+  commit: (id, order) => movePlaylist(id, () => droppedIndex(allPlaylists.value.map(playlistKey), id, order))
 })
 
 const showRepairPrompt = ref(false)
