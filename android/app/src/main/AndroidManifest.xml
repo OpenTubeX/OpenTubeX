@@ -6,13 +6,14 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
-    <!-- DLNA uses HTTP at runtime-discovered LAN IPs and loopback relay ports.
-         Network Security Config domain rules cannot match arbitrary LAN IP ranges,
-         so a static allowlist would break discovery on other networks. Native
-         control requests are pinned to SSDP responders, refuse redirects and do
-         not send app cookies; media relays accept only the selected renderer. -->
+    <!-- The network security config permits cleartext because DLNA uses HTTP at
+         runtime-discovered LAN IPs and loopback relay ports. Domain rules cannot
+         match arbitrary LAN IP ranges, so a static allowlist would break discovery
+         on other networks. Native control requests are pinned to SSDP responders,
+         refuse redirects and do not send app cookies; media relays accept only the
+         selected renderer. -->
     <application
-        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:name=".OpenTubeXApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
