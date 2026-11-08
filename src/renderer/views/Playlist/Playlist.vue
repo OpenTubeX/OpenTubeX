@@ -1539,10 +1539,12 @@ async function saveDraggedOrder(items) {
   }
 }
 
-// Videos removed during a drag wait until it ends and its order is saved.
+// Videos removed during a drag wait until it ends and every order it saves is saved.
 watch(isVideoDragging, async dragging => {
   if (dragging || !removePendingVideosAfterDrag) return
-  await draggedOrderSave
+  for (let save = draggedOrderSave; save; save = draggedOrderSave) await save
+  // A later drag can start meanwhile and handle the removal once it ends.
+  if (isVideoDragging.value || !removePendingVideosAfterDrag) return
   removePendingVideosAfterDrag = false
   await removeToBeDeletedVideosSometimes()
 })
