@@ -191,8 +191,9 @@
           </template>
           <template v-else>
             <FtButton
-              v-if="isUserPlaylist"
+              v-if="inActionRow('edit')"
               class="actionButton"
+              data-overflow-key="edit"
               :title="t('User Playlists.Edit Playlist Info')"
               :icon="['fas', 'edit']"
               theme="secondary"
@@ -203,8 +204,9 @@
               </template>
             </FtButton>
             <FtButton
-              v-else-if="showPlaylists"
+              v-if="inActionRow('save')"
               class="actionButton"
+              data-overflow-key="save"
               :title="isPlaylistBookmarked ? t('User Playlists.Remove Saved Playlist') : t('User Playlists.Save Playlist')"
               :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
               :selected="isPlaylistBookmarked"
@@ -217,8 +219,9 @@
               </template>
             </FtButton>
             <FtButton
-              v-if="videoCount > 0"
+              v-if="inActionRow('queue')"
               class="actionButton"
+              data-overflow-key="queue"
               :title="t('Playlist.Add Playlist to Queue')"
               :disabled="queueSnapshotPending"
               :aria-busy="queueSnapshotPending"
@@ -233,8 +236,9 @@
               <span class="buttonLabel">{{ t('Video.Add to Queue') }}</span>
             </FtButton>
             <FtButton
-              v-if="supportsYtDlp && enableDownloads && videoCount > 0"
+              v-if="inActionRow('download')"
               class="actionButton"
+              data-overflow-key="download"
               :title="t('Downloads.Download Playlist')"
               :icon="['fas', 'download']"
               theme="secondary"
@@ -272,13 +276,13 @@
               class="actionButton"
               :title="t('Video.More Options')"
               aria-haspopup="menu"
-              :aria-busy="addingMissingVideosPending"
+              :aria-busy="moreOptionsPending"
               theme="secondary"
               @click="openMoreOptionsMenu"
             >
               <FtIcon
-                :icon="addingMissingVideosPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
-                :spin="addingMissingVideosPending"
+                :icon="moreOptionsPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
+                :spin="moreOptionsPending"
                 aria-hidden="true"
               />
               <span class="buttonLabel">{{ t('More') }}</span>
@@ -681,11 +685,47 @@ function togglePinnedToNavigation() {
 const SEPARATOR = { type: 'separator' }
 
 /**
+ * The actions of the action row that move to the More menu when even their
+ * icons do not fit on one line, keyed by name.
+ */
+const rowActions = computed(() => ({
+  edit: {
+    visible: isUserPlaylist.value,
+    label: t('User Playlists.Edit Playlist Info'),
+    icon: ['fas', 'edit'],
+    run: enterEditMode,
+  },
+  save: {
+    visible: !isUserPlaylist.value && showPlaylists.value,
+    label: props.isPlaylistBookmarked ? t('User Playlists.Remove Saved Playlist') : t('User Playlists.Save Playlist'),
+    icon: props.isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark'],
+    enabled: !props.playlistBookmarkPending,
+    run: () => emit('toggle-playlist-bookmark'),
+  },
+  queue: {
+    visible: props.videoCount > 0,
+    label: t('Playlist.Add Playlist to Queue'),
+    icon: ['fas', 'add-to-queue'],
+    enabled: !queueSnapshotPending.value,
+    run: addPlaylistToQueue,
+  },
+  download: {
+    visible: supportsYtDlp && enableDownloads.value && props.videoCount > 0,
+    label: t('Downloads.Download Playlist'),
+    icon: ['fas', 'download'],
+    run: () => { showDownloadPrompt.value = true },
+  },
+}))
+
+// The order in which the row's actions move to the More menu
+const ROW_ACTION_OVERFLOW_ORDER = ['download', 'queue', 'save', 'edit']
+
+/**
  * Less frequent actions for the overflow menu, grouped by separators. The menu
  * drops leading, trailing, and repeated separators.
  * @type {import('vue').ComputedRef<object[]>}
  */
-const moreMenuItems = computed(() => {
+const ownMenuItems = computed(() => {
   const items = []
   const hasVideos = props.videoCount > 0
 
@@ -747,13 +787,29 @@ const moreMenuItems = computed(() => {
     })
   }
 
-  return items.map(item => ({ enabled: true, ...item }))
+  return items
 })
 
 const moreOptionsButton = useTemplateRef('moreOptionsButton')
 
-// Labels collapse to icons from the end instead of wrapping the actions onto a second row
-useFittedButtonLabels(useTemplateRef('playlistOptions'), useTemplateRef('actionRow'))
+// Labels collapse to icons from the end instead of wrapping the actions onto a
+// second row. If even the icons do not fit, actions move to the More menu.
+const { overflowed: overflowedRowActions } = useFittedButtonLabels(useTemplateRef('playlistOptions'), useTemplateRef('actionRow'),
+  () => editMode.value ? [] : ROW_ACTION_OVERFLOW_ORDER.filter(key => rowActions.value[key].visible))
+
+/** @param {string} key */
+function inActionRow(key) {
+  return rowActions.value[key].visible && !overflowedRowActions.value.includes(key)
+}
+
+/** @type {import('vue').ComputedRef<object[]>} */
+const moreMenuItems = computed(() => {
+  // Moved actions lead the menu in their order in the row
+  const moved = Object.entries(rowActions.value)
+    .filter(([key]) => overflowedRowActions.value.includes(key))
+    .map(([, { label, icon, enabled = true, run }]) => ({ label, icon, enabled, run }))
+  return [...moved, SEPARATOR, ...ownMenuItems.value].map(item => ({ enabled: true, ...item }))
+})
 
 function openMoreOptionsMenu() {
   openButtonMenu(moreOptionsButton.value.$el, moreMenuItems, props.title)
@@ -818,6 +874,8 @@ const unavailableVideoScan = computed(() => unavailableVideoScans.get(props.id))
 
 const queueSnapshotPending = ref(false)
 let queueSnapshot
+// Adding missing videos starts from the menu, as does adding to the queue when that action moved there
+const moreOptionsPending = computed(() => addingMissingVideosPending.value || (queueSnapshotPending.value && !inActionRow('queue')))
 
 function cancelQueueSnapshot() {
   queueSnapshot?.cancel()
