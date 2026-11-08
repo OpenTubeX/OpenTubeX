@@ -496,6 +496,11 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Link Underlines:
+      Link Underlines: "Nuorodų pabraukimas"
+      On Hover: "Pabraukti nuorodas užvedus žymeklį"
+      Never: "Niekada nepabraukti nuorodų"
+      Always: "Visada pabraukti nuorodas"
     Limit Titles to Two Lines: "Riboti pavadinimus iki dviejų eilučių"
     Close Window With Last Tab: 'Uždaryti langą uždarius paskutinį skirtuką'
     Preferred Video Codec: Pageidaujamas vaizdo kodekas

@@ -385,6 +385,11 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Link Underlines:
+      Link Underlines: "קו תחתון לקישורים"
+      On Hover: "הוספת קו תחתון לקישורים בריחוף"
+      Never: "לעולם לא להוסיף קו תחתון לקישורים"
+      Always: "תמיד להוסיף קו תחתון לקישורים"
     Limit Titles to Two Lines: "הגבלת כותרות לשתי שורות"
     Close Window With Last Tab: 'סגירת החלון בעת סגירת הלשונית האחרונה'
     Preferred Video Codec: מקודד וידאו מועדף

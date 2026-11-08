@@ -31,6 +31,7 @@ const GENERAL_APPEARANCE_KEYS = new Set([
   'Data Saver Thumbnails',
   'Grid Columns',
   'Limit Titles to Two Lines',
+  'Link Underlines',
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',

@@ -362,6 +362,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     thumbnailPreference: '',
     thumbnailDataSaver: false,
     limitTitlesToTwoLines: true,
+    linkUnderline: 'hover',
     showThumbnailPreviews: true,
     showVideoMenuButton: false,
     thumbnailSize: DEFAULT_THUMBNAIL_SIZE,

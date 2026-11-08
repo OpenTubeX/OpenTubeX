@@ -416,6 +416,11 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Link Underlines:
+      Link Underlines: "Substrekado de ligiloj"
+      On Hover: "Substreki ligilojn dum ŝvebado"
+      Never: "Neniam substreki ligilojn"
+      Always: "Ĉiam substreki ligilojn"
     Limit Titles to Two Lines: "Limigi titolojn al du linioj"
     Preferred Video Codec: Preferata videokodeko
     Enable Tabs: Ŝalti langetojn

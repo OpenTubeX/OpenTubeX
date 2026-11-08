@@ -380,6 +380,11 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Link Underlines:
+      Link Underlines: "Gạch chân liên kết"
+      On Hover: "Gạch chân liên kết khi di chuột qua"
+      Never: "Không bao giờ gạch chân liên kết"
+      Always: "Luôn gạch chân liên kết"
     Limit Titles to Two Lines: "Giới hạn tiêu đề trong hai dòng"
     Close Window With Last Tab: 'Đóng cửa sổ khi đóng thẻ cuối cùng'
     Preferred Video Codec: Codec video ưu tiên

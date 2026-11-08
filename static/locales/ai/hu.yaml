@@ -380,6 +380,11 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Link Underlines:
+      Link Underlines: "Hivatkozások aláhúzása"
+      On Hover: "Hivatkozások aláhúzása rámutatáskor"
+      Never: "Soha ne húzza alá a hivatkozásokat"
+      Always: "Mindig húzza alá a hivatkozásokat"
     Limit Titles to Two Lines: "Címek korlátozása két sorra"
     Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
     Preferred Video Codec: Előnyben részesített videokodek

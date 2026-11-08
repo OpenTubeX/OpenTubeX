@@ -381,6 +381,11 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Garis bawah tautan"
+      On Hover: "Garis bawahi tautan saat kursor di atasnya"
+      Never: "Jangan pernah garis bawahi tautan"
+      Always: "Selalu garis bawahi tautan"
     Limit Titles to Two Lines: "Batasi judul menjadi dua baris"
     Close Window With Last Tab: 'Tutup jendela saat menutup tab terakhir'
     Preferred Video Codec: Codec video pilihan

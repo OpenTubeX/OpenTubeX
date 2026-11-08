@@ -380,6 +380,11 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Link Underlines:
+      Link Underlines: "链接下划线"
+      On Hover: "悬停时为链接添加下划线"
+      Never: "从不为链接添加下划线"
+      Always: "始终为链接添加下划线"
     Limit Titles to Two Lines: "标题最多显示两行"
     Close Window With Last Tab: '关闭最后一个标签页时关闭窗口'
     Preferred Video Codec: 首选视频编解码器

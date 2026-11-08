@@ -506,6 +506,11 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Link Underlines:
+      Link Underlines: "Podčrtovanje povezav"
+      On Hover: "Podčrtaj povezave ob prehodu s kazalcem"
+      Never: "Nikoli ne podčrtaj povezav"
+      Always: "Vedno podčrtaj povezave"
     Limit Titles to Two Lines: "Omeji naslove na dve vrstici"
     Close Window With Last Tab: 'Zapri okno ob zaprtju zadnjega zavihka'
     Preferred Video Codec: Prednostni video kodek

@@ -380,6 +380,11 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Link Underlines:
+      Link Underlines: "連結底線"
+      On Hover: "游標停留時為連結加上底線"
+      Never: "永不為連結加上底線"
+      Always: "一律為連結加上底線"
     Limit Titles to Two Lines: "標題最多顯示兩行"
     Close Window With Last Tab: '關閉最後一個分頁時關閉視窗'
     Preferred Video Codec: 偏好的影片編解碼器

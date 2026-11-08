@@ -461,6 +461,11 @@ Settings:
       Description: Wische horizontal über ein Video-Vorschaubild und lasse los, um die ausgewählte Aktion auszuführen.
     Data Saver Thumbnails: "Datensparende Vorschaubilder"
     Limit Titles to Two Lines: Titel auf zwei Zeilen begrenzen
+    Link Underlines:
+      Link Underlines: Link-Unterstreichung
+      On Hover: Links beim Darüberfahren unterstreichen
+      Never: Links nie unterstreichen
+      Always: Links immer unterstreichen
     Use tray icon: "Symbol im Infobereich verwenden"
     Close to system tray: "Beim Schließen in den Infobereich minimieren"
     Tray required for background refresh: "Das Symbol im Infobereich ist erforderlich, solange die Hintergrundaktualisierung von Abonnements aktiviert ist."

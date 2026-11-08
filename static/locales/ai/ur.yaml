@@ -430,6 +430,11 @@ Settings:
       Network: نیٹ ورک
       Disk: ڈسک
   General Settings:
+    Link Underlines:
+      Link Underlines: "لنک انڈر لائن"
+      On Hover: "ماؤس لے جانے پر لنکس کو انڈر لائن کریں"
+      Never: "لنکس کو کبھی انڈر لائن نہ کریں"
+      Always: "لنکس کو ہمیشہ انڈر لائن کریں"
     Limit Titles to Two Lines: "عنوانات کو دو سطروں تک محدود کریں"
     Preferred Video Codec: ترجیحی ویڈیو کوڈیک
     Enable Tabs: ٹیبز فعال کریں

@@ -382,6 +382,11 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Keçidlərin altından xətt"
+      On Hover: "Üzərinə gəldikdə keçidlərin altından xətt çək"
+      Never: "Keçidlərin altından heç vaxt xətt çəkmə"
+      Always: "Keçidlərin altından həmişə xətt çək"
     Limit Titles to Two Lines: "Başlıqları iki sətirlə məhdudlaşdır"
     Close Window With Last Tab: 'Son tab bağlananda pəncərəni bağla'
     Preferred Video Codec: Üstünlük verilən video kodeki

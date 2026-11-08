@@ -381,6 +381,11 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Link Underlines:
+      Link Underlines: "Sublinierea linkurilor"
+      On Hover: "Subliniază linkurile la trecerea cursorului"
+      Never: "Nu sublinia niciodată linkurile"
+      Always: "Subliniază întotdeauna linkurile"
     Limit Titles to Two Lines: "Limitează titlurile la două rânduri"
     Close Window With Last Tab: 'Închide fereastra la închiderea ultimei file'
     Preferred Video Codec: Codec video preferat

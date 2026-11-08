@@ -725,6 +725,10 @@
     "ri": "tv-line",
     "material": "tv-outline-rounded"
   },
+  "underline": {
+    "ri": "underline",
+    "material": "format-underlined-rounded"
+  },
   "undo": {
     "ri": "arrow-go-back-line",
     "material": "undo-rounded"

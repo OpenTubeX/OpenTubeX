@@ -2025,6 +2025,7 @@ onBeforeUnmount(() => {
   removeCapacitorTabPreviews?.()
   removeCapacitorTabAvatars?.()
   document.documentElement.classList.remove('hideOutlines', 'limitTitlesToTwoLines')
+  delete document.documentElement.dataset.linkUnderline
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
@@ -2538,6 +2539,10 @@ watch(outlinesHidden, hidden => {
 // On <html>, like hideOutlines, so every list in the document matches.
 watch(() => store.getters.getLimitTitlesToTwoLines, limit => {
   document.documentElement.classList.toggle('limitTitlesToTwoLines', limit)
+}, { flush: 'sync', immediate: true })
+
+watch(() => store.getters.getLinkUnderline, value => {
+  document.documentElement.dataset.linkUnderline = value
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()

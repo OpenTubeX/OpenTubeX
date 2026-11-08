@@ -543,6 +543,11 @@ Settings:
   Return to Settings Menu: Keer terug na instellingskieslys
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
+    Link Underlines:
+      Link Underlines: "Skakelonderstreping"
+      On Hover: "Onderstreep skakels wanneer die wyser daaroor beweeg"
+      Never: "Onderstreep skakels nooit"
+      Always: "Onderstreep skakels altyd"
     Limit Titles to Two Lines: "Beperk titels tot twee reëls"
     Preferred Video Codec: Voorkeur-videokodek
     Enable Tabs: Aktiveer oortjies

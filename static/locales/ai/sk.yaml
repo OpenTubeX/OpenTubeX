@@ -380,6 +380,11 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Podčiarknutie odkazov"
+      On Hover: "Podčiarkovať odkazy pri prechode myšou"
+      Never: "Nikdy nepodčiarkovať odkazy"
+      Always: "Vždy podčiarkovať odkazy"
     Limit Titles to Two Lines: "Obmedziť názvy na dva riadky"
     Close Window With Last Tab: 'Zavrieť okno pri zatvorení poslednej karty'
     Preferred Video Codec: Preferovaný videokodek

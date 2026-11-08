@@ -514,6 +514,11 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Link Underlines:
+      Link Underlines: "Subratllat dels enllaços"
+      On Hover: "Subratlla els enllaços en passar-hi el cursor"
+      Never: "No subratllis mai els enllaços"
+      Always: "Subratlla sempre els enllaços"
     Limit Titles to Two Lines: "Limita els títols a dues línies"
     Close Window With Last Tab: 'Tanca la finestra en tancar l’última pestanya'
     Preferred Video Codec: Còdec de vídeo preferit

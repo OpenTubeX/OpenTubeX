@@ -380,6 +380,11 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Understreking av lenker"
+      On Hover: "Understrek lenker når pekeren holdes over"
+      Never: "Aldri understrek lenker"
+      Always: "Alltid understrek lenker"
     Limit Titles to Two Lines: "Begrens titler til to linjer"
     Close Window With Last Tab: 'Lukk vinduet når den siste fanen lukkes'
     Preferred Video Codec: Foretrukket videokodek

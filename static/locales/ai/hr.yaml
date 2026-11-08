@@ -383,6 +383,11 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Link Underlines:
+      Link Underlines: "Podcrtavanje poveznica"
+      On Hover: "Podcrtaj poveznice pri prelasku pokazivačem"
+      Never: "Nikad ne podcrtavaj poveznice"
+      Always: "Uvijek podcrtaj poveznice"
     Limit Titles to Two Lines: "Ograniči naslove na dva retka"
     Close Window With Last Tab: 'Zatvori prozor pri zatvaranju posljednje kartice'
     Preferred Video Codec: Preferirani videokodek
