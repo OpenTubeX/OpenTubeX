@@ -11,15 +11,15 @@ export function getVideoThumbnailSource(src, dataSaver = false) {
 
 /**
  * Smaller versions of the same YouTube thumbnail, including Invidious proxies.
- * Preserve query parameters and leave portraits, chosen frames, and custom
- * thumbnails alone.
+ * Shorts without a selected portrait thumbnail fall back to their middle frame.
+ * Preserve query parameters and leave chosen frames and custom thumbnails alone.
  * @param {string} src
  * @returns {string | null}
  */
 export function getVideoThumbnailFallbackUrl(src) {
-  const qualities = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault']
-  const match = src.match(/\/vi(?:_webp)?\/[^/?]+\/(maxresdefault|sddefault|hqdefault)\.(?:jpg|webp)(?=[?#]|$)/)
+  const fallbacks = { maxresdefault: 'sddefault', sddefault: 'hqdefault', hqdefault: 'mqdefault', oardefault: 'oar2' }
+  const match = src.match(/\/vi(?:_webp)?\/[^/?]+\/(maxresdefault|sddefault|hqdefault|oardefault)\.(?:jpg|webp)(?=[?#]|$)/)
   if (!match) return null
 
-  return src.replace(match[0], match[0].replace(match[1], qualities[qualities.indexOf(match[1]) + 1]))
+  return src.replace(match[0], match[0].replace(match[1], fallbacks[match[1]]))
 }
