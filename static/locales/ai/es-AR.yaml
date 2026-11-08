@@ -919,6 +919,7 @@ Settings:
     Enable Skip Silence by Default: Activar la omisión de silencios de forma predeterminada
     Enable Video Zoom: Activar el zoom del video
     Enable Seek History: Activar el historial de saltos
+    Show Seek Bar Filmstrip: "Mostrar tira de fotogramas de la barra de búsqueda"
     Voice-over Translation:
       Title: Traducción por voz superpuesta
       Attribution: (con tecnología de Yandex)
@@ -2614,6 +2615,7 @@ Tooltips:
     Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
     Enable Seek History: Recuerda desde dónde saltaste en cada video hasta que se cierre la app. Muestra la lista del historial de saltos en el menú de configuración del reproductor y activa sus atajos de teclado.
+    Show Seek Bar Filmstrip: "Al arrastrar el control de la barra de búsqueda se muestra una tira de fotogramas alrededor de donde vas a llegar, y arrastrar hacia arriba sobre ella te permite buscar con precisión. Si está desactivado, al arrastrar se muestra una sola miniatura, como al pasar el cursor por encima."
     Voice-over Translation: Cuando solicitas una traducción, envía el ID, la duración y el idioma seleccionado del video al servicio no oficial de traducción por voz superpuesta de Yandex. Está desactivado de forma predeterminada.
     Hold to Double Playback Speed: Mantené pulsada la barra espaciadora o el botón izquierdo del mouse sobre el reproductor para duplicar temporalmente la velocidad de reproducción actual.
     Ambient Mode: Mezcla los colores del video con el área que rodea al reproductor.

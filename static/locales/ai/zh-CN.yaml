@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: 默认启用“跳过静音片段”
     Enable Video Zoom: 启用视频缩放
     Enable Seek History: 启用跳转历史
+    Show Seek Bar Filmstrip: "显示进度条帧画面条"
     Voice-over Translation:
       Title: 旁白翻译
       Attribution: （由 Yandex 提供支持）
@@ -2152,6 +2153,7 @@ Tooltips:
     Enable Skip Silence by Default: 为新标签页启用跳过静音。在一个标签页中更改此设置不会影响其他标签页。
     Enable Video Zoom: 在播放器的设置菜单中显示缩放控件，并启用其键盘快捷键和平移控件。
     Enable Seek History: 在应用关闭前记住你在每个视频中从哪里跳转。在播放器设置菜单中显示跳转历史列表，并启用其键盘快捷键。
+    Show Seek Bar Filmstrip: "拖动进度条滑块时，会显示目标位置附近的一排帧画面，向上拖到其上即可精确定位。停用后，拖动时只显示一张缩略图，与悬停时相同。"
     Voice-over Translation: 请求翻译时，将视频 ID、时长和所选语言发送到非官方 Yandex 配音翻译服务。默认禁用。
     Hold to Double Playback Speed: 将鼠标指针置于播放器上并按住空格键或鼠标左键，可暂时将当前播放速度加倍。
     Ambient Mode: 将视频色彩融合到播放器周围区域。

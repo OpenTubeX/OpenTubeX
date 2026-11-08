@@ -842,6 +842,7 @@ Settings:
     Enable Skip Silence by Default: Səssiz hissələri keçməni ilkin olaraq aktivləşdir
     Enable Video Zoom: Videonun yaxınlaşdırılmasını aktivləşdir
     Enable Seek History: Keçid tarixçəsini aktivləşdir
+    Show Seek Bar Filmstrip: "İrəliləmə zolağı kadr lentini göstər"
     Continue Playback When Screen Is Locked: Ekran kilidləndikdə oynatmağa davam et
     Voice-over Translation:
       Title: Səsli tərcümə
@@ -2164,6 +2165,7 @@ Tooltips:
     Enable Skip Silence by Default: Yeni vərəqlərdə səssiz hissələrin keçilməsini aktivləşdirir. Bir vərəqdə dəyişdirilməsi digər vərəqlərə təsir etmir.
     Enable Video Zoom: Oynadıcının tənzimləmələr menyusunda miqyas idarəsini göstərir və onun klaviatura qısayollarını və görüntünü sürüşdürmə idarələrini aktivləşdirir.
     Enable Seek History: Tətbiq bağlanana qədər hər videoda haradan keçid etdiyinizi yadda saxlayır. Pleyerin parametrlər menyusunda keçid tarixçəsi siyahısını göstərir və onun klaviatura qısayollarını aktivləşdirir.
+    Show Seek Bar Filmstrip: "İrəliləmə zolağının düyməsini sürüşdürdükdə keçəcəyiniz yerin ətrafındakı kadrlardan ibarət lent göstərilir, onun üzərinə yuxarı çəkmək isə dəqiq keçid edir. Deaktiv edildikdə, sürüşdürmə üzərinə gəldikdə olduğu kimi tək miniatür göstərir."
     Continue Playback When Screen Is Locked: Səsi arxa planda oynatmağa davam edir və Android media idarələrini təmin edir. Tətbiq artıq görünmədikdə oynatmanı dayandırmaq üçün bunu bağlayın.
     Voice-over Translation: Tərcümə istədiyinizdə videonun ID-sini, müddətini və seçilmiş dili qeyri-rəsmi Yandex səsli tərcümə xidmətinə göndərir. İlkin olaraq bağlıdır.
     Hold to Double Playback Speed: Cari oynatma sürətini müvəqqəti ikiqat artırmaq üçün oynadıcı üzərində Boşluq düyməsini və ya siçanın sol düyməsini basıb saxlayın.

@@ -847,6 +847,7 @@ Settings:
     Enable Skip Silence by Default: Activar de maneira predeterminada o salto de silencios
     Enable Video Zoom: Activar a ampliación do vídeo
     Enable Seek History: Activar o historial de saltos
+    Show Seek Bar Filmstrip: "Amosar a tira de fotogramas da barra de busca"
     Voice-over Translation:
       Title: Tradución de voz
       Attribution: (con tecnoloxía de Yandex)
@@ -2212,6 +2213,7 @@ Tooltips:
     Enable Skip Silence by Default: Activa o salto de silencios nas lapelas novas. Cambialo nunha lapela non afecta ás demais.
     Enable Video Zoom: Amosa o control de ampliación no menú de configuración do reprodutor e activa os seus atallos de teclado e controis de desprazamento.
     Enable Seek History: Lembra desde onde saltaches en cada vídeo ata que se peche a aplicación. Mostra a lista do historial de saltos no menú de configuración do reprodutor e activa os seus atallos de teclado.
+    Show Seek Bar Filmstrip: "Ao arrastrar o control da barra de busca amósase unha tira de fotogramas arredor de onde vas chegar, e arrastrar cara arriba sobre ela permite buscar con precisión. Cando está desactivado, ao arrastrar amósase unha soa miniatura, como ao pasar o cursor por riba."
     Voice-over Translation: Ao solicitar unha tradución, envía o ID, a duración e o idioma seleccionado do vídeo ao servizo non oficial de tradución de voz de Yandex. Está desactivado de maneira predeterminada.
     Hold to Double Playback Speed: Mantén premida a barra espazadora ou o botón esquerdo do rato sobre o reprodutor para duplicar temporalmente a velocidade de reprodución actual.
     Ambient Mode: Mestura as cores do vídeo coa zona que rodea o reprodutor.

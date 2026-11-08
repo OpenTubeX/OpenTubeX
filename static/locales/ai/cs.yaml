@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Ve výchozím nastavení přeskakovat ticho
     Enable Video Zoom: Povolit přiblížení videa
     Enable Seek History: Povolit historii přeskoků
+    Show Seek Bar Filmstrip: "Zobrazit filmový pás posuvníku"
     Voice-over Translation:
       Title: Překlad dabingu
       Attribution: (používá Yandex)
@@ -2152,6 +2153,7 @@ Tooltips:
     Enable Skip Silence by Default: Zapne přeskakování ticha pro nové karty. Změna na jedné kartě neovlivní ostatní karty.
     Enable Video Zoom: Zobrazí v nabídce nastavení přehrávače ovládání přiblížení a zapne jeho klávesové zkratky a posouvání obrazu.
     Enable Seek History: Pamatuje si, odkud jste v každém videu přeskočili, dokud aplikaci nezavřete. Zobrazí seznam historie přeskoků v nabídce nastavení přehrávače a povolí její klávesové zkratky.
+    Show Seek Bar Filmstrip: "Tažení jezdce posuvníku zobrazí pás snímků kolem místa, kam se přesunete, a přetažením nahoru na něj můžete posouvat přesně. Je-li vypnuto, tažení zobrazí jedinou miniaturu jako při najetí myší."
     Voice-over Translation: Při požadavku na překlad odešle ID videa, délku a vybraný jazyk neoficiální službě Yandex pro překlad dabingu. Ve výchozím nastavení je vypnuto.
     Hold to Double Playback Speed: Podržením mezerníku nebo levého tlačítka myši nad přehrávačem dočasně zdvojnásobíte aktuální rychlost přehrávání.
     Ambient Mode: Rozšíří barvy videa do prostoru kolem přehrávače.

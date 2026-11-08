@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Luba vaikuse vahelejätmine vaikimisi
     Enable Video Zoom: Luba video suurendamine
     Enable Seek History: Luba kerimisajalugu
+    Show Seek Bar Filmstrip: "Näita kerimisriba kaadririba"
     Voice-over Translation:
       Title: Pealelugemisega tõlge
       Attribution: (Yandexi toel)
@@ -2155,6 +2156,7 @@ Tooltips:
     Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
+    Show Seek Bar Filmstrip: "Kerimisriba nupu lohistamine näitab kaadririba selle koha ümber, kuhu jõuad, ja selle peale üles tõmmates saad täpselt kerida. Kui see on keelatud, näitab lohistamine üht pisipilti nagu kursoriga üle liikudes."
     Voice-over Translation: Tõlkepäringu tegemisel saadab video ID, kestuse ja valitud keele mitteametlikule Yandexi pealelugemise tõlketeenusele. Vaikimisi välja lülitatud.
     Hold to Double Playback Speed: Praeguse esituskiiruse ajutiseks kahekordistamiseks hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
     Ambient Mode: Sulandab video värvid pleieri ümbrusega.

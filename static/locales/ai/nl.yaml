@@ -847,6 +847,7 @@ Settings:
     Enable Skip Silence by Default: Stiltes standaard overslaan
     Enable Video Zoom: Videozoom inschakelen
     Enable Seek History: Spoelgeschiedenis inschakelen
+    Show Seek Bar Filmstrip: "Filmstrip van zoekbalk tonen"
     Voice-over Translation:
       Title: Voice-oververtaling
       Attribution: (mogelijk gemaakt door Yandex)
@@ -2218,6 +2219,7 @@ Tooltips:
     Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
     Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
     Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
+    Show Seek Bar Filmstrip: "Als je de knop van de zoekbalk sleept, verschijnt een strook frames rond de plek waar je uitkomt, en als je omhoog op de strook sleept, zoek je nauwkeurig. Indien uitgeschakeld, toont slepen één miniatuur, zoals bij aanwijzen."
     Voice-over Translation: Stuurt de video-ID, duur en geselecteerde taal naar de onofficiële voice-oververtaaldienst van Yandex wanneer je om een vertaling vraagt. Standaard uitgeschakeld.
     Hold to Double Playback Speed: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk te verdubbelen.
     Ambient Mode: Laat de kleuren van de video overvloeien in het gebied rond de speler.

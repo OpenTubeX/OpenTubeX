@@ -446,6 +446,78 @@ test.describe('with a short interface hide delay', () => {
   })
 })
 
+test.describe('with the filmstrip turned off', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        enableMobileFullscreenSeek: true,
+        showMobileSeekPreview: true,
+        showSeekBarFilmstrip: false
+      }
+    }
+  })
+
+  test('dragging the seek bar knob shows the single thumbnail', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await routeDemoMedia(page)
+    const { video, duration } = await openVideoWithStoryboard(page)
+
+    const player = page.locator('.ftVideoPlayer')
+    const bar = player.locator('.shaka-seek-bar')
+    const filmstrip = player.locator('.ft-seek-filmstrip')
+    const preview = player.locator('.shaka-player-ui-thumbnail-container')
+    const previewImage = preview.locator('.shaka-player-ui-thumbnail-image-container')
+    await player.hover()
+    const bounds = await bar.boundingBox()
+    const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+    const thumbFraction = await bar.evaluate(element => (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min)))
+
+    await page.mouse.move(pointAt(thumbFraction).x, pointAt(thumbFraction).y)
+    await page.mouse.down()
+    await page.mouse.move(pointAt(0.5).x, pointAt(0.5).y, { steps: 4 })
+    await expect(previewImage).toBeVisible()
+    await expect(filmstrip).toBeHidden()
+    await expect(player.locator('.shaka-seek-bar-container')).not.toHaveClass(/ft-seek-filmstrip-active/)
+    // Pulling up over where the strip would be keeps seeking at the bar's scale.
+    await page.mouse.move(pointAt(0.6).x, bounds.y - 60, { steps: 4 })
+    await expect(filmstrip).toBeHidden()
+    await attachScreenshot('single thumbnail while dragging the knob')
+    await page.mouse.up()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.6, 0)
+  })
+
+  test('fullscreen swipe-to-seek shows the single thumbnail and hides it on release', async ({ app, page }) => {
+    const touch = await page.context().newCDPSession(page)
+    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+    await mockPlayableWatchPage(app, page)
+    await routeDemoMedia(page)
+    const { video } = await openVideoWithStoryboard(page)
+    await video.evaluate(element => { element.currentTime = 15 })
+    await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime === 15)).toBe(true)
+    await mockCapacitorPhoneLayout(page)
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    const preview = player.locator('.shaka-player-ui-thumbnail-container')
+    await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown')
+
+    const box = await player.boundingBox()
+    const start = { x: box.x + box.width * 0.35, y: box.y + box.height * 0.4 }
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    for (let step = 1; step <= 5; step++) {
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: start.x + box.width * 0.04 * step, y: start.y }] })
+    }
+    await expect(preview.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
+    await expect(preview.locator('.shaka-player-ui-thumbnail-time')).toHaveText('0:21')
+    await expect(player.locator('.ft-seek-filmstrip')).toBeHidden()
+
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(preview).toHaveCSS('visibility', 'hidden')
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(21)
+  })
+})
+
 test('rebuilding the controls mid-drag ends the drag so play and pause keep working', async ({ app, page }) => {
   // A finger does not focus the bar, so no blur ends its drag when the bar is replaced.
   const touch = await page.context().newCDPSession(page)

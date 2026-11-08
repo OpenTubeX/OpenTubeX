@@ -1012,6 +1012,7 @@ Settings:
     Enable Skip Silence by Default: 무음 구간 건너뛰기를 기본으로 활성화
     Enable Video Zoom: 동영상 확대/축소 활성화
     Enable Seek History: 탐색 기록 활성화
+    Show Seek Bar Filmstrip: "탐색 바 필름 스트립 표시"
     Voice-over Translation:
       Title: 음성 번역
       Attribution: Yandex 제공
@@ -2540,6 +2541,7 @@ Tooltips:
     Enable Skip Silence by Default: 새 탭에서 무음 구간 건너뛰기를 활성화합니다. 한 탭에서 변경해도 다른 탭에는 영향을 주지 않습니다.
     Enable Video Zoom: 플레이어 설정 메뉴에 확대/축소 컨트롤을 표시하고 키보드 단축키와 화면 이동 컨트롤을 활성화합니다.
     Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.
+    Show Seek Bar Filmstrip: "탐색 바 손잡이를 끌면 이동할 위치 주변의 프레임 띠가 표시되고, 그 위로 끌어올리면 정밀하게 탐색할 수 있습니다. 비활성화하면 마우스를 올렸을 때처럼 끄는 동안 썸네일 하나만 표시됩니다."
     Voice-over Translation: 번역을 요청하면 동영상 ID, 재생 시간 및 선택한 언어를 비공식 Yandex 음성 번역 서비스로 전송합니다. 기본적으로 비활성화되어 있습니다.
     Hold to Double Playback Speed: 플레이어 위에서 스페이스바 또는 마우스 왼쪽 버튼을 길게 누르면 현재 재생 속도가 일시적으로 두 배가 됩니다.
     Ambient Mode: 동영상 색상을 플레이어 주변 영역에 혼합합니다.

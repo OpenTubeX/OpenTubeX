@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Sessizliği Atlamayı Varsayılan Olarak Etkinleştir
     Enable Video Zoom: Video Yakınlaştırmayı Etkinleştir
     Enable Seek History: Atlama Geçmişini Etkinleştir
+    Show Seek Bar Filmstrip: "Sarma çubuğu kare şeridini göster"
     Voice-over Translation:
       Title: Seslendirme çevirisi
       Attribution: (Yandex tarafından desteklenmektedir)
@@ -2153,6 +2154,7 @@ Tooltips:
     Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.
+    Show Seek Bar Filmstrip: "Sarma çubuğunun düğmesini sürüklemek, varacağınız yerin çevresindeki karelerden oluşan bir şerit gösterir; şeridin üzerine yukarı çekmek hassas sarma sağlar. Devre dışı bırakıldığında sürükleme, üzerine gelindiğinde olduğu gibi tek bir küçük resim gösterir."
     Voice-over Translation: Çeviri istediğinizde video kimliğini, süresini ve seçili dili resmî olmayan Yandex seslendirme çevirisi hizmetine gönderir. Varsayılan olarak devre dışıdır.
     Hold to Double Playback Speed: Geçerli oynatma hızını geçici olarak ikiye katlamak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
     Ambient Mode: Videonun renklerini oynatıcının çevresindeki alana yayar.

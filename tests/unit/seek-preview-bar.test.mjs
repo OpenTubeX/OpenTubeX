@@ -8,6 +8,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
 
 function fixture() {
   let factory
+  const store = { getters: { getShowSeekBarFilmstrip: true } }
   const window = {}
   class SeekBar {
     constructor(parent, controls) {
@@ -68,6 +69,7 @@ function fixture() {
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
     SeekFilmstrip,
+    store,
     isReducedMotionEnabled: () => false,
     i18n: { global: { t: key => key } },
     window,
@@ -97,7 +99,7 @@ function fixture() {
     bar.setValue(time)
     bar.onChange()
   }
-  return { bar, controls, preview, drag }
+  return { bar, controls, preview, drag, store }
 }
 
 test('ordinary seek bar updates keep following playback', () => {
@@ -196,6 +198,26 @@ test('swipe previews show the seek bar time and filmstrip at the thumb', () => {
   preview(null, true)
   assert.equal(bar.filmstrip.time, null)
   assert.equal(controls.timePreview.style.visibility, 'hidden')
+})
+
+test('with the filmstrip turned off, drags and swipes keep the single thumbnail', () => {
+  const { bar, controls, preview, drag, store } = fixture()
+  store.getters.getShowSeekBarFilmstrip = false
+  bar.filmstrip.element = { getBoundingClientRect: () => ({ top: 0, height: 50, bottom: 50 }) }
+  bar.onChangeStart()
+  controls.listeners.get('window:mousemove')({ clientX: 304, clientY: 0 })
+  drag(20)
+  assert.equal(bar.filmstrip.time, null)
+  drag(25)
+  assert.equal(bar.value, 25, 'Pulling up does not start precise seeking')
+  bar.onChangeEnd()
+
+  controls.timePreview.style.visibility = 'visible'
+  preview(20, true)
+  assert.equal(bar.bar.events.at(-1).type, 'mousemove', 'Swipes still show the seek bar time and thumbnail')
+  assert.equal(bar.filmstrip.time, null)
+  preview(null, true)
+  assert.equal(controls.timePreview.style.visibility, 'hidden', 'The thumbnail hides when the swipe ends')
 })
 
 test('dragging the thumb shows the filmstrip but tapping does not', () => {

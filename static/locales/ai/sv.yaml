@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Hoppa över tystnad som standard
     Enable Video Zoom: Aktivera videozoom
     Enable Seek History: Aktivera hopphistorik
+    Show Seek Bar Filmstrip: "Visa sökfältets filmremsa"
     Voice-over Translation:
       Title: Dubbningsöversättning
       Attribution: (drivs av Yandex)
@@ -2153,6 +2154,7 @@ Tooltips:
     Enable Skip Silence by Default: Aktiverar överhoppning av tystnad för nya flikar. En ändring i en flik påverkar inte andra flikar.
     Enable Video Zoom: Visar zoomkontrollen i spelarens inställningsmeny och aktiverar dess kortkommandon och panoreringskontroller.
     Enable Seek History: Kommer ihåg var du hoppade ifrån i varje video tills appen stängs. Visar hopphistoriklistan i spelarens inställningsmeny och aktiverar dess kortkommandon.
+    Show Seek Bar Filmstrip: "När du drar i sökfältets reglage visas en remsa med bildrutor runt platsen där du hamnar, och drar du uppåt på den spolar du exakt. När detta är avaktiverat visar dragningen en enda miniatyrbild, som när du håller pekaren över."
     Voice-over Translation: Skickar videons ID, längd och valt språk till Yandex inofficiella tjänst för dubbningsöversättning när du begär en översättning. Funktionen är inaktiverad som standard.
     Hold to Double Playback Speed: Håll ned mellanslagstangenten eller vänster musknapp över spelaren för att tillfälligt dubbla den aktuella uppspelningshastigheten.
     Ambient Mode: Tonar ut videons färger i området runt spelaren.

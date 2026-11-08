@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Gaitu isiluneak saltatzea modu lehenetsian
     Enable Video Zoom: Gaitu bideoaren zooma
     Enable Seek History: Gaitu jauzien historia
+    Show Seek Bar Filmstrip: "Erakutsi bilaketa-barraren fotograma-zerrenda"
     Voice-over Translation:
       Title: Ahots bidezko itzulpena
       Attribution: (Yandexek eskainia)
@@ -2162,6 +2163,7 @@ Tooltips:
     Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
+    Show Seek Bar Filmstrip: "Bilaketa-barraren kontrola arrastatzean, iritsiko zaren lekuaren inguruko fotograma-zerrenda bat erakusten da, eta haren gainera gora arrastatuz gero zehatz bilatzen da. Desgaituta dagoenean, arrastatzean irudi txiki bakarra erakusten da, gainetik pasatzean bezala."
     Voice-over Translation: Itzulpena eskatzean bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio Yandexen ahots bidezko itzulpen-zerbitzu ez-ofizialari. Modu lehenetsian desgaituta dago.
     Hold to Double Playback Speed: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako bikoizteko.
     Ambient Mode: Bideoaren koloreak erreproduzigailuaren inguruan hedatzen ditu.

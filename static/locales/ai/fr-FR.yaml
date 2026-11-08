@@ -836,6 +836,7 @@ Settings:
     Enable Skip Silence by Default: Ignorer les silences par défaut
     Enable Video Zoom: Activer le zoom vidéo
     Enable Seek History: Activer l'historique des sauts
+    Show Seek Bar Filmstrip: "Afficher la bande d’images de la barre de progression"
     Voice-over Translation:
       Title: Traduction vocale
       Attribution: (par Yandex)
@@ -2151,6 +2152,7 @@ Tooltips:
     Enable Skip Silence by Default: Active les silences ignorés pour les nouveaux onglets. Toute modification dans un onglet reste sans effet sur les autres.
     Enable Video Zoom: Affiche la commande Zoom dans le menu des paramètres du lecteur et active ses raccourcis clavier ainsi que ses commandes de déplacement.
     Enable Seek History: Mémorise les endroits d'où vous avez sauté dans chaque vidéo jusqu'à la fermeture de l'application. Affiche la liste de l'historique des sauts dans le menu des paramètres du lecteur et active ses raccourcis clavier.
+    Show Seek Bar Filmstrip: "Faire glisser le curseur de la barre de progression affiche une bande d’images autour de l’endroit où vous arriverez, et glisser vers le haut dessus permet une recherche précise. Lorsque cette option est désactivée, le glissement affiche une seule miniature, comme lors du survol."
     Voice-over Translation: Envoie l’identifiant de la vidéo, sa durée et la langue sélectionnée au service non officiel de traduction vocale Yandex lorsque vous demandez une traduction. Cette option est désactivée par défaut.
     Hold to Double Playback Speed: Maintenez la barre d’espace ou le bouton gauche de la souris sur le lecteur pour doubler temporairement la vitesse de lecture actuelle.
     Ambient Mode: Diffuse les couleurs de la vidéo dans la zone qui entoure le lecteur.
