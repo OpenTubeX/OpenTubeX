@@ -168,19 +168,27 @@ test.describe('desktop quick settings animation', () => {
   test('cleans up when switching layouts during a close animation', async ({ page }) => {
     await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
     const menu = page.locator('.quickSettingsMenu')
+    // Freeze the document timeline so the close animation is still running when
+    // the layout switches, however long the steps in between take.
+    const cdp = await page.context().newCDPSession(page)
     for (const closingPhoneSheet of [false, true]) {
       await page.locator('.profileTrigger').click()
       await menu.locator('.profileSummary').click()
-      if (closingPhoneSheet) {
-        await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
-      } else {
-        await page.locator('.profileTrigger').click()
+      await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 })
+      try {
+        if (closingPhoneSheet) {
+          await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+        } else {
+          await page.locator('.profileTrigger').click()
+        }
+        await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
+        await expect(menu).toBeAttached()
+        await page.setViewportSize({ width: 1100, height: closingPhoneSheet ? 900 : 480 })
+        await expect(menu).toHaveCount(0)
+        await expect(page.locator('.mobileSheet')).toHaveCount(0)
+      } finally {
+        await cdp.send('Animation.setPlaybackRate', { playbackRate: 1 })
       }
-      await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
-      await expect(menu).toBeAttached()
-      await page.setViewportSize({ width: 1100, height: closingPhoneSheet ? 900 : 480 })
-      await expect(menu).toHaveCount(0)
-      await expect(page.locator('.mobileSheet')).toHaveCount(0)
     }
     await page.locator('.profileTrigger').click()
     await expect(menu.locator('.profileSummary')).toBeVisible()
