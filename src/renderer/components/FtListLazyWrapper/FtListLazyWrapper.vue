@@ -7,17 +7,17 @@
     :class="{
       grid: layout === 'grid',
       list: layout === 'list',
-      draggable: isDraggable,
+      draggable: dragsVideo,
       pointerDragging,
       draggedVideo: isVideoDragging && draggedVideo.videoId === videoData.videoId && draggedVideo.playlistItemId === videoData.playlistItemId,
     }"
-    :draggable="isDraggable && !pointerDragging"
+    :draggable="dragsVideo && !pointerDragging"
     :data-playlist-drag-item="isDraggable ? '' : null"
     :data-video-id="videoData.videoId"
     :data-playlist-item-id="videoData.playlistItemId"
-    @pointerdown.capture="isDraggable && startPointerDrag($event, videoData)"
+    @pointerdown.capture="dragsVideo && startPointerDrag($event, videoData)"
     @keydown="isDraggable && moveWithKeyboard($event, videoData)"
-    v-on="isDraggable ? draggableEventHandlers : {}"
+    v-on="dragsVideo ? draggableEventHandlers : {}"
   >
     <template
       v-if="visible"
@@ -207,6 +207,8 @@ const inUserPlaylist = props.playlistType === 'user'
 const isPlaylistCard = (props.data.type ?? props.dataType) === 'playlist'
 const showGrabBar = computed(() => (inUserPlaylist || isPlaylistCard) && props.videoDraggingPossible)
 const isDraggable = computed(() => showGrabBar.value && (props.canMoveVideoUp || props.canMoveVideoDown))
+// The playlists overview drags its cards with useGridReorder, so they only take keyboard moves here.
+const dragsVideo = computed(() => isDraggable.value && !isPlaylistCard)
 const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,

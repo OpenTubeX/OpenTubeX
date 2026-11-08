@@ -5,6 +5,7 @@
     :item-count="data.length"
     :item-keys="resultKeys"
     :youtube-style-shorts="youtubeStyleShorts"
+    :disable-move-transition="disableMoveTransition"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
@@ -163,6 +164,10 @@ const props = defineProps({
     default: false,
   },
   youtubeStyleShorts: {
+    type: Boolean,
+    default: false,
+  },
+  disableMoveTransition: {
     type: Boolean,
     default: false,
   },

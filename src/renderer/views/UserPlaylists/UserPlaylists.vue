@@ -149,11 +149,9 @@
         :can-move-video-up="canReorder"
         :can-move-video-down="canReorder"
         :playlist-items-length="activeData.length"
-        :dragged-video="draggedPlaylist"
-        :is-video-dragging="draggedPlaylist.videoId != null"
-        @drag-video="draggedPlaylist = $event"
-        @move-dragged-video="onMoveDraggedPlaylist"
-        @drag-video-end="onDragPlaylistEnd"
+        :is-video-dragging="draggedPlaylistId != null"
+        :disable-move-transition="draggedPlaylistId != null"
+        @pointerdown.capture="startPlaylistDrag"
         @move-video-up="id => movePlaylist(id, index => index - 1)"
         @move-video-down="id => movePlaylist(id, index => index + 1)"
         @move-video-to-the-top="id => movePlaylist(id, () => 0)"
@@ -271,10 +269,11 @@ import { playlistRepairRecords } from '../../../playlistRepair'
 import { metadataRepairBusy, repairCookiesConfigured } from '../../helpers/historyRepair'
 import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '../../helpers/playlistRepair'
 
-import { ctrlFHandler, debounce, getIconForSortPreference, throttle } from '../../helpers/utils'
+import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS as SORT_BY_OPTIONS } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
+import { useGridReorder } from '../../composables/useGridReorder'
 
 const { locale, t } = useI18n()
 const { tabId } = useTabContext()
@@ -339,9 +338,8 @@ const allPlaylists = computed(() => {
   return sortUserPlaylists(playlists, sortBy.value, tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder, cachedCollator.value)
 })
 
-/** @type {import('vue').Ref<string[] | null>} Order shown while dragging, saved on drop */
+/** @type {import('vue').Ref<string[] | null>} Order shown until a move is saved */
 const tempCustomOrder = ref(null)
-const draggedPlaylist = ref({ videoId: null, playlistItemId: null })
 const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')
 
 /**
@@ -362,58 +360,12 @@ async function movePlaylist(id, getTargetIndex) {
   if (tempCustomOrder.value === ids) tempCustomOrder.value = null
 }
 
-/**
- * @param {import('../../helpers/dragAndDrop').VideoData} target
- * @param {import('../../helpers/dragAndDrop').VideoData} source
- */
-function moveDraggedPlaylistTemporarily(target, source) {
-  pendingNativeDragMove = null
-  // The cards glide after a move, so the cursor can enter the same target again.
-  // Moving onto it twice would undo the first move. Pointer drags track this themselves.
-  if (!source.pointerDragging && target.videoId === lastNativeDragTargetId) return
-  const ids = tempCustomOrder.value?.slice() ?? allPlaylists.value.map(playlistKey)
-  const targetIndex = ids.indexOf(target.videoId)
-  const sourceIndex = ids.indexOf(source.videoId)
-  if (targetIndex === -1 || sourceIndex === -1) return
-
-  ids.splice(sourceIndex, 1)
-  ids.splice(targetIndex, 0, source.videoId)
-  tempCustomOrder.value = ids
-  lastNativeDragTargetId = target.videoId
-}
-
-/** @type {string | null} Playlist the natively dragged card last moved onto */
-let lastNativeDragTargetId = null
-
-/** @type {Parameters<typeof moveDraggedPlaylistTemporarily> | null} Latest native target skipped by the throttle */
-let pendingNativeDragMove = null
-
-// Native drags fire repeatedly while cards animate, so wait between moves.
-const moveDraggedPlaylistTemporarilyThrottled = throttle(moveDraggedPlaylistTemporarily, 100)
-
-/**
- * @param {import('../../helpers/dragAndDrop').VideoData} target
- * @param {import('../../helpers/dragAndDrop').VideoData} source
- */
-function onMoveDraggedPlaylist(target, source) {
-  // Pointer drags already wait for transitions and flush their final target.
-  if (source.pointerDragging) {
-    moveDraggedPlaylistTemporarily(target, source)
-  } else {
-    pendingNativeDragMove = [target, source]
-    moveDraggedPlaylistTemporarilyThrottled(target, source)
-  }
-}
-
-async function onDragPlaylistEnd() {
-  if (pendingNativeDragMove != null) moveDraggedPlaylistTemporarily(...pendingNativeDragMove)
-  lastNativeDragTargetId = null
-  if (tempCustomOrder.value != null) {
-    await store.dispatch('updateUserPlaylistsCustomOrder', tempCustomOrder.value)
-  }
-  tempCustomOrder.value = null
-  draggedPlaylist.value = { videoId: null, playlistItemId: null }
-}
+const { draggedId: draggedPlaylistId, onPointerDown: startPlaylistDrag } = useGridReorder({
+  itemSelector: '[data-playlist-drag-item]',
+  handleSelector: '.grabBar',
+  getId: item => item.dataset.videoId,
+  commit: (id, index) => movePlaylist(id, () => index)
+})
 
 const showRepairPrompt = ref(false)
 const repairOptions = ref([])

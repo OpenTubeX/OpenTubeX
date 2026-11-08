@@ -53,6 +53,11 @@ const props = defineProps({
   youtubeStyleShorts: {
     type: Boolean,
     default: false
+  },
+  // Set while a drag positions the items itself and commits their new order.
+  disableMoveTransition: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -124,6 +129,7 @@ const transitionDurations = computed(() => {
 // patched TransitionGroup not to measure every child before each update.
 const moveClass = computed(() => {
   const suppressed = suppressMoveTransition.value ||
+    props.disableMoveTransition ||
     reducedMotion.value ||
     props.itemCount > MOVE_TRANSITION_MAX_ITEMS
 

@@ -46,7 +46,7 @@ function overview(store) {
     sessionStorage: { getItem: () => null, setItem() {} },
     document: { removeEventListener() {} },
     getIconForSortPreference() {},
-    throttle: callback => callback,
+    useGridReorder: () => ({ draggedId: ref(null), onPointerDown() {} }),
     playlistKey, sortUserPlaylists, SORT_BY_OPTIONS: USER_PLAYLISTS_SORT_BY_OPTIONS,
     isValidPlaylistBookmark: () => true, playlistBookmarkToListData: value => value,
     debounce(callback) {

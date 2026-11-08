@@ -849,31 +849,92 @@ test.describe('custom playlists overview order', () => {
     })
   }
 
-  test('keeps a drag move when the cursor enters the gliding target again', async ({ page }) => {
+  test('slides playlist cards aside while dragging and lets Escape cancel the drag', { tag: '@scale' }, async ({ page }) => {
     await goTo(page, 'userplaylists')
-    const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+    const cards = page.locator('.playlistList [data-playlist-drag-item]')
+    const titles = cards.locator('.h3Title')
+    const card = name => cards.filter({ hasText: `Overview ${name}` })
+    const order = () => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder)
     await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
-
-    // After A takes C's place, C glides away beneath the cursor and fires
-    // dragenter again once the move throttle has passed.
-    await page.evaluate(async () => {
-      const card = name => [...document.querySelectorAll('.playlistList [data-playlist-drag-item]')]
-        .find(element => element.textContent.includes(`Overview ${name}`))
-      const dataTransfer = new DataTransfer()
-      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
-      const source = card('A')
-      fire(source, 'dragstart')
-      // The cards receive the dragged playlist on the next render.
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      fire(card('C'), 'dragenter')
-      await new Promise(resolve => setTimeout(resolve, 150))
-      fire(card('C').querySelector('.h3Title'), 'dragenter')
-      fire(source, 'dragend')
+    const savedOrder = await order()
+    const slots = await cards.evaluateAll(elements => elements.map(element => {
+      const { x, y } = element.getBoundingClientRect()
+      return { x, y }
+    }))
+    const handle = await card('C').locator('.grabBar').boundingBox()
+    const target = await card('A').boundingBox()
+    const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+    const end = { x: start.x + target.x - slots[0].x, y: start.y + target.y - slots[0].y }
+    const position = name => card(name).evaluate(element => {
+      const { x, y } = element.getBoundingClientRect()
+      return { x, y }
     })
 
-    await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
+    async function dragCToA() {
+      await page.mouse.move(start.x, start.y)
+      await page.mouse.down()
+      // A click on the handle does not start a drag.
+      await page.mouse.move(start.x + 2, start.y)
+      await expect(page.locator('.reorderDragged')).toHaveCount(0)
+      await page.mouse.move(end.x, end.y, { steps: 12 })
+      await expect(page.locator('.reorderDragged')).toHaveText(/Overview C/)
+      // The cards keep their DOM order and slide into the proposed one.
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      await expect.poll(() => position('B')).toEqual(expect.objectContaining({ x: expect.closeTo(slots[0].x, 0), y: expect.closeTo(slots[0].y, 0) }))
+      await expect.poll(() => position('A')).toEqual(expect.objectContaining({ x: expect.closeTo(slots[1].x, 0), y: expect.closeTo(slots[1].y, 0) }))
+      // The dragged card stays visible under the pointer.
+      await expect(card('C')).toHaveCSS('opacity', '1')
+      const dragged = await position('C')
+      expect(dragged.x).toBeCloseTo(slots[2].x, 0)
+    }
+
+    await dragCToA()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+    for (const [index, name] of ['C', 'B', 'A'].entries()) {
+      await expect.poll(() => position(name)).toEqual({ x: expect.closeTo(slots[index].x, 0), y: expect.closeTo(slots[index].y, 0) })
+    }
+    await page.mouse.up()
+    await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+    expect(await order()).toEqual(savedOrder)
+
+    await dragCToA()
+    await page.mouse.up()
+    await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+    await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+    // The dropped card rests in its slot once the order is committed.
+    for (const [index, name] of ['B', 'A', 'C'].entries()) {
+      await expect.poll(() => position(name)).toEqual({ x: expect.closeTo(slots[index].x, 0), y: expect.closeTo(slots[index].y, 0) })
+    }
+    await expect(cards.first()).not.toHaveAttribute('style', /translate/)
+    await expect.poll(order).toEqual(['custom-overview-b', 'custom-overview-a', 'custom-overview-c'])
+  })
+
+  test('reorders playlist cards by touch without opening the card actions', async ({ page }) => {
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await goTo(page, 'userplaylists')
+    const cards = page.locator('.playlistList [data-playlist-drag-item]')
+    await expect(cards.locator('.h3Title')).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+    const handle = await cards.filter({ hasText: 'Overview A' }).locator('.grabBar').boundingBox()
+    const target = await cards.first().locator('.grabBar').boundingBox()
+    const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: x == null ? [] : [{ x, y, id: 0 }]
+    })
+
+    await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
+    // Outlast the long-press delay to prove the handle does not open the card actions.
+    await page.waitForTimeout(600)
+    await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
+    await touch('touchMove', (handle.x + target.x) / 2, target.y + target.height / 2)
+    await touch('touchMove', target.x + target.width / 2, target.y + target.height / 2)
+    await expect(page.locator('.reorderDragged')).toHaveText(/Overview A/)
+    await touch('touchEnd')
+    await expect(cards.locator('.h3Title')).toHaveText(['Overview A', 'Overview C', 'Overview B'])
     await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
       .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
+    await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
   })
 
   test('pins playlists to the side navigation in the overview order', async ({ app, page }) => {
@@ -928,6 +989,46 @@ test.describe('custom playlists overview order', () => {
     await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
       .toEqual(['custom-overview-c', 'custom-overview-a'])
     await expect(page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]')).toHaveCount(0)
+  })
+})
+
+test.describe('long custom playlists overview', () => {
+  test.use({
+    seed: {
+      settings: { userPlaylistsSortBy: 'custom', listType: 'list' },
+      playlists: Array.from({ length: 30 }, (_, index) => ({
+        _id: `long-overview-${index}`,
+        playlistName: `Long overview ${index}`,
+        protected: false,
+        description: '',
+        videos: [],
+        createdAt: Date.now() - index * 86_400_000,
+        lastUpdatedAt: Date.now()
+      }))
+    }
+  })
+
+  test('scrolls while a dragged playlist card nears the window edge', { tag: '@scale' }, async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+    await expect(titles.first()).toHaveText('Long overview 0')
+    const handle = await page.locator('.playlistList .grabBar').first().boundingBox()
+    const viewportHeight = await page.evaluate(() => window.innerHeight)
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handle.x + handle.width / 2, viewportHeight - 4, { steps: 8 })
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600)
+    await page.mouse.move(handle.x + handle.width / 2, viewportHeight / 2, { steps: 4 })
+    const stoppedScroll = await page.evaluate(() => window.scrollY)
+    await page.mouse.up()
+    await expect(page.locator('.reorderDragged')).toHaveCount(0)
+    // The card lands where it was dropped, below the rows scrolled past.
+    const index = (await titles.allTextContents()).indexOf('Long overview 0')
+    expect(index).toBeGreaterThan(2)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder?.indexOf('long-overview-0'))).toBe(index)
+    const dropped = await page.locator('.playlistList [data-playlist-drag-item]').nth(index).boundingBox()
+    expect(Math.abs(dropped.y + dropped.height / 2 - viewportHeight / 2)).toBeLessThan(dropped.height)
+    expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
   })
 })
 
