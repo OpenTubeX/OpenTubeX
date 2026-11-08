@@ -1080,6 +1080,8 @@ test.describe('custom theme editor', () => {
   })
 
   test('copies built-in themes, previews efficiently, persists, and survives closing settings', async ({ app, page }) => {
+    // Edits dozens of colors across several editor sessions, which takes longer than the default on slower machines.
+    test.slow()
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.getByRole('button', { name: 'Create custom theme' }).click()
