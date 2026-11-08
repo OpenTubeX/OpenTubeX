@@ -515,34 +515,48 @@ test('a failed control bar migration retries on the next launch', async () => {
 const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
 const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
 
-/** @param {Record<string, unknown>} stored */
-async function migrateAutoLoadComments(stored) {
+const syncTimestampWriterStart = settingsSource.indexOf('let settingSyncTimestampWrite')
+const syncTimestampWriterEnd = settingsSource.indexOf('const customState', syncTimestampWriterStart)
+
+/**
+ * @param {Record<string, unknown>} stored
+ * @param {Record<string, number>} [startupEditTimes] edit times saved earlier in startup
+ */
+async function migrateAutoLoadComments(stored, startupEditTimes) {
+  const state = { syncServerSettingUpdatedAt: startupEditTimes ?? stored.syncServerSettingUpdatedAt ?? {} }
   const commits = {}
   await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(syncTimestampWriterStart, syncTimestampWriterEnd)}
     ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
   })()`, {
     userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
-    commit: (mutation, value) => { commits[mutation] = value },
+    state,
+    commit: (mutation, value) => {
+      commits[mutation] = value
+      if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
+    },
     DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    isSettingSyncable: () => true,
+    CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+    console,
   })
   // Objects from the script's context have another realm's prototype.
   return JSON.parse(JSON.stringify({ stored, commits }))
 }
 
 test('startup copies Auto Load Next Page to comments with its sync edit time', async () => {
+  const editTimes = { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }
   assert.deepEqual(await migrateAutoLoadComments({
     generalAutoLoadMorePaginatedItemsEnabled: false,
-    syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5 },
-  }), {
+    syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20 },
+  }, { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }), {
     stored: {
       generalAutoLoadMorePaginatedItemsEnabled: false,
       autoLoadComments: false,
-      syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5, autoLoadComments: 20 },
+      // Keeps the edit time an earlier startup migration saved.
+      syncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 },
     },
-    commits: {
-      setAutoLoadComments: false,
-      setSyncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5, autoLoadComments: 20 },
-    },
+    commits: { setAutoLoadComments: false, setSyncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 } },
   })
 
   // Without a recorded edit, the copy is not an edit either.

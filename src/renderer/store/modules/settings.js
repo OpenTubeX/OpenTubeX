@@ -460,7 +460,7 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 
 let settingSyncTimestampWrite = Promise.resolve()
 
-function recordSettingSyncTimestamp(commit, settings, settingId) {
+function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
   settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
@@ -471,7 +471,7 @@ function recordSettingSyncTimestamp(commit, settings, settingId) {
       : {}
     const updatedAt = {
       ...current,
-      [settingId]: Date.now(),
+      [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
@@ -1105,12 +1105,10 @@ const customActions = {
         )?.value !== false
         commit('setAutoLoadComments', autoLoadComments)
         await DBSettingHandlers.upsert('autoLoadComments', autoLoadComments)
-        const editTimes = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')?.value
-        const editedAt = editTimes?.generalAutoLoadMorePaginatedItemsEnabled
+        const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
+          ?.value?.generalAutoLoadMorePaginatedItemsEnabled
         if (typeof editedAt === 'number') {
-          const updatedAt = { ...editTimes, autoLoadComments: editedAt }
-          await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
-          commit('setSyncServerSettingUpdatedAt', updatedAt)
+          await recordSettingSyncTimestamp(commit, state, 'autoLoadComments', editedAt)
         }
       }
 
