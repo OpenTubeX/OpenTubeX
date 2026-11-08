@@ -285,10 +285,6 @@ test.describe('while collaborators are loading', () => {
 
   for (const refreshedCollaborators of [undefined, []]) {
     test(`keeps fetched collaborators when a background channel refresh ${refreshedCollaborators ? 'returns an empty list' : 'omits the list'}`, async ({ app, page }) => {
-      await page.evaluate(async () => {
-        await window.$store.dispatch('updateBackendPreference', 'invidious')
-        await window.$store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
-      })
       await app.electronApp.context().route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
         json: {
           author: 'Updated Channel A',
@@ -358,6 +354,11 @@ test.describe('while collaborators are loading', () => {
       const prompt = page.locator('.prompt')
       await expect(prompt.locator('.collaboratorName')).toHaveText(['Channel A', 'Channel C', 'Channel D'])
       const feedUrl = page.url()
+      // Only the local API looks collaborators up, so the channel refreshes through Invidious afterwards
+      await page.evaluate(async () => {
+        await window.$store.dispatch('updateBackendPreference', 'invidious')
+        await window.$store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
+      })
 
       await prompt.getByRole('link', { name: 'Channel A' }).click({ button: 'middle' })
 

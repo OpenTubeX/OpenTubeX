@@ -20,6 +20,8 @@ const PACK_LOADERS = {
 }
 
 const packPromises = new Map()
+/** @type {Map<string, { body: string, width?: number, height?: number }>} */
+const loadedIcons = new Map()
 let customIconsRegistered = false
 
 function registerCustomIcons() {
@@ -46,7 +48,10 @@ function registerCustomIcons() {
 async function loadAndRegisterPack(pack) {
   const module = await PACK_LOADERS[pack]()
   const bundle = module.default
-  for (const [id, data] of Object.entries(bundle)) addIcon(id, data)
+  for (const [id, data] of Object.entries(bundle)) {
+    addIcon(id, data)
+    loadedIcons.set(id, data)
+  }
 
   registerCustomIcons()
 }
@@ -68,4 +73,14 @@ export function registerMappedIcons(pack) {
     packPromises.set(pack, promise)
   }
   return packPromises.get(pack)
+}
+
+/**
+ * The glyph of a loaded pack, for images drawn outside of `FtIcon`.
+ * The selected pack is always loaded, as it only becomes selected once loaded.
+ * @param {string | null} id an Iconify id
+ * @returns {{ body: string, width?: number, height?: number } | null}
+ */
+export function getLoadedIconData(id) {
+  return (id && loadedIcons.get(id)) ?? null
 }

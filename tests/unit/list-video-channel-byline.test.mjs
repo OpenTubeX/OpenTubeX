@@ -16,7 +16,7 @@ async function clickByline({ electron, event, channels = [{ id: 'UC-one', name: 
     showCollaboratorsPrompt: { value: false },
     id: { value: 'video' },
     setCollaboratorsLoading: () => {},
-    getLocalVideoChannels: async () => channels,
+    getVideoChannels: async () => channels,
     openInternalPath: options => opened.push(options),
     isUnloadedBackgroundTabClick: () => false,
     showToast: () => {},
@@ -52,5 +52,46 @@ test('left-clicking a byline that resolves to one channel opens it in the curren
     assert.equal(opened.length, 1)
     assert.equal(opened[0].doCreateNewTab, false)
     assert.equal(opened[0].makeActive, true)
+  }
+})
+
+const getVideoChannels = card.slice(card.indexOf('async function getVideoChannels'), card.indexOf('\n/**\n * Opens the collaborators prompt'))
+
+/**
+ * @param {string} backend
+ * @param {boolean} fallback
+ */
+async function lookUpChannels(backend, fallback = false) {
+  const calls = []
+  const context = {
+    backendPreference: { value: backend },
+    store: { getters: { getBackendFallback: fallback } },
+    // Mirrors fallback.js for a build with the local API
+    requestWithFallback: async (requests, options) => {
+      const order = options.backend === 'local' ? ['local', 'invidious'] : ['invidious', 'local']
+      try {
+        return { result: await requests[order[0]]() }
+      } catch (error) {
+        if (!options.fallback) throw error
+        return { result: await requests[order[1]]() }
+      }
+    },
+    getLocalVideoChannels: async id => { calls.push(`local ${id}`); return [{ id: 'UC-local', name: 'Local' }] },
+    invidiousGetVideoInformation: async id => {
+      calls.push(`invidious ${id}`)
+      return { author: 'Creator', authorId: 'UC-creator', authorThumbnails: [{ url: 'https://images.test/small.jpg' }, { url: 'https://images.test/large.jpg' }] }
+    }
+  }
+  const channels = await runInNewContext(`${getVideoChannels}; getVideoChannels('video')`, context)
+  return { channels, calls }
+}
+
+test('bylines look channels up with the local API only when it is the preferred backend', async () => {
+  assert.deepEqual((await lookUpChannels('local')).calls, ['local video'])
+
+  for (const backend of ['invidious', 'yattee']) {
+    const { channels, calls } = await lookUpChannels(backend, true)
+    assert.deepEqual(calls, ['invidious video'], `${backend} must not contact YouTube directly`)
+    assert.deepEqual(JSON.parse(JSON.stringify(channels)), [{ id: 'UC-creator', name: 'Creator', thumbnail: 'https://images.test/large.jpg', subtitle: '' }])
   }
 })

@@ -582,6 +582,8 @@ import {
   debounce
 } from '../../helpers/utils.js'
 import { getLocalVideoChannels } from '../../helpers/api/local.js'
+import { invidiousGetVideoInformation } from '../../helpers/api/invidious.js'
+import { requestWithFallback } from '../../helpers/api/fallback.js'
 import { isOnAiSlopList } from '../../helpers/aiSlopList.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
@@ -2300,6 +2302,24 @@ function openInExternalPlayer() {
 }
 
 /**
+ * Only the local API lists the collaborators of a video. The Invidious API returns
+ * its main channel without contacting YouTube from this device.
+ * @param {string} videoId
+ */
+async function getVideoChannels(videoId) {
+  const { result } = await requestWithFallback({
+    local: () => getLocalVideoChannels(videoId),
+    invidious: async () => {
+      const video = await invidiousGetVideoInformation(videoId)
+      return video.authorId
+        ? [{ id: video.authorId, name: video.author, thumbnail: video.authorThumbnails?.at(-1)?.url ?? '', subtitle: '' }]
+        : []
+    }
+  }, { backend: backendPreference.value, fallback: store.getters.getBackendFallback })
+  return result
+}
+
+/**
  * Opens the collaborators prompt for collaboration videos, or the single
  * channel otherwise. In Electron, a middle click opens that channel in a
  * background tab like the regular channel link. Elsewhere a new tab can't be
@@ -2322,7 +2342,7 @@ async function openChannelByline(event) {
   const videoId = id.value
 
   try {
-    const collaborators = await getLocalVideoChannels(videoId)
+    const collaborators = await getVideoChannels(videoId)
 
     if (id.value !== videoId || disableChannelLinks.value) {
       return

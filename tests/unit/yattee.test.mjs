@@ -133,6 +133,19 @@ test('proxied videos only keep media that the server relays', () => {
   assert.equal(normalized.isListed, true)
 })
 
+test('plain-text descriptions are escaped and their links are linked', () => {
+  const description = 'Visit https://example.com/a?b=1&c=2\n<b>not bold</b> 00:05'
+  const expected = 'Visit <a href="https://example.com/a?b=1&c=2" target="_blank" rel="noopener noreferrer">example.com/a?b=1&amp;c=2</a><br>&lt;b&gt;not bold&lt;/b&gt; 00:05'
+
+  // yt-dlp extractions repeat the plain text as `descriptionHtml`
+  assert.equal(normalizeYatteeVideo({ ...video, description, descriptionHtml: description }, server, true).descriptionHtml, expected)
+  assert.equal(normalizeYatteeVideo({ ...video, description, descriptionHtml: null }, server, true).descriptionHtml, expected)
+
+  // Servers backed by Invidious return its HTML
+  const html = 'Visit <a href="https://example.com/">https://example.com/</a>'
+  assert.equal(normalizeYatteeVideo({ ...video, description: 'Visit https://example.com/', descriptionHtml: html }, server, true).descriptionHtml, html)
+})
+
 test('direct videos keep YouTube URLs and use the HLS manifest for live streams', () => {
   const normalized = normalizeYatteeVideo({ ...video, liveNow: true }, server, false)
 
@@ -236,16 +249,21 @@ test('comments get publication timestamps and hearts', () => {
   const response = normalizeYatteeComments({
     comments: [
       { content: 'a <b>', publishedText: '6 years ago', published: null, isHearted: true },
-      { content: 'b', contentHtml: 'b', publishedText: 'unknown', published: 1700000000 }
+      { content: 'b', contentHtml: 'b', publishedText: 'unknown', published: 1700000000 },
+      // The server repeats the plain text as `contentHtml`
+      { content: '1 < 2 <i>x</i>', contentHtml: '1 < 2 <i>x</i>', publishedText: 'unknown', published: 1700000000 },
+      { content: 'kept', contentHtml: '<b>kept</b>', publishedText: 'unknown', published: 1700000000 }
     ]
   })
 
-  const [first, second] = response.comments
+  const [first, second, third, fourth] = response.comments
   assert.ok(first.published < before - 5 * 365 * 24 * 60 * 60)
   assert.deepEqual(first.creatorHeart, {})
   assert.equal(first.contentHtml, 'a &lt;b&gt;')
   assert.equal(second.published, 1700000000)
   assert.equal(second.creatorHeart, undefined)
+  assert.equal(third.contentHtml, '1 &lt; 2 &lt;i&gt;x&lt;/i&gt;')
+  assert.equal(fourth.contentHtml, '<b>kept</b>')
 })
 
 test('search suggestions are wrapped like Invidious does', () => {

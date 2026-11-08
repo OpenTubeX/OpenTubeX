@@ -56,9 +56,12 @@ export function useResultChannelAvatar(result, channelId, enabled) {
       (resolvingChannelId == null && result.value.videoId &&
         (cachedThumbnail === null || isCollaborativeVideoAuthor(result.value.author)))) {
       try {
+        // The lookup contacts YouTube directly, so other backends go without it
         const collaborators = result.value.collaborators?.length > 0
           ? result.value.collaborators
-          : result.value.videoId ? await getLocalVideoChannels(result.value.videoId) : []
+          : result.value.videoId && store.getters.getBackendPreference === 'local'
+            ? await getLocalVideoChannels(result.value.videoId)
+            : []
         if (generation !== loadGeneration) return
         if (collaborators.length > 0) {
           channelThumbnails.value = collaborators.map((channel, index) =>

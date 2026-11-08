@@ -81,9 +81,12 @@ test('data saver restores medium-resolution sources and preserves thumbnail pref
 
 test('resolution fallback preserves proxies and parameters without changing other images', () => {
   assert.equal(getVideoThumbnailFallbackUrl('https://i.ytimg.com/vi_webp/video/maxresdefault.webp?x=1'), 'https://i.ytimg.com/vi_webp/video/sddefault.webp?x=1')
-  for (const name of ['mqdefault', 'mq1', 'oar1', 'oardefault']) {
+  for (const name of ['mqdefault', 'mq1', 'oar1', 'oar2']) {
     assert.equal(getVideoThumbnailFallbackUrl(`https://i.ytimg.com/vi/video/${name}.jpg`), null)
   }
+  // Not every Short has a selected portrait thumbnail, but each has generated frames
+  assert.equal(getVideoThumbnailFallbackUrl('https://i.ytimg.com/vi/short/oardefault.jpg'), 'https://i.ytimg.com/vi/short/oar2.jpg')
+  assert.equal(getVideoThumbnailFallbackUrl('https://invidious.test/vi/short/oardefault.jpg?host=x'), 'https://invidious.test/vi/short/oar2.jpg?host=x')
   assert.equal(getVideoThumbnailFallbackUrl('https://yt3.ggpht.com/avatar'), null)
   assert.equal(getVideoThumbnailFallbackUrl('data:image/png;base64,AA=='), null)
 })

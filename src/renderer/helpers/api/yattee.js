@@ -1,5 +1,6 @@
 import { mapConcurrently } from '../concurrent-map.js'
 import { calculatePublishedDate, escapeHTML } from '../feed-metadata.js'
+import { linkifyDescription } from '../descriptionLinks.js'
 
 // yattee-server (https://github.com/yattee/yattee-server) mostly follows the
 // Invidious API. These helpers adapt the parts where its responses differ.
@@ -110,6 +111,15 @@ export function getYatteeStreamExpiry(url) {
 }
 
 /**
+ * yt-dlp extractions repeat the plain text where Invidious returns HTML.
+ * @param {string | null | undefined} html
+ * @param {string} text
+ */
+function hasHtml(html, text) {
+  return typeof html === 'string' && html !== text
+}
+
+/**
  * @param {{url: string}[] | undefined} thumbnails
  * @param {string} serverUrl
  */
@@ -142,7 +152,9 @@ export function normalizeYatteeVideo(video, serverUrl, proxyVideos) {
   return {
     ...video,
     description,
-    descriptionHtml: video.descriptionHtml ?? escapeHTML(description).replaceAll('\n', '<br>'),
+    descriptionHtml: hasHtml(video.descriptionHtml, description)
+      ? video.descriptionHtml
+      : linkifyDescription(escapeHTML(description).replaceAll('\n', '<br>')),
     keywords: video.keywords ?? [],
     isListed: video.isListed ?? true,
     authorThumbnails: resolveThumbnails(video.authorThumbnails, serverUrl),
@@ -322,7 +334,9 @@ export function normalizeYatteeComments(response) {
       comment.creatorHeart = {}
     }
 
-    comment.contentHtml ??= escapeHTML(comment.content ?? '')
+    if (!hasHtml(comment.contentHtml, comment.content)) {
+      comment.contentHtml = escapeHTML(comment.content ?? '')
+    }
   }
 
   return response

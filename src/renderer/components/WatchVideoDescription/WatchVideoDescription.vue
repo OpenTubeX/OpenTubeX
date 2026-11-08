@@ -526,12 +526,15 @@ function updateDescriptionFadeState() {
  * @returns {string}
  */
 function parseDescriptionHtml(descriptionText) {
-  // Attributes match through their closing quote, and URL parts stop at the next
-  // occurrence of their own prefix, so remote text can't take quadratic time
+  // Attributes match through their closing quote, so remote text can't take quadratic time
   return descriptionText
+    .replaceAll(/href="([^"]*)"/g, (attribute, href) => {
+      // Unwrap YouTube's redirect links, leaving other links and their parameters alone
+      const redirect = /^(?:https:\/\/www\.youtube\.com)?\/redirect\?(.*)$/.exec(href)
+      const target = redirect && new URLSearchParams(redirect[1].replaceAll('&amp;', '&')).get('q')
+      return target ? `href="${target.replaceAll('"', '%22')}"` : attribute
+    })
     .replaceAll('target="_blank"', '')
-    .replaceAll(/\/redirect(?:(?!\/redirect).)+?(?=q=)/g, '')
-    .replaceAll('q=', '')
     .replaceAll(/rel="nofollow\snoopener"/g, '')
     .replaceAll(/class="[^"\n]*"/g, '')
     .replaceAll(/id="[^"\n]*"/g, '')
@@ -539,11 +542,6 @@ function parseDescriptionHtml(descriptionText) {
     .replaceAll(/data-url="[^"\n]*"/g, '')
     .replaceAll(/data-sessionlink="[^"\n]*"/g, '')
     .replaceAll('&amp;', '&')
-    .replaceAll('%3A', ':')
-    .replaceAll('%2F', '/')
-    .replaceAll(/&v(?:(?!&v).)+?(?=")/g, '')
-    .replaceAll(/&redirect-token(?:(?!&redirect-token).)+?(?=")/g, '')
-    .replaceAll(/&redir_token(?:(?!&redir_token).)+?(?=")/g, '')
     .replaceAll('href="/', 'href="https://www.youtube.com/')
     .replaceAll('href="/hashtag/', 'href="https://wwww.youtube.com/hashtag/')
     .replaceAll('yt.www.watch.player.seekTo', 'changeDuration')
