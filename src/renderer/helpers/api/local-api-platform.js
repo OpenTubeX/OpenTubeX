@@ -14,6 +14,11 @@ export function evaluatePlayerScript(data) {
   return playerScriptEvaluator.evaluate(data.output)
 }
 
+/** Loads the player-script interpreter before the first video needs it. */
+export function prewarmPlayerScriptEvaluator() {
+  playerScriptEvaluator.prewarm()
+}
+
 /**
  * Generates a video-bound PO token through the isolated host implementation.
  * @param {string} videoId

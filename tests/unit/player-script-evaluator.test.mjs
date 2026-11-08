@@ -151,3 +151,22 @@ test('preserves the worker startup error when recovery cannot start', async () =
   await assert.rejects(pending, error => error === startupError)
   assert.equal(evaluator.requests.size, 0)
 })
+
+test('prewarming starts the worker once and leaves no pending request', async () => {
+  const workers = []
+  const evaluator = new PlayerScriptEvaluator(() => {
+    const worker = new FakeWorker()
+    workers.push(worker)
+    return worker
+  })
+  evaluator.prewarm()
+  evaluator.prewarm()
+  assert.equal(workers.length, 1)
+  assert.equal(workers[0].requests.length, 1)
+  workers[0].reply({ id: workers[0].requests[0].id, result: 0 })
+  const next = evaluator.evaluate('next')
+  assert.equal(workers.length, 1)
+  workers[0].reply({ id: workers[0].requests[1].id, result: 'next' })
+  assert.equal(await next, 'next')
+  assert.equal(evaluator.requests.size, 0)
+})

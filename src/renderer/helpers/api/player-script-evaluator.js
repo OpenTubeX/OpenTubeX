@@ -32,6 +32,15 @@ export class PlayerScriptEvaluator {
     })
   }
 
+  /**
+   * Start the worker and load its interpreter while the caller is still waiting
+   * for the network, so the first script does not wait for both.
+   */
+  prewarm() {
+    if (this.worker) return
+    this.evaluate('return 0').catch(() => {})
+  }
+
   /** Start a worker and connect responses to pending evaluations. */
   startWorker() {
     const worker = this.createWorker()
