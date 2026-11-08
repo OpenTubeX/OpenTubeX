@@ -19,7 +19,8 @@ concurrency:
 
 jobs:
   submit:
-    if: github.repository == 'OpenTubeX/OpenTubeX'
+    # Nightly releases are prereleases; manual retries have no release event.
+    if: github.repository == 'OpenTubeX/OpenTubeX' && !github.event.release.prerelease
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -102,7 +103,7 @@ jobs:
             --json title,url \
             --limit 100
         } | jq --arg version "$VERSION" \
-          'first(.[] | select((.title | contains("OpenTubeX.OpenTubeX")) and (.title | contains($version)))) // empty')"
+          'first(.[] | select(.title | test("OpenTubeX\\.OpenTubeX\\b") and ([scan("[0-9]+(?:\\.[0-9]+)+")] | index($version)))) // empty')"
 
         if [[ -n "$existing_pr" ]]; then
           echo "An open pull request already updates OpenTubeX.OpenTubeX ${VERSION}:"
@@ -179,59 +180,13 @@ jobs:
 
         echo "directory=$manifest_dir" >> "$GITHUB_OUTPUT"
 
-    - name: Validate package submission credentials
-      if: steps.duplicate.outputs.needed == 'true'
-      env:
-        PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        if [[ -z "$PACKAGE_SUBMISSION_TOKEN" ]]; then
-          echo '::error::The PACKAGE_SUBMISSION_TOKEN repository secret is missing.'
-          exit 1
-        fi
-
-        echo "::add-mask::${PACKAGE_SUBMISSION_TOKEN}"
-
-    - name: Create or synchronize the organization fork
+    - name: Synchronize the organization fork
       if: steps.duplicate.outputs.needed == 'true'
       env:
         GH_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
-
-        if ! gh api repos/OpenTubeX/winget-pkgs >/dev/null 2>&1; then
-          echo 'Creating OpenTubeX/winget-pkgs.'
-          gh api \
-            --method POST \
-            repos/microsoft/winget-pkgs/forks \
-            -f organization=OpenTubeX \
-            -f name=winget-pkgs \
-            -F default_branch_only=true \
-            >/dev/null
-
-          for attempt in {1..30}; do
-            if gh api repos/OpenTubeX/winget-pkgs >/dev/null 2>&1; then
-              break
-            fi
-
-            if (( attempt == 30 )); then
-              echo '::error::OpenTubeX/winget-pkgs was not ready after 60 seconds.'
-              exit 1
-            fi
-
-            sleep 2
-          done
-        fi
-
-        parent="$(gh api repos/OpenTubeX/winget-pkgs --jq '.parent.full_name // ""')"
-
-        if [[ "$parent" != microsoft/winget-pkgs ]]; then
-          echo "::error::OpenTubeX/winget-pkgs is not a fork of microsoft/winget-pkgs."
-          exit 1
-        fi
 
         gh api \
           --method POST \
@@ -333,7 +288,7 @@ jobs:
           --json title,url \
           --limit 100 \
           | jq --arg version "$VERSION" \
-            'first(.[] | select((.title | contains("OpenTubeX.OpenTubeX")) and (.title | contains($version)))) // empty')"
+            'first(.[] | select(.title | test("OpenTubeX\\.OpenTubeX\\b") and ([scan("[0-9]+(?:\\.[0-9]+)+")] | index($version)))) // empty')"
 
         if [[ -n "$existing_pr" ]]; then
           echo "An open pull request appeared while this workflow was running:"
