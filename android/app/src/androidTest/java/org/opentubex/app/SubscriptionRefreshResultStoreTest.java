@@ -86,6 +86,14 @@ public class SubscriptionRefreshResultStoreTest {
     }
 
     @Test
+    public void resultsWithoutALeadingIdAreStillIndexed() throws Exception {
+        assertTrue(directory.isDirectory() || directory.mkdirs());
+        String id = "0000000000001-" + UUID.randomUUID();
+        Files.write(resultFile.toPath(), ("{\"kind\":\"completion\",\"id\":\"" + id + "\"}").getBytes(StandardCharsets.UTF_8));
+        assertEquals(id, SubscriptionRefreshResultStore.readId(resultFile));
+    }
+
+    @Test
     public void openingTheStoreDeletesInterruptedWrites() throws Exception {
         assertTrue(directory.isDirectory() || directory.mkdirs());
         File interrupted = new File(directory, "0000000000000-" + UUID.randomUUID() + ".tmp");

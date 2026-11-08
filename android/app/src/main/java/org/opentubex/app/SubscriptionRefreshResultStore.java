@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 final class SubscriptionRefreshResultStore {
     private static final String DIRECTORY_NAME = "subscription-refresh-results";
@@ -37,12 +39,27 @@ final class SubscriptionRefreshResultStore {
     private static final Set<String> VOLATILE_URL_PARAMETERS = new HashSet<>(Arrays.asList(
         "pp", "rs", "sqp", "usqp", "redir_token", "continue", "days_since_epoch"
     ));
+    private static final Pattern LEADING_ID = Pattern.compile("\\{\"id\":\"([0-9]{13}-[0-9a-f-]{36})\"[,}]");
     private static File indexedDirectory;
     private static SubscriptionRefreshResultIndex index;
 
     private SubscriptionRefreshResultStore() {}
 
-    static synchronized void writeChannel(
+    /** A fetched feed, serialized and fingerprinted once for every profile that subscribes to it. */
+    static final class ChannelPayload {
+        final String channelId;
+        final String json;
+        final String fingerprint;
+
+        ChannelPayload(String channelId, JSONObject payload) {
+            this.channelId = channelId;
+            json = payload.toString();
+            // The channel ID lets a cache clear forget only that channel's fingerprints.
+            fingerprint = channelId + "\n" + fingerprint(payload);
+        }
+    }
+
+    static void writeChannel(
         Context context,
         String profileId,
         String feedType,
@@ -50,19 +67,27 @@ final class SubscriptionRefreshResultStore {
         JSONObject payload,
         long timestamp
     ) throws IOException, JSONException {
-        String slot = profileId + "\n" + feedType + "\n" + channelId;
+        writeChannel(context, profileId, feedType, new ChannelPayload(channelId, payload), timestamp);
+    }
+
+    static synchronized void writeChannel(
+        Context context,
+        String profileId,
+        String feedType,
+        ChannelPayload payload,
+        long timestamp
+    ) throws IOException, JSONException {
+        String slot = profileId + "\n" + feedType + "\n" + payload.channelId;
         // An unchanged feed would only make the app import the same data again.
         // A pending result for this slot already holds that payload.
         File fingerprintFile = new File(directory(context), slotName(slot) + ".fingerprint");
-        // The channel ID lets a cache clear forget only that channel's fingerprints.
-        String fingerprint = channelId + "\n" + fingerprint(payload);
-        if (fingerprint.equals(readFingerprint(fingerprintFile))) return;
+        if (payload.fingerprint.equals(readFingerprint(fingerprintFile))) return;
         JSONObject result = baseResult("channel", profileId, feedType, timestamp)
-            .put("channelId", channelId)
-            .put("payload", payload);
-        write(context, result, slot);
+            .put("channelId", payload.channelId);
+        String head = result.toString();
+        write(context, result.getString("id"), head.substring(0, head.length() - 1) + ",\"payload\":" + payload.json + '}', slot);
         try (FileOutputStream output = new FileOutputStream(fingerprintFile)) {
-            output.write(fingerprint.getBytes(StandardCharsets.UTF_8));
+            output.write(payload.fingerprint.getBytes(StandardCharsets.UTF_8));
         } catch (IOException error) {
             // A missing fingerprint only means the next unchanged result is written again.
             fingerprintFile.delete();
@@ -147,12 +172,15 @@ final class SubscriptionRefreshResultStore {
     }
 
     private static void write(Context context, JSONObject result, String slot) throws IOException, JSONException {
+        write(context, result.getString("id"), result.toString(), slot);
+    }
+
+    private static void write(Context context, String id, String json, String slot) throws IOException {
         File directory = directory(context);
         SubscriptionRefreshResultIndex pending = directory.equals(indexedDirectory) ? index : null;
-        String id = result.getString("id");
         File target = new File(directory, slotName(slot) + ".json");
         File temporary = new File(directory, id + ".tmp");
-        byte[] bytes = result.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
         try (FileOutputStream output = new FileOutputStream(temporary)) {
             output.write(bytes);
             output.getFD().sync();
@@ -175,13 +203,7 @@ final class SubscriptionRefreshResultStore {
             // a write that was interrupted with its process.
             File[] temporaryFiles = directory.listFiles((dir, name) -> name.endsWith(".tmp"));
             if (temporaryFiles != null) for (File file : temporaryFiles) file.delete();
-            index = new SubscriptionRefreshResultIndex(directory, file -> {
-                try {
-                    return read(file).getString("id");
-                } catch (JSONException error) {
-                    throw new IOException("Invalid pending refresh result", error);
-                }
-            });
+            index = new SubscriptionRefreshResultIndex(directory, SubscriptionRefreshResultStore::readId);
             indexedDirectory = directory;
         }
         return index;
@@ -266,6 +288,29 @@ final class SubscriptionRefreshResultStore {
 
     private static String createId() {
         return String.format("%013d-%s", System.currentTimeMillis(), UUID.randomUUID());
+    }
+
+    /**
+     * Results can hold large responses. Their writer puts the ID first, so read only
+     * the start of the file to index it, and parse the rest when it is imported.
+     */
+    static String readId(File file) throws IOException {
+        byte[] head = new byte[(int) Math.min(file.length(), 128)];
+        try (FileInputStream input = new FileInputStream(file)) {
+            int offset = 0;
+            while (offset < head.length) {
+                int count = input.read(head, offset, head.length - offset);
+                if (count < 0) break;
+                offset += count;
+            }
+            Matcher id = LEADING_ID.matcher(new String(head, 0, offset, StandardCharsets.UTF_8));
+            if (id.lookingAt()) return id.group(1);
+        }
+        try {
+            return read(file).getString("id");
+        } catch (JSONException error) {
+            throw new IOException("Invalid pending refresh result", error);
+        }
     }
 
     private static JSONObject read(File file) throws IOException, JSONException {

@@ -103,6 +103,8 @@ final class UploadNotifications {
     /** Checks a raw response saved by the scheduled refresh worker. */
     static void observePayload(Context context, String channelId, String feedType, JSONObject payload) {
         try {
+            // Skip extracting entries from feeds without notifications.
+            if (configuredChannel(configuration(context), channelId, feedType) == null) return;
             observe(context, channelId, feedType, entries(feedType, payload, System.currentTimeMillis()));
         } catch (Exception error) {
             android.util.Log.w("OpenTubeXUploads", "Unable to check for new uploads", error);

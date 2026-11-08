@@ -13,13 +13,20 @@ import androidx.work.WorkerParameters;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.io.File;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -27,6 +34,7 @@ public final class SubscriptionRefreshWorker extends Worker {
     private static final String LOG_TAG = "OpenTubeXFetch";
     static final String FEED_TYPE_INPUT = "feedType";
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
+    private static final int FETCH_CONCURRENCY = 4;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
     // Scheduled workers have no renderer state, but still need their last
     // progress and notification labels when the app returns to the background.
@@ -191,6 +199,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         Set<String> failedProfileIds = new LinkedHashSet<>();
         SubscriptionRefreshNotificationProgress notificationProgress =
             new SubscriptionRefreshNotificationProgress();
+        ExecutorService fetches = Executors.newFixedThreadPool(FETCH_CONCURRENCY);
         try {
             List<String> orderedChannelIds = new ArrayList<>(channelIds);
             SubscriptionRefreshCheckpoint checkpoint = SubscriptionRefreshCheckpoint.load(
@@ -216,18 +225,46 @@ public final class SubscriptionRefreshWorker extends Worker {
             );
 
             int total = channelIds.size();
+            // Fetch a few channels ahead, but store them in order, so the checkpoint
+            // stays a single index. The foreground refresh fetches in parallel too.
+            ArrayDeque<Future<JSONObject>> fetching = new ArrayDeque<>();
+            int nextFetch = checkpoint.nextIndex;
             for (int index = checkpoint.nextIndex; index < orderedChannelIds.size(); index++) {
-                if (SubscriptionRefreshCoordinator.isCancelled(token)) {
-                    checkpoint.clear();
-                    return Result.success();
+                boolean batchEnded = SystemClock.elapsedRealtime() - batchStartedAt >= MAXIMUM_BATCH_MILLIS;
+                // Requests already sent finish this batch; later channels wait for the next one.
+                while (!batchEnded && nextFetch < orderedChannelIds.size() && fetching.size() < FETCH_CONCURRENCY) {
+                    String nextChannelId = orderedChannelIds.get(nextFetch++);
+                    fetching.add(fetches.submit(() -> SubscriptionRefreshHttpClient.fetch(feed, nextChannelId)));
                 }
-                if (isStopped() || SystemClock.elapsedRealtime() - batchStartedAt >= MAXIMUM_BATCH_MILLIS) {
-                    return Result.retry();
-                }
+                if (fetching.isEmpty()) return Result.retry();
+                Future<JSONObject> fetch = fetching.remove();
                 String channelId = orderedChannelIds.get(index);
                 List<String> profileIds = targetProfileIds(feeds, channelId);
+                JSONObject payload = null;
+                Exception fetchError = null;
+                while (payload == null && fetchError == null) {
+                    if (SubscriptionRefreshCoordinator.isCancelled(token)) {
+                        checkpoint.clear();
+                        return Result.success();
+                    }
+                    if (isStopped()) return Result.retry();
+                    try {
+                        payload = fetch.get(1, TimeUnit.SECONDS);
+                    } catch (TimeoutException waiting) {
+                        // Check for cancellation again while the request runs.
+                    } catch (InterruptedException error) {
+                        Thread.currentThread().interrupt();
+                        return Result.retry();
+                    } catch (ExecutionException error) {
+                        if (error.getCause() instanceof Error fatal) throw fatal;
+                        fetchError = error.getCause() instanceof Exception cause ? cause : error;
+                    }
+                }
                 try {
-                    JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
+                    if (fetchError != null) throw fetchError;
+                    // Profiles share the subscribed channel's response.
+                    SubscriptionRefreshResultStore.ChannelPayload result =
+                        new SubscriptionRefreshResultStore.ChannelPayload(channelId, payload);
                     boolean stored = false;
                     long timestamp = System.currentTimeMillis();
                     for (String profileId : profileIds) {
@@ -236,8 +273,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                                 context,
                                 profileId,
                                 feedType,
-                                channelId,
-                                payload,
+                                result,
                                 timestamp
                             );
                             stored = true;
@@ -342,6 +378,8 @@ public final class SubscriptionRefreshWorker extends Worker {
             );
             return Result.retry();
         } finally {
+            // Abandoned requests fail once their thread is interrupted or times out.
+            fetches.shutdownNow();
             completeWorker(context, token);
         }
     }

@@ -33,6 +33,19 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void cancelledFetchesStopReadingTheirResponse() throws Exception {
+        Thread.currentThread().interrupt();
+        try {
+            SubscriptionRefreshHttpClient.readResponse(new java.io.ByteArrayInputStream(new byte[] { '{', '}' }));
+            fail("an interrupted fetch keeps downloading");
+        } catch (java.io.IOException error) {
+            assertEquals("Refresh cancelled", error.getMessage());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void channelWithoutShortsDoesNotFailItsBackgroundRefresh() throws Exception {
         JSONArray requests = new JSONArray()
             .put(new JSONObject().put("format", "rss"))

@@ -66,9 +66,11 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
               try {
                 const payload = await fetchChannel(snapshot, feedType, channelId, controller.signal)
                 if (controller.signal.aborted) return
+                // One timestamp lets the app import the shared response once.
+                const timestamp = now()
                 for (const feed of targets) {
                   if (controller.signal.aborted) return
-                  await saveResult({ kind: 'channel', profileId: feed.profileId, feedType, channelId, timestamp: now(), payload })
+                  await saveResult({ kind: 'channel', profileId: feed.profileId, feedType, channelId, timestamp, payload })
                 }
               } catch (error) {
                 for (const feed of targets) failed.add(feed.key)

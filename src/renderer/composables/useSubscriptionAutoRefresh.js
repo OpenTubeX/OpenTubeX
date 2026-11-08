@@ -994,7 +994,8 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     const timestamp = new Date(Number(result.timestamp) || Date.now())
     const config = getAndroidSubscriptionCacheConfig(feedType)
     const previousCache = config.getCache()[result.channelId]
-    if (previousCache?.timestamp > timestamp) return
+    // Every profile with this channel gets the same fetch, which only needs one import.
+    if (previousCache?.timestamp >= timestamp) return
     let entries = result.payload?.backgroundFormat === 'entries'
       ? result.payload.entries
       : result.payload?.backgroundFormat === 'rss'

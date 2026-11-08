@@ -16,7 +16,17 @@ public class BackgroundSyncPlugin extends Plugin {
 
     @Override
     public void load() {
-        active = new WeakReference<>(this);
+        synchronized (BackgroundSyncPlugin.class) {
+            active = new WeakReference<>(this);
+            BackgroundSyncWorker.resume(getContext());
+        }
+    }
+
+    /** Pauses the periodic job unless a renderer loaded, which resumes it itself. */
+    static synchronized boolean pauseWithoutRenderer(Context context) {
+        if (active.get() != null) return false;
+        BackgroundSyncWorker.pause(context);
+        return true;
     }
 
     /** Asks the renderer to sync, returning the hold it releases afterwards. */

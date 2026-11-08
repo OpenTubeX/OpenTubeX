@@ -255,11 +255,13 @@ final class SubscriptionRefreshHttpClient {
         }
     }
 
-    private static String readResponse(InputStream input) throws IOException {
+    static String readResponse(InputStream input) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buffer = new byte[8192];
         int count;
         while ((count = input.read(buffer)) >= 0) {
+            // A cancelled refresh interrupts its fetches; stop downloading their bodies.
+            checkInterrupted();
             if (output.size() + count > MAXIMUM_RESPONSE_BYTES) {
                 throw new IOException("Subscription response is too large");
             }
