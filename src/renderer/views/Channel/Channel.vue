@@ -53,6 +53,15 @@
           :icon="['fas', 'arrow-right']"
           @click="router.push(currentTabViewAllRoute)"
         />
+        <FtToggleSwitch
+          v-if="showHideWatchedSwitch"
+          class="hideWatchedSwitch"
+          :label="$t('Channel.Hide Watched')"
+          compact
+          controlled
+          :default-value="hideWatched"
+          @change="hideWatchedOverride = $event"
+        />
         <FtSelect
           v-if="showVideoSortBy && currentTab === 'videos' && (showFetchMoreButton || filteredVideos.length > 1)"
           :value="videoSortBy"
@@ -331,6 +340,7 @@ import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 
 import store from '../../store/index'
@@ -605,6 +615,19 @@ const hideChannelCommunity = computed(() => store.getters.getHideChannelCommunit
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideWatchedSubs = computed(() => store.getters.getHideWatchedSubs)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideWatched = computed(() => hideWatchedOverride.value ?? hideWatchedSubs.value)
+
+// Like the sort select, but counting watched videos too so the switch never hides itself.
+const showHideWatchedSwitch = computed(() => {
+  switch (currentTab.value) {
+    case 'videos': return showFetchMoreButton.value || latestVideos.value.length > 1
+    case 'shorts': return !hideChannelShorts.value && (showFetchMoreButton.value || latestShorts.value.length > 1)
+    case 'live': return showFetchMoreButton.value || latestLive.value.length > 1
+    default: return false
+  }
+})
 
 /**
  * @param {{
@@ -1285,7 +1308,7 @@ const showVideoSortBy = ref(true)
 const videoSortBy = ref('newest')
 
 const filteredVideos = computed(() => {
-  if (hideWatchedSubs.value) {
+  if (hideWatched.value) {
     return filterWatchedArray(latestVideos.value)
   } else {
     return latestVideos.value
@@ -1293,7 +1316,7 @@ const filteredVideos = computed(() => {
 })
 
 const filteredShorts = computed(() => {
-  if (hideWatchedSubs.value) {
+  if (hideWatched.value) {
     return filterWatchedArray(latestShorts.value)
   } else {
     return latestShorts.value
@@ -1303,7 +1326,7 @@ const filteredShorts = computed(() => {
 const filteredLive = computed(() => {
   let videos = latestLive.value
 
-  if (hideWatchedSubs.value) {
+  if (hideWatched.value) {
     videos = filterWatchedArray(videos)
   }
 
@@ -3086,6 +3109,17 @@ function filterWatchedArray(videos) {
   const historyCache = store.getters.getHistoryCacheById
   return videos.filter(video => historyCache[video.videoId] === undefined)
 }
+</script>
+
+<script>
+// Shared by every channel page so the switch stays put while browsing channels.
+/** @type {import('vue').Ref<boolean | null>} */
+const hideWatchedOverride = ref(null)
+
+// Changing the setting makes it the default again, even while no channel page is open.
+watch(() => store.getters.getHideWatchedSubs, () => {
+  hideWatchedOverride.value = null
+})
 </script>
 
 <style scoped src="./Channel.css" />

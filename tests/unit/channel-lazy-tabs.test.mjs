@@ -232,14 +232,14 @@ test('a superseded Invidious channel load does not update the page', async () =>
 
 test('filtered shorts reuse the parsed shorts instead of copying them', () => {
   const latestShorts = shallowRef([])
-  const hideWatchedSubs = ref(false)
+  const hideWatched = ref(false)
   const id = ref('UCchannel')
   const { filteredShorts, withChannelShortsContext } = vm.runInNewContext(`
     ${slice('const filteredShorts = computed(', 'const filteredLive = computed(')}
     ${slice('function withChannelShortsContext(', 'watch(shortSortBy')}
     ;({ filteredShorts, withChannelShortsContext })
   `, {
-    computed, latestShorts, hideWatchedSubs, id,
+    computed, latestShorts, hideWatched, id,
     store: { getters: { getHistoryCacheById: { watched: {} } } },
     filterWatchedArray: videos => videos.filter(video => video.videoId !== 'watched'),
   })
@@ -250,7 +250,7 @@ test('filtered shorts reuse the parsed shorts instead of copying them', () => {
   assert.deepEqual(shorts.map(({ shortSource, shortChannelId }) => [shortSource, shortChannelId]),
     [['channel', 'UCchannel'], ['channel', 'UCchannel']])
 
-  hideWatchedSubs.value = true
+  hideWatched.value = true
   assert.equal(filteredShorts.value[0], shorts[1], 'filtering keeps the stamped objects')
 })
 

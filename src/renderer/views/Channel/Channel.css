@@ -52,6 +52,15 @@
   margin-block: var(--channel-sort-label-space) 0;
 }
 
+.select-container > .hideWatchedSwitch {
+  /* Size to the label instead of taking the row like a settings switch. */
+  inline-size: auto;
+}
+
+.select-container:has(> .select) > .hideWatchedSwitch {
+  margin-block-start: var(--channel-sort-label-space);
+}
+
 @media (any-pointer: coarse), (width <= 680px) {
   .select-container {
     --channel-sort-label-space: 8px;
