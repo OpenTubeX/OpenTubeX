@@ -532,6 +532,17 @@ test.describe('phone search suggestions', () => {
           Math.abs(bounds.right - search.right) < 0.1 &&
           Math.abs(bounds.top - search.bottom) < 0.1
       })).toBe(true)
+      // The bar and the dropdown share one rounded outline.
+      await expect.poll(() => results.evaluate(list => {
+        const bar = list.closest('.searchContainer')
+        const barStyle = getComputedStyle(bar)
+        const listStyle = getComputedStyle(list)
+        return {
+          barBottom: [barStyle.borderEndStartRadius, barStyle.borderEndEndRadius],
+          sharedShadow: barStyle.boxShadow.includes(listStyle.boxShadow),
+          cornersMatch: listStyle.borderEndStartRadius === barStyle.borderStartStartRadius
+        }
+      })).toEqual({ barBottom: ['0px', '0px'], sharedShadow: true, cornersMatch: true })
     })
   }
 })
