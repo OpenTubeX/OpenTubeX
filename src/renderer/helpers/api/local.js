@@ -29,7 +29,7 @@ import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { normalizeVideoPopularityResponse } from '../player/videoPopularity'
 import { parseLocalCollaboratorItems, parseLocalVideoChannels } from '../video-collaborators'
 
-import { evaluatePlayerScript, generateContentPoToken } from './local-api-platform'
+import { evaluatePlayerScript, generateContentPoToken, prewarmPlayerScriptEvaluator } from './local-api-platform'
 import { calculatePublishedDate, deepCopy, extractNumberFromString, getChannelPlaylistId, getRelativeTimeFromDate } from '../utils'
 
 const {
@@ -727,6 +727,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
 
   let htmlExtracts
   let player
+
+  // Deciphering the streams needs the interpreter right after the watch page loads
+  prewarmPlayerScriptEvaluator()
 
   try {
     htmlExtracts = await getWatchHTMLWatchPage(id, fetchFunc)

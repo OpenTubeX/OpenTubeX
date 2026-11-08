@@ -48,6 +48,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     PlayerCache: class {},
     UniversalCache: class {},
     generateContentPoToken: () => { requests.push('token'); return token },
+    prewarmPlayerScriptEvaluator: () => {},
     process: { env: { IS_ELECTRON: true } },
     getPaidPromotionDurationMs,
     normalizeVideoPopularityResponse,
