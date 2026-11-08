@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: Hlaða fleiri síðum af straumum, leitarniðurstöðum og öðrum listum sjálfvirkt.
     Auto Load Comments:
       Label: Hlaða athugasemdum sjálfvirkt
-      Tooltip: Hlaða athugasemdum og fleiri athugasemdasíðum sjálfvirkt þegar þú flettir að þeim.
+      Tooltip: Hlaða athugasemdum þegar síðan opnast og hlaða fleirum þegar þú flettir.
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.

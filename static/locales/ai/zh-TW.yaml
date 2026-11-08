@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: 自動載入動態、搜尋結果和其他清單的更多頁面。
     Auto Load Comments:
       Label: 自動載入留言
-      Tooltip: 捲動到留言時自動載入留言與更多留言頁面。
+      Tooltip: 開啟頁面時載入留言，並在捲動時載入更多留言。
   Context Menu Search Settings:
     Context Menu Search Settings: 內容選單搜尋
     Description: 選擇在已選取文字上按一下滑鼠右鍵時顯示的搜尋引擎。搜尋結果會在預設瀏覽器中開啟。

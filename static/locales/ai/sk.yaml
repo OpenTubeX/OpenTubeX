@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: Automaticky načíta ďalšie stránky odberov, výsledkov vyhľadávania a ďalších zoznamov.
     Auto Load Comments:
       Label: Automaticky načítať komentáre
-      Tooltip: Automaticky načíta komentáre a ďalšie stránky komentárov, keď sa k nim posuniete.
+      Tooltip: Načíta komentáre pri otvorení stránky a pri posúvaní načíta ďalšie.
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.

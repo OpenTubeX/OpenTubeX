@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: A hírfolyamok, keresési találatok és más listák további oldalainak automatikus betöltése.
     Auto Load Comments:
       Label: Hozzászólások automatikus betöltése
-      Tooltip: A hozzászólások és további hozzászólásoldalak automatikus betöltése, amikor odagörgetsz.
+      Tooltip: A hozzászólások betöltése az oldal megnyitásakor, görgetéskor pedig további hozzászólások betöltése.
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.

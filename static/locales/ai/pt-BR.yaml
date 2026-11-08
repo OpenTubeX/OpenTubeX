@@ -472,7 +472,7 @@ Settings:
       Lists Tooltip: Carregar automaticamente mais páginas de feeds, resultados de pesquisa e outras listas.
     Auto Load Comments:
       Label: Carregamento automático de comentários
-      Tooltip: Carregar automaticamente os comentários e as páginas adicionais de comentários ao rolar até eles.
+      Tooltip: Carregar os comentários ao abrir a página e carregar mais enquanto você rola.
   Context Menu Search Settings:
     Context Menu Search Settings: Pesquisa no menu de contexto
     Description: Escolha os motores de pesquisa apresentados ao clicar com o botão direito em texto selecionado. As pesquisas são abertas no navegador padrão.

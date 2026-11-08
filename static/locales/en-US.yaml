@@ -731,7 +731,7 @@ Settings:
       Lists Tooltip: Load additional pages of feeds, search results, and other lists automatically.
     Auto Load Comments:
       Label: Auto Load Comments
-      Tooltip: Load comments and additional comment pages automatically when you scroll to them.
+      Tooltip: Load comments when the page opens and load more comments as you scroll.
     Default Landing Page: Default Landing Page
     New Tab Position:
       New Tab Position: New Tab Position

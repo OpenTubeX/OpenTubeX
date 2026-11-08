@@ -505,7 +505,7 @@ Settings:
       Lists Tooltip: Lentlərin, axtarış nəticələrinin və digər siyahıların əlavə səhifələrini avtomatik yüklə.
     Auto Load Comments:
       Label: Şərhləri Avtomatik Yüklə
-      Tooltip: Şərhləri və əlavə şərh səhifələrini onlara sürüşdürdükdə avtomatik yüklə.
+      Tooltip: Səhifə açılanda şərhləri yüklə və sürüşdürdükcə daha çox şərh yüklə.
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekst menyusunda axtarış
     Description: Seçilmiş mətnə sağ kliklədikdə görünəcək axtarış sistemlərini seçin. Axtarışlar ilkin brauzerinizdə açılır.

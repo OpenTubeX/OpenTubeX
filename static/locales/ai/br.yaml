@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: Kargañ pajennoù ouzhpenn eus ar gwazhioù, an disoc'hoù klask hag ar rolloù all ent emgefreek.
     Auto Load Comments:
       Label: Kargañ an evezhiadennoù ent emgefreek
-      Tooltip: Kargañ an evezhiadennoù hag ar pajennoù evezhiadennoù ouzhpenn ent emgefreek pa dibunit betek enno.
+      Tooltip: Kargañ an evezhiadennoù pa vez digoret ar bajenn ha kargañ muioc'h a evezhiadennoù en ur zibunañ.
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."

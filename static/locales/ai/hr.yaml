@@ -506,7 +506,7 @@ Settings:
       Lists Tooltip: Automatski učitaj dodatne stranice feedova, rezultata pretraživanja i drugih popisa.
     Auto Load Comments:
       Label: Automatski učitaj komentare
-      Tooltip: Automatski učitaj komentare i dodatne stranice komentara kada se pomakneš do njih.
+      Tooltip: Učitaj komentare pri otvaranju stranice i učitavaj još komentara dok se pomičeš.
   Context Menu Search Settings:
     Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
     Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.

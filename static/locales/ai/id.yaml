@@ -504,7 +504,7 @@ Settings:
       Lists Tooltip: Muat halaman tambahan dari feed, hasil penelusuran, dan daftar lainnya secara otomatis.
     Auto Load Comments:
       Label: Otomatis Memuat Komentar
-      Tooltip: Muat komentar dan halaman komentar tambahan secara otomatis saat Anda menggulir ke sana.
+      Tooltip: Muat komentar saat halaman dibuka dan muat lebih banyak komentar saat Anda menggulir.
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.

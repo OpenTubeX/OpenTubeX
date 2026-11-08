@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: Carica automaticamente altre pagine di feed, risultati di ricerca e altri elenchi.
     Auto Load Comments:
       Label: Carica automaticamente i commenti
-      Tooltip: Carica automaticamente i commenti e le pagine aggiuntive di commenti quando scorri fino a essi.
+      Tooltip: Carica i commenti all’apertura della pagina e caricane altri mentre scorri.
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.

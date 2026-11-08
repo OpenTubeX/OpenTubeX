@@ -503,7 +503,7 @@ Settings:
       Lists Tooltip: Laadi voogude, otsingutulemuste ja muude loendite lisalehed automaatselt.
     Auto Load Comments:
       Label: Laadi kommentaarid automaatselt
-      Tooltip: Laadi kommentaarid ja täiendavad kommentaarilehed automaatselt, kui nendeni kerid.
+      Tooltip: Laadi kommentaarid lehe avamisel ja laadi kerimisel rohkem kommentaare.
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.

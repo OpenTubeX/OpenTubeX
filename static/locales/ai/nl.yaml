@@ -508,7 +508,7 @@ Settings:
       Lists Tooltip: Extra pagina's van feeds, zoekresultaten en andere lijsten automatisch laden.
     Auto Load Comments:
       Label: Opmerkingen automatisch laden
-      Tooltip: Opmerkingen en extra pagina's met opmerkingen automatisch laden wanneer je ernaartoe scrolt.
+      Tooltip: Opmerkingen laden wanneer de pagina opent en meer opmerkingen laden terwijl je scrolt.
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.

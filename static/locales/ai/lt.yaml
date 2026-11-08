@@ -625,7 +625,7 @@ Settings:
       Off: Išjungta
     Auto Load Comments:
       Label: Automatiškai įkelti komentarus
-      Tooltip: Automatiškai įkelti komentarus ir papildomus komentarų puslapius, kai prie jų slenkate.
+      Tooltip: Įkelti komentarus atidarius puslapį ir slenkant įkelti daugiau.
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.

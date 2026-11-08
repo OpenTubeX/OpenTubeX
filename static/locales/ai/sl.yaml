@@ -635,7 +635,7 @@ Settings:
       Off: Izklopljeno
     Auto Load Comments:
       Label: Samodejno naloži komentarje
-      Tooltip: Samodejno naloži komentarje in dodatne strani komentarjev, ko se pomaknete do njih.
+      Tooltip: Naloži komentarje ob odprtju strani in med pomikanjem naloži več komentarjev.
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.

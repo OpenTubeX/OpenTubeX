@@ -280,7 +280,7 @@ Settings:
       Lists Tooltip: Wczytuj automatycznie kolejne strony subskrypcji, wyników wyszukiwania i innych list.
     Auto Load Comments:
       Label: Automatyczne wczytywanie komentarzy
-      Tooltip: Wczytuj komentarze i kolejne strony komentarzy automatycznie po przewinięciu do nich.
+      Tooltip: Wczytuj komentarze po otwarciu strony i kolejne podczas przewijania.
   Theme Settings:
     Sections:
       Interface: "Interfejs"

@@ -643,7 +643,7 @@ Settings:
       Off: Desactivades
     Auto Load Comments:
       Label: Carrega automàticament els comentaris
-      Tooltip: Carrega automàticament els comentaris i les pàgines addicionals de comentaris quan us desplaceu fins a ells.
+      Tooltip: Carrega els comentaris en obrir la pàgina i carrega’n més mentre et desplaces.
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.

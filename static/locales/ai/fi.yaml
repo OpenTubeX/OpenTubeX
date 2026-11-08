@@ -508,7 +508,7 @@ Settings:
       Lists Tooltip: Lataa syötteiden, hakutulosten ja muiden luetteloiden lisäsivuja automaattisesti.
     Auto Load Comments:
       Label: Lataa kommentit automaattisesti
-      Tooltip: Lataa kommentit ja lisää kommenttisivuja automaattisesti, kun vierität niiden kohdalle.
+      Tooltip: Lataa kommentit sivun avautuessa ja lataa lisää vierittäessäsi.
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.

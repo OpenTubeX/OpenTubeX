@@ -604,7 +604,7 @@ Settings:
       Off: 끔
     Auto Load Comments:
       Label: 댓글 자동 불러오기
-      Tooltip: 스크롤하여 도달하면 댓글과 추가 댓글 페이지를 자동으로 불러옵니다.
+      Tooltip: 페이지를 열 때 댓글을 불러오고 스크롤하면 더 많은 댓글을 불러옵니다.
   Context Menu Search Settings:
     Context Menu Search Settings: 상황에 맞는 메뉴 검색
     Description: 선택한 텍스트를 마우스 오른쪽 버튼으로 클릭할 때 표시할 검색 엔진을 선택하세요. 검색 결과는 기본 브라우저에서 열립니다.
