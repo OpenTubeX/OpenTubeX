@@ -143,6 +143,53 @@ test('remeasures restyled shells in bounded batches and leaves hidden rows waiti
   windowing.disconnect()
 })
 
+test('remeasures every cell of a grid row in the same frame', () => {
+  let intersect, resize
+  const frames = []
+  const windowing = createListWindow({
+    IntersectionObserver: class { constructor(fn) { intersect = fn } observe() {} unobserve() {} disconnect() {} },
+    ResizeObserver: class { constructor(fn) { resize = fn } observe() {} unobserve() {} disconnect() {} },
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length },
+    cancelAnimationFrame() {},
+  })
+  const runFrame = () => { for (const callback of frames.splice(0)) callback() }
+
+  const columns = 4
+  let cardHeight = 100
+  const mounted = new Map()
+  const shellHeights = new Map()
+  const handles = []
+  const elements = Array.from({ length: 40 }, (_, index) => {
+    const row = Math.floor(index / columns)
+    const rowElements = () => elements.slice(row * columns, (row + 1) * columns)
+    // A grid cell is as tall as the tallest cell or shell in its row.
+    const element = {
+      offsetTop: row * 1000,
+      getBoundingClientRect: () => ({
+        height: Math.max(...rowElements().map(cell => mounted.get(cell) ? cardHeight : shellHeights.get(cell) ?? cardHeight))
+      })
+    }
+    mounted.set(element, true)
+    handles.push(windowing.observe(element, {
+      mount() { mounted.set(element, true) },
+      unmount(height) { mounted.set(element, false); shellHeights.set(element, height) },
+      isMounted: () => mounted.get(element),
+      isProtected: () => false,
+    }))
+    return element
+  })
+  resize(elements.map(target => ({ target, contentRect: { width: 300, height: cardHeight } })))
+  intersect(elements.map(target => ({ target, isIntersecting: false })))
+  runFrame()
+
+  // A smaller font size shrinks every card without resizing the grid.
+  cardHeight = 70
+  for (const handle of handles) handle.remeasure()
+  for (let frameCount = 0; frames.length > 0 && frameCount < 1000; frameCount++) runFrame()
+  assert.ok(elements.every(element => shellHeights.get(element) === 70 && !mounted.get(element)))
+  windowing.disconnect()
+})
+
 test('keeps remeasuring shells when the list hides during a remeasure', () => {
   let intersect, resize
   const frames = []

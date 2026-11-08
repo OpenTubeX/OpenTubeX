@@ -17,14 +17,19 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     remeasureFrame = null
     // Rebuilding every distant card in one frame stalls large desktop feeds.
     let count = 0
+    let rowTop
     for (const item of widthRemeasures) {
       // A hidden row measures nothing and would keep its stale height, so it
       // waits until the resize observer reports its box again.
       if (item.hidden) continue
-      if (count === 2) {
+      // A grid cell stretches to the stale shells beside it, so every cell of
+      // a grid row is remounted in the same frame.
+      const top = item.element.offsetTop
+      if (count >= 2 && (top === undefined || top !== rowTop)) {
         remeasureFrame = frame(remeasureWidths)
         return
       }
+      rowTop = top
       widthRemeasures.delete(item)
       if (items.has(item.element) && !item.near && !item.isMounted()) {
         // The old height is stale. If the list hides before the row is laid
