@@ -249,9 +249,16 @@ test('sheet dismissal uses the release position when the last touchmove is coale
 test('dragging during entry takes over from the current visual position', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-  await page.locator('.moreOptionNav').click()
   const menu = page.locator('.moreOptionContainer')
-  const movement = await menu.evaluate(element => {
+  const movement = await page.evaluate(async () => {
+    document.querySelector('.moreOptionNav').click()
+    await new Promise(resolve => setTimeout(resolve))
+    // Hold the entry, which a loaded machine could otherwise finish before the drag.
+    const element = document.querySelector('.moreOptionContainer')
+    element.getAnimations().forEach(animation => {
+      animation.pause()
+      animation.currentTime = Number(animation.effect.getComputedTiming().duration) / 2
+    })
     const handle = element.querySelector('.bottomSheetHandle')
     const before = new DOMMatrixReadOnly(getComputedStyle(element).transform).m42
     handle.dispatchEvent(new PointerEvent('pointerdown', {
