@@ -94,3 +94,27 @@ test('an empty advertised Invidious continuation is not accepted as a complete s
     }),
   }), /Missing playlist continuation/)
 })
+
+test('snapshots report how many videos have loaded out of the playlist size', async () => {
+  const localProgress = []
+  const localPages = [
+    { info: { title: 'Source', total_items: '3 videos' }, items: [video('a', 0), video('b', 1)], has_continuation: true },
+    { items: [video('c', 2)], has_continuation: false },
+  ]
+  await loadLocalPlaylistSnapshot('source', {
+    getPlaylist: async () => localPages[0],
+    getContinuation: async () => localPages[1],
+    parseVideos: items => items,
+    getTotal: page => Number.parseInt(page.info.total_items),
+    onProgress: (loaded, total) => localProgress.push([loaded, total]),
+  })
+  assert.deepEqual(localProgress, [[2, 3], [3, 3]])
+
+  const invidiousProgress = []
+  const invidiousPages = [[video('a', 0), video('b', 1)], [video('b', 1), video('a', 100)], [video('last', 200)]]
+  await loadInvidiousPlaylistSnapshot('source', {
+    getPlaylist: async (_id, page = 1) => ({ videoCount: 201, pageVideoCount: invidiousPages[page - 1].length, videos: invidiousPages[page - 1] }),
+    onProgress: (loaded, total) => invidiousProgress.push([loaded, total]),
+  })
+  assert.deepEqual(invidiousProgress, [[2, 201], [3, 201], [4, 201]])
+})

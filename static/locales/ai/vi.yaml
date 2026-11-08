@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Lên
   Move Down: Xuống
   Remove: Xóa
+  Background Tasks:
+    Loading videos from {playlistName}: 'Đang tải video từ {playlistName}'
+    Adding missing videos to {playlistName}: 'Đang thêm video còn thiếu vào {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Đang kiểm tra video không khả dụng trong {playlistName} ({checked}/{total})'
 History:
   From Date: 'Từ'
   To Date: 'Đến'

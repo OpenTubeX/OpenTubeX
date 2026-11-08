@@ -258,6 +258,10 @@ User Playlists:
   Move Up: Yuxarı köçür
   Move Down: Aşağı köçür
   Remove: Sil
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} siyahısından videolar yüklənir'
+    Adding missing videos to {playlistName}: 'Çatışmayan videolar {playlistName} siyahısına əlavə edilir'
+    Checking {playlistName} for unavailable videos: '{playlistName} əlçatmaz videolar üçün yoxlanılır ({checked}/{total})'
 History:
   From Date: 'Başlanğıc'
   To Date: 'Son'

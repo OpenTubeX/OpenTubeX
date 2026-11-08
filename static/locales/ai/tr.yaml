@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Yukarı taşı
   Move Down: Aşağı taşı
   Remove: Kaldır
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} listesinden videolar yükleniyor'
+    Adding missing videos to {playlistName}: 'Eksik videolar {playlistName} listesine ekleniyor'
+    Checking {playlistName} for unavailable videos: '{playlistName} listesinde kullanılamayan videolar denetleniyor ({checked}/{total})'
 History:
   From Date: 'Başlangıç'
   To Date: 'Bitiş'

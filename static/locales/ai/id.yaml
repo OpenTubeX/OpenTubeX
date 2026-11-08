@@ -257,6 +257,10 @@ User Playlists:
   Move Up: Ke atas
   Move Down: Ke bawah
   Remove: Hapus
+  Background Tasks:
+    Loading videos from {playlistName}: 'Memuat video dari {playlistName}'
+    Adding missing videos to {playlistName}: 'Menambahkan video yang hilang ke {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Memeriksa video yang tidak tersedia di {playlistName} ({checked}/{total})'
 History:
   From Date: 'Dari'
   To Date: 'Sampai'

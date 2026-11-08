@@ -131,6 +131,10 @@ User Playlists:
   Move Up: Wyżej
   Move Down: Niżej
   Remove: Usuń
+  Background Tasks:
+    Loading videos from {playlistName}: 'Wczytywanie filmów z {playlistName}'
+    Adding missing videos to {playlistName}: 'Dodawanie brakujących filmów do {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Sprawdzanie niedostępnych filmów w {playlistName} ({checked}/{total})'
 Settings:
   Diagnostics:
     Diagnostics: Diagnostyka

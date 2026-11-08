@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Upp
   Move Down: Niður
   Remove: Fjarlægja
+  Background Tasks:
+    Loading videos from {playlistName}: 'Hleð myndskeiðum úr {playlistName}'
+    Adding missing videos to {playlistName}: 'Bæti myndskeiðum sem vantar við {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Athuga ótiltæk myndskeið í {playlistName} ({checked}/{total})'
 History:
   From Date: 'Frá'
   To Date: 'Til'

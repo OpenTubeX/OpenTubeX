@@ -307,6 +307,10 @@ User Playlists:
   Move Up: اوپر
   Move Down: نیچے
   Remove: ہٹائیں
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} سے ویڈیوز لوڈ ہو رہی ہیں'
+    Adding missing videos to {playlistName}: 'غائب ویڈیوز {playlistName} میں شامل کی جا رہی ہیں'
+    Checking {playlistName} for unavailable videos: '{playlistName} میں دستیاب نہ ہونے والی ویڈیوز کی جانچ ہو رہی ہے ({checked}/{total})'
 History:
   From Date: سے
   To Date: تک

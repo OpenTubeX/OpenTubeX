@@ -410,6 +410,10 @@ User Playlists:
   Move Up: Skuif op
   Move Down: Skuif af
   Remove: Verwyder
+  Background Tasks:
+    Loading videos from {playlistName}: 'Laai video''s van {playlistName}'
+    Adding missing videos to {playlistName}: 'Voeg ontbrekende video''s by {playlistName} by'
+    Checking {playlistName} for unavailable videos: 'Kontroleer {playlistName} vir onbeskikbare video''s ({checked}/{total})'
 History:
   From Date: Van
   To Date: Tot

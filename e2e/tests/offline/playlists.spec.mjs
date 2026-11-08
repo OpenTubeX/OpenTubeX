@@ -617,13 +617,15 @@ test.describe('playlist cleanup', () => {
     await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
 
     await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toContainText('Found: 2')
-    await expect(dialog).toContainText('Could not check: 1')
-    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    const result = page.locator('.toast').filter({ hasText: 'Cleanup test: Remove unavailable videos?' })
+    await expect(result).toContainText('Found: 2')
+    await expect(result).toContainText('Could not check: 1')
+    await result.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('dead0000000')).toHaveCount(0)
+    await expect(page.locator('.toast').filter({ hasText: 'Cleanup test: 2 videos have been removed' })).toBeVisible()
 
     await (await openPlaylistMenuItem(page, 'Remove Watched Videos')).click()
+    const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('remove 1 watched video')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('live0000000')).toHaveCount(0)
@@ -656,12 +658,100 @@ test.describe('playlist cleanup', () => {
     await dispatchStoreAction(page, 'updateBackendPreference', 'local')
 
     await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toContainText('Found: 2')
-    await expect(dialog).toContainText('Could not check: 1')
-    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    const result = page.locator('.toast').filter({ hasText: 'Cleanup test: Remove unavailable videos?' })
+    await expect(result).toContainText('Found: 2')
+    await expect(result).toContainText('Could not check: 1')
+    await result.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId)))
       .toEqual(['live0000000', 'unknown00000'])
+  })
+
+  test('keeps checking for unavailable videos after leaving the playlist', async ({ page }) => {
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route('https://playlist-cleanup.test/api/v1/videos/**', async route => {
+      const id = new URL(route.request().url()).pathname.split('/').at(-1)
+      if (id === 'dead0000000') {
+        await held
+        return route.fulfill({ status: 404, json: { error: 'This video has been removed' } })
+      }
+      return route.fulfill({ json: { videoId: id } })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
+    await expect(page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'Cancel (2/3)' })).toBeVisible()
+    const progressToast = page.getByTestId('progress-toast')
+    await expect(progressToast).toContainText('Checking Cleanup test for unavailable videos (2/3)')
+
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+    // Returning to the playlist shows the running check instead of starting another one
+    await expect(page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'Cancel (2/3)' })).toBeVisible()
+    await goTo(page, 'userplaylists')
+    release()
+
+    const result = page.locator('.toast').filter({ hasText: 'Cleanup test: Remove unavailable videos?' })
+    await expect(result).toContainText('Found: 2')
+    await expect(result).toContainText('Could not check: 0')
+    await expect(progressToast).toHaveCount(0)
+    await result.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId)))
+      .toEqual(['live0000000', 'unknown00000'])
+  })
+
+  test('cancels the unavailable video check from the playlist', async ({ page }) => {
+    await page.route('https://playlist-cleanup.test/api/v1/videos/**', () => {})
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
+    const cancel = page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'Cancel (0/3)' })
+    await cancel.click()
+    await expect(cancel).toHaveCount(0)
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+    await expect(await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).toBeEnabled()
+  })
+
+  test('keeps adding missing videos after leaving the playlist', async ({ page }) => {
+    let release
+    const held = new Promise(resolve => { release = resolve })
+    await page.route(/https:\/\/playlist-cleanup\.test\/api\/v1\/playlists\/source-playlist\?/, async route => {
+      await held
+      return route.fulfill({
+        json: {
+          title: 'Source playlist',
+          description: '',
+          playlistId: 'source-playlist',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          authorThumbnails: [],
+          videoCount: 2,
+          viewCount: 1,
+          updated: 1_700_000_000,
+          videos: ['live0000000', 'new00000000'].map((videoId, index) => ({
+            type: 'video', title: videoId, videoId, author: 'Test Channel', authorId: 'UC-test-channel-id', authorUrl: '/channel/UC-test-channel-id', videoThumbnails: [], index, lengthSeconds: 60,
+          })),
+        },
+      })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+
+    await (await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).click()
+    await expect(page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }))
+      .toHaveAttribute('aria-busy', 'true')
+    await expect(await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).toBeDisabled()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('progress-toast')).toContainText('Adding missing videos to Cleanup test')
+
+    await goTo(page, 'userplaylists')
+    release()
+    await expect(page.locator('.toast').filter({ hasText: 'Cleanup test: Playlist has been updated.' })).toBeVisible()
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+    expect(await page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId)))
+      .toEqual(['dead0000000', 'live0000000', 'dead0000000', 'unknown00000', 'new00000000'])
   })
 })
 

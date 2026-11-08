@@ -257,6 +257,10 @@ User Playlists:
   Move Up: I fyny
   Move Down: I lawr
   Remove: Dileu
+  Background Tasks:
+    Loading videos from {playlistName}: 'Yn llwytho fideos o {playlistName}'
+    Adding missing videos to {playlistName}: 'Yn ychwanegu fideos coll at {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Yn gwirio {playlistName} am fideos nad ydynt ar gael ({checked}/{total})'
 History:
   From Date: 'O'
   To Date: 'Hyd at'

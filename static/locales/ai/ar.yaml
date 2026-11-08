@@ -261,6 +261,10 @@ User Playlists:
   Move Up: نقل لأعلى
   Move Down: نقل لأسفل
   Remove: إزالة
+  Background Tasks:
+    Loading videos from {playlistName}: 'جارٍ تحميل الفيديوهات من {playlistName}'
+    Adding missing videos to {playlistName}: 'جارٍ إضافة الفيديوهات المفقودة إلى {playlistName}'
+    Checking {playlistName} for unavailable videos: 'جارٍ التحقق من الفيديوهات غير المتاحة في {playlistName} ({checked}/{total})'
 History:
   From Date: 'من'
   To Date: 'إلى'
