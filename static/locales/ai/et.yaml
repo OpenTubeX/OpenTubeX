@@ -1899,6 +1899,8 @@ Playlist:
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
   Close Playlist: Sulge esitusloend
   Preload Playlist: "Eellaadi kõik videod"
+  Preload Playlist Warning Title: "Kas eellaadida kõik videod?"
+  Preload Playlist Warning: "Eellaadimine küsib YouTube'ilt selle esitusloendi iga video. Paljude päringute saatmine lühikese aja jooksul võib põhjustada, et YouTube blokeerib ajutiselt teie IP-aadressi. Kas soovite jätkata?"
   Preloading Playlist: "Kõigi videote eellaadimine..."
   Playlist Preload Complete: "Eellaaditud videoid: {count}."
   Playlist Preload Partial: "Eellaaditi {preloaded}/{requested} videot. {failed} eellaadimine nurjus."

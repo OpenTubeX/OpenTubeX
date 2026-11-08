@@ -19,6 +19,17 @@ async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
   return sources.length > 0 && sources.every(source => source.includes(expectedUrlPart))
 }
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {'Yes' | 'No'} answer
+ */
+async function answerPlaylistPreloadPrompt(page, answer) {
+  const prompt = page.getByRole('dialog', { name: 'Preload all videos?' })
+  await expect(prompt).toContainText('temporarily blocked by YouTube')
+  await prompt.getByRole('button', { name: answer, exact: true }).click()
+  await expect(prompt).toHaveCount(0)
+}
+
 test.describe('playlist creation', () => {
   test('a playlist can be created through the UI', async ({ page }) => {
     await goTo(page, 'userplaylists')
@@ -164,6 +175,49 @@ test.describe('seeded playlists', () => {
     await expect.poll(() => allThumbnailsInclude(playlistCard, 'thumbnail_placeholder')).toBe(true)
   })
 
+  test('asks before preloading a large playlist', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpPreloadVideoIds = []
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpPreloadVideoIds.push(videoId)
+        return { error: 'mock failure' }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+    await dispatchStoreAction(page, 'addPlaylist', {
+      _id: 'large-preload',
+      playlistName: 'Large preload playlist',
+      videos: Array.from({ length: 51 }, (_, index) => ({
+        videoId: `large${String(index).padStart(6, '0')}`,
+        title: `Large playlist video ${index}`,
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        lengthSeconds: 120,
+        published: Date.now() - 86_400_000,
+        timeAdded: Date.now(),
+        playlistItemId: `large-item-${index}`,
+        type: 'video'
+      }))
+    })
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large preload playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+    await answerPlaylistPreloadPrompt(page, 'No')
+
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadVideoIds)).toEqual([])
+
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+    await answerPlaylistPreloadPrompt(page, 'Yes')
+    await expect(page.getByText(
+      'Preloaded 0 of 51 videos. 51 could not be preloaded.'
+    )).toBeVisible()
+    expect(await app.electronApp.evaluate(() => new Set(globalThis.__ytDlpPreloadVideoIds).size)).toBe(51)
+  })
+
   test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
     await dispatchStoreAction(page, 'updateYtDlpPreloadEnabled', true)
     await dispatchStoreAction(page, 'updateYtDlpPreloadCount', 0)
@@ -192,6 +246,7 @@ test.describe('seeded playlists', () => {
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
     )).toEqual(['ccccccccccc'])
 
+    await expect(page.getByRole('dialog', { name: 'Preload all videos?' })).toHaveCount(0)
     await expect(await openPlaylistMenuItem(page, 'Preloading all videos...')).toBeDisabled()
     await page.keyboard.press('Escape')
 

@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
   Close Playlist: 关闭播放列表
   Preload Playlist: "预加载所有视频"
+  Preload Playlist Warning Title: "要预加载所有视频吗？"
+  Preload Playlist Warning: "预加载会向 YouTube 请求此播放列表中的每个视频。短时间内发送大量请求可能导致 YouTube 暂时封锁你的 IP 地址。要继续吗？"
   Preloading Playlist: "正在预加载所有视频..."
   Playlist Preload Complete: "已预加载视频：{count}。"
   Playlist Preload Partial: "已预加载 {requested} 个视频中的 {preloaded} 个，{failed} 个未能预加载。"

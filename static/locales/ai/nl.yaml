@@ -1961,6 +1961,8 @@ Playlist:
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
   Close Playlist: Afspeellijst sluiten
   Preload Playlist: "Alle video’s vooraf laden"
+  Preload Playlist Warning Title: "Alle video’s vooraf laden?"
+  Preload Playlist Warning: "Vooraf laden vraagt elke video in deze afspeellijst op bij YouTube. Veel verzoeken in korte tijd kunnen ervoor zorgen dat YouTube je IP-adres tijdelijk blokkeert. Wil je doorgaan?"
   Preloading Playlist: "Alle video’s worden vooraf geladen..."
   Playlist Preload Complete: "Vooraf geladen video’s: {count}."
   Playlist Preload Partial: "{preloaded} van {requested} video’s vooraf geladen. {failed} konden niet worden geladen."

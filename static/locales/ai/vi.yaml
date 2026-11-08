@@ -1910,6 +1910,8 @@ Playlist:
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
   Close Playlist: Đóng danh sách phát
   Preload Playlist: "Tải trước tất cả video"
+  Preload Playlist Warning Title: "Tải trước tất cả video?"
+  Preload Playlist Warning: "Tải trước sẽ yêu cầu YouTube cung cấp từng video trong danh sách phát này. Gửi nhiều yêu cầu trong thời gian ngắn có thể khiến YouTube tạm thời chặn địa chỉ IP của bạn. Bạn có muốn tiếp tục không?"
   Preloading Playlist: "Đang tải trước tất cả video..."
   Playlist Preload Complete: "Video đã tải trước: {count}."
   Playlist Preload Partial: "Đã tải trước {preloaded}/{requested} video. Không thể tải trước {failed} video."

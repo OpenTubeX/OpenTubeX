@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "Precaricamento video: {completed} di {requested}"
   Close Playlist: Chiudi playlist
   Preload Playlist: "Precarica tutti i video"
+  Preload Playlist Warning Title: "Precaricare tutti i video?"
+  Preload Playlist Warning: "Il precaricamento richiede a YouTube ogni video di questa playlist. Inviare molte richieste in poco tempo può portare YouTube a bloccare temporaneamente il tuo indirizzo IP. Vuoi continuare?"
   Preloading Playlist: "Precaricamento di tutti i video..."
   Playlist Preload Complete: "Video precaricati: {count}."
   Playlist Preload Partial: "Precaricati {preloaded} video su {requested}. Impossibile precaricarne {failed}."

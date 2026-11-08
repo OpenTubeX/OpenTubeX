@@ -1944,6 +1944,8 @@ Playlist:
   Add Playlist to Queue: Aldoni ludliston al la vico
   Playlist Added to Queue: Ludlisto aldonita al la vico
   Preload Playlist: Antaŭŝargi ĉiujn videaĵojn
+  Preload Playlist Warning Title: "Ĉu antaŭŝargi ĉiujn videaĵojn?"
+  Preload Playlist Warning: "Antaŭŝargado petas ĉiun videaĵon de ĉi tiu ludlisto de YouTube. Sendi multajn petojn en mallonga tempo povas igi YouTube provizore bloki vian IP-adreson. Ĉu vi volas daŭrigi?"
   Preloading Playlist: Antaŭŝargado de ĉiuj videaĵoj...
   Playlist Already Preloaded: Ĉiuj videaĵoj de la ludlisto jam estas antaŭŝargitaj
   Playlist Preload Progress: 'Antaŭŝargado de videaĵoj: {completed} el {requested}'

@@ -1979,6 +1979,8 @@ Playlist:
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
   Close Playlist: Luk playliste
   Preload Playlist: "Forudindlæs alle videoer"
+  Preload Playlist Warning Title: "Forudindlæs alle videoer?"
+  Preload Playlist Warning: "Forudindlæsning henter hver video i denne playliste fra YouTube. Mange forespørgsler på kort tid kan få YouTube til midlertidigt at blokere din IP-adresse. Vil du fortsætte?"
   Preloading Playlist: "Forudindlæser alle videoer..."
   Playlist Preload Complete: "Forudindlæste videoer: {count}."
   Playlist Preload Partial: "Forudindlæste {preloaded} af {requested} videoer. {failed} kunne ikke forudindlæses."

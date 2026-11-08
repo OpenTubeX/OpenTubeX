@@ -2272,6 +2272,8 @@ Playlist:
     VideoDurationDescending: 재생 시간 (긴순)
     Custom: 사용자 지정
   Preload Playlist: "모든 동영상 미리 불러오기"
+  Preload Playlist Warning Title: "모든 동영상을 미리 불러올까요?"
+  Preload Playlist Warning: "미리 불러오기는 이 재생목록의 모든 동영상을 YouTube에 요청합니다. 짧은 시간에 많은 요청을 보내면 YouTube가 IP 주소를 일시적으로 차단할 수 있습니다. 계속하시겠습니까?"
   Preloading Playlist: "모든 동영상을 미리 불러오는 중..."
   Playlist Preload Complete: "미리 불러온 동영상: {count}개."
   Playlist Preload Partial: "동영상 {requested}개 중 {preloaded}개를 미리 불러왔습니다. {failed}개는 실패했습니다."

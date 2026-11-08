@@ -1931,6 +1931,8 @@ Playlist:
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
   Close Playlist: Zatvori popis za reprodukciju
   Preload Playlist: "Predučitaj sve videozapise"
+  Preload Playlist Warning Title: "Predučitati sve videozapise?"
+  Preload Playlist Warning: "Predučitavanje od YouTubea traži svaki videozapis s ovog popisa za reprodukciju. Slanje mnogo zahtjeva u kratkom vremenu može dovesti do toga da YouTube privremeno blokira vašu IP adresu. Želite li nastaviti?"
   Preloading Playlist: "Predučitavanje svih videozapisa..."
   Playlist Preload Complete: "Predučitani videozapisi: {count}."
   Playlist Preload Partial: "Predučitano je {preloaded} od {requested} videozapisa. Predučitavanje {failed} videozapisa nije uspjelo."

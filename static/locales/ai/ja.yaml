@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
   Close Playlist: プレイリストを閉じる
   Preload Playlist: "すべての動画を先読み"
+  Preload Playlist Warning Title: "すべての動画を先読みしますか？"
+  Preload Playlist Warning: "先読みでは、この再生リストのすべての動画を YouTube にリクエストします。短時間に多数のリクエストを送信すると、YouTube によって IP アドレスが一時的にブロックされる場合があります。続行しますか？"
   Preloading Playlist: "すべての動画を先読みしています..."
   Playlist Preload Complete: "先読みした動画: {count}。"
   Playlist Preload Partial: "{requested} 本中 {preloaded} 本を先読みしました。{failed} 本は先読みできませんでした。"

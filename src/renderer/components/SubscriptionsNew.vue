@@ -138,10 +138,12 @@
   />
   <FtPrompt
     v-if="showRefreshWarning"
+    theme="readable-width"
     :label="$t('Subscriptions.New Feed Refresh Warning Title')"
     :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size }, activeSubscriptionIds.size)]"
     :option-names="[$t('Yes'), $t('No')]"
     :option-values="['refresh', 'cancel']"
+    :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
     autosize
     @click="handleRefreshWarning"
   />

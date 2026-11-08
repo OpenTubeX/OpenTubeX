@@ -2306,6 +2306,8 @@ Playlist:
     VideoDurationDescending: Trukmė (ilgiausi viršuje)
     Custom: Pasirinktinė tvarka
   Preload Playlist: "Iš anksto įkelti visus vaizdo įrašus"
+  Preload Playlist Warning Title: "Iš anksto įkelti visus vaizdo įrašus?"
+  Preload Playlist Warning: "Išankstinis įkėlimas iš YouTube užklausia kiekvieną šio grojaraščio vaizdo įrašą. Daug užklausų per trumpą laiką gali lemti, kad YouTube laikinai užblokuos jūsų IP adresą. Ar norite tęsti?"
   Preloading Playlist: "Iš anksto įkeliami visi vaizdo įrašai..."
   Playlist Preload Complete: "Iš anksto įkelta vaizdo įrašų: {count}."
   Playlist Preload Partial: "Iš anksto įkelta {preloaded} iš {requested} vaizdo įrašų. Nepavyko įkelti {failed}."

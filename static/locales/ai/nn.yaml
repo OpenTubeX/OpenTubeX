@@ -2196,6 +2196,8 @@ Playlist:
     VideoDurationDescending: Lengd (lengste)
     Custom: Eigendefinert
   Preload Playlist: "Førehandslast alle videoar"
+  Preload Playlist Warning Title: "Førehandslaste alle videoar?"
+  Preload Playlist Warning: "Førehandslasting hentar kvar video i denne spelelista frå YouTube. Mange førespurnader på kort tid kan føre til at YouTube mellombels blokkerer IP-adressa di. Vil du halde fram?"
   Preloading Playlist: "Førehandslastar alle videoar..."
   Playlist Preload Complete: "Førehandslasta videoar: {count}."
   Playlist Preload Partial: "Førehandslasta {preloaded} av {requested} videoar. {failed} kunne ikkje førehandslastast."

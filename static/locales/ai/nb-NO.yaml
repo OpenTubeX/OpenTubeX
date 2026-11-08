@@ -1902,6 +1902,8 @@ Playlist:
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
   Close Playlist: Lukk spillelisten
   Preload Playlist: "Forhåndslast alle videoer"
+  Preload Playlist Warning Title: "Forhåndslaste alle videoer?"
+  Preload Playlist Warning: "Forhåndslasting henter hver video i denne spillelisten fra YouTube. Mange forespørsler på kort tid kan føre til at YouTube midlertidig blokkerer IP-adressen din. Vil du fortsette?"
   Preloading Playlist: "Forhåndslaster alle videoer..."
   Playlist Preload Complete: "Forhåndslastede videoer: {count}."
   Playlist Preload Partial: "Forhåndslastet {preloaded} av {requested} videoer. {failed} kunne ikke forhåndslastes."

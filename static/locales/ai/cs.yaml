@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"
   Close Playlist: Zavřít playlist
   Preload Playlist: "Přednačíst všechna videa"
+  Preload Playlist Warning Title: "Přednačíst všechna videa?"
+  Preload Playlist Warning: "Přednačítání si od YouTube vyžádá každé video v tomto playlistu. Odeslání mnoha požadavků v krátkém čase může vést k dočasnému zablokování vaší IP adresy ze strany YouTube. Chcete pokračovat?"
   Preloading Playlist: "Přednačítají se všechna videa..."
   Playlist Preload Complete: "Přednačtená videa: {count}."
   Playlist Preload Partial: "Přednačteno {preloaded} z {requested} videí. {failed} se nepodařilo přednačíst."

@@ -2381,6 +2381,8 @@ Playlist:
     VideoDurationDescending: Trajanje (najdaljši)
     Custom: Po meri
   Preload Playlist: "Prednaloži vse videoposnetke"
+  Preload Playlist Warning Title: "Prednaložiti vse videoposnetke?"
+  Preload Playlist Warning: "Prednalaganje od YouTuba zahteva vsak videoposnetek s tega seznama predvajanja. Pošiljanje veliko zahtev v kratkem času lahko povzroči, da YouTube začasno blokira vaš naslov IP. Ali želite nadaljevati?"
   Preloading Playlist: "Prednalaganje vseh videoposnetkov..."
   Playlist Preload Complete: "Prednaloženi videoposnetki: {count}."
   Playlist Preload Partial: "Prednaloženih je {preloaded} od {requested} videov. {failed} jih ni bilo mogoče prednaložiti."

@@ -1906,6 +1906,8 @@ Playlist:
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
   Close Playlist: "Serriñ ar roll-videoioù"
   Preload Playlist: "Rakgargañ an holl videoioù"
+  Preload Playlist Warning Title: "Rakgargañ an holl videoioù?"
+  Preload Playlist Warning: "Ar rakgargañ a c'houlenn pep video eus ar roll-c'hoari-mañ digant YouTube. Kas kalz goulennoù e berr amzer a c'hall lakaat YouTube da stankañ ho chomlec'h IP evit ur mare. Kenderc'hel?"
   Preloading Playlist: "O rakgargañ an holl videoioù..."
   Playlist Preload Complete: "Videoioù rakgarget: {count}."
   Playlist Preload Partial: "{preloaded} diwar {requested} video rakgarget. C’hwitet ez eus bet war {failed}."

@@ -1927,6 +1927,8 @@ Playlist:
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"
   Close Playlist: Затваряне на плейлиста
   Preload Playlist: "Предварително зареждане на всички видеа"
+  Preload Playlist Warning Title: "Предварително зареждане на всички видеа?"
+  Preload Playlist Warning: "Предварителното зареждане изисква всяко видео от този плейлист от YouTube. Изпращането на много заявки за кратко време може да доведе до временно блокиране на IP адреса ви от YouTube. Искате ли да продължите?"
   Preloading Playlist: "Предварително зареждане на всички видеа..."
   Playlist Preload Complete: "Предварително заредени видеа: {count}."
   Playlist Preload Partial: "Предварително заредени са {preloaded} от {requested} видеа. {failed} не можаха да се заредят."

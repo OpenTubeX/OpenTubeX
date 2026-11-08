@@ -1929,6 +1929,8 @@ Playlist:
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
   Close Playlist: Κλείσιμο λίστας αναπαραγωγής
   Preload Playlist: "Προφόρτωση όλων των βίντεο"
+  Preload Playlist Warning Title: "Προφόρτωση όλων των βίντεο;"
+  Preload Playlist Warning: "Η προφόρτωση ζητά από το YouTube κάθε βίντεο αυτής της λίστας αναπαραγωγής. Η αποστολή πολλών αιτημάτων σε σύντομο χρόνο μπορεί να οδηγήσει το YouTube να αποκλείσει προσωρινά τη διεύθυνση IP σας. Θέλετε να συνεχίσετε;"
   Preloading Playlist: "Γίνεται προφόρτωση όλων των βίντεο..."
   Playlist Preload Complete: "Προφορτωμένα βίντεο: {count}."
   Playlist Preload Partial: "Προφορτώθηκαν {preloaded} από {requested} βίντεο. Απέτυχαν {failed}."

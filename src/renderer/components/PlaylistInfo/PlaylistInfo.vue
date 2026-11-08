@@ -318,6 +318,17 @@
         @click="handleRemoveDuplicateVideosPromptAnswer"
       />
       <FtPrompt
+        v-if="showPreloadPlaylistPrompt"
+        autosize
+        theme="readable-width"
+        :label="t('Playlist.Preload Playlist Warning Title')"
+        :extra-labels="[t('Playlist.Preload Playlist Warning')]"
+        :option-names="[t('Yes'), t('No')]"
+        :option-values="['preload', 'cancel']"
+        :option-icons="[['fas', 'forward'], ['fas', 'xmark']]"
+        @click="handlePreloadPlaylistPromptAnswer"
+      />
+      <FtPrompt
         v-if="showExportPrompt"
         autosize
         :label="t('Settings.Data Settings.Select Export Type')"
@@ -499,6 +510,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  preloadRequiresConfirmation: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close', 'toggle-playlist-bookmark', 'preload-playlist'])
@@ -511,6 +526,7 @@ const editMode = ref(false)
 const showDeletePlaylistPrompt = ref(false)
 const showRemoveVideosOnWatchPrompt = ref(false)
 const showRemoveDuplicateVideosPrompt = ref(false)
+const showPreloadPlaylistPrompt = ref(false)
 const showExportPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
@@ -760,7 +776,13 @@ const ownMenuItems = computed(() => {
           : t('Playlist.Preload Playlist'),
       icon: ['fas', 'forward'],
       enabled: !props.preloadPending && !props.preloadComplete,
-      run: () => emit('preload-playlist'),
+      run: () => {
+        if (props.preloadRequiresConfirmation) {
+          showPreloadPlaylistPrompt.value = true
+        } else {
+          emit('preload-playlist')
+        }
+      },
     })
   }
   items.push(SEPARATOR)
@@ -837,6 +859,8 @@ const playlistPersistenceDisabled = computed(() => {
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
+watch(showRemoveDuplicateVideosPrompt, handlePromptToggle)
+watch(showPreloadPlaylistPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
 watch(showDownloadPrompt, handlePromptToggle)
 watch(enableDownloads, (enabled) => {
@@ -1133,6 +1157,14 @@ const deletePlaylistPromptNames = computed(() => [
   t('Yes, Delete'),
   t('Cancel')
 ])
+
+/**
+ * @param {'preload' | 'cancel' | null} option
+ */
+function handlePreloadPlaylistPromptAnswer(option) {
+  showPreloadPlaylistPrompt.value = false
+  if (option === 'preload') { emit('preload-playlist') }
+}
 
 /** @type {import('vue').ComputedRef<number>} */
 const userPlaylistWatchedVideoCount = computed(() => {

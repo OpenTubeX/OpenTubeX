@@ -2152,6 +2152,8 @@ Playlist:
   Add Playlist to Queue: Voeg afspeellys by tou
   Playlist Added to Queue: Afspeellys by tou gevoeg
   Preload Playlist: Laai alle video’s vooraf
+  Preload Playlist Warning Title: "Laai alle video’s vooraf?"
+  Preload Playlist Warning: "Vooraflaai vra elke video in hierdie snitlys by YouTube aan. Te veel versoeke in ’n kort tyd kan veroorsaak dat YouTube u IP-adres tydelik blokkeer. Wil u voortgaan?"
   Preloading Playlist: Laai alle video’s vooraf...
   Playlist Already Preloaded: Alle afspeellysvideo’s is reeds vooraf gelaai
   Playlist Preload Progress: 'Laai video’s vooraf: {completed} van {requested}'

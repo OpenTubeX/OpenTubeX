@@ -1867,6 +1867,8 @@ Playlist:
   Playlist Preload Progress: "Pré-carregando vídeos: {completed} de {requested}"
   Close Playlist: Fechar lista de reprodução
   Preload Playlist: "Pré-carregar todos os vídeos"
+  Preload Playlist Warning Title: "Pré-carregar todos os vídeos?"
+  Preload Playlist Warning: "O pré-carregamento solicita ao YouTube cada vídeo desta playlist. Enviar muitas solicitações em pouco tempo pode fazer com que o YouTube bloqueie temporariamente seu endereço IP. Deseja continuar?"
   Preloading Playlist: "A pré-carregar todos os vídeos..."
   Playlist Preload Complete: "Vídeos pré-carregados: {count}."
   Playlist Preload Partial: "Foram pré-carregados {preloaded} de {requested} vídeos. Não foi possível pré-carregar {failed}."

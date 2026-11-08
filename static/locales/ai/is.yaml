@@ -1918,6 +1918,8 @@ Playlist:
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
   Close Playlist: Loka spilunarlista
   Preload Playlist: "Forhlaða öll myndskeið"
+  Preload Playlist Warning Title: "Forhlaða öll myndskeið?"
+  Preload Playlist Warning: "Forhleðsla sækir hvert myndskeið í þessum spilunarlista frá YouTube. Margar beiðnir á stuttum tíma geta orðið til þess að YouTube loki tímabundið á IP-töluna þína. Viltu halda áfram?"
   Preloading Playlist: "Forhleðsla allra myndskeiða..."
   Playlist Preload Complete: "Forhlaðin myndskeið: {count}."
   Playlist Preload Partial: "Forhlóð {preloaded} af {requested} myndskeiðum. Ekki tókst að forhlaða {failed}."

@@ -1904,6 +1904,8 @@ Playlist:
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
   Close Playlist: 關閉播放清單
   Preload Playlist: "預先載入所有影片"
+  Preload Playlist Warning Title: "要預先載入所有影片嗎？"
+  Preload Playlist Warning: "預先載入會向 YouTube 請求此播放清單中的每部影片。短時間內傳送大量請求可能導致 YouTube 暫時封鎖你的 IP 位址。要繼續嗎？"
   Preloading Playlist: "正在預先載入所有影片..."
   Playlist Preload Complete: "已預先載入影片：{count}。"
   Playlist Preload Partial: "已預先載入 {requested} 部影片中的 {preloaded} 部，{failed} 部無法載入。"

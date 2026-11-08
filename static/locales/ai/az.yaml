@@ -1907,6 +1907,8 @@ Video:
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə
+  Preload Playlist Warning Title: "Bütün videolar öncədən yüklənsin?"
+  Preload Playlist Warning: "Öncədən yükləmə bu pleylistdəki hər videonu YouTube-dan sorğulayır. Qısa müddətdə çoxlu sorğu göndərmək YouTube-un IP ünvanınızı müvəqqəti bloklamasına səbəb ola bilər. Davam etmək istəyirsiniz?"
   Preloading Playlist: Bütün videolar öncədən yüklənilir...
   Playlist Already Preloaded: Pleylistin bütün videoları artıq öncədən yüklənib
   Playlist Preload Progress: 'Videolar öncədən yüklənilir: {requested} videodan {completed}'
