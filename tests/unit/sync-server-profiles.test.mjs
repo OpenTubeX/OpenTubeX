@@ -33,6 +33,7 @@ for (const colors of [
       dispatch: async (action, profile) => {
         assert.equal(action, 'updateProfile')
         profileList.push(structuredClone(profile))
+        return true
       },
     }
 

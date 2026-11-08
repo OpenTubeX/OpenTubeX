@@ -825,9 +825,10 @@ async function mergeSubscriptions(client, store, previousIds, options) {
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
-  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
+  const readLocalBookmarks = () => (Array.isArray(store.state.settings.playlistBookmarks)
     ? store.state.settings.playlistBookmarks
     : []).filter(isValidPlaylistBookmark)
+  const localBookmarks = readLocalBookmarks()
   const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
   const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
@@ -854,6 +855,10 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
   })
 
   if (!metadataEquals(localBookmarks, mergedBookmarks)) {
+    // Replacing the list would drop bookmarks saved or removed meanwhile.
+    if (!metadataEquals(readLocalBookmarks(), localBookmarks)) {
+      throw new Error('Playlist bookmarks changed during sync. Try again.')
+    }
     const saved = await store.dispatch('replacePlaylistBookmarks', mergedBookmarks)
     if (!saved) throw new Error('Could not save synced playlist bookmarks')
   }
@@ -899,7 +904,11 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
   for (const id of localById.keys()) {
     if (!mergedIds.has(id)) {
+      // `removePlaylist` logs failures instead of returning them.
       await store.dispatch('removePlaylist', id)
+      if (store.state.playlists.playlists.some(playlist => playlist._id === id)) {
+        throw new Error('Could not remove synced playlist')
+      }
     }
   }
 
@@ -1038,7 +1047,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         protected: false,
         videos: mergedVideos,
       }
-      await store.dispatch('addPlaylist', local)
+      if (!await store.dispatch('addPlaylist', local)) throw new Error('Could not save synced playlist')
     } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
       const saved = await store.dispatch('updatePlaylistFromSync', {
         previous: local,
@@ -1216,7 +1225,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     if (!mergedIds.has(id)) await client.deleteSubscriptionGroup(remote.remoteId)
   }
   for (const id of localById.keys()) {
-    if (!mergedIds.has(id)) await store.dispatch('removeProfile', id)
+    if (!mergedIds.has(id) && !await store.dispatch('removeProfile', id)) {
+      throw new Error('Could not remove synced profile')
+    }
   }
 
   for (const id of mergedIds) {
@@ -1290,7 +1301,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
       subscriptions: mergedSubscriptions,
     }
     if (!local || !metadataEquals(local, mergedProfile)) {
-      await store.dispatch('updateProfile', mergedProfile)
+      if (!await store.dispatch('updateProfile', mergedProfile)) throw new Error('Could not save synced profile')
     }
 
     next[id] = {
