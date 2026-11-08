@@ -145,7 +145,7 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
   })
 }
 
-const parseDescriptionHtml = vm.runInNewContext(`${setup.slice(setup.indexOf('function parseDescriptionHtml('), setup.indexOf('function processDescriptionHtml('))}; parseDescriptionHtml`)
+const parseDescriptionHtml = vm.runInNewContext(`${setup.slice(setup.indexOf('function parseDescriptionHtml('), setup.indexOf('function processDescriptionHtml('))}; parseDescriptionHtml`, { URLSearchParams })
 
 test('Invidious HTML descriptions drop YouTube redirects and tracking attributes', () => {
   assert.equal(
@@ -155,6 +155,11 @@ test('Invidious HTML descriptions drop YouTube redirects and tracking attributes
   assert.equal(
     parseDescriptionHtml('<a href="/watch?v=abc&amp;t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="/hashtag/music">#music</a>'),
     '<a href="https://www.youtube.com/watch?v=abc&t=65s" data-onclick="jump_to_time" data-jump-time="65">1:05</a> Intro\n<a href="https://www.youtube.com/hashtag/music">#music</a>'
+  )
+  // Only redirect links are unwrapped, so other links keep their parameters
+  assert.equal(
+    parseDescriptionHtml('<a href="https://example.com/search?q=cats&amp;v=2">https://example.com/search?q=cats&amp;v=2</a>'),
+    '<a href="https://example.com/search?q=cats&v=2">https://example.com/search?q=cats&v=2</a>'
   )
   // A value that repeats the attribute name is removed with its attribute
   assert.equal(
@@ -170,6 +175,7 @@ test('Invidious HTML descriptions with repeated unterminated attributes are clea
     assert.equal(parseDescriptionHtml(html), html)
   }
   parseDescriptionHtml(`class="${'a'.repeat(100_000)}\n`.repeat(2))
+  parseDescriptionHtml('href="/redirect?q='.repeat(10_000))
   const elapsed = threadCpuMilliseconds() - started
   assert.ok(elapsed < 1000, `cleaning took ${Math.round(elapsed)} ms of CPU time`)
 })
