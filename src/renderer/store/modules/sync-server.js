@@ -60,6 +60,7 @@ import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
+import { syncDeletionKey, syncDeletions } from '../../helpers/sync-deletions.js'
 
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
@@ -185,6 +186,8 @@ const state = {
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
   syncServerDevices: {},
+  /** Deletions the last sync stopped at, until the user reviews them */
+  syncServerPendingDeletion: null,
 }
 
 const getters = {
@@ -199,6 +202,7 @@ const getters = {
     ? i18n.global.t('Settings.Sync Settings.Server Update Required')
     : state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
+  getSyncServerPendingDeletion: state => state.syncServerPendingDeletion,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
   getSyncServerWatchStatsSupported: state => state.syncServerWatchStatsSupported,
   getSyncServerLiveRemindersSupported: state => state.syncServerLiveRemindersSupported,
@@ -310,6 +314,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let externalMediaBaseline = previous.externalMediaPositions
   const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
     settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
+  // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
+  const deletions = syncDeletions.snapshot()
   const result = {}
   const skippedCollections = new Set()
   let tabRevocationError = null
@@ -463,7 +469,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.subscriptions,
-          { allowDataLoss }
+          { allowDataLoss, deletions }
         )
         result.subscriptions = next.subscriptions.length
         break
@@ -474,7 +480,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           previous.playlists,
           // Takeout only supplies video IDs. Encrypted sync can carry unknown
           // uploaders; the legacy server requires real channel metadata.
-          { allowDataLoss, allowMissingUploader: encrypted }
+          { allowDataLoss, deletions, allowMissingUploader: encrypted }
         )
         result.playlists = Object.keys(next.playlists).length
         break
@@ -483,7 +489,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.playlistBookmarks,
-          { allowDataLoss }
+          { allowDataLoss, deletions }
         )
         result.playlistBookmarks = next.playlistBookmarks.length
         break
@@ -498,8 +504,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           store,
           previous.history,
           // Imported playlist videos can enter history without uploader metadata.
-          { allowDataLoss, allowMissingUploader: encrypted },
-          { changedIds: unchangedRemote ? changedIds : null }
+          { allowDataLoss, deletions, allowMissingUploader: encrypted },
+          // Restoring entries can involve ones that did not change locally.
+          { changedIds: unchangedRemote && !deletions.history ? changedIds : null }
         )
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)
@@ -536,7 +543,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             targetClient,
             store,
             previous.profiles,
-            { allowDataLoss }
+            { allowDataLoss, deletions }
           )
           if (profiles !== null) {
             next.profiles = profiles
@@ -830,7 +837,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 retryDocument.playlistBookmarks = data
                 const retryClient = new EncryptedSyncAdapter(retryDocument)
                 next.playlistBookmarks = await syncPlaylistBookmarks(
-                  retryClient, store, next.playlistBookmarks, { allowDataLoss }
+                  retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions }
                 )
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
@@ -881,6 +888,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
+    syncDeletions.release(deletions)
+    commit('setSyncServerPendingDeletion', null)
     if (progressStarted) commit('setSyncServerLastResult', result)
     if (tabRevocationError) throw tabRevocationError
     finishProgress()
@@ -922,6 +931,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
+    // Sync settings reviews these deletions when it opens. The review accepts
+    // a choice only after the sync stopped.
+    if (error instanceof SyncServerDataLossError) commit('setSyncServerPendingDeletion', error.details)
     throw error
   } finally {
     releaseSyncClient(networkClient)
@@ -1551,6 +1563,8 @@ const actions = {
     commit('setSyncServerStatus', 'idle')
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
+    commit('setSyncServerPendingDeletion', null)
+    syncDeletions.clear()
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -1593,6 +1607,26 @@ const actions = {
 
   syncWithSyncServer(context, options = {}) {
     return getScheduler(context).sync(options)
+  },
+
+  /**
+   * Applies the user's choice for the deletions the last sync stopped at, then
+   * syncs again. Deletions in other lists still need their own review.
+   * @param {'delete' | 'keep'} choice
+   */
+  async resolveSyncServerDeletion({ commit, dispatch, state }, choice) {
+    const pending = state.syncServerPendingDeletion
+    if (!pending) return null
+    const key = syncDeletionKey(pending.collection, pending.scope)
+    const ids = pending.items.map(item => item.id)
+    if (choice === 'keep') syncDeletions.keep(key, ids)
+    else syncDeletions.confirm(key, ids)
+    commit('setSyncServerPendingDeletion', null)
+    return await dispatch('syncWithSyncServer', { notifyDataLoss: false })
+  },
+
+  dismissSyncServerDeletion({ commit }) {
+    commit('setSyncServerPendingDeletion', null)
   },
 
   async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
@@ -1859,6 +1893,9 @@ const mutations = {
   },
   setSyncServerDevices(state, devices) {
     state.syncServerDevices = devices
+  },
+  setSyncServerPendingDeletion(state, details) {
+    state.syncServerPendingDeletion = details
   },
 }
 

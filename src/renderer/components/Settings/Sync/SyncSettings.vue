@@ -345,14 +345,14 @@
         :label="t('Settings.Sync Settings.Data Loss Confirmation')"
         theme="readable-width"
         fixed-layout
-        @click="dataLossWarning = null"
+        @click="dismissDataLossWarning"
       >
         <div class="deleteAccountContent">
           <p class="deleteAccountWarning">
             {{ t('Settings.Sync Settings.Data Loss Warning', {
               deleted: dataLossWarning.deleted,
               previous: dataLossWarning.previous,
-              collection: dataLossWarning.collection,
+              collection: dataLossCollection,
             }) }}
           </p>
           <ul class="dataLossItems">
@@ -368,15 +368,20 @@
         <template #footer>
           <FtFlexBox class="actions">
             <FtButton
+              :label="t('Settings.Sync Settings.Keep Deleted Items')"
+              :icon="['fas', 'undo']"
+              @click="resolveDataLoss('keep')"
+            />
+            <FtButton
               :label="t('Settings.Sync Settings.Confirm Data Loss')"
               theme="destructive"
-              :icon="['fas', 'triangle-exclamation']"
-              @click="confirmDataLossSync"
+              :icon="['fas', 'trash']"
+              @click="resolveDataLoss('delete')"
             />
             <FtButton
               :label="t('Cancel')"
               :icon="['fas', 'xmark']"
-              @click="dataLossWarning = null"
+              @click="dismissDataLossWarning"
             />
           </FtFlexBox>
         </template>
@@ -499,7 +504,7 @@
 
 <script setup>
 import { syncProgressLabel as getSyncProgressLabel } from '../../../helpers/syncProgressLabel'
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../../FtButton/FtButton.vue'
@@ -513,13 +518,13 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import SyncPairing from './SyncPairing.vue'
 import SyncAccountManagement from './SyncAccountManagement.vue'
 import SyncActivity from './SyncActivity.vue'
+import { settingsSubpageKey } from '../../FtSettingsSubpage/settingsSubpage'
 
 import store from '../../../store/index'
 import {
   SyncServerClient,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
-  SyncServerDataLossError,
   isSessionExpiredError,
   normalizeSyncServerUrl,
 } from '../../../helpers/sync-server'
@@ -565,7 +570,22 @@ const newPassword = ref('')
 const confirmedPassword = ref('')
 const passwordPromptError = ref('')
 const accountManagement = useTemplateRef('accountManagement')
-const dataLossWarning = ref(null)
+const settingsWindow = inject(settingsSubpageKey, null)
+// The store keeps the deletions a sync stopped at, including background syncs.
+const dataLossWarning = computed(() => store.getters.getSyncServerPendingDeletion)
+const dataLossCollectionLabels = {
+  subscriptions: () => t('Subscriptions.Subscriptions'),
+  playlists: () => t('Playlists'),
+  playlistBookmarks: () => t('Settings.Sync Settings.Saved Playlists'),
+  history: () => t('History.History'),
+  profiles: () => t('Settings.Sync Settings.Profiles'),
+}
+// Nested lists show the name of their playlist or profile.
+const dataLossCollection = computed(() => {
+  const warning = dataLossWarning.value
+  if (!warning) return ''
+  return warning.scopeName ?? dataLossCollectionLabels[warning.collection]?.() ?? warning.collection
+})
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
@@ -770,11 +790,8 @@ async function syncNow() {
       showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
     }
   } catch (error) {
-    if (error instanceof SyncServerDataLossError) {
-      dataLossWarning.value = error
-      return
-    }
-    localError.value = error.message
+    // The review prompt shows deletions the sync stopped at.
+    if (!store.getters.getSyncServerPendingDeletion) localError.value = error.message
   }
 }
 
@@ -792,18 +809,24 @@ function pairingCompleted(result) {
   })
 }
 
-async function confirmDataLossSync() {
+/** @param {'delete' | 'keep'} choice */
+async function resolveDataLoss(choice) {
   if (busy.value) return
-  dataLossWarning.value = null
   localError.value = ''
   try {
-    const result = await store.dispatch('syncWithSyncServer', { allowDataLoss: true })
+    const result = await store.dispatch('resolveSyncServerDeletion', choice)
     if (result !== null) {
       showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
     }
   } catch (error) {
-    localError.value = error.message
+    if (!store.getters.getSyncServerPendingDeletion) localError.value = error.message
   }
+}
+
+function dismissDataLossWarning() {
+  // A closed settings window hides the review until it opens again.
+  if (settingsWindow && !settingsWindow.isActive.value) return
+  store.dispatch('dismissSyncServerDeletion')
 }
 
 async function disconnect() {

@@ -1381,7 +1381,8 @@ Settings:
     Sync completed: Synchronizácia bola dokončená
     Sync failed: "Synchronizácia zlyhala: {error}"
     Data Loss Confirmation: Potvrdiť synchronizáciu s odstránením údajov?
-    Data Loss Warning: Stav servera by odstránil {deleted} z {previous} predtým synchronizovaných položiek v kolekcii {collection}. Môže to znamenať neúspešnú migráciu alebo obnovenie servera. Pokračujte, len ak chcete tieto údaje odstrániť a máte zálohu.
+    Data Loss Warning: Synchronizácia by na všetkých zariadeniach odstránila {deleted} z {previous} predtým synchronizovaných položiek v „{collection}“. Ak ste ich neodstránili vy, napríklad preto, že server bol obnovený, ponechajte si ich, aby sa všade obnovili.
+    Keep Deleted Items: Ponechať položky
     Confirm Data Loss: Odstrániť a pokračovať
     Use Shared Tabs: 'Používať jednu zdieľanú súpravu kariet vo všetkých zariadeniach'
     Shared Tabs Warning: 'Otvorené karty v tomto zariadení sa stanú spoločnou sadou. Ostatné zariadenia pri synchronizácii nahradia svoje otvorené karty touto sadou; karty z rôznych zariadení sa nezlúčia.'

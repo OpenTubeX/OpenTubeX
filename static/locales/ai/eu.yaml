@@ -1380,7 +1380,8 @@ Settings:
     Sync completed: Sinkronizazioa osatu da
     Sync failed: 'Sinkronizazioak huts egin du: {error}'
     Data Loss Confirmation: Datuak ezabatuko dituen sinkronizazioa berretsi?
-    Data Loss Warning: Zerbitzariaren egoerak aurretik sinkronizatutako {previous} {collection} elementuetatik {deleted} ezabatuko lituzke. Baliteke zerbitzariaren migrazio edo berrezarpen batek huts egin izana. Jarraitu ezabaketa nahita egiten ari bazara eta babeskopia bat baduzu soilik.
+    Data Loss Warning: Sinkronizazioak «{collection}» ataleko aurretik sinkronizatutako {previous} elementuetatik {deleted} ezabatuko lituzke gailu guztietan. Zuk ezabatu ez badituzu, adibidez zerbitzaria berrezarri delako, mantendu itzazu leku guztietan leheneratzeko.
+    Keep Deleted Items: Mantendu elementuak
     Confirm Data Loss: Ezabatu eta jarraitu
     Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
     Shared Tabs Warning: 'Gailu honetan irekita dauden fitxak multzo partekatua bihurtuko dira. Beste gailuek sinkronizatzean beren fitxa irekiak multzo horrekin ordeztuko dituzte; gailu desberdinetako fitxak ez dira bateratuko.'

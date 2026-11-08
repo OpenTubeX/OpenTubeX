@@ -146,8 +146,22 @@ test.describe('destructive sync', () => {
     await notification.getByRole('button', { name: 'Sync', exact: true }).click()
     await expect(sync).toBeVisible()
     await expect(autoSync).not.toBeChecked()
-    await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
-    await expect(page.getByRole('dialog', { name: 'Confirm destructive sync?' }).locator('.dataLossItems li')).toHaveCount(profiles.length)
+    // Sync settings opens the review of the blocked deletions without another sync.
+    const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
+    await expect(warning.locator('.dataLossItems li')).toHaveCount(profiles.length)
+    await expect(warning).toContainText('previously synced items in Profiles')
+
+    // Keeping the profiles uploads them again instead of deleting them here.
+    const uploads = []
+    page.on('request', request => {
+      if (request.method() === 'POST' && request.url().endsWith('/subscriptions/groups/')) uploads.push(request)
+    })
+    await warning.getByRole('button', { name: 'Keep items', exact: true }).click()
+    await expect(warning).toBeHidden()
+    await expect(page.locator('.toast', { hasText: 'Sync completed' })).toBeVisible()
+    expect(uploads).toHaveLength(profiles.length)
+    await expect(autoSync).toBeChecked()
+    expect(await page.evaluate(() => window.$store.getters.getProfileList.length)).toBe(profiles.length + 1)
   })
 
   test('lists affected profiles and keeps long deletion lists usable', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {

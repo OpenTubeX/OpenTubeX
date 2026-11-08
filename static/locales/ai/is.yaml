@@ -1384,7 +1384,8 @@ Settings:
     Sync completed: Samstillingu lokið
     Sync failed: 'Samstilling mistókst: {error}'
     Data Loss Confirmation: Staðfesta samstillingu sem eyðir gögnum?
-    Data Loss Warning: Staða þjónsins myndi eyða {deleted} af {previous} atriðum í {collection} sem áður voru samstillt. Þetta getur bent til þess að gagnaflutningur þjónsins hafi mistekist eða hann hafi verið endurstilltur. Haltu aðeins áfram ef eyðingin er fyrirhuguð og þú átt öryggisafrit.
+    Data Loss Warning: Samstillingin myndi eyða {deleted} af {previous} áður samstilltum atriðum í „{collection}“ á öllum tækjum. Ef þú eyddir þeim ekki, til dæmis vegna þess að þjónninn var endurstilltur, skaltu halda þeim til að endurheimta þau alls staðar.
+    Keep Deleted Items: Halda atriðum
     Confirm Data Loss: Eyða og halda áfram
     Use Shared Tabs: 'Nota eitt sameiginlegt flipasafn í öllum tækjum'
     Shared Tabs Warning: 'Opnir flipar á þessu tæki verða sameiginlega flipasafnið. Önnur tæki skipta út opnum flipum sínum fyrir þetta safn þegar þau samstillast; flipum frá mismunandi tækjum er ekki slegið saman.'

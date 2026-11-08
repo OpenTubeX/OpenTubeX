@@ -1594,7 +1594,8 @@ Settings:
     Sync completed: Sinkronisering voltooi
     Sync failed: 'Sinkronisering het misluk: {error}'
     Data Loss Confirmation: Bevestig vernietigende sinkronisering?
-    Data Loss Warning: Die bedienertoestand sou {deleted} van {previous} voorheen gesinkroniseerde {collection}-items skrap. Dit kan op ’n mislukte bedienermigrasie of -terugstelling dui. Gaan slegs voort as hierdie skrapping opsetlik is en u ’n rugsteun het.
+    Data Loss Warning: Sinkronisering sou {deleted} van {previous} voorheen gesinkroniseerde items in “{collection}” op alle toestelle skrap. As u hulle nie geskrap het nie, byvoorbeeld omdat die bediener teruggestel is, behou hulle om hulle oral te herstel.
+    Keep Deleted Items: Behou items
     Confirm Data Loss: Skrap en gaan voort
     Server Update Required: Werk hierdie bediener by om geënkripteerde regstreekse sinkronisering te ondersteun.
   Proxy Settings:

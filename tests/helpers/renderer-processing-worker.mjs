@@ -21,7 +21,7 @@ parentPort.on('message', async message => {
   } catch (error) {
     parentPort.postMessage({ type: 'error', id: message.id, error: {
       name: error.name, message: error.message,
-      collection: error.collection, deleted: error.deleted, previous: error.previous, items: error.items,
+      details: error.name === 'SyncServerDataLossError' ? error.details : undefined,
     } })
   }
 })

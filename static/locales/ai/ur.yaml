@@ -1460,7 +1460,8 @@ Settings:
     Sync completed: سنک مکمل ہو گئی
     Sync failed: 'سنک ناکام ہو گئی: {error}'
     Data Loss Confirmation: تباہ کن سنک کی تصدیق کریں؟
-    Data Loss Warning: سرور کی حالت پہلے سے سنک شدہ {previous} میں سے {deleted} {collection} آئٹمز حذف کر دے گی۔ یہ سرور کی ناکام منتقلی یا ری سیٹ کی نشاندہی کر سکتا ہے۔ صرف اسی صورت میں جاری رکھیں جب یہ حذف کرنا جان بوجھ کر ہو اور آپ کے پاس بیک اپ موجود ہو۔
+    Data Loss Warning: سنک تمام آلات پر “{collection}” میں پہلے سے سنک شدہ {previous} آئٹمز میں سے {deleted} حذف کر دے گا۔ اگر آپ نے انہیں حذف نہیں کیا، مثال کے طور پر اس لیے کہ سرور ری سیٹ ہو گیا تھا، تو انہیں ہر جگہ بحال کرنے کے لیے رکھیں۔
+    Keep Deleted Items: آئٹمز رکھیں
     Confirm Data Loss: حذف کریں اور جاری رکھیں
     Server Update Required: انکرپٹڈ لائیو سنک کو سپورٹ کرنے کے لیے یہ سرور اپ ڈیٹ کریں۔
   Proxy Settings:

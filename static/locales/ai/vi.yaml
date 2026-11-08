@@ -1384,7 +1384,8 @@ Settings:
     Sync completed: Đã đồng bộ
     Sync failed: 'Đồng bộ thất bại: {error}'
     Data Loss Confirmation: Xác nhận đồng bộ có xóa dữ liệu?
-    Data Loss Warning: Trạng thái máy chủ sẽ xóa {deleted} trong số {previous} mục {collection} đã đồng bộ trước đó. Điều này có thể cho thấy quá trình di chuyển hoặc đặt lại máy chủ đã lỗi. Chỉ tiếp tục nếu bạn chủ ý xóa và đã có bản sao lưu.
+    Data Loss Warning: Đồng bộ sẽ xóa {deleted} trong số {previous} mục đã đồng bộ trước đó trong “{collection}” trên tất cả thiết bị. Nếu bạn không xóa chúng, chẳng hạn vì máy chủ đã bị đặt lại, hãy giữ chúng để khôi phục ở mọi nơi.
+    Keep Deleted Items: Giữ các mục
     Confirm Data Loss: Xóa và tiếp tục
     Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
     Shared Tabs Warning: 'Các thẻ đang mở trên thiết bị này sẽ trở thành bộ thẻ dùng chung. Khi đồng bộ hóa, các thiết bị khác sẽ thay thế thẻ đang mở bằng bộ thẻ này; thẻ từ các thiết bị khác nhau không được gộp lại.'

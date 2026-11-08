@@ -14,6 +14,7 @@ import { buildRecommendationProfile } from '../../src/renderer/helpers/recommend
 import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync.js'
 import watchQueue, { persistWatchQueue } from '../../src/renderer/store/modules/watch-queue.js'
 import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
+import { trackLocalSyncDeletions } from '../../src/renderer/helpers/sync-deletions.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -60,6 +61,8 @@ function fixture () {
     isSettingSyncEnabled: () => false,
     isRemoteSyncDispatch: () => false,
     historyChanges: createHistoryChangeTracker(),
+    trackLocalSyncDeletions,
+    MAIN_PROFILE_ID: 'allChannels',
     SYNC_ACTION_REASONS: new Map(),
     SYNC_MUTATION_REASONS: new Map(),
   })

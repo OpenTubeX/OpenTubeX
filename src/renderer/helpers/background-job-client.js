@@ -66,7 +66,7 @@ export class BackgroundJobClient {
       request.cancelTimeout()
       if (data.type === 'error') {
         const error = data.error.name === 'SyncServerDataLossError'
-          ? new SyncServerDataLossError(data.error.collection, data.error.deleted, data.error.previous, data.error.items)
+          ? new SyncServerDataLossError(data.error.details)
           : new Error(data.error.message)
         error.name = data.error.name
         request.reject(error)

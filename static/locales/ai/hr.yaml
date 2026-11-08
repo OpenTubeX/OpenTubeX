@@ -1388,7 +1388,8 @@ Settings:
     Sync completed: Sinkronizacija dovršena
     Sync failed: 'Sinkronizacija nije uspjela: {error}'
     Data Loss Confirmation: Potvrditi sinkronizaciju koja briše podatke?
-    Data Loss Warning: Stanje poslužitelja izbrisalo bi {deleted} od {previous} prethodno sinkroniziranih stavki zbirke {collection}. To može upućivati na neuspjelu migraciju ili ponovno postavljanje poslužitelja. Nastavite samo ako namjerno želite izbrisati te podatke i imate sigurnosnu kopiju.
+    Data Loss Warning: Sinkronizacija bi na svim uređajima izbrisala {deleted} od {previous} prethodno sinkroniziranih stavki u „{collection}”. Ako ih niste izbrisali vi, primjerice zato što je poslužitelj ponovno postavljen, zadržite ih kako biste ih vratili posvuda.
+    Keep Deleted Items: Zadrži stavke
     Confirm Data Loss: Izbriši i nastavi
     Use Shared Tabs: 'Upotrebljavaj jedan zajednički skup kartica na svim uređajima'
     Shared Tabs Warning: 'Otvorene kartice na ovom uređaju postaju zajednički skup. Drugi uređaji pri sinkronizaciji zamjenjuju svoje otvorene kartice tim skupom; kartice s različitih uređaja ne spajaju se.'

@@ -1407,7 +1407,8 @@ Settings:
     Sync completed: Synkronointi valmistui
     Sync failed: 'Synkronointi epäonnistui: {error}'
     Data Loss Confirmation: Vahvistetaanko tietoja poistava synkronointi?
-    Data Loss Warning: Palvelimen tila poistaisi {deleted}/{previous} aiemmin synkronoitua {collection}-kohdetta. Tämä voi johtua epäonnistuneesta palvelimen siirrosta tai nollauksesta. Jatka vain, jos poisto on tarkoituksellinen ja sinulla on varmuuskopio.
+    Data Loss Warning: Synkronointi poistaisi kaikilta laitteilta osiosta ”{collection}” {deleted}/{previous} aiemmin synkronoitua kohdetta. Jos et poistanut niitä itse, esimerkiksi koska palvelin nollattiin, säilytä ne, jotta ne palautetaan kaikkialle.
+    Keep Deleted Items: Säilytä kohteet
     Confirm Data Loss: Poista ja jatka
     Use Shared Tabs: 'Käytä yhtä jaettua välilehtijoukkoa kaikilla laitteilla'
     Shared Tabs Warning: 'Tällä laitteella avoinna olevista välilehdistä tulee yhteinen välilehtijoukko. Muut laitteet korvaavat avoimet välilehtensä tällä joukolla synkronoidessaan; eri laitteiden välilehtiä ei yhdistetä.'

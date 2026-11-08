@@ -1384,7 +1384,8 @@ Settings:
     Sync completed: Sinkronisasi selesai
     Sync failed: 'Sinkronisasi gagal: {error}'
     Data Loss Confirmation: Konfirmasikan sinkronisasi destruktif?
-    Data Loss Warning: Status server akan menghapus {deleted} dari {previous} item {collection} yang sebelumnya disinkronkan. Hal ini dapat menandakan migrasi server gagal atau server diatur ulang. Lanjutkan hanya jika penghapusan ini disengaja dan Anda memiliki cadangan.
+    Data Loss Warning: Sinkronisasi akan menghapus {deleted} dari {previous} item yang sebelumnya disinkronkan di “{collection}” pada semua perangkat. Jika Anda tidak menghapusnya, misalnya karena server diatur ulang, pertahankan item tersebut untuk memulihkannya di mana saja.
+    Keep Deleted Items: Pertahankan item
     Confirm Data Loss: Hapus dan lanjutkan
     Use Shared Tabs: 'Gunakan satu kumpulan tab bersama di semua perangkat'
     Shared Tabs Warning: 'Tab yang terbuka di perangkat ini menjadi kumpulan bersama. Saat perangkat lain disinkronkan, tab mereka yang terbuka diganti dengan kumpulan ini; tab dari perangkat berbeda tidak digabungkan.'

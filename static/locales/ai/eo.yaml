@@ -1424,7 +1424,8 @@ Settings:
     Sync completed: Sinkronigo finiĝis
     Sync failed: 'Sinkronigo malsukcesis: {error}'
     Data Loss Confirmation: Ĉu konfirmi detruan sinkronigon?
-    Data Loss Warning: La stato de la servilo forigus {deleted} el {previous} antaŭe sinkronigitaj eroj de {collection}. Tio povas indiki malsukcesan servilan migradon aŭ restarigon. Daŭrigu nur se ĉi tiu forigo estas intenca kaj vi havas savkopion.
+    Data Loss Warning: La sinkronigo forigus {deleted} el {previous} antaŭe sinkronigitaj eroj en “{collection}” en ĉiuj aparatoj. Se vi ne forigis ilin, ekzemple ĉar la servilo estis restarigita, konservu ilin por restarigi ilin ĉie.
+    Keep Deleted Items: Konservi erojn
     Confirm Data Loss: Forigi kaj daŭrigi
     Server Update Required: Ĝisdatigu ĉi tiun servilon por subteni ĉifritan tujan sinkronigon.
   Proxy Settings:

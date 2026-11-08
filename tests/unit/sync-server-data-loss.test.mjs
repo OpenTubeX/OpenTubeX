@@ -37,6 +37,14 @@ const channel = { id: 'channel-1', name: 'A channel' }
 const bookmark = bookmarks.createPlaylistBookmark({ id: 'playlist-1', title: 'A saved playlist', uploaderId: 'channel-1', uploaderName: 'A channel' })
 const profile = { _id: 'profile-1', name: 'A profile', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [channel] }
 const playlist = { _id: 'playlist-1', playlistName: 'A playlist', videos: [video] }
+const largePlaylist = {
+  _id: 'playlist-large', playlistName: 'A large playlist',
+  videos: Array.from({ length: 10 }, (_, index) => ({ videoId: `video-${index}`, title: `Video ${index}`, authorId: 'channel-1' })),
+}
+const largeProfile = {
+  _id: 'profile-large', name: 'A large profile', bgColor: '#000000', textColor: '#FFFFFF',
+  subscriptions: Array.from({ length: 10 }, (_, index) => ({ id: `channel-${index}`, name: `Channel ${index}` })),
+}
 const cases = [
   {
     collection: 'subscriptions', method: 'syncSubscriptions',
@@ -45,7 +53,7 @@ const cases = [
     previous: [channel.id], item: { id: channel.id, name: channel.name },
   },
   {
-    collection: 'saved playlists', method: 'syncPlaylistBookmarks',
+    collection: 'playlistBookmarks', method: 'syncPlaylistBookmarks',
     state: { settings: { playlistBookmarks: [bookmark] } },
     client: { getPlaylistBookmarks: async () => [] },
     previous: [bookmark.playlist.id], item: { id: bookmark.playlist.id, name: bookmark.playlist.title },
@@ -64,23 +72,23 @@ const cases = [
     previous: [video.videoId], item: { id: video.videoId, name: video.title },
   },
   {
-    collection: 'videos in playlist A playlist', method: 'syncPlaylists',
-    state: { playlists: { playlists: [playlist] } },
+    collection: 'playlistVideos', scope: largePlaylist._id, scopeName: largePlaylist.playlistName, method: 'syncPlaylists',
+    state: { playlists: { playlists: [largePlaylist] } },
     client: {
-      getPlaylists: async () => [{ id: playlist._id }],
-      getPlaylist: async () => ({ playlist: { id: playlist._id, title: playlist.playlistName }, videos: [] }),
+      getPlaylists: async () => [{ id: largePlaylist._id }],
+      getPlaylist: async () => ({ playlist: { id: largePlaylist._id, title: largePlaylist.playlistName }, videos: [] }),
     },
-    previous: { [playlist._id]: { metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } },
-    item: { id: video.videoId, name: video.title },
+    previous: { [largePlaylist._id]: { metadata: { title: largePlaylist.playlistName, description: '' }, videos: largePlaylist.videos.map(item => item.videoId) } },
+    items: largePlaylist.videos.map(item => ({ id: item.videoId, name: item.title })),
   },
   {
-    collection: 'channels in profile A profile', method: 'syncProfiles',
-    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }, profile] } },
+    collection: 'profileChannels', scope: largeProfile._id, scopeName: largeProfile.name, method: 'syncProfiles',
+    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: largeProfile.subscriptions }, largeProfile] } },
     client: {
-      getSubscriptionGroups: async () => [{ group: { id: profile._id, title: profile.name }, channels: [] }],
+      getSubscriptionGroups: async () => [{ group: { id: largeProfile._id, title: largeProfile.name }, channels: [] }],
     },
-    previous: { [profile._id]: { metadata: { title: profile.name, bgColor: '#000000', textColor: '#FFFFFF' }, channels: [channel.id] } },
-    item: { id: channel.id, name: channel.name },
+    previous: { [largeProfile._id]: { metadata: { title: largeProfile.name, bgColor: '#000000', textColor: '#FFFFFF' }, channels: largeProfile.subscriptions.map(item => item.id) } },
+    items: largeProfile.subscriptions.map(item => ({ id: item.id, name: item.name })),
   },
 ]
 
@@ -90,7 +98,9 @@ for (const scenario of cases) {
     await assert.rejects(context[scenario.method](scenario.client, store, scenario.previous), error => {
       assert.ok(error instanceof errors.SyncServerDataLossError, error.stack)
       assert.equal(error.collection, scenario.collection)
-      assert.deepEqual(structuredClone(error.items), [scenario.item])
+      assert.equal(error.scope, scenario.scope ?? null)
+      assert.equal(error.scopeName, scenario.scopeName ?? null)
+      assert.deepEqual(structuredClone(error.items), scenario.items ?? [scenario.item])
       return true
     })
   })

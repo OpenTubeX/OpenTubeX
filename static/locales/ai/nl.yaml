@@ -1407,7 +1407,8 @@ Settings:
     Sync completed: Synchronisatie voltooid
     Sync failed: "Synchronisatie mislukt: {error}"
     Data Loss Confirmation: Synchronisatie met gegevensverlies bevestigen?
-    Data Loss Warning: De serverstatus zou {deleted} van de {previous} eerder gesynchroniseerde items uit {collection} verwijderen. Dit kan wijzen op een mislukte servermigratie of reset. Ga alleen door als deze verwijdering de bedoeling is en je een back-up hebt.
+    Data Loss Warning: Synchronisatie zou {deleted} van de {previous} eerder gesynchroniseerde items in ‘{collection}’ op alle apparaten verwijderen. Als je ze niet zelf hebt verwijderd, bijvoorbeeld omdat de server is gereset, behoud ze dan om ze overal te herstellen.
+    Keep Deleted Items: Items behouden
     Confirm Data Loss: Verwijderen en doorgaan
     Use Shared Tabs: 'Eén gedeelde set tabbladen op alle apparaten gebruiken'
     Shared Tabs Warning: 'De geopende tabbladen op dit apparaat worden de gedeelde set. Andere apparaten vervangen hun geopende tabbladen door deze set wanneer ze synchroniseren; tabbladen van verschillende apparaten worden niet samengevoegd.'

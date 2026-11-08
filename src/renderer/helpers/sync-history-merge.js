@@ -1,4 +1,5 @@
 import { SyncServerDataLossError } from './sync-server-errors.js'
+import { syncDeletionKey } from './sync-deletions.js'
 
 export const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 // Released clients require a truthy uploader ID to preserve video membership.
@@ -10,38 +11,64 @@ function mapBy(items, getId) {
   return new Map(items.map(item => [getId(item), item]))
 }
 
+// Lists inside a playlist or profile that exists on both sides. A server reset
+// removes the whole parent, so emptying one of these lists is an ordinary edit.
+const NESTED_COLLECTIONS = new Set(['playlistVideos', 'profileChannels'])
+
+/**
+ * @param {Iterable<string>} localIds
+ * @param {Iterable<string>} remoteIds
+ * @param {Iterable<string>} [previousIds] The IDs both sides had after the last sync
+ * @param {object} [options]
+ * @param {boolean} [options.allowDataLoss] Applies every deletion without asking
+ * @param {string} [options.collection]
+ * @param {string | null} [options.scope] The playlist or profile ID of a nested list
+ * @param {string | null} [options.scopeName]
+ * @param {Record<string, import('./sync-deletions.js').SyncDeletionDecision>} [options.deletions]
+ *   Deletions to apply or undo without asking, by {@link syncDeletionKey}
+ * @param {(id: string) => string | null | undefined} [options.getItemName]
+ */
 export function mergeIds(
   localIds,
   remoteIds,
   previousIds = [],
-  { allowDataLoss = false, collection = 'data', getItemName = () => null } = {}
+  { allowDataLoss = false, collection = 'data', scope = null, scopeName = null, deletions, getItemName = () => null } = {}
 ) {
   const local = new Set(localIds)
   const remote = new Set(remoteIds)
   const previous = new Set(previousIds)
   const allIds = new Set([...local, ...remote, ...previous])
+  const decision = deletions?.[syncDeletionKey(collection, scope)]
+  const confirmed = new Set(decision?.confirmed)
+  const kept = new Set(decision?.kept)
 
   const merged = new Set(Array.from(allIds).filter(id => {
-    if (!previous.has(id)) {
+    if (!previous.has(id) || kept.has(id)) {
       return local.has(id) || remote.has(id)
     }
 
     // Once both sides have seen an item, a deletion on either side wins.
     return local.has(id) && remote.has(id)
   }))
-  const deletedIds = Array.from(previous).filter(id => !merged.has(id))
+  // Items already missing on both sides lose nothing.
+  const deletedIds = Array.from(previous).filter(id => !merged.has(id) && (local.has(id) || remote.has(id)) &&
+    !confirmed.has(id))
   const deleted = deletedIds.length
-  const oneSideWasEmptied = previous.size > 0 && (
+  const oneSideWasEmptied = previous.size > 0 && !NESTED_COLLECTIONS.has(collection) && (
     (local.size === 0 && remote.size > 0) ||
     (remote.size === 0 && local.size > 0)
   )
   const isMassDeletion = deleted >= 10 && deleted / previous.size >= 0.5
 
   if (!allowDataLoss && deleted > 0 && (oneSideWasEmptied || isMassDeletion)) {
-    throw new SyncServerDataLossError(collection, deleted, previous.size, deletedIds.map(id => ({
-      id,
-      name: getItemName(id) || id,
-    })))
+    throw new SyncServerDataLossError({
+      collection,
+      scope,
+      scopeName,
+      deleted,
+      previous: previous.size,
+      items: deletedIds.map(id => ({ id, name: getItemName(id) || id })),
+    })
   }
 
   return merged

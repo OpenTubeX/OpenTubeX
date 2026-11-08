@@ -26,6 +26,8 @@ import {
   isRemoteSyncDispatch,
 } from '../helpers/sync-server-scheduling'
 import { historyChanges } from '../helpers/sync-history-changes.js'
+import { trackLocalSyncDeletions } from '../helpers/sync-deletions.js'
+import { MAIN_PROFILE_ID } from '../../constants'
 
 function syncOnLocalChanges(store) {
   const revisions = new Map()
@@ -107,6 +109,11 @@ function reloadRecommendationEvidenceAfterHistoryRemoval(store) {
   })
 }
 
+const confirmLocalSyncDeletions = trackLocalSyncDeletions({
+  isRemoteDispatch: isRemoteSyncDispatch,
+  mainProfileId: MAIN_PROFILE_ID,
+})
+
 export default createStore({
   modules: {
     aiSlopList,
@@ -133,7 +140,7 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, trackHistoryChanges, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
+  plugins: [syncOnLocalChanges, trackHistoryChanges, confirmLocalSyncDeletions, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]

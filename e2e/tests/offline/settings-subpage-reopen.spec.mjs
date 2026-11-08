@@ -710,11 +710,22 @@ test.describe('protected settings subpage reopening', () => {
               { remoteId: `removed-profile-${index}`, metadata: { title: `Removed profile ${index}` }, channels: [] }
             ]))
           })
-        }
+        },
+        // The server lost these profiles, so sync stops before deleting them here.
+        profiles: [
+          { _id: 'allChannels', name: 'All Channels', subscriptions: [] },
+          ...Array.from({ length: 16 }, (_, index) => ({
+            _id: `removed-profile-${index}`,
+            name: `Removed profile ${index}`,
+            bgColor: '#000000',
+            textColor: '#FFFFFF',
+            subscriptions: []
+          }))
+        ]
       }
     })
 
-    test('dismisses a prompt created while Settings is already locked', async ({ app, page }) => {
+    test('keeps a prompt created while Settings is locked hidden until it unlocks', async ({ app, page }) => {
       await page.route('https://sync.example/**', route => route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify(route.request().url().endsWith('/health')
@@ -749,9 +760,13 @@ test.describe('protected settings subpage reopening', () => {
       expect(await page.evaluate(() => window.lateSettingsSyncError)).toMatchObject({ name: 'SyncServerDataLossError' })
       const prompt = page.getByRole('dialog', { name: 'Confirm destructive sync?', exact: true })
       await expect(prompt).toHaveCount(0)
+      await expectPromptResourcesReleased(page)
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
+      // Sync stays paused until the user reviews the deletions.
+      await expect(prompt).toBeVisible()
+      await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
       await expect(prompt).toHaveCount(0)
       await expectPromptResourcesReleased(page)
     })

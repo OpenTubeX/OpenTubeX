@@ -1706,7 +1706,8 @@ Settings:
     Sync completed: S'ha completat la sincronització
     Sync failed: 'Ha fallat la sincronització: {error}'
     Data Loss Confirmation: Voleu confirmar la sincronització destructiva?
-    Data Loss Warning: L'estat del servidor suprimiria {deleted} dels {previous} elements de {collection} sincronitzats anteriorment. Això pot indicar una migració o un restabliment fallits del servidor. Continueu només si voleu fer aquesta supressió i teniu una còpia de seguretat.
+    Data Loss Warning: La sincronització suprimiria {deleted} dels {previous} elements sincronitzats anteriorment a «{collection}» en tots els dispositius. Si no els heu suprimit vosaltres, per exemple perquè s'ha restablert el servidor, conserveu-los per restaurar-los a tot arreu.
+    Keep Deleted Items: Conserva els elements
     Confirm Data Loss: Suprimeix i continua
     Use Shared Tabs: 'Utilitza un únic conjunt de pestanyes compartit entre dispositius'
     Shared Tabs Warning: 'Les pestanyes obertes en aquest dispositiu es converteixen en el conjunt compartit. Quan se sincronitzin, els altres dispositius substituiran les seves pestanyes obertes per aquest conjunt; les pestanyes de dispositius diferents no es combinaran.'
