@@ -748,7 +748,7 @@ Settings:
       Disabled: 已禁用
       Brightness: 亮度
       Volume: 音量
-      Hint: 在视频任意一侧上下滑动。
+      Hint: 全屏时在视频任意一侧上下滑动。
       Unavailable: 无法调整播放控件。
     yt-dlp Streaming: "yt-dlp 流媒体"
     Continue Playback When Screen Is Locked: '屏幕锁定时继续播放'

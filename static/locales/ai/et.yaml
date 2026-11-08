@@ -748,7 +748,7 @@ Settings:
       Disabled: Keelatud
       Brightness: Heledus
       Volume: Helitugevus
-      Hint: Pühi video küljel üles või alla.
+      Hint: Pühi täisekraanil video küljel üles või alla.
       Unavailable: Taasesituse juhtelementide kohandamine ebaõnnestus.
     yt-dlp Streaming: "yt-dlp voogedastus"
     Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'

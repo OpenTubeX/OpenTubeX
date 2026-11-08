@@ -101,7 +101,6 @@
         fullscreenDockResizing,
         fullscreenDockReordering,
         mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
-        mobileSideSwipesEnabled,
         mobileFullscreenSwiping,
         mobileFullscreenSwipeSettling,
         presentationModeChanging,

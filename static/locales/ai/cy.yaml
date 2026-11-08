@@ -751,7 +751,7 @@ Settings:
       Disabled: Analluogwyd
       Brightness: Disgleirdeb
       Volume: Lefel sain
-      Hint: Sweipiwch i fyny neu i lawr ar ochr y fideo.
+      Hint: Sweipiwch i fyny neu i lawr ar ochr y fideo yn y modd sgrin lawn.
       Unavailable: Methu addasu rheolyddion chwarae.
     yt-dlp Streaming: "Ffrydio yt-dlp"
     Continue Playback When Screen Is Locked: 'Parhau i chwarae pan fydd y sgrin wedi’i chloi'

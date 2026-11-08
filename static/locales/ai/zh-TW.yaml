@@ -748,7 +748,7 @@ Settings:
       Disabled: 已停用
       Brightness: 亮度
       Volume: 音量
-      Hint: 在影片任一側上下滑動。
+      Hint: 全螢幕時在影片任一側上下滑動。
       Unavailable: 無法調整播放控制項。
     yt-dlp Streaming: "yt-dlp 串流"
     Continue Playback When Screen Is Locked: '螢幕鎖定時繼續播放'

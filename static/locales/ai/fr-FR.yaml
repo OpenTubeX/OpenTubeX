@@ -748,7 +748,7 @@ Settings:
       Disabled: Désactivé
       Brightness: Luminosité
       Volume: Volume
-      Hint: Balayez vers le haut ou le bas sur un côté de la vidéo.
+      Hint: Balayez vers le haut ou le bas sur un côté de la vidéo en plein écran.
       Unavailable: Impossible de régler les commandes de lecture.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuer la lecture lorsque l’écran est verrouillé'

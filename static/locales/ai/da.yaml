@@ -765,7 +765,7 @@ Settings:
       Disabled: Deaktiveret
       Brightness: Lysstyrke
       Volume: Lydstyrke
-      Hint: Stryg op eller ned i en af videoens sider.
+      Hint: Stryg op eller ned i en af videoens sider i fuld skærm.
       Unavailable: Kunne ikke justere afspilningskontrollerne.
     yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Fortsæt afspilning, når skærmen er låst'

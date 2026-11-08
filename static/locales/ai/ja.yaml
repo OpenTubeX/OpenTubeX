@@ -748,7 +748,7 @@ Settings:
       Disabled: 無効
       Brightness: 明るさ
       Volume: 音量
-      Hint: 動画の左右どちらかで上下にスワイプします。
+      Hint: 全画面表示で動画の左右どちらかを上下にスワイプします。
       Unavailable: 再生コントロールを調整できませんでした。
     yt-dlp Streaming: "yt-dlp ストリーミング"
     Continue Playback When Screen Is Locked: '画面ロック中も再生を続ける'

@@ -748,7 +748,7 @@ Settings:
       Disabled: Vypnuto
       Brightness: Jas
       Volume: Hlasitost
-      Hint: Přejeďte nahoru nebo dolů po straně videa.
+      Hint: Na celé obrazovce přejeďte nahoru nebo dolů po straně videa.
       Unavailable: Nepodařilo se upravit ovládání přehrávání.
     yt-dlp Streaming: "Streamování přes yt-dlp"
     Continue Playback When Screen Is Locked: 'Pokračovat v přehrávání při zamčené obrazovce'

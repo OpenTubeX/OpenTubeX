@@ -777,7 +777,7 @@ Settings:
       Disabled: غیرفعال
       Brightness: روشنایی
       Volume: بلندی صدا
-      Hint: در یکی از کناره‌های ویدیو به بالا یا پایین بکشید.
+      Hint: در حالت تمام‌صفحه، در یکی از کناره‌های ویدیو به بالا یا پایین بکشید.
       Unavailable: تنظیم کنترل‌های پخش ممکن نشد.
     yt-dlp Streaming: "پخش جریانی yt-dlp"
     Continue Playback When Screen Is Locked: 'ادامه پخش هنگام قفل بودن صفحه'

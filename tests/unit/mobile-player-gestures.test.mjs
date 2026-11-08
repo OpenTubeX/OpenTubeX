@@ -106,7 +106,7 @@ test('Shorts taps still reveal playback controls', t => {
 })
 
 test('left and right vertical swipes use their configured actions with fractional geometry', t => {
-  const { gestures: g, event, calls, captures } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false })
+  const { gestures: g, event, calls, captures } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false, fullscreen: () => true })
   for (const [x, action] of [[50, 'volume'], [370, 'brightness']]) {
     calls.length = 0
     g.startMobileFullscreenGesture(event(x))
@@ -125,7 +125,7 @@ test('left and right vertical swipes use their configured actions with fractiona
 test('side zones and seek distance follow the video beside an open fullscreen dock', t => {
   // A 160px dock leaves the video at 10-250px inside the 10-410px player.
   for (const [x, action] of [[50, 'volume'], [130, null], [226, 'brightness']]) {
-    const { gestures: g, event, calls } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false, surfaceWidth: 240 })
+    const { gestures: g, event, calls } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false, fullscreen: () => true, surfaceWidth: 240 })
     g.startMobileFullscreenGesture(event(x))
     assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), action !== null)
     g.finishMobileFullscreenGesture(event(x, 49.75))
@@ -344,7 +344,7 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
 
 test('side swipe adjustments keep hidden controls hidden', t => {
   const { controls, attributes } = createShakaControls()
-  const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false })
+  const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
   container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
   for (const type of ['touchmove', 'touchend']) {
     container.addEventListener(type, event => controls.onMouseMove_(event))
@@ -372,7 +372,7 @@ test('side swipe adjustments keep hidden controls hidden', t => {
 test('a second touch that cancels an adjustment reveals controls only when it moves', t => {
   for (const moves of [false, true]) {
     const { controls, attributes } = createShakaControls()
-    const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false })
+    const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
     container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
     for (const type of ['touchmove', 'touchend']) {
       container.addEventListener(type, event => controls.onMouseMove_(event))
@@ -400,7 +400,7 @@ test('a canceled adjustment suppresses touch ends until every finger lifts', t =
   let now = 1000
   t.mock.method(performance, 'now', () => now)
   const { controls, attributes } = createShakaControls()
-  const { gestures: g, event, container } = fixture(t, { controls, fullscreenSwipe: false })
+  const { gestures: g, event, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
   container.addEventListener('touchend', event => controls.onMouseMove_(event))
   g.startMobileFullscreenGesture(event(50))
   assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
@@ -416,7 +416,7 @@ test('a canceled adjustment suppresses touch ends until every finger lifts', t =
 })
 
 test('horizontal movement never becomes an adjustment later in the same gesture', t => {
-  const { gestures: g, event, calls } = fixture(t)
+  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, seekSwipe: () => false })
   g.startMobileFullscreenGesture(event())
   g.moveMobileFullscreenGesture(event(100, 149))
   g.moveMobileFullscreenGesture(event(100, 50))
@@ -425,7 +425,7 @@ test('horizontal movement never becomes an adjustment later in the same gesture'
 })
 
 test('a second finger cancels adjustments for pinch zoom, even when zoom is disabled', t => {
-  const { gestures: g, event, calls, captures } = fixture(t)
+  const { gestures: g, event, calls, captures } = fixture(t, { fullscreen: () => true })
   g.startMobileFullscreenGesture(event())
   g.moveMobileFullscreenGesture(event(50, 100))
   g.startMobileFullscreenGesture(event(100, 100, { pointerId: 2, isPrimary: false }))
@@ -445,7 +445,7 @@ for (const [name, options, extra] of [
   ['disabled sides', { left: 'disabled', fullscreenSwipe: false }, {}],
 ]) {
   test(`does not adjust from ${name}`, t => {
-    const { gestures: g, event, calls } = fixture(t, options)
+    const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, ...options })
     g.startMobileFullscreenGesture(event(50, 150, extra))
     g.moveMobileFullscreenGesture(event(50, 50, extra))
     g.finishMobileFullscreenGesture(event(50, 50, extra))
@@ -454,7 +454,7 @@ for (const [name, options, extra] of [
 }
 
 test('a slightly diagonal start can settle into a vertical side swipe', t => {
-  const { gestures: g, event, calls } = fixture(t)
+  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
   g.startMobileFullscreenGesture(event(50, 150))
   g.moveMobileFullscreenGesture(event(63, 138))
   g.moveMobileFullscreenGesture(event(64, 100))
@@ -462,7 +462,7 @@ test('a slightly diagonal start can settle into a vertical side swipe', t => {
 })
 
 test('a side swipe that starts on a toolbar button does not click the button on release', t => {
-  const { gestures: g, event } = fixture(t)
+  const { gestures: g, event } = fixture(t, { fullscreen: () => true })
   const target = new ElementStub('.shaka-controls-button-panel')
   g.startMobileFullscreenGesture(event(370, 150, { target }))
   g.moveMobileFullscreenGesture(event(370, 100, { target }))
@@ -474,7 +474,7 @@ test('a side swipe that starts on a toolbar button does not click the button on 
 
 for (const [side, x] of [['left', 50], ['right', 370]]) {
   test(`playback speed works on the ${side} with fullscreen swiping disabled`, t => {
-    const { gestures: g, event, calls } = fixture(t, { left: 'disabled', right: 'disabled', [side]: 'speed', fullscreenSwipe: false })
+    const { gestures: g, event, calls } = fixture(t, { left: 'disabled', right: 'disabled', [side]: 'speed', fullscreenSwipe: false, fullscreen: () => true })
     g.startMobileFullscreenGesture(event(x))
     assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), true)
     g.finishMobileFullscreenGesture(event(x, 49.75))
@@ -541,14 +541,27 @@ for (const secondFinger of [false, true]) {
   })
 }
 
-test('side adjustments retain priority over minimization', t => {
-  const { gestures: g, event, calls } = fixture(t, { minimize: true })
-  g.startMobileFullscreenGesture(event(50, 150))
-  g.moveMobileFullscreenGesture(event(50, 250))
-  g.finishMobileFullscreenGesture(event(50, 250))
-  assert.equal(calls.includes('drag-begin'), false)
-  assert.deepEqual(calls[0], ['begin', 'brightness'])
-})
+for (const x of [50, 370]) {
+  test(`inline side swipes at ${x}px enter fullscreen and minimize instead of adjusting`, async t => {
+    const { gestures: g, event, calls, paint } = fixture(t, { minimize: true })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(x, 150))
+    assert.equal(g.moveMobileFullscreenGesture(event(x, 50)), true)
+    g.finishMobileFullscreenGesture(event(x, 50))
+    t.mock.timers.tick(0)
+    await nextTick()
+    paint()
+    paint()
+    await Promise.resolve()
+    assert.deepEqual(calls, ['fullscreen'])
+
+    calls.length = 0
+    g.startMobileFullscreenGesture(event(x, 150))
+    assert.equal(g.moveMobileFullscreenGesture(event(x, 250)), true)
+    g.finishMobileFullscreenGesture(event(x, 250))
+    assert.deepEqual(calls, ['drag-begin', ['drag-move', 0, 100], ['drag-finish', true]])
+  })
+}
 
 
 for (const distance of [24, 120]) {

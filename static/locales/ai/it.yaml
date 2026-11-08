@@ -748,7 +748,7 @@ Settings:
       Disabled: Disattivato
       Brightness: Luminosità
       Volume: Volume
-      Hint: Scorri verso l’alto o il basso su un lato del video.
+      Hint: Scorri verso l’alto o il basso su un lato del video a schermo intero.
       Unavailable: Impossibile regolare i controlli di riproduzione.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continua la riproduzione quando lo schermo è bloccato'
