@@ -253,6 +253,10 @@ jobs:
         PROJECTS: ${{ matrix.projects }}
         E2E_XVFB: '1'
         E2E_FLAKY_REPORT: ${{ runner.temp }}/e2e-flaky.json
+        # Every test starts from a new profile, whose databases the app syncs to
+        # disk while it starts. A runner's disk can stall those syncs for half a
+        # minute, so keep the profiles in memory.
+        TMPDIR: /dev/shm
       run: |
         test_args=()
         for project in $PROJECTS; do
