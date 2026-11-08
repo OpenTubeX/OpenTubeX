@@ -1208,21 +1208,27 @@ test.describe('custom playlist order', () => {
       const grip = rows.first().locator('.grabBar')
       await expect(grip).toBeVisible()
       const from = await grip.boundingBox()
+      const first = await rows.first().boundingBox()
       const to = await rows.nth(1).boundingBox()
       const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
         type,
         touchPoints: x == null ? [] : [{ x, y, id: 0 }]
       })
-      await touch('touchStart', from.x + from.width / 2, from.y + from.height / 2)
-      await expect(rows.first()).toHaveClass(/pointerDragging/)
-      await expect(rows.first()).toHaveCSS('opacity', '0.6')
+      const start = { x: from.x + from.width / 2, y: from.y + from.height / 2 }
+      await touch('touchStart', start.x, start.y)
       // Outlast the long-press delay to prove the drag does not open the link actions sheet.
       await page.waitForTimeout(600)
       await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
-      await touch('touchMove', to.x + to.width / 2, to.y + to.height / 2)
-      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+      await touch('touchMove', start.x + (to.x - first.x) / 2, start.y + (to.y - first.y) / 2)
+      await touch('touchMove', start.x + to.x - first.x, start.y + to.y - first.y)
+      await expect(rows.first()).toHaveClass(/reorderDragged/)
+      await expect(rows.first()).toHaveCSS('opacity', '1')
+      // The rows keep their DOM order and slide aside until the drop.
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 1')
+      await expect.poll(async () => (await rows.nth(1).boundingBox()).y).toBeCloseTo(first.y, 0)
       await touch('touchEnd')
-      await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
+      await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
       await expect.poll(() => page.evaluate(() => {
         return window.$store
           .getters.getPlaylist('large-custom-playlist').videos[0].title
@@ -1231,8 +1237,11 @@ test.describe('custom playlist order', () => {
       // Cancelling a subsequent gesture releases capture and leaves reordering usable.
       const next = await rows.first().locator('.grabBar').boundingBox()
       await touch('touchStart', next.x + next.width / 2, next.y + next.height / 2)
+      await touch('touchMove', next.x + next.width / 2, next.y + next.height / 2 + 40)
+      await expect(page.locator('.reorderDragged')).toHaveCount(1)
       await touch('touchCancel')
-      await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+      await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
       await goTo(page, 'userplaylists')
       await page.getByText('Large custom playlist').click()
       await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
@@ -1242,9 +1251,10 @@ test.describe('custom playlist order', () => {
         await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
         await touch('touchMove', handle.x + handle.width / 2, 990)
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll + 100)
-        await expect.poll(() => rows.evaluateAll(elements => elements.findIndex(element => element.classList.contains('pointerDragging')))).toBeGreaterThan(2)
+        // The dragged row stays under the finger while the page scrolls.
+        await expect.poll(async () => (await page.locator('.reorderDragged').boundingBox()).y).toBeGreaterThan(990 - first.height - 1)
         await touch('touchCancel')
-        await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+        await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
         const stoppedScroll = await page.evaluate(() => window.scrollY)
         await page.waitForTimeout(150)
         expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
@@ -1296,21 +1306,22 @@ test.describe('custom playlist order', () => {
     const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
     await expect(titles.first()).toHaveText('Custom playlist video 1')
 
-    await page.evaluate(async () => {
-      const row = index => document.querySelectorAll('.playlistItemsCard [data-playlist-drag-item]')[index]
-      const dataTransfer = new DataTransfer()
-      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
-      const source = row(0)
-      fire(source, 'dragstart')
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      fire(row(1), 'dragenter')
-      // Another window adds a video while the drag is still in progress
-      await window.$store.dispatch('addVideo', {
-        _id: 'large-custom-playlist',
-        videoData: { videoId: 'addedduring', title: 'Added during the drag', author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60 }
-      })
-      fire(source, 'dragend')
-    })
+    const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    const handle = await rows.first().locator('.videoIndexArea').boundingBox()
+    const first = await rows.first().boundingBox()
+    const second = await rows.nth(1).boundingBox()
+    const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(start.x, start.y + second.y - first.y, { steps: 6 })
+    await expect(page.locator('.reorderDragged')).toHaveCount(1)
+    // Another window adds a video while the drag is still in progress
+    await page.evaluate(() => window.$store.dispatch('addVideo', {
+      _id: 'large-custom-playlist',
+      videoData: { videoId: 'addedduring', title: 'Added during the drag', author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60 }
+    }))
+    await expect(page.locator('.reorderDragged')).toHaveCount(1)
+    await page.mouse.up()
 
     await expect(titles.first()).toHaveText('Custom playlist video 2')
     const expected = ['Custom playlist video 2', 'Custom playlist video 1', 'Custom playlist video 3']
@@ -1323,6 +1334,10 @@ test.describe('custom playlist order', () => {
         .find(playlist => playlist._id === 'large-custom-playlist')
       return [videos.length, ...videos.slice(0, 3).map(video => video.title), videos.at(-1).title]
     }).toEqual([102, ...expected, 'Added during the drag'])
+
+    // The saved order replaces the one shown during the drag, so later moves still show.
+    await rows.first().locator('.videoIndexArea').press('ArrowDown')
+    await expect(titles.first()).toHaveText('Custom playlist video 1')
   })
 
   test('touch honors a fast final destination before release', async ({ page }) => {

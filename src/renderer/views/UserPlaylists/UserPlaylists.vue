@@ -248,7 +248,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, nextTick, ref, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -357,7 +357,8 @@ async function movePlaylist(id, getTargetIndex) {
   // Show the move before the setting is saved, so repeated keys build on it.
   tempCustomOrder.value = ids
   await store.dispatch('updateUserPlaylistsCustomOrder', ids)
-  if (tempCustomOrder.value === ids) tempCustomOrder.value = null
+  // The ref holds a reactive copy, so compare the original array.
+  if (toRaw(tempCustomOrder.value) === ids) tempCustomOrder.value = null
 }
 
 const { draggedId: draggedPlaylistId, onPointerDown: startPlaylistDrag } = useGridReorder({

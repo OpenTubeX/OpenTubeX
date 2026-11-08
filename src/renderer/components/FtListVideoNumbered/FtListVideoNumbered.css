@@ -7,19 +7,6 @@
   block-size: 40px;
 }
 
-.draggable:active {
-  cursor: grabbing;
-}
-
-.draggedVideo.pointerDragging {
-  opacity: 0.6;
-}
-
-.draggedVideo {
-  opacity: 0;
-  transition: 0.01s;
-}
-
 .videoIndexArea {
   min-inline-size: 30px;
   color: var(--tertiary-text-color);

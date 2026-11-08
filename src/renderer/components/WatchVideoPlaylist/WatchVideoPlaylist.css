@@ -367,10 +367,6 @@
   margin-inline-end: var(--scrollbar-track-width);
 }
 
-.playlistItem.draggedVideo {
-  opacity: 0.25;
-}
-
 .playlistItem:not(:last-child) {
   margin-block-end: 2px;
 }

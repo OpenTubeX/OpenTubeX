@@ -15,7 +15,8 @@ const SCROLL_SPEED = 900
  * pointer cannot change the target. The order is committed once the dropped
  * card has settled into its slot; Escape cancels the drag.
  *
- * Bind `onPointerDown` as a capturing pointerdown listener on the list.
+ * Bind `onPointerDown` as a capturing pointerdown listener on the list. The
+ * classes it sets are styled in helpers/gridReorder.css.
  *
  * @param {object} options
  * @param {string} options.itemSelector Matches the list's reorderable children
@@ -33,9 +34,11 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   /** @param {PointerEvent} event */
   function onPointerDown(event) {
     if (session || !event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-    const list = /** @type {HTMLElement} */ (event.currentTarget)
     const item = event.target.closest(handleSelector)?.closest(itemSelector)
-    if (!item || item.parentElement !== list) return
+    // Overlay scrollbars can wrap the rows in their own elements inside the bound list.
+    const list = item?.parentElement
+    const host = /** @type {Element} */ (event.currentTarget)
+    if (!list || !host.contains(list)) return
     // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
     event.preventDefault()
     event.stopPropagation()
@@ -69,12 +72,13 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     const ids = items.map(getId)
     Object.assign(session, { started: true, items, ids, indexById: new Map(ids.map((id, index) => [id, index])), sourceIndex })
     measure()
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const source = session.slots[sourceIndex]
     // Keep the card's grab point under the pointer.
     session.grabX = session.startX - origin.left - source.left
     session.grabY = session.startY - origin.top - source.top
-    let scroller = list.parentElement
+    // The list can scroll itself, like the watch page playlist.
+    let scroller = list
     while (scroller && !/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
     session.scroller = scroller ?? document.scrollingElement
     // Cards that render or reflow during the drag move the slots.
@@ -97,7 +101,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   /** Layout positions relative to the list, without any translation applied to the cards. */
   function measure() {
     const { list, items } = session
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const slots = items.map(element => {
       const bounds = element.getBoundingClientRect()
       const [x, y] = currentTranslation(element)
@@ -132,7 +136,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     if (!session?.started || session.dropping) return
     const { list, slots, sourceIndex, bounds } = session
     const source = slots[sourceIndex]
-    const origin = list.getBoundingClientRect()
+    const origin = contentOrigin(list)
     const left = clamp(session.x - origin.left - session.grabX, bounds.left, bounds.right - source.width)
     const top = clamp(session.y - origin.top - session.grabY, bounds.top, bounds.bottom - source.height)
 
@@ -286,6 +290,15 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   onBeforeUnmount(finish)
 
   return { draggedId, onPointerDown }
+}
+
+/**
+ * Where the list's content starts on screen, so positions stay put when the list scrolls itself.
+ * @param {Element} list
+ */
+function contentOrigin(list) {
+  const bounds = list.getBoundingClientRect()
+  return { left: bounds.left - list.scrollLeft, top: bounds.top - list.scrollTop }
 }
 
 /** @param {Element} element */

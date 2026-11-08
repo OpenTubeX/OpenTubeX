@@ -214,7 +214,9 @@
           v-overlay-scrollbars
           :name="animatePlaylistItems ? 'playlistItem' : undefined"
           :tag="animatePlaylistItems ? 'div' : undefined"
+          :data-skip-move="isVideoDragging ? '' : null"
           class="playlistItemsWrapper"
+          @pointerdown.capture="startVideoDrag"
         >
           <FtListVideoNumbered
             v-for="(item, index) in playlistItems"
@@ -236,15 +238,11 @@
             :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
             :can-remove-from-playlist="isUserPlaylist"
             :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-            :dragged-video="draggedVideo"
             :is-sort-order-custom="isSortOrderCustom"
             :is-video-dragging="isVideoDragging"
             appearance="watchPlaylistItem"
             nested-scroller
             :initial-visible-state="Math.abs(index - currentVideoIndexZeroBased) < 4 || (progressBarTargetIndex >= 0 && Math.abs(index - progressBarTargetIndex) < 4)"
-            @drag-video="setDraggedVideo"
-            @drag-video-end="onDragVideoEnd"
-            @move-dragged-video="onMoveDraggedVideo"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
             @move-video-to-the-top="(videoId, playlistItemId) => moveVideo(videoId, playlistItemId, () => 0)"
@@ -288,7 +286,7 @@ import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { usesInvidiousApi } from '../../../apiBackends'
 
-import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -302,6 +300,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getPlaylistSkipAvailability, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
+import { useGridReorder } from '../../composables/useGridReorder'
 
 const props = defineProps({
   playlistId: {
@@ -383,8 +382,6 @@ const randomizedPlaylistItems = shallowRef([])
 const skippedUnavailableItems = new Set()
 let expectedAutoSkipItem = null
 /** @import { VideoData } from '../../helpers/dragAndDrop' */
-/** @type {import('vue').Ref<VideoData>} */
-const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const showProgressBarPreview = ref(false)
 const previewPositionPixels = ref(0)
 const previewVideoIndex = ref(1)
@@ -597,11 +594,17 @@ const animatePlaylistItems = computed(() => {
 // close. Retain move animations only where that cost stays bounded.
 const playlistItemsWrapperComponent = computed(() => animatePlaylistItems.value ? TransitionGroup : 'div')
 
-const isVideoDragging = computed(() => {
-  const { videoId, playlistItemId } = draggedVideo.value
-
-  return videoId != null && playlistItemId != null
+const { draggedId: draggedPlaylistItemId, onPointerDown: startVideoDrag } = useGridReorder({
+  itemSelector: '[data-playlist-drag-item]',
+  handleSelector: '.videoIndexArea',
+  getId: item => item.dataset.playlistItemId,
+  commit: (playlistItemId, index) => {
+    const video = playlistItems.value.find(item => item.playlistItemId === playlistItemId)
+    if (video) moveVideo(video.videoId, playlistItemId, () => index)
+  }
 })
+
+const isVideoDragging = computed(() => draggedPlaylistItemId.value != null)
 
 const previewStyle = computed(() => ({
   left: `${previewPositionPixels.value}px`,
@@ -1024,48 +1027,6 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
     })
     console.error(error)
   }
-}
-
-/** @param {VideoData} video */
-function setDraggedVideo(video) {
-  draggedVideo.value = video
-}
-
-function onDragVideoEnd() {
-  persistPlaylistOrder(playlistItems.value)
-  setDraggedVideo({ videoId: null, playlistItemId: null })
-}
-
-/**
- * @param {VideoData} draggedOverVideo
- * @param {VideoData} draggedVideo_
- */
-function moveDraggedVideoTemporarily(draggedOverVideo, draggedVideo_) {
-  const items = playlistItems.value.slice()
-  const draggedOverIndex = items.findIndex((video) => {
-    return video.videoId === draggedOverVideo.videoId && video.playlistItemId === draggedOverVideo.playlistItemId
-  })
-  const draggedVideoIndex = items.findIndex((video) => {
-    return video.videoId === draggedVideo_.videoId && video.playlistItemId === draggedVideo_.playlistItemId
-  })
-
-  if (draggedOverIndex === -1 || draggedVideoIndex === -1) { return }
-
-  const [itemToMove] = items.splice(draggedVideoIndex, 1)
-  items.splice(draggedOverIndex, 0, itemToMove)
-  playlistItems.value = items
-}
-
-const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
-
-/**
- * @param {VideoData} video
- * @param {VideoData} source
- */
-function onMoveDraggedVideo(video, source) {
-  // Pointer drags already wait for transitions and flush their final target.
-  if (source.pointerDragging) moveDraggedVideoTemporarily(video, source)
-  else moveDraggedVideoTemporarilyThrottled(video, source)
 }
 
 /**

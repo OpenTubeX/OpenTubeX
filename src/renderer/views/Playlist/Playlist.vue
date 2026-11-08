@@ -113,10 +113,7 @@
           :icon="sortOrderIcon"
           @change="updatePlaylistSortOrder"
         />
-        <AutoScrollWrapper
-          v-if="visiblePlaylistItems.length > 0"
-          :hot-zone-enabled="isSortOrderCustom && isVideoDragging && !draggedVideo.pointerDragging"
-        >
+        <template v-if="visiblePlaylistItems.length > 0">
           <FtElementList
             v-if="playlistViewType !== 'list'"
             :data="visiblePlaylistItems"
@@ -135,12 +132,10 @@
             :can-move-video-down="canMoveVideos"
             :playlist-items-length="shownPlaylistItems.length"
             :can-remove-from-playlist="true"
-            :dragged-video="draggedVideo"
             :is-video-dragging="isVideoDragging"
+            :disable-move-transition="isVideoDragging"
             :video-dragging-possible="videoDraggingPossible"
-            @drag-video="setDraggedVideo"
-            @drag-video-end="onDragVideoEnd"
-            @move-dragged-video="onMoveDraggedVideo"
+            @pointerdown.capture="startVideoDrag"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
             @move-video-to-the-top="moveVideoToTheTop"
@@ -152,6 +147,8 @@
             name="playlistItem"
             tag="span"
             class="playlistItems"
+            :data-skip-move="isVideoDragging ? '' : null"
+            @pointerdown.capture="startVideoDrag"
           >
             <FtListVideoNumbered
               v-for="(item, index) in visiblePlaylistItems"
@@ -170,12 +167,8 @@
               :can-remove-from-playlist="true"
               :video-index="playlistInVideoSearchMode ? shownPlaylistItemIndex(item) : index"
               :initial-visible-state="index < 10"
-              :dragged-video="draggedVideo"
               :is-sort-order-custom="isSortOrderCustom"
               :is-video-dragging="isVideoDragging"
-              @drag-video="setDraggedVideo"
-              @drag-video-end="onDragVideoEnd"
-              @move-dragged-video="onMoveDraggedVideo"
               @move-video-up="moveVideoUp"
               @move-video-down="moveVideoDown"
               @move-video-to-the-top="moveVideoToTheTop"
@@ -183,7 +176,7 @@
               @remove-from-playlist="removeVideoFromPlaylist"
             />
           </TransitionGroup>
-        </AutoScrollWrapper>
+        </template>
         <FtFlexBox
           v-else-if="playlistInVideoSearchMode && !moreVideoDataAvailable"
         >
@@ -243,7 +236,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -256,7 +249,6 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
-import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -278,7 +270,6 @@ import {
   showToast,
   showInvidiousFallbackToast,
   deepCopy,
-  throttle,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
@@ -303,6 +294,7 @@ import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD } from '../..
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
+import { useGridReorder } from '../../composables/useGridReorder'
 
 provide(thumbnailSizeSettingKey, 'playlistThumbnailSize')
 const playlistPage = useTemplateRef('playlistPage')
@@ -362,10 +354,6 @@ const showUnavailableVideosAlert = ref(false)
 const playlistItems = ref([])
 /** @type {import('vue').ComputedRef<any[] | null>} */
 const tempShownPlaylistItems = ref(null)
-/** @import { VideoData } from '../../helpers/dragAndDrop' */
-/** @import { Ref } from 'vue' */
-/** @type {Ref<VideoData>} draggedVideo */
-const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const userPlaylistVisibleLimit = ref(100)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Playlist | null>} */
 const continuationData = shallowRef(null)
@@ -1495,86 +1483,63 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
   }
 }
 
-/**
- * @param {VideoData} video
- */
-function setDraggedVideo(video) {
-  draggedVideo.value = video
-}
-
-async function onDragVideoEnd() {
-  if (tempShownPlaylistItems.value != null) {
-    // Save on drag end ONLY. Apply the shown order to the saved entries, so
-    // videos another window added or removed during the drag stay that way.
-    try {
-      const saved = await store.dispatch('reorderPlaylistVideos', {
-        _id: playlistId.value,
-        playlistItemIds: tempShownPlaylistItems.value.map(video => video.playlistItemId),
-      })
-      if (!saved) throw new Error('Could not update playlist')
-      playlistItems.value = selectedUserPlaylist.value.videos
-    } catch (e) {
-      showToast({
-        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-      console.error(e)
-    }
-  }
-
-  // Cleanup
-  tempShownPlaylistItems.value = null
-
-  // Unset dragged video
-  setDraggedVideo({
-    videoId: null,
-    playlistItemId: null,
-  })
-
-  if (removePendingVideosAfterDrag) {
-    removePendingVideosAfterDrag = false
-    await removeToBeDeletedVideosSometimes()
-  }
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const isVideoDragging = computed(() => {
-  const { videoId, playlistItemId } = draggedVideo.value
-
-  return videoId != null && playlistItemId != null
+const { draggedId: draggedPlaylistItemId, onPointerDown: startVideoDrag } = useGridReorder({
+  itemSelector: '[data-playlist-drag-item]',
+  handleSelector: '.grabBar:not(.grabBarDisabled), .videoIndexArea',
+  getId: item => item.dataset.playlistItemId,
+  commit: moveDraggedVideo
 })
 
-function moveDraggedVideoTemporarily({ videoId, playlistItemId }, { videoId: droppedVideoId, playlistItemId: droppedPlaylistItemId }) {
-  // To ensure we can drag an item back to its original position in a single drag (i.e. no change), the temp items should be used
-  const playlistItems_ = tempShownPlaylistItems.value != null ? tempShownPlaylistItems.value.slice() : playlistItems.value.slice()
+/** @type {import('vue').ComputedRef<boolean>} */
+const isVideoDragging = computed(() => draggedPlaylistItemId.value != null)
 
-  const draggedOverIndex = playlistItems_.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
-
-  const droppedVideoOriginalIndex = playlistItems_.findIndex((video) => {
-    return video.videoId === droppedVideoId && video.playlistItemId === droppedPlaylistItemId
-  })
-
-  const playlistItemToBeMoved = playlistItems_.splice(droppedVideoOriginalIndex, 1)[0]
-  playlistItems_.splice(draggedOverIndex, 0, playlistItemToBeMoved)
-
-  tempShownPlaylistItems.value = playlistItems_
-}
-
-// Only fire once per 100ms to prevent items moving up and down repeatedly during transition
-// 100ms is manually tested value (50ms won't work)
-const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
+/** @type {Promise<void> | null} */
+let draggedOrderSave = null
 
 /**
- * @param {VideoData} video
- * @param {VideoData} source
+ * @param {string} playlistItemId
+ * @param {number} index
  */
-function onMoveDraggedVideo(video, source) {
-  // Pointer drags already wait for transitions and flush their final target.
-  if (source.pointerDragging) moveDraggedVideoTemporarily(video, source)
-  else moveDraggedVideoTemporarilyThrottled(video, source)
+function moveDraggedVideo(playlistItemId, index) {
+  const items = shownPlaylistItems.value.slice()
+  const from = items.findIndex(video => video.playlistItemId === playlistItemId)
+  if (from === -1 || from === index) return
+  items.splice(index, 0, ...items.splice(from, 1))
+  // Show the new order right away, while the saved one is updated.
+  tempShownPlaylistItems.value = items
+  draggedOrderSave = saveDraggedOrder(items).finally(() => { draggedOrderSave = null })
 }
+
+/** @param {any[]} items */
+async function saveDraggedOrder(items) {
+  try {
+    // Apply the shown order to the saved entries, so videos another window
+    // added or removed in the meantime stay that way.
+    const saved = await store.dispatch('reorderPlaylistVideos', {
+      _id: playlistId.value,
+      playlistItemIds: items.map(video => video.playlistItemId),
+    })
+    if (!saved) throw new Error('Could not update playlist')
+    playlistItems.value = selectedUserPlaylist.value.videos
+  } catch (e) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    console.error(e)
+  } finally {
+    // The ref holds a reactive copy, so compare the original array.
+    if (toRaw(tempShownPlaylistItems.value) === items) tempShownPlaylistItems.value = null
+  }
+}
+
+// Videos removed during a drag wait until it ends and its order is saved.
+watch(isVideoDragging, async dragging => {
+  if (dragging || !removePendingVideosAfterDrag) return
+  await draggedOrderSave
+  removePendingVideosAfterDrag = false
+  await removeToBeDeletedVideosSometimes()
+})
 
 /**
  * @param {string} videoId
