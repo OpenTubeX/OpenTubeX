@@ -39,6 +39,13 @@ export function migrateLegacySyncedSettings(remote) {
       ...legacy, key: 'videoDescriptionMode', value: legacy.value === true ? 'hide' : 'collapsed',
     }
   }
+  // Auto Load Next Page used to control comments too.
+  const autoLoadNextPage = remote.generalAutoLoadMorePaginatedItemsEnabled
+  if (autoLoadNextPage && !remote.autoLoadComments) {
+    migrated.autoLoadComments = {
+      ...autoLoadNextPage, key: 'autoLoadComments', value: autoLoadNextPage.value !== false,
+    }
+  }
   const quickSettings = remote.quickSettings
   if (Array.isArray(quickSettings?.value) && quickSettings.value.includes('hideVideoDescription')) {
     migrated.quickSettings = { ...quickSettings, value: migrateVideoDescriptionSettingId(quickSettings.value) }

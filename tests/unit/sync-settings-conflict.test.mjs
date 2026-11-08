@@ -242,6 +242,23 @@ test('deleting the selected custom theme restores its base and accent colors bef
   ])
 })
 
+test('devices read Auto Load Comments from the Auto Load Next Page entry of older versions', () => {
+  const key = 'autoLoadComments'
+  const legacy = { key: 'generalAutoLoadMorePaginatedItemsEnabled', value: false, updatedAt: 10 }
+  const remote = migrateLegacySyncedSettings({ generalAutoLoadMorePaginatedItemsEnabled: legacy })
+
+  // A new device adopts the account's choice instead of uploading its default.
+  assert.deepEqual(mergeSettingEntry({ key, value: true, remoteEntry: remote[key], now: 100 }),
+    { key, value: false, updatedAt: 10 })
+  assert.equal(remote.generalAutoLoadMorePaginatedItemsEnabled, legacy)
+
+  assert.equal(migrateLegacySyncedSettings({
+    generalAutoLoadMorePaginatedItemsEnabled: { ...legacy, value: true },
+  })[key].value, true)
+  const current = { key, value: true, updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ generalAutoLoadMorePaginatedItemsEnabled: legacy, [key]: current })[key], current)
+})
+
 test('devices read the Video descriptions select from the Hide Video Description entry of older versions', () => {
   const key = 'videoDescriptionMode'
   const legacy = { key: 'hideVideoDescription', value: true, updatedAt: 10 }
