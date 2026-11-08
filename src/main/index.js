@@ -30,7 +30,7 @@ import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, waitForDatastores } from '../datastores'
-import { extractExpiryTimestamp, ImageCache } from './ImageCache'
+import { createImageCacheHandler, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
@@ -1373,96 +1373,13 @@ function runApp() {
     if (replaceHttpCache) {
       // in-memory image cache
 
-      const imageCache = new ImageCache()
+      protocol.handle('imagecache', createImageCacheHandler(new ImageCache(), (url, webContentsId) => {
+        const invidiousAuthorization = invidiousAuthorizations.get(webContentsId)
 
-      protocol.handle('imagecache', (request) => {
-        const [requestUrl, rawWebContentsId] = request.url.split('#')
-
-        return new Promise((resolve, reject) => {
-          const url = decodeURIComponent(requestUrl.substring(13))
-          if (imageCache.has(url)) {
-            const cached = imageCache.get(url)
-
-            resolve(new Response(cached.data, {
-              headers: { 'content-type': cached.mimeType }
-            }))
-            return
-          }
-
-          let headers
-
-          if (rawWebContentsId) {
-            const invidiousAuthorization = invidiousAuthorizations.get(parseInt(rawWebContentsId))
-
-            if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
-              headers = {
-                Authorization: invidiousAuthorization.authorization
-              }
-            }
-          }
-
-          const newRequest = net.request({
-            method: request.method,
-            url,
-            headers
-          })
-
-          // Electron doesn't allow certain headers to be set:
-          // https://www.electronjs.org/docs/latest/api/client-request#requestsetheadername-value
-          // also blacklist Origin and Referrer as we don't want to let YouTube know about them
-          const blacklistedHeaders = ['content-length', 'host', 'trailer', 'te', 'upgrade', 'cookie2', 'keep-alive', 'transfer-encoding', 'origin', 'referrer']
-
-          for (const header of Object.keys(request.headers)) {
-            if (!blacklistedHeaders.includes(header.toLowerCase())) {
-              newRequest.setHeader(header, request.headers[header])
-            }
-          }
-
-          newRequest.on('response', (response) => {
-            const chunks = []
-            response.on('data', (chunk) => {
-              chunks.push(chunk)
-            })
-
-            response.on('end', () => {
-              const data = Buffer.concat(chunks)
-              const mimeType = response.headers['content-type']
-
-              // Only a complete 200 response is an image worth keeping; an error
-              // page or a partial 206 answer would be served to every later
-              // request for the URL as if it were the whole image.
-              if (response.statusCode === 200) {
-                imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
-              }
-
-              // Response() only accepts 200-599 and throws when a body accompanies
-              // a status that forbids one.
-              const status = response.statusCode >= 200 && response.statusCode <= 599
-                ? response.statusCode
-                : 502
-              const bodyAllowed = ![204, 205, 304].includes(status)
-              resolve(new Response(bodyAllowed ? data : null, {
-                status,
-                headers: { 'content-type': mimeType }
-              }))
-            })
-
-            response.on('error', (error) => {
-              console.error('image cache error', error)
-              reject(error)
-            })
-          })
-
-          newRequest.on('error', (err) => {
-            // Settle the request so the <img> fires its error event and the
-            // renderer can show a placeholder instead of waiting forever.
-            console.error(err)
-            reject(err)
-          })
-
-          newRequest.end()
-        })
-      })
+        if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
+          return { Authorization: invidiousAuthorization.authorization }
+        }
+      }, net.request))
 
       const imageRequestFilter = { urls: ['https://*/*', 'http://*/*'], types: ['image'] }
       session.defaultSession.webRequest.onBeforeRequest(imageRequestFilter, (details, callback) => {

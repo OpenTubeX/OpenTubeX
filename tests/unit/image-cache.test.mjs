@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
+import { EventEmitter } from 'node:events'
 import test from 'node:test'
 
-import { extractExpiryTimestamp, ImageCache } from '../../src/main/ImageCache.js'
+import { createImageCacheHandler, extractExpiryTimestamp, ImageCache } from '../../src/main/ImageCache.js'
 
 const now = Math.trunc(Date.now() / 1000)
 
@@ -80,4 +81,57 @@ test('expired images are not served before the periodic cleanup', (t) => {
   t.mock.timers.tick(60_000)
   assert.equal(cache.has('https://example.com/a'), false)
   assert.equal(cache._bytes, 0)
+})
+
+test('Cache-Control no-store and no-cache images are not reused', () => {
+  const cache = new ImageCache()
+  for (const cacheControl of ['no-store', 'no-cache', 'public, no-cache, max-age=3600', 'max-age=3600, No-Store', 'no-cache="set-cookie"']) {
+    const url = `https://example.com/${encodeURIComponent(cacheControl)}`
+    cache.add(url, 'image/png', Buffer.alloc(1), extractExpiryTimestamp({ 'cache-control': cacheControl }))
+    assert.equal(cache.has(url), false, `Cache-Control: ${cacheControl} was cached`)
+  }
+  assert.ok(extractExpiryTimestamp({ 'cache-control': 'public' }) > now)
+})
+
+/**
+ * A stand-in for Electron's net.request that answers each request with the
+ * body for its Authorization header.
+ * @param {Record<string, string>} bodies
+ */
+function fakeRequest(bodies) {
+  const requests = []
+  const request = ({ url, headers }) => {
+    requests.push({ url, headers })
+    const clientRequest = new EventEmitter()
+    clientRequest.setHeader = () => {}
+    clientRequest.end = () => {
+      const response = new EventEmitter()
+      response.statusCode = 200
+      response.headers = { 'content-type': 'image/png', 'cache-control': 'max-age=3600' }
+      clientRequest.emit('response', response)
+      response.emit('data', Buffer.from(bodies[headers?.Authorization ?? '']))
+      response.emit('end')
+    }
+    return clientRequest
+  }
+  return { request, requests }
+}
+
+test('images fetched with account credentials are not shared through the cache', async () => {
+  const { request, requests } = fakeRequest({ '': 'public', 'Bearer a': 'account a', 'Bearer b': 'account b' })
+  const authorizations = new Map([[1, 'Bearer a'], [2, 'Bearer b']])
+  const handle = createImageCacheHandler(new ImageCache(), (_url, id) => {
+    const authorization = authorizations.get(id)
+    return authorization ? { Authorization: authorization } : undefined
+  }, request)
+  const imageUrl = `imagecache://${encodeURIComponent('https://invidious.example.com/vi/a/default.jpg')}`
+  const load = async (suffix) => (await handle(new Request(imageUrl + suffix))).text()
+
+  assert.equal(await load('#1'), 'account a')
+  assert.equal(await load('#2'), 'account b')
+  assert.equal(await load('#3'), 'public', 'an unauthenticated window got an account image')
+  assert.equal(await load(''), 'public')
+  assert.equal(await load('#1'), 'account a')
+  // Only the unauthenticated image comes from the cache.
+  assert.equal(requests.length, 4)
 })
