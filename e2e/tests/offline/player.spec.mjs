@@ -338,13 +338,20 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
     await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
     // Timed in the page, as the test's own steps can take longer than the delay on a busy machine
     window.lastMouseMoveAt = 0
+    window.controlsRevealedAt = 0
     window.controlsHiddenAt = 0
     document.addEventListener('mousemove', () => { window.lastMouseMoveAt = performance.now() }, true)
     new MutationObserver(records => {
-      if (records.some(record => record.target.matches('.shaka-controls-container') && record.target.getAttribute('shown') !== 'true')) {
+      const player = document.querySelector('.tabContent[aria-hidden="false"] .ftVideoPlayer')
+      const controls = player?.querySelector('.shaka-controls-container')
+      if (!controls) return
+      const shown = controls.getAttribute('shown') === 'true'
+      if (!shown && records.some(record => record.target === controls && record.attributeName === 'shown')) {
         window.controlsHiddenAt = performance.now()
+      } else if (shown && !player.classList.contains('no-cursor')) {
+        window.controlsRevealedAt = performance.now()
       }
-    }).observe(document.body, { subtree: true, attributeFilter: ['shown'] })
+    }).observe(document.body, { subtree: true, attributeFilter: ['shown', 'class'] })
   })
 
   for (const mode of ['portrait', 'landscape', 'fullWindow', 'fullscreen']) {
@@ -354,11 +361,15 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
     if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
     await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
     const bounds = await player.boundingBox()
+    await page.evaluate(() => {
+      window.controlsRevealedAt = 0
+      window.controlsHiddenAt = 0
+    })
     await page.mouse.move(0, 0)
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-    await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(player).not.toHaveClass(/no-cursor/)
-    await page.evaluate(() => { window.controlsHiddenAt = 0 })
+    // The last movement shows the controls and the cursor. Checked in the page,
+    // as they can hide again before a busy test runner looks.
+    await expect.poll(() => page.evaluate(() => window.controlsRevealedAt >= window.lastMouseMoveAt)).toBe(true)
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
     // Not before the delay since the last movement. Timers don't fire early, so
