@@ -2452,8 +2452,7 @@ function showAvailableUpdateToast() {
 }
 
 async function checkForNewUpdates() {
-  // Keep an open prompt's changelog until the user closes it
-  if (!checkForUpdates.value || showReleaseNotes.value) {
+  if (!checkForUpdates.value) {
     return
   }
 
@@ -2488,6 +2487,10 @@ async function checkForNewUpdates() {
       import('./helpers/releaseNotesMarkdown'),
       window.ftElectron?.getPackageManagerUpdate() ?? null
     ])
+    // The setting can change during the request, and an open prompt keeps its changelog
+    if (!checkForUpdates.value || showReleaseNotes.value) {
+      return
+    }
     packageManagerUpdate.value = packageManager
     const changelogHtml = createReleaseNotesMarkdown().parse(changelog)
     // Pick screenshots for the app theme when the prompt opens, because the

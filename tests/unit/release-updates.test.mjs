@@ -286,7 +286,7 @@ test('a single release changelog has no heading', () => {
 test('scheduleUpdateChecks repeats checks by wall-clock time', (t) => {
   t.mock.timers.enable({ apis: ['setInterval', 'Date'] })
   const hour = 60 * 60 * 1000
-  const visibility = new EventTarget()
+  const visibility = Object.assign(new EventTarget(), { hidden: false })
   let checks = 0
   const stop = scheduleUpdateChecks(() => { checks++ }, 6 * hour, visibility)
 
@@ -299,6 +299,11 @@ test('scheduleUpdateChecks repeats checks by wall-clock time', (t) => {
 
   // A suspended app's timers fall behind the clock, so becoming visible checks
   t.mock.timers.setTime(Date.now() + 7 * hour)
+  visibility.hidden = true
+  visibility.dispatchEvent(new Event('visibilitychange'))
+  t.mock.timers.tick(15 * 60 * 1000)
+  assert.equal(checks, 1)
+  visibility.hidden = false
   visibility.dispatchEvent(new Event('visibilitychange'))
   assert.equal(checks, 2)
   visibility.dispatchEvent(new Event('visibilitychange'))
