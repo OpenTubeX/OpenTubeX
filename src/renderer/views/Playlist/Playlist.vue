@@ -61,6 +61,7 @@
         :playlist-bookmark-pending="playlistBookmarkPending"
         :preload-available="playlistPreloadAvailable"
         :preload-pending="playlistPreloadPending"
+        :preload-requires-confirmation="playlistPreloadRequiresConfirmation"
         :preload-complete="playlistPreloadComplete"
         :search-video-mode-allowed="shownVideoCount > 1 || playlistInVideoSearchMode"
         :search-query-text="searchQueryTextRequested"
@@ -290,7 +291,7 @@ import {
 } from '../../helpers/player/ytDlpPlayback'
 import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
 import { startProgressBarOperation } from '../../helpers/progressBar'
-import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD } from '../../../constants'
+import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD, PLAYLIST_PRELOAD_CONFIRM_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
@@ -398,6 +399,10 @@ const playlistPreloadAvailable = computed(() => {
 const playlistPreloadVideoIds = computed(() => [...new Set(playlistItems.value
   .map(video => video.videoId)
   .filter(videoId => typeof videoId === 'string' && videoId !== ''))])
+// Remote playlists only load their first page before preloading, so also use their reported total
+const playlistPreloadRequiresConfirmation = computed(() => {
+  return Math.max(videoCount.value, playlistPreloadVideoIds.value.length) > PLAYLIST_PRELOAD_CONFIRM_THRESHOLD
+})
 const playlistPreloadVideoIdsKey = computed(() => playlistPreloadVideoIds.value.join('\0'))
 const ytDlpPlaybackCacheKey = computed(() => buildYtDlpPlaybackCacheKey(store.getters))
 const ytDlpPlaybackUseAuthentication = computed(() =>

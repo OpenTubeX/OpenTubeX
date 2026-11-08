@@ -1955,6 +1955,8 @@ Playlist:
   Playlist Preload Progress: "Precargando vídeos: {completed} de {requested}"
   Close Playlist: Pechar a lista de reprodución
   Preload Playlist: "Precargar todos os vídeos"
+  Preload Playlist Warning Title: "Precargar todos os vídeos?"
+  Preload Playlist Warning: "A precarga solicita a YouTube cada vídeo desta lista de reprodución. Enviar moitas solicitudes en pouco tempo pode facer que YouTube bloquee temporalmente o teu enderezo IP. Queres continuar?"
   Preloading Playlist: "Precargando todos os vídeos..."
   Playlist Preload Complete: "Vídeos precargados: {count}."
   Playlist Preload Partial: "Precargáronse {preloaded} de {requested} vídeos. Non se puideron precargar {failed}."

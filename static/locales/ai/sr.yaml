@@ -1973,6 +1973,8 @@ Playlist:
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
   Close Playlist: Затвори листу за репродукцију
   Preload Playlist: "Учитај све снимке унапред"
+  Preload Playlist Warning Title: "Учитати све снимке унапред?"
+  Preload Playlist Warning: "Учитавање унапред од YouTube-а захтева сваки снимак са ове плејлисте. Слање много захтева у кратком року може довести до тога да YouTube привремено блокира вашу IP адресу. Желите ли да наставите?"
   Preloading Playlist: "Учитавање свих снимака унапред..."
   Playlist Preload Complete: "Унапред учитани снимци: {count}."
   Playlist Preload Partial: "Унапред је учитано {preloaded} од {requested} снимака. Учитавање {failed} видео-снимака унапред није успело."

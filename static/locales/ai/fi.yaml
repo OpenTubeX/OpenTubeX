@@ -1950,6 +1950,8 @@ Playlist:
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
   Close Playlist: Sulje soittolista
   Preload Playlist: "Esilataa kaikki videot"
+  Preload Playlist Warning Title: "Esiladataanko kaikki videot?"
+  Preload Playlist Warning: "Esilataus pyytää YouTubelta jokaisen tämän soittolistan videon. Monen pyynnön lähettäminen lyhyessä ajassa voi saada YouTuben estämään IP-osoitteesi tilapäisesti. Haluatko jatkaa?"
   Preloading Playlist: "Esiladataan kaikkia videoita..."
   Playlist Preload Complete: "Esiladattuja videoita: {count}."
   Playlist Preload Partial: "Esiladattiin {preloaded}/{requested} videota. {failed} videon esilataus epäonnistui."

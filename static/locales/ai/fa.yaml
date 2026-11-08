@@ -1991,6 +1991,8 @@ Playlist:
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
   Close Playlist: بستن فهرست پخش
   Preload Playlist: "پیش‌بارگیری همهٔ ویدیوها"
+  Preload Playlist Warning Title: "همهٔ ویدیوها پیش‌بارگیری شوند؟"
+  Preload Playlist Warning: "پیش‌بارگیری هر ویدیوی این فهرست پخش را از YouTube درخواست می‌کند. ارسال درخواست‌های زیاد در زمان کوتاه ممکن است باعث شود YouTube نشانی IP شما را موقتاً مسدود کند. می‌خواهید ادامه دهید؟"
   Preloading Playlist: "در حال پیش‌بارگیری همهٔ ویدیوها..."
   Playlist Preload Complete: "ویدیوهای پیش‌بارگیری‌شده: {count}."
   Playlist Preload Partial: "از {requested} ویدیو، {preloaded} مورد پیش‌بارگیری شد. پیش‌بارگیری {failed} مورد ناموفق بود."

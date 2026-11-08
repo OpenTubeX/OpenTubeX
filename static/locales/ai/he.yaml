@@ -1952,6 +1952,8 @@ Playlist:
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
   Close Playlist: סגירת רשימת ההשמעה
   Preload Playlist: "טעינת כל הסרטונים מראש"
+  Preload Playlist Warning Title: "לטעון מראש את כל הסרטונים?"
+  Preload Playlist Warning: "טעינה מראש מבקשת מ־YouTube כל סרטון ברשימת ההשמעה הזו. שליחת בקשות רבות בזמן קצר עלולה לגרום ל־YouTube לחסום זמנית את כתובת ה־IP שלך. להמשיך?"
   Preloading Playlist: "כל הסרטונים נטענים מראש..."
   Playlist Preload Complete: "סרטונים שנטענו מראש: {count}."
   Playlist Preload Partial: "נטענו מראש {preloaded} מתוך {requested} סרטונים. טעינת {failed} נכשלה."

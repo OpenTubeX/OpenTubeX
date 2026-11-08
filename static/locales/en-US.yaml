@@ -2892,6 +2892,8 @@ Playlist:
   Add Playlist to Queue: Add Playlist to Queue
   Playlist Added to Queue: Playlist added to queue
   Preload Playlist: Preload all videos
+  Preload Playlist Warning Title: Preload all videos?
+  Preload Playlist Warning: Preloading requests every video in this playlist from YouTube. Sending many requests in a short time can get your IP address temporarily blocked by YouTube. Do you want to continue?
   Preloading Playlist: Preloading all videos...
   Playlist Already Preloaded: All playlist videos are already preloaded
   Playlist Preload Progress: 'Preloading videos: {completed} of {requested}'

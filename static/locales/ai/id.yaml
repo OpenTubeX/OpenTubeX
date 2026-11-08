@@ -1922,6 +1922,8 @@ Playlist:
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"
   Close Playlist: Tutup Daftar Putar
   Preload Playlist: "Pramuat semua video"
+  Preload Playlist Warning Title: "Pramuat semua video?"
+  Preload Playlist Warning: "Pramuat meminta setiap video dalam daftar putar ini dari YouTube. Mengirim banyak permintaan dalam waktu singkat dapat membuat YouTube memblokir alamat IP Anda untuk sementara. Ingin melanjutkan?"
   Preloading Playlist: "Mempramuat semua video..."
   Playlist Preload Complete: "Video yang dipramuat: {count}."
   Playlist Preload Partial: "Berhasil mempramuat {preloaded} dari {requested} video. {failed} gagal dipramuat."

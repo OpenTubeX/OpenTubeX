@@ -1946,6 +1946,8 @@ Playlist:
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
   Close Playlist: إغلاق قائمة التشغيل
   Preload Playlist: "تحميل كل الفيديوهات مسبقًا"
+  Preload Playlist Warning Title: "تحميل كل الفيديوهات مسبقًا؟"
+  Preload Playlist Warning: "يطلب التحميل المسبق كل فيديو في قائمة التشغيل هذه من YouTube. قد يؤدي إرسال طلبات كثيرة في وقت قصير إلى حظر YouTube لعنوان IP الخاص بك مؤقتًا. هل تريد المتابعة؟"
   Preloading Playlist: "جارٍ تحميل كل الفيديوهات مسبقًا..."
   Playlist Preload Complete: "الفيديوهات المحمّلة مسبقًا: {count}."
   Playlist Preload Partial: "تم تحميل {preloaded} من أصل {requested} فيديو مسبقًا. تعذر تحميل {failed}."

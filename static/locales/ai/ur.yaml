@@ -2008,6 +2008,8 @@ Playlist:
   Add Playlist to Queue: پلے لسٹ قطار میں شامل کریں
   Playlist Added to Queue: پلے لسٹ قطار میں شامل کر دی گئی
   Preload Playlist: تمام ویڈیوز پہلے سے لوڈ کریں
+  Preload Playlist Warning Title: "تمام ویڈیوز پہلے سے لوڈ کریں؟"
+  Preload Playlist Warning: "پہلے سے لوڈ کرنا اس پلے لسٹ کی ہر ویڈیو YouTube سے طلب کرتا ہے۔ کم وقت میں بہت سی درخواستیں بھیجنے سے YouTube آپ کا IP پتہ عارضی طور پر بلاک کر سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟"
   Preloading Playlist: تمام ویڈیوز پہلے سے لوڈ ہو رہی ہیں...
   Playlist Already Preloaded: پلے لسٹ کی تمام ویڈیوز پہلے ہی لوڈ ہو چکی ہیں
   Playlist Preload Progress: 'ویڈیوز پہلے سے لوڈ ہو رہی ہیں: {requested} میں سے {completed}'

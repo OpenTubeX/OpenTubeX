@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"
   Close Playlist: Oynatma Listesini Kapat
   Preload Playlist: "Tüm videoları önceden yükle"
+  Preload Playlist Warning Title: "Tüm videolar önceden yüklensin mi?"
+  Preload Playlist Warning: "Önceden yükleme, bu oynatma listesindeki her videoyu YouTube'dan ister. Kısa sürede çok sayıda istek göndermek, YouTube'un IP adresinizi geçici olarak engellemesine neden olabilir. Devam etmek istiyor musunuz?"
   Preloading Playlist: "Tüm videolar önceden yükleniyor..."
   Playlist Preload Complete: "Önceden yüklenen videolar: {count}."
   Playlist Preload Partial: "{requested} videodan {preloaded} tanesi önceden yüklendi. {failed} tanesi yüklenemedi."

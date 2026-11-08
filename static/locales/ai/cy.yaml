@@ -1931,6 +1931,8 @@ Playlist:
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"
   Close Playlist: Cau'r rhestr chwarae
   Preload Playlist: "Rhaglwytho pob fideo"
+  Preload Playlist Warning Title: "Rhaglwytho pob fideo?"
+  Preload Playlist Warning: "Mae rhaglwytho yn gofyn i YouTube am bob fideo yn y rhestr chwarae hon. Gall anfon llawer o geisiadau mewn amser byr achosi i YouTube rwystro eich cyfeiriad IP dros dro. Ydych chi am barhau?"
   Preloading Playlist: "Wrthi’n rhaglwytho pob fideo..."
   Playlist Preload Complete: "Fideos wedi’u rhaglwytho: {count}."
   Playlist Preload Partial: "Rhaglwythwyd {preloaded} o {requested} fideo. Methodd {failed}."

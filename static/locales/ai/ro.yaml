@@ -1947,6 +1947,8 @@ Playlist:
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
   Close Playlist: Închide playlistul
   Preload Playlist: "Preîncarcă toate videoclipurile"
+  Preload Playlist Warning Title: "Preîncărcați toate videoclipurile?"
+  Preload Playlist Warning: "Preîncărcarea solicită de la YouTube fiecare videoclip din această listă de redare. Trimiterea multor solicitări într-un timp scurt poate face ca YouTube să vă blocheze temporar adresa IP. Doriți să continuați?"
   Preloading Playlist: "Se preîncarcă toate videoclipurile..."
   Playlist Preload Complete: "Videoclipuri preîncărcate: {count}."
   Playlist Preload Partial: "S-au preîncărcat {preloaded} din {requested} videoclipuri. {failed} nu au putut fi preîncărcate."

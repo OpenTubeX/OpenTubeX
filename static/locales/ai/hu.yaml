@@ -1897,6 +1897,8 @@ Playlist:
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
   Close Playlist: Lejátszási lista bezárása
   Preload Playlist: "Összes videó előtöltése"
+  Preload Playlist Warning Title: "Előtölti az összes videót?"
+  Preload Playlist Warning: "Az előtöltés a lejátszási lista minden videóját lekéri a YouTube-tól. Ha rövid idő alatt sok kérés érkezik, a YouTube ideiglenesen letilthatja az IP-címét. Folytatja?"
   Preloading Playlist: "Az összes videó előtöltése..."
   Playlist Preload Complete: "Előtöltött videók: {count}."
   Playlist Preload Partial: "{requested} videóból {preloaded} előtöltve. {failed} előtöltése sikertelen."

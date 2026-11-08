@@ -1993,6 +1993,8 @@ Playlist:
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
   Close Playlist: Закрыць спіс прайгравання
   Preload Playlist: "Папярэдне загрузіць усе відэа"
+  Preload Playlist Warning Title: "Папярэдне загрузіць усе відэа?"
+  Preload Playlist Warning: "Папярэдняя загрузка запытвае ў YouTube кожнае відэа з гэтага плэйліста. Вялікая колькасць запытаў за кароткі час можа прывесці да часовага блакавання вашага IP-адраса з боку YouTube. Працягнуць?"
   Preloading Playlist: "Папярэдняя загрузка ўсіх відэа..."
   Playlist Preload Complete: "Папярэдне загружана відэа: {count}."
   Playlist Preload Partial: "Папярэдне загружана {preloaded} з {requested} відэа. Не ўдалося загрузіць {failed}."

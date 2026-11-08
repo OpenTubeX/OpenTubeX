@@ -1898,6 +1898,8 @@ Playlist:
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
   Close Playlist: Stäng spellista
   Preload Playlist: "Förinläs alla videor"
+  Preload Playlist Warning Title: "Förinläsa alla videor?"
+  Preload Playlist Warning: "Förinläsning begär varje video i den här spellistan från YouTube. Många förfrågningar på kort tid kan leda till att YouTube tillfälligt blockerar din IP-adress. Vill du fortsätta?"
   Preloading Playlist: "Förinläser alla videor..."
   Playlist Preload Complete: "Förinlästa videor: {count}."
   Playlist Preload Partial: "Förinläste {preloaded} av {requested} videor. {failed} kunde inte förinläsas."

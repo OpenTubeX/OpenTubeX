@@ -2628,6 +2628,8 @@ Playlist:
   Add Playlist to Queue: Playlist zur Warteschlange hinzufügen
   Playlist Added to Queue: Playlist zur Warteschlange hinzugefügt
   Preload Playlist: Alle Videos vorladen
+  Preload Playlist Warning Title: Alle Videos vorladen?
+  Preload Playlist Warning: Beim Vorladen wird jedes Video dieser Playlist von YouTube abgerufen. Viele Anfragen in kurzer Zeit können dazu führen, dass YouTube deine IP-Adresse vorübergehend sperrt. Möchtest du fortfahren?
   Preloading Playlist: Alle Videos werden vorgeladen ...
   Playlist Already Preloaded: Alle Videos der Playlist sind bereits vorgeladen
   Playlist Preload Progress: 'Videos werden vorgeladen: {completed} von {requested}'

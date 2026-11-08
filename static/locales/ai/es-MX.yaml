@@ -2236,6 +2236,8 @@ Playlist:
     VideoDurationDescending: Duración (más larga)
     Custom: Personalizado
   Preload Playlist: "Precargar todos los vídeos"
+  Preload Playlist Warning Title: "¿Precargar todos los vídeos?"
+  Preload Playlist Warning: "La precarga solicita a YouTube cada vídeo de esta lista de reproducción. Enviar muchas solicitudes en poco tiempo puede hacer que YouTube bloquee temporalmente tu dirección IP. ¿Quieres continuar?"
   Preloading Playlist: "Precargando todos los vídeos..."
   Playlist Preload Complete: "Vídeos precargados: {count}."
   Playlist Preload Partial: "Se precargaron {preloaded} de {requested} vídeos. No se pudieron precargar {failed}."

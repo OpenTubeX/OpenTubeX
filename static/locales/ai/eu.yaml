@@ -1907,6 +1907,8 @@ Playlist:
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
   Close Playlist: Itxi erreprodukzio-zerrenda
   Preload Playlist: "Aurrekargatu bideo guztiak"
+  Preload Playlist Warning Title: "Bideo guztiak aurrekargatu?"
+  Preload Playlist Warning: "Aurrekargak erreprodukzio-zerrenda honetako bideo guztiak eskatzen dizkio YouTube-ri. Denbora laburrean eskaera asko bidaltzeak YouTube-k zure IP helbidea aldi baterako blokeatzea eragin dezake. Jarraitu nahi duzu?"
   Preloading Playlist: "Bideo guztiak aurrekargatzen..."
   Playlist Preload Complete: "Aurrekargatutako bideoak: {count}."
   Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."

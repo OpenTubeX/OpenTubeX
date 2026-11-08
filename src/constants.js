@@ -772,6 +772,9 @@ const PLAYLIST_HEIGHT_COMPACT_THRESHOLD = 500
 // Acting on this many tabs at once (or more) asks for a confirmation first
 const MULTIPLE_TABS_CONFIRM_THRESHOLD = 5
 
+// Preloading more videos than this asks for a confirmation first, as many requests can get the IP address blocked
+const PLAYLIST_PRELOAD_CONFIRM_THRESHOLD = 50
+
 // YouTube search character limit is 100 characters
 const SEARCH_CHAR_LIMIT = 100
 
@@ -908,6 +911,7 @@ export {
   MOBILE_WIDTH_THRESHOLD,
   PLAYLIST_HEIGHT_COMPACT_THRESHOLD,
   MULTIPLE_TABS_CONFIRM_THRESHOLD,
+  PLAYLIST_PRELOAD_CONFIRM_THRESHOLD,
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,

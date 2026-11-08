@@ -1582,6 +1582,8 @@ Playlist:
   Playlist Already Preloaded: "Wszystkie filmy z playlisty są już wstępnie wczytane"
   Playlist Preload Progress: "Wstępne wczytywanie filmów: {completed} z {requested}"
   Preload Playlist: "Wstępnie wczytaj wszystkie filmy"
+  Preload Playlist Warning Title: "Wstępnie wczytać wszystkie filmy?"
+  Preload Playlist Warning: "Wstępne wczytywanie pobiera z YouTube każdy film z tej playlisty. Wysłanie wielu żądań w krótkim czasie może spowodować tymczasowe zablokowanie Twojego adresu IP przez YouTube. Czy chcesz kontynuować?"
   Preloading Playlist: "Wstępne wczytywanie wszystkich filmów..."
   Playlist Preload Complete: "Wstępnie wczytane filmy: {count}."
   Playlist Preload Partial: "Wstępnie wczytano {preloaded} z {requested} filmów. Nie udało się wczytać {failed}."
