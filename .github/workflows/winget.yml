@@ -176,7 +176,14 @@ jobs:
           --topics-json "$TOPICS_JSON"
 
         # Komac reparses and validates the final, post-processed manifests.
-        komac submit --dry-run --yes "$manifest_dir"
+        # It skips manifests that fail to parse and still exits successfully.
+        validation_log="${RUNNER_TEMP}/komac-validation.log"
+        komac submit --dry-run --yes "$manifest_dir" 2>&1 | tee "$validation_log"
+
+        if grep --quiet 'No valid packages' "$validation_log"; then
+          echo '::error::Komac rejected the post-processed manifests.'
+          exit 1
+        fi
 
         echo "directory=$manifest_dir" >> "$GITHUB_OUTPUT"
 
