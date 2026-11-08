@@ -1510,23 +1510,27 @@ function moveDraggedVideo(playlistItemId, order) {
   // Show the new order right away, while the saved one is updated.
   tempShownPlaylistItems.value = items
   // A later drag can start before this save finishes, so save in order.
-  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(items)).finally(() => {
+  const id = playlistId.value
+  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items)).finally(() => {
     if (draggedOrderSave === save) draggedOrderSave = null
   })
   draggedOrderSave = save
 }
 
-/** @param {any[]} items */
-async function saveDraggedOrder(items) {
+/**
+ * @param {string} id The playlist the drag happened in, which may no longer be the open one
+ * @param {any[]} items
+ */
+async function saveDraggedOrder(id, items) {
   try {
     // Apply the shown order to the saved entries, so videos another window
     // added or removed in the meantime stay that way.
     const saved = await store.dispatch('reorderPlaylistVideos', {
-      _id: playlistId.value,
+      _id: id,
       playlistItemIds: items.map(video => video.playlistItemId),
     })
     if (!saved) throw new Error('Could not update playlist')
-    playlistItems.value = selectedUserPlaylist.value.videos
+    if (playlistId.value === id) playlistItems.value = selectedUserPlaylist.value.videos
   } catch (e) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
