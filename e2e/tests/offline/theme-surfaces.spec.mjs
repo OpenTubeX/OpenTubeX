@@ -222,7 +222,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
     })
 
     test('command palette and Tab Organizer use the card gradient', async ({ page }) => {
-      await page.keyboard.press('Control+k')
+      await page.keyboard.press('ControlOrMeta+k')
       const palette = page.locator('.commandPalette')
       await expect(palette).toBeVisible()
       await expect(palette).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
