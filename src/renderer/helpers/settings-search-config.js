@@ -365,6 +365,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Video View Type': ['Video View Type'],
     'Grid Columns': ['Grid Columns', 'Playlist Grid Columns'],
     'Thumbnail Preference': ['Thumbnail Preference'],
+    'Link Underlines': ['Link Underlines'],
     'Extra Thumbnail Action Button': ['Extra Thumbnail Action Button'],
     'External Link Handling': ['External Link Handling']
   },

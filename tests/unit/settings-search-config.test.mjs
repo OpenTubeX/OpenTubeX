@@ -747,3 +747,15 @@ test('settings search lists RSS feed settings only where their controls exist', 
     assert.equal(labels.includes('Manage RSS Feeds'), manageable, `Manage RSS Feeds ${usingElectron} ${enabled}`)
   }
 })
+
+test('link underline search finds the dropdown, not its options', () => {
+  const labels = [...createSettingsSearchIndex({
+    sections: [{ type: 'appearance', title: 'Appearance', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron: true,
+  }).values()].flat().map(({ label }) => label)
+  assert.ok(labels.includes('Link Underlines'))
+  assert.ok(!labels.includes('Never underline links'))
+  assert.ok(!labels.includes('Always underline links'))
+})
