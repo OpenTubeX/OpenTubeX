@@ -257,6 +257,10 @@ User Playlists:
   Move Up: Sus
   Move Down: Jos
   Remove: Eliminați
+  Background Tasks:
+    Loading videos from {playlistName}: 'Se încarcă videoclipurile din {playlistName}'
+    Adding missing videos to {playlistName}: 'Se adaugă videoclipurile lipsă în {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Se caută videoclipuri indisponibile în {playlistName} ({checked}/{total})'
 History:
   From Date: 'De la'
   To Date: 'Până la'

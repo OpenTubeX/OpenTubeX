@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Flytt opp
   Move Down: Flytt ned
   Remove: Fjern
+  Background Tasks:
+    Loading videos from {playlistName}: 'Laster inn videoer fra {playlistName}'
+    Adding missing videos to {playlistName}: 'Legger til manglende videoer i {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Ser etter utilgjengelige videoer i {playlistName} ({checked}/{total})'
 History:
   From Date: 'Fra'
   To Date: 'Til'

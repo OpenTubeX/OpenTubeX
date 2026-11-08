@@ -280,6 +280,10 @@ User Playlists:
   Move Up: بالا
   Move Down: پایین
   Remove: پاک کردن
+  Background Tasks:
+    Loading videos from {playlistName}: 'در حال بارگیری ویدیوها از {playlistName}'
+    Adding missing videos to {playlistName}: 'در حال افزودن ویدیوهای جاافتاده به {playlistName}'
+    Checking {playlistName} for unavailable videos: 'در حال بررسی ویدیوهای ناموجود در {playlistName} ({checked}/{total})'
 History:
   From Date: 'از'
   To Date: 'تا'

@@ -220,7 +220,7 @@
               v-if="videoCount > 0"
               class="actionButton"
               :title="t('Playlist.Add Playlist to Queue')"
-              :disabled="snapshotPending"
+              :disabled="queueSnapshotPending"
               :aria-busy="queueSnapshotPending"
               theme="secondary"
               @click="addPlaylistToQueue"
@@ -245,18 +245,18 @@
               </template>
             </FtButton>
             <FtButton
-              v-if="deadVideoScanRunning"
+              v-if="unavailableVideoScan"
               class="actionButton"
               aria-busy="true"
               theme="secondary"
-              @click="deadVideoScanController?.abort()"
+              @click="unavailableVideoScan.cancel()"
             >
               <FtIcon
                 :icon="['fas', 'sync']"
                 spin
                 aria-hidden="true"
               />
-              {{ `${t('User Playlists.Cancel')} (${deadVideoProgress.checked}/${deadVideoProgress.total})` }}
+              {{ `${t('User Playlists.Cancel')} (${unavailableVideoScan.checked}/${unavailableVideoScan.total})` }}
             </FtButton>
             <FtShareButton
               v-if="sharePlaylistButtonVisible"
@@ -272,13 +272,13 @@
               class="actionButton"
               :title="t('Video.More Options')"
               aria-haspopup="menu"
-              :aria-busy="menuSnapshotPending"
+              :aria-busy="addingMissingVideosPending"
               theme="secondary"
               @click="openMoreOptionsMenu"
             >
               <FtIcon
-                :icon="menuSnapshotPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
-                :spin="menuSnapshotPending"
+                :icon="addingMissingVideosPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
+                :spin="addingMissingVideosPending"
                 aria-hidden="true"
               />
               <span class="buttonLabel">{{ t('More') }}</span>
@@ -303,15 +303,6 @@
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         is-first-option-destructive
         @click="handleRemoveVideosOnWatchPromptAnswer"
-      />
-      <FtPrompt
-        v-if="showRemoveDeadVideosPrompt"
-        autosize
-        :label="t('User Playlists.Remove Unavailable Videos Confirmation', { count: deadVideoItemIds.size, uncertain: deadVideoProgress.uncertain })"
-        :option-names="deletePlaylistPromptNames"
-        :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
-        is-first-option-destructive
-        @click="handleRemoveDeadVideosPromptAnswer"
       />
       <FtPrompt
         v-if="showRemoveDuplicateVideosPrompt"
@@ -380,7 +371,6 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
-import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
   ctrlFHandler,
@@ -393,11 +383,7 @@ import {
   writeFileWithPicker,
   deepCopy,
 } from '../../helpers/utils'
-import { getPlaylistSnapshot } from '../../helpers/api/playlist-snapshot'
-import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
-import { createLocalPlaylistAvailabilityChecker } from '../../helpers/api/local'
-import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
-import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
+import { addingMissingVideos, addMissingPlaylistVideos, loadPlaylistVideos, scanPlaylistForUnavailableVideos, unavailableVideoScans } from '../../helpers/playlistTasks'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { openButtonMenu } from '../../helpers/buttonMenu'
@@ -520,11 +506,6 @@ const query = ref('')
 const editMode = ref(false)
 const showDeletePlaylistPrompt = ref(false)
 const showRemoveVideosOnWatchPrompt = ref(false)
-const showRemoveDeadVideosPrompt = ref(false)
-const deadVideoScanRunning = ref(false)
-const deadVideoProgress = ref({ checked: 0, total: 0, uncertain: 0 })
-const deadVideoItemIds = ref(new Set())
-let deadVideoScanController
 const showRemoveDuplicateVideosPrompt = ref(false)
 const showExportPrompt = ref(false)
 const showDownloadPrompt = ref(false)
@@ -722,10 +703,10 @@ const moreMenuItems = computed(() => {
   }
 
   if (hasVideos && showPlaylists.value) {
-    items.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], enabled: !snapshotPending.value, run: toggleCopyVideosPrompt })
+    items.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], run: copyPlaylist })
   }
   if (isUserPlaylist.value && selectedUserPlaylist.value?.sourcePlaylistId) {
-    items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !snapshotPending.value, run: addMissingVideos })
+    items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !addingMissingVideosPending.value, run: () => addMissingPlaylistVideos(props.id) })
   }
   if (isUserPlaylist.value && hasVideos) {
     items.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'file-export'], run: () => { showExportPrompt.value = true } })
@@ -751,8 +732,8 @@ const moreMenuItems = computed(() => {
     items.push({ label: t('User Playlists.Remove Watched Videos'), icon: ['fas', 'eye-slash'], run: () => { showRemoveVideosOnWatchPrompt.value = true } })
   }
   // While the scan runs, its progress and cancel button are in the action row.
-  if (isUserPlaylist.value && hasVideos && !deadVideoScanRunning.value) {
-    items.push({ label: t('User Playlists.Remove Unavailable Videos'), icon: ['fas', 'link-slash'], run: scanDeadVideos })
+  if (isUserPlaylist.value && hasVideos && !unavailableVideoScan.value) {
+    items.push({ label: t('User Playlists.Remove Unavailable Videos'), icon: ['fas', 'link-slash'], run: () => scanPlaylistForUnavailableVideos(props.id) })
   }
   items.push(SEPARATOR)
 
@@ -800,7 +781,6 @@ const playlistPersistenceDisabled = computed(() => {
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
-watch(showRemoveDeadVideosPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
 watch(showDownloadPrompt, handlePromptToggle)
 watch(enableDownloads, (enabled) => {
@@ -831,110 +811,63 @@ function handlePlaylistNameInput(input) {
   newTitle.value = input.trim()
 }
 
-const snapshotPending = ref(false)
-// Copying and adding missing videos start from the menu, so the More button shows their progress.
+// Copying, adding missing videos, and checking for unavailable videos run in
+// the background, so they continue when the playlist is left.
+const addingMissingVideosPending = computed(() => addingMissingVideos.has(props.id))
+const unavailableVideoScan = computed(() => unavailableVideoScans.get(props.id))
+
 const queueSnapshotPending = ref(false)
-const menuSnapshotPending = computed(() => snapshotPending.value && !queueSnapshotPending.value)
-let snapshotController
+let queueSnapshot
 
-function cancelSnapshot() {
-  snapshotController?.abort()
+function cancelQueueSnapshot() {
+  queueSnapshot?.cancel()
 }
 
-watch(() => props.id, cancelSnapshot)
-onBeforeUnmount(cancelSnapshot)
+watch(() => props.id, cancelQueueSnapshot)
+onBeforeUnmount(cancelQueueSnapshot)
 
-async function loadSnapshot(id) {
-  snapshotController = new AbortController()
-  snapshotPending.value = true
-  try {
-    const snapshot = await getPlaylistSnapshot(id, {
-      backend: backendPreference.value,
-      fallback: store.getters.getBackendFallback,
-      signal: snapshotController.signal,
-    })
-    // YouTube playlists follow the channels' members-only settings
-    const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
-    return { ...snapshot, videos: snapshot.videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds })) }
-  } catch (error) {
-    if (!snapshotController.signal.aborted) {
-      console.error(error)
-      showToast({
-        message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"),
-        icon: ['fas', 'circle-exclamation'],
-      })
-    }
-    return null
-  } finally {
-    snapshotPending.value = false
-  }
-}
-
-async function toggleCopyVideosPrompt() {
-  if (snapshotPending.value) return
-  const id = props.id
-  const defaults = {
+function copyPlaylist() {
+  const newPlaylistDefaultProperties = {
     title: props.channelName === '' ? props.title : `${props.title} | ${props.channelName}`,
     description: props.description,
-    sourcePlaylistId: isUserPlaylist.value ? selectedUserPlaylist.value?.sourcePlaylistId : id,
+    sourcePlaylistId: isUserPlaylist.value ? selectedUserPlaylist.value?.sourcePlaylistId : props.id,
   }
-  const snapshot = isUserPlaylist.value ? { videos: props.videos } : await loadSnapshot(id)
-  if (!snapshot) return
+  if (isUserPlaylist.value) {
+    store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: props.videos, newPlaylistDefaultProperties })
+    return
+  }
 
+  // The prompt opens right away and the playlist's videos load in the meantime
+  const pending = loadPlaylistVideos(props.id, {
+    icon: ['fas', 'copy'],
+    message: t('User Playlists.Background Tasks.Loading videos from {playlistName}', { playlistName: props.title }),
+  })
   store.dispatch('showAddToPlaylistPromptForManyVideos', {
-    videos: snapshot.videos,
-    newPlaylistDefaultProperties: defaults,
+    pendingVideos: { ...pending, videoCount: props.videoCount, previewVideos: props.videos.slice(0, 3) },
+    newPlaylistDefaultProperties,
   })
 }
 
 async function addPlaylistToQueue() {
-  if (snapshotPending.value) return
+  if (queueSnapshotPending.value) return
   // Queue user playlists in their displayed sort order.
   let videos = props.sortedVideos
   if (!isUserPlaylist.value) {
     queueSnapshotPending.value = true
-    const snapshot = await loadSnapshot(props.id)
+    queueSnapshot = loadPlaylistVideos(props.id, {
+      icon: ['fas', 'add-to-queue'],
+      message: t('User Playlists.Background Tasks.Loading videos from {playlistName}', { playlistName: props.title }),
+    })
+    videos = await queueSnapshot.promise
+    queueSnapshot = null
     queueSnapshotPending.value = false
     // Leaving the playlist while it loads cancels the action.
-    if (!snapshot || snapshotController.signal.aborted) return
-    videos = snapshot.videos
+    if (!videos) return
   }
   if (videos.length === 0) return
 
   store.commit('addVideosToWatchQueue', { videos: deepCopy(videos) })
   showToast({ message: t('Playlist.Playlist Added to Queue'), icon: ['fas', 'queue'] })
-}
-
-async function addMissingVideos() {
-  if (snapshotPending.value) return
-  const id = props.id
-  const sourceId = selectedUserPlaylist.value?.sourcePlaylistId
-  if (!sourceId) return
-  const snapshot = await loadSnapshot(sourceId)
-  if (!snapshot) return
-
-  snapshotPending.value = true
-  try {
-    snapshotController.signal.throwIfAborted()
-    // Insert the snapshot as one ordered, deduplicated batch so a concurrent
-    // preference change cannot split the refresh between the two ends.
-    const saved = await store.dispatch('addVideos', { _id: id, videos: snapshot.videos, deduplicate: true })
-    if (!saved) throw new Error('Could not add source playlist videos')
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
-      icon: ['fas', 'check'],
-    })
-  } catch (error) {
-    if (!snapshotController.signal.aborted) {
-      console.error(error)
-      showToast({
-        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-    }
-  } finally {
-    snapshotPending.value = false
-  }
 }
 
 async function savePlaylistInfo() {
@@ -1169,65 +1102,6 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
   )
 })
 
-async function scanDeadVideos() {
-  if (deadVideoScanRunning.value) return
-  const playlistId = props.id
-  const videos = [...selectedUserPlaylist.value.videos]
-  deadVideoScanController = new AbortController()
-  const signal = deadVideoScanController.signal
-  deadVideoScanRunning.value = true
-  deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
-  try {
-    const useLocal = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(store.getters.getBackendPreference)
-    const checkLocal = useLocal ? await createLocalPlaylistAvailabilityChecker(signal) : null
-    const result = await findDeadPlaylistItems(videos, async (videoId, scanSignal) => {
-      const timeoutSignal = AbortSignal.any([scanSignal, AbortSignal.timeout(20_000)])
-      if (checkLocal) {
-        const response = await checkLocal(videoId, timeoutSignal)
-        return isUnavailablePlayerResponse(response, videoId)
-      }
-      return isUnavailableInvidiousResponse(await getInvidiousPlaylistAvailability(videoId, timeoutSignal), videoId)
-    }, signal, progress => { deadVideoProgress.value = progress })
-    if (props.id !== playlistId) return
-    deadVideoItemIds.value = result.itemIds
-    if (result.itemIds.size > 0) {
-      showRemoveDeadVideosPrompt.value = true
-    } else {
-      showToast({
-        message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
-        icon: ['fas', 'check'],
-      })
-    }
-  } catch (error) {
-    if (!signal.aborted) {
-      console.error(error)
-      showToast({ message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"), icon: ['fas', 'circle-exclamation'] })
-    }
-  } finally {
-    if (deadVideoScanController?.signal === signal) {
-      deadVideoScanRunning.value = false
-      deadVideoScanController = null
-    }
-  }
-}
-
-async function handleRemoveDeadVideosPromptAnswer(option) {
-  showRemoveDeadVideosPrompt.value = false
-  if (option !== 'delete') return
-  const playlist = selectedUserPlaylist.value
-  const videos = playlist.videos.filter(video => !deadVideoItemIds.value.has(video.playlistItemId))
-  const removed = playlist.videos.length - videos.length
-  if (removed === 0) return
-  const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
-  showToast({
-    message: saved
-      ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
-      : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-    icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
-  })
-  deadVideoItemIds.value = new Set()
-}
-
 /**
  * @param {'delete' | 'cancel' | null} option
  */
@@ -1397,15 +1271,11 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  deadVideoScanController?.abort()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 
 watch(() => props.id, () => {
   exitEditMode()
-  deadVideoScanController?.abort()
-  showRemoveDeadVideosPrompt.value = false
-  deadVideoItemIds.value = new Set()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

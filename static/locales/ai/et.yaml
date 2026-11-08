@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Üles
   Move Down: Alla
   Remove: Eemalda
+  Background Tasks:
+    Loading videos from {playlistName}: 'Laadin videoid esitusloendist {playlistName}'
+    Adding missing videos to {playlistName}: 'Lisan puuduvaid videoid esitusloendisse {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrollin esitusloendit {playlistName} kättesaamatute videote suhtes ({checked}/{total})'
 History:
   From Date: 'Alates'
   To Date: 'Kuni'

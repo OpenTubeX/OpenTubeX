@@ -269,6 +269,10 @@ User Playlists:
   Move Up: மேலே
   Move Down: கீழே
   Remove: அகற்று
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} இலிருந்து காணொளிகள் ஏற்றப்படுகின்றன'
+    Adding missing videos to {playlistName}: 'விடுபட்ட காணொளிகள் {playlistName} இல் சேர்க்கப்படுகின்றன'
+    Checking {playlistName} for unavailable videos: '{playlistName} இல் கிடைக்காத காணொளிகள் சரிபார்க்கப்படுகின்றன ({checked}/{total})'
 History:
   From Date: 'தொடக்க தேதி'
   To Date: 'முடிவு தேதி'

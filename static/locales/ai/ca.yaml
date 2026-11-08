@@ -390,6 +390,10 @@ User Playlists:
   Move Up: Amunt
   Move Down: Avall
   Remove: Suprimeix
+  Background Tasks:
+    Loading videos from {playlistName}: 'S''estan carregant els vídeos de {playlistName}'
+    Adding missing videos to {playlistName}: 'S''estan afegint els vídeos que falten a {playlistName}'
+    Checking {playlistName} for unavailable videos: 'S''està comprovant si hi ha vídeos no disponibles a {playlistName} ({checked}/{total})'
 History:
   From Date: 'Des de'
   To Date: 'Fins a'

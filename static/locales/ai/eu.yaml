@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Gora
   Move Down: Behera
   Remove: Kendu
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} zerrendako bideoak kargatzen'
+    Adding missing videos to {playlistName}: 'Falta diren bideoak {playlistName} zerrendara gehitzen'
+    Checking {playlistName} for unavailable videos: '{playlistName} zerrendan erabilgarri ez dauden bideoak bilatzen ({checked}/{total})'
 History:
   From Date: 'Hasiera'
   To Date: 'Amaiera'

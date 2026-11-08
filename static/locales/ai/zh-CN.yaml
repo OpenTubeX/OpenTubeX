@@ -256,6 +256,10 @@ User Playlists:
   Move Up: 上移
   Move Down: 下移
   Remove: 删除
+  Background Tasks:
+    Loading videos from {playlistName}: '正在从 {playlistName} 加载视频'
+    Adding missing videos to {playlistName}: '正在将缺失的视频添加到 {playlistName}'
+    Checking {playlistName} for unavailable videos: '正在检查 {playlistName} 中不可用的视频 ({checked}/{total})'
 History:
   From Date: '开始日期'
   To Date: '结束日期'

@@ -256,6 +256,10 @@ User Playlists:
   Move Up: 上へ
   Move Down: 下へ
   Remove: 削除
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} の動画を読み込み中'
+    Adding missing videos to {playlistName}: '{playlistName} に不足している動画を追加中'
+    Checking {playlistName} for unavailable videos: '{playlistName} の利用できない動画を確認中 ({checked}/{total})'
 History:
   From Date: '開始日'
   To Date: '終了日'

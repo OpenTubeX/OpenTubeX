@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Uheloc'h
   Move Down: Izeloc'h
   Remove: Tennañ
+  Background Tasks:
+    Loading videos from {playlistName}: 'O kargañ ar videoioù eus {playlistName}'
+    Adding missing videos to {playlistName}: 'Oc''h ouzhpennañ ar videoioù a vank da {playlistName}'
+    Checking {playlistName} for unavailable videos: 'O wiriañ ar videoioù dihegerz e {playlistName} ({checked}/{total})'
 History:
   From Date: 'Adalek'
   To Date: 'Betek'

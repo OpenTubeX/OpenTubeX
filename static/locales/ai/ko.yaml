@@ -347,6 +347,10 @@ User Playlists:
   Move Up: 위로
   Move Down: 아래로
   Remove: 제거
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName}에서 동영상을 불러오는 중'
+    Adding missing videos to {playlistName}: '{playlistName}에 누락된 동영상을 추가하는 중'
+    Checking {playlistName} for unavailable videos: '{playlistName}에서 사용할 수 없는 동영상을 확인하는 중 ({checked}/{total})'
 History:
   From Date: '시작일'
   To Date: '종료일'

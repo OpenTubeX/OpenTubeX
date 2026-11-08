@@ -1,3 +1,5 @@
+import { markRaw } from 'vue'
+
 import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
@@ -24,6 +26,44 @@ const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 
 let settingsWindowMorph = Promise.resolve()
+
+/**
+ * Throws if the videos lack the details the add to playlist prompt needs.
+ * @param {unknown} videos
+ */
+function assertValidPlaylistPromptVideos(videos) {
+  const requiredVideoKeys = [
+    'videoId',
+    'title',
+    'lengthSeconds',
+
+    // These two properties will be missing for shorts added to a playlist from anywhere but the watch page
+    // 'author',
+    // 'authorId',
+
+    // `timeAdded` should be generated when videos are added
+    // Not when a prompt is displayed
+    // 'timeAdded',
+
+    // `playlistItemId` should be generated anyway
+    // 'playlistItemId',
+
+    // `type` should be added in action anyway
+    // 'type',
+  ]
+  let missingKeys = []
+  const valid = Array.isArray(videos) && videos.every((video) => {
+    missingKeys = requiredVideoKeys.filter(key => !Object.hasOwn(video, key))
+    return missingKeys.length === 0
+  })
+
+  if (!valid) {
+    const errorMsgText = 'Incorrect videos data passed when opening playlist prompt'
+    console.error(errorMsgText)
+    console.error({ videoObjectArray: videos, missingKeys })
+    throw new Error(errorMsgText)
+  }
+}
 
 function morphSettingsWindow(commit, update, getButton) {
   settingsWindowMorph = morphUtilityWindow(update, getButton, morphing => {
@@ -92,6 +132,8 @@ const state = {
   showSearchFilters: false,
   searchFilterValueChangedByTabId: {},
   toBeAddedToPlaylistVideoList: [],
+  /** Videos the add to playlist prompt is waiting for, see `showAddToPlaylistPromptForManyVideos` */
+  toBeAddedToPlaylistPendingVideos: null,
   newPlaylistDefaultProperties: {},
   newPlaylistVideoObject: [],
   regionNames: [],
@@ -224,6 +266,10 @@ const getters = {
     return state.toBeAddedToPlaylistVideoList
   },
 
+  getToBeAddedToPlaylistPendingVideos(state) {
+    return state.toBeAddedToPlaylistPendingVideos
+  },
+
   getNewPlaylistDefaultProperties(state) {
     return state.newPlaylistDefaultProperties
   },
@@ -330,66 +376,42 @@ const actions = {
     return parsedString
   },
 
-  showAddToPlaylistPromptForManyVideos ({ commit }, { videos: videoObjectArray, newPlaylistDefaultProperties }) {
-    let videoDataValid = true
-    if (!Array.isArray(videoObjectArray)) {
-      videoDataValid = false
-    }
-    let missingKeys = []
-
-    if (videoDataValid) {
-      const requiredVideoKeys = [
-        'videoId',
-        'title',
-        'lengthSeconds',
-
-        // These two properties will be missing for shorts added to a playlist from anywhere but the watch page
-        // 'author',
-        // 'authorId',
-
-        // `timeAdded` should be generated when videos are added
-        // Not when a prompt is displayed
-        // 'timeAdded',
-
-        // `playlistItemId` should be generated anyway
-        // 'playlistItemId',
-
-        // `type` should be added in action anyway
-        // 'type',
-      ]
-      // Using `every` to loop and `return false` to break
-      videoObjectArray.every((video) => {
-        const videoPropertyKeys = Object.keys(video)
-        const missingKeysHere = requiredVideoKeys.filter(x => !videoPropertyKeys.includes(x))
-        if (missingKeysHere.length > 0) {
-          videoDataValid = false
-          missingKeys = missingKeysHere
-          return false
-        }
-        // Return true to continue loop
-        return true
-      })
+  // Opens the prompt for adding videos to playlists. Pass `pendingVideos`
+  // ({ promise, cancel, videoCount, previewVideos }) instead of `videos` to open
+  // it while the videos are still loading: the prompt shows the expected count
+  // and preview until they arrive, and closing it cancels the loading.
+  showAddToPlaylistPromptForManyVideos ({ commit, dispatch, state }, { videos, pendingVideos, newPlaylistDefaultProperties }) {
+    if (pendingVideos == null) {
+      assertValidPlaylistPromptVideos(videos)
     }
 
-    if (!videoDataValid) {
-      // Print error and abort
-      const errorMsgText = 'Incorrect videos data passed when opening playlist prompt'
-      console.error(errorMsgText)
-      console.error({
-        videoObjectArray,
-        missingKeys,
-      })
-      throw new Error(errorMsgText)
-    }
-
+    state.toBeAddedToPlaylistPendingVideos?.cancel()
+    commit('setToBeAddedToPlaylistPendingVideos', pendingVideos == null ? null : markRaw(pendingVideos))
     commit('setShowAddToPlaylistPrompt', true)
-    commit('setToBeAddedToPlaylistVideoList', videoObjectArray)
+    commit('setToBeAddedToPlaylistVideoList', pendingVideos == null ? videos : [])
     if (newPlaylistDefaultProperties != null) {
       commit('setNewPlaylistDefaultProperties', newPlaylistDefaultProperties)
     }
+
+    pendingVideos?.promise.then((loadedVideos) => {
+      // The prompt was closed or already handed the videos over to a save
+      if (state.toBeAddedToPlaylistPendingVideos !== pendingVideos) return
+
+      commit('setToBeAddedToPlaylistPendingVideos', null)
+      try {
+        // Loading failures have already been reported
+        if (loadedVideos == null) throw new Error('Could not load the videos')
+        assertValidPlaylistPromptVideos(loadedVideos)
+        commit('setToBeAddedToPlaylistVideoList', loadedVideos)
+      } catch {
+        dispatch('hideAddToPlaylistPrompt')
+      }
+    })
   },
 
-  hideAddToPlaylistPrompt ({ commit }) {
+  hideAddToPlaylistPrompt ({ commit, state }) {
+    state.toBeAddedToPlaylistPendingVideos?.cancel()
+    commit('setToBeAddedToPlaylistPendingVideos', null)
     commit('setShowAddToPlaylistPrompt', false)
     // The default value properties are only valid until prompt is closed
     commit('resetNewPlaylistDefaultProperties')
@@ -1014,6 +1036,10 @@ const mutations = {
 
   setToBeAddedToPlaylistVideoList (state, payload) {
     state.toBeAddedToPlaylistVideoList = payload
+  },
+
+  setToBeAddedToPlaylistPendingVideos (state, payload) {
+    state.toBeAddedToPlaylistPendingVideos = payload
   },
 
   setNewPlaylistDefaultProperties (state, payload) {

@@ -372,6 +372,10 @@ User Playlists:
   Move Up: Aukštyn
   Move Down: Žemyn
   Remove: Pašalinti
+  Background Tasks:
+    Loading videos from {playlistName}: 'Įkeliami vaizdo įrašai iš {playlistName}'
+    Adding missing videos to {playlistName}: 'Į {playlistName} pridedami trūkstami vaizdo įrašai'
+    Checking {playlistName} for unavailable videos: 'Tikrinama, ar {playlistName} yra nepasiekiamų vaizdo įrašų ({checked}/{total})'
 History:
   From Date: 'Nuo'
   To Date: 'Iki'

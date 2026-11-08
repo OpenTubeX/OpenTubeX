@@ -11,14 +11,24 @@ import { toRaw } from 'vue'
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
 const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts, toRaw })
-const componentSource = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
-const refreshSource = componentSource.slice(componentSource.indexOf('async function addMissingVideos()'), componentSource.indexOf('async function savePlaylistInfo()'))
+const playlistTasksSource = await readFile(new URL('../../src/renderer/helpers/playlistTasks.js', import.meta.url), 'utf8')
+const refreshSource = playlistTasksSource.slice(playlistTasksSource.indexOf('export async function addMissingPlaylistVideos('), playlistTasksSource.indexOf('/**', playlistTasksSource.indexOf('export async function addMissingPlaylistVideos(')))
+  .replace('export ', '')
 const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
 const bulkIpcSource = mainSource.slice(mainSource.indexOf('        case DBActions.PLAYLISTS.UPSERT_VIDEOS:'), mainSource.indexOf('        case DBActions.GENERAL.DELETE:', mainSource.indexOf('        case DBActions.PLAYLISTS.UPSERT_VIDEOS:')))
 const bulkActionSource = storeSource.slice(storeSource.indexOf('  async addVideos({ commit }'), storeSource.indexOf('  async grabAllPlaylists('))
 const singleActionSource = storeSource.slice(storeSource.indexOf('  addVideo({ commit }'), storeSource.indexOf('  async addVideos({ commit }'))
 const promptSource = await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')
 const promptSaveSource = promptSource.slice(promptSource.search(/(?:async )?function addSelectedToPlaylists\(/), promptSource.indexOf("/** @type {import('vue').ComputedRef<object>} */\nconst newPlaylistDefaultProperties"))
+
+// The prompt's save reads the playlists from the store, as it can finish after the prompt has closed.
+function promptSave({ allPlaylists, store, ...context }) {
+  return vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    pendingVideos: { value: null },
+    ...context,
+    store: { ...store, getters: { getPlaylist: id => allPlaylists.value.find(playlist => playlist._id === id) } },
+  })
+}
 
 function storeActions(handlers) {
   return vm.runInNewContext(`({ ${singleActionSource} ${bulkActionSource} })`, {
@@ -152,12 +162,10 @@ for (const preference of [false, true]) {
     const sourceVideos = [{ videoId: 'first' }, { videoId: 'source-a' }, { videoId: 'source-b' }, { videoId: 'source-a' }]
     const actions = storeActions(Playlists)
     let firstSave = true
-    const refresh = vm.runInNewContext(refreshSource + '\naddMissingVideos', {
-      props: { id: 'custom' },
-      selectedUserPlaylist: { value: { sourcePlaylistId: 'source' } },
-      snapshotPending: { value: false },
-      snapshotController: new AbortController(),
-      loadSnapshot: async () => ({ videos: sourceVideos }),
+    playlist.sourcePlaylistId = 'source'
+    const refresh = vm.runInNewContext(refreshSource + '\naddMissingPlaylistVideos', {
+      addingMissingVideos: new Set(),
+      loadPlaylistVideos: () => ({ promise: Promise.resolve(sourceVideos) }),
       store: {
         getters: { getPlaylist: () => playlist },
         dispatch: async (action, payload) => {
@@ -170,11 +178,12 @@ for (const preference of [false, true]) {
           return saved
         },
       },
-      t: value => value,
+      i18n: { global: { t: value => value } },
       showToast: () => {},
+      showUpdateFailedToast: () => assert.fail('The refresh must be saved'),
       console,
     })
-    await refresh()
+    await refresh('custom')
     const expected = preference ? ['source-a', 'source-b', 'first', 'second'] : ['first', 'second', 'source-a', 'source-b']
     assert.deepEqual(Array.from(playlist.videos, video => video.videoId), expected)
     assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, video => video.videoId), expected)
@@ -245,7 +254,7 @@ test('the bulk prompt waits for writes and reports failure without a success toa
   const toasts = []
   const saving = { value: false }
   let writes = 0
-  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+  const save = promptSave({
     saving,
     selectedPlaylistIdList: { value: ['custom'] },
     allPlaylists: { value: [{ _id: 'custom', playlistName: 'Weekend watching', videos: [] }] },
@@ -272,7 +281,7 @@ test('the bulk prompt waits for writes and reports failure without a success toa
 test('a playlist missing before save gets a generic error without exposing its ID', async () => {
   const toasts = []
   const errorMessage = 'There was an issue with updating this playlist.'
-  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+  const save = promptSave({
     saving: { value: false },
     selectedPlaylistIdList: { value: ['missing-playlist-id'] },
     allPlaylists: { value: [] },
@@ -303,7 +312,7 @@ test('renderer insertion uses the committed direction when the preference change
 
 test('partial bulk failure names the failed playlist and counts only the successful target', async () => {
   const toasts = []
-  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+  const save = promptSave({
     saving: { value: false },
     selectedPlaylistIdList: { value: ['saved', 'failed'] },
     allPlaylists: { value: [{ _id: 'saved', playlistName: 'Saved playlist', videos: [] }, { _id: 'failed', playlistName: 'Failed playlist', videos: [] }] },
@@ -325,7 +334,7 @@ for (const allowDuplicates of [false, true]) {
     const toggle = { value: allowDuplicates }
     const writes = []
     const toasts = []
-    const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    const save = promptSave({
       saving: { value: false },
       selectedPlaylistIdList: { value: ['first', 'second'] },
       allPlaylists: { value: ['first', 'second'].map(_id => ({ _id, videos: [{ videoId: 'existing' }] })) },
@@ -347,7 +356,7 @@ for (const allowDuplicates of [false, true]) {
 
 test('a bulk save skips empty filtered batches without reporting an addition', async () => {
   const toasts = []
-  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+  const save = promptSave({
     saving: { value: false },
     selectedPlaylistIdList: { value: ['custom'] },
     allPlaylists: { value: [{ _id: 'custom', videos: [{ videoId: 'existing' }] }] },

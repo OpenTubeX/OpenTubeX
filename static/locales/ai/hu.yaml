@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Fel
   Move Down: Le
   Remove: Eltávolítás
+  Background Tasks:
+    Loading videos from {playlistName}: 'Videók betöltése innen: {playlistName}'
+    Adding missing videos to {playlistName}: 'Hiányzó videók hozzáadása ehhez: {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Nem elérhető videók keresése itt: {playlistName} ({checked}/{total})'
 History:
   From Date: 'Kezdő dátum'
   To Date: 'Záró dátum'

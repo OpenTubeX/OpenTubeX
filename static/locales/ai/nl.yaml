@@ -261,6 +261,10 @@ User Playlists:
   Move Up: Omhoog
   Move Down: Omlaag
   Remove: Verwijderen
+  Background Tasks:
+    Loading videos from {playlistName}: 'Video''s uit {playlistName} laden'
+    Adding missing videos to {playlistName}: 'Ontbrekende video''s toevoegen aan {playlistName}'
+    Checking {playlistName} for unavailable videos: '{playlistName} controleren op niet-beschikbare video''s ({checked}/{total})'
 History:
   From Date: 'Van'
   To Date: 'Tot'

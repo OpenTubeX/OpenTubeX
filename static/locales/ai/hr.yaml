@@ -259,6 +259,10 @@ User Playlists:
   Move Up: Gore
   Move Down: Dolje
   Remove: Ukloni
+  Background Tasks:
+    Loading videos from {playlistName}: 'Učitavanje videozapisa iz {playlistName}'
+    Adding missing videos to {playlistName}: 'Dodavanje nedostajućih videozapisa u {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Provjera nedostupnih videozapisa u {playlistName} ({checked}/{total})'
 History:
   From Date: 'Od'
   To Date: 'Do'

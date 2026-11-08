@@ -257,6 +257,10 @@ User Playlists:
   Remove Watched Videos: Angesehene Videos entfernen
   Remove Unavailable Videos: Nicht verfügbare Videos entfernen
   Remove Unavailable Videos Confirmation: 'Nicht verfügbare Videos entfernen? Gefunden: {count}. Nicht überprüfbar: {uncertain}. Nicht überprüfte Videos bleiben erhalten.'
+  Background Tasks:
+    Loading videos from {playlistName}: Videos aus {playlistName} werden geladen
+    Adding missing videos to {playlistName}: Fehlende Videos werden zu {playlistName} hinzugefügt
+    Checking {playlistName} for unavailable videos: '{playlistName} wird auf nicht verfügbare Videos geprüft ({checked}/{total})'
   Delete Playlist: Playlist löschen
   Are you sure you want to delete this playlist? This cannot be undone: Bist du sicher, dass du diese Playlist löschen möchtest? Dies kann nicht rückgängig gemacht werden.
   Reorder Hint: Ziehen oder mit den Pfeiltasten neu anordnen

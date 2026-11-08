@@ -258,6 +258,10 @@ User Playlists:
   Move Up: Move up
   Move Down: Move down
   Remove: Remove
+  Background Tasks:
+    Loading videos from {playlistName}: 'Loading videos from {playlistName}'
+    Adding missing videos to {playlistName}: 'Adding missing videos to {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Checking {playlistName} for unavailable videos ({checked}/{total})'
 History:
   From Date: 'From'
   To Date: 'To'

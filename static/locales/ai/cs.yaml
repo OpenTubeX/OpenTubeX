@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Nahoru
   Move Down: Dolů
   Remove: Odebrat
+  Background Tasks:
+    Loading videos from {playlistName}: 'Načítání videí z {playlistName}'
+    Adding missing videos to {playlistName}: 'Přidávání chybějících videí do {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrola nedostupných videí v {playlistName} ({checked}/{total})'
 History:
   From Date: 'Od'
   To Date: 'Do'

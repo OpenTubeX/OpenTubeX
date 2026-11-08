@@ -261,6 +261,10 @@ User Playlists:
   Move Up: העלאה
   Move Down: הורדה
   Remove: הסרה
+  Background Tasks:
+    Loading videos from {playlistName}: 'טוען סרטונים מ־{playlistName}'
+    Adding missing videos to {playlistName}: 'מוסיף סרטונים חסרים ל־{playlistName}'
+    Checking {playlistName} for unavailable videos: 'בודק סרטונים לא זמינים ב־{playlistName} ({checked}/{total})'
 History:
   From Date: 'מתאריך'
   To Date: 'עד תאריך'

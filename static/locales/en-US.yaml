@@ -457,6 +457,10 @@ User Playlists:
   Remove Watched Videos: Remove Watched Videos
   Remove Unavailable Videos: Remove Unavailable Videos
   Remove Unavailable Videos Confirmation: 'Remove unavailable videos? Found: {count}. Could not check: {uncertain}. Unchecked videos will be kept.'
+  Background Tasks:
+    Loading videos from {playlistName}: Loading videos from {playlistName}
+    Adding missing videos to {playlistName}: Adding missing videos to {playlistName}
+    Checking {playlistName} for unavailable videos: 'Checking {playlistName} for unavailable videos ({checked}/{total})'
   Enable Quick Bookmark With This Playlist: Enable Quick Bookmark With This Playlist
   Quick Bookmark Enabled: Quick Bookmark Enabled
   Pin to Navigation: Pin to Navigation

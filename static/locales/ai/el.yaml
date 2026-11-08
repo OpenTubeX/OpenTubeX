@@ -257,6 +257,10 @@ User Playlists:
   Move Up: Πάνω
   Move Down: Κάτω
   Remove: Αφαίρεση
+  Background Tasks:
+    Loading videos from {playlistName}: 'Φόρτωση βίντεο από {playlistName}'
+    Adding missing videos to {playlistName}: 'Προσθήκη βίντεο που λείπουν στο {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Έλεγχος του {playlistName} για μη διαθέσιμα βίντεο ({checked}/{total})'
 History:
   From Date: 'Από'
   To Date: 'Έως'

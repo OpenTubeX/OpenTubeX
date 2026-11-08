@@ -256,6 +256,10 @@ User Playlists:
   Move Up: Nahor
   Move Down: Nadol
   Remove: Odstrániť
+  Background Tasks:
+    Loading videos from {playlistName}: 'Načítavajú sa videá z {playlistName}'
+    Adding missing videos to {playlistName}: 'Pridávajú sa chýbajúce videá do {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrolujú sa nedostupné videá v {playlistName} ({checked}/{total})'
 History:
   From Date: 'Od'
   To Date: 'Do'

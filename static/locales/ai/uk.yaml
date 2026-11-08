@@ -261,6 +261,10 @@ User Playlists:
   Move Up: Вгору
   Move Down: Вниз
   Remove: Вилучити
+  Background Tasks:
+    Loading videos from {playlistName}: 'Завантаження відео з {playlistName}'
+    Adding missing videos to {playlistName}: 'Додавання відсутніх відео до {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Перевірка {playlistName} на недоступні відео ({checked}/{total})'
 History:
   From Date: 'Від'
   To Date: 'До'

@@ -293,6 +293,10 @@ User Playlists:
   Move Up: Supren
   Move Down: Malsupren
   Remove: Forigi
+  Background Tasks:
+    Loading videos from {playlistName}: 'Ŝargante videojn el {playlistName}'
+    Adding missing videos to {playlistName}: 'Aldonante mankantajn videojn al {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrolante {playlistName} pri nedisponeblaj videoj ({checked}/{total})'
 History:
   From Date: De
   To Date: Ĝis

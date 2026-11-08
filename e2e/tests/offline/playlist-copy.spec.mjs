@@ -146,33 +146,88 @@ test('a failed copy leaves no partial prompt and can be retried', async ({ page 
   await expect(page.getByRole('dialog')).toContainText('Select a playlist to add your 102 videos to')
 })
 
-test('copying stays busy during pagination and navigation cancels the pending dialog', async ({ page }) => {
+async function holdContinuation(page) {
   let release
   const continuation = new Promise(resolve => { release = resolve })
   let started
   const continuationStarted = new Promise(resolve => { started = resolve })
+  let continuationRequests = 0
   await page.route(/\/api\/v1\/playlists\/fork-source\?/, async route => {
     if (new URL(route.request().url()).searchParams.has('page')) {
+      continuationRequests++
       started()
       await continuation
-      await route.fulfill({ json: response([video(100), video(101)]) })
+      await route.fulfill({ json: response([video(100), video(101)]) }).catch(() => {})
     } else {
       await route.fulfill({ json: response(Array.from({ length: 100 }, (_, index) => video(index))) })
     }
   })
+  return { release, continuationStarted, continuationRequests: () => continuationRequests }
+}
+
+test('the copy dialog opens while the playlist loads and the copy finishes after leaving the page', async ({ page }) => {
+  const { release, continuationStarted } = await holdContinuation(page)
   await openPlaylist(page)
   await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
   await continuationStarted
-  await expect(page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }))
-    .toHaveAttribute('aria-busy', 'true')
-  await expect(await openPlaylistMenuItem(page, 'Copy Playlist')).toBeDisabled()
-  await page.keyboard.press('Escape')
+  const addDialog = page.getByRole('dialog').filter({ hasText: 'Select a playlist to add your 102 videos to' })
+  await expect(addDialog).toBeVisible()
+  await expect(addDialog).toContainText('Fork video 0')
+  const progressToast = page.getByTestId('progress-toast')
+  await expect(progressToast).toContainText('Loading videos from Source playlist')
+  await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', /^98\.0\d*$/)
+
+  await addDialog.getByRole('button', { name: 'Create New Playlist', exact: true }).click()
+  const createDialog = page.getByRole('dialog').filter({ has: page.locator('.playlistNameInput') })
+  await createDialog.locator('input').fill('My copy')
+  await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
+  await addDialog.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
+  expect((await getCopy(page)).videos).toEqual([])
+
   await goTo(page, 'userplaylists')
+  release()
+  await expect.poll(async () => (await getCopy(page))?.videos.map(video => video.videoId))
+    .toEqual(Array.from({ length: 102 }, (_, index) => video(index).videoId))
+  await expect(progressToast).toHaveCount(0)
+  await expect(page.locator('.toast').filter({ hasText: 'Video(s) added to 1 playlist' })).toBeVisible()
+})
+
+test('the copy dialog shows the loaded videos once they arrive', async ({ page }) => {
+  const { release, continuationStarted } = await holdContinuation(page)
+  await page.evaluate(videos => window.$store.dispatch('addPlaylist', { playlistName: 'Full copy', protected: false, description: '', videos }),
+    Array.from({ length: 102 }, (_, index) => ({ videoId: video(index).videoId, title: `Fork video ${index}`, lengthSeconds: 60 })))
+  await openPlaylist(page)
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
+  await continuationStarted
+  const addDialog = page.getByRole('dialog')
+  await expect(addDialog).toContainText('and 99 more videos')
+  // A playlist chosen while the videos load is deselected once it turns out to contain all of them
+  await addDialog.getByText('Full copy', { exact: true }).click()
+  await expect(addDialog).toContainText('1 Selected')
+  release()
+  await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+  await expect(addDialog).toContainText('Select a playlist to add your 102 videos to')
+  await expect(addDialog).toContainText('and 99 more videos')
+  await expect(addDialog).toContainText('0 Selected')
+  await expect(addDialog.locator('.playlist-selector-container.disabled')).toContainText('Full copy')
+})
+
+test('closing the copy dialog while the playlist loads cancels the loading', async ({ page }) => {
+  const { release, continuationStarted, continuationRequests } = await holdContinuation(page)
+  await openPlaylist(page)
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
+  await continuationStarted
+  await expect(page.getByTestId('progress-toast')).toBeVisible()
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByTestId('progress-toast')).toHaveCount(0)
   const finished = page.waitForResponse(response => response.url().includes('/playlists/fork-source?') && response.url().includes('page=2'))
   release()
   await finished
   await expect(page.getByRole('dialog')).toHaveCount(0)
+  expect(continuationRequests()).toBe(1)
+  await expect(page.locator('.toast').filter({ hasText: 'This playlist could not be loaded.' })).toHaveCount(0)
 })
 
 test('adds every page of a remote playlist to the queue in order', async ({ page }) => {

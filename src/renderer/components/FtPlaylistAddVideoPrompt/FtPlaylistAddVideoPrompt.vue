@@ -250,13 +250,18 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<{ videoId: string, [key: string]: any }[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
-const toBeAddedToPlaylistVideoCount = computed(() => toBeAddedToPlaylistVideoList.value.length)
+/** @type {import('vue').ComputedRef<{ promise: Promise<object[] | null>, videoCount: number, previewVideos: object[] } | null>} */
+const pendingVideos = computed(() => store.getters.getToBeAddedToPlaylistPendingVideos)
+
+// While the videos load, the prompt shows the count and preview of the playlist they come from
+const toBeAddedToPlaylistVideoCount = computed(() => pendingVideos.value?.videoCount ?? toBeAddedToPlaylistVideoList.value.length)
 
 // Phones only preview one video, so the playlists keep enough room
 const maxPreviewVideos = computed(() => phoneLayout.value ? 1 : 3)
 
 const previewVideos = computed(() => {
-  return toBeAddedToPlaylistVideoList.value.slice(0, maxPreviewVideos.value).map((video) => ({
+  const videos = pendingVideos.value?.previewVideos ?? toBeAddedToPlaylistVideoList.value
+  return videos.slice(0, maxPreviewVideos.value).map((video) => ({
     title: video.title,
     author: video.author,
     thumbnail: getVideoThumbnailUrl(video.videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
@@ -345,6 +350,8 @@ const getPlaylistIdsFiltered = (filter) => {
   const ids = new Set()
 
   const toBeAddedToPlaylistVideoIdList_ = toBeAddedToPlaylistVideoIdList.value
+  // Nothing is known about videos that are still loading
+  if (toBeAddedToPlaylistVideoIdList_.length === 0) return ids
 
   allPlaylists.value.forEach((playlist) => {
     const playlistVideoIdSet = playlist.videos.reduce((s, v) => s.add(v.videoId), new Set())
@@ -426,7 +433,8 @@ watch(showingCreatePlaylistPrompt, (val) => {
   }
 })
 
-watch(addingDuplicateVideosEnabled, (val) => {
+// Videos that finish loading can disable playlists selected in the meantime
+watch([addingDuplicateVideosEnabled, toBeAddedToPlaylistVideoList], ([val]) => {
   if (!val) {
     // Only care when addingDuplicateVideosEnabled disabled
     // Remove disabled playlists
@@ -457,7 +465,6 @@ const saving = ref(false)
 
 async function addSelectedToPlaylists() {
   if (saving.value) return
-  const addedPlaylistIds = new Set()
 
   if (selectedPlaylistIdList.value.length === 0) {
     showToast({
@@ -467,63 +474,83 @@ async function addSelectedToPlaylists() {
     return
   }
 
+  const playlistIds = [...selectedPlaylistIdList.value]
+  const allowDuplicates = addingDuplicateVideosEnabled.value
+  const pending = pendingVideos.value
+  if (pending) {
+    // Hand the loading videos over to the save, so closing the prompt does not cancel them
+    store.commit('setToBeAddedToPlaylistPendingVideos', null)
+    hide()
+    const videos = await pending.promise
+    if (videos) await addVideosToPlaylists(playlistIds, videos, allowDuplicates)
+    return
+  }
+
   saving.value = true
   try {
-    const allPlaylists_ = allPlaylists.value
-    const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
-    const allowDuplicates = addingDuplicateVideosEnabled.value
-    const failedPlaylistNames = []
-
-    for (const selectedPlaylistId of [...selectedPlaylistIdList.value]) {
-      const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-      if (playlist == null) {
-        failedPlaylistNames.push(null)
-        continue
-      }
-
-      let videosToBeAdded
-
-      if (!allowDuplicates) {
-        const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-        videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
-      } else {
-        // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-        videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
-      }
-
-      if (videosToBeAdded.length === 0) continue
-
-      const saved = await store.dispatch('addVideos', {
-        _id: playlist._id,
-        videos: videosToBeAdded,
-      })
-      if (saved) addedPlaylistIds.add(playlist._id)
-      else failedPlaylistNames.push(playlist.playlistName)
-    }
-
-    if (addedPlaylistIds.size > 0) {
-      showToast({
-        message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-          playlistCount: addedPlaylistIds.size,
-        }, addedPlaylistIds.size),
-        // Show the thumbnail when a single video was added
-        image: toBeAddedToPlaylistVideoList_.length === 1
-          ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
-          : null,
-        icon: ['fac', 'playlist-check'],
-      })
-    }
-    for (const playlistName of failedPlaylistNames) {
-      const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
-      showToast({
-        message: playlistName == null ? message : `${playlistName}: ${message}`,
-        icon: ['fas', 'circle-exclamation'],
-      })
-    }
-
+    await addVideosToPlaylists(playlistIds, toBeAddedToPlaylistVideoList.value, allowDuplicates)
     hide()
   } finally {
     saving.value = false
+  }
+}
+
+/**
+ * Runs after the prompt has closed when the videos were still loading, so it
+ * only relies on the store.
+ * @param {string[]} playlistIds
+ * @param {object[]} videos
+ * @param {boolean} allowDuplicates
+ */
+async function addVideosToPlaylists(playlistIds, videos, allowDuplicates) {
+  const addedPlaylistIds = new Set()
+  const failedPlaylistNames = []
+
+  for (const playlistId of playlistIds) {
+    const playlist = store.getters.getPlaylist(playlistId)
+    if (playlist == null) {
+      failedPlaylistNames.push(null)
+      continue
+    }
+
+    let videosToBeAdded
+
+    if (!allowDuplicates) {
+      const playlistVideoIds = new Set(playlist.videos.map((v) => v.videoId))
+      videosToBeAdded = videos.filter((v) => !playlistVideoIds.has(v.videoId))
+    } else {
+      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
+      videosToBeAdded = videos.slice()
+    }
+
+    if (videosToBeAdded.length === 0) continue
+
+    const saved = await store.dispatch('addVideos', {
+      _id: playlist._id,
+      videos: videosToBeAdded,
+    })
+    if (saved) addedPlaylistIds.add(playlist._id)
+    else failedPlaylistNames.push(playlist.playlistName)
+  }
+
+  if (addedPlaylistIds.size > 0) {
+    showToast({
+      message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
+        playlistCount: addedPlaylistIds.size,
+      }, addedPlaylistIds.size),
+      // Show the thumbnail when a single video was added
+      image: videos.length === 1
+        ? getVideoThumbnailUrl(videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
+        : null,
+      icon: ['fac', 'playlist-check'],
+    })
+  }
+  for (const playlistName of failedPlaylistNames) {
+    const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
+    showToast({
+      message: playlistName == null ? message : `${playlistName}: ${message}`,
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 }
 

@@ -261,6 +261,10 @@ User Playlists:
   Move Up: Ylös
   Move Down: Alas
   Remove: Poista
+  Background Tasks:
+    Loading videos from {playlistName}: 'Ladataan videoita soittolistasta {playlistName}'
+    Adding missing videos to {playlistName}: 'Lisätään puuttuvia videoita soittolistaan {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Tarkistetaan soittolistan {playlistName} saatavuutta ({checked}/{total})'
 History:
   From Date: 'Alkaen'
   To Date: 'Asti'

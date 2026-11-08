@@ -266,6 +266,10 @@ User Playlists:
   Move Up: Нагоре
   Move Down: Надоле
   Remove: Уклони
+  Background Tasks:
+    Loading videos from {playlistName}: 'Учитавање видео-снимака са {playlistName}'
+    Adding missing videos to {playlistName}: 'Додавање недостајућих видео-снимака у {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Провера недоступних видео-снимака у {playlistName} ({checked}/{total})'
 History:
   From Date: 'Од'
   To Date: 'До'
