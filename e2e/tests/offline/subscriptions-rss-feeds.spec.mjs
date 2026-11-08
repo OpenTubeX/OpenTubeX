@@ -431,6 +431,25 @@ test.describe('with followed feeds', () => {
     await expect(banner).toHaveText('1 feed could not be refreshed.')
   })
 
+  test('spaces the refresh error banner evenly between the header and the items @scale', async ({ page }) => {
+    await mockFeeds(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.locator('.errorBanner')).toBeVisible()
+    await expect(panel.locator('.ft-list-item')).toHaveCount(2)
+
+    const { above, below } = await page.evaluate(() => {
+      const header = document.querySelector('.subscriptionsHeader').getBoundingClientRect()
+      const banner = document.querySelector('#subscriptionsPanel .errorBanner').getBoundingClientRect()
+      // The item's padding is empty space, so measure to its content
+      const content = document.querySelector('#subscriptionsPanel .ft-list-item > *').getBoundingClientRect()
+      return { above: banner.top - header.bottom, below: content.top - banner.bottom }
+    })
+    expect(above).toBeGreaterThan(0)
+    expect(Math.abs(above - below)).toBeLessThan(1)
+  })
+
   test('shows the empty state after dismissing the errors of every feed', async ({ page }) => {
     await mockFeeds(page)
     await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
