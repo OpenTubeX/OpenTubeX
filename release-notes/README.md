@@ -42,7 +42,7 @@ Name the file after the change in kebab-case, for example `queue-video-details.m
 
 ## Front matter
 
-- `category`: `highlight`, `improvement`, or `fix`. Highlights lead the release, so keep them to two or three changes most users will care about.
+- `category`: `highlight`, `feature`, `improvement`, or `fix`. Highlights lead the release, so keep them to two or three changes most users will care about. Use `feature` for new features, settings, and options, and `improvement` for changes to existing ones.
 - `platforms` (optional): any of `android`, `ios`, `linux`, `macos`, `windows`, and `desktop`. Leave it out when the change affects every platform. The update prompt in the app and the store listings skip notes for other platforms.
 - `references` (optional): issue and pull request numbers, for example `[2509]`. They replace the references from the pull requests that changed the file, for notes added after their change merged.
 

@@ -77,7 +77,7 @@ test('release note cleanup removes promotional and image content', () => {
 - Use the <kbd>Ctrl</kbd> key. ![Screenshot](screenshot.png)
   <img alt="image" src="image.webp">
 
-## More improvements
+## Improvements
 
 - Read [the guide](https://example.com).
   image
@@ -87,7 +87,7 @@ test('release note cleanup removes promotional and image content', () => {
 
 - Use the Ctrl key.
 
-More improvements
+Improvements
 
 - Read the guide.`)
 })

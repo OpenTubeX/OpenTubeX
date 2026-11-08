@@ -441,7 +441,7 @@ test('release notes for other platforms are hidden', async ({ page }) => {
       '',
       '- **Android, iOS:** Mobile highlight. (#1)',
       '',
-      '## More improvements',
+      '## Improvements',
       '',
       '- Shared improvement. (#2)',
       '- **Desktop:** Desktop improvement. (#3)',
@@ -450,7 +450,7 @@ test('release notes for other platforms are hidden', async ({ page }) => {
     ].join('\n'))
   ])
 
-  await expect(page.locator('.changeLogText h2')).toHaveText(['More improvements'])
+  await expect(page.locator('.changeLogText h2')).toHaveText(['Improvements'])
   await expect(page.locator('.changeLogText li')).toHaveText([
     'Shared improvement. (#2)',
     'Desktop: Desktop improvement. (#3)'
