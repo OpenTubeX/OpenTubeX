@@ -839,7 +839,7 @@ Settings:
     Enable Skip Silence by Default: Aktifkan Lewati Bagian Hening Secara Bawaan
     Enable Video Zoom: Aktifkan Zoom Video
     Enable Seek History: Aktifkan Riwayat Lompatan
-    Show Seek Bar Filmstrip: "Tampilkan strip bingkai bilah pencarian"
+    Show Seek Bar Filmstrip: "Tampilkan strip bingkai bilah progres"
     Voice-over Translation:
       Title: Terjemahan sulih suara
       Attribution: (didukung oleh Yandex)
@@ -2178,7 +2178,7 @@ Tooltips:
     Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.
-    Show Seek Bar Filmstrip: "Menyeret kenop bilah pencarian menampilkan strip bingkai di sekitar tempat tujuan Anda, dan menarik ke atas ke strip tersebut memungkinkan pencarian secara presisi. Jika dinonaktifkan, menyeret hanya menampilkan satu gambar mini, seperti saat mengarahkan kursor."
+    Show Seek Bar Filmstrip: "Menyeret kenop bilah progres menampilkan strip bingkai di sekitar tempat tujuan Anda, dan menarik ke atas ke strip tersebut memungkinkan pencarian secara presisi. Jika dinonaktifkan, menyeret hanya menampilkan satu gambar mini, seperti saat mengarahkan kursor."
     Voice-over Translation: Mengirim ID video, durasi, dan bahasa yang dipilih ke layanan tidak resmi terjemahan sulih suara Yandex saat Anda meminta terjemahan. Nonaktif secara bawaan.
     Hold to Double Playback Speed: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk menggandakan sementara kecepatan pemutaran saat ini.
     Ambient Mode: Memadukan warna video dengan area di sekitar pemutar.
