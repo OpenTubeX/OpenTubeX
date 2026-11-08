@@ -42,6 +42,11 @@ export default {
       [/:global\((?:[^()]|\([^()]*\))*\)\s*[^\s,]/],
       { splitList: true, message: 'Write `.a .b` instead of `:global(.a) .b`; Vue drops the selector after :global(...)' }
     ],
+    // Chromium 119, the WebView our Android 8 tests use, can crash the renderer on these.
+    'declaration-property-value-disallowed-list': [
+      { '/.*/': [/\bfrom\s+color-mix\(/] },
+      { message: 'Mix relative colors instead of taking a relative color of a color-mix(); Chromium 119 can crash on it' }
+    ],
     'a11y/no-outline-none': true,
     'liberty/use-logical-spec': ['always']
   }

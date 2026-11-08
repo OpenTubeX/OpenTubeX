@@ -90,7 +90,10 @@ body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false'
 
 /* stylelint-disable-next-line selector-no-qualifying-type */
 body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false']), .selected) > .ft-icon {
-  color: var(--destructive-icon-color, oklch(from color-mix(in oklab, var(--destructive-color) 40%, var(--primary-text-color)) l 0.18 29deg));
+  /* Mixing two relative colors equals a relative color of their mix here, since
+     both share chroma and hue. Chromium 119 (Android 8's WebView) can crash the
+     renderer on a relative color whose origin is a color-mix(). */
+  color: var(--destructive-icon-color, color-mix(in oklch, oklch(from var(--destructive-color) l 0.18 29deg) 40%, oklch(from var(--primary-text-color) l 0.18 29deg)));
 }
 
 .btn.variant-elevated {

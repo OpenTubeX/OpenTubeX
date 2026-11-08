@@ -104,8 +104,10 @@ body {
   --destructive-active-color: #c62828;
 
   /* Error text keeps most of the text color's lightness, so it stays readable
-     on every surface, and takes a red hue (the default destructive red's). */
-  --error-text-color: oklch(from color-mix(in oklab, var(--destructive-color) 20%, var(--primary-text-color)) l 0.14 29deg);
+     on every surface, and takes a red hue (the default destructive red's).
+     Mixed from two relative colors, because Chromium 119 can crash on a
+     relative color whose origin is a color-mix(); the result is the same. */
+  --error-text-color: color-mix(in oklch, oklch(from var(--destructive-color) l 0.14 29deg) 20%, oklch(from var(--primary-text-color) l 0.14 29deg));
   --members-only-color: #1b7331;
   --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
