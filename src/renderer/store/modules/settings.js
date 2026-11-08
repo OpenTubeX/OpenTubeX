@@ -1097,13 +1097,21 @@ const customActions = {
 
       // Auto Load Next Page used to control comments too, so they keep its value.
       // Saving it settles the choice, so a later change to Auto Load Next Page is
-      // not copied. Not dispatched, so it does not count as an edit for sync.
+      // not copied. For sync, the copy keeps the edit time of Auto Load Next Page
+      // instead of counting as a new edit, so a newer choice from another device wins.
       if (!userSettings.some(entry => entry._id === 'autoLoadComments')) {
         const autoLoadComments = userSettings.find(
           entry => entry._id === 'generalAutoLoadMorePaginatedItemsEnabled'
         )?.value !== false
         commit('setAutoLoadComments', autoLoadComments)
         await DBSettingHandlers.upsert('autoLoadComments', autoLoadComments)
+        const editTimes = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')?.value
+        const editedAt = editTimes?.generalAutoLoadMorePaginatedItemsEnabled
+        if (typeof editedAt === 'number') {
+          const updatedAt = { ...editTimes, autoLoadComments: editedAt }
+          await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
+          commit('setSyncServerSettingUpdatedAt', updatedAt)
+        }
       }
 
       if (legacyHideAiVideoSummariesEntry) {

@@ -511,3 +511,52 @@ test('a failed control bar migration retries on the next launch', async () => {
   assert.deepEqual([...stored.controlBarButtons], ['chapters', 'screenshot', 'menu'])
   assert.equal(stored.controlBarButtonsMigration, true)
 })
+
+const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
+const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
+
+/** @param {Record<string, unknown>} stored */
+async function migrateAutoLoadComments(stored) {
+  const commits = {}
+  await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
+  })()`, {
+    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+    commit: (mutation, value) => { commits[mutation] = value },
+    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+  })
+  // Objects from the script's context have another realm's prototype.
+  return JSON.parse(JSON.stringify({ stored, commits }))
+}
+
+test('startup copies Auto Load Next Page to comments with its sync edit time', async () => {
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5 },
+  }), {
+    stored: {
+      generalAutoLoadMorePaginatedItemsEnabled: false,
+      autoLoadComments: false,
+      syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5, autoLoadComments: 20 },
+    },
+    commits: {
+      setAutoLoadComments: false,
+      setSyncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20, baseTheme: 5, autoLoadComments: 20 },
+    },
+  })
+
+  // Without a recorded edit, the copy is not an edit either.
+  assert.deepEqual(await migrateAutoLoadComments({}), {
+    stored: { autoLoadComments: true },
+    commits: { setAutoLoadComments: true },
+  })
+
+  // A saved choice is never replaced.
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    stored: { generalAutoLoadMorePaginatedItemsEnabled: false, autoLoadComments: true },
+    commits: {},
+  })
+})
