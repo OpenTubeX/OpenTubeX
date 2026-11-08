@@ -521,3 +521,22 @@ test('keeping a profile the server lost restores its channels', async () => {
   assert.deepEqual(Array.from(group.channels, item => item.id), [channel.id])
   assert.deepEqual(Array.from(store.state.profiles.profileList[1].subscriptions, item => item.id), [channel.id])
 })
+
+test('retrying an interrupted playlist restoration keeps its videos', async () => {
+  // The first attempt recreated the playlist on the server, then failed before uploading its video.
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylist({ id: playlist._id, title: playlist.playlistName, description: '' })
+  const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [structuredClone(playlist)] } },
+    dispatch: async (action, value) => {
+      assert.equal(action, 'updatePlaylistFromSync')
+      store.state.playlists.playlists = [value.playlist]
+      return true
+    },
+  }
+  await context.syncPlaylists(adapter, store, previous, { deletions: { playlists: { kept: [playlist._id] } } })
+  assert.deepEqual(Array.from((await adapter.getPlaylist(playlist._id)).videos, item => item.id), [video.videoId])
+  assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, item => item.videoId), [video.videoId])
+})

@@ -907,8 +907,11 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     let local = localById.get(id)
     let remote = remoteById.get(id)
     // A playlist missing on one side is new there or restored from a kept
-    // deletion. Its videos are all additions, not deletions.
-    const previousVideos = local && remote ? previous[id]?.videos : []
+    // deletion. Its videos are all additions, not deletions, also when a
+    // retry finds a restoration that stopped halfway.
+    const previousVideos = local && remote && !options.deletions?.playlists?.kept?.includes(id)
+      ? previous[id]?.videos
+      : []
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
     const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
     if (metadata.custom_thumbnail) {
@@ -1222,8 +1225,11 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const local = localById.get(id)
     let remote = remoteById.get(id)
     // A profile missing on one side is new there or restored from a kept
-    // deletion. Its channels are all additions, not deletions.
-    const previousChannels = local && remote ? previous[id]?.channels : []
+    // deletion. Its channels are all additions, not deletions, also when a
+    // retry finds a restoration that stopped halfway.
+    const previousChannels = local && remote && !options.deletions?.profiles?.kept?.includes(id)
+      ? previous[id]?.channels
+      : []
     const oldMetadata = previous[id]?.metadata
     const localMetadata = local ? profileMetadata(local, oldMetadata) : null
     const remoteMetadata = remote
