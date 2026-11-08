@@ -350,7 +350,7 @@ export async function readClipboard() {
  * This writes to the clipboard. If an error occurs during the copy,
  * a toast with the error is shown. If the copy is successful and
  * there is a success message, a toast with that message is shown.
- * @param {string|Blob} content the content to be copied to the clipboard (text or image Blob)
+ * @param {string|Error|Blob} content the content to be copied to the clipboard (text, an error copied as its message, or an image Blob)
  * @param {object} [options] - Optional settings for the copy operation.
  * @param {null|string} options.messageOnSuccess the message to be displayed as a toast when the copy succeeds (optional)
  * @param {null|string} options.messageOnError the message to be displayed as a toast when the copy fails (optional)
@@ -363,7 +363,8 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
         if (content instanceof Blob) {
           await Clipboard.write({ image: await blobToDataUrl(content), label: 'OpenTubeX' })
         } else {
-          await Clipboard.write({ text: content, label: 'OpenTubeX' })
+          // The native bridge serializes options as JSON, which turns non-string values such as errors into {}
+          await Clipboard.write({ text: String(content), label: 'OpenTubeX' })
         }
       } else if (content instanceof Blob) {
         await navigator.clipboard.write([

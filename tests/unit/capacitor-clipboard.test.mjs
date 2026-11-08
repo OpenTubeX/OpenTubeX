@@ -113,3 +113,21 @@ test('reads native URL clipboard entries as text', async () => {
   const { readClipboard } = loadClipboard({ read: async () => ({ type: 'URL', value: 'https://youtu.be/example' }) })
   assert.equal(await readClipboard(), 'https://youtu.be/example')
 })
+
+test('copies errors as their message text through the native bridge', async () => {
+  const writes = []
+  const toasts = []
+  // The Capacitor bridge serializes plugin options as JSON, which turns an Error into {}
+  const { copyToClipboard } = loadClipboard({
+    write: async options => {
+      const sent = JSON.parse(JSON.stringify(options))
+      if (typeof sent.text !== 'string') throw new Error('One of text, html, image or url must be provided.')
+      writes.push(sent)
+    },
+  }, toasts)
+
+  await copyToClipboard(new Error('Request failed'))
+
+  assert.deepEqual(writes, [{ text: 'Error: Request failed', label: 'OpenTubeX' }])
+  assert.deepEqual(toasts, [])
+})
