@@ -35,15 +35,16 @@
   cursor: pointer;
 }
 
-.notificationEntry:hover,
-.notificationEntry:focus-visible {
+/* Highlight the whole row, including the action column beside the entry. */
+.notificationRow:hover,
+.notificationRow:has(.notificationEntry:focus-visible) {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
 }
 
-.notificationRow.unread .notificationEntry:hover,
-.notificationRow.unread .notificationEntry:focus-visible {
-  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+.notificationRow.unread:hover,
+.notificationRow.unread:has(.notificationEntry:focus-visible) {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
   color: inherit;
 }
 
@@ -75,10 +76,10 @@
   cursor: pointer;
 }
 
+/* Translucent so it stands out on the row's hover background. */
 .entryAction:hover,
 .entryAction:focus-visible {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+  background-color: color-mix(in srgb, currentcolor 12%, transparent);
 }
 
 .notificationKind {
@@ -150,6 +151,12 @@
 .notificationText time {
   color: var(--secondary-text-color);
   font-size: 12px;
+}
+
+/* Secondary text can match the hover background, as in Hot Pink. */
+.notificationRow:hover :is(.entryAction, .notificationKind, .notificationText time),
+.notificationRow:has(.notificationEntry:focus-visible) :is(.entryAction, .notificationKind, .notificationText time) {
+  color: inherit;
 }
 
 .notificationsEmpty {

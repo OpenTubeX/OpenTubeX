@@ -13,18 +13,18 @@ const shortcutModifier = process.platform === 'darwin' ? 'Meta' : 'Control'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
 
-test.use({
-  seed: {
-    settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
-    profiles: [{
-      _id: 'allChannels',
-      name: 'All Channels',
-      bgColor: '#000000',
-      textColor: '#FFFFFF',
-      subscriptions: [{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos', 'shorts', 'live', 'posts'] }]
-    }]
-  }
-})
+const seed = {
+  settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
+  profiles: [{
+    _id: 'allChannels',
+    name: 'All Channels',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions: [{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos', 'shorts', 'live', 'posts'] }]
+  }]
+}
+
+test.use({ seed })
 
 /**
  * Replaces system notifications with a record of them, and decides whether the
@@ -216,6 +216,51 @@ test('read notifications can be cleared one at a time', async ({ app, page }) =>
   await expect.poll(async () => (await page.evaluate(() => window.ftElectron.notificationHistory.list())).map(entry => entry.body))
     .toStrictEqual([`Upload ${first}`])
 })
+
+// Hot Pink turns hovered rows white, the color of its icons and secondary text.
+for (const baseTheme of ['system', 'hotPink']) {
+  test.describe(`${baseTheme} theme`, () => {
+    test.use({ seed: { ...seed, settings: { ...seed.settings, baseTheme } } })
+
+    test('hovering a notification highlights its whole row, and its action on top', { tag: '@scale' }, async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await mockSystemNotifications(app)
+      await announceUploads(page, ['b', 'a'])
+
+      await page.getByRole('button', { name: 'Notifications (2 unread)', exact: true }).click()
+      const dropdown = page.locator('.notificationCenterDropdown')
+      await dropdown.getByRole('button', { name: 'Mark as read', exact: true }).first().click()
+      await expect(dropdown.getByRole('button', { name: 'Clear', exact: true })).toHaveCount(1)
+      const style = (locator) => locator.evaluate(element => {
+        const { backgroundColor, color } = getComputedStyle(element)
+        return { backgroundColor, color }
+      })
+
+      // One read and one unread row.
+      for (const row of await dropdown.locator('.notificationRow').all()) {
+        const action = row.locator('.entryAction')
+        await page.mouse.move(0, 0)
+        const idle = await style(row)
+        const rowBox = await row.boundingBox()
+        const actionBox = await action.boundingBox()
+        // The action column below the button belongs to the row's hover area.
+        expect(rowBox.y + rowBox.height - (actionBox.y + actionBox.height)).toBeGreaterThan(8)
+        await page.mouse.move(actionBox.x + actionBox.width / 2, rowBox.y + rowBox.height - 4)
+        const hovered = await style(row)
+        expect(hovered.backgroundColor).not.toBe(idle.backgroundColor)
+        const actionStyle = await style(action)
+        expect(actionStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        expect(actionStyle.color).not.toBe(hovered.backgroundColor)
+        expect((await style(row.locator('time'))).color).not.toBe(hovered.backgroundColor)
+
+        // The action keeps a highlight of its own over the row's.
+        await action.hover()
+        expect((await style(row)).backgroundColor).toBe(hovered.backgroundColor)
+        expect((await style(action)).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+      }
+    })
+  })
+}
 
 test('the bell icon follows the notifications and wiggles for new ones', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
