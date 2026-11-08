@@ -198,25 +198,46 @@ final class AndroidProxyRelay implements AutoCloseable {
         }
     }
 
-    /** Clients answer the first 407 on the same connection, unless a request body follows it. */
+    /** Clients answer the first 407 on the same connection. A Content-Length body is
+     * discarded first, because Android 8 cannot retry a request with a body when the
+     * connection closes (its URLConnection then fails with a NullPointerException). */
     private String[] readAuthenticatedHeaders(Socket client) throws IOException {
+        InputStream input = client.getInputStream();
         for (int attempt = 0; attempt < 3; attempt++) {
-            String[] headers = readHeaders(client.getInputStream()).split("\r\n");
-            boolean hasBody = false;
+            String[] headers = readHeaders(input).split("\r\n");
+            // Only a single Content-Length body can be skipped. Chunked, ambiguous and
+            // 100-continue requests close, since their body cannot be found or never comes.
+            boolean close = false;
+            long length = -1;
             for (int i = 1; i < headers.length; i++) {
                 String[] header = headers[i].split(":", 2);
                 String name = header[0].trim().toLowerCase(Locale.ROOT);
                 String value = header.length == 2 ? header[1].trim() : "";
                 if (name.equals("proxy-authorization") &&
                     MessageDigest.isEqual(authorization, value.getBytes(StandardCharsets.US_ASCII))) return headers;
-                if (name.equals("transfer-encoding") || (name.equals("content-length") && !value.equals("0"))) hasBody = true;
+                if (name.equals("transfer-encoding") || name.equals("expect")) close = true;
+                if (name.equals("content-length")) {
+                    if (length >= 0) close = true;
+                    try { length = Long.parseLong(value); } catch (NumberFormatException error) { close = true; }
+                    if (length < 0) close = true;
+                }
             }
+            if (!close && length > 0) skipBytes(input, length);
             OutputStream output = client.getOutputStream();
             output.write(AUTHENTICATION_REQUIRED);
-            output.write((hasBody ? "Connection: close\r\n\r\n" : "\r\n").getBytes(StandardCharsets.US_ASCII));
-            if (hasBody) return null;
+            output.write((close ? "Connection: close\r\n\r\n" : "\r\n").getBytes(StandardCharsets.US_ASCII));
+            if (close) return null;
         }
         return null;
+    }
+
+    private static void skipBytes(InputStream input, long length) throws IOException {
+        byte[] buffer = new byte[8192];
+        while (length > 0) {
+            int count = input.read(buffer, 0, (int) Math.min(buffer.length, length));
+            if (count == -1) throw new EOFException();
+            length -= count;
+        }
     }
 
     static boolean isLoopbackName(String host) {

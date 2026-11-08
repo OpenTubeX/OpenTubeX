@@ -375,6 +375,43 @@ public class AndroidProxyIntegrationTest {
         }
     }
 
+    /** Android 8's URLConnection threw a NullPointerException when the relay's challenge
+     * for a plain HTTP request with a body closed the connection. */
+    @Test public void nativeHttpPostsPlainHttpBodiesThroughTheRelay() throws Exception {
+        AndroidProxy.ready().get(10, TimeUnit.SECONDS);
+        try (ServerSocket upstream = new ServerSocket(0, 20, InetAddress.getByName("127.0.0.1"))) {
+            AtomicReference<String> received = new AtomicReference<>();
+            Thread thread = new Thread(() -> {
+                try (Socket socket = upstream.accept()) {
+                    String headers = AndroidProxyRelay.readHeaders(socket.getInputStream());
+                    byte[] body = new byte[7];
+                    new java.io.DataInputStream(socket.getInputStream()).readFully(body);
+                    received.set(headers.split("\r\n", 2)[0] + " " + new String(body, StandardCharsets.US_ASCII));
+                    socket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+                        .getBytes(StandardCharsets.US_ASCII));
+                } catch (Exception ignored) { /* The assertions report a missing request. */ }
+            }, "test-upstream");
+            thread.setDaemon(true);
+            thread.start();
+            AndroidProxy.configure(new JSONObject().put("enabled", true).put("protocol", "http")
+                .put("hostname", "127.0.0.1").put("port", Integer.toString(upstream.getLocalPort()))
+                .put("username", "").put("password", ""));
+            HttpURLConnection connection = (HttpURLConnection) new URL("http://never-resolve.invalid/sync").openConnection();
+            try {
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(3000);
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.getOutputStream().write("payload".getBytes(StandardCharsets.US_ASCII));
+                assertEquals(200, connection.getResponseCode());
+                assertEquals("POST http://never-resolve.invalid/sync HTTP/1.1 payload", received.get());
+            } finally {
+                connection.disconnect();
+                AndroidProxy.configure(new JSONObject().put("enabled", false));
+            }
+        }
+    }
+
     @Test public void webViewFetchUsesProxyOverride() throws Exception {
         AndroidProxy.ready().get(10, TimeUnit.SECONDS);
         try (RecordingProxy proxy = new RecordingProxy()) {

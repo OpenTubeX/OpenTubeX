@@ -360,6 +360,52 @@ public class AndroidProxyRelayTest {
         }
     }
 
+    @Test public void challengedRequestBodiesKeepTheConnectionForTheAuthenticatedRetry() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+             Socket client = new Socket("127.0.0.1", relay.port())) {
+            client.setSoTimeout(3000);
+            CompletableFuture<String> upstream = CompletableFuture.supplyAsync(() -> {
+                try (Socket socket = destination.accept()) {
+                    String headers = AndroidProxyRelay.readHeaders(socket.getInputStream());
+                    String body = new String(socket.getInputStream().readNBytes(7), StandardCharsets.US_ASCII);
+                    socket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok".getBytes(StandardCharsets.US_ASCII));
+                    return headers.split("\r\n", 2)[0] + " " + body;
+                } catch (Exception error) { throw new RuntimeException(error); }
+            });
+            String request = "POST http://destination.test:" + destination.getLocalPort() + "/sync HTTP/1.1\r\nContent-Length: 7\r\n";
+            OutputStream output = client.getOutputStream();
+            output.write((request + "\r\npayload").getBytes(StandardCharsets.US_ASCII));
+            // Android 8's URLConnection loses the proxy route when the challenge closes the
+            // connection, so the relay must discard the body and keep the connection open.
+            String challenge = AndroidProxyRelay.readHeaders(client.getInputStream());
+            assertTrue(challenge, challenge.startsWith("HTTP/1.1 407"));
+            assertFalse(challenge, challenge.contains("Connection: close"));
+            output.write((request + "Proxy-Authorization: " + relay.authorizationHeader() + "\r\n\r\npayload")
+                .getBytes(StandardCharsets.US_ASCII));
+            assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
+            assertEquals("POST /sync HTTP/1.1 payload", upstream.get(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test public void challengedBodiesWithoutOneKnownLengthCloseTheConnection() throws Exception {
+        for (String body : new String[] {
+            "Transfer-Encoding: chunked\r\n\r\n7\r\npayload\r\n0\r\n\r\n",
+            "Content-Length: 7\r\nContent-Length: 0\r\n\r\npayload",
+            "Content-Length: 7\r\nExpect: 100-continue\r\n\r\n",
+        }) {
+            try (AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+                 Socket client = new Socket("127.0.0.1", relay.port())) {
+                client.setSoTimeout(3000);
+                client.getOutputStream().write(("POST http://destination.test/sync HTTP/1.1\r\n" + body).getBytes(StandardCharsets.US_ASCII));
+                String challenge = AndroidProxyRelay.readHeaders(client.getInputStream());
+                assertTrue(body + challenge, challenge.startsWith("HTTP/1.1 407"));
+                assertTrue(body + challenge, challenge.contains("Connection: close\r\n"));
+                assertEquals(body, -1, client.getInputStream().read());
+            }
+        }
+    }
+
     @Test public void loopbackDestinationsAreNeverProxied() throws Exception {
         try (ServerSocket destination = server();
              AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK)) {
