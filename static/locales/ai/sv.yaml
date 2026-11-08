@@ -1530,8 +1530,6 @@ Channel:
     Original post unavailable: "Det ursprungliga inlägget är inte tillgängligt"
     Members-only video hidden by OpenTubeX: "Video endast för medlemmar dold av OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video dold av OpenTubeX eftersom titeln innehåller dold text"
-  Shows:
-    This channel does not currently have any shows: Den här kanalen har för närvarande inga serier
 Video:
   Info panel source: 'Källa: {source}'
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."
