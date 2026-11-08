@@ -5,7 +5,8 @@ import {
   fetchReleasePages,
   findUpdateRelease,
   findUpdateReleases,
-  formatReleaseChangelog
+  formatReleaseChangelog,
+  scheduleUpdateChecks
 } from '../../src/renderer/helpers/releaseUpdates.js'
 
 const stableRelease = {
@@ -280,4 +281,31 @@ test('a single release changelog has no heading', () => {
   ]
 
   assert.equal(formatReleaseChangelog(releases), 'Patch release notes')
+})
+
+test('scheduleUpdateChecks repeats checks by wall-clock time', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const hour = 60 * 60 * 1000
+  const visibility = new EventTarget()
+  let checks = 0
+  const stop = scheduleUpdateChecks(() => { checks++ }, 6 * hour, visibility)
+
+  t.mock.timers.tick(6 * hour - 1)
+  visibility.dispatchEvent(new Event('visibilitychange'))
+  assert.equal(checks, 0)
+
+  t.mock.timers.tick(15 * 60 * 1000)
+  assert.equal(checks, 1)
+
+  // A suspended app's timers fall behind the clock, so becoming visible checks
+  t.mock.timers.setTime(Date.now() + 7 * hour)
+  visibility.dispatchEvent(new Event('visibilitychange'))
+  assert.equal(checks, 2)
+  visibility.dispatchEvent(new Event('visibilitychange'))
+  assert.equal(checks, 2)
+
+  stop()
+  t.mock.timers.tick(12 * hour)
+  visibility.dispatchEvent(new Event('visibilitychange'))
+  assert.equal(checks, 2)
 })

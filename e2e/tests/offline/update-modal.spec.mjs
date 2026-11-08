@@ -40,7 +40,7 @@ async function showUpdateNotification(page, releases) {
     body: JSON.stringify(releases)
   }))
 
-  // The update check only runs at startup, so enable it and reload. The route
+  // The first update check runs at startup, so enable it and reload. The route
   // above stays installed across the reload, so no request ever leaves.
   await goTo(page, 'settings')
   const updateToggle = page.locator('.switch-ctn', { hasText: 'Check for Updates' })
@@ -237,6 +237,36 @@ test('closing the release notes restores the update notification', async ({ page
   await page.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(page.locator('.changeLogTitle')).toHaveCount(0)
   await expect(notification).toBeVisible()
+})
+
+test('periodic update checks keep one notification for the newest release', async ({ page }) => {
+  const releases = [
+    release(`OpenTubeX ${olderUpdateVersion}`, `v${olderUpdateVersion}-beta`, '- Older change')
+  ]
+  const notification = await showUpdateNotification(page, releases)
+  await expect(notification).toContainText(olderUpdateVersion)
+
+  let requests = 0
+  await page.route(RELEASES_URL, (route) => {
+    requests++
+    return route.fallback()
+  })
+  // Move the clock past the six-hour interval; becoming visible runs a due check.
+  const recheck = () => page.evaluate(() => {
+    const now = Date.now()
+    Date.now = () => now + 7 * 60 * 60 * 1000
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+
+  await recheck()
+  await expect.poll(() => requests).toBe(1)
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+
+  releases.unshift(release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES))
+  await recheck()
+  await expect(page.locator('.toast', { hasText: `Version ${newestUpdateVersion} is now available` })).toBeVisible()
+  // A duplicate from the first recheck or the older toast would remain here
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
 })
 
 test('a single update shows its version once and renders the release notes', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
