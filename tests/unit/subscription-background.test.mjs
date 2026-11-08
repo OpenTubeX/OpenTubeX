@@ -149,6 +149,19 @@ test('background scheduling respects deadlines, deduplicates channels, and exclu
   assert.equal(fetched.length, 3)
 })
 
+test('profiles sharing a channel get one fetch time, so the app imports it once', async () => {
+  let now = 100
+  const saved = []
+  const scheduler = createSubscriptionBackgroundScheduler({ now: () => now++, fetchChannel: async () => ({ videos: [] }), saveResult: async result => saved.push(result) })
+  scheduler.configure(configuration())
+  await scheduler.setBackground(true)
+  now = 1000
+  await scheduler.tick()
+  const shared = saved.filter(result => result.kind === 'channel' && result.channelId === 'UC1')
+  assert.deepEqual(shared.map(result => result.profileId).sort(), ['all', 'custom'])
+  assert.equal(shared[0].timestamp, shared[1].timestamp)
+})
+
 test('reopening waits for cancellation and does not save an aborted response or completion', async () => {
   let now = 0
   const resolveFetches = []

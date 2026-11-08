@@ -65,6 +65,12 @@ public final class BackgroundSyncWorker extends Worker {
         if (getInputData().getBoolean(REQUEST_SYNC_INPUT, false)) {
             // The visible renderer schedules its own syncs.
             if (AppVisibility.isVisible()) return Result.success();
+            // Without a renderer, this process was started for the job and cannot sync.
+            // The next renderer schedules the job again once it starts automatic sync.
+            if (!BackgroundSyncPlugin.isLoaded()) {
+                WorkManager.getInstance(context).cancelUniqueWork(PERIODIC_WORK);
+                return Result.success();
+            }
             keeper = BackgroundSync.claimKeeper();
             hold = BackgroundSyncPlugin.requestSync(context);
         }

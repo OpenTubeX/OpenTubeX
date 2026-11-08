@@ -14,10 +14,16 @@ final class SubscriptionRefreshNotification {
     static final String CHANNEL_ID = OpenTubeXNotificationChannels.SUBSCRIPTION_REFRESH_ID;
     static final int NOTIFICATION_ID = 0x53554253;
 
+    // Progress rebuilds this notification often; register the channels once per process.
+    private static volatile boolean channelsCreated;
+
     private SubscriptionRefreshNotification() {}
 
     static Notification build(Context context, String token, String title, String cancelLabel, int progress) {
-        OpenTubeXNotificationChannels.createAll(context);
+        if (!channelsCreated) {
+            OpenTubeXNotificationChannels.createAll(context);
+            channelsCreated = true;
+        }
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, CHANNEL_ID)
             : new Notification.Builder(context);

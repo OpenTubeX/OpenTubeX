@@ -19,6 +19,10 @@ public class BackgroundSyncPlugin extends Plugin {
         active = new WeakReference<>(this);
     }
 
+    static boolean isLoaded() {
+        return active.get() != null;
+    }
+
     /** Asks the renderer to sync, returning the hold it releases afterwards. */
     static String requestSync(Context context) {
         BackgroundSyncPlugin plugin = active.get();
