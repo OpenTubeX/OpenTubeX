@@ -1,16 +1,81 @@
 .notificationList {
+  --notification-gap: 4px;
+  --dismiss-direction: 1;
+
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--notification-gap);
   margin: 0;
   padding: 4px;
+
+  /* Dismissed rows slide out without adding a horizontal scroll range. */
+  overflow-x: clip;
   list-style: none;
+}
+
+.notificationList:dir(rtl) {
+  --dismiss-direction: -1;
 }
 
 .notificationRow {
   display: flex;
   align-items: flex-start;
   border-radius: var(--shape-corner-medium);
+}
+
+/* A dismissed row slides out, then closes its gap so the rows below move up. */
+.notificationRow-leave-active {
+  min-block-size: 0;
+  overflow: clip;
+  interpolate-size: allow-keywords;
+  animation: notification-dismiss var(--motion-slow-effects) both;
+}
+
+@keyframes notification-dismiss {
+  50% {
+    block-size: auto;
+    margin-block-end: 0;
+    opacity: 0;
+    translate: calc(100% * var(--dismiss-direction)) 0;
+  }
+
+  100% {
+    block-size: 0;
+    margin-block-end: calc(-1 * var(--notification-gap));
+    opacity: 0;
+    translate: calc(100% * var(--dismiss-direction)) 0;
+  }
+}
+
+/* Clearing every row slides them out together before the empty state fades in. */
+.notificationList-leave-active {
+  animation: notification-list-dismiss var(--motion-default-effects) both;
+}
+
+.notificationList-leave-active > .notificationRow {
+  animation: notification-list-row-dismiss var(--motion-default-effects) both;
+}
+
+@keyframes notification-list-dismiss {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes notification-list-row-dismiss {
+  to {
+    translate: calc(100% * var(--dismiss-direction)) 0;
+  }
+}
+
+.notificationsEmpty.notificationList-enter-active {
+  animation: notification-empty-enter var(--motion-default-effects) both;
+}
+
+@keyframes notification-empty-enter {
+  from {
+    opacity: 0;
+  }
 }
 
 .notificationRow.unread {
