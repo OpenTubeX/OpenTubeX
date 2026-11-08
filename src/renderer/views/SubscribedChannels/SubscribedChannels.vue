@@ -11,11 +11,10 @@
         </h2>
       </div>
       <div
-        v-if="activeProfileSubscriptions.length > 0"
+        v-if="activeProfileSubscriptions.length > 1"
         class="controls"
       >
         <ft-input
-          v-show="activeProfileSubscriptions.length > 1"
           ref="searchBarChannels"
           class="channelSearch"
           input-type="search"
@@ -28,7 +27,6 @@
           @input="handleQueryChange"
         />
         <FtSelect
-          v-if="activeProfileSubscriptions.length > 1"
           class="sortSelect"
           :value="sortBy"
           :select-names="sortByNames"

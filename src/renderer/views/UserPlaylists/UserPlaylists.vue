@@ -34,23 +34,19 @@
             />
           </div>
         </div>
-        <div
+        <FtInput
           v-if="fullData.length > 1"
-          class="searchInputsRow"
-        >
-          <FtInput
-            ref="searchBar"
-            class="playlistSearch"
-            input-type="search"
-            :label="$t('User Playlists.Search bar placeholder')"
-            :icon="['fas', 'search']"
-            :placeholder="$t('Form Inputs.Search Text Hint')"
-            :value="query"
-            :show-action-button="false"
-            :maxlength="255"
-            @input="handleQueryChange"
-          />
-        </div>
+          ref="searchBar"
+          class="playlistSearch"
+          input-type="search"
+          :label="$t('User Playlists.Search bar placeholder')"
+          :icon="['fas', 'search']"
+          :placeholder="$t('Form Inputs.Search Text Hint')"
+          :value="query"
+          :show-action-button="false"
+          :maxlength="255"
+          @input="handleQueryChange"
+        />
         <div
           v-if="fullData.length > 1"
           class="optionsRow"

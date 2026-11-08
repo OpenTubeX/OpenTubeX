@@ -25,8 +25,8 @@ test('playlist controls match History spacing and align the switch with sorting'
       const geometry = await page.locator('.optionsRow').evaluate(element => {
         const card = element.closest('.card')
         const headingBottom = Math.max(...[...card.querySelector('.headingRow').children].map(child => child.getBoundingClientRect().bottom))
-        const search = card.querySelector('.searchInputsRow input').getBoundingClientRect()
-        const searchLabel = card.querySelector('.searchInputsRow .selectLabel').getBoundingClientRect()
+        const search = card.querySelector('.playlistSearch input').getBoundingClientRect()
+        const searchLabel = card.querySelector('.playlistSearch .selectLabel').getBoundingClientRect()
         const toggleText = element.querySelector('.switch-label-text')
         const text = toggleText.getBoundingClientRect()
         const trackHeight = Number.parseFloat(getComputedStyle(toggleText, '::before').height)
@@ -78,7 +78,7 @@ test.describe('single playlist', () => {
   test('keeps a gap below the heading when search controls are hidden', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await expect(page.getByRole('link', { name: 'Favorites', exact: true })).toBeVisible()
-    await expect(page.locator('.searchInputsRow')).toHaveCount(0)
+    await expect(page.locator('.playlistSearch')).toHaveCount(0)
     await expect(page.locator('.optionsRow')).toHaveCount(0)
     await expect.poll(() => page.locator('.headingRow').evaluate(element => {
       const headingBottom = Math.max(...[...element.children].map(child => child.getBoundingClientRect().bottom))

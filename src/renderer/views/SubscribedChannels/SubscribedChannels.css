@@ -1,4 +1,8 @@
 .card {
+  /* Match the search spacing below the History and Playlists headings. */
+  --channels-heading-gap: calc(3px + var(--page-title-offset));
+  --channels-field-label-outset: 7px;
+
   box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: 92dvw;
@@ -14,11 +18,18 @@
   padding-block-start: var(--page-title-offset);
 }
 
+.heading:has(+ .controls) {
+  margin-block-end: 0;
+}
+
 .controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 16px;
+
+  /* The outlined labels sit above the fields. */
+  margin-block-start: calc(var(--channels-heading-gap) + var(--channels-field-label-outset));
 }
 
 .channelSearch {
@@ -155,6 +166,12 @@
   color: var(--primary-color);
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --channels-field-label-outset: 9px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 100%;
@@ -162,7 +179,7 @@
 
   .controls {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: 16px;
+    row-gap: calc(20px + var(--channels-field-label-outset));
   }
 
   .channels {
