@@ -1340,6 +1340,32 @@ test.describe('custom playlist order', () => {
     await expect(titles.first()).toHaveText('Custom playlist video 1')
   })
 
+  test('a drag continues while the next page of videos loads', async ({ page }) => {
+    await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+    const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    await expect(rows).toHaveCount(100)
+    const handle = await rows.first().locator('.videoIndexArea').boundingBox()
+    const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(start.x, start.y + 40, { steps: 4 })
+    await expect(page.locator('.reorderDragged')).toHaveCount(1)
+    // Reaching the end of the first page loads the next one under the drag.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect(rows).toHaveCount(101)
+    await expect(page.locator('.reorderDragged')).toHaveCount(1)
+    await page.mouse.move(start.x, start.y + 60, { steps: 2 })
+    await page.mouse.up()
+    await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
+    // The video lands under the pointer, far below where the drag started.
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('large-custom-playlist').videos
+      .findIndex(video => video.title === 'Custom playlist video 1'))).toBeGreaterThan(50)
+    const dropped = await rows.filter({ has: page.getByText('Custom playlist video 1', { exact: true }) }).boundingBox()
+    expect(Math.abs(dropped.y + dropped.height / 2 - (start.y + 60))).toBeLessThan(dropped.height)
+  })
+
   test('touch honors a fast final destination before release', async ({ page }) => {
     await page.setViewportSize({ width: 430, height: 1000 })
     await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')

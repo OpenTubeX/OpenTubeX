@@ -87,8 +87,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
       update()
     })
     items.forEach(element => session.observer.observe(element))
-    // The measured cards no longer match a list that another window changed.
-    session.mutationObserver = new MutationObserver(cancel)
+    session.mutationObserver = new MutationObserver(addItems)
     session.mutationObserver.observe(list, { childList: true })
     document.addEventListener('scroll', update, { capture: true, passive: true })
     document.addEventListener('keydown', cancelFromKeyboard, true)
@@ -96,6 +95,25 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     list.classList.add('reorderActive')
     item.classList.add('reorderDragged')
     draggedId.value = session.ids[sourceIndex]
+  }
+
+  /**
+   * Takes in the items a next page appends. Any other change, such as another
+   * window removing an item, no longer matches the measured items.
+   * @param {MutationRecord[]} records
+   */
+  function addItems(records) {
+    if (session.dropping) return
+    const items = [...session.list.children].filter(element => element.matches(itemSelector))
+    if (records.some(record => record.removedNodes.length > 0) || session.items.some((element, index) => items[index] !== element)) {
+      cancel()
+      return
+    }
+    const ids = items.map(getId)
+    items.slice(session.items.length).forEach(element => session.observer.observe(element))
+    Object.assign(session, { items, ids, indexById: new Map(ids.map((id, index) => [id, index])) })
+    measure()
+    update()
   }
 
   /** Layout positions relative to the list, without any translation applied to the cards. */

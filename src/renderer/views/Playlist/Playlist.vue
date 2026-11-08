@@ -1507,7 +1507,11 @@ function moveDraggedVideo(playlistItemId, index) {
   items.splice(index, 0, ...items.splice(from, 1))
   // Show the new order right away, while the saved one is updated.
   tempShownPlaylistItems.value = items
-  draggedOrderSave = saveDraggedOrder(items).finally(() => { draggedOrderSave = null })
+  const save = saveDraggedOrder(items).finally(() => {
+    // A later drag can start before this save finishes.
+    if (draggedOrderSave === save) draggedOrderSave = null
+  })
+  draggedOrderSave = save
 }
 
 /** @param {any[]} items */
