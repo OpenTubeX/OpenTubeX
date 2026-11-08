@@ -425,7 +425,8 @@ test.describe('synced setting indicators', () => {
     const sliders = themeSection.locator('.sliderGrid')
       .filter({ has: page.getByRole('slider', { name: /^UI Roundness:/ }) })
       .locator(':scope > *')
-    await expect(sliders).toHaveCount(3)
+    // UI Scale, Font Size, UI Roundness, and Animation Speed.
+    await expect(sliders).toHaveCount(4)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
