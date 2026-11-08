@@ -1,4 +1,4 @@
-import { sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { expectOverlayScrollRange, expectScrollAtRenderedEnd, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
@@ -53,6 +53,59 @@ async function mockTranslatedEndscreen(app, page) {
   })
 }
 
+/** @param {import('@playwright/test').Locator} scroller */
+async function scrollToBottom(scroller) {
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+}
+
+/**
+ * Starts a mocked live chat that delivers the given Super Chats.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ id: string, message: string, amount: string, authorId: string, authorName: string }[]} superChats
+ */
+async function startMockLiveChat(page, superChats) {
+  const view = await watchViewHandle(page)
+  await view.evaluate(async (view, superChats) => {
+    const listeners = new Map()
+    const chat = new EventTarget()
+    chat.is_replay = false
+    chat.on = (event, listener) => listeners.set(listener, event)
+    chat.once = chat.on
+    chat.off = (_event, listener) => listeners.delete(listener)
+    chat.stop = () => {}
+    chat.start = () => {
+      for (const [listener, event] of listeners) {
+        if (event !== 'start') continue
+        listener({
+          actions: superChats.map(superChat => ({
+            is: type => type.type === 'AddChatItemAction',
+            item: {
+              is: type => type.type === 'LiveChatPaidMessage',
+              id: superChat.id,
+              timestamp: Date.now(),
+              message: { text: superChat.message },
+              purchase_amount: superChat.amount,
+              author: {
+                id: superChat.authorId,
+                name: superChat.authorName,
+                thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+              }
+            }
+          }))
+        })
+      }
+    }
+    view.$store.commit('setHideLiveChat', false)
+    view.liveChat = chat
+    view.liveChatIsReplay = false
+    view.liveChatOpen = true
+    view.isLive = true
+    view.isUpcoming = false
+    await view.$nextTick()
+  }, superChats)
+}
+
 test.describe('watch page', () => {
   test('does not speculate about live chat while availability loads', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
@@ -77,45 +130,13 @@ test.describe('watch page', () => {
   test('shows the donor handle in live chat and the expanded donation', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
-    const view = await watchViewHandle(page)
-    await view.evaluate(async view => {
-      const listeners = new Map()
-      const chat = new EventTarget()
-      chat.is_replay = false
-      chat.on = (event, listener) => listeners.set(listener, event)
-      chat.once = chat.on
-      chat.off = (_event, listener) => listeners.delete(listener)
-      chat.stop = () => {}
-      chat.start = () => {
-        for (const [listener, event] of listeners) {
-          if (event !== 'start') continue
-          listener({
-            actions: [{
-              is: type => type.type === 'AddChatItemAction',
-              item: {
-                is: type => type.type === 'LiveChatPaidMessage',
-                id: 'donation',
-                timestamp: Date.now(),
-                message: { text: 'Thank you for the stream! https://example.com/merch' },
-                purchase_amount: '$10.00',
-                author: {
-                  id: 'donor-channel',
-                  name: '@donor',
-                  thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
-                }
-              }
-            }]
-          })
-        }
-      }
-      view.$store.commit('setHideLiveChat', false)
-      view.liveChat = chat
-      view.liveChatIsReplay = false
-      view.liveChatOpen = true
-      view.isLive = true
-      view.isUpcoming = false
-      await view.$nextTick()
-    })
+    await startMockLiveChat(page, [{
+      id: 'donation',
+      message: 'Thank you for the stream! https://example.com/merch',
+      amount: '$10.00',
+      authorId: 'donor-channel',
+      authorName: '@donor'
+    }])
 
     const chat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat' })
     const author = chat.locator('.liveChatComments .channelName')
@@ -153,6 +174,53 @@ test.describe('watch page', () => {
     await expect(expanded).toBeVisible()
     await expanded.click({ position: { x: 4, y: 4 } })
     await expect(expanded).toBeHidden()
+  })
+
+  test('scrolls a long expanded Super Chat with overlay scrollbars', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await startMockLiveChat(page, [
+      {
+        id: 'long-donation',
+        message: 'Thank you for the stream, this is a very long Super Chat message. '.repeat(40),
+        amount: '$50.00',
+        authorId: 'long-donor',
+        authorName: '@longdonor'
+      },
+      { id: 'short-donation', message: 'Short', amount: '$5.00', authorId: 'short-donor', authorName: '@shortdonor' }
+    ])
+
+    const chat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat' })
+    const chips = chat.locator('.superChatComments .superChat')
+    await chips.filter({ hasText: '$50.00' }).click()
+    const expanded = chat.locator('.openedSuperChat')
+    await expect(expanded.locator('.donationAmount')).toHaveText('$50.00')
+    await expect(expanded).toHaveAttribute('data-overlayscrollbars-viewport', '')
+    // The bar measures the new range on a later frame.
+    await expect.poll(() => expanded.evaluate(element => ({
+      overflows: element.scrollHeight - element.clientHeight > 1,
+      nativeScrollbar: getComputedStyle(element).scrollbarWidth,
+      overlayScrollbar: element.querySelector(':scope > .os-scrollbar-vertical:not(.os-scrollbar-unusable)') !== null
+    }))).toEqual({ overflows: true, nativeScrollbar: 'none', overlayScrollbar: true })
+
+    await scrollToBottom(expanded)
+    await expectScrollAtRenderedEnd(expanded)
+    await expectOverlayScrollRange(expanded)
+    if (uiScale === 100) await chat.screenshot({ path: testInfo.outputPath('expanded-super-chat-scrollbar.png') })
+
+    // At this window size, the chat is wider and the message takes fewer lines.
+    const originalRange = await expanded.evaluate(element => element.scrollHeight - element.clientHeight)
+    await setWindowSize(app, page, { width: 1000, height: 899 })
+    await expect.poll(() => expanded.evaluate(element => element.scrollHeight - element.clientHeight))
+      .toBeLessThan(originalRange)
+    await expectOverlayScrollRange(expanded)
+
+    // Another Super Chat replaces the content and starts at its top.
+    await scrollToBottom(expanded)
+    await chips.filter({ hasText: '$5.00' }).click()
+    await expect(expanded.locator('.donationAmount')).toHaveText('$5.00')
+    await expect.poll(() => expanded.evaluate(element => element.scrollTop)).toBe(0)
+    await expectOverlayScrollRange(expanded)
   })
 
   test('retries failed live chat avatars and preserves the pop-out target', async ({ app, page }) => {
