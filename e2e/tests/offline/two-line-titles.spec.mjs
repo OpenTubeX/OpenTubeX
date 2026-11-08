@@ -396,4 +396,17 @@ test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, 
     await expectValidScrollRange(panel, ':scope > .playlistItem')
     await expectAtEnd(panel)
   })
+
+  test('remeasures grid rows that were scrolled out of the page when the font size changes', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
+    await goTo(page, 'history')
+    await expect(page.getByRole('heading', { name: MANY_VIDEOS[1].title, exact: true })).toBeVisible()
+    const body = page.locator('body')
+    await scrollThrough(body)
+    await expect.poll(() => shellCount(body, '[data-feed-item-key]')).toBeGreaterThan(0)
+    await page.evaluate(() => window.$store.dispatch('updateFontSize', 75))
+    await expectShellsMatchRows(body, '[data-feed-item-key]')
+    await expectValidScrollRange(body, '[data-feed-item-key]')
+    await expectAtEnd(body)
+  })
 })

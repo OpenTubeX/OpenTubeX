@@ -425,6 +425,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
   'uiScale',
+  'fontSize',
   'verticalTabBarWidth',
 ])
 

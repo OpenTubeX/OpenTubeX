@@ -164,7 +164,7 @@
   inline-size: 100%;
   min-inline-size: 0;
   padding-inline-end: 0;
-  font-size: var(--ft-tile-label-size, 11px);
+  font-size: calc(var(--ft-tile-label-size, 11px) * var(--font-scale, 1));
   line-height: 1.25;
   text-align: center;
 }
@@ -219,7 +219,7 @@
   max-inline-size: 100%;
   padding-inline-start: 0;
   overflow: hidden;
-  font-size: var(--ft-tile-value-size, 10px);
+  font-size: calc(var(--ft-tile-value-size, 10px) * var(--font-scale, 1));
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 0.75;
@@ -347,7 +347,7 @@
   min-block-size: var(--ft-option-block-size, 40px);
   padding: 6px 4px;
   border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
-  font-size: var(--ft-option-font-size, 11px);
+  font-size: calc(var(--ft-option-font-size, 11px) * var(--font-scale, 1));
   line-height: 1.25;
   text-align: center;
   background: rgb(255 255 255 / 7%);
@@ -437,7 +437,7 @@
   min-block-size: 24px;
   padding: 0 10px;
   border-radius: inherit;
-  font-size: var(--ft-header-action-font-size, 12px);
+  font-size: calc(var(--ft-header-action-font-size, 12px) * var(--font-scale, 1));
 }
 
 :deep(.shaka-overflow-menu .ft-quality-codecs > button[aria-pressed='true']) {
@@ -596,7 +596,7 @@
   min-block-size: var(--ft-option-block-size, 40px);
   padding: 6px 4px;
   border-radius: calc(var(--ft-tile-radius, 10px) * var(--ui-roundness));
-  font-size: var(--ft-option-font-size, 11px);
+  font-size: calc(var(--ft-option-font-size, 11px) * var(--font-scale, 1));
   line-height: 1.25;
   text-align: center;
   background: rgb(255 255 255 / 7%);

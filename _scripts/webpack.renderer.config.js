@@ -8,12 +8,22 @@ const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const getStartupSplash = require('./startupSplash')
+const postcssFontScale = require('./postcssFontScale')
 const getBuildCommit = require('./buildCommit')
 const {
   SHAKA_LOCALE_MAPPINGS,
   SHAKA_LOCALES_PREBUNDLED,
   SHAKA_LOCALES_TO_BE_BUNDLED
 } = require('./getShakaLocales')
+
+const postcssLoader = {
+  loader: 'postcss-loader',
+  options: {
+    postcssOptions: {
+      plugins: [postcssFontScale]
+    }
+  }
+}
 
 const isDevMode = process.env.NODE_ENV === 'development'
 const rendererPlatform = process.platform
@@ -96,6 +106,7 @@ const config = {
               esModule: false
             }
           },
+          postcssLoader,
           {
             loader: 'sass-loader',
             options: {
@@ -115,7 +126,8 @@ const config = {
             options: {
               esModule: false
             }
-          }
+          },
+          postcssLoader
         ],
         rules: [
           {

@@ -567,6 +567,7 @@ Settings:
     Invalid Engine: نام اور %s پر مشتمل ایک درست HTTP یا HTTPS تلاش URL درج کریں۔
     Engine Limit: آپ زیادہ سے زیادہ {count} حسب ضرورت سرچ انجن شامل کر سکتے ہیں۔
   Theme Settings:
+    Font Size: فونٹ سائز
     Sections:
       Interface: "انٹرفیس"
       Side Bar and Header: "سائیڈ بار اور ہیڈر"

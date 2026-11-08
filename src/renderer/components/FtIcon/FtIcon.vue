@@ -311,6 +311,14 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 </script>
 
 <style>
+/* Icons with their own size keep it at every Font Size setting. Icons sized
+   by the surrounding text (1em) still grow with that text. */
+.ft-custom-icon,
+.ft-icon,
+.shaka-ui-icon {
+  --font-scale: 1;
+}
+
 .ft-custom-icon {
   display: inline-flex;
   flex-shrink: 0;

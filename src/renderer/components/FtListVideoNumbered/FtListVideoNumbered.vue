@@ -287,10 +287,15 @@ if (windowed) {
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
   }, { flush: 'post' })
-  // Two-line titles and list thumbnail sizes change row heights without the
-  // width change that remeasures shells.
+  // Two-line titles, text settings, and list thumbnail sizes change row
+  // heights without the width change that remeasures shells.
   watch(
-    [() => store.getters.getLimitTitlesToTwoLines, () => store.state.settings[thumbnailSizeSetting]],
+    [
+      () => store.getters.getLimitTitlesToTwoLines,
+      () => store.getters.getFontSize,
+      () => store.getters.getAppFont,
+      () => store.state.settings[thumbnailSizeSetting]
+    ],
     () => windowItem?.remeasure(),
     { flush: 'post' }
   )

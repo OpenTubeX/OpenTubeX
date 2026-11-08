@@ -1,5 +1,7 @@
 export const DEFAULT_APP_FONT = 'Geist Variable'
 export const SYSTEM_APP_FONT = 'system'
+export const MIN_FONT_SIZE = 75
+export const MAX_FONT_SIZE = 150
 
 const APP_FONT_FALLBACKS = "system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'"
 

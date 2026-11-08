@@ -517,6 +517,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Font Size: 字型大小
     Sections:
       Interface: "介面"
       Side Bar and Header: "側邊欄和標題列"

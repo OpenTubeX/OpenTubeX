@@ -517,6 +517,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Font Size: Leturstærð
     Sections:
       Interface: "Viðmót"
       Side Bar and Header: "Hliðarstika og haus"

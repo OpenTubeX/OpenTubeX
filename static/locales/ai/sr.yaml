@@ -527,6 +527,7 @@ Settings:
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.
   Theme Settings:
+    Font Size: Величина фонта
     Sections:
       Interface: "Интерфејс"
       Side Bar and Header: "Бочна трака и заглавље"

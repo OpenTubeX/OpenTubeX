@@ -517,6 +517,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Font Size: Teckenstorlek
     Sections:
       Interface: "Gränssnitt"
       Side Bar and Header: "Sidofält och sidhuvud"

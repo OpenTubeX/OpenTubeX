@@ -541,6 +541,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Font Size: Памер шрыфту
     Sections:
       Interface: "Інтэрфейс"
       Side Bar and Header: "Бакавая панэль і загаловак"

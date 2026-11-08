@@ -51,6 +51,16 @@
         @change="updateUiScale"
       />
       <FtSlider
+        :label="t('Settings.Theme Settings.Font Size')"
+        :default-value="fontSize"
+        setting-key="fontSize"
+        :min-value="MIN_FONT_SIZE"
+        :max-value="MAX_FONT_SIZE"
+        :step="5"
+        value-extension="%"
+        @change="store.dispatch('updateFontSize', $event)"
+      />
+      <FtSlider
         :label="t('Settings.Theme Settings.UI Roundness')"
         :default-value="uiRoundness"
         setting-key="uiRoundness"
@@ -419,6 +429,7 @@ import {
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../../helpers/loadTabAvatars'
 import { showToast } from '../../../helpers/utils'
 import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../../../helpers/capacitorUiScale'
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../helpers/appFont'
 
 const { t } = useI18n()
 
@@ -700,6 +711,9 @@ function updateVerticalTabHeight(value) {
 
 /** @type {import('vue').ComputedRef<number>} */
 const uiScale = computed(() => store.getters.getUiScale)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fontSize = computed(() => store.getters.getFontSize)
 
 /**
  * @param {number} value

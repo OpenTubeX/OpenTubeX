@@ -374,8 +374,12 @@ if (windowed) {
     }, { flush: 'post' })
   }
   watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
-  // Two-line titles change row heights without a resize that remeasures shells.
-  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.remeasure(), { flush: 'post' })
+  // Two-line titles and text settings change row heights without a resize that remeasures shells.
+  watch(
+    [() => store.getters.getLimitTitlesToTwoLines, () => store.getters.getFontSize, () => store.getters.getAppFont],
+    () => windowItem?.remeasure(),
+    { flush: 'post' }
+  )
   onBeforeUnmount(() => windowItem?.dispose())
 }
 

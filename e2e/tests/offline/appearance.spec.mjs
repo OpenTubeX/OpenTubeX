@@ -1578,6 +1578,43 @@ test.describe('UI roundness', () => {
   })
 })
 
+test.describe('font size', { tag: '@scale' }, () => {
+  test('scales text but not icons when changed, and saves it', async ({ app, page, attachScreenshot }) => {
+    const navLabel = page.locator('.sideNav .navOption .navLabel').first()
+    const navIcon = page.locator('.sideNav .navOption .navIcon').first()
+    await expect(navLabel).toHaveCSS('font-size', '12px')
+    await expect(navIcon).toHaveCSS('font-size', '24px')
+
+    await goToSettingsSection(page, 'theme')
+    const sectionTitle = page.locator('.sectionTitle').first()
+    await expect(sectionTitle).toHaveCSS('font-size', '22px')
+    const spacing = await page.locator('.sectionBody').first().evaluate(element => getComputedStyle(element).padding)
+
+    await page.getByRole('slider', { name: /Font Size/ }).fill('150')
+    await expect(page.locator('body')).toHaveCSS('--font-scale', '1.5')
+    await expect(page.locator('body')).toHaveCSS('font-size', '24px')
+    await expect(sectionTitle).toHaveCSS('font-size', '33px')
+    await expect(navLabel).toHaveCSS('font-size', '18px')
+    await expect(navIcon).toHaveCSS('font-size', '24px')
+    await expect(page.locator('.sectionBody').first()).toHaveCSS('padding', spacing)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).fontSize).toBe(150)
+    await attachScreenshot('settings at 150% font size')
+  })
+
+  test.describe('saved at 150%', () => {
+    test.use({ seed: { settings: { fontSize: 150 } } })
+
+    test('applies on startup and widens the side bar for its labels', async ({ page }) => {
+      await expect(page.locator('body')).toHaveCSS('font-size', '24px')
+      await expect(page.locator('.sideNav .navOption .navLabel').first()).toHaveCSS('font-size', '18px')
+      await expect(page.locator('.sideNav .navOption .navIcon').first()).toHaveCSS('font-size', '24px')
+      // UI Scale zoom can leave the computed width a fraction of a pixel off.
+      await expect.poll(() => page.locator('.sideNav').first().evaluate(element => parseFloat(getComputedStyle(element).width)))
+        .toBeCloseTo(156, 0)
+    })
+  })
+})
+
 test.describe('rounded feed page headers', () => {
   test.use({
     seed: {

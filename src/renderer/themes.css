@@ -1,12 +1,21 @@
+/* Resolves the Font Size scaling to a plain length for code that reads it. */
+@property --form-control-height {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 45px;
+}
+
 body {
   margin: 0;
   min-block-size: 100vh;
   font-family: var(--app-font-family);
+  font-size: 16px;
   color: var(--primary-text-color);
   background-color: var(--bg-color);
 
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
+  --font-scale: 1;
 
   /* Material 3 corner scale, scaled by the UI Roundness setting. */
   --shape-corner-extra-small: calc(4px * var(--ui-roundness));
@@ -32,10 +41,12 @@ body {
   --motion-slow-effects: 350ms linear(0, 0.065, 0.2, 0.351, 0.491, 0.611, 0.708, 0.783, 0.841, 0.885, 0.917, 0.941, 0.958, 0.97, 0.979, 0.985, 0.99, 0.993, 0.995, 0.997, 0.998, 0.998, 0.999, 0.999, 1);
   --modal-backdrop-blur: blur(2px);
   --focus-border-width: 2px;
-  --form-control-height: 45px;
+
+  /* Form controls grow with the Font Size setting so their text keeps fitting. */
+  --form-control-height: calc(45px * var(--font-scale));
   --native-color-scheme: light;
-  --form-control-value-padding: 18px 4px;
-  --form-control-label-top: 4px;
+  --form-control-value-padding: calc(18px * var(--font-scale)) 4px;
+  --form-control-label-top: calc(4px * var(--font-scale));
   --switch-track-width: 40px;
   --switch-track-height: 24px;
   --switch-thumb-inset: 3px;
@@ -137,9 +148,9 @@ body {
 
 /* Inherit native touch sizing into dialogs and other teleported controls too. */
 :where(:root.appCapacitorTabs) body {
-  --form-control-height: max(56px, var(--phone-touch-target, 48px));
-  --form-control-value-padding: 24px 8px;
-  --form-control-label-top: 8px;
+  --form-control-height: max(calc(56px * var(--font-scale)), var(--phone-touch-target, 48px));
+  --form-control-value-padding: calc(24px * var(--font-scale)) 8px;
+  --form-control-label-top: calc(8px * var(--font-scale));
   --switch-track-width: 52px;
   --switch-track-height: 32px;
   --switch-thumb-inset: 4px;

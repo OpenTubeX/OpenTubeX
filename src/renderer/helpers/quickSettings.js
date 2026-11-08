@@ -1,4 +1,5 @@
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition.js'
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from './appFont.js'
 
 const CORE_QUICK_SETTINGS = [
   ['baseTheme', 'appearance', 'Settings.Theme Settings.Base Theme.Base Theme', { control: 'select', icon: ['fas', 'palette'] }],
@@ -48,6 +49,17 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
       'Settings.Theme Settings.Icon Pack.Remix Icon',
     ],
     icon: ['fas', 'icons'],
+  },
+  {
+    id: 'fontSize',
+    section: 'appearance',
+    labelKey: 'Settings.Theme Settings.Font Size',
+    control: 'slider',
+    min: MIN_FONT_SIZE,
+    max: MAX_FONT_SIZE,
+    step: 5,
+    extension: '%',
+    icon: ['fas', 'font'],
   },
   {
     id: 'uiRoundness',

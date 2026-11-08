@@ -518,6 +518,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Font Size: Μέγεθος γραμματοσειράς
     Sections:
       Interface: "Διεπαφή"
       Side Bar and Header: "Πλευρική στήλη και κεφαλίδα"

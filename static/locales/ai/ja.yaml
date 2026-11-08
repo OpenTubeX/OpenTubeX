@@ -517,6 +517,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Font Size: フォントサイズ
     Sections:
       Interface: "インターフェース"
       Side Bar and Header: "サイドバーとヘッダー"

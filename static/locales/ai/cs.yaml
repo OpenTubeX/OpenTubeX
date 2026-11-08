@@ -517,6 +517,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Font Size: Velikost písma
     Sections:
       Interface: "Rozhraní"
       Side Bar and Header: "Postranní panel a záhlaví"

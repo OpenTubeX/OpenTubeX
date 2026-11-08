@@ -259,7 +259,7 @@
   display: block;
   position: absolute;
   grid-area: 1 / 1 / 2 / 2;
-  inset-block: -7px 0;
+  inset-block: calc(-7px * var(--font-scale, 1)) 0;
   inset-inline: 0;
   min-inline-size: 0;
   margin: 0;
@@ -273,7 +273,7 @@
 
 .outlined .inputLegend {
   display: block;
-  min-block-size: 14px;
+  min-block-size: calc(14px * var(--font-scale, 1));
   max-inline-size: calc(100% - var(--input-label-reserved-space));
   margin-inline-start: 12px;
   padding: 0;
@@ -313,11 +313,11 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .outlined .inputOutline {
-    inset-block-start: -9px;
+    inset-block-start: calc(-9px * var(--font-scale, 1));
   }
 
   .outlined .inputLegend {
-    min-block-size: 18px;
+    min-block-size: calc(18px * var(--font-scale, 1));
   }
 
   .outlined.floatingLabel .selectLabel {
