@@ -189,6 +189,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   /** @type {{ type: 'drag' | 'resize' | 'volume', corner?: string, startX: number, startY: number, startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
   let scrollMiniPointerSession = null
   let scrollMiniPlayerRestoreRect = null
+  // The first click of a double-click on the video can reveal controls under
+  // the pointer, so the second click lands on one of them.
+  let scrollMiniClickStartedOnVideo = false
   let lastKnownInlinePlayerHeight = 0
   /** @type {number | null} */
   let scrollMiniScrollFrame = null
@@ -1253,6 +1256,24 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniScrollToTop()
   }
 
+  /**
+   * Remembers whether a click gesture started on the video rather than a control.
+   * @param {MouseEvent} event
+   */
+  function trackScrollMiniClick(event) {
+    if (event.detail !== 1) return
+    scrollMiniClickStartedOnVideo = event.target instanceof Element &&
+      event.target.classList.contains('scrollMiniPointerLayer')
+  }
+
+  /**
+   * Returns to the full player when a double-click started on the video.
+   * @param {MouseEvent} event
+   */
+  function handleScrollMiniDoubleClick(event) {
+    if (scrollMiniClickStartedOnVideo) scrollMiniScrollToTop(event)
+  }
+
   function dismissCrossTabMiniPlayer(event) {
     event?.preventDefault()
     event?.stopPropagation()
@@ -1266,9 +1287,15 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  /**
+   * Toggles playback, except for the second click of a double-click on the video.
+   * @param {MouseEvent} [event]
+   */
   async function scrollMiniTogglePlayPause(event) {
     event?.preventDefault()
     event?.stopPropagation()
+
+    if (event?.detail > 1 && scrollMiniClickStartedOnVideo) return
 
     const videoElement = video.value
     if (!videoElement) return
@@ -1725,6 +1752,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     restoreInlinePlayer,
     restoreScrollMiniPlayerFromTap,
     scrollMiniTogglePlayPause,
+    trackScrollMiniClick,
+    handleScrollMiniDoubleClick,
     revealScrollMiniPlayerControls,
     scrollMiniVolume,
     scrollMiniVolumeExpanded,
