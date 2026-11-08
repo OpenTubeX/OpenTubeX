@@ -98,12 +98,12 @@ for (const [name, mimeType, content] of [
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const screenshotSource = playerSource.split('// #region screenshots')[1].split('// #endregion screenshots')[0]
 
-function loadScreenshot({ directory = 'content://documents/tree/screenshots', chosenDirectory, mode = 'default_folder' } = {}) {
+function loadScreenshot({ directory = 'content://documents/tree/screenshots', chosenDirectory, mode = 'default_folder', image = new Blob(['frame'], { type: 'image/png' }) } = {}) {
   const saved = []
+  const copied = []
   const settings = []
   const toasts = []
   const video = { videoWidth: 1920, videoHeight: 1080, currentTime: 10, paused: false, pauseCalls: 0, pause() { this.paused = true; this.pauseCalls++ }, play() { this.paused = false } }
-  const image = new Blob(['frame'], { type: 'image/png' })
   const takeScreenshot = vm.runInNewContext(`${screenshotSource}\ntakeScreenshot`, {
     process: { env: { IS_CAPACITOR: true } },
     video: { value: video },
@@ -121,12 +121,13 @@ function loadScreenshot({ directory = 'content://documents/tree/screenshots', ch
     },
     chooseAndroidDirectory: async () => chosenDirectory,
     writeFileWithPicker: async (...args) => { saved.push(args); return true },
+    copyToClipboard: async content => copied.push(content),
     showToast: toast => toasts.push(toast.message),
     t: key => key,
     console,
     document: { createElement: () => ({ getContext: () => ({ drawImage() {} }), toBlob: callback => callback(image), remove() {} }) },
   })
-  return { takeScreenshot, saved, settings, video, toasts }
+  return { takeScreenshot, saved, copied, settings, video, toasts }
 }
 
 test('the player saves screenshots automatically to its configured Android folder', async () => {
@@ -152,6 +153,13 @@ test('canceling initial folder selection saves nothing and restores playback', a
   assert.deepEqual(state.saved, [])
   assert.deepEqual(state.toasts, [])
   assert.equal(state.video.paused, false)
+})
+
+test('a failed screenshot encode is reported instead of copied', async () => {
+  const state = loadScreenshot({ mode: 'clipboard', image: null })
+  await state.takeScreenshot()
+  assert.deepEqual(state.copied, [])
+  assert.deepEqual(state.toasts, ['Screenshot Error'])
 })
 
 test('ask-path mode uses the save picker instead of the automatic screenshot folder', async () => {
