@@ -83,9 +83,10 @@ test.use({ seed })
 /**
  * The videos themselves cannot be loaded offline, but the playlist is local, so the
  * watch view still decides which skip buttons the player is allowed to show.
+ * With `withNextVideo`, also reads the playlist video that skipping forward plays.
  */
-function readSkipAvailability(page) {
-  return page.evaluate(() => {
+function readSkipAvailability(page, withNextVideo = false) {
+  return page.evaluate((withNextVideo) => {
     const app = document.querySelector('#app')?.__vue_app__
 
     const findWatchView = (vnode) => {
@@ -112,9 +113,10 @@ function readSkipAvailability(page) {
 
     return {
       canPlayNext: watchView.canSkipToNextVideo,
-      canPlayPrevious: watchView.canSkipToPreviousVideo
+      canPlayPrevious: watchView.canSkipToPreviousVideo,
+      ...(withNextVideo && { nextVideoId: watchView.$refs.watchVideoPlaylist?.nextVideo?.videoId })
     }
-  })
+  }, withNextVideo)
 }
 
 test('playlist counter stays below the title when expanded and collapsed', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
@@ -213,9 +215,10 @@ test('does not highlight another video after removing the playing one', async ({
   await expect(playlistItems).toHaveCount(VIDEO_TITLES.length - 1)
   await expect(playlistItems.locator('.videoIndexIcon')).toHaveCount(0)
   // Skipping still continues from where the removed video was.
-  await expect.poll(() => readSkipAvailability(page)).toEqual({
+  await expect.poll(() => readSkipAvailability(page, true)).toEqual({
     canPlayNext: true,
-    canPlayPrevious: true
+    canPlayPrevious: true,
+    nextVideoId: 'skipvideo2'
   })
   await attachScreenshot('queue after removing the playing video')
 })
