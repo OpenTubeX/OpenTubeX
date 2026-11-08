@@ -249,7 +249,7 @@ Settings:
     Auto Load Next Page:
       Tooltip: Tự động tải các trang video và bình luận.
       Label: Tự động nhấn tải thêm
-    Open Deep Links In New Window: Mở các URL được truyền đến FreeTube vào cửa sổ mới
+    Open Deep Links In New Window: Mở các URL được truyền đến OpenTubeX vào cửa sổ mới
     Minimize to system tray: Thu nhỏ xuống khay hệ thống
   Theme Settings:
     Theme Settings: 'Chủ đề'
@@ -370,7 +370,7 @@ Settings:
     Disable Smooth Scrolling: Tắt cuộn mượt
     Expand Side Bar by Default: Mở rộng thanh bên theo mặc định
     Hide Side Bar Labels: Ẩn nhãn thanh bên
-    Hide FreeTube Header Logo: Ẩn logo FreeTube trên thanh trên
+    Hide OpenTubeX Header Logo: Ẩn logo OpenTubeX trên thanh trên
   Player Settings:
     Player Settings: 'Trình phát'
     Play Next Video: 'Tự động phát video được đề xuất'
@@ -431,12 +431,11 @@ Settings:
       External Player: Trình phát ngoài ({externalPlayerName})
       Full Window (Always On): Toàn cửa sổ (luôn bật)
       Full Screen (Always On): Toàn màn hình (luôn bật)
-      Tooltip: Phần lớn chế độ xem mặc định chỉ được áp dụng khi bạn mở một phiên xem mới. Nếu bạn chuyển sang chế độ xem mới trong lúc xem video thì chế độ đó sẽ được áp dụng cho đến khi bạn tắt FreeTube, trừ khi bạn chọn chế độ xem được đánh dấu là luôn bật, thì chúng sẽ luôn được áp dụng cho các video mới.
+      Tooltip: Phần lớn chế độ xem mặc định chỉ được áp dụng khi bạn mở một phiên xem mới. Nếu bạn chuyển sang chế độ xem mới trong lúc xem video thì chế độ đó sẽ được áp dụng cho đến khi bạn tắt OpenTubeX, trừ khi bạn chọn chế độ xem được đánh dấu là luôn bật, thì chúng sẽ luôn được áp dụng cho các video mới.
     Autoplay Interruption Timer: Bộ đếm thời gian ngắt tự động phát
   Subscription Settings:
     Subscription Settings: 'Đăng ký'
     Fetch Feeds from RSS: Cập nhật bảng tin qua RSS
-    Fetch Automatically: Tự động làm mới bảng tin
     Confirm Before Unsubscribing: Nhắc xác nhận trước khi hủy đăng ký
     'Limit the number of videos displayed for each channel': Giới hạn số video được hiển thị cho mỗi kênh
     To: Xuống
@@ -458,7 +457,7 @@ Settings:
     Import History: Nhập lịch sử
     Export NewPipe: Xuất NewPipe
     Export YouTube: Xuất YouTube
-    Export FreeTube: Xuất FreeTube
+    Export OpenTubeX: Xuất OpenTubeX
     Export Subscriptions: Xuất đăng ký
     Import Subscriptions: Nhập đăng ký
     Select Export Type: Chọn kiểu xuất ra
@@ -472,9 +471,9 @@ Settings:
     History File: Tệp lịch sử
     Playlist File: Tệp danh sách phát
     Subscription File: Tệp đăng ký
-    Export Playlists For Older FreeTube Versions:
-      Label: Xuất danh sách phát cho các phiên bản FreeTube cũ hơn
-      Tooltip: "Tùy chọn này sẽ gộp tất cả các danh sách phát vào một danh sách phát mang tên 'Ưa thích'.\nCách để nhập & xuất video trong danh sách phát cho một phiên bản cũ hơn của FreeTube:\n1. Xuất danh sách phát với tùy chọn này được bật.\n2. Xóa tất cả các danh sách phát qua tùy chọn Xóa tất cả danh sách phát trong mục Cài đặt quyền riêng tư.\n3. Mở phiên bản cũ hơn và nhập danh sách phát đã được xuất ra."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Xuất danh sách phát cho các phiên bản OpenTubeX cũ hơn
+      Tooltip: "Tùy chọn này sẽ gộp tất cả các danh sách phát vào một danh sách phát mang tên 'Ưa thích'.\nCách để nhập & xuất video trong danh sách phát cho một phiên bản cũ hơn của OpenTubeX:\n1. Xuất danh sách phát với tùy chọn này được bật.\n2. Xóa tất cả các danh sách phát qua tùy chọn Xóa tất cả danh sách phát trong mục Cài đặt quyền riêng tư.\n3. Mở phiên bản cũ hơn và nhập danh sách phát đã được xuất ra."
     Search history: Lịch sử tìm kiếm
     Import search history: Nhập lịch sử tìm kiếm
     Export search history: Xuất lịch sử tìm kiếm
@@ -578,7 +577,7 @@ Settings:
     Error getting network information. Is your proxy configured properly?: Lỗi nhận thông tin mạng. Proxy của bạn đã được cài đặc đúng cách chưa?
     Clicking on Test Proxy will send a request to: Nhấn vào Thử proxy sẽ gửi yêu cầu đến
     Test Proxy: Thử proxy
-    Proxy Warning: FreeTube không bao gồm proxy theo mặc định nhưng có thể kết nối đến một proxy bên ngoài, bao gồm các proxy chạy cục bộ như Tor hoặc các proxy SOCKS5 được cung cấp bởi một số các VPN. Nếu bạn sử dụng tính năng này, hãy đảm bảo proxy/Tor của bạn được cấu hình đúng cách, nếu không FreeTube sẽ không thể tải dữ liệu về được.
+    Proxy Warning: OpenTubeX không bao gồm proxy theo mặc định nhưng có thể kết nối đến một proxy bên ngoài, bao gồm các proxy chạy cục bộ như Tor hoặc các proxy SOCKS5 được cung cấp bởi một số các VPN. Nếu bạn sử dụng tính năng này, hãy đảm bảo proxy/Tor của bạn được cấu hình đúng cách, nếu không OpenTubeX sẽ không thể tải dữ liệu về được.
     Proxy Username: Tên người dùng ủy quyền
     Proxy Password: Mật khẩu Proxy
   SponsorBlock Settings:
@@ -590,7 +589,7 @@ Settings:
       Auto Skip: Tự động bỏ qua
       Prompt To Skip: Nhắc nhở bỏ qua
       Do Nothing: Không làm gì
-    Notify when sponsor segment is skipped: Thông báo khi đoạn quảng cáo bị bỏ qua
+    Notify when sponsor segment is skipped: Hiển thị thông báo sau khi bỏ qua phân đoạn
     Category Color: Bản màu
     SponsorBlock Settings: SponsorBlock
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': URL API ảnh xem trước DeArrow (Mặc định là https://dearrow-thumb.ajay.app)
@@ -646,7 +645,7 @@ About:
   Credits: Ghi công
   Donate: Quyên tặng
   GitHub issues: Sự cố GitHub
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   Beta: Thử nghiệm
   Downloads / Changelog: Tải xuống / nhật ký thay đổi
   GitHub releases: Bản phát hành GitHub
@@ -658,7 +657,7 @@ About:
   AGPLv3: giấy phép AGPLv3
   Licensed under the {licenseLink}: Được cấp phép theo {licenseLink}
   Please read the {roomRulesLink}: Vui lòng đọc {roomRulesLink}
-  FreeTube is made possible by {creditsPageLink}: FreeTube được tạo ra bởi {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX được tạo ra bởi {creditsPageLink}
 Channel:
   Subscribe: 'Đăng ký'
   Unsubscribe: 'Hủy đăng ký'
@@ -670,6 +669,7 @@ Channel:
       Newest: 'Mới nhất'
       Oldest: 'Cũ nhất'
       Most Popular: 'Phổ biến nhất'
+    This channel does not currently have any videos: 'Kênh này hiện chưa có video'
     This channel has videos but none could be displayed, try fetching more: Kênh này có video nhưng không có video nào có thể được hiển thị, có thể thử tải thêm
   Playlists:
     Playlists: 'Danh sách phát'
@@ -703,13 +703,13 @@ Channel:
     votes: '{votes} bình chọn'
     Reveal Answers: Hiện Câu trả lời
     Hide Answers: Ẩn Câu trả lời
-    Video hidden by FreeTube: FreeTube đã ẩn video này
+    Video hidden by OpenTubeX: OpenTubeX đã ẩn video này
     View Full Post: Mở rộng bài đăng
     Viewing Posts Only Supported By Invidious: Việc xem các bài đăng chỉ được hỗ trợ qua Invidious. Hãy đi đến trang Cộng đồng của kênh để xem nội dung này mà không cần Invidious.
   Releases:
     Releases: Xuất bản
     This channel does not currently have any releases: Kênh này hiện không có bất kỳ bản phát hành nào
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Kênh này là kênh giới hạn độ tuổi và hiện tại không thể xem được trên FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Kênh này là kênh giới hạn độ tuổi và hiện tại không thể xem được trên OpenTubeX.
   Channel Tabs: Trang kênh
   Shorts:
     This channel does not currently have any shorts: Kênh này hiện không có video shorts
@@ -759,13 +759,21 @@ Video:
   Copy YouTube Channel Link: Sao chép liên kết của kênh
   Sponsor Block category:
     sponsor: Nhà tài trợ
-    intro: Giới thiệu
-    self-promotion: Tự thúc đẩy
-    interaction: Tương tác
-    music offtopic: Nhạc ngoại tuyến
-    outro: Kết thúc
-    recap: Tóm tắt
-    filler: Bộ lọc
+    intro: Tạm dừng/Giới thiệu
+    self-promotion: Quảng cáo không trả công/Tự quảng cáo
+    interaction: Nhắc tương tác (Đăng ký)
+    music offtopic: 'Nhạc: Phần không nhạc'
+    outro: Màn hình kết thúc/Danh đề
+    recap: Xem trước/Tóm tắt
+    filler: 'Lạc đề, nhảm nhí/Câu đùa'
+    hook: Gây chú ý/Lời chào
+    highlight: Điểm/Khoảnh khắc quan trọng
+    exclusive access: Truy cập riêng
+  Sponsor Block category short:
+    intro: Tạm ngừng
+    interaction: Nhắc nhở tương tác
+    music offtopic: Không có nhạc
+    filler: 'Các đoạn lạc đề, nhảm nhí'
   Streamed on: Phát trực tiếp vào lúc
   Started streaming on: Bắt đầu phát trực tiếp vào lúc
   External Player:
@@ -812,7 +820,7 @@ Video:
       Stats: Thông tin nâng cao
       Media Formats: 'Định dạng: {formats}'
       Dropped Frames / Total Frames: 'Khung bị bỏ: {droppedFrames} / tổng số khung: {totalFrames}'
-    Skipped segment: Đã bỏ qua phân đoạn {segmentCategory}
+    Skipped segment: '{segmentCategory} đã bỏ qua'
     You appear to be offline: Bạn có vẻ đang offline.
     Playback will resume automatically when your connection comes back: Trình phát sẽ tự động tiếp tục khi bạn kết nối trở lại.
     TranslatedCaptionTemplate: '{language} (được dịch từ "{originalLanguage}")'
@@ -824,22 +832,22 @@ Video:
     Take Screenshot: Chụp ảnh màn hình
     Autoplay is off: Tự động phát đang tắt
     Autoplay is on: Tự động phát đang bật
-  MembersOnly: Các video trả phí không thể được xem qua FreeTube vì chúng yêu cầu đăng nhập qua một tài khoản Google có đăng kí trả phí với kênh đã đăng các video đó.
-  AgeRestricted: Các video giới hạn độ tuổi không thể được xem qua FreeTube vì chúng yêu cầu đăng nhập qua Google và sử dụng một tài khoản YouTube đã được xác minh độ tuổi.
+  MembersOnly: Các video trả phí không thể được xem qua OpenTubeX vì chúng yêu cầu đăng nhập qua một tài khoản Google có đăng kí trả phí với kênh đã đăng các video đó.
+  AgeRestricted: Các video giới hạn độ tuổi không thể được xem qua OpenTubeX vì chúng yêu cầu đăng nhập qua Google và sử dụng một tài khoản YouTube đã được xác minh độ tuổi.
   IP block: YouTube đang chặn địa chị IP của bạn khỏi việc xem video. Hãy thử sử dụng một VPN hoặc proxy khác.
   DeArrow:
-    Show Modified Details: Hiện thông tin đã sửa đổi
-    Show Original Details: Hiện thông tin gốc
+    Show Modified Details: Hiện chi tiết đã sửa đổi
+    Show Original Details: Hiện chi tiết gốc
 #& Playlists
   Unlisted: Không liệt kê
-  DRMProtected: Không thể phát video được bảo vệ DRM trong FreeTube vì chúng yêu cầu các thành phần nguồn đóng độc quyền. Nếu bạn muốn xem video này, vui lòng xem trên trang web chính thức của YouTube trong trình duyệt web hỗ trợ DRM.
+  DRMProtected: Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền. Nếu bạn muốn xem video này, vui lòng xem trên trang web chính thức của YouTube trong trình duyệt web hỗ trợ DRM.
   Save Watched Progress: Lưu tiến trình đã xem
   Watched Progress Saved: Xem tiến trình đã lưu
   Popout Live Chat: Chat nổi
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Thời gian quảng cáo đầu video còn lại: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Thời gian chờ SABR còn lại: {remindingTimeSeconds}s'
-  Private: Video riêng tư không thể xem trên FreeTube vì chúng có đăng nhập tài khoản Google và sở hữu video đó.
+  Private: Video riêng tư không thể xem trên OpenTubeX vì chúng có đăng nhập tài khoản Google và sở hữu video đó.
   Enable SponsorBlock on Channel: Bật SponsorBlock cho kênh này
   Disable SponsorBlock on Channel: Tắt SponsorBlock cho kênh này
   AI: AI
@@ -995,13 +1003,13 @@ Channels:
   Count: '{number} kênh đã tìm được.'
 Tooltips:
   General Settings:
-    Thumbnail Preference: Tất cả các hình thu nhỏ trên FreeTube sẽ được thay thế bằng khung hình của video, làm mờ hoặc ẩn thay vì hình thu nhỏ mặc định.
-    External Link Handling: "Chọn tác vụ mặc định khi một liên kết không thể mở được nhập vào FreeTube.\nTheo mặc định, FreeTube sẽ mở liên kết này trong trình duyệt mặc định của bạn.\n"
-    Fallback to Non-Preferred Backend on Failure: Khi API ưu tiên của bạn gặp sự cố, FreeTube sẽ tự động sử dụng API không ưu tiên của bạn làm phương án dự phòng khi nó được bật lên.
-    Preferred API Backend: Chọn backend mà FreeTube sử dụng để lấy dữ liệu. API cục bộ là một trình trích xuất tích hợp sẵn. API Invidious yêu cầu máy chủ Invidious để kết nối.
-    Invidious Instance: Phiên bản Invidious mà FreeTube sẽ kết nối với để gọi các lệnh API.
+    Thumbnail Preference: Tất cả các hình thu nhỏ trên OpenTubeX sẽ được thay thế bằng khung hình của video, làm mờ hoặc ẩn thay vì hình thu nhỏ mặc định.
+    External Link Handling: "Chọn tác vụ mặc định khi một liên kết không thể mở được nhập vào OpenTubeX.\nTheo mặc định, OpenTubeX sẽ mở liên kết này trong trình duyệt mặc định của bạn.\n"
+    Fallback to Non-Preferred Backend on Failure: Khi API ưu tiên của bạn gặp sự cố, OpenTubeX sẽ tự động sử dụng API không ưu tiên của bạn làm phương án dự phòng khi nó được bật lên.
+    Preferred API Backend: Chọn backend mà OpenTubeX sử dụng để lấy dữ liệu. API cục bộ là một trình trích xuất tích hợp sẵn. API Invidious yêu cầu máy chủ Invidious để kết nối.
+    Invidious Instance: Phiên bản Invidious mà OpenTubeX sẽ kết nối với để gọi các lệnh API.
     Region for Trending: Xu hướng khu vực cho phép bạn chọn các video thịnh hành của quốc gia mà bạn muốn hiển thị.
-    Open Deep Links In New Window: Các URL được truyền đến FreeTube, chẳng hạn như thông qua các trình mở rộng trình duyệt tự động chuyển hướng hay đối số khị mở qua dòng lệnh, sẽ được mở trên một cửa sổ mới.
+    Open Deep Links In New Window: Các URL được truyền đến OpenTubeX, chẳng hạn như thông qua các trình mở rộng trình duyệt tự động chuyển hướng hay đối số khị mở qua dòng lệnh, sẽ được mở trên một cửa sổ mới.
   Player Settings:
     Proxy Videos Through Invidious: Sẽ kết nối với Invidious để cung cấp video thay vì kết nối trực tiếp với YouTube.
     Default Media Format: Cài đặt các định dạng được dùng khi phát video. Định dạng DASH có thể phát với chất lượng cao hơn. Các định dạng cũ được giới hạn ở mức tối đa là 360p nhưng chúng tiêu tốn ít băng thông hơn. Định dạng âm thanh là những luồng chỉ phát âm thanh.
@@ -1009,18 +1017,17 @@ Tooltips:
     Skip by Scrolling Over Video Player: Sử dụng con lăn chuột để bỏ qua video, kiểu MPV.
   External Player Settings:
     Custom External Player Arguments: Bất kỳ tham số dòng lệnh tùy chỉnh nào, bạn muốn được chuyển đến trình phát bên ngoài.
-    Custom External Player Executable: Theo mặc định, FreeTube sẽ giả định rằng trình phát bên ngoài đã chọn có thể được tìm thấy thông qua biến môi trường PATH. Nếu cần, bạn có thể đặt một đường dẫn tuỳ chọn ở đây.
+    Custom External Player Executable: Theo mặc định, OpenTubeX sẽ giả định rằng trình phát bên ngoài đã chọn có thể được tìm thấy thông qua biến môi trường PATH. Nếu cần, bạn có thể đặt một đường dẫn tuỳ chọn ở đây.
     Ignore Warnings: 'Loại bỏ cảnh báo khi trình phát bên ngoài hiện tại không hỗ trợ cho thao tác hiện tại (ví dụ: đảo ngược danh sách phát, v.v.).'
     DefaultCustomArgumentsTemplate: "(Mặc định: '{defaultCustomArguments}')"
     External Player: Chọn một trình phát bên ngoài sẽ hiển thị một biểu tượng để mở video (danh sách phát nếu được hỗ trợ) trong trình phát bên ngoài, trên hình thu nhỏ của video. Cảnh báo, cài đặt Invidious không ảnh hưởng đến trình phát bên ngoài.
     Ignore Default Arguments: Không gửi các tham số mặc định đến trình phát bên ngoài ngoài URL của video (như tốc độ phát, URL danh sách phát, v.v.). Các tham số tùy chỉnh vẫn sẽ được gửi.
   Subscription Settings:
-    Fetch Feeds from RSS: Khi được bật lên, FreeTube sẽ sử dụng RSS thay vì phương thức mặc định để lấy nguồn cấp dữ liệu đăng ký của bạn. RSS nhanh hơn và tránh việc bị chặn IP, nhưng không cung cấp thông tin nhất định như thời lượng video, trạng thái phát trực tiếp hoặc các bài đăng
-    Fetch Automatically: Khi được bật, FreeTube sẽ tự động lấy nguồn cấp dữ liệu đăng ký của bạn khi khởi động, khi mở cửa sổ mới.
+    Fetch Feeds from RSS: Khi được bật lên, OpenTubeX sẽ sử dụng RSS thay vì phương thức mặc định để lấy nguồn cấp dữ liệu đăng ký của bạn. RSS nhanh hơn và tránh việc bị chặn IP, nhưng không cung cấp thông tin nhất định như thời lượng video, trạng thái phát trực tiếp hoặc các bài đăng
   Distraction Free Settings:
     Hide Channels: Nhập tên kênh hoặc ID kênh để ẩn tất cả video, danh sách phát và chính kênh đó khỏi xuất hiện trong tìm kiếm, xu hướng, phổ biến nhất và được đề xuất. Tên kênh đã nhập phải khớp hoàn toàn và có phân biệt chữ hoa chữ thường.
     Hide Subscriptions Live: Cài đặt này bị ghi đè bởi cài đặt "{appWideSetting}" trên toàn ứng dụng, trong phần "{subsection}" của "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Nhập một từ khóa hoặc cụm từ (không phân biết hoa thường) để ẩn các video & danh sách phát có tiêu đề gốc chứa các mục đó khỏi FreeTube, ngoại trừ các video trong Lịch sử, các danh sách phát của bạn, và video trong các danh sách phát.
+    Hide Videos, Playlists and Channels Containing Text: Nhập một từ khóa hoặc cụm từ (không phân biết hoa thường) để ẩn các video & danh sách phát có tiêu đề gốc chứa các mục đó khỏi OpenTubeX, ngoại trừ các video trong Lịch sử, các danh sách phát của bạn, và video trong các danh sách phát.
     Hide Videos on Watch: Ẩn các video đã xem khỏi tab Video, Video ngắn và Trực tiếp trên trang Đăng ký và Kênh. Điều này không ảnh hưởng đến tab Trang chủ trên trang Kênh
   SponsorBlock Settings:
     UseDeArrowThumbnails: Thay thế thumbnail video bằng thumbnail gửi từ DeArrow.

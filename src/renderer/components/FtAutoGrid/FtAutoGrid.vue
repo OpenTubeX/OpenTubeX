@@ -1,20 +1,324 @@
 <template>
-  <div
+  <TransitionGroup
+    ref="gridElement"
+    tag="div"
+    name="feed"
+    :appear="appear"
+    :duration="transitionDurations"
+    :move-class="moveClass"
+    :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
+    :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
+      autoGrid: true,
       grid: grid,
-      list: !grid
+      list: !grid,
+      thumbnailSizeReady: grid && thumbnailSizeReady,
+      youtubeStyleShorts
     }"
+    @before-leave="captureLeavingItemLayout"
   >
     <slot />
-  </div>
+  </TransitionGroup>
 </template>
 
 <script setup>
-defineProps({
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+
+import store from '../../store/index'
+
+import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { measureStableGridWidth } from './gridWidth'
+import { measureLeavingItemLayouts } from './leavingItemLayout'
+
+const props = defineProps({
+  appear: {
+    type: Boolean,
+    default: false
+  },
   grid: {
     type: Boolean,
     required: true
+  },
+  itemCount: {
+    type: Number,
+    default: 0
+  },
+  itemKeys: {
+    type: Array,
+    default: null
+  },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false
   }
+})
+
+// Above this many items the move transition costs more than it conveys. Vue's
+// FLIP measures and then writes a transform per child in one loop, so every
+// item forces its own layout pass; on a feed of hundreds of cards that stalls
+// the very interaction (pagination, filtering) it is meant to smooth over.
+const MOVE_TRANSITION_MAX_ITEMS = 50
+
+const gridElement = useTemplateRef('gridElement')
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+const animationSpeedMultiplier = computed(() => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed))
+const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.value}ms`)
+
+// The thumbnail size custom properties are written straight to the element
+// instead of through a reactive `:style` binding, and the measured width is
+// kept out of the reactive graph: TransitionGroup's render function calls
+// getBoundingClientRect() on every child, so any re-render of this component
+// costs a layout pass over the whole feed. Dragging the thumbnail size slider
+// emits an event per step, which turned that into hundreds of forced layouts.
+let gridWidth = 0
+let renderedGridWidth = 0
+let active = true
+
+function updateGridSliderLimit() {
+  const element = gridElement.value?.$el
+  if (element) setThumbnailGridVisible(element, active && props.grid && gridWidth > 0, thumbnailSizeSetting)
+}
+
+watch(() => props.grid, updateGridSliderLimit)
+onActivated(() => {
+  active = true
+  updateGridSliderLimit()
+})
+onDeactivated(() => {
+  keepBottomGeneration++
+  active = false
+  updateGridSliderLimit()
+})
+
+// Only whether the width is known needs to reach the template, and that flips
+// just once, right after mount.
+const thumbnailSizeReady = ref(false)
+
+// While the container itself is being sized or resized (initial layout,
+// window resize, or a modal's
+// scrollbar compensation nudging the layout by a fraction of a pixel at
+// fractional display scales), the FLIP move transition must not run —
+// it should only animate actual list changes. 'feed-move-suppressed' has
+// no transition, so the TransitionGroup skips the move handling entirely.
+const suppressMoveTransition = ref(false)
+let suppressResetTimeout = null
+
+const systemReducedMotion = usePhoneLayout('(prefers-reduced-motion: reduce)')
+const reducedMotion = computed(() => store.getters.getReducedMotion === 'on' ||
+  (store.getters.getReducedMotion === 'system' && systemReducedMotion.value))
+
+// Vue otherwise infers timing with getComputedStyle for every entering card,
+// interleaving style reads with class writes across the whole incoming batch.
+const transitionDurations = computed(() => {
+  return {
+    enter: reducedMotion.value ? 0 : 300 / animationSpeedMultiplier.value,
+    // Only the New feed fades departing cards; other lists remove them immediately.
+    leave: reducedMotion.value || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
+  }
+})
+
+// 'feed-move-suppressed' has no transition, and data-skip-move tells the
+// patched TransitionGroup not to measure every child before each update.
+const moveClass = computed(() => {
+  const suppressed = suppressMoveTransition.value ||
+    reducedMotion.value ||
+    props.itemCount > MOVE_TRANSITION_MAX_ITEMS
+
+  return suppressed ? 'feed-move-suppressed' : undefined
+})
+
+// Grids forced on a list preference, such as Shorts, keep automatic columns.
+function getGridColumns() {
+  const viewType = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
+  if (viewType === 'fullWidth') return 1
+  return viewType === 'grid' ? store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]] : 0
+}
+
+function applyThumbnailSizeStyles() {
+  const element = gridElement.value?.$el
+
+  if (!element) {
+    return
+  }
+
+  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth, getGridColumns())
+
+  for (const [property, value] of Object.entries(styles)) {
+    element.style.setProperty(property, value)
+  }
+}
+
+watch(() => [
+  store.state.settings[thumbnailSizeSetting],
+  store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]],
+  store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]]
+], applyThumbnailSizeStyles)
+
+let leavingItemLayouts = null
+let pendingLeavingItems = []
+onBeforeUpdate(() => {
+  leavingItemLayouts = null
+  pendingLeavingItems = []
+  const grid = gridElement.value?.$el
+  if (!props.itemKeys || !(grid instanceof Element) || grid.closest('.newFeed') === null) return
+  const retainedKeys = new Set(props.itemKeys)
+  const leaving = Array.from(grid.children).filter(element => (
+    !retainedKeys.has(element.getAttribute('data-feed-item-key')) &&
+    !element.classList.contains('feed-leave-active')
+  ))
+  if (leaving.length === 0) return
+  leavingItemLayouts = measureLeavingItemLayouts(grid)
+  pendingLeavingItems = leaving
+  nextTick(() => { leavingItemLayouts = null })
+})
+
+function applyLeavingItemLayout(element) {
+  const layout = leavingItemLayouts.get(element)
+  if (!layout) return
+  for (const [dimension, value] of Object.entries(layout)) {
+    element.style.setProperty(`--feed-leave-${dimension}`, `${value}px`)
+  }
+}
+
+function captureLeavingItemLayout(element) {
+  // Only the New feed takes leaving items out of flow and consumes these
+  // geometry variables. Measuring every removed card in other feeds forces
+  // repeated layouts during a large subscription refresh.
+  if (!(element instanceof Element) || element.closest('.newFeed') === null) {
+    return
+  }
+
+  if (leavingItemLayouts === null) {
+    leavingItemLayouts = measureLeavingItemLayouts(gridElement.value.$el)
+    nextTick(() => { leavingItemLayouts = null })
+  }
+  // TransitionGroup has now captured the retained cards' original positions.
+  // Vue forces a reflow in each leave hook. Position the entire departing
+  // batch first so those reflows see no intervening layout-changing writes.
+  for (const leaving of pendingLeavingItems) {
+    applyLeavingItemLayout(leaving)
+    leaving.classList.add('feed-leave-active')
+  }
+  pendingLeavingItems = []
+  applyLeavingItemLayout(element)
+}
+
+let resizeObserver = null
+let phoneWidthQuery = null
+let observedScrollbarWidth = 0
+let observedViewportWidth = null
+let pageAtBottom = false
+
+// A newer measurement, deactivation or unmount cancels pending settle frames.
+let keepBottomGeneration = 0
+
+function keepPageAtBottom(frames, generation) {
+  if (generation !== keepBottomGeneration) return
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  const target = window.scrollY
+  if (frames > 0) {
+    requestAnimationFrame(() => {
+      if (generation !== keepBottomGeneration) return
+      // Growing rows leave the position in place and shrinking ones keep it at
+      // the end. A position above both means the page was scrolled away.
+      const root = document.documentElement
+      const atBottom = root.scrollHeight - root.clientHeight - window.scrollY <= 2
+      if (window.scrollY < target - 2 && !atBottom) return
+      keepPageAtBottom(frames - 1, generation)
+    })
+  }
+}
+
+function updatePageAtBottom() {
+  const root = document.documentElement
+  pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
+}
+
+/**
+ * @param {number} contentWidth
+ * @param {boolean} [viewportCrossedPhoneWidth]
+ */
+function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
+  const element = gridElement.value?.$el
+  if (!element) return
+  const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
+    document.body.style.paddingInlineEnd !== ''
+  const measurement = measureStableGridWidth(
+    contentWidth,
+    observedScrollbarWidth,
+    observedViewportWidth,
+    window.innerWidth,
+    document.documentElement.clientWidth,
+    scrollbarCompensated
+  )
+  observedScrollbarWidth = measurement.scrollbarWidth
+  observedViewportWidth = measurement.viewportWidth
+
+  const widthAdjustmentChanged = contentWidth - measurement.gridWidth !== renderedGridWidth - gridWidth
+  renderedGridWidth = contentWidth
+
+  if (measurement.gridWidth !== gridWidth) {
+    // Scroll anchoring keeps the top visible card in place, which leaves a
+    // page that was scrolled to its end above the new end. This includes the
+    // first measurement, when a grid replaces a list at the end of the page.
+    // Resize observations run after layout and any restored scroll position.
+    if (gridWidth === 0) updatePageAtBottom()
+    const keepBottom = pageAtBottom && measurement.gridWidth > 0 && !element.closest('[inert]')
+    suppressMoveTransition.value = true
+    clearTimeout(suppressResetTimeout)
+    suppressResetTimeout = setTimeout(() => {
+      suppressMoveTransition.value = false
+    }, 100)
+
+    gridWidth = measurement.gridWidth
+    updateGridSliderLimit()
+    applyThumbnailSizeStyles()
+    thumbnailSizeReady.value = gridWidth > 0
+    // thumbnailSizeReady resizes the cards once Vue renders it, and windowed
+    // rows settle their measured size over the following frames.
+    if (keepBottom) {
+      const generation = ++keepBottomGeneration
+      nextTick(() => keepPageAtBottom(2, generation))
+    }
+  } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
+    // Keeps the stretched size equal to the stable one under a transient
+    // scrollbar, and applies the phone column minimum to a constrained grid.
+    applyThumbnailSizeStyles()
+  }
+  updatePageAtBottom()
+}
+
+// A grid whose width stays the same still changes its phone column minimum.
+// The stored width belongs to the previous layout, so measure the new one.
+function handlePhoneWidthChange() {
+  const element = gridElement.value?.$el
+  if (!element || gridWidth === 0) return
+  const style = getComputedStyle(element)
+  const horizontalInsets = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
+    .reduce((total, property) => total + (Number.parseFloat(style[property]) || 0), 0)
+  updateGridWidth(element.getBoundingClientRect().width - horizontalInsets, true)
+}
+
+onMounted(() => {
+  phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
+  phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
+
+  resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
+  resizeObserver.observe(gridElement.value.$el)
+  window.addEventListener('scroll', updatePageAtBottom, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  keepBottomGeneration++
+  active = false
+  updateGridSliderLimit()
+  resizeObserver?.disconnect()
+  phoneWidthQuery?.removeEventListener('change', handlePhoneWidthChange)
+  window.removeEventListener('scroll', updatePageAtBottom)
+  clearTimeout(suppressResetTimeout)
 })
 </script>
 

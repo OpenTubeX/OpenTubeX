@@ -1,16 +1,22 @@
 <template>
   <div
     v-if="showResult"
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    ref="shell"
+    v-first-visible="(windowed && !deferWindowing) || windowItemObserved || visible ? false : onFirstVisible"
+    :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
     :class="{
       grid: layout === 'grid',
       list: layout === 'list',
       draggable: isDraggable,
-      draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      pointerDragging,
+      draggedVideo: isVideoDragging && draggedVideo.videoId === videoData.videoId && draggedVideo.playlistItemId === videoData.playlistItemId,
     }"
-    :draggable="isDraggable"
+    :draggable="isDraggable && !pointerDragging"
+    :data-playlist-drag-item="isDraggable ? '' : null"
+    :data-video-id="videoData.videoId"
+    :data-playlist-item-id="videoData.playlistItemId"
+    @pointerdown.capture="isDraggable && startPointerDrag($event, videoData)"
+    @keydown="isDraggable && moveWithKeyboard($event, videoData)"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -19,17 +25,18 @@
       <FtListVideo
         v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
         :playlist-id="playlistId"
         :playlist-type="playlistType"
         :playlist-item-id="playlistItemId"
         :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
+        :show-watched-style-in-history="showWatchedStyleInHistory"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
         :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
         :can-move-video-up="canMoveVideoUp"
         :can-move-video-down="canMoveVideoDown"
         :can-remove-from-playlist="canRemoveFromPlaylist"
-        :layout="layout"
+        :force-list-type="layout"
         :show-grab-bar="showGrabBar && layout === 'grid'"
         :grab-bar-enabled="isDraggable && layout === 'grid'"
         @move-video-up="moveVideoUp"
@@ -41,44 +48,54 @@
       <FtListChannel
         v-else-if="finalDataType === 'channel'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
       <FtListPlaylist
         v-else-if="finalDataType === 'playlist'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
         :search-query-text="searchQueryText"
+        :show-grab-bar="isDraggable"
       />
       <FtCommunityPost
         v-else-if="finalDataType === 'community'"
         :hide-forbidden-titles="hideForbiddenTitles"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
       <FtListHashtag
         v-else-if="data.type === 'hashtag'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { computed, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
+import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
+import { vFirstVisible } from '../../helpers/firstVisible'
 
-import { handleDragAndDrop } from '../../helpers/dragAndDrop'
+import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
-import FtListChannel from '../FtListChannel/FtListChannel.vue'
-import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
-import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
-import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
+import {
+  FtCommunityPost,
+  FtListChannel,
+  FtListHashtag,
+  FtListPlaylist,
+} from './lazyListComponents'
 
 import store from '../../store/index'
+import { isOnAiSlopList } from '../../helpers/aiSlopList'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
   data: {
     type: Object,
     required: true
@@ -103,6 +120,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
+  },
   useChannelsHiddenPreference: {
     type: Boolean,
     default: true,
@@ -112,6 +133,10 @@ const props = defineProps({
     default: true,
   },
   hideForbiddenTitles: {
+    type: Boolean,
+    default: true
+  },
+  hideMembersOnly: {
     type: Boolean,
     default: true
   },
@@ -178,9 +203,11 @@ const emit = defineEmits([
 ])
 
 const inUserPlaylist = props.playlistType === 'user'
-const showGrabBar = computed(() => inUserPlaylist && props.videoDraggingPossible)
+// Playlist cards reorder with the same events, keyed by their playlist ID.
+const isPlaylistCard = (props.data.type ?? props.dataType) === 'playlist'
+const showGrabBar = computed(() => (inUserPlaylist || isPlaylistCard) && props.videoDraggingPossible)
 const isDraggable = computed(() => showGrabBar.value && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag } = handleDragAndDrop(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -210,24 +237,27 @@ const hideUpcomingPremieres = computed(() => {
   return store.getters.getHideUpcomingPremieres
 })
 
-/** @type {import('vue').ComputedRef<{name : string, preferredName: string, icon: string}[]>} */
-const channelsHidden = computed(() => {
-  // Some component users like channel view will have this disabled
-  if (!props.useChannelsHiddenPreference) { return [] }
+const EMPTY_SET = new Set()
 
-  return JSON.parse(store.getters.getChannelsHidden).map((ch) => {
-    // Legacy support
-    if (typeof ch === 'string') {
-      return { name: ch, preferredName: '', icon: '' }
-    }
-    return ch
-  })
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const channelsHiddenNames = computed(() => {
+  // Some component users like channel view will have this disabled
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getActiveChannelsHiddenNames
 })
 
-/** @type {string[]} */
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const aiSlopChannels = computed(() => {
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getAiSlopBlockedChannels
+})
+
+/** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
+  return store.getters.getActiveForbiddenTitles
 })
 
 const showResult = computed(() => {
@@ -238,38 +268,14 @@ const showResult = computed(() => {
   }
 
   if (dataType === 'video' || dataType === 'shortVideo') {
-    if (hideLiveStreams.value && (props.data.liveNow || props.data.lengthSeconds == null)) {
-      // hide livestreams
-      return false
-    }
-
-    if (hideUpcomingPremieres.value &&
-        // Observed for premieres in Local API Channels.
-        (props.data.premiereDate != null ||
-          // Invidious API
-          // `premiereTimestamp` only available on premiered videos
-          // https://docs.invidious.io/api/common_types/#videoobject
-          props.data.premiereTimestamp != null ||
-          // viewCount is our only method of detecting premieres in RSS
-          // data without sending an additional request.
-          // If we ever get a better flag, use it here instead.
-          (props.data.isRSS && props.data.viewCount === '0'))) {
-      // hide upcoming
-      return false
-    }
-
-    const lowerCaseAuthor = props.data.author?.toLowerCase()
-
-    if (channelsHidden.value.some(ch => ch.name === props.data.authorId || (props.data.collaborators?.length > 0 && ch.name === props.data.collaborators[0].id)) ||
-    channelsHidden.value.some(ch => ch.name === props.data.author) ||
-    (lowerCaseAuthor != null && forbiddenTitles.value.some(text => lowerCaseAuthor.includes(text)))) {
-      // hide videos by author
-      return false
-    }
-
-    const lowerCaseTitle = props.data.title?.toLowerCase()
-
-    if (lowerCaseTitle != null && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) {
+    if (isVideoHiddenByPreferences(props.data, {
+      hideLiveStreams: hideLiveStreams.value,
+      hideUpcomingPremieres: hideUpcomingPremieres.value,
+      hiddenChannelNames: channelsHiddenNames.value,
+      aiSlopChannels: aiSlopChannels.value,
+      forbiddenTitles: forbiddenTitles.value,
+      membersOnlyChannelIds: props.hideMembersOnly ? store.getters.getMembersOnlyChannelIdSet : null
+    })) {
       return false
     }
   } else if (dataType === 'channel') {
@@ -285,8 +291,12 @@ const showResult = computed(() => {
 
     const lowerCaseName = props.data.name?.toLowerCase()
 
-    if ((attrsToCheck.some(a => a != null && channelsHidden.value.some(ch => ch.name === a))) ||
-      (lowerCaseName != null && forbiddenTitles.value.some((text) => lowerCaseName.includes(text)))) {
+    if ((attrsToCheck.some(a => a != null && channelsHiddenNames.value.has(a))) ||
+      isOnAiSlopList(aiSlopChannels.value, {
+        authorId: props.data.id ?? props.data.authorId,
+        authorHandle: props.data.handle ?? props.data.channelHandle
+      }) ||
+      (forbiddenTitles.value.some((text) => lowerCaseName.includes(text)))) {
       // hide channels by author
       return false
     }
@@ -309,7 +319,7 @@ const showResult = computed(() => {
       props.data.authorId,
     ]
 
-    if (attrsToCheck.some(a => a != null && channelsHidden.value.some(ch => ch.name === a))) {
+    if (attrsToCheck.some(a => a != null && channelsHiddenNames.value.has(a))) {
       // hide playlists by author
       return false
     }
@@ -318,14 +328,59 @@ const showResult = computed(() => {
 })
 
 const visible = ref(props.firstScreen)
-
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible) {
-    visible.value = isVisible
+// Evaluate only when the card mounts. Metadata edits remain reactive without
+// copying every cached entry before pagination or lazy rendering.
+const displayedData = computed(() => props.dataOverrides
+  ? { ...reactive(props.data), ...props.dataOverrides }
+  : props.data)
+// Community cards contain expandable text/media whose local state must survive scrolling.
+const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
+const deferWindowing = process.env.IS_ELECTRON
+const shell = useTemplateRef('shell')
+const shellHeight = ref(0)
+const windowItemObserved = ref(false)
+let windowItem
+if (windowed) {
+  function startWindowing(element) {
+    windowItem = observeWindowedListItem(element, {
+      mount: () => { visible.value = true },
+      unmount: height => { shellHeight.value = height; visible.value = false },
+      isMounted: () => visible.value,
+      isProtected: () => {
+        let nearViewport = false
+        if (deferWindowing) {
+          if (!element.isConnected) return true
+          // KeepAlive can report an old intersection as a feed tab reattaches.
+          const bounds = element.getBoundingClientRect()
+          nearViewport = bounds.bottom > -WINDOWED_LIST_OVERSCAN_PX &&
+            bounds.top < window.innerHeight + WINDOWED_LIST_OVERSCAN_PX
+        }
+        return nearViewport || props.isVideoDragging ||
+          element.contains(document.activeElement) ||
+          !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
+      },
+    })
+    windowItemObserved.value = true
   }
+  watch(shell, element => {
+    windowItem?.dispose()
+    windowItem = null
+    windowItemObserved.value = false
+    if (element && (!deferWindowing || visible.value)) startWindowing(element)
+  }, { flush: 'post' })
+  if (deferWindowing) {
+    watch(visible, isVisible => {
+      if (isVisible && shell.value && !windowItem) startWindowing(shell.value)
+    }, { flush: 'post' })
+  }
+  watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
+  // Two-line titles change row heights without a resize that remeasures shells.
+  watch(() => store.getters.getLimitTitlesToTwoLines, () => windowItem?.remeasure(), { flush: 'post' })
+  onBeforeUnmount(() => windowItem?.dispose())
+}
+
+function onFirstVisible() {
+  visible.value = true
 }
 
 /**
@@ -378,10 +433,9 @@ function onDragVideo(event) {
 /** @import { VideoData } from '../../helpers/dragAndDrop' */
 
 /** @type {VideoData} */
-const videoData = {
-  videoId: props.data.videoId,
-  playlistItemId: props.playlistItemId,
-}
+const videoData = isPlaylistCard
+  ? { videoId: props.data._id ?? props.data.playlistId, playlistItemId: props.data._id ?? props.data.playlistId }
+  : { videoId: props.data.videoId, playlistItemId: props.playlistItemId }
 
 </script>
 

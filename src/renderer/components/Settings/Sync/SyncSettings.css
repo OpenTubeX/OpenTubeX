@@ -1,0 +1,184 @@
+.description,
+.connectionStatus,
+.lastSync,
+.compatibilityWarning,
+.privacyStatus,
+.privacyWarning,
+.privacyHint,
+.privacyPolicy,
+.serverCheckStatus,
+.sharedTabsWarning,
+.error {
+  text-align: center;
+}
+
+.description,
+.lastSync {
+  color: var(--secondary-text-color);
+}
+
+.description {
+  box-sizing: border-box;
+  line-height: 1.4;
+  margin-block: 0.25rem 1rem;
+  margin-inline: auto;
+  max-inline-size: calc(88ch + 2.5rem);
+  padding-inline: 1.25rem;
+}
+
+.connectionStatus {
+  margin-block: 0.75rem 0.5rem;
+}
+
+.lastSync,
+.compatibilityWarning {
+  margin-block: 0.5rem;
+}
+
+.syncProgress {
+  margin-block: 0.75rem;
+  margin-inline: auto;
+  max-inline-size: 32rem;
+}
+
+.syncProgressLabel {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-block-end: 0.35rem;
+}
+
+.syncProgressLabel > :last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.syncProgressTrack {
+  background-color: var(--side-nav-color);
+  block-size: 0.4rem;
+  border-radius: var(--shape-corner-full);
+  overflow: hidden;
+}
+
+.syncProgressFill {
+  animation: sync-progress-stripes 700ms linear infinite;
+  background-color: var(--primary-color);
+  background-image: linear-gradient(
+    -45deg,
+    rgb(255 255 255 / 18%) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgb(255 255 255 / 18%) 50%,
+    rgb(255 255 255 / 18%) 75%,
+    transparent 75%
+  );
+  background-size: 1rem 1rem;
+  block-size: 100%;
+  transition: inline-size var(--motion-default-effects);
+}
+
+@keyframes sync-progress-stripes {
+  to {
+    background-position: 1rem 0;
+  }
+}
+
+.privacyStatus,
+.privacyWarning {
+  margin-block: 0.5rem;
+}
+
+.privacyHint {
+  color: var(--secondary-text-color);
+  margin-block: 0.5rem;
+}
+
+.privacyPolicy {
+  margin-block: 0.5rem;
+}
+
+.serverCheckStatus {
+  color: var(--secondary-text-color);
+  margin-block: 0.5rem;
+}
+
+.privacyWarning {
+  color: var(--error-color, #c62828);
+  font-weight: 600;
+}
+
+.compatibilityWarning {
+  color: var(--secondary-text-color);
+  font-style: italic;
+}
+
+.error {
+  color: var(--error-color, #c62828);
+  overflow-wrap: anywhere;
+}
+
+.fields {
+  align-items: center;
+  flex-direction: column;
+}
+
+.toggles {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  margin-block: 0.25rem 0.75rem;
+  place-items: center;
+}
+
+.syncOptions {
+  justify-items: start;
+}
+
+.fields :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+}
+
+.actions {
+  justify-content: center;
+}
+
+.deleteAccountWarning {
+  margin-inline: auto;
+  max-inline-size: 38rem;
+  text-align: center;
+}
+
+.deleteAccountContent {
+  box-sizing: border-box;
+}
+
+.deleteAccountContent :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+  margin-inline: auto;
+}
+
+.passwordForm {
+  display: grid;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.passwordForm p {
+  margin: 0;
+}
+
+.dataLossItems {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  padding-inline-start: 1.5rem;
+}
+
+.dataLossItems li {
+  margin-block: 0.5rem;
+}
+
+.dataLossItems small {
+  color: var(--secondary-text-color);
+  display: block;
+}

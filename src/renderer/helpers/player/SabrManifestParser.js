@@ -1,10 +1,10 @@
 import shaka from 'shaka-player'
 import { parseWebmSegmentIndex } from './WebmSegmentIndexParser'
 import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
-import { MIME_TYPE_CODECS_REGEX } from '../utils.js'
 
 /**
  * @typedef {{
+ *   scheme: string,
  *   duration: number,
  *   formats: {
  *     itag: number,
@@ -73,6 +73,8 @@ import { MIME_TYPE_CODECS_REGEX } from '../utils.js'
 const NetworkingEngine = shaka.net.NetworkingEngine
 
 export const MANIFEST_TYPE_SABR = 'application/sabr+json'
+
+const CODECS_REGEX = /codecs="?([^"]+)"?/
 
 const VIDEO_CODEC_PRIORITIES = [
   'av01',
@@ -185,12 +187,19 @@ class SabrManifestParser {
             hasVoiceBoostAudio,
             presentationTimeline,
             networkingEngine,
-            fakeVideoFormatId
+            fakeVideoFormatId,
+            manifestData.scheme
           )
         )
       } else if (!this._config.disableVideo) {
         videoStreams.push(
-          /** @__NOINLINE__ */ createVideoStream(format, currentId++, presentationTimeline, networkingEngine)
+          /** @__NOINLINE__ */ createVideoStream(
+            format,
+            currentId++,
+            presentationTimeline,
+            networkingEngine,
+            manifestData.scheme
+          )
         )
       }
     }
@@ -246,9 +255,6 @@ class SabrManifestParser {
     currentId += textStreams.length
 
     const imageStreams = /** @__NOINLINE__ */ createImageStreams(manifestData.storyboards, presentationTimeline, currentId)
-    currentId += imageStreams.length
-
-    const chapterStreams = /** @__NOINLINE__ */ createChapterStreams(manifestData.chapters, currentId)
 
     /** @type {shaka.extern.Manifest} */
     const manifest = {
@@ -257,7 +263,7 @@ class SabrManifestParser {
       variants,
       textStreams,
       imageStreams,
-      chapterStreams,
+      chapterStreams: [],
       presentationTimeline,
 
       gapCount: 0,
@@ -299,6 +305,7 @@ function buildFormatId(format) {
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
  * @param {string | undefined} fakeVideoFormatId
+ * @param {string} scheme
  */
 function createAudioStream(
   format,
@@ -307,7 +314,8 @@ function createAudioStream(
   hasVoiceBoostAudio,
   presentationTimeline,
   networkingEngine,
-  fakeVideoFormatId
+  fakeVideoFormatId,
+  scheme
 ) {
   const roles = []
 
@@ -353,7 +361,7 @@ function createAudioStream(
     id,
     originalId: buildFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
-    codecs: format.mimeType.match(MIME_TYPE_CODECS_REGEX)[1],
+    codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
     bandwidth: format.bitrate,
     audioSamplingRate: format.audioSampleRate ?? null,
@@ -374,6 +382,7 @@ function createAudioStream(
         stream,
         presentationTimeline,
         networkingEngine,
+        scheme,
         fakeVideoFormatId
       )
     },
@@ -406,8 +415,9 @@ function createAudioStream(
  * @param {number} id
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
  */
-function createVideoStream(format, id, presentationTimeline, networkingEngine) {
+function createVideoStream(format, id, presentationTimeline, networkingEngine, scheme) {
   const colorGamut = format.colorPrimaries === 'BT2020' ? 'rec2020' : 'srgb'
 
   let hdr = 'SDR'
@@ -424,7 +434,7 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine) {
     id,
     originalId: buildFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
-    codecs: format.mimeType.match(MIME_TYPE_CODECS_REGEX)[1],
+    codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
     bandwidth: format.bitrate,
     width: format.width,
@@ -438,7 +448,7 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine) {
       // shaka-player sometimes calls the create function even when the segment index already exists
       if (stream.segmentIndex) { return }
 
-      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine)
+      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine, scheme)
     },
     closeSegmentIndex: () => {
       if (stream.segmentIndex) {
@@ -625,88 +635,11 @@ function createImageStreams(storyboards, presentationTimeline, currentId) {
 }
 
 /**
- * @param {SabrManifest['chapters']} chapters
- * @param {number} currentId
- */
-function createChapterStreams(chapters, currentId) {
-  if (chapters.length === 0) {
-    return []
-  }
-
-  /** @type {shaka.media.SegmentReference[]} */
-  const references = []
-
-  for (const chapter of chapters) {
-    const reference = new shaka.media.SegmentReference(
-      chapter.startSeconds,
-      chapter.endSeconds,
-      () => [],
-      /* startByte= */ 0,
-      /* endByte= */ null,
-      /* initSegmentReference= */ null,
-      /* timestampOffset= */ 0,
-      /* appendWindowStart= */ 0,
-      /* appendWindowEnd= */ Infinity
-    )
-
-    reference.setMetadata({
-      title: chapter.title,
-      images: chapter.thumbnail
-        ? [{
-            url: chapter.thumbnail.url,
-            width: chapter.thumbnail.width,
-            height: chapter.thumbnail.height,
-          }]
-        : []
-    })
-
-    references.push(reference)
-  }
-
-  /** @type {shaka.extern.Stream} */
-  const stream = {
-    id: currentId,
-    originalId: null,
-    groupId: null,
-    createSegmentIndex: () => Promise.resolve(),
-    segmentIndex: new shaka.media.SegmentIndex(references),
-    mimeType: 'text/plain',
-    codecs: '',
-    supplementalCodecs: '',
-    kind: '',
-    encrypted: false,
-    drmInfos: [],
-    keyIds: new Set(),
-    language: 'und',
-    originalLanguage: 'und',
-    label: null,
-    type: 'chapter',
-    primary: false,
-    trickModeVideo: null,
-    dependencyStream: null,
-    emsgSchemeIdUris: null,
-    roles: [],
-    forced: false,
-    channelsCount: null,
-    audioSamplingRate: null,
-    spatialAudio: false,
-    closedCaptions: null,
-    accessibilityPurpose: null,
-    external: true,
-    fastSwitching: false,
-    fullMimeTypes: new Set(['text/plain']),
-    isAudioMuxedInVideo: false,
-    baseOriginalId: null
-  }
-
-  return [stream]
-}
-
-/**
  * @param {SabrManifest['formats'][0]} format
  * @param {shaka.extern.Stream} stream
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
  * @param {string | undefined} fakeVideoFormatId
  */
 async function createMediaSegmentIndex(
@@ -714,9 +647,10 @@ async function createMediaSegmentIndex(
   stream,
   presentationTimeline,
   networkingEngine,
+  scheme,
   fakeVideoFormatId = undefined
 ) {
-  let url = `sabr:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
+  let url = `${scheme}:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
 
   if (fakeVideoFormatId) {
     url += `&videoFormatId=${encodeURIComponent(fakeVideoFormatId)}`

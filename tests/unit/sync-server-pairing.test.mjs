@@ -1,0 +1,293 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import {
+  Aes256Gcm,
+  CipherSuite,
+  DhkemX25519HkdfSha256,
+  HkdfSha256,
+} from '@hpke/core'
+import {
+  bindPairingRequestToAccount,
+  createPairingInvite,
+  createPairingInvitePayload,
+  createPairingQrPayload,
+  createPairingRecipient,
+  createPairingRequest,
+  decryptPairingKey,
+  encryptPairingKey,
+  pairingComparisonCode,
+  pairingRequestFromInviteSession,
+  pairingSessionMatchesRequest,
+  parsePairingInvitePayload,
+  parsePairingQrPayload,
+  syncServerTokenAccountId,
+  randomPairingDeviceId,
+  randomPairingVerificationCode,
+} from '../../src/renderer/helpers/sync-server-pairing.js'
+
+const ORIGIN = 'https://sync.example.com'
+const ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+const PRIVACY = {
+  key: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
+  salt: 'AAECAwQFBgcICQoLDA0ODw==',
+  version: 1,
+}
+const TRANSFER = {
+  ...PRIVACY,
+  username: 'sync-user',
+  token: 'header.payload.signature',
+  verificationCode: '042731',
+}
+
+const VECTOR_PAYLOAD = 'AXrwPfFZ4tdXUcGojrWp6HmI8Tjc51luvaOtfwuwSoc02gY_WD6GVfCyLGKwYSuknzs_H11knturZTqjsTJrRcQt8oshhSYeR5zmADfHjlxtUOUtbFjE4FXS_YonTthVfWHiloh8tvG4Azunpwg9xCbRkx_yUqT1hHt-x2LNH8YqrdE6i019RuzpbRiUhwqd6mURrvdyDl5nuDJz5GnrrYCE2J4yf74i0V-6Ji-_WLGK2NH_L8apZxPQoshh0sYNiddX75ZcxWVcbAYGLHYdxAZNKR4M9qciId_PomIm4Op2SCCw2NH98YqJ7jD6YDLzHXEpx3K2qFlwCL0IjqzbG5rQbXg6a62l'
+
+async function pairingRequest (deviceName = 'Living room laptop') {
+  const recipient = await createPairingRecipient(deviceName)
+  const qr = createPairingQrPayload(recipient, ORIGIN)
+  const qrRequest = parsePairingQrPayload(qr)
+  const request = bindPairingRequestToAccount(qrRequest, ACCOUNT_ID)
+  return { recipient, qrRequest, request, qr }
+}
+
+test('pairing again keeps the saved device identity but refreshes pairing credentials', async () => {
+  const id = randomPairingDeviceId()
+  const first = await createPairingRecipient('Pixel', id)
+  const second = await createPairingRecipient('Pixel', id)
+  assert.equal(first.recipientDeviceId, id)
+  assert.equal(second.recipientDeviceId, id)
+  for (const field of ['sessionId', 'recipientPublicKey', 'pairingSecret', 'recipientToken']) {
+    assert.notEqual(first[field], second[field])
+  }
+  assert.equal(parsePairingQrPayload(createPairingQrPayload(second, ORIGIN)).recipientDeviceId, id)
+})
+
+test('pairing creates a valid identity when the saved one is missing or corrupt', async () => {
+  for (const savedId of ['', 'corrupt', null]) {
+    const recipient = await createPairingRecipient('Pixel', savedId)
+    assert.equal(parsePairingQrPayload(createPairingQrPayload(recipient, ORIGIN)).recipientDeviceId,
+      recipient.recipientDeviceId)
+    assert.notEqual(recipient.recipientDeviceId, savedId)
+  }
+})
+
+test('transfers account authorization and the privacy key with HPKE PSK authentication', async () => {
+  const { recipient, request } = await pairingRequest()
+  const approvingDeviceId = randomPairingDeviceId()
+  const payload = await encryptPairingKey(request, approvingDeviceId, TRANSFER)
+
+  const received = await decryptPairingKey(
+    request,
+    approvingDeviceId,
+    recipient.recipientKey,
+    payload
+  )
+
+  assert.deepEqual(received, {
+    username: TRANSFER.username,
+    token: TRANSFER.token,
+    ...PRIVACY,
+    verificationCode: TRANSFER.verificationCode,
+  })
+  assert.doesNotMatch(payload, /AAECAwQF/)
+  assert.doesNotMatch(payload, /sync-user|header\.payload/)
+})
+
+test('decrypts the published protocol v1 interoperability vector', async () => {
+  const suite = new CipherSuite({
+    kem: new DhkemX25519HkdfSha256(),
+    kdf: new HkdfSha256(),
+    aead: new Aes256Gcm(),
+  })
+  const recipientIkm = Uint8Array.from(Buffer.from(
+    'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8',
+    'base64url'
+  ))
+  const recipientKeyPair = await suite.kem.deriveKeyPair(recipientIkm)
+  const request = {
+    version: 1,
+    origin: ORIGIN,
+    sessionId: 'ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8',
+    recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+    recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+    recipientDeviceName: 'Vector laptop',
+    pairingSecret: 'oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8',
+    accountId: ACCOUNT_ID,
+  }
+
+  assert.deepEqual(await decryptPairingKey(
+    request,
+    'QEFCQ0RFRkdISUpLTE1OTw',
+    recipientKeyPair.privateKey,
+    VECTOR_PAYLOAD
+  ), TRANSFER)
+})
+
+test('binds the encrypted key to the server, account, session, and both devices', async () => {
+  const { recipient, request } = await pairingRequest()
+  const approvingDeviceId = randomPairingDeviceId()
+  const payload = await encryptPairingKey(request, approvingDeviceId, TRANSFER)
+  const tampered = { ...request, sessionId: 'A'.repeat(43) }
+
+  await assert.rejects(
+    decryptPairingKey(tampered, approvingDeviceId, recipient.recipientKey, payload),
+    /could not be authenticated/
+  )
+  await assert.rejects(
+    decryptPairingKey(request, 'B'.repeat(22), recipient.recipientKey, payload),
+    /could not be authenticated/
+  )
+})
+
+test('rejects a relay response made without the QR-only pairing secret', async () => {
+  const { recipient, request } = await pairingRequest()
+  const approvingDeviceId = randomPairingDeviceId()
+  const payload = await encryptPairingKey(request, approvingDeviceId, TRANSFER)
+  const forgedRequest = { ...request, pairingSecret: 'C'.repeat(43) }
+
+  await assert.rejects(
+    decryptPairingKey(forgedRequest, approvingDeviceId, recipient.recipientKey, payload),
+    /could not be authenticated/
+  )
+})
+
+test('uses strict versioned QR serialization and HTTPS origins', async () => {
+  const { recipient, qr, qrRequest } = await pairingRequest('Büro-Laptop')
+  assert.equal(qrRequest.recipientDeviceName, 'Büro-Laptop')
+  assert.equal(qrRequest.accountId, undefined)
+  assert.equal(qr.includes(recipient.recipientToken), false)
+  assert.equal(qr.includes(recipient.recipientTokenHash), false)
+
+  assert.throws(
+    () => createPairingQrPayload(recipient, 'http://sync.example.com')
+  )
+  assert.throws(() => parsePairingQrPayload('https://sync.example.com/pairing?key=secret'))
+
+  const prefix = 'opentubex-pairing:'
+  const encoded = qr.slice(prefix.length).replaceAll('-', '+').replaceAll('_', '/')
+  const parsed = JSON.parse(atob(encoded + '='.repeat((4 - encoded.length % 4) % 4)))
+  parsed.unexpected = true
+  const malformed = prefix + btoa(JSON.stringify(parsed))
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replace(/=+$/, '')
+  assert.throws(() => parsePairingQrPayload(malformed), /not a valid OpenTubeX pairing code/)
+})
+
+test('matches an authenticated server session against every QR relay field', async () => {
+  const { qrRequest, request } = await pairingRequest()
+  const session = {
+    version: 1,
+    id: request.sessionId,
+    account_id: null,
+    recipient_public_key: request.recipientPublicKey,
+    recipient_device_id: request.recipientDeviceId,
+    recipient_device_name: request.recipientDeviceName,
+    approving_device_id: null,
+    approved: false,
+    expires_at: Date.now() + 60000,
+  }
+
+  assert.equal(pairingSessionMatchesRequest(session, qrRequest), true)
+  assert.equal(pairingSessionMatchesRequest({
+    ...session,
+    account_id: request.accountId,
+    approving_device_id: randomPairingDeviceId(),
+    approved: true,
+  }, request, true), true)
+  assert.equal(pairingSessionMatchesRequest({ ...session, account_id: crypto.randomUUID() }, qrRequest), false)
+  assert.equal(pairingSessionMatchesRequest({ ...session, approved: true }, request), false)
+  assert.equal(pairingSessionMatchesRequest({ ...session, unexpected: true }, request), false)
+  assert.equal(pairingSessionMatchesRequest({ ...session, expires_at: Date.now() - 1 }, request), false)
+})
+
+test('creates fixed-width numeric verification codes', () => {
+  for (let index = 0; index < 100; index++) {
+    assert.match(randomPairingVerificationCode(), /^\d{6}$/)
+  }
+})
+
+function unclaimedSession (request) {
+  return {
+    version: 1,
+    id: request.sessionId,
+    account_id: null,
+    recipient_public_key: request.recipientPublicKey,
+    recipient_device_id: request.recipientDeviceId,
+    recipient_device_name: request.recipientDeviceName,
+    approving_device_id: null,
+    expires_at: Date.now() + 60000,
+    approved: false,
+  }
+}
+
+test('invites from a connected device let the new device register its own key', async () => {
+  const invite = parsePairingInvitePayload(createPairingInvitePayload(createPairingInvite(ORIGIN, ACCOUNT_ID)))
+  const deviceId = randomPairingDeviceId()
+  const recipient = await createPairingRecipient('Phone', deviceId, invite)
+  assert.equal(recipient.sessionId, invite.sessionId)
+  assert.equal(recipient.pairingSecret, invite.pairingSecret)
+  assert.equal(recipient.recipientToken, invite.recipientToken)
+  assert.equal(recipient.recipientDeviceId, deviceId)
+  const tokenHash = await crypto.subtle.digest('SHA-256', Buffer.from(invite.recipientToken, 'base64url'))
+  assert.equal(recipient.recipientTokenHash, Buffer.from(tokenHash).toString('base64url'))
+
+  const recipientRequest = createPairingRequest(recipient, ORIGIN)
+  const approverRequest = pairingRequestFromInviteSession(invite, unclaimedSession(recipientRequest))
+  assert.deepEqual(approverRequest, recipientRequest)
+
+  const comparisonCode = await pairingComparisonCode(approverRequest)
+  assert.match(comparisonCode, /^\d{6}$/)
+  assert.equal(await pairingComparisonCode(recipientRequest), comparisonCode)
+
+  const approvingDeviceId = randomPairingDeviceId()
+  const request = bindPairingRequestToAccount(approverRequest, ACCOUNT_ID)
+  const payload = await encryptPairingKey(request, approvingDeviceId, {
+    ...TRANSFER,
+    verificationCode: comparisonCode,
+  })
+  const received = await decryptPairingKey(
+    bindPairingRequestToAccount(recipientRequest, ACCOUNT_ID),
+    approvingDeviceId,
+    recipient.recipientKey,
+    payload
+  )
+  assert.equal(received.verificationCode, comparisonCode)
+})
+
+test('a key registered by another device under an invite produces a different comparison code', async () => {
+  const invite = createPairingInvite(ORIGIN, ACCOUNT_ID)
+  const legitimate = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const intruder = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const approverRequest = pairingRequestFromInviteSession(invite, unclaimedSession(intruder))
+  assert.notEqual(await pairingComparisonCode(approverRequest), await pairingComparisonCode(legitimate))
+})
+
+test('rejects claimed, foreign, or malformed invite sessions and payloads', async () => {
+  const invite = createPairingInvite(ORIGIN, ACCOUNT_ID)
+  const request = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const session = unclaimedSession(request)
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, account_id: ACCOUNT_ID }))
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, approved: true }))
+  assert.throws(() => pairingRequestFromInviteSession(createPairingInvite(ORIGIN, ACCOUNT_ID), session))
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, recipient_public_key: 'short' }))
+
+  assert.throws(() => createPairingInvite('http://sync.example.com', ACCOUNT_ID))
+  assert.throws(() => createPairingInvite(ORIGIN, 'not-an-account'))
+  const inviteCode = createPairingInvitePayload(invite)
+  assert.throws(() => parsePairingQrPayload(inviteCode), /not a valid OpenTubeX pairing code/)
+  const qrCode = createPairingQrPayload(await createPairingRecipient('Phone'), ORIGIN)
+  assert.throws(() => parsePairingInvitePayload(qrCode), /not a valid OpenTubeX pairing code/)
+  assert.throws(() => parsePairingInvitePayload(`${inviteCode}A`), /not a valid OpenTubeX pairing code/)
+})
+
+test('reads the inviting account from its sync server session token', () => {
+  const token = claims => [
+    Buffer.from('{"alg":"HS256"}').toString('base64url'),
+    Buffer.from(JSON.stringify(claims)).toString('base64url'),
+    'signature',
+  ].join('.')
+  assert.equal(syncServerTokenAccountId(token({ sub: ACCOUNT_ID, exp: 1 })), ACCOUNT_ID)
+  for (const invalid of [token({ sub: 'someone' }), token({}), 'opaque-token', '', null]) {
+    assert.throws(() => syncServerTokenAccountId(invalid))
+  }
+})

@@ -1,0 +1,138 @@
+import { test, expect, openInterfaceCustomizer } from '../../helpers/app.mjs'
+
+test.describe('touch customization', { tag: '@scale' }, () => {
+  for (const { name, rowSelector, idAttribute, handleSelector = '.dragHandle' } of [
+    { name: 'fullscreen actions', rowSelector: '.selectedAction', idAttribute: 'data-fullscreen-action-id' },
+    { name: 'control bar', rowSelector: '[data-placement-section="bar"] .placementItem:not(.unordered)', idAttribute: 'data-control-bar-button-id' },
+    { name: 'navigation', rowSelector: '.selectedItem', idAttribute: 'data-navigation-item-id' },
+    { name: 'quick settings', rowSelector: '.selectedSection', idAttribute: 'data-section-id', handleSelector: ':scope > .sectionHeader .dragHandle' },
+  ]) {
+    test(`scrolls to offscreen ${name} items during a touch drag`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 600 })
+      await openInterfaceCustomizer(page, name)
+
+      const rows = page.locator(rowSelector)
+      const scroller = page.locator('.customizerEditorScroll')
+      const itemIds = () => rows.evaluateAll((elements, attribute) => (
+        elements.map(element => element.getAttribute(attribute))
+      ), idAttribute)
+      const original = await itemIds()
+      const session = await page.context().newCDPSession(page)
+      try {
+        for (const down of [true, false]) {
+          const handle = rows.nth(down ? 0 : original.length - 1).locator(handleSelector)
+          await handle.scrollIntoViewIfNeeded()
+          const source = await handle.boundingBox()
+          const viewport = await scroller.boundingBox()
+          const x = source.x + source.width / 2
+          const startY = source.y + source.height / 2
+          const endY = down ? viewport.y + viewport.height - 10 : viewport.y + 10
+          await session.send('Input.dispatchTouchEvent', {
+            type: 'touchStart', touchPoints: [{ x, y: startY, id: 1 }],
+          })
+          for (let step = 1; step <= 5; step++) {
+            await session.send('Input.dispatchTouchEvent', {
+              type: 'touchMove', touchPoints: [{ x, y: startY + (endY - startY) * step / 5, id: 1 }],
+            })
+          }
+          // At non-100% UI Scale, scrollHeight rounds to whole CSS pixels while
+          // scrollTop snaps to device pixels, so allow one more device pixel.
+          await expect.poll(() => scroller.evaluate((element, scrollDown) => (
+            scrollDown
+              ? element.scrollHeight - element.clientHeight - element.scrollTop
+              : element.scrollTop
+          ) - 1 / devicePixelRatio, down)).toBeLessThanOrEqual(1)
+          await expect.poll(() => rows.evaluateAll((elements, attribute) => elements
+            .toSorted((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
+            .map(element => element.getAttribute(attribute)), idAttribute))
+            .toEqual(down ? [...original.slice(1), original[0]] : original)
+          await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+          await expect.poll(itemIds).toEqual(down ? [...original.slice(1), original[0]] : original)
+          await expect(page.locator(`${rowSelector}.dragging`)).toHaveCount(0)
+        }
+      } finally {
+        await session.detach()
+      }
+    })
+
+    test(`reorders ${name} by touch and cancels interrupted drags`, async ({ page, uiScale }) => {
+      // Keep the editor's CSS height at every UI scale, so a whole drag fits
+      // between the edges where useOrderedItemReorder scrolls the editor.
+      await page.setViewportSize({ width: 375, height: Math.ceil(812 * uiScale / 100) })
+      await openInterfaceCustomizer(page, name)
+
+      const rows = page.locator(rowSelector)
+      const itemIds = () => rows.evaluateAll((elements, attribute) => (
+        elements.map(element => element.getAttribute(attribute))
+      ), idAttribute)
+      const original = await itemIds()
+      const scroller = page.locator('.customizerEditorScroll')
+      const session = await page.context().newCDPSession(page)
+
+      async function drag(from, to, cancel = false) {
+        const current = await itemIds()
+        const handle = rows.nth(from).locator(handleSelector)
+        await handle.scrollIntoViewIfNeeded()
+        async function measure() {
+          const source = await handle.boundingBox()
+          const sourceRow = await rows.nth(from).boundingBox()
+          const target = await rows.nth(to).boundingBox()
+          const start = { x: source.x + source.width / 2, y: source.y + source.height / 2 }
+          const restingTop = to > from ? target.y + target.height - sourceRow.height : target.y
+          return { start, end: { x: start.x, y: start.y + restingTop - sourceRow.y } }
+        }
+        // An end near the editor's edge starts edge scrolling, which keeps
+        // moving the target after the preview matched, so center the drag.
+        const path = await measure()
+        await scroller.evaluate((element, middle) => {
+          const bounds = element.getBoundingClientRect()
+          element.scrollBy({ top: middle - bounds.top - bounds.height / 2, behavior: 'instant' })
+        }, (path.start.y + path.end.y) / 2)
+        const { start, end } = await measure()
+        // useOrderedItemReorder scrolls within 40px of the editor's edges
+        const editor = await scroller.boundingBox()
+        for (const y of [start.y, end.y]) {
+          expect(y).toBeGreaterThan(editor.y + 40)
+          expect(y).toBeLessThan(editor.y + editor.height - 40)
+        }
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchStart', touchPoints: [{ ...start, id: 1 }],
+        })
+        for (let step = 1; step <= 5; step++) {
+          await session.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x: end.x, y: start.y + (end.y - start.y) * step / 5, id: 1 }],
+          })
+        }
+        const preview = current.slice()
+        preview.splice(to, 0, preview.splice(from, 1)[0])
+        await expect.poll(() => rows.evaluateAll((elements, attribute) => elements
+          .toSorted((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
+          .map(element => element.getAttribute(attribute)), idAttribute)).toEqual(preview)
+        await session.send('Input.dispatchTouchEvent', {
+          type: cancel ? 'touchCancel' : 'touchEnd', touchPoints: [],
+        })
+        await expect(page.locator(`${rowSelector}.dragging`)).toHaveCount(0)
+        await expect(page.locator(`${rowSelector}.dropBefore, ${rowSelector}.dropAfter`)).toHaveCount(0)
+      }
+
+      // Quick settings categories are tall; a shorter drag keeps both ends
+      // clear of the editor's edges.
+      const far = name === 'quick settings' ? 1 : 2
+      const moved = original.slice()
+      moved.splice(0, 0, moved.splice(far, 1)[0])
+      try {
+        await drag(far, 0)
+        await expect.poll(itemIds).toEqual(moved)
+        await expect(page.getByRole('button', { name: 'Reset to defaults' })).toBeEnabled()
+        await drag(0, far)
+        await expect.poll(itemIds).toEqual(original)
+        await expect(page.getByRole('button', { name: 'Reset to defaults' })).toBeDisabled()
+        await drag(far, 0, true)
+        await expect.poll(itemIds).toEqual(original)
+      } finally {
+        await session.detach()
+      }
+    })
+  }
+})

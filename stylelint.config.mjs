@@ -37,6 +37,11 @@ export default {
         ignorePseudoClasses: ['deep', 'global']
       }
     ],
+    // Vue's scoped CSS drops everything after a leading :global(...), so `:global(.a) .b` styles `.a`.
+    'selector-disallowed-list': [
+      [/:global\((?:[^()]|\([^()]*\))*\)\s*[^\s,]/],
+      { splitList: true, message: 'Write `.a .b` instead of `:global(.a) .b`; Vue drops the selector after :global(...)' }
+    ],
     'a11y/no-outline-none': true,
     'liberty/use-logical-spec': ['always']
   }

@@ -1,45 +1,548 @@
 .card {
-  inline-size: 85%;
+  --subscriptions-header-padding-block-end: 12px;
+  --subscriptions-top-bar-block-size: 60px;
+
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
+  overflow: visible;
+}
+
+.subscriptionsPage.hasTabBar .card {
+  --subscriptions-top-bar-block-size: 92px;
+}
+
+.subscriptionsHeader {
+  --new-feed-groups-gap: 16px;
+
+  position: sticky;
+  inset-block-start: var(--subscriptions-top-bar-block-size);
+  z-index: 3;
+  margin-inline: -16px;
+  padding-block: var(--page-title-offset) var(--subscriptions-header-padding-block-end);
+  padding-inline: 16px;
+  border-start-start-radius: var(--shape-corner-medium);
+  border-start-end-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 0 var(--primary-shadow-color);
+}
+
+.subscriptionsHeader.tabbedNewFeed {
+  box-shadow: none;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+}
+
+.feedTabsControlsRow {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader.tabbedNewFeed .headerRow {
+  margin-inline: -16px;
+  padding-block-end: var(--subscriptions-header-padding-block-end);
+  padding-inline: 16px;
+  border-block-end: 1px solid var(--primary-shadow-color);
+}
+
+.markAllSeenButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+
+  /* Half the height rather than full, so the press morph is smooth. */
+  border-radius: calc(13px * var(--ui-roundness));
+  color: var(--primary-color);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.85em;
+  gap: 6px;
+  padding-block: 5px;
+  padding-inline: 7px;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.markAllSeenButton:hover,
+.markAllSeenButton:focus-visible {
+  background-color: var(--side-nav-hover-color);
+}
+
+.markAllSeenButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.markAllSeenButton:not(:disabled):active {
+  border-radius: var(--shape-corner-small);
+}
+
+.headerActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+
+  /* Size to its content so the header row keeps the whole widget together. */
+  max-inline-size: 100%;
+}
+
+.headerViewToggle {
+  flex-shrink: 0;
+}
+
+.headerViewToggle :deep(.iconButton) {
+  block-size: 36px;
+  inline-size: 36px;
+}
+
+/* Outranks the base-no-default hover rule so the enabled state stays visible. */
+.headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']) {
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+.headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']:is(:hover, :focus-visible)) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.subscriptionsHeader .headerActions .headerRefreshWidget {
+  flex: 0 0 auto;
+  inline-size: auto;
+}
+
+.headerActions .headerSortSelect {
+  flex: 1 1 220px;
+  min-inline-size: 0;
+  inline-size: 220px;
+  margin-block: 0;
+}
+
+.headerSortSelect :deep(.select-text) {
+  padding-block: 2px;
+  block-size: 36px;
+  padding-inline-start: 86px;
+  font-size: 0.9rem;
+}
+
+.headerSortSelect :deep(.nativeSelect) {
+  block-size: 36px;
+}
+
+/* This compact control keeps its label inline rather than in an outline notch. */
+.headerActions .headerSortSelect :deep(.selectOutline) {
+  inset-block-start: 0;
+}
+
+.headerActions .headerSortSelect :deep(.selectLegend) {
+  display: contents;
+}
+
+.headerActions .headerSortSelect :deep(.select-label) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 12px;
+  padding-inline: 0;
+  z-index: 1;
+  max-inline-size: 68px;
+  overflow: hidden;
+  color: var(--tertiary-text-color);
+  font-size: 0.8rem;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+}
+
+.headerSortSelect :deep(.select-label-text) {
+  overflow: hidden;
+}
+
+.headerSortSelect :deep(.select-placeholder) {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .message {
   color: var(--tertiary-text-color);
 }
 
+.tabsRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 4px;
+}
+
 .tabs {
-  inline-size: 100%;
-  margin-block: -3px 10px;
+  --material-tab-font-size: 1.1em;
+  --material-tab-padding-inline: 15px;
+
+  flex-wrap: wrap;
+  inline-size: auto;
+  justify-content: flex-start;
+  gap: 4px 10px;
+  margin-block: 0;
+  position: relative;
+  overflow-inline: clip;
   color: var(--tertiary-text-color);
 }
 
+/* Two line layout: the grouped tabs and controls move below the title together. */
+.subscriptionsHeader:not(.singleRow) .feedTabsControlsRow {
+  flex-basis: 100%;
+}
+
+.subscriptionsHeader:not(.singleRow) .tabsRow {
+  /* Keep the tabs at their natural width so the controls wrap first. The tabs
+     only wrap once they have the full row and still do not fit. */
+  flex: 1 0 max-content;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader:not(.singleRow) .tabs {
+  flex: 0 0 max-content;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.subscriptionsHeader:not(.singleRow) .headerActions {
+  flex: 0 1 auto;
+}
+
+.subscriptionsHeader.singleRow .headerRow {
+  justify-content: flex-start;
+}
+
+/* Deciding whether everything fits onto one line relies on the natural widths,
+   so nothing may shrink or wrap while it does */
+.subscriptionsHeader.singleRow .headerRow > * {
+  flex-shrink: 0;
+}
+
+.subscriptionsHeader.singleRow .feedTabsControlsRow,
+.subscriptionsHeader.singleRow .tabsRow,
+.subscriptionsHeader.singleRow .tabs {
+  flex-wrap: nowrap;
+}
+
+.subscriptionsHeader.singleRow .feedTabsControlsRow > * {
+  flex-shrink: 0;
+}
+
+.subscriptionsHeader.singleRow .tabsRow {
+  margin-block: 0;
+}
+
+.subscriptionsHeader.singleRow .headerActions {
+  margin-inline-start: auto;
+}
+
 .selectedTab {
-  border-block-end: 3px solid var(--primary-color);
   color: var(--primary-text-color);
   font-weight: bold;
-  box-sizing: border-box;
-  margin-block-end: -3px;
 }
 
 .tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
   text-align: center;
-  padding: 15px;
+  padding-block: 12px;
+  padding-inline: 15px;
   font-size: 1.1em;
   cursor: pointer;
-  align-self: flex-end;
+  align-self: stretch;
 }
 
 .tab:hover {
   font-weight: bold;
 }
 
+.tabLabel {
+  display: inline-grid;
+}
+
+.tabLabel::after {
+  content: attr(data-label);
+  grid-area: 1 / 1;
+  font-weight: bold;
+  visibility: hidden;
+}
+
+.tabLabel > span {
+  grid-area: 1 / 1;
+}
+
 .subscriptionIcon {
   color: var(--primary-color);
 }
 
+/* The loader stacks on the icon so refreshing never changes the tab width. */
+.tabIcon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.tabIcon > .subscriptionIcon,
+.tabIcon > .tabLoadingIndicator {
+  grid-area: 1 / 1;
+}
+
+.tabIcon.loading .subscriptionIcon {
+  visibility: hidden;
+}
+
+.newFeedTabs {
+  --material-tab-padding-inline: 15px;
+
+  align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  margin-block: 8px 0;
+  position: relative;
+  overflow-inline: clip;
+  color: var(--tertiary-text-color);
+}
+
+.subscriptionGroups {
+  margin-block-start: 10px;
+}
+
+/*
+  The groups share the row of the New feed's tabs while they fit beside them,
+  with the tabs still centered (`updateGroupsBesideNewFeedTabs`).
+*/
+@media only screen and (width > 680px) {
+  .subscriptionsHeader.groupsBesideNewFeedTabs {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    column-gap: var(--new-feed-groups-gap);
+  }
+
+  .subscriptionsHeader.groupsBesideNewFeedTabs .headerRow {
+    grid-column: 1 / -1;
+  }
+
+  .subscriptionsHeader.groupsBesideNewFeedTabs .newFeedTabs {
+    grid-area: 2 / 2;
+  }
+
+  .subscriptionsHeader.groupsBesideNewFeedTabs .subscriptionGroups {
+    grid-area: 2 / 1;
+    align-self: center;
+    margin-block-start: 8px;
+  }
+}
+
+.newFeedTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding-block: 9px;
+  padding-inline: 15px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+
+.newFeedTab:hover {
+  color: var(--primary-text-color);
+  font-weight: bold;
+}
+
+.newFeedTabDot {
+  inset-block-start: 8px;
+  inset-inline-end: 7px;
+  margin: 0;
+  position: absolute;
+}
+
+@media only screen and (width <= 680px), only screen and (orientation: landscape) and (height <= 600px) {
+  .subscriptionsHeader {
+    --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);
+
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .subscriptionsHeader.scrollHidden:not(:has(:focus-visible)) {
+    transform: translateY(calc(-100% - var(--subscriptions-top-bar-block-size) - 2px));
+    transition: var(--mobile-nav-hide-transition);
+    pointer-events: none;
+  }
+}
+
+@media only screen and (680px < width <= 1280px) {
+  .tabs {
+    --material-tab-padding-inline: 12px;
+
+    column-gap: 8px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    --subscriptions-header-padding-block-end: 10px;
+
+    inline-size: 100%;
+  }
+
+  .headerRow {
+    align-items: flex-start;
+    row-gap: 8px;
+  }
+
+  .pageTitle {
+    inline-size: 100%;
+  }
+
+  .tabsRow {
+    margin-block: 0;
+  }
+
+  .subscriptionsHeader:not(.singleRow) .tabs {
+    --material-tab-min-height: 48px;
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+
+    flex: 1 1 auto;
+    inline-size: 100%;
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+
+  .tab,
+  .newFeedTab {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    min-block-size: 44px;
+    padding-block: 4px;
+    padding-inline: 4px;
+    font-size: 0.9em;
+  }
+
+  .tabLabel {
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .tabLabel > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feedTabsControlsRow {
+    gap: 12px 8px;
+  }
+
+  .headerActions {
+    flex-wrap: wrap;
+    gap: 6px;
+    inline-size: 100%;
+  }
+
+  .headerActions .headerRefreshWidget:has(> .lastRefreshTimestamp) {
+    flex-basis: 100%;
+    inline-size: 100%;
+  }
+
+  /* The RSS feed manager button shares the refresh status row */
+  .headerActions:has(> .headerManageFeeds) .headerRefreshWidget {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) {
+    --refresh-button-row-span: 3;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerRefreshWidget {
+    display: contents;
+  }
+
+  .headerActions .headerSortSelect {
+    flex-basis: 0;
+  }
+
+  .headerSortSelect :deep(.select-text) {
+    padding-inline-start: 36px;
+  }
+
+  .headerActions .headerSortSelect :deep(.select-label) {
+    max-inline-size: 16px;
+  }
+
+  .headerSortSelect :deep(.select-label-text) {
+    /* The icon and selected value keep the compact control understandable. */
+    display: none;
+  }
+
+  .markAllSeenButton {
+    min-block-size: 36px;
+    border-radius: calc(18px * var(--ui-roundness));
+    order: 2;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .markAllSeenButton {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+  }
+
+  .newFeedTabs {
+    --material-tab-min-height: 48px;
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+}
+
+@media only screen and (width <= 480px) {
+  .tabs .subscriptionIcon,
+  .tabs .tabIcon:not(.loading),
+  .newFeedTabs .subscriptionIcon {
+    display: none;
+  }
+
+  /* Without icons, the spinner sits in a corner so labels keep their space. */
+  .tabs .tabIcon.loading {
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-end: 2px;
   }
 }

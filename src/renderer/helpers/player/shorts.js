@@ -1,0 +1,332 @@
+import {
+  applySubscriptionVideoLimit,
+  isMembersOnlySubscriptionVideoVisible,
+  isSubscriptionFeedTypeEnabled
+} from '../subscription-channels.js'
+
+const MAX_SHORT_DURATION_SECONDS = 3 * 60
+const MAX_CHANNEL_SHORTS_CONTEXTS = 20
+const SHORTS_COMPLETION_END_MARGIN_SECONDS = 0.5
+const SHORTS_COMPLETION_MAX_PLAYBACK_TICK_SECONDS = 2
+const SHORTS_COMPLETION_MIN_PLAYBACK_AFTER_SEEK_SECONDS = 1
+const channelShortsNavigationContexts = new Map()
+export const SHORTS_PREVIOUS_COUNT = 3
+export const SHORTS_NEXT_COUNT = 3
+
+/** Keep only nearby Shorts in the playback window. */
+export function getShortsPlaybackWindow(feed, currentVideoId) {
+  const index = feed.findIndex(video => video.videoId === currentVideoId)
+  if (index < 0) return { previous: [], next: [] }
+
+  const previous = feed.slice(Math.max(0, index - SHORTS_PREVIOUS_COUNT), index)
+    .map(video => video.videoId)
+  const next = feed.slice(index + 1, index + 1 + SHORTS_NEXT_COUNT)
+    .map(video => video.videoId)
+  return { previous, next }
+}
+
+/**
+ * Shares nearby Shorts metadata and playback positions between navigation and
+ * preloading. Signed stream URLs are short lived, so stale metadata is fetched
+ * again even when its Short remains in the window.
+ */
+export class ShortsPlaybackCache {
+  constructor({ now = Date.now, ttlMs = 5 * 60_000 } = {}) {
+    this.now = now
+    this.ttlMs = ttlMs
+    this.entries = new Map()
+    this.positions = new Map()
+  }
+
+  get(key, load) {
+    const cached = this.entries.get(key)
+    if (cached && cached.expiresAt > this.now()) return cached.promise
+
+    const entry = { expiresAt: this.now() + this.ttlMs, promise: null }
+    entry.promise = Promise.resolve().then(load).catch(error => {
+      if (this.entries.get(key) === entry) this.entries.delete(key)
+      throw error
+    })
+    this.entries.set(key, entry)
+    return entry.promise
+  }
+
+  set(key, value) {
+    this.entries.set(key, {
+      expiresAt: this.now() + this.ttlMs,
+      promise: Promise.resolve(value),
+    })
+  }
+
+  delete(key) {
+    this.entries.delete(key)
+  }
+
+  retain(keys, videoIds) {
+    const keptKeys = new Set(keys)
+    const keptVideoIds = new Set(videoIds)
+    for (const key of this.entries.keys()) {
+      if (!keptKeys.has(key)) this.entries.delete(key)
+    }
+    for (const videoId of this.positions.keys()) {
+      if (!keptVideoIds.has(videoId)) this.positions.delete(videoId)
+    }
+  }
+
+  savePosition(videoId, seconds) {
+    if (videoId && Number.isFinite(seconds) && seconds >= 0) {
+      this.positions.set(videoId, seconds)
+    }
+  }
+
+  getPosition(videoId) {
+    return this.positions.get(videoId) ?? 0
+  }
+
+  hasPosition(videoId) {
+    return this.positions.has(videoId)
+  }
+}
+
+/**
+ * Keeps seek jumps from completing a Short. After a seek, only continuous
+ * forward playback can re-enable completion detection.
+ *
+ * @param {object} options
+ * @param {boolean} options.blockedBySeek
+ * @param {number} options.playbackAfterSeekSeconds
+ * @param {number} options.elapsedSeconds
+ * @param {number} options.currentSeconds
+ * @param {number} options.durationSeconds
+ * @returns {{blockedBySeek: boolean, playbackAfterSeekSeconds: number, reachedEnd: boolean}}
+ */
+export function getShortsCompletionState({
+  blockedBySeek,
+  playbackAfterSeekSeconds,
+  elapsedSeconds,
+  currentSeconds,
+  durationSeconds,
+}) {
+  let playedSeconds = playbackAfterSeekSeconds
+  let blocked = blockedBySeek
+
+  if (
+    blocked &&
+    elapsedSeconds > 0 &&
+    elapsedSeconds <= SHORTS_COMPLETION_MAX_PLAYBACK_TICK_SECONDS
+  ) {
+    playedSeconds += elapsedSeconds
+    blocked = playedSeconds < SHORTS_COMPLETION_MIN_PLAYBACK_AFTER_SEEK_SECONDS
+  }
+
+  return {
+    blockedBySeek: blocked,
+    playbackAfterSeekSeconds: playedSeconds,
+    reachedEnd: !blocked &&
+      durationSeconds > 0 &&
+      currentSeconds >= durationSeconds - SHORTS_COMPLETION_END_MARGIN_SECONDS
+  }
+}
+
+/**
+ * Prefers YouTube's selected portrait thumbnail only when the user has not
+ * explicitly chosen another frame.
+ * @param {{ thumbnailUrl?: string } | null | undefined} video
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {string | null} fallbackUrl
+ * @returns {string | null}
+ */
+export function getPreferredShortThumbnailUrl(video, thumbnailPreference, fallbackUrl) {
+  return thumbnailPreference === '' && video?.thumbnailUrl
+    ? video.thumbnailUrl
+    : fallbackUrl
+}
+
+/**
+ * Keeps a channel page's visible Shorts sequence available while its Watch
+ * route replaces the channel component in the same tab.
+ *
+ * @param {string} channelId
+ * @param {object[]} videos
+ */
+export function setChannelShortsNavigationContext(channelId, videos) {
+  if (!channelId) {
+    return
+  }
+
+  channelShortsNavigationContexts.delete(channelId)
+  channelShortsNavigationContexts.set(channelId, videos.slice())
+
+  if (channelShortsNavigationContexts.size > MAX_CHANNEL_SHORTS_CONTEXTS) {
+    channelShortsNavigationContexts.delete(channelShortsNavigationContexts.keys().next().value)
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @returns {object[]}
+ */
+export function getChannelShortsNavigationContext(channelId) {
+  return channelShortsNavigationContexts.get(channelId)?.slice() ?? []
+}
+
+/**
+ * @param {object} format
+ * @returns {number | null}
+ */
+function getFormatAspectRatio(format) {
+  const width = Number(format?.width)
+  const height = Number(format?.height)
+
+  if (width > 0 && height > 0) {
+    return width / height
+  }
+
+  const size = typeof format?.size === 'string'
+    ? format.size.match(/^(?<width>\d+)x(?<height>\d+)$/)
+    : null
+
+  if (!size) {
+    return null
+  }
+
+  return Number(size.groups.width) / Number(size.groups.height)
+}
+
+/**
+ * Returns the most representative video aspect ratio in a list of stream
+ * formats. Audio-only formats and formats without dimensions are ignored.
+ *
+ * @param {object[]} formats
+ * @returns {number | null}
+ */
+export function getVideoAspectRatio(formats) {
+  for (const format of formats ?? []) {
+    const aspectRatio = getFormatAspectRatio(format)
+
+    if (aspectRatio !== null) {
+      return aspectRatio
+    }
+  }
+
+  return null
+}
+
+/**
+ * Portrait media up to three minutes long is a useful fallback when no content
+ * classification exists. Square media is ambiguous, so only explicit
+ * navigation metadata classifies it as a Short. Explicit metadata also wins
+ * over the geometry fallback.
+ *
+ * @param {object} options
+ * @param {boolean | null} [options.explicit]
+ * @param {number} [options.duration]
+ * @param {object[]} [options.formats]
+ * @returns {boolean}
+ */
+export function isYouTubeShort({ explicit = null, duration, formats = [] }) {
+  if (typeof explicit === 'boolean') {
+    return explicit
+  }
+
+  const aspectRatio = getVideoAspectRatio(formats)
+
+  return Number(duration) > 0 &&
+    Number(duration) <= MAX_SHORT_DURATION_SECONDS &&
+    aspectRatio !== null &&
+    aspectRatio < 1
+}
+
+/**
+ * Extracts the optional long-form video promoted by a Short's Reel response.
+ *
+ * @param {object} response
+ * @returns {{videoId: string, title: string} | null}
+ */
+export function parseLocalShortLinkedVideo(response) {
+  const metadataItems = response?.data?.overlay?.reelPlayerOverlayRenderer
+    ?.playerOverlay?.reelPlayerOverlayViewModel?.metapanel
+    ?.reelMetapanelViewModel?.metadataItems
+
+  if (!Array.isArray(metadataItems)) {
+    return null
+  }
+
+  for (const item of metadataItems) {
+    const buttons = item.reelCarouselViewModel?.buttonViewModels
+
+    if (!Array.isArray(buttons)) {
+      continue
+    }
+
+    for (const buttonItem of buttons) {
+      const button = buttonItem.reelCarouselButtonViewModel?.buttonViewModel?.buttonViewModel
+      const videoId = button?.onTap?.innertubeCommand?.watchEndpoint?.videoId
+      const title = button?.titleFormatted?.content ?? button?.accessibilityText
+
+      if (videoId && title) {
+        return { videoId, title }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Builds the same newest-first sequence shown by the subscriptions Shorts tab.
+ * Keeping this pure makes feed navigation deterministic while the watch route
+ * is reused for each Short.
+ *
+ * @param {object} options
+ * @param {Record<string, {videos?: object[]}>} options.cache
+ * @param {{id: string}[]} options.subscriptions
+ * @param {(video: object) => boolean} [options.isHidden]
+ * @param {(video: object) => boolean} [options.isWatched]
+ * @param {boolean} [options.hideWatched]
+ * @param {boolean} [options.restrictedPlaybackConfigured]
+ * @param {number | null} [options.maxPerChannel]
+ * @param {string} [options.currentVideoId]
+ * @returns {object[]}
+ */
+export function buildSubscriptionShortsFeed({
+  cache,
+  subscriptions,
+  isHidden = () => false,
+  isWatched = () => false,
+  hideWatched = false,
+  restrictedPlaybackConfigured = false,
+  maxPerChannel = null,
+  currentVideoId = '',
+}) {
+  const videos = subscriptions
+    .filter(channel => isSubscriptionFeedTypeEnabled(channel, 'shorts'))
+    .flatMap(channel => (cache[channel.id]?.videos ?? []).filter(video => (
+      isMembersOnlySubscriptionVideoVisible(video, channel, restrictedPlaybackConfigured)
+    )))
+    .filter(video => video.videoId && !isHidden(video))
+    .filter(video =>
+      video.videoId === currentVideoId ||
+      !hideWatched ||
+      !isWatched(video)
+    )
+    .slice()
+    .sort((a, b) => Number(b.published ?? 0) - Number(a.published ?? 0))
+
+  const videoIds = new Set()
+
+  const uniqueVideos = videos.filter(video => {
+    if (videoIds.has(video.videoId)) {
+      return false
+    }
+    videoIds.add(video.videoId)
+    return true
+  })
+
+  return applySubscriptionVideoLimit(
+    uniqueVideos,
+    subscriptions,
+    maxPerChannel,
+    currentVideoId
+  )
+}

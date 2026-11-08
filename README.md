@@ -1,52 +1,126 @@
 <p align="center">
- <img alt="" src="/_icons/logoColor.svg" width=500 align="center">
+ <img alt="OpenTubeX Logo" src="/_icons/logoColor.svg" width="500" align="center">
 </p>
 
-FreeTube is an open source desktop YouTube player built with privacy in mind.
-Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
-Available for Windows (10 and later), Mac (macOS 13 and later) & Linux thanks to Electron.
+OpenTubeX is an open-source, highly customizable, privacy-focused YouTube client.
+It is available for Windows 10 and later, macOS 13 and later, and Linux. Android builds and experimental iOS/iPadOS builds are also available.
 
-<p align="center"><a href="https://github.com/FreeTubeApp/FreeTube/releases">Download FreeTube</a></p>
+It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
+and is independently developed and supported. It is not affiliated with,
+endorsed by, maintained by, or supported by the FreeTube project.
+
+<br>
 <p align="center">
-  <a href="https://github.com/FreeTubeApp/FreeTube/actions/workflows/build.yml">
-    <img alt='Build status' src="https://github.com/FreeTubeApp/FreeTube/actions/workflows/build.yml/badge.svg?branch=development" />
+  <a href="https://opentubex.org/downloads/">
+    <img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/download-outline.svg" width="220" alt="Download">
   </a>
-  <a href="https://hosted.weblate.org/engage/free-tube/">
-    <img src="https://hosted.weblate.org/widgets/free-tube/-/svg-badge.svg" alt="Translation status" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
+    <img alt="Latest release" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/release.svg" />
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
+    <img alt="Build status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/build.svg" />
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml">
+    <img alt="E2E tests" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/e2e.svg" />
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
+    <img alt="CodeQL" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/codeql.svg" />
+  </a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX">
+    <img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" />
+  </a>
+  <a href="https://weblate.opentubex.org/engage/opentubex/">
+    <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://fluxer.opentubex.org">
+    <img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" />
+  </a>
+  <a href="https://matrix.opentubex.org">
+    <img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://alternativeto.net/software/opentubex/about/?utm_source=badge&amp;utm_medium=referral">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="https://alternativeto.net/static/badges/badge-wide-light.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://alternativeto.net/static/badges/badge-wide-dark.svg">
+      <img alt="OpenTubeX on AlternativeTo" src="https://alternativeto.net/static/badges/badge-wide-dark.svg" width="340">
+    </picture>
   </a>
 </p>
 
 <hr>
-<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#donate">Donate</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://freetubeapp.io/">Website</a> &bull; <a href="https://docs.freetubeapp.io/">Documentation</a> &bull; <a href="https://docs.freetubeapp.io/faq/">FAQ</a> &bull; <a href="https://github.com/FreeTubeApp/FreeTube/discussions">Discussions</a></p>
+<p align="center">
+  <a href="#screenshots"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/screenshots.svg" alt="Screenshots"></a>
+  <a href="#features"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/features.svg" alt="Features"></a>
+  <a href="#how-does-it-work"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/how-it-works.svg" alt="How does it work?"></a>
+  <a href="#download-links"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/download-links.svg" alt="Download Links"></a>
+  <a href="#contributing"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contributing.svg" alt="Contributing"></a>
+  <a href="#localization"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/localization.svg" alt="Localization"></a>
+  <a href="#contact"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contact.svg" alt="Contact"></a>
+  <a href="#license"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/license-link.svg" alt="License"></a>
+</p>
+<p align="center">
+  <a href="https://opentubex.org/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/website.svg" alt="Website"></a>
+  <a href="https://opentubex.org/privacy/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/privacy.svg" alt="Privacy"></a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/discussions"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/discussions.svg" alt="Discussions"></a>
+</p>
+
 <hr>
 
-> [!NOTE] 
-> FreeTube is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
+<p align="center">
+  <a href="https://youtu.be/cKilnnScH9U">
+    <img src="docs/screenshots/OpenTubeX-promo.webp" alt="Watch the 24-second OpenTubeX promo: Power-user YouTube." width="400">
+  </a>
+  <br>
+  <a href="https://youtu.be/cKilnnScH9U">▶ Watch the promo · 24 seconds</a>
+</p>
+
+> [!NOTE]
+> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
 >
-> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/FreeTubeApp/FreeTube/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/FreeTubeApp/FreeTube/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
+> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
-## Screenshots
-| The main FreeTube window                                                                         |
-|--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube1.png)|
+<a id="why-opentubex"></a>
+## ✨ Why OpenTubeX?
 
-| Watching a video                                                                                 |
-|--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube2.png)|
+Watch YouTube without ads or a Google account, with subscriptions, playlists and
+history stored on your device by default. OpenTubeX gives you control over what
+appears in your feed, how videos play and how the app looks.
 
-| Settings                                                                                         |
-|--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube3.png)|
+- **Choose what fills your feed.** Group subscriptions into profiles, choose whether each channel shows videos, Shorts, live streams or posts, and set daily video limits. Optional recommendations rank unwatched videos locally using your viewing activity and feedback.
+- **Set playback preferences once.** Save speed and quality preferences per channel, customize keyboard shortcuts, skip silence or repeat a section of a video. SponsorBlock lets you choose which segments to skip and which channels to exempt.
+- **Keep watching while you browse.** Open videos in tabs, build a queue and keep the mini-player playing as you switch tabs. Restore your desktop session when you return.
+- **Make the interface fit you.** Choose or create a theme, rearrange navigation and put the controls you use in Quick Settings. Customize your Home page with subscriptions, unfinished videos, playlists and more.
+- **Decide where your library lives.** Keep your data local or enable sync across devices. End-to-end encryption is available with enhanced-privacy sync on a compatible server. See the [privacy policy](https://opentubex.org/privacy/#desktop-and-mobile-apps) for what each option shares.
+- **Keep track of your viewing.** See your watch time in daily and weekly charts, search your watch history and choose how long to keep it.
 
-## How does it work?
-FreeTube uses a built in extractor to grab and serve data / videos. The [Invidious API](https://github.com/iv-org/invidious) can also optionally be used. FreeTube does not use any official APIs to obtain data. While YouTube can still see your video requests, it can no
-longer track you using cookies or JavaScript. Your subscriptions, playlists and history are stored locally on your computer and never sent out.
+<a id="screenshots"></a>
+## 📸 Screenshots
 
-> [!IMPORTANT]  
-> Using a VPN or Tor is highly recommended to hide your IP while using FreeTube.
+| The main OpenTubeX window |
+| --- |
+| <picture> <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/OpenTubeX1-light.png"> <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/OpenTubeX1-dark.png"> <img alt="OpenTubeX subscriptions" src="docs/screenshots/OpenTubeX1-dark.png"> </picture> |
 
-## Features
+| Watching a video |
+| --- |
+| <picture> <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/OpenTubeX2-light.png"> <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/OpenTubeX2-dark.png"> <img alt="OpenTubeX playing Flying over Japan, paused at 3:41:58" src="docs/screenshots/OpenTubeX2-dark.png"> </picture> |
+
+| Settings |
+| --- |
+| <picture> <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/OpenTubeX3-light.png"> <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/OpenTubeX3-dark.png"> <img alt="OpenTubeX settings dialog maximized" src="docs/screenshots/OpenTubeX3-dark.png"> </picture> |
+
+<a id="features-added-by-opentubex"></a>
+<a id="features"></a>
+## 🚀 Features
+
 * Watch videos without ads
 * Use YouTube without Google tracking you using cookies and JavaScript
 * Two extractor APIs to choose from (Built in or Invidious)
@@ -60,7 +134,7 @@ longer track you using cookies or JavaScript. Your subscriptions, playlists and 
 * Most popular videos page based on the set Invidious instance
 * SponsorBlock
 * DeArrow
-* Open videos from your browser directly into FreeTube (with extension)
+* Open videos from your browser directly into OpenTubeX (with extension)
 * Watch videos using an external player
 * Full Theme support
 * Make a screenshot of a video
@@ -71,97 +145,192 @@ longer track you using cookies or JavaScript. Your subscriptions, playlists and 
 * Show/hide functionality or elements within the app using the distraction free settings
 * View channel posts
 
-### Browser Extensions
-The following extensions open YouTube links directly in FreeTube:
+[View more on the OpenTubeX website](https://opentubex.org/extra-features/).
 
-- [LibRedirect](https://libredirect.manerakai.com/)
-- [RedirectTube](https://github.com/MStankiewiczOfficial/RedirectTube)
+<a id="how-does-it-work"></a>
+## ⚙️ How does it work?
+OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
 
-LibRedirect automatically redirect YouTube links to FreeTube.
+OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See the [privacy policy](https://opentubex.org/privacy/#privacy-and-threat-model) for the complete threat model.
+
+By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
+
+> [!IMPORTANT]  
+> Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.
+
+<a id="browser-extensions"></a>
+## 🧩 Browser Extensions
+The following extensions open YouTube links directly in OpenTubeX:
+
+- [LibRedirect](https://libredirect.manerakai.com/) since version [3.5.0](https://github.com/libredirect/browser_extension/releases/tag/v3.5.0)
+- [RedirectTube](https://github.com/stankiewiczmichal/RedirectTube) since version [2.0.0 (26071)](https://github.com/stankiewiczmichal/RedirectTube/releases/tag/26071)
+
+LibRedirect automatically redirects YouTube links to OpenTubeX.
 > [!IMPORTANT]
-> To ensure proper functionality, select FreeTube as Frontend in the Services settings of the extension.
+> To ensure proper functionality, select OpenTubeX as Frontend in the Services settings of the extension.
 
-RedirectTube, doesn’t automatically open YouTube links in FreeTube (although this feature can be enabled in the settings). Instead, it adds buttons to the toolbar and context menu, which you can click to open videos in FreeTube manually.
+RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although this feature can be enabled in the settings). Instead, it adds buttons to the toolbar and context menu, which you can click to open videos in OpenTubeX manually.
 
-- Download LibRedirect from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/libredirect/) (for Firefox based-browsers) or [developer's website](https://libredirect.manerakai.com/download_chromium.html) (for Chrome and Chromium-based browsers).
+- Download LibRedirect from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/libredirect/) (for Firefox based-browsers) or [developer's website](https://libredirect.manerakai.com/docs.html#chromium-install) (for Chrome and Chromium-based browsers).
 
 - Download RedirectTube from [Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/redirecttube/) (for Firefox based-browsers) or [Chrome Web Store](https://chromewebstore.google.com/detail/redirecttube/jpbaggklodpddjcadlebabhiopjkjfjh) (for Chrome and Chromium-based browsers).
 
 > [!NOTE]
 > These extensions do not work on Linux portable builds!
 >
-> If you have issues with the extension working with FreeTube, please create an issue in this repository instead of the extension repository.
+> If you have issues with the extension working with OpenTubeX, please create an issue in this repository instead of the extension repository.
 
-## Download Links
+<a id="download-links"></a>
+## 📦 Download Links
 ### Official Downloads
 
+<p>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
+    <img alt="GitHub downloads" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/downloads.svg" />
+  </a>
+</p>
+
+> [!NOTE]
+> OpenTubeX supports Windows 10 and later, macOS 13 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
+
 > [!CAUTION]
-> FreeTube is only supported on Windows 10 and later, macOS 13 and above, and various Linux distributions. Installing it on unsupported systems may result in unexpected issues.
+> Only download OpenTubeX from the official sources listed here. Third-party download sites repackage our builds and often host outdated versions. One of them, YasDL, is on [FMHY's unsafe sites list](https://fmhy.net/unsafe) for uploading software with malware. To check a file from GitHub Releases, compare its SHA-256 checksum with the digest GitHub shows next to it on the release page.
 
-* [GitHub Releases](https://github.com/FreeTubeApp/FreeTube/releases)
+* [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
+* [OpenTubeX Website](https://opentubex.org/downloads/)
+* Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`) <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/winget.svg" alt="WinGet version" align="absmiddle"></a>
+* Windows: [Scoop bucket](https://github.com/OpenTubeX/scoop-bucket) (`scoop bucket add opentubex https://github.com/OpenTubeX/scoop-bucket`, then `scoop install opentubex/opentubex`), with [installation instructions](https://opentubex.org/downloads/#install-scoop).
+* macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap) (`brew install --cask opentubex/tap/opentubex`), with [installation and update instructions](https://opentubex.org/downloads/#install-homebrew).
+  * To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
+* Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
+* Fedora / Enterprise Linux: [COPR repository](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/) or [RPM repository](https://rpm.opentubex.org/)
+* openSUSE: [RPM repository](https://rpm.opentubex.org/)
+* Arch Linux / Arch Linux ARM: [Arch repository](https://arch.opentubex.org/)
+* Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
+* Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
+* Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
+* Arch User Repository (AUR): [opentubex](https://aur.archlinux.org/packages/opentubex/) and [opentubex-bin](https://aur.archlinux.org/packages/opentubex-bin/) <a href="https://aur.archlinux.org/packages/opentubex-bin/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/aur.svg" alt="AUR version" align="absmiddle"></a>
+* Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 17 (API 37). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22-lite%5B.-%5D%5C%22%2C%5C%22invertAPKFilter%5C%22%3Atrue%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%7D). On devices with little storage, install OpenTubeX Lite from the same F-Droid repository or [through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.lite%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Lite%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22-lite%5B.-%5D%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%7D). It installs as a separate app with smaller APKs that leave out yt-dlp and FFmpeg, so downloads and other yt-dlp features are unavailable.
+  OpenTubeX supports [Keep Android Open](https://keepandroidopen.org/) and will never be available on the Google Play Store.
+* iOS / iPadOS (experimental): requires 17.4 or later. See the [installation and update instructions](https://opentubex.org/docs/installing/#ios--ipados-experimental).
 
-* [FreeTube Website](https://freetubeapp.io/#download)
+<p>
+  <a href="https://snapcraft.io/opentubex">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
+      <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" width="188" height="56">
+    </picture>
+  </a>
+  <a href="https://flatpark.org/apps/org.opentubex.OpenTubeX/">
+    <img alt="Get it on FlatPark" src="https://flatpark.org/badges/get-it-on-flatpark.svg" width="154" height="56">
+  </a>
+  <a href="https://fdroid.opentubex.org/">
+    <img alt="Get it on F-Droid" src="docs/badges/fdroid.png" width="188" height="56">
+  </a>
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22-lite%5B.-%5D%5C%22%2C%5C%22invertAPKFilter%5C%22%3Atrue%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%7D">
+    <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="188" height="56">
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
+    <img alt="Get it on GitHub" src="docs/badges/github.png" width="188" height="56">
+  </a>
+</p>
 
-* Flatpak on Flathub: [Download](https://flathub.org/apps/details/io.freetubeapp.FreeTube) and [Source Code](https://github.com/flathub/io.freetubeapp.FreeTube)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
+<br />
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/)
 
-#### Automated Builds (Nightly / Weekly)
+#### Automated Builds (Nightly / Daily)
 > [!WARNING]
 > Use these builds at your own risk. These are pre-release versions and are only intended for people that want to test changes early and are willing to accept that things could break from one build to another. 
 
-Builds are automatically created from changes to our development branch via [GitHub Actions](https://github.com/FreeTubeApp/FreeTube/actions?query=workflow%3ABuild).
+Builds are automatically created from changes to our development branch via [GitHub Actions](http://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml).
 
-The first build with a green check mark is the latest build.  
-
-> [!IMPORTANT]
-> You will need to have a GitHub account to download these builds.
-
-### Projects maintained by individual FreeTube team members
-* Homebrew FreeTube (Apple Silicon only): [Install](https://github.com/PikachuEXE/homebrew-FreeTube)
-
-* FreeTubeAndroid (FreeTube port for Android and PWA): [Download](https://github.com/MarmadileManteater/FreeTubeAndroid/releases) and [Source Code](https://github.com/MarmadileManteater/FreeTubeAndroid)
+The first build with a green check mark is the latest build.
 
 > [!IMPORTANT]
-> These projects are related to FreeTube and are maintained by individual members of the FreeTube team. While they are not part of the main FreeTube project, they may be useful to FreeTube users. There may be issues when using these projects compared to the official builds. Any issues specific to these builds should be reported to their respective maintainers. Make sure you always try an [official download](https://github.com/freetubeapp/freetube/#official-downloads) before reporting your issue to us!
+> Downloading directly from GitHub Actions requires a GitHub account.
+> You can also download the builds without an account via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development?preview).
 
-## Contributing
-Thank you very much to the [People and Projects](https://docs.freetubeapp.io/credits/) that make FreeTube possible!
+* Windows: [Scoop bucket](https://github.com/OpenTubeX/scoop-bucket#nightly-builds) (`scoop install opentubex/opentubex-nightly`), which shares settings and data with the stable package
+* macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap#nightly-builds) (`brew install --cask opentubex/tap/opentubex@nightly`), which replaces the stable cask and shares its data
+* Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
+* Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
+* openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
+* Arch Linux / Arch Linux ARM: [Arch nightly repository](https://arch.opentubex.org/#nightly-builds)
+* Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
+* Snap: [Edge channel](https://snap.opentubex.org/#development-builds) (`sudo snap install opentubex --edge`)
+* Arch User Repository (AUR): [Prebuilt nightly](https://aur.archlinux.org/packages/opentubex-nightly-bin/) (`opentubex-nightly-bin`), or [build the current development source](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`). The nightly binary package supports x86_64 and aarch64.
+* Android: [OpenTubeX Nightly and OpenTubeX Nightly Lite on F-Droid](https://fdroid.opentubex.org/#release-channels), [OpenTubeX Nightly through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.nightly%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Nightly%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22nightly%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22android-%28arm64-v8a%7Carmeabi-v7a%7Cx86_64%7Cx86%7Cuniversal%29%5B.%5Dapk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D), [OpenTubeX Nightly Lite through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.nightly.lite%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Nightly%20Lite%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22nightly%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22android-lite-%28arm64-v8a%7Carmeabi-v7a%7Cx86_64%7Cx86%7Cuniversal%29%5B.%5Dapk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D), or an APK for your device’s architecture from the build artifacts
+
+<a id="contributing"></a>
+## 🤝 Contributing
+Thank you very much to the people and projects that make OpenTubeX possible!
 
 If you like to get your hands dirty and want to contribute, we would love to
 have your help.  Send a pull request and someone will review your code. 
 
 > [!IMPORTANT]
-> Please follow the [Contribution Guidelines](https://github.com/FreeTubeApp/FreeTube/blob/development/CONTRIBUTING.md) before sending your pull request.
+> Please follow the [Contribution Guidelines](https://github.com/OpenTubeX/OpenTubeX/blob/development/CONTRIBUTING.md) before sending your pull request.
 
-## Localization
-<a href="https://hosted.weblate.org/engage/free-tube/">
-<img src="https://hosted.weblate.org/widgets/free-tube/-/287x66-grey.png" alt="Translation status" />
+<a id="localization"></a>
+## 🌍 Localization
+<a href="https://weblate.opentubex.org/engage/opentubex/">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png">
+    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-black.png">
+    <img src="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-dark.svg">
+    <img src="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
+  </picture>
 </a>
 
-We are actively looking for translations!  We use [Weblate](https://hosted.weblate.org/engage/free-tube/) to make it easy for translators to get involved.  Click on the badge above to learn how to get involved.
+We are actively looking for translations! We use [Weblate](https://weblate.opentubex.org/engage/opentubex/) to make it easy for translators to get involved. Click on one of the graphics above to learn how to get involved.
 
-For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/flathub/io.freetubeapp.FreeTube/blob/master/io.freetubeapp.FreeTube.desktop).
+For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 
-## Contact
-If you ever have any questions, feel free to ask it on our [Discussions](https://github.com/FreeTubeApp/FreeTube/discussions) page.  Alternatively, you can join our [Matrix Space](https://matrix.to/#/#freetubeapp:matrix.org).  
+<a id="contact"></a>
+## 💬 Contact
+If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page, join our [Fluxer](https://fluxer.opentubex.org) server, or our [Matrix](https://matrix.opentubex.org) space (`#opentubex:matrix.org`).
 
-> [!IMPORTANT]
-> Don't forget to check out the [rules](https://docs.freetubeapp.io/community/matrix/) before joining.
+<a id="ai-assisted-development"></a>
+## 🤖 AI-assisted development
 
-## Donate
-If you enjoy using FreeTube, you're welcome to leave a donation using the following method.  
+OpenTubeX is developed extensively with AI-assisted tools. This allows our small
+maintainer team to develop features, fix bugs, and iterate much more rapidly.
+The source code remains open for anyone to inspect, review, modify, or fork.
 
-* Bitcoin Address: `1Lih7Ho5gnxb1CwPD4o59ss78pwo2T91eS`
+This disclosure refers to how OpenTubeX is developed. It does not mean the app
+sends your viewing data to an AI service. If AI-assisted development does not
+align with your preferences, OpenTubeX may simply not be the right project for
+you.
 
-While your donations are much appreciated, only donate if you really want to.  Donations are used for keeping the website up and running and eventual code signing costs. 
-
-> [!TIP]
-> If you are using the Invidious API then we recommend that you donate to the instance that you use. You can also donate to the [Invidious team](https://invidious.io/donate/) or the [Local API developer](https://github.com/sponsors/LuanRT).
-
-## License
+<a id="license"></a>
+## 📄 License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  
 
-FreeTube is Free Software: You can use, study share and improve it at your
+OpenTubeX is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
 [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) as
 published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.  
+(at your option) any later version.
+
+<a id="project-activity"></a>
+## 📈 Project activity
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity.svg?v=obsidian" />
+    <img alt="OpenTubeX project activity over the last 30 days" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity-light.svg?v=obsidian" width="740" />
+  </picture>
+</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history.svg?v=obsidian" />
+    <img alt="OpenTubeX star history" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history-light.svg?v=obsidian" width="740" />
+  </picture>
+</p>

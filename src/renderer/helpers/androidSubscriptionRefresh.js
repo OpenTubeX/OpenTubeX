@@ -1,0 +1,171 @@
+import { registerPlugin } from '@capacitor/core'
+import { LocalNotifications } from '@capacitor/local-notifications'
+import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshData'
+
+const SubscriptionRefresh = process.env.IS_CAPACITOR && !process.env.IS_IOS
+  ? registerPlugin('SubscriptionRefresh')
+  : null
+
+const startController = createSubscriptionRefreshStartController()
+let batchNotificationsDenied = null
+
+export async function requestAndroidSubscriptionRefreshNotificationPermission() {
+  try {
+    let current = await LocalNotifications.checkPermissions()
+    if (current.display === 'prompt' || current.display === 'prompt-with-rationale') {
+      current = await LocalNotifications.requestPermissions()
+    }
+    return current.display === 'denied'
+  } catch (error) {
+    console.error('Failed to request subscription refresh notification permission', error)
+    return false
+  }
+}
+
+export async function startAndroidSubscriptionRefresh(refreshId, title, cancelLabel, tab) {
+  if (!SubscriptionRefresh) return { acquired: true, notificationsDenied: false }
+
+  let notificationsDenied = false
+  const start = startController.begin(refreshId, () => (
+    (batchNotificationsDenied === null
+      ? requestAndroidSubscriptionRefreshNotificationPermission()
+      : Promise.resolve(batchNotificationsDenied))
+      .then(denied => {
+        notificationsDenied = denied
+        return SubscriptionRefresh.start({ title, cancelLabel, tab })
+      })
+      .then(({ token, acquired }) => acquired ? token : null)
+      .catch(error => {
+        console.error('Failed to start Android subscription refresh work', error)
+        return null
+      })
+  ))
+  if (start === null) return { acquired: false, notificationsDenied: false }
+
+  const token = await start
+  return { acquired: token !== null, notificationsDenied }
+}
+
+export function updateAndroidSubscriptionRefresh(refreshId, progress) {
+  const start = startController.current(refreshId)
+  if (!start) return
+
+  start.then(token => {
+    if (!startController.isCurrent(refreshId, start) || token === null) return
+    return SubscriptionRefresh.update({ token, progress: Math.round(progress) })
+  }).catch(error => {
+    console.error('Failed to update Android subscription refresh work', error)
+  })
+}
+
+export function finishAndroidSubscriptionRefresh(refreshId) {
+  const start = startController.finish(refreshId)
+  if (!start) return
+
+  return start.then(token => token === null ? null : SubscriptionRefresh.finish({ token })).catch(error => {
+    console.error('Failed to finish Android subscription refresh work', error)
+  })
+}
+
+export function configureAndroidSubscriptionRefresh(configuration) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.configure({ configuration })
+}
+
+export function configureAndroidUploadNotifications(configuration) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.configureUploadNotifications({ configuration })
+}
+
+export function observeAndroidUploads(value) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.observeUploads(value)
+}
+
+/**
+ * Takes the upload notifications Android has shown since the last call.
+ * @returns {Promise<{ feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[]>}
+ */
+export async function takeAndroidUploadNotifications() {
+  if (!SubscriptionRefresh) return []
+  const { notifications } = await SubscriptionRefresh.takeShownNotifications()
+  return Array.isArray(notifications) ? notifications : []
+}
+
+export async function isAndroidSubscriptionRefreshActive() {
+  if (!SubscriptionRefresh) return false
+  const { active } = await SubscriptionRefresh.isActive()
+  return active === true
+}
+
+export function getAndroidSubscriptionRefreshState() {
+  if (!SubscriptionRefresh) return Promise.resolve(null)
+  return SubscriptionRefresh.getState()
+}
+
+export function cancelAndroidSubscriptionRefresh() {
+  if (!SubscriptionRefresh) return
+  SubscriptionRefresh.cancel().catch(error => {
+    console.error('Failed to cancel Android subscription refresh', error)
+  })
+}
+
+export async function getNextAndroidSubscriptionRefreshResult() {
+  if (process.env.IS_ELECTRON) return window.ftElectron.subscriptionAutoRefresh.nextBackgroundResult()
+  if (!SubscriptionRefresh) return null
+  const { result } = await SubscriptionRefresh.nextPendingResult()
+  return result ?? null
+}
+
+export async function acknowledgeAndroidSubscriptionRefreshResult(id) {
+  if (process.env.IS_ELECTRON) return window.ftElectron.subscriptionAutoRefresh.acknowledgeBackgroundResult(id)
+  if (!SubscriptionRefresh) return
+  const { removed } = await SubscriptionRefresh.acknowledgePendingResult({ id })
+  if (!removed) throw new Error('Unable to acknowledge pending subscription refresh data')
+}
+
+/**
+ * Closed-app refreshes skip feeds that match their last queued result. Once
+ * their cache is cleared, those feeds have to be queued again.
+ * @param {string[]} [channelIds] Omit to forget every channel.
+ */
+export function forgetAndroidSubscriptionRefreshFingerprints(channelIds) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.forgetFingerprints(channelIds ? { channelIds } : {})
+}
+
+/** Android queued notifications for the visible app, for example from a background refresh. */
+export async function addAndroidNotificationsQueuedListener(listener) {
+  if (!SubscriptionRefresh) return () => {}
+  const handle = await SubscriptionRefresh.addListener('notificationsQueued', listener)
+  return () => handle.remove()
+}
+
+export async function addAndroidSubscriptionRefreshCancelledListener(listener) {
+  if (!SubscriptionRefresh) return () => {}
+  const handle = await SubscriptionRefresh.addListener('cancelled', listener)
+  return () => handle.remove()
+}
+
+export async function withAndroidSubscriptionRefreshBatch(refresh, notification) {
+  if (!SubscriptionRefresh) return refresh()
+  try {
+    // Ask while the activity is available, before the batch can outlive it.
+    const notificationsDenied = await requestAndroidSubscriptionRefreshNotificationPermission()
+    const { acquired } = await SubscriptionRefresh.beginBatch(notification)
+    if (!acquired) return
+    batchNotificationsDenied = notificationsDenied
+  } catch (error) {
+    console.error('Failed to begin Android subscription refresh batch', error)
+    return
+  }
+  try {
+    return await refresh()
+  } finally {
+    try {
+      await SubscriptionRefresh.endBatch()
+    } finally {
+      batchNotificationsDenied = null
+    }
+  }
+}

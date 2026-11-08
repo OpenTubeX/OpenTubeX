@@ -5,21 +5,47 @@
       :aria-labelledby="id"
       class="button"
       type="button"
-      @mouseenter="setHovered"
-      @mouseleave="setHovered"
-      @focus="setFocused"
-      @blur="setFocused"
+      :style="{ anchorName: visible ? tooltipAnchor : null }"
+      @mouseenter="setHovered(true)"
+      @mouseleave="setHovered(false)"
+      @focus="setFocused(true)"
+      @blur="setFocused(false)"
+      @click="dialogOpen = noHover"
     >
-      <FontAwesomeIcon :icon="['fas', 'question-circle']" />
+      <FtIcon :icon="['fas', 'question-circle']" />
     </button>
-    <Teleport to=".app">
+    <!-- Touch screens cannot hover, and a tap would leave a focus tooltip stuck open. -->
+    <FtPrompt
+      v-if="dialogOpen"
+      autosize
+      theme="slim"
+      :option-names="[t('Close')]"
+      :option-values="[null]"
+      :option-icons="[['fas', 'xmark']]"
+      @click="dialogOpen = false"
+    >
+      <template #label="{ labelId }">
+        <p
+          :id="labelId"
+          class="dialogText"
+          :class="{ allowNewlines }"
+        >
+          {{ tooltip }}
+        </p>
+      </template>
+    </FtPrompt>
+    <Teleport :to="tooltipTarget">
       <p
         :id="id"
-        ref="tooltipRef"
+        ref="textRef"
         class="text"
-        :class="[resolvedPosition, { visible: isVisible }]"
-        :style="tooltipStyle"
+        :class="{
+          [position]: true,
+          allowNewlines,
+          open: visible && settingsOverlayActive,
+        }"
         role="tooltip"
+        :style="tooltipStyle"
       >
         {{ tooltip }}
       </p>
@@ -28,8 +54,192 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, ref, reactive, useTemplateRef, useId } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { getAnchoredPosition, getUntransformedRect, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+
+const { t } = useI18n()
+
+const buttonRef = useTemplateRef('buttonRef')
+const textRef = useTemplateRef('textRef')
+const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
+const tooltipStyle = ref({})
+const visible = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  setHovered(false)
+  setFocused(false)
+})
+useAnchoredViewportBounds(buttonRef, textRef, visible)
+const noHover = usePhoneLayout('(hover: none)')
+const dialogOpen = ref(false)
+const EDGE_MARGIN = 8
+const TOOLTIP_GAP = 16
+let hovered = false
+let focused = false
+let positionAnimationFrame = null
+let positionMutationObserver = null
+let positionResizeObserver = null
+let trackingPosition = false
+
+/**
+ * @param {boolean} value
+ */
+function setHovered(value) {
+  if (value && (!settingsOverlayActive.value || noHover.value)) return
+  hovered = value
+  updateVisibility()
+}
+
+/**
+ * @param {boolean} value
+ */
+function setFocused(value) {
+  if (value && (!settingsOverlayActive.value || noHover.value)) return
+  focused = value
+  updateVisibility()
+}
+
+function updateVisibility() {
+  visible.value = hovered || focused
+  if (visible.value) {
+    tooltipTarget.value = document.fullscreenElement ?? document.body
+    nextTick(() => {
+      if (!settingsOverlayActive.value || !visible.value) return
+      positionTooltip()
+      startTrackingPosition()
+    })
+  } else {
+    stopTrackingPosition()
+    freezePosition()
+  }
+}
+
+/**
+ * The trigger loses its anchor-name once the tooltip closes, so keep the
+ * tooltip where it is while the close animation plays.
+ */
+function freezePosition() {
+  const text = textRef.value
+  if (!text || !tooltipStyle.value.positionAnchor) return
+  const rect = getUntransformedRect(text)
+  tooltipStyle.value = { left: `${rect.left}px`, top: `${rect.top}px` }
+}
+
+function startTrackingPosition() {
+  if (!visible.value || trackingPosition) return
+  trackingPosition = true
+  window.addEventListener('resize', schedulePositionUpdate)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+
+  if (!supportsAnchorPositioning) {
+    window.addEventListener('scroll', schedulePositionUpdate, true)
+    positionMutationObserver ??= new MutationObserver((records) => {
+      const tooltip = textRef.value
+      if (tooltip && records.every(({ target }) => target === tooltip || tooltip.contains(target))) {
+        return
+      }
+      schedulePositionUpdate()
+    })
+    positionMutationObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class', 'hidden', 'style'],
+      childList: true,
+      subtree: true,
+    })
+  }
+
+  positionResizeObserver ??= new ResizeObserver(schedulePositionUpdate)
+  if (buttonRef.value) {
+    positionResizeObserver.observe(buttonRef.value)
+  }
+  if (textRef.value) {
+    positionResizeObserver.observe(textRef.value)
+  }
+  schedulePositionUpdate()
+}
+
+function stopTrackingPosition() {
+  trackingPosition = false
+  window.removeEventListener('resize', schedulePositionUpdate)
+  window.removeEventListener('scroll', schedulePositionUpdate, true)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  positionMutationObserver?.disconnect()
+  positionResizeObserver?.disconnect()
+  if (positionAnimationFrame !== null) {
+    cancelAnimationFrame(positionAnimationFrame)
+    positionAnimationFrame = null
+  }
+}
+
+function schedulePositionUpdate() {
+  if (!visible.value || positionAnimationFrame !== null) return
+  positionAnimationFrame = requestAnimationFrame(() => {
+    positionAnimationFrame = null
+    positionTooltip()
+  })
+}
+
+function positionTooltip() {
+  const button = buttonRef.value
+  const text = textRef.value
+  if (!visible.value || !button || !text) return
+
+  const buttonRect = button.getBoundingClientRect()
+  const width = text.offsetWidth
+  const height = text.offsetHeight
+  const isRtl = getComputedStyle(button).direction === 'rtl'
+  let left
+  let top
+
+  switch (props.position) {
+    case 'left':
+      left = isRtl ? buttonRect.right + TOOLTIP_GAP : buttonRect.left - width - TOOLTIP_GAP
+      top = buttonRect.top + (buttonRect.height - height) / 2
+      break
+    case 'right':
+      left = isRtl ? buttonRect.left - width - TOOLTIP_GAP : buttonRect.right + TOOLTIP_GAP
+      top = buttonRect.top + (buttonRect.height - height) / 2
+      break
+    case 'top':
+      left = buttonRect.left + (buttonRect.width - width) / 2
+      top = buttonRect.top - height - TOOLTIP_GAP
+      break
+    case 'bottom-left':
+      left = isRtl ? buttonRect.left : buttonRect.right - width
+      top = buttonRect.bottom + TOOLTIP_GAP
+      break
+    default:
+      left = buttonRect.left + (buttonRect.width - width) / 2
+      top = buttonRect.bottom + TOOLTIP_GAP
+  }
+
+  tooltipStyle.value = getAnchoredPosition(tooltipAnchor, buttonRect, Math.round(left), Math.round(top), {
+    minLeft: EDGE_MARGIN,
+    maxLeft: window.innerWidth - width - EDGE_MARGIN,
+    minTop: EDGE_MARGIN,
+    maxTop: window.innerHeight - height - EDGE_MARGIN
+  })
+}
+
+async function handleFullscreenChange() {
+  tooltipTarget.value = document.fullscreenElement ?? document.body
+  if (visible.value) {
+    await nextTick()
+    positionResizeObserver?.disconnect()
+    if (buttonRef.value) positionResizeObserver?.observe(buttonRef.value)
+    if (textRef.value) positionResizeObserver?.observe(textRef.value)
+    schedulePositionUpdate()
+  }
+}
+
+onBeforeUnmount(() => {
+  stopTrackingPosition()
+})
 
 const props = defineProps({
   position: {
@@ -41,144 +251,16 @@ const props = defineProps({
     type: String,
     required: true
   },
+  allowNewlines: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const id = useId()
+const tooltipAnchor = `--tooltip-${id}`
 
-const VIEWPORT_MARGIN = 8 // minimum distance (px) to the window edges
-const ANCHOR_GAP = 12 // distance (px) between the button and the tooltip
-const OPPOSITE_POSITIONS = {
-  top: 'bottom',
-  bottom: 'top',
-  left: 'right',
-  right: 'left'
-}
-
-const buttonRef = useTemplateRef('buttonRef')
-const tooltipRef = useTemplateRef('tooltipRef')
-const isHovered = ref(false)
-const isFocused = ref(false)
-const isBttnOutOfView = ref(false)
-const tooltipStyle = reactive({ top: '0px', left: '0px' })
-const resolvedPosition = ref(props.position)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const isActive = computed(() => isHovered.value || isFocused.value)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const isVisible = computed(() => isActive.value && !isBttnOutOfView.value)
-
-function updatePosition() {
-  const buttonRect = buttonRef.value.getBoundingClientRect()
-  const viewportWidth = document.documentElement.clientWidth
-  const viewportHeight = document.documentElement.clientHeight
-
-  isBttnOutOfView.value = buttonRect.bottom < 0 || buttonRect.top > viewportHeight || buttonRect.right < 0 || buttonRect.left > viewportWidth
-  if (isBttnOutOfView.value) {
-    return
-  }
-
-  const tooltipRect = tooltipRef.value.getBoundingClientRect()
-  const isRtl = getComputedStyle(buttonRef.value).direction === 'rtl'
-  const isBottomLeft = props.position === 'bottom-left'
-
-  let position = props.position
-  if (isBottomLeft) {
-    position = 'bottom'
-  } else if (isRtl && (position === 'left' || position === 'right')) {
-    position = OPPOSITE_POSITIONS[position]
-  }
-
-  const availableSpace = {
-    top: buttonRect.top - ANCHOR_GAP - VIEWPORT_MARGIN,
-    bottom: viewportHeight - buttonRect.bottom - ANCHOR_GAP - VIEWPORT_MARGIN,
-    left: buttonRect.left - ANCHOR_GAP - VIEWPORT_MARGIN,
-    right: viewportWidth - buttonRect.right - ANCHOR_GAP - VIEWPORT_MARGIN,
-  }
-
-  const requiredSpace = position === 'top' || position === 'bottom' ? tooltipRect.height : tooltipRect.width
-
-  // Flip to the opposite side only if the tooltip doesn't fit on the preferred one and the opposite side has more room
-  if (availableSpace[position] < requiredSpace) {
-    const oppositePosition = OPPOSITE_POSITIONS[position]
-    if (availableSpace[oppositePosition] > availableSpace[position]) {
-      position = oppositePosition
-    }
-  }
-
-  const horizontalOffset = isBottomLeft ? ((isRtl ? 1 : -1) * (tooltipRect.width / 2 - buttonRect.width)) : 0
-
-  let top
-  let left
-  switch (position) {
-    case 'top':
-      top = buttonRect.top - ANCHOR_GAP - tooltipRect.height
-      left = buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2 + horizontalOffset
-      break
-    case 'left':
-      top = buttonRect.top + buttonRect.height / 2 - tooltipRect.height / 2
-      left = buttonRect.left - ANCHOR_GAP - tooltipRect.width
-      break
-    case 'right':
-      top = buttonRect.top + buttonRect.height / 2 - tooltipRect.height / 2
-      left = buttonRect.right + ANCHOR_GAP
-      break
-    case 'bottom':
-      top = buttonRect.bottom + ANCHOR_GAP
-      left = buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2 + horizontalOffset
-      break
-  }
-
-  // Clamp inside the viewport
-  const minTop = VIEWPORT_MARGIN
-  const maxTop = viewportHeight - VIEWPORT_MARGIN - tooltipRect.height
-  top = Math.max(minTop, Math.min(top, maxTop))
-
-  const minLeft = VIEWPORT_MARGIN
-  const maxLeft = viewportWidth - VIEWPORT_MARGIN - tooltipRect.width
-  left = Math.max(minLeft, Math.min(left, maxLeft))
-
-  tooltipStyle.top = `${top}px`
-  tooltipStyle.left = `${left}px`
-  resolvedPosition.value = position
-}
-
-/**
- * @param {PointerEvent} event
- */
-function setHovered(event) {
-  isHovered.value = event.type === 'mouseenter'
-  refresh()
-}
-
-/**
- * @param {FocusEvent} event
- */
-function setFocused(event) {
-  isFocused.value = event.type === 'focus'
-  refresh()
-}
-
-function refresh() {
-  if (isActive.value) {
-    show()
-  } else {
-    removeListeners()
-  }
-}
-
-function show() {
-  updatePosition()
-  window.addEventListener('resize', updatePosition)
-  window.addEventListener('scroll', updatePosition, true)
-}
-
-function removeListeners() {
-  window.removeEventListener('resize', updatePosition)
-  window.removeEventListener('scroll', updatePosition, true)
-}
-
-onBeforeUnmount(removeListeners)
+defineExpose({ id })
 </script>
 
 <style scoped src="./FtTooltip.css" />

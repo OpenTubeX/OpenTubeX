@@ -1,5 +1,7 @@
 import i18n from '../../i18n/index'
 
+import { checkYoutubeChannelId } from '../../helpers/channels'
+import { commitCustomThemesEdit } from '../../helpers/customThemeSync.js'
 import {
   CHANNEL_HANDLE_REGEX,
   createWebURL,
@@ -7,6 +9,54 @@ import {
   replaceFilenameForbiddenChars,
   searchFiltersMatch,
 } from '../../helpers/utils'
+import {
+  loadLegacyChannelThumbnailCache,
+  loadLegacyVideoAvatarCache,
+} from '../../helpers/channelThumbnailStorage'
+import { getSettingsWindowIconButton, morphUtilityWindow } from '../../helpers/utilityWindowMorph'
+import { getSearchFilterTabId } from '../../../search-history'
+import {
+  mergeYouTubeCaptionLanguageCodes,
+  YOUTUBE_CAPTION_LANGUAGE_CODES,
+} from '../../helpers/player/youtubeCaptionLanguages'
+
+const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
+const VIDEO_AVATAR_CACHE_LIMIT = 200
+
+let settingsWindowMorph = Promise.resolve()
+
+function morphSettingsWindow(commit, update, getButton) {
+  settingsWindowMorph = morphUtilityWindow(update, getButton, morphing => {
+    commit('setSettingsWindowMorphing', morphing)
+  })
+  return settingsWindowMorph
+}
+
+// The page stays interactive during a morph, so retry requests made meanwhile
+// once it finishes instead of dropping them.
+async function afterSettingsWindowMorph(state, retry) {
+  while (state.settingsWindowMorphing) await settingsWindowMorph.catch(() => {})
+  return retry()
+}
+
+function getMinimizedSettingsWindowButton() {
+  return document.querySelector('.minimizedUtilityButton')
+}
+
+function getOrCreateSearchSettings(state, tabId) {
+  state.searchSettingsByTabId[tabId] ??= {
+    prioritize: 'relevance',
+    time: '',
+    type: 'all',
+    duration: '',
+    features: [],
+  }
+  return state.searchSettingsByTabId[tabId]
+}
+
+// Each search keeps every loaded page of results, so a session only keeps the
+// most recently loaded ones to return to.
+const MAX_SESSION_SEARCHES = 30
 
 const state = {
   isSideNavOpen: false,
@@ -15,36 +65,46 @@ const state = {
   popularCache: null,
   trendingCache: {
     gaming: null,
+    music: null,
     sports: null,
     podcasts: null
   },
-  cachedPlaylist: null,
+  cachedPlaylists: {},
   deArrowCache: {},
-  showProgressBar: false,
+  // Seed the in-memory fallback once so upgraded sessions can migrate unloaded
+  // tabs to image files without opening every tab first.
+  channelThumbnailCache: loadLegacyChannelThumbnailCache(),
+  videoAvatarCache: loadLegacyVideoAvatarCache(),
+  /** @type {{ id: number, icon: string[], message: string, percentage: number }[]} */
+  progressOperations: [],
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
+  settingsWindowOpen: false,
+  settingsWindowMinimized: false,
+  settingsWindowMorphing: false,
+  settingsWindowReturnView: null,
+  settingsWindowView: null,
+  settingsWindowSection: null,
+  settingsWindowSectionRequest: null,
+  customThemeEditorOpen: false,
+  customThemes: [],
   showSearchFilters: false,
-  searchFilterValueChanged: false,
-  progressBarPercentage: 0,
+  searchFilterValueChangedByTabId: {},
   toBeAddedToPlaylistVideoList: [],
   newPlaylistDefaultProperties: {},
   newPlaylistVideoObject: [],
   regionNames: [],
   regionValues: [],
-  searchSettings: {
-    prioritize: 'relevance',
-    time: '',
-    type: 'all',
-    duration: '',
-    features: [],
-  },
+  youtubeCaptionLanguageCodes: [...YOUTUBE_CAPTION_LANGUAGE_CODES],
+  searchSettingsByTabId: {},
   externalPlayerNames: [],
   externalPlayerValues: [],
   externalPlayerCmdArguments: {},
   lastPopularRefreshTimestamp: '',
   lastTrendingRefreshTimestamp: {
     gaming: '',
+    music: '',
     sports: '',
     podcasts: ''
   },
@@ -75,6 +135,14 @@ const getters = {
     return state.deArrowCache
   },
 
+  getChannelThumbnail: (state) => (channelId) => {
+    return state.channelThumbnailCache[channelId] ?? null
+  },
+
+  getVideoAvatar: (state) => (videoId) => {
+    return state.videoAvatarCache[videoId] ?? null
+  },
+
   getPopularCache(state) {
     return state.popularCache
   },
@@ -83,20 +151,61 @@ const getters = {
     return state.trendingCache
   },
 
-  getCachedPlaylist(state) {
-    return state.cachedPlaylist
+  getCachedPlaylist: (state) => (tabId = 'web') => {
+    return state.cachedPlaylists[tabId] ?? null
   },
 
-  getSearchSettings(state) {
-    return state.searchSettings
+  getSearchSettings: (state) => (tabId = 'web') => {
+    return state.searchSettingsByTabId[tabId] ?? {
+      prioritize: 'relevance',
+      time: '',
+      type: 'all',
+      duration: '',
+      features: [],
+    }
   },
 
-  getSearchFilterValueChanged(state) {
-    return state.searchFilterValueChanged
+  getSearchFilterValueChanged: (state) => (tabId = 'web') => {
+    return state.searchFilterValueChangedByTabId[tabId] ?? false
   },
 
   getIsKeyboardShortcutPromptShown(state) {
     return state.isKeyboardShortcutPromptShown
+  },
+
+  getSettingsWindowOpen(state) {
+    return state.settingsWindowOpen
+  },
+
+  getSettingsWindowMinimized(state) {
+    return state.settingsWindowMinimized
+  },
+
+  getSettingsWindowMorphing(state) {
+    return state.settingsWindowMorphing
+  },
+
+  getSettingsWindowReturnView(state) {
+    return state.settingsWindowReturnView
+  },
+
+  getSettingsWindowView(state) {
+    return state.settingsWindowView
+  },
+
+  getSettingsWindowSection(state) {
+    return state.settingsWindowSection
+  },
+  getSettingsWindowSectionRequest(state) {
+    return state.settingsWindowSectionRequest
+  },
+
+  getCustomThemeEditorOpen(state) {
+    return state.customThemeEditorOpen
+  },
+
+  getCustomThemes(state) {
+    return state.customThemes
   },
 
   getShowAddToPlaylistPrompt(state) {
@@ -123,12 +232,8 @@ const getters = {
     return state.newPlaylistVideoObject
   },
 
-  getShowProgressBar(state) {
-    return state.showProgressBar
-  },
-
-  getProgressBarPercentage(state) {
-    return state.progressBarPercentage
+  getProgressOperations(state) {
+    return state.progressOperations
   },
 
   getRegionNames(state) {
@@ -137,6 +242,10 @@ const getters = {
 
   getRegionValues(state) {
     return state.regionValues
+  },
+
+  getYouTubeCaptionLanguageCodes(state) {
+    return state.youtubeCaptionLanguageCodes
   },
 
   getExternalPlayerNames(state) {
@@ -180,6 +289,8 @@ const getters = {
 }
 
 const actions = {
+  updateCustomThemes: commitCustomThemesEdit,
+
   showOutlines({ commit }) {
     commit('setOutlinesHidden', false)
   },
@@ -290,11 +401,109 @@ const actions = {
   },
 
   showKeyboardShortcutPrompt ({ commit }) {
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowView', null)
     commit('setIsKeyboardShortcutPromptShown', true)
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', true)
   },
 
   hideKeyboardShortcutPrompt ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', false)
+  },
+
+  showSettingsWindow ({ commit }, view = null) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowView', view)
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', true)
+  },
+
+  showDownloadsFromSettings ({ commit }) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', 'settings')
+    commit('setSettingsWindowView', 'downloads')
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', true)
+  },
+
+  toggleSettingsWindow ({ state, commit }) {
+    const open = state.settingsWindowMinimized || !state.settingsWindowOpen ||
+      state.settingsWindowView !== null ||
+      state.isKeyboardShortcutPromptShown
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowView', null)
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', open)
+  },
+
+  hideSettingsWindow ({ commit }) {
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowMinimized', false)
+    commit('setSettingsWindowOpen', false)
+  },
+
+  // Morphs out of the app header button for the view when the window is closed
+  openSettingsWindowFromIcon ({ state, commit, dispatch }, view = null) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('openSettingsWindowFromIcon', view))
+    }
+    if (state.settingsWindowOpen || state.settingsWindowMinimized) {
+      return dispatch('showSettingsWindow', view)
+    }
+    return morphSettingsWindow(commit, async () => {
+      commit('setIsKeyboardShortcutPromptShown', false)
+      commit('setSettingsWindowReturnView', null)
+      commit('setSettingsWindowView', view)
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', true)
+    }, () => getSettingsWindowIconButton(view))
+  },
+
+  // Morphs back into the app header button for the current view if it is shown
+  closeSettingsWindowToIcon ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('closeSettingsWindowToIcon'))
+    }
+    const view = state.settingsWindowView
+    if (!state.settingsWindowOpen || !getSettingsWindowIconButton(view)?.getClientRects().length) {
+      return dispatch('hideSettingsWindow')
+    }
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowReturnView', null)
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', false)
+    }, () => getSettingsWindowIconButton(view))
+  },
+
+  minimizeSettingsWindow ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('minimizeSettingsWindow'))
+    }
+    if (!state.settingsWindowOpen) return
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowOpen', false)
+      commit('setSettingsWindowMinimized', true)
+    }, getMinimizedSettingsWindowButton)
+  },
+
+  restoreSettingsWindow ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('restoreSettingsWindow'))
+    }
+    if (!state.settingsWindowMinimized) return
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', true)
+    }, getMinimizedSettingsWindowButton)
+  },
+
+  showSettingsWindowRoot ({ commit }) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowView', null)
   },
 
   showSearchFilters ({ commit }) {
@@ -303,10 +512,6 @@ const actions = {
 
   hideSearchFilters ({ commit }) {
     commit('setShowSearchFilters', false)
-  },
-
-  updateShowProgressBar ({ commit }, value) {
-    commit('setShowProgressBar', value)
   },
 
   async getRegionData ({ commit }, locale) {
@@ -320,7 +525,12 @@ const actions = {
     commit('setRegionValues', countries.codes)
   },
 
-  async getYoutubeUrlInfo({ rootState, state }, urlStr) {
+  /**
+   * @param {string | { url: string, tabId?: string }} payload the URL, optionally
+   * with the tab it opens in, whose search filters apply instead of the presented tab's
+   */
+  async getYoutubeUrlInfo({ rootState, getters, rootGetters }, payload) {
+    let { url: urlStr, tabId = rootGetters.getPresentedTabId } = typeof payload === 'string' ? { url: payload } : payload
     // Returns
     // - urlType [String] `video`, `playlist`
     //
@@ -342,9 +552,6 @@ const actions = {
     // If `urlType` is "channel"
     // - channelId [String]
     //
-    // If `urlType` is "clip"
-    // - clipId
-    //
     // If `urlType` is "unknown"
     // Nothing else
     //
@@ -355,13 +562,15 @@ const actions = {
       urlStr = `https://www.youtube.com/${urlStr}`
     }
 
-    const { videoId, timestamp, playlistId } = getVideoParamsFromUrl(urlStr)
+    const { videoId, timestamp, playlistId, commentId, isShort } = getVideoParamsFromUrl(urlStr)
     if (videoId) {
       return {
         urlType: 'video',
         videoId,
         playlistId,
-        timestamp
+        timestamp,
+        commentId,
+        isShort
       }
     }
 
@@ -379,7 +588,6 @@ const actions = {
       /^\/(?:(?:channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|shows|playlists|about|community|channels))?\/?$/
 
     const hashtagPattern = /^\/hashtag\/(?<tag>[^#&/?]+)$/
-    const clipPattern = /^\/clip\/(?<clipId>.+)/
     const postPattern = /^\/post\/(?<postId>.+)/
     const showPattern = /^\/show\/VL(?<playlistId>.+)/
     const feedPattern = /^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/
@@ -390,8 +598,7 @@ const actions = {
       ['hashtag', hashtagPattern],
       ['post', postPattern],
       ['feed', feedPattern],
-      ['channel', channelPattern],
-      ['clip', clipPattern]
+      ['channel', channelPattern]
     ])
 
     for (const [type, pattern] of typePatterns) {
@@ -447,7 +654,7 @@ const actions = {
           return { urlType: 'unknown' }
         }
 
-        const searchSettings = state.searchSettings
+        const searchSettings = getters.getSearchSettings(getSearchFilterTabId(tabId))
         const query = {
           prioritize: searchSettings.prioritize,
           time: searchSettings.time,
@@ -475,13 +682,6 @@ const actions = {
           urlType: 'hashtag',
           hashtag
         }
-      }
-
-      case 'clip': {
-        const match = url.pathname.match(clipPattern)
-        const clipId = match.groups.clipId
-
-        return { urlType: 'clip', clipId }
       }
 
       case 'post': {
@@ -523,9 +723,18 @@ const actions = {
       */
       case 'channel': {
         const match = url.pathname.match(channelPattern)
-        const channelId = match.groups.channelId
+        const rawChannelId = match.groups.channelId
+        let channelId = rawChannelId
+        if (rawChannelId.startsWith('@') && checkYoutubeChannelId(rawChannelId.slice(1))) {
+          channelId = rawChannelId.slice(1)
+        }
         if (!channelId) {
           return { urlType: 'unknown' }
+        }
+
+        let channelUrlPath = url.pathname
+        if (channelId !== rawChannelId) {
+          channelUrlPath = `/channel/${channelId}${match.groups.tab ? `/${match.groups.tab}` : ''}`
         }
 
         let subPath
@@ -582,7 +791,7 @@ const actions = {
           subPath,
           // The original URL could be from Invidious.
           // We need to make sure it starts with youtube.com, so that YouTube's resolve endpoint can recognise it
-          url: `https://www.youtube.com${url.pathname}`
+          url: `https://www.youtube.com${channelUrlPath}`
         }
       }
       case 'feed': {
@@ -640,12 +849,19 @@ const mutations = {
     state.outlinesHidden = value
   },
 
-  setShowProgressBar (state, value) {
-    state.showProgressBar = value
+  addProgressOperation (state, operation) {
+    state.progressOperations.push(operation)
   },
 
-  setProgressBarPercentage (state, value) {
-    state.progressBarPercentage = value
+  updateProgressOperation (state, { id, ...progress }) {
+    const operation = state.progressOperations.find(operation => operation.id === id)
+    if (operation) {
+      Object.assign(operation, progress)
+    }
+  },
+
+  removeProgressOperation (state, id) {
+    state.progressOperations = state.progressOperations.filter(operation => operation.id !== id)
   },
 
   setSessionSearchHistory (state, history) {
@@ -668,26 +884,73 @@ const mutations = {
     state.deArrowCache[payload.videoId] = payload
   },
 
-  removeFromSessionSearchHistory (state, query) {
-    state.sessionSearchHistory = state.sessionSearchHistory.filter((search) => search.query !== query)
+  setChannelThumbnail (state, { channelId, thumbnail }) {
+    if (!channelId || !thumbnail) {
+      return
+    }
+
+    const cache = state.channelThumbnailCache
+    if (cache[channelId] === thumbnail) {
+      return
+    }
+
+    const keys = Object.keys(cache)
+    if (!(channelId in cache) && keys.length >= CHANNEL_THUMBNAIL_CACHE_LIMIT) {
+      delete cache[keys[0]]
+    }
+
+    cache[channelId] = thumbnail
+  },
+
+  setVideoAvatar (state, { videoId, avatar }) {
+    if (!videoId || !avatar) return
+
+    const cache = state.videoAvatarCache
+    if (cache[videoId] === avatar) return
+
+    const keys = Object.keys(cache)
+    if (!(videoId in cache) && keys.length >= VIDEO_AVATAR_CACHE_LIMIT) {
+      delete cache[keys[0]]
+    }
+
+    cache[videoId] = avatar
+  },
+
+  removeFromSessionSearchHistory (state, { query, searchSettings }) {
+    state.sessionSearchHistory = state.sessionSearchHistory.filter((search) => {
+      return search.query !== query || !searchFiltersMatch(search.searchSettings, searchSettings)
+    })
   },
 
   addToSessionSearchHistory (state, payload) {
     const sameSearch = state.sessionSearchHistory.findIndex((search) => {
-      return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings)
+      return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings) &&
+        (search.spellCorrection ?? true) === (payload.spellCorrection ?? true)
     })
 
     if (sameSearch !== -1) {
       state.sessionSearchHistory[sameSearch].data = payload.data
-      if (payload.nextPageRef) {
-        // Local API
+      state.sessionSearchHistory[sameSearch].apiUsed = payload.apiUsed
+      if (Object.hasOwn(payload, 'nextPageRef')) {
         state.sessionSearchHistory[sameSearch].nextPageRef = payload.nextPageRef
-      } else if (payload.searchPage) {
-        // Invidious API
+      }
+      if (Object.hasOwn(payload, 'searchPage')) {
         state.sessionSearchHistory[sameSearch].searchPage = payload.searchPage
       }
+      if (Object.hasOwn(payload, 'hasMoreResults')) {
+        state.sessionSearchHistory[sameSearch].hasMoreResults = payload.hasMoreResults
+      }
+      if (Object.hasOwn(payload, 'searchNotice')) {
+        state.sessionSearchHistory[sameSearch].searchNotice = payload.searchNotice
+        state.sessionSearchHistory[sameSearch].searchCorrection = payload.searchCorrection
+        state.sessionSearchHistory[sameSearch].searchParams = payload.searchParams
+      }
+      state.sessionSearchHistory.push(...state.sessionSearchHistory.splice(sameSearch, 1))
     } else {
       state.sessionSearchHistory.push(payload)
+      if (state.sessionSearchHistory.length > MAX_SESSION_SEARCHES) {
+        state.sessionSearchHistory.splice(0, state.sessionSearchHistory.length - MAX_SESSION_SEARCHES)
+      }
     }
   },
 
@@ -701,6 +964,48 @@ const mutations = {
 
   setIsKeyboardShortcutPromptShown (state, payload) {
     state.isKeyboardShortcutPromptShown = payload
+  },
+
+  setSettingsWindowOpen (state, payload) {
+    state.settingsWindowOpen = payload
+  },
+
+  setSettingsWindowMinimized (state, payload) {
+    state.settingsWindowMinimized = payload
+  },
+
+  setSettingsWindowMorphing (state, payload) {
+    state.settingsWindowMorphing = payload
+  },
+
+  setSettingsWindowReturnView (state, payload) {
+    state.settingsWindowReturnView = payload
+  },
+
+  setSettingsWindowView (state, payload) {
+    state.settingsWindowView = payload
+  },
+
+  /**
+   * @param {object} state
+   * @param {string | { section: string, subpage?: string } | null} payload the section, optionally with
+   * the `data-settings-subpage` button to open after showing it
+   */
+  setSettingsWindowSection (state, payload) {
+    state.settingsWindowSectionRequest = payload === null
+      ? null
+      : typeof payload === 'string' ? { section: payload } : payload
+  },
+  rememberSettingsWindowSection (state, payload) {
+    state.settingsWindowSection = payload
+  },
+
+  setCustomThemeEditorOpen (state, payload) {
+    state.customThemeEditorOpen = payload
+  },
+
+  setCustomThemes (state, payload) {
+    state.customThemes = payload
   },
 
   setShowSearchFilters (state, payload) {
@@ -732,7 +1037,7 @@ const mutations = {
 
   /**
    * @param {typeof state} state
-   * @param {{page: 'gaming' | 'sports' | 'podcasts', timestamp: Date}} param1
+   * @param {{page: 'gaming' | 'music' | 'sports' | 'podcasts', timestamp: Date}} param1
    */
   setLastTrendingRefreshTimestamp (state, { page, timestamp }) {
     state.lastTrendingRefreshTimestamp[page] = timestamp
@@ -744,38 +1049,53 @@ const mutations = {
 
   /**
    * @param {typeof state} state
-   * @param {'gaming' | 'sports' | 'podcasts'} page
+   * @param {'gaming' | 'music' | 'sports' | 'podcasts'} page
    */
   clearTrendingCache(state, page) {
     state.trendingCache[page] = null
   },
 
-  setCachedPlaylist(state, value) {
-    state.cachedPlaylist = value
+  // Drops the caches of tabs that no longer exist.
+  pruneTabCaches(state, tabIds) {
+    for (const cache of [state.cachedPlaylists, state.searchSettingsByTabId, state.searchFilterValueChangedByTabId]) {
+      for (const tabId of Object.keys(cache)) {
+        if (tabId !== 'web' && !tabIds.has(tabId)) {
+          delete cache[tabId]
+        }
+      }
+    }
   },
 
-  setSearchFilterValueChanged (state, value) {
-    state.searchFilterValueChanged = value
+  setCachedPlaylist(state, { tabId = 'web', value }) {
+    if (value == null) {
+      delete state.cachedPlaylists[tabId]
+    } else {
+      state.cachedPlaylists[tabId] = value
+    }
   },
 
-  setSearchPrioritize (state, value) {
-    state.searchSettings.prioritize = value
+  setSearchFilterValueChanged (state, { tabId = 'web', value }) {
+    state.searchFilterValueChangedByTabId[tabId] = value
   },
 
-  setSearchTime (state, value) {
-    state.searchSettings.time = value
+  setSearchPrioritize (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).prioritize = value
   },
 
-  setSearchType (state, value) {
-    state.searchSettings.type = value
+  setSearchTime (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).time = value
   },
 
-  setSearchDuration (state, value) {
-    state.searchSettings.duration = value
+  setSearchType (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).type = value
   },
 
-  setSearchFeatures (state, value) {
-    state.searchSettings.features = value
+  setSearchDuration (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).duration = value
+  },
+
+  setSearchFeatures (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).features = value
   },
 
   setRegionNames (state, value) {
@@ -784,6 +1104,13 @@ const mutations = {
 
   setRegionValues (state, value) {
     state.regionValues = value
+  },
+
+  setYouTubeCaptionLanguageCodes(state, languages) {
+    state.youtubeCaptionLanguageCodes = mergeYouTubeCaptionLanguageCodes([
+      ...state.youtubeCaptionLanguageCodes,
+      ...languages,
+    ])
   },
 
   setExternalPlayerNames (state, value) {

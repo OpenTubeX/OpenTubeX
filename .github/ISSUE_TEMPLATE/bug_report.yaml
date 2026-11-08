@@ -1,29 +1,26 @@
 name: Bug Report
 description: Report an issue or unexpected behavior that occurs within the application
-title: "[Bug]: "
 type: Bug
 body:
   - type: markdown
     attributes:
       value: |
         **README: Before You Submit Your Issue**
-        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/FreeTubeApp/FreeTube/discussions).
+        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/OpenTubeX/OpenTubeX/discussions).
   - type: checkboxes
     attributes:
       label: Guidelines
       description: Please ensure you've completed all of the following.
       options:
-        - label: I have encountered this bug in the [latest release of FreeTube](https://github.com/FreeTubeApp/FreeTube/releases).
+        - label: I have encountered this bug in the [latest release of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX/releases).
           required: true
-        - label: I have encountered this bug in the [official downloads of FreeTube](https://github.com/FreeTubeApp/FreeTube#official-downloads). **The only official downloads are from the [https://freetubeapp.io](https://freetubeapp.io/#download) website, the [FreeTubeApp/FreeTube GitHub repository](https://github.com/FreeTubeApp/FreeTube/releases) and the [io.freetubeapp.FreeTube flatpak](https://flathub.org/en/apps/io.freetubeapp.FreeTube) from Flathub.**
+        - label: I have encountered this bug in the [official downloads of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX#official-downloads).
           required: true
-        - label: I have [searched the issue tracker for **open and closed** issues](https://github.com/FreeTubeApp/FreeTube/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
+        - label: I have [searched the issue tracker for **open and closed** issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
           required: true
-        - label: I have searched the [documentation](https://docs.freetubeapp.io/) for information that matches the description of the bug I want to file, without success.
+        - label: I have searched the [documentation](https://opentubex.org/docs/) for information that matches the description of the bug I want to file, without success.
           required: true
         - label: This issue contains only one bug.
-          required: true
-        - label: I have read and agree to follow the [rules](https://docs.freetubeapp.io/community/rules/).
           required: true
   - type: textarea
     attributes:
@@ -65,18 +62,33 @@ body:
       required: true
   - type: input
     attributes:
-      label: FreeTube Version
+      label: OpenTubeX Version
       description: |
         If using releases, enter the version.
-        If using nightly builds, enter commit hash or build number, you can find it via about page in the FreeTube application.
-      placeholder: v0.14.0, 8c4278
+        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
+      placeholder: v0.37.0, 8c4278
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Operating System
+      description: Which operating system does this issue concern?
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+        - iPadOS
+        - Other
     validations:
       required: true
   - type: input
     attributes:
       label: Operating System Version
-      description: What operating system version are you using? On Windows, click Start button > Settings > System > About. On macOS, click the Apple Menu > About This Mac. On Linux, use lsb_release or uname -a.
-      placeholder: "e.g. Windows 10 version 1909, macOS Catalina 10.15.7, or Ubuntu 20.04"
+      description: What operating system version are you using? On Windows, click Start button > Settings > System > About. On macOS, click the Apple Menu > About This Mac. On Linux, use lsb_release or uname -a. On Android, open Settings > About phone > Android version. On iOS or iPadOS, open Settings > General > About.
+      placeholder: "e.g. Windows 11 version 24H2, macOS Sequoia 15.7, Ubuntu 24.04, Android 15, iOS 18.6, or iPadOS 18.6"
     validations:
       required: true
   - type: dropdown
@@ -86,27 +98,42 @@ body:
       options:
         - .AppImage
         - .deb
+        - APT repository
+        - Flatpak (OpenTubeX remote)
+        - Flatpark
+        - Snap
+        - Nix
         - .dmg
-        - .exe
-        - Flathub
+        - Homebrew
+        - .apk (Android)
+        - F-Droid repository
+        - Obtainium
+        - OpenTubeX Lite (.apk / F-Droid / Obtainium)
+        - .ipa (iOS / iPadOS)
+        - SideStore
+        - iloader
+        - AltStore Classic
+        - .exe installer
+        - WinGet
         - .pacman
-        - Portable
         - .rpm
-        - .zip / .7z
-        - .apk (FreeTubeAndroid Unofficial)
-        - .apk (Alpine Linux Package Unofficial)
-        - AUR (Unofficial)
-        - Chocolatey (Unofficial)
-        - Homebrew (Unofficial)
-        - Nix (Unofficial)
-        - PortableApps (Unofficial)
-        - Scoop (Unofficial)
-        - Snapcraft (Unofficial)
-        - WAPT (Unofficial)
-        - winget (Unofficial)
+        - COPR repository
+        - RPM repository
+        - Portable .zip / .7z
+        - AUR
         - other
     validations:
       required: true
+  - type: dropdown
+    attributes:
+      label: Architecture
+      description: Which CPU architecture is your OpenTubeX build for? It is part of the downloaded file name.
+      options:
+        - x64 / amd64 / x86_64
+        - arm64 / arm64-v8a (including Apple Silicon)
+        - armv7l / armeabi-v7a
+        - x86
+        - I don't know
   - type: dropdown
     attributes:
       label: Primary API used
@@ -115,20 +142,37 @@ body:
       options:
         - Local API
         - Invidious API
+        - Yattee Server
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Stream Extraction Method
+      description: Which stream extraction method is selected in General Settings? OpenTubeX Lite does not show this setting; select Built-in.
+      multiple: false
+      options:
+        - Built-in
+        - yt-dlp
     validations:
       required: true
   - type: input
     attributes:
-      label: 'Last Known Working FreeTube Version (If Any)'
-      description: What is the last version of FreeTube this worked in, if applicable?
-      placeholder: v0.14.0
-  - type: upload
+      label: 'Last Known Working OpenTubeX Version (If Any)'
+      description: What is the last version of OpenTubeX this worked in, if applicable?
+      placeholder: v0.37.0
+  - type: textarea
     id: screenshots
     attributes:
-      label: Upload screenshots or videos
-      description: If applicable, add screenshots or videos to help explain your problem.
+      label: Screenshots or videos
+      description: If applicable, drag and drop or paste screenshots or videos here to help explain your problem.
     validations:
       required: false
+  - type: textarea
+    attributes:
+      label: Diagnostic report
+      description: |
+        Open Settings > Advanced > Diagnostics, turn on "Enable diagnostic logging", reproduce the bug, then save or copy the report.
+        Attach the file or paste the report here. Check it for anything you do not want to share before posting.
   - type: textarea
     attributes:
       label: Additional Information
@@ -140,5 +184,5 @@ body:
       label: Nightly Build
       description: Please ensure you've completed the following, if applicable.
       options:
-        - label: I have encountered this bug in the latest **official** [nightly build](https://docs.freetubeapp.io/development/nightly-builds), do not check this box if you are using an unofficial or custom build.
+        - label: I have encountered this bug in the latest **official** [nightly build](https://opentubex.org/downloads/#development), do not check this box if you are using an unofficial or custom build.
           required: false

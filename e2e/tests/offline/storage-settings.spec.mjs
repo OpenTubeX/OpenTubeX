@@ -1,0 +1,854 @@
+import { IpcChannels } from '../../../src/constants.js'
+import { access, mkdir, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { expect, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
+
+test.use({
+  seed: {
+    settings: {
+      currentLocale: 'en-US',
+      enableVideoMetadataCache: true,
+      historyRetentionDays: '30'
+    },
+    profiles: [{
+      _id: 'allChannels',
+      name: 'All Channels',
+      subscriptions: [{ id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Channel A' }]
+    }],
+    searchHistory: [{ _id: 'saved search', lastUpdatedAt: 1 }],
+    subscriptionCache: [{
+      _id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+      videos: [{ videoId: 'aaaaaaaaaaa', title: 'Cached video' }],
+      videosTimestamp: 1
+    }]
+  }
+})
+
+test('keeps storage content inset from the top and bottom of its cards', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialBlack'))
+  const storage = await goToSettingsSection(page, 'storage')
+  for (const width of [375, 1600]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+    }, { width, uiScale })
+    await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+    await expect.poll(() => storage.locator('.sectionBody').evaluateAll(elements => elements.map(element => {
+      const bounds = element.getBoundingClientRect()
+      const children = [...element.children].map(child => child.getBoundingClientRect())
+      return {
+        top: Math.round(Math.min(...children.map(child => child.top)) - bounds.top),
+        bottom: Math.round(bounds.bottom - Math.max(...children.map(child => child.bottom)))
+      }
+    }))).toEqual(Array.from({ length: await storage.locator('.sectionBody').count() }, () => ({ top: 20, bottom: 20 })))
+    if (width === 375 && uiScale === 100) {
+      for (const toast of await page.locator('[data-sonner-toast]').all()) {
+        await toast.focus()
+        await page.keyboard.press('Escape')
+      }
+      await expect(page.locator('.toast')).toHaveCount(0)
+      await storage.locator('.storageBreakdown').scrollIntoViewIfNeeded()
+      await page.screenshot({ path: testInfo.outputPath('mobile-storage-chart-spacing.png') })
+      await storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..').evaluate(element => element.scrollIntoView({ block: 'start' }))
+      await page.screenshot({ path: testInfo.outputPath('mobile-storage-card-spacing.png') })
+    }
+  }
+})
+
+test('keeps retention label transparent and its indicators inside the card', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateBaseTheme', 'dark')
+    store.commit('setSyncServerEnabled', true)
+    store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerSyncSettings', true)
+    store.commit('setHighlightChangedSettings', true)
+  })
+  const storage = await goToSettingsSection(page, 'storage')
+  const input = storage.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true })
+  const root = input.locator('../..')
+  await expect(root.locator('.syncedSettingIndicator')).toBeVisible()
+  for (const width of [1600, 1000, 375]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+    }, { width, uiScale })
+    await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(direction => { document.body.dir = direction }, direction)
+      await input.scrollIntoViewIfNeeded()
+      const geometry = await root.evaluate(element => {
+        const card = element.closest('.storageItem')
+        const bounds = card.getBoundingClientRect()
+        const style = getComputedStyle(card)
+        const label = element.querySelector('.selectLabel').getBoundingClientRect()
+        const control = element.querySelector('input').getBoundingClientRect()
+        const outline = element.querySelector('.inputOutline').getBoundingClientRect()
+        const action = element.querySelector('.inputAction').getBoundingClientRect()
+        const indicators = [...element.querySelectorAll('.inputIndicators button')].map(button => {
+          const rect = button.getBoundingClientRect()
+          return { left: rect.left, right: rect.right }
+        })
+        return {
+          left: bounds.left + parseFloat(style.paddingLeft),
+          right: bounds.right - parseFloat(style.paddingRight),
+          indicators,
+          labelBackground: getComputedStyle(element.querySelector('.selectLabel')).backgroundColor,
+          labelCenter: label.top + label.height / 2,
+          inputTop: control.top,
+          outlineLeft: outline.left,
+          outlineRight: outline.right,
+          controlLeft: control.left,
+          controlRight: control.right,
+          actionLeft: action.left,
+          actionRight: action.right
+        }
+      })
+      expect.soft(geometry.labelBackground, 'label reveals the card surface').toBe('rgba(0, 0, 0, 0)')
+      expect.soft(Math.abs(geometry.labelCenter - geometry.inputTop), `${width}px ${uiScale}%: label centered in outline notch`).toBeLessThanOrEqual(1)
+      expect.soft(Math.abs(geometry.outlineLeft - geometry.controlLeft), 'outline starts at input').toBeLessThanOrEqual(1)
+      expect.soft(Math.abs(geometry.outlineRight - geometry.controlRight), 'outline excludes external indicators').toBeLessThanOrEqual(1)
+      expect.soft(geometry.actionLeft, 'save action inside input').toBeGreaterThanOrEqual(geometry.controlLeft)
+      expect.soft(geometry.actionRight, 'save action inside input').toBeLessThanOrEqual(geometry.controlRight)
+      for (const bounds of geometry.indicators) {
+        expect.soft(bounds.left, `${width}px ${uiScale}% ${direction}: indicator left`).toBeGreaterThanOrEqual(geometry.left - 1)
+        expect.soft(bounds.right, `${width}px ${uiScale}% ${direction}: indicator right`).toBeLessThanOrEqual(geometry.right + 1)
+      }
+      await root.locator('.selectLabel').click()
+      await expect(input).toBeFocused()
+      expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'focus does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+      await input.evaluate(element => element.blur())
+      await input.hover()
+      expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'hover does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+    }
+    if (width === 1600 && uiScale === 100) {
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await input.locator('xpath=ancestor::article').screenshot({ path: testInfo.outputPath('retention-card.png') })
+    }
+  }
+})
+
+test.describe('native number arrows', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', historyRetentionDays: '30' } } })
+  test('number input arrows highlight independently and retain native stepping', async ({ app, page, uiScale }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), uiScale === 100 ? 'dark' : 'light')
+    const section = await goToSettingsSection(page, 'storage')
+    const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)' })
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(direction => { document.body.dir = direction }, direction)
+      await input.scrollIntoViewIfNeeded()
+      await input.fill('30')
+      await input.evaluate(element => element.scrollIntoView({ block: 'center' }))
+      const bounds = await input.boundingBox()
+      const padding = await input.evaluate(element => parseFloat(getComputedStyle(element)[document.body.dir === 'rtl' ? 'paddingLeft' : 'paddingRight']))
+      const x = direction === 'rtl' ? padding + 4 : bounds.width - padding - 4
+      const upper = { x, y: bounds.height / 2 - 7 }
+      const lower = { x, y: bounds.height / 2 + 7 }
+      const primary = await input.evaluate(element => {
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--primary-color)'
+        element.parentElement.append(probe)
+        const color = getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number)
+        probe.remove()
+        return color
+      })
+      // capturePage preserves the hovered pointer; Playwright's screenshot
+      // capture can move Electron's pointer back to the X server position.
+      const highlightedPixels = async (name) => {
+        const box = await input.boundingBox()
+        const result = await app.electronApp.evaluate(async ({ BrowserWindow }, { box, primary, start, end }) => {
+          const webContents = BrowserWindow.getAllWindows()[0].webContents
+          const zoom = webContents.getZoomFactor()
+          const image = await webContents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })
+          const { width, height } = image.getSize()
+          const pixels = image.toBitmap()
+          const counts = [0, 0]
+          for (let y = 5; y < height - 5; y++) {
+            for (let x = Math.floor(start * width); x < Math.ceil(end * width); x++) {
+              const i = (y * width + x) * 4
+              if (pixels[i + 2] === primary[0] && pixels[i + 1] === primary[1] && pixels[i] === primary[2]) counts[y < height / 2 ? 0 : 1]++
+            }
+          }
+          return { counts, png: image.toPNG().toString('base64') }
+        }, { box, primary, start: (x - 9) / bounds.width, end: (x + 9) / bounds.width })
+        if (name) await writeFile(testInfo.outputPath(name), Buffer.from(result.png, 'base64'))
+        return result.counts
+      }
+      for (const [position, selected] of [[upper, 0], [lower, 1]]) {
+        await input.hover({ position })
+        const counts = await highlightedPixels(`number-arrow-${direction}-${selected}.png`)
+        expect.soft(counts[selected], 'hovered arrow uses the theme highlight').toBeGreaterThan(5)
+        expect.soft(counts[1 - selected], 'other arrow keeps its normal color').toBe(0)
+      }
+      await input.hover({ position: { x: bounds.width / 2, y: bounds.height / 2 } })
+      expect(await highlightedPixels()).toEqual([0, 0])
+      await input.hover({ position: upper })
+      await page.locator('.settingsBreadcrumb').hover()
+      expect(await highlightedPixels()).toEqual([0, 0])
+      await input.click({ position: upper })
+      await expect(input).toHaveValue('31')
+      await input.click({ position: lower })
+      await expect(input).toHaveValue('30')
+      await input.press('ArrowUp')
+      await expect(input).toHaveValue('31')
+    }
+  })
+})
+
+test('number arrow pressed paint reaches controls inside dialog overlays', async ({ page }) => {
+  const section = await goToSettingsSection(page, 'storage')
+  const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true })
+  await input.scrollIntoViewIfNeeded()
+  const position = await input.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return { x: rect.width - parseFloat(getComputedStyle(element).paddingRight) - 4, y: rect.height / 2 - 7 }
+  })
+  // Settings is already a dialog. Model FtPrompt/FtMobileSheet's propagation
+  // boundary without replacing the input or its native stepping behavior.
+  await input.evaluate(element => element.closest('[role="dialog"]').addEventListener('pointerdown', event => event.stopPropagation()))
+  // Custom themes can make the pressed color translucent, the arrow stays opaque.
+  await page.locator('body').evaluate(element => element.style.setProperty('--primary-color-active', '#b38fdf1a'))
+  await input.hover({ position })
+  await page.mouse.down()
+  try {
+    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).not.toBe('')
+    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-down-color'))).toBe('')
+    expect(await input.evaluate(element => {
+      const probe = document.createElement('div')
+      probe.style.backgroundColor = element.style.getPropertyValue('--number-step-up-color')
+      document.body.append(probe)
+      const context = document.createElement('canvas').getContext('2d')
+      context.fillStyle = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      context.fillRect(0, 0, 1, 1)
+      return [...context.getImageData(0, 0, 1, 1).data]
+    })).toEqual([179, 143, 223, 255])
+  } finally {
+    await page.mouse.up()
+  }
+  await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).toBe('var(--primary-color)')
+})
+
+test('calculates storage usage only after the Storage tab opens', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channel) => {
+    globalThis.__storageUsageReadCount = 0
+    ipcMain.removeHandler(channel)
+    ipcMain.handle(channel, () => {
+      globalThis.__storageUsageReadCount++
+      return { profileTotal: 0, otherProfileData: 0 }
+    })
+  }, IpcChannels.STORAGE_GET_USAGE)
+
+  const dataAndStorage = await goToSettingsSection(page, 'data')
+  expect(await app.electronApp.evaluate(() => globalThis.__storageUsageReadCount)).toBe(0)
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"]'))
+    .toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"] [data-icon="layer-group"]'))
+    .toBeVisible()
+  await expect(page.locator('.settingsWindow [data-settings-tab="storage"] [data-icon="database"]'))
+    .toBeVisible()
+  await expect(dataAndStorage.locator('.storageBreakdown')).toHaveCount(0)
+
+  const settingsContent = page.locator('.settingsContent')
+  await settingsContent.evaluate(element => { element.scrollTop = 100 })
+  const storageTab = page.locator('.settingsWindow [data-settings-tab="storage"]')
+  await page.locator('.settingsWindow [data-settings-tab="data"]').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(storageTab).toBeFocused()
+  await expect(storageTab).toHaveAttribute('aria-selected', 'true')
+  await expect.poll(() => settingsContent.evaluate(element => element.scrollTop)).toBe(0)
+  await expect.poll(() => app.electronApp.evaluate(
+    () => globalThis.__storageUsageReadCount
+  )).toBe(1)
+})
+
+test('opens the Storage tab when legacy storage navigation changes while mounted', async ({ page }) => {
+  await goToSettingsSection(page, 'data')
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"]'))
+    .toHaveAttribute('aria-selected', 'true')
+
+  await page.evaluate(() => {
+    window.$store
+      .commit('setSettingsWindowSection', 'storage')
+  })
+
+  await expect(page.locator('.settingsWindow [data-settings-tab="storage"]'))
+    .toHaveAttribute('aria-selected', 'true')
+})
+
+test('keeps unavailable storage categories visible and marks the total as partial', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      tabPreviews: 1024,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.YT_DLP_LIST_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_LIST_DOWNLOADS, () => [])
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const breakdown = storage.locator('.storageBreakdown')
+  await expect(breakdown.locator('.storageDonutCenter')).toContainText('At least 1 KiB')
+  await expect(breakdown.locator('li')).toHaveText([
+    'Application cachesAt least 1 KiB100%',
+    'Browser cachesExact size unavailable',
+    'Stored app dataExact size unavailable',
+    'Browser runtime dataExact size unavailable',
+    'Other profile filesExact size unavailable'
+  ])
+})
+
+test('moves storage controls into one searchable category', async ({ app, attachScreenshot, page }) => {
+  const mebibyte = 1024 * 1024
+  await app.electronApp.evaluate(({ ipcMain }, { channels, mebibyte }) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      downloadRecords: mebibyte,
+      videoMetadata: 8 * mebibyte,
+      subscriptionCache: 4 * mebibyte,
+      searchHistory: mebibyte,
+      history: 6 * mebibyte,
+      watchStats: 2 * mebibyte,
+      playlists: 10 * mebibyte,
+      profiles: 2 * mebibyte,
+      settings: mebibyte,
+      tabSessions: 3 * mebibyte,
+      liveReminders: mebibyte,
+      ytDlpPlayback: mebibyte,
+      httpCache: 10 * mebibyte,
+      tabPreviews: 2 * mebibyte,
+      playerCache: 3 * mebibyte,
+      browserCacheData: 5 * mebibyte,
+      browserRuntimeData: 5 * mebibyte,
+      otherProfileData: 10 * mebibyte,
+      profileTotal: 75 * mebibyte
+    }))
+    ipcMain.removeHandler(channels.YT_DLP_LIST_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_LIST_DOWNLOADS, () => [{
+      id: 'storage-preview-download',
+      status: 'completed',
+      sizeBytes: 20 * mebibyte
+    }])
+  }, { channels: IpcChannels, mebibyte })
+
+  const storage = await goToSettingsSection(page, 'storage')
+
+  await expect(storage.getByRole('heading', { name: 'Downloads', exact: true })).toBeVisible()
+  await expect(storage.getByRole('heading', { name: 'Replaceable caches' })).toBeVisible()
+  await expect(storage.getByRole('heading', { name: 'Stored histories' })).toBeVisible()
+  await expect(storage.getByRole('heading', { name: 'Other user data' })).toBeVisible()
+  await expect(storage.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
+  const playbackCaches = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Playback caches', exact: true })
+  })
+  await expect(playbackCaches).toContainText(
+    'The URL cache applies only to streams fetched with yt-dlp.'
+  )
+  const playbackCacheSize = storage.getByRole('slider', {
+    name: /yt-dlp stream URL cache limit/
+  })
+  const playbackCacheTooltip = 'Sets the maximum size of each cached yt-dlp stream entry. Set it to 0 MB to disable persistent caching for yt-dlp streams.'
+  await playbackCaches.getByRole('button', { name: playbackCacheTooltip }).focus()
+  await expect(page.getByRole('tooltip')).toHaveText(playbackCacheTooltip)
+  await expect(playbackCacheSize).toHaveValue('5')
+  await playbackCacheSize.fill('4')
+  await expect.poll(() => page.evaluate(() => (
+    window.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(4)
+  await playbackCacheSize.fill('0')
+  await expect.poll(() => page.evaluate(() => (
+    window.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(0)
+  await playbackCacheSize.fill('5')
+  await expect.poll(() => page.evaluate(() => (
+    window.$store
+      .getters.getYtDlpPlaybackCacheMaxEntrySize
+  ))).toBe(5)
+  await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
+  await expect(storage.getByRole('checkbox', { name: 'Replace HTTP Cache' })).toHaveCount(0)
+  await expect(storage.locator('.storageKind')).toHaveCount(0)
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'downloads.json' })
+    .locator('[data-icon="file-lines"]')).toBeVisible()
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'subscription-cache.sqlite' })
+    .locator('[data-icon="file-lines"]')).toBeVisible()
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'tab-previews/' })
+    .locator('[data-icon="folder-open"]')).toBeVisible()
+  await expect(storage.getByText('Measured profile data')).toHaveCount(0)
+  await expect(storage.getByRole('button', { name: 'Refresh sizes' })).toHaveCount(0)
+  const cacheGrid = storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..')
+  await expect(cacheGrid).toHaveCSS(
+    'grid-template-columns',
+    /\d+(\.\d+)?px \d+(\.\d+)?px/
+  )
+  const breakdown = storage.locator('.storageBreakdown')
+  await expect(storage.getByRole('heading', { name: 'Storage breakdown' })).toHaveCount(0)
+  await expect(breakdown).toHaveAttribute('aria-label', /Storage breakdown/)
+  await expect(breakdown.locator('.storageDonutCenter')).toContainText('95 MiB')
+  await expect(breakdown.locator('li')).toHaveText([
+    'Tracked downloaded media20 MiB21.1%',
+    'Application caches10 MiB10.5%',
+    'Browser caches15 MiB15.8%',
+    'Stored app data35 MiB36.8%',
+    'Browser runtime data5 MiB5.3%',
+    'Other profile files10 MiB10.5%'
+  ])
+  await expect(breakdown.locator('.storageDonutSegment')).toHaveCount(6)
+  await attachScreenshot('storage settings overview')
+
+  const cacheSegment = breakdown.locator('[data-chart-segment="browser-caches"]')
+  await breakdown.scrollIntoViewIfNeeded()
+  const chartBox = await breakdown.locator('.storageDonutChart').boundingBox()
+  await page.mouse.move(
+    chartBox.x + chartBox.width * 0.8,
+    chartBox.y + chartBox.height * 0.73
+  )
+  await expect(breakdown.locator('.storageDonutTooltip')).toHaveText(
+    'Browser caches15 MiB · 15.8%'
+  )
+  await attachScreenshot('storage chart tooltip')
+  await cacheSegment.focus()
+  await expect(breakdown.locator('.storageDonutTooltip')).toBeVisible()
+
+  const otherFiles = breakdown.locator('li').filter({ hasText: 'Other profile files' })
+  await otherFiles.getByRole('button').focus()
+  await otherFiles.getByRole('button').hover()
+  await expect(page.getByRole('tooltip').filter({ hasText: 'Backups, temporary files' })).toBeVisible()
+
+  const settingsContent = page.locator('.settingsContent')
+  await settingsContent.evaluate(element => { element.scrollTop = 80 })
+  const returnScrollTop = await settingsContent.evaluate(element => element.scrollTop)
+  expect(returnScrollTop).toBeGreaterThan(0)
+  await storage.getByRole('button', { name: 'Open Downloads', exact: true }).click()
+  const downloadsDialog = page.getByRole('dialog', { name: 'Downloads', exact: true })
+  await expect(downloadsDialog.getByRole('button', { name: 'Back', exact: true })).toBeVisible()
+  await attachScreenshot('downloads opened from storage settings')
+  await downloadsDialog.getByRole('button', { name: 'Back', exact: true }).click()
+  await expect(storage).toBeVisible()
+  await expect.poll(async () => Math.abs(
+    await settingsContent.evaluate(element => element.scrollTop) - returnScrollTop
+  )).toBeLessThanOrEqual(1)
+
+  const privacy = await goToSettingsSection(page, 'privacy')
+  await expect(privacy.getByRole('checkbox', { name: 'Metadata history' })).toHaveCount(0)
+  await expect(privacy.getByLabel('Automatic History Retention (Days)')).toHaveCount(0)
+  await expect(privacy.getByRole('button', { name: 'Remove Watch History' })).toHaveCount(0)
+
+  const search = page.getByRole('searchbox', { name: 'Search settings' })
+  await search.fill('Automatic History Retention')
+  await page.getByRole('button', { name: 'Automatic History Retention (Days)', exact: true }).click()
+  await expect(page.locator('.settingsContent > [data-section="data"]')).toBeVisible()
+  await expect(page.locator('[data-settings-tab="storage"]')).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByLabel('Automatic History Retention (Days)')).toHaveClass(/settingsSearchTarget/)
+
+  await search.fill('Clear Search History and Cache')
+  await page.getByRole('button', { name: 'Clear Search History and Cache', exact: true }).click()
+  await expect(page.locator('.settingsContent > [data-section="data"]')).toBeVisible()
+  await expect(page.locator('[data-settings-tab="storage"]')).toHaveAttribute('aria-selected', 'true')
+})
+
+test('separates replaceable search results from saved search history', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = window.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'temporary search',
+      data: [{ videoId: 'aaaaaaaaaaa' }]
+    })
+  })
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const sessionCache = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Session search cache', exact: true })
+  })
+  await expect(sessionCache).toContainText('1 search is cached in memory')
+  await sessionCache.getByRole('button', { name: 'Clear session search cache' }).click()
+  await page.getByRole('dialog', { name: 'Clear the session search cache?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+
+  expect(await page.evaluate(() => ({
+    cached: window.$store
+      .getters.getSessionSearchHistory.length,
+    saved: window.$store
+      .getters.getSearchHistoryEntries.length
+  }))).toEqual({ cached: 0, saved: 1 })
+  await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
+
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
+  await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
+  await page.getByRole('dialog', { name: 'Delete all saved search history?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+  await expect.poll(() => page.evaluate(
+    () => window.$store
+      .getters.getSearchHistoryEntries.length
+  )).toBe(0)
+})
+
+test('shows the page before asynchronous size calculation finishes', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channel) => {
+    // Held until the test has seen the page, since navigating there can take longer than any fixed delay.
+    const usage = Promise.withResolvers()
+    globalThis.__releaseStorageUsage = usage.resolve
+    ipcMain.removeHandler(channel)
+    ipcMain.handle(channel, async () => {
+      await usage.promise
+      return {
+        downloadRecords: 0,
+        videoMetadata: 0,
+        subscriptionCache: 0,
+        searchHistory: 0,
+        history: 0,
+        watchStats: 0,
+        playlists: 0,
+        profiles: 0,
+        settings: 0,
+        tabSessions: 0,
+        liveReminders: 0,
+        ytDlpPlayback: 0,
+        httpCache: 0,
+        tabPreviews: 0,
+        playerCache: 0,
+        browserCacheData: 0,
+        browserRuntimeData: 0,
+        otherProfileData: 0,
+        profileTotal: 0
+      }
+    })
+  }, IpcChannels.STORAGE_GET_USAGE)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const breakdown = storage.locator('.storageBreakdown')
+  await expect(breakdown.locator('.storageDonutCenter')).toContainText('Calculating…')
+  await app.electronApp.evaluate(() => globalThis.__releaseStorageUsage())
+  await expect(breakdown.locator('.storageDonutCenter')).toContainText('0 B')
+  await expect(breakdown.locator('li')).toHaveCount(0)
+  await expect(breakdown.locator('.storageDonutSegment')).toHaveCount(0)
+  for (const buttonName of [
+    'Clear subscription and feed cache',
+    'Clear session search cache',
+    'Clear HTTP cache',
+    'Clear tab image cache',
+    'Clear playback caches',
+    'Clear Video Metadata Cache'
+  ]) {
+    await expect(storage.getByRole('button', { name: buttonName, exact: true })).toBeDisabled()
+  }
+})
+
+test('reports cleanup rejection instead of success', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      tabPreviews: 1024,
+      otherProfileData: 0,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.STORAGE_CLEAR)
+    ipcMain.handle(channels.STORAGE_CLEAR, () => false)
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Clear tab image cache' }).click()
+  await page.getByRole('dialog', { name: 'Clear tab thumbnails and channel avatars?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+})
+
+test('reports rejected store cleanup instead of success', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = window.$store
+    store._actions.removeAllSearchHistoryEntries = [() => Promise.resolve(false)]
+  })
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
+  await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
+  await page.getByRole('dialog', { name: 'Delete all saved search history?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  expect(await page.evaluate(() => (
+    window.$store
+      .getters.getSearchHistoryEntries.length
+  ))).toBe(1)
+})
+
+test('reports rejected profile cleanup instead of success', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = window.$store
+    store._actions.updateProfile = [() => Promise.resolve(false)]
+  })
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Remove All Subscriptions / Profiles' }).click()
+  await page.getByRole('dialog', {
+    name: 'Are you sure you want to remove all subscriptions and profiles? This cannot be undone.'
+  }).getByRole('button', { name: 'Yes, Delete' }).click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  expect(await page.evaluate(() => (
+    window.$store
+      .getters.getProfileList[0].subscriptions.length
+  ))).toBe(1)
+})
+
+test('refreshes sizes when database compaction fails', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    globalThis.__searchHistoryBytes = 1024
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      searchHistory: globalThis.__searchHistoryBytes,
+      otherProfileData: 0,
+      profileTotal: globalThis.__searchHistoryBytes
+    }))
+    ipcMain.removeHandler(channels.STORAGE_COMPACT_DATABASES)
+    ipcMain.handle(channels.STORAGE_COMPACT_DATABASES, () => {
+      globalThis.__searchHistoryBytes = 0
+      return false
+    })
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
+  await expect(searchHistory.locator('.storageSize')).toHaveText('1 KiB')
+  await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
+  await page.getByRole('dialog', { name: 'Delete all saved search history?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(searchHistory.locator('.storageSize')).toHaveText('0 B')
+})
+
+test('reports rejected download record cleanup', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      downloadRecords: 1024,
+      otherProfileData: 0,
+      profileTotal: 1024
+    }))
+    ipcMain.removeHandler(channels.YT_DLP_LIST_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_LIST_DOWNLOADS, () => [{
+      id: 'finished-download',
+      status: 'completed',
+      sizeBytes: 1024
+    }])
+    ipcMain.removeHandler(channels.YT_DLP_CLEAR_DOWNLOADS)
+    ipcMain.handle(channels.YT_DLP_CLEAR_DOWNLOADS, () => false)
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  await storage.getByRole('button', { name: 'Clear download history records' }).click()
+  await page.getByRole('dialog', { name: 'Clear all finished download records?' })
+    .getByRole('button', { name: 'Clear records' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+})
+
+test('reports rejected yt-dlp playback cleanup', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    globalThis.__playerCacheBytes = 1024
+    ipcMain.removeHandler(channels.STORAGE_GET_USAGE)
+    ipcMain.handle(channels.STORAGE_GET_USAGE, () => ({
+      ytDlpPlayback: 1024,
+      playerCache: globalThis.__playerCacheBytes,
+      otherProfileData: 0,
+      profileTotal: 1024 + globalThis.__playerCacheBytes
+    }))
+    ipcMain.removeHandler(channels.STORAGE_CLEAR)
+    ipcMain.handle(channels.STORAGE_CLEAR, () => {
+      globalThis.__playerCacheBytes = 0
+      return true
+    })
+    ipcMain.removeHandler(channels.YT_DLP_PLAYBACK_CACHE_CLEAR)
+    ipcMain.handle(channels.YT_DLP_PLAYBACK_CACHE_CLEAR, () => false)
+  }, IpcChannels)
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const playbackCaches = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Playback caches', exact: true })
+  })
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('2 KiB')
+  await playbackCaches.getByRole('button', { name: 'Clear playback caches' }).click()
+  await page.getByRole('dialog', { name: 'Clear the yt-dlp and player caches?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+
+  await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('1 KiB')
+})
+
+test('isolates browser session data with the test profile', async ({ app }) => {
+  const paths = await app.electronApp.evaluate(({ app: electronApp }) => ({
+    userData: electronApp.getPath('userData'),
+    sessionData: electronApp.getPath('sessionData')
+  }))
+
+  expect(paths).toEqual({
+    userData: app.userDataDir,
+    sessionData: app.userDataDir
+  })
+})
+
+test('accounts for every file in the profile total', async ({ page }) => {
+  const usage = await page.evaluate(() => window.ftElectron.storage.getUsage())
+  const categorizedTotal = Object.entries(usage).reduce((total, [key, size]) => (
+    ['otherProfileData', 'profileTotal'].includes(key) ? total : total + size
+  ), 0)
+
+  expect(usage.otherProfileData).toBeGreaterThanOrEqual(0)
+  expect(categorizedTotal + usage.otherProfileData).toBe(usage.profileTotal)
+})
+
+test('separates Chromium cache and runtime files from the catch-all', async ({ app, page }) => {
+  const mebibyte = 1024 * 1024
+  const files = [
+    ['Code Cache/js/storage-test.bin', 2 * mebibyte],
+    ['GPUCache/storage-test.bin', mebibyte],
+    ['Session Storage/storage-test.bin', 3 * mebibyte],
+    ['Local Storage/leveldb/storage-test.bin', 4 * mebibyte],
+    ['Dictionaries/storage-test.bin', 5 * mebibyte],
+    ['Crashpad/reports/storage-test.dmp', 6 * mebibyte]
+  ]
+
+  await Promise.all(files.map(async ([relativePath, size]) => {
+    const filePath = path.join(app.userDataDir, relativePath)
+    await mkdir(path.dirname(filePath), { recursive: true })
+    await writeFile(filePath, Buffer.alloc(size))
+  }))
+
+  const usage = await page.evaluate(() => window.ftElectron.storage.getUsage())
+  expect(usage.browserCacheData).toBeGreaterThanOrEqual(8 * mebibyte)
+  expect(usage.browserRuntimeData).toBeGreaterThanOrEqual(13 * mebibyte)
+
+  const categorizedTotal = Object.entries(usage).reduce((total, [key, size]) => (
+    ['otherProfileData', 'profileTotal'].includes(key) ? total : total + size
+  ), 0)
+  expect(categorizedTotal + usage.otherProfileData).toBe(usage.profileTotal)
+})
+
+test('clears bounded disk caches without touching user data', async ({ app, page }) => {
+  // Parallel Xvfb workers share window focus. This test covers cleanup, not the IPC focus guard.
+  await app.electronApp.evaluate(({ webContents }) => {
+    for (const contents of webContents.getAllWebContents()) {
+      Object.defineProperty(contents, 'isFocused', { value: () => true })
+    }
+  })
+  const playerCacheDirectory = path.join(app.userDataDir, 'player_cache')
+  const playerCacheFile = path.join(playerCacheDirectory, 'player.js')
+  const tabCacheDirectory = path.join(app.userDataDir, 'tab-previews')
+  const tabCacheFile = path.join(
+    tabCacheDirectory,
+    '1c2f1f8e-4c9c-4f0e-8f1a-2b3c4d5e6f70.jpg'
+  )
+  await Promise.all([
+    mkdir(playerCacheDirectory, { recursive: true }),
+    mkdir(tabCacheDirectory, { recursive: true })
+  ])
+  await Promise.all([
+    writeFile(playerCacheFile, Buffer.alloc(2 * 1024 * 1024)),
+    writeFile(tabCacheFile, Buffer.alloc(1024 * 1024))
+  ])
+
+  const storage = await goToSettingsSection(page, 'storage')
+  const tabCache = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Tab thumbnails and channel avatars', exact: true })
+  })
+  const playbackCaches = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Playback caches', exact: true })
+  })
+  await expect(tabCache.locator('.storageSize')).toHaveText('1 MiB')
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('2 MiB')
+
+  await playbackCaches.getByRole('button', { name: 'Clear playback caches' }).click()
+  await page.bringToFront()
+  await page.getByRole('dialog', { name: 'Clear the yt-dlp and player caches?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+  await expect.poll(() => access(playerCacheFile).then(() => true, () => false)).toBe(false)
+  await expect(playbackCaches.locator('.storageSize')).toHaveText('0 B')
+  await expect(playbackCaches.getByRole('button', { name: 'Clear playback caches' }))
+    .toBeDisabled()
+
+  await tabCache.getByRole('button', { name: 'Clear tab image cache' }).click()
+  await page.bringToFront()
+  await page.getByRole('dialog', { name: 'Clear tab thumbnails and channel avatars?' })
+    .getByRole('button', { name: 'Clear cache' })
+    .click()
+  await expect.poll(() => access(tabCacheFile).then(() => true, () => false)).toBe(false)
+
+  // Active tabs may immediately recreate their thumbnails after cleanup.
+  await expect(tabCache.locator('.storageSize')).not.toHaveText('1 MiB')
+  expect(await page.evaluate(() => (
+    window.$store
+      .getters.getSearchHistoryEntries.length
+  ))).toBe(1)
+})
+
+test('uses a third column when the settings window is maximized', async ({
+  app,
+  attachScreenshot,
+  page
+}) => {
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  const storage = await goToSettingsSection(page, 'storage')
+  await page.getByRole('button', { name: 'Maximize' }).click()
+
+  const cacheGrid = storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..')
+  await expect(cacheGrid).toHaveCSS(
+    'grid-template-columns',
+    /\d+(\.\d+)?px \d+(\.\d+)?px \d+(\.\d+)?px/
+  )
+  expect(await page.locator('.settingsContent').evaluate(
+    element => element.scrollWidth <= element.clientWidth + 1
+  )).toBe(true)
+  await attachScreenshot('maximized storage settings grid')
+})
+
+test.describe('compact storage settings', () => {
+  test.use({
+    seed: {
+      settings: {
+        baseTheme: 'dark',
+        currentLocale: 'en-US',
+        uiScale: 95
+      }
+    }
+  })
+
+  test('fits a narrow settings window without horizontal scrolling', async ({ app, attachScreenshot, page }) => {
+    await setWindowSize(app, page, { width: 620, height: 720 })
+    const storage = await goToSettingsSection(page, 'storage')
+    const content = page.locator('.settingsContent')
+    const cacheGrid = storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..')
+
+    await expect(storage.locator('.storageBreakdown')).toHaveCSS(
+      'grid-template-columns',
+      /\d+(\.\d+)?px \d+(\.\d+)?px/
+    )
+    await expect(cacheGrid).toHaveCSS('grid-template-columns', /^\d+(\.\d+)?px$/)
+    expect(await content.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+    await attachScreenshot('compact dark storage settings')
+  })
+})

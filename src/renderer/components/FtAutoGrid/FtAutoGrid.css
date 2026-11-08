@@ -1,8 +1,49 @@
+/* FtAutoGrid writes these to the grid whenever its width changes, such as on
+   every frame of the side navigation animation. Only the grid reads them;
+   inherited, each write would restyle every card. */
+@property --thumbnail-grid-size {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --thumbnail-grid-stretch {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --shorts-thumbnail-grid-min-size {
+  syntax: '*';
+  inherits: false;
+}
+
 .grid {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(262px, 1fr));
   justify-content: space-evenly;
+}
+
+.grid.thumbnailSizeReady {
+  grid-template-columns: repeat(auto-fill, min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%));
+}
+
+.grid.youtubeStyleShorts,
+.grid.youtubeStyleShorts.thumbnailSizeReady {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(
+      min(var(--shorts-thumbnail-grid-min-size), 100%),
+      1fr
+    )
+  );
+  justify-content: start;
+}
+
+@media (width <= 680px) {
+  .grid.youtubeStyleShorts.thumbnailSizeReady {
+    grid-template-columns: repeat(auto-fill, min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%));
+    justify-content: space-evenly;
+  }
 }
 
 .list {

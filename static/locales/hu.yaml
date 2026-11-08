@@ -40,7 +40,6 @@ Global:
     Watching Count: 1 néző | {count} néző
     Like Count: 1 embernek tetszik | {count} embernek tetszik
     Comment Count: 1 hozzászólás | {count} hozzászólás
-    Replies Remaining: "{' '}(1 hátralévő) | {' '}({count} hátralévő)"
 Version {versionNumber} is now available!  Click for more details: 'A(z) {versionNumber} verzió már elérhető! Kattintson a további részletekért'
 Download From Site: 'Letöltés a webhelyről'
 
@@ -255,7 +254,7 @@ Settings:
     Auto Load Next Page:
       Label: Következő oldal automatikus betöltése
       Tooltip: További oldalak és a hozzászólások automatikus betöltése.
-    Open Deep Links In New Window: FreeTube-nak átadott webcímek megnyitása új ablakban
+    Open Deep Links In New Window: OpenTubeX-nak átadott webcímek megnyitása új ablakban
     Minimize to system tray: Kicsinyítés a tálcára
   Theme Settings:
     Theme Settings: 'Téma'
@@ -376,7 +375,7 @@ Settings:
     Expand Side Bar by Default: Alapértelmezés szerinti oldalsáv megjelenítése
     Disable Smooth Scrolling: Finom görgetés letiltása
     Hide Side Bar Labels: Gombfeliratok elrejtése az oldalsávról
-    Hide FreeTube Header Logo: FreeTube logó elrejtése a fejlécből
+    Hide OpenTubeX Header Logo: OpenTubeX logó elrejtése a fejlécből
   Player Settings:
     Player Settings: 'Lejátszó'
     Play Next Video: 'Ajánlott videók automatikus lejátszása'
@@ -477,8 +476,8 @@ Settings:
     Select Export Type: 'Exportálási típus kiválasztása'
     Import Subscriptions: 'Feliratkozások importálása'
     Export Subscriptions: 'Feliratkozások exportálása'
-    Export FreeTube: 'FreeTube exportálása'
-    Export YouTube: 'YouTube-formátumba exportálás'
+    Export OpenTubeX: 'OpenTubeX exportálása'
+    Export YouTube: YouTube-formátumba exportálás
     Export NewPipe: 'NewPipe exportálása'
     Import History: 'Előzmények importálása'
     Export History: 'Előzmények exportálása'
@@ -504,9 +503,9 @@ Settings:
     Subscription File: Feliratkozás-fájl
     History File: Előzményfájl
     Playlist File: Lejátszási lista fájl
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Ez az opció az összes lejátszási lista videóit egyetlen, „Kedvencek” nevű lejátszási listába exportálja.\nHogyan exportálhat és importálhat videókat lejátszási listákba a FreeTube régebbi verziója esetében:\n1. Exportálja a lejátszási listáit, ezzel az opcióval bekacsolva.\n2. Törölje az összes meglévő lejátszási listáját az Adatvédelmi beállítások alatt található Összes lejátszási lista eltávolítása opcióval.\n3. Indítsa el a FreeTube régebbi verzióját, és importálja az exportált lejátszási listákat."
-      Label: Lejátszási listák exportálása régebbi FreeTube verziókhoz
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Ez az opció az összes lejátszási lista videóit egyetlen, „Kedvencek” nevű lejátszási listába exportálja.\nHogyan exportálhat és importálhat videókat lejátszási listákba a OpenTubeX régebbi verziója esetében:\n1. Exportálja a lejátszási listáit, ezzel az opcióval bekacsolva.\n2. Törölje az összes meglévő lejátszási listáját az Adatvédelmi beállítások alatt található Összes lejátszási lista eltávolítása opcióval.\n3. Indítsa el a OpenTubeX régebbi verzióját, és importálja az exportált lejátszási listákat."
+      Label: Lejátszási listák exportálása régebbi OpenTubeX verziókhoz
 
     Search history file: Keresési előzmények fájl
     Search history: Keresési előzmények
@@ -589,11 +588,11 @@ Settings:
     Enable Tor / Proxy: Tor/Proxy engedélyezése
     Proxy Settings: Proxy
     Error getting network information. Is your proxy configured properly?: Hiba a hálózati adatok lekérésekor. Megfelelő a proxy beállítása?
-    Proxy Warning: A FreeTube nem rendelkezik beépített proxyval, de képes csatlakozni egy külső proxyhoz, például egy olyanhoz, amely az Ön gépén fut, mint a Tor, vagy egy külső proxyhoz, például egy SOCKS5 proxyhoz, amelyet egyes VPN-ek biztosítanak. Ha engedélyezve van, győződjön meg arról, hogy a proxy/Tor megfelelően van beállítva, különben a FreeTube nem fog tudni adatokat lekérni.
+    Proxy Warning: A OpenTubeX nem rendelkezik beépített proxyval, de képes csatlakozni egy külső proxyhoz, például egy olyanhoz, amely az Ön gépén fut, mint a Tor, vagy egy külső proxyhoz, például egy SOCKS5 proxyhoz, amelyet egyes VPN-ek biztosítanak. Ha engedélyezve van, győződjön meg arról, hogy a proxy/Tor megfelelően van beállítva, különben a OpenTubeX nem fog tudni adatokat lekérni.
     Proxy Username: Proxy felhasználónév
     Proxy Password: Proxy jelszó
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Értesítés a szponzorált szakasz kihagyásáról
+    Notify when sponsor segment is skipped: 'Jelezzen, ha egy szegmens át lett ugorva'
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': 'SponsorBlock API webcíme (Alapértelmezett: https://sponsor.ajay.app)'
     Enable SponsorBlock: SponsorBlock engedélyezése
     SponsorBlock Settings: SponsorBlock
@@ -663,7 +662,7 @@ About:
   Help: Súgó
   GitHub releases: GitHub-kiadások
   Downloads / Changelog: Letöltések / Változáslista
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   Source code: Forráskód
   Beta: Béta
   FAQ: GYIK
@@ -672,7 +671,7 @@ About:
   AGPLv3: AGPLv3
   Licensed under the {licenseLink}: Licencelve a(z) {licenseLink} alatt
   Please read the {roomRulesLink}: 'Olvassa el a következőt: {roomRulesLink}'
-  FreeTube is made possible by {creditsPageLink}: A FreeTube {creditsPageLink} jóvoltából jöhetett létre
+  OpenTubeX is made possible by {creditsPageLink}: A OpenTubeX {creditsPageLink} jóvoltából jöhetett létre
 Profile:
   Profile Select: 'Profil kiválasztása'
   All Channels: 'Összes csatorna'
@@ -730,6 +729,7 @@ Channel:
       Newest: 'Legújabb'
       Oldest: 'Legrégebbi'
       Most Popular: 'Legnépszerűbb'
+    This channel does not currently have any videos: 'Ebben a csatornában jelenleg nincsenek videók'
     This channel has videos but none could be displayed, try fetching more: Ez a csatorna tartalmaz videókat, de egyik sem jeleníthető meg, további videók lekérése
   Playlists:
     Playlists: 'Lejátszási listák'
@@ -749,7 +749,7 @@ Channel:
       Tags: Címkék
       Search for: „{tag}” címke keresése
     Links: Hivatkozások
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Ez a csatorna korhatáros, és jelenleg nem tekinthető meg a FreeTube alkalmazásban.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Ez a csatorna korhatáros, és jelenleg nem tekinthető meg a OpenTubeX alkalmazásban.
   Channel Tabs: Csatornalapok
   Live:
     This channel does not currently have any live streams: Jelenleg nincs élő közvetítés ezen a csatornán
@@ -759,7 +759,7 @@ Channel:
     Reveal Answers: Válaszok felfedése
     Hide Answers: Válaszok elrejtése
     votes: '{votes} szavazat'
-    Video hidden by FreeTube: FreeTube által rejtett videó
+    Video hidden by OpenTubeX: OpenTubeX által rejtett videó
     View Full Post: Teljes bejegyzés megtekintése
     Viewing Posts Only Supported By Invidious: A hozzászólások megtekintését csak az Invidious támogatja. Az Invidious nélkül is megtekintheti a csatornák közösségi fülét.
   Shorts:
@@ -824,14 +824,22 @@ Video:
   Video has been saved: Videó mentve
   Save Video: Videó mentése
   Sponsor Block category:
-    music offtopic: Témán kívüli zene
-    interaction: Interakció
-    self-promotion: Önreklámozás
-    outro: Utójáték
-    intro: Bevezető
+    music offtopic: 'Zene: nem-zene szegmens'
+    interaction: Emlékeztető (Feliratkozás)
+    self-promotion: Nem fizetett/önpromóció
+    outro: Záróképernyő/ Stáblista
+    intro: Megszakítás/Intro animáció
     sponsor: Szponzor
-    filler: Kitöltő
-    recap: Összegzés
+    filler: Kitérők/viccek
+    recap: Előzetes/Ismétlés
+    hook: Horog/Köszöntés
+    highlight: Kiemelés
+    exclusive access: Exkluzív hozzáférés
+  Sponsor Block category short:
+    intro: Megszakítás
+    interaction: Emlékeztető
+    music offtopic: Nem-Zene
+    filler: Kitérők
   External Player:
     Unsupported Actions:
       looping playlists: lejátszási lista folyamatos lejátszása
@@ -877,7 +885,7 @@ Video:
       Resolution: 'Felbontás: {width}x{height}{''@''}{frameRate}'
       CodecsVideoAudio: 'Kodekek: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
     You appear to be offline: Úgy tűnik, hogy jelenleg nem kapcsolódik a hálózathoz.
-    Skipped segment: Kihagyott {segmentCategory} szakasz
+    Skipped segment: '{segmentCategory} átugorva'
     TranslatedCaptionTemplate: '{language} (fordítva erről: „{originalLanguage}”)'
     Show Stats: Statisztika megjelenítése
     Playback will resume automatically when your connection comes back: A lejátszás automatikusan folytatódik, amikor a kapcsolat helyreáll.
@@ -885,12 +893,12 @@ Video:
     Autoplay is on: Az automatikus lejátszás be van kapcsolva
   IP block: A YouTube letiltotta az IP-címéről történő videómegtekintést, vagy előfordulhat, hogy a videó olyan tartalmat tartalmaz, amelyben kiskorúak szerepelnek, és amelyhez a YouTube korlátozza a hozzáférést a bejelentkezés nélkül használók számára. Ha IP-cím alapú tiltásról van szó, akkor próbáljon meg másik VPN-re vagy proxyra váltani.
   Unlisted: Listázatlan
-  AgeRestricted: A FreeTube-on nem lehet korhatáros videókat megtekinteni, mivel ezekhez Google-bejelentkezés és korhatár-ellenőrzött YouTube-fiók használata szükséges.
-  MembersOnly: A csak tagoknak szóló videók nem tekinthetők meg a FreeTube-on, mivel ezekhez Google-bejelentkezés és fizetett tagság szükséges a feltöltő csatornájához.
+  AgeRestricted: A OpenTubeX-on nem lehet korhatáros videókat megtekinteni, mivel ezekhez Google-bejelentkezés és korhatár-ellenőrzött YouTube-fiók használata szükséges.
+  MembersOnly: A csak tagoknak szóló videók nem tekinthetők meg a OpenTubeX-on, mivel ezekhez Google-bejelentkezés és fizetett tagság szükséges a feltöltő csatornájához.
   DeArrow:
-    Show Modified Details: Módosított részletek megjelenítése
-    Show Original Details: Eredeti részletek megjelenítése
-  DRMProtected: A DRM-védelemmel ellátott videók nem játszhatók le a FreeTube-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség. Ha meg szeretné nézni ezt a videót, akkor tekintse meg a YouTube hivatalos weboldalán egy DRM-képes böngészőben.
+    Show Modified Details: Módosított adatok mutatása
+    Show Original Details: Eredeti adatok megjelenítése
+  DRMProtected: A DRM-védelemmel ellátott videók nem játszhatók le a OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség. Ha meg szeretné nézni ezt a videót, akkor tekintse meg a YouTube hivatalos weboldalán egy DRM-képes böngészőben.
 #& Playlists
   Save Watched Progress: Megtekintett videó folyamatának mentése
   Watched Progress Saved: Megtekintett videó folyamata elmentve
@@ -898,7 +906,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Hátralévő előzetes hirdetési idő: {remindingTimeSeconds} mp'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Hátralévő SABR várakozási idő: {remindingTimeSeconds} mp'
   Popout Live Chat: Felugró csevegés
-  Private: A privát videók nem tekinthetők meg a FreeTube-on, mivel a megtekintésükhöz Google-bejelentkezés és a videó tulajdonjoga szükséges.
+  Private: A privát videók nem tekinthetők meg a OpenTubeX-on, mivel a megtekintésükhöz Google-bejelentkezés és a videó tulajdonjoga szükséges.
   Collapse Playlist: Lejátszási lista összecsukása
   Expand Playlist: Lejátszási lista kibontása
   Station: Állomás
@@ -908,9 +916,8 @@ Video:
   Enable SponsorBlock on Channel: SponsorBlock engedélyezése a csatornán
   Disable SponsorBlock on Channel: SponsorBlock letiltása a csatornán
   AI: MI
-  'AI: Content was made with AI': 'MI: A tartalom mesterséges intelligencia felhasználásával készült'
+  AI-generated content: "MI: A tartalom mesterséges intelligencia felhasználásával készült"
   How this was made: Hogyan készült ez
-  Reload Page: Oldal újratöltése
 Playlist:
   #& About
   View Full Playlist: 'Teljes lejátszási lista megtekintése'
@@ -980,8 +987,6 @@ Comments:
   View 1 reply from {channelName}: 1 válasz megtekintése a(z) {channelName} csatornában
   View {replyCount} replies from {channelName} and others: '{replyCount} válasz megtekintése a(z) {channelName} és egyéb csatornákban'
   Loading replies: Válaszok betöltése...
-  Hide Replies: Válasz elrejtése | Válaszok elrejtése
-  Comments are turned off: A hozzászólások ki vannak kapcsolva
 Up Next: 'Következő'
 
 # Toast Messages
@@ -1004,23 +1009,23 @@ Yes: 'Igen'
 No: 'Nem'
 Tooltips:
   General Settings:
-    Preferred API Backend: Válassza ki a háttéralkalmazást, amelyet a FreeTube használ az adatok megszerzéséhez. A helyi API egy beépített kinyerő. Az Invidious API használatához Invidious-kiszolgáló szükséges.
+    Preferred API Backend: Válassza ki a háttéralkalmazást, amelyet a OpenTubeX használ az adatok megszerzéséhez. A helyi API egy beépített kinyerő. Az Invidious API használatához Invidious-kiszolgáló szükséges.
     Region for Trending: A felkapottak régiója lehetővé teszi a választást, hogy melyik ország felkapott videóit szeretné megtekinteni.
-    Invidious Instance: Az Invidious-példány, amelyhez a FreeTube API-hívások céljából kapcsolódik. A beállítás módosításai csak a jelenlegi ablakra vonatkoznak, kivéve, ha ezt a példányt alapértelmezettként állítja be.
-    Thumbnail Preference: A FreeTube-ban minden videó bélyegképe az alapértelmezett miniatűr helyett a videóból kiválasztott képkockára lesz cserélve, amely elmosódott vagy rejtett is lehet.
-    Fallback to Non-Preferred Backend on Failure: Ha a választott API-val probléma adódik, a FreeTube automatikusan megpróbálja a nem előnyben részesített API-t használni tartalék módszerként, ha ez a funkció engedélyezve van.
-    External Link Handling: "Válassza ki az alapértelmezett viselkedést, amikor egy olyan hivatkozásra kattint, amelyet FreeTube nem tud megnyitni.\nA FreeTube alapértelmezés szerint megnyitja a kattintott hivatkozást az alapértelmezett böngészőben.\n"
-    Open Deep Links In New Window: A FreeTube-nak átadott webcímek, például a böngészőbővítmények vagy parancssori argumentumok átirányításával, új ablakban nyílnak meg.
+    Invidious Instance: Invidious példány, amelyhez a OpenTubeX csatlakozni fog az API-hívásokhoz.
+    Thumbnail Preference: A OpenTubeX-ban minden videó bélyegképe az alapértelmezett miniatűr helyett a videóból kiválasztott képkockára lesz cserélve, amely elmosódott vagy rejtett is lehet.
+    Fallback to Non-Preferred Backend on Failure: Ha a választott API-val probléma adódik, a OpenTubeX automatikusan megpróbálja a nem előnyben részesített API-t használni tartalék módszerként, ha ez a funkció engedélyezve van.
+    External Link Handling: "Válassza ki az alapértelmezett viselkedést, amikor egy olyan hivatkozásra kattint, amelyet OpenTubeX nem tud megnyitni.\nA OpenTubeX alapértelmezés szerint megnyitja a kattintott hivatkozást az alapértelmezett böngészőben.\n"
+    Open Deep Links In New Window: A OpenTubeX-nak átadott webcímek, például a böngészőbővítmények vagy parancssori argumentumok átirányításával, új ablakban nyílnak meg.
   Subscription Settings:
-    Fetch Feeds from RSS: Amikor engedélyezve van, a FreeTube az RSS-t fogja használni az alapértelmezett módszer helyett a feliratkozási hírfolyam lekérdezéséhez. Az RSS gyorsabb és megakadályozza az IP-tiltást, de nem tartalmaz bizonyos információkat, például a videó időtartamát, az élő állapotot vagy a bejegyzéseket
-    Fetch Automatically: Ha engedélyezve van, a FreeTube automatikusan lekéri a feliratkozási hírcsatornát indításkor, valamint új ablak megnyitásakor.
+    Fetch Feeds from RSS: Amikor engedélyezve van, a OpenTubeX az RSS-t fogja használni az alapértelmezett módszer helyett a feliratkozási hírfolyam lekérdezéséhez. Az RSS gyorsabb és megakadályozza az IP-tiltást, de nem tartalmaz bizonyos információkat, például a videó időtartamát, az élő állapotot vagy a bejegyzéseket
+    Fetch Automatically: Ha engedélyezve van, a OpenTubeX automatikusan lekéri a feliratkozási hírcsatornát indításkor, valamint új ablak megnyitásakor.
   Player Settings:
     Default Media Format: A videóhoz használt formátumok beállítása. A DASH-formátumok magasabb minőségű lejátszást tesznek lehetővé. A régebbi formátumok legfeljebb 360p felbontásúak, de kevesebb sávszélességet igényelnek. A hangformátumok kizárólag hangadatfolyamokat tartalmaznak.
     Proxy Videos Through Invidious: A videók lejátszásához a YouTube helyett az Invidioust használja.
     Scroll Playback Rate Over Video Player: Amíg a kurzor a videó felett van, nyomja meg és tartsa lenyomva a Control billentyűt (Mac számítógépen a Command billentyű), és görgesse az egér görgőjét előre vagy hátra a lejátszási sebesség szabályozásához. Tartsa lenyomva a Control billentyűt (Mac számítógépen a Command billentyű), majd kattintson az egér bal gombjával az alapértelmezett lejátszási sebesség gyors visszatéréséhez (1x, hacsak nem módosították a beállításokban).
     Skip by Scrolling Over Video Player: Használja az egérgörgőt a videóban való előre- és visszaugráshoz, MPV-stílusban.
   External Player Settings:
-    Custom External Player Executable: Alapértelmezés szerint a FreeTube feltételezi, hogy a kiválasztott külső lejátszó megtalálható a PATH (ÚTVONAL) környezeti változón keresztül. Szükség esetén itt egyéni útvonal állítható be.
+    Custom External Player Executable: Alapértelmezés szerint a OpenTubeX feltételezi, hogy a kiválasztott külső lejátszó megtalálható a PATH (ÚTVONAL) környezeti változón keresztül. Szükség esetén itt egyéni útvonal állítható be.
     Ignore Warnings: Figyelmeztetések mellőzése, amikor a jelenlegi külső lejátszó nem támogatja a jelenlegi műveletet (pl. lejátszási listák megfordítása stb.).
     Custom External Player Arguments: A külső lejátszónak átadni kívánt egyéni parancssori argumentumok.
     External Player: Külső lejátszó kiválasztása esetén megjelenik egy ikon a videó (lejátszási lista, ha támogatott) megnyitásához a külső lejátszóban, a bélyegképen. Figyelem! Az Invidious beállításai nincsenek hatással a külső lejátszókra.
@@ -1032,7 +1037,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Adjon meg egy csatornaazonosítót, hogy elrejtse az adott csatorna összes videóját, lejátszási listáját, valamint magát a csatornát is a keresési találatokból, a felkapottakból, a legnépszerűbbek közül és az ajánlottakból. A megadott csatornaazonosítónak pontos egyezésnek kell lennie, és kis- és nagybetűérzékeny.
     Hide Subscriptions Live: Ezt a beállítást felülírja az alkalmazásszintű „{appWideSetting}” beállítás a(z) „{settingsSection}” „{subsection}” szakaszában
-    Hide Videos, Playlists and Channels Containing Text: Adjon meg egy szót, szótöredéket vagy kifejezést (nem érzékeny a nagy- és kisbetűkre), hogy elrejtse az összes olyan videót és lejátszási listát, amelynek eredeti címe tartalmazza ezt a szót vagy kifejezést a FreeTube egész területén, kivéve az előzményeket, a lejátszási listákat és a lejátszási listákon belüli videókat.
+    Hide Videos, Playlists and Channels Containing Text: Adjon meg egy szót, szótöredéket vagy kifejezést (nem érzékeny a nagy- és kisbetűkre), hogy elrejtse az összes olyan videót és lejátszási listát, amelynek eredeti címe tartalmazza ezt a szót vagy kifejezést a OpenTubeX egész területén, kivéve az előzményeket, a lejátszási listákat és a lejátszási listákon belüli videókat.
     Hide Videos on Watch: Elrejti a megtekintett videókat a videók-, rövidek- és élő lapokról a feliratkozás- és a csatornaoldalon. Ez nem érinti a kezdőoldalon található csatornalapokat
   SponsorBlock Settings:
     UseDeArrowTitles: Videócímek cseréje a DeArrow felhasználói által beküldött címekre.

@@ -1,0 +1,33 @@
+import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+
+async function openPlayerSettings(page) {
+  const section = await goToSettingsSection(page, 'advanced')
+  const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
+  const ytDlpSection = heading.locator('xpath=../..')
+
+  return ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ })
+}
+
+test.describe('parallel segment loading slider', () => {
+  test('persists the configured limit', async ({ app }) => {
+    const slider = await openPlayerSettings(app.page)
+
+    // shaka-player's default, so playback is sequential until the user opts in
+    await expect(slider).toHaveValue('1')
+    await expect(slider).toHaveAttribute('min', '1')
+    await expect(slider).toHaveAttribute('max', '10')
+
+    await slider.fill('4')
+    await expect(slider).toHaveValue('4')
+
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        readDatastore(app.userDataDir, 'settings')
+      )
+      return settings.segmentPrefetchLimit
+    }).toBe(4)
+
+    const relaunched = await app.relaunch()
+    await expect(await openPlayerSettings(relaunched.page)).toHaveValue('4')
+  })
+})

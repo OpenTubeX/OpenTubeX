@@ -3,10 +3,10 @@
     <div
       class="vote-count"
     >
-      {{ $t('Channel.Posts.votes', {votes: formattedVotes}) }}
+      {{ $t('Channel.Posts.votes', {votes: formattedVotes}, data.totalVotes) }}
     </div>
     <div
-      v-for="(choice, index) in data.content"
+      v-for="(choice, index) in choices"
       :key="index"
     >
       <div
@@ -29,11 +29,14 @@
         class="option"
       >
         <span class="empty-circle" />
-        <img
+        <FtRetryImage
           v-if="choice.image"
-          :src="findSmallestPollImage(choice.image)"
+          class="pollImage"
+          :src="choice.image.url"
+          :style="{ inlineSize: `${125 * (choice.image.width / choice.image.height || 1)}px` }"
+          :fallback-icon="['fas', 'file-image']"
           alt=""
-        >
+        />
         <div
           class="option-text"
           dir="auto"
@@ -54,23 +57,25 @@
         v-if="!revealAnswer"
         class="option-text"
       >
-        <FontAwesomeIcon :icon="['fas', 'eye']" /> {{ $t('Channel.Posts.Reveal Answers') }}
+        <FtIcon :icon="['fas', 'eye']" /> {{ $t('Channel.Posts.Reveal Answers') }}
       </div>
       <div
         v-else
         class="option-text"
       >
-        <FontAwesomeIcon :icon="['fas', 'eye-slash']" /> {{ $t('Channel.Posts.Hide Answers') }}
+        <FtIcon :icon="['fas', 'eye-slash']" /> {{ $t('Channel.Posts.Hide Answers') }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { computed, ref } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
-import { formatNumber, isNumberRounded } from '../../helpers/utils'
+import { formatNumber } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 
 const props = defineProps({
   data: {
@@ -81,17 +86,22 @@ const props = defineProps({
 
 const formattedVotes = computed(() => {
   const votes = props.data.totalVotes
-  return formatNumber(votes, votes != null && isNumberRounded(votes) ? { notation: 'compact' } : undefined)
+  return formatNumber(votes, votes != null && isRoundedNumber(votes) ? { notation: 'compact' } : undefined)
 })
 
 const revealAnswer = ref(false)
+
+const choices = computed(() => props.data.content.map(choice => ({
+  ...choice,
+  image: choice.image ? findSmallestPollImage(choice.image) : null
+})))
 
 /**
  * Use smallest as it's resized to 125px anyways and they're usually all larger than that
  * @param {{ height: number, width: number, url: string }[]} images
  */
 function findSmallestPollImage(images) {
-  return images.reduce((prev, img) => (img.height < prev.height) ? img : prev, images[0]).url
+  return images.reduce((prev, img) => (img.height < prev.height) ? img : prev, images[0])
 }
 </script>
 

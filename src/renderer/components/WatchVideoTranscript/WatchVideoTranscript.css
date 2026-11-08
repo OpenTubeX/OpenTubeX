@@ -1,0 +1,278 @@
+.transcriptCard {
+  padding-block-start: 16px;
+}
+
+.transcriptHeader,
+.transcriptHeaderActions,
+.transcriptActions,
+.transcriptControls {
+  display: flex;
+  align-items: center;
+}
+
+.transcriptHeader {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.transcriptCard:not(.transcriptCardFullscreen) .transcriptHeader {
+  margin-block-end: 16px;
+}
+
+.transcriptTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  letter-spacing: -0.01em;
+}
+
+.transcriptActions {
+  flex: 0 0 auto;
+  gap: inherit;
+  justify-content: flex-end;
+}
+
+.transcriptHeaderActions {
+  position: relative;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.transcriptHeaderAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.transcriptHeaderAction:hover,
+.transcriptHeaderAction:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.transcriptHeaderAction.active {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.transcriptHeaderAction.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.transcriptHeaderAction:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.transcriptLanguageMenu {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 40px;
+  inline-size: 260px;
+  max-inline-size: calc(100vw - 48px);
+  max-block-size: min(320px, 50dvh);
+  overflow-y: auto;
+  padding: 6px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-color);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: var(--shape-corner-large);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.transcriptLanguages {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transcriptLanguageMenu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.transcriptLanguageMenu button:hover,
+.transcriptLanguageMenu button:focus-visible {
+  background-color: var(--side-nav-hover-color);
+}
+
+.transcriptLanguageMenu .selected {
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+.transcriptLanguageMenu .selected:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.transcriptControls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-block: 16px;
+}
+
+.transcriptCard:not(.transcriptCardFullscreen) .transcriptControls {
+  margin-block-start: 0;
+}
+
+.transcriptControls > :first-child {
+  flex: 1;
+}
+
+.transcriptMessage {
+  color: var(--tertiary-text-color);
+  margin-block: 24px 8px;
+  text-align: center;
+}
+
+.transcriptSegments {
+  --transcript-fade-size: 16px;
+  --transcript-scrollbar-reserve: 14px;
+  --transcript-fade-top: #000;
+  --transcript-fade-bottom: #000;
+
+  position: relative;
+  max-block-size: 420px;
+  overflow-y: auto;
+
+  /* Fade clipped transcript text while keeping the overlay scrollbar sharp. */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      var(--transcript-fade-top),
+      #000 var(--transcript-fade-size),
+      #000 calc(100% - var(--transcript-fade-size)),
+      var(--transcript-fade-bottom)
+    ),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(100% - var(--transcript-scrollbar-reserve)) 100%,
+    var(--transcript-scrollbar-reserve) 100%;
+  mask-position: 0 0, 100% 0;
+  mask-repeat: no-repeat;
+  mask-composite: add;
+}
+
+.transcriptSegments.transcriptFadeTop {
+  --transcript-fade-top: transparent;
+}
+
+.transcriptSegments.transcriptFadeBottom {
+  --transcript-fade-bottom: transparent;
+}
+
+.transcriptSegments:dir(rtl) {
+  mask-position: 100% 0, 0 0;
+}
+
+/* Chunks that never mounted estimate one line per segment, plus the 2px gap
+   between segments; released chunks keep their measured height. */
+.transcriptChunk.windowedListShell {
+  block-size: calc(var(--transcript-chunk-rows) * (22px + 1.4em));
+}
+
+/* Segments form one segmented list across chunks: large outer corners, tight
+   inner ones. Padding rather than margin keeps the gap inside each chunk's
+   measured height, because a first row's margin would collapse out of it. */
+.transcriptChunk [role='listitem'] {
+  padding-block-start: 2px;
+}
+
+.transcriptSegment {
+  display: grid;
+  grid-template-columns: 5em 1fr;
+  gap: 12px;
+  inline-size: 100%;
+  padding-block: 10px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  color: var(--primary-text-color);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.4;
+  text-align: start;
+  transition: background-color var(--motion-default-effects), color var(--motion-default-effects);
+}
+
+.transcriptSegment:hover,
+.transcriptSegment:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+/* The active segment takes a tonal tint, like the current chapter. */
+.transcriptSegment.active {
+  background-color: color-mix(in srgb, var(--primary-color) 24%, transparent);
+}
+
+.transcriptSegment.active:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: var(--primary-text-color);
+}
+
+/* The first segment of the list has no gap or neighbor above it. */
+.transcriptChunk:first-child > [role='listitem']:first-child {
+  padding-block-start: 0;
+}
+
+.transcriptChunk:first-child > [role='listitem']:first-child > .transcriptSegment {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.transcriptChunk:last-child > [role='listitem']:last-child > .transcriptSegment {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.transcriptTimestamp {
+  font-variant-numeric: tabular-nums;
+  font-weight: bold;
+}
+
+.transcriptText {
+  overflow-wrap: anywhere;
+}
+
+@media only screen and (width <= 600px) {
+  .transcriptControls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .transcriptActions {
+    justify-content: flex-start;
+  }
+
+  .transcriptSegment {
+    grid-template-columns: 4.5em 1fr;
+    padding-inline: 4px;
+  }
+}

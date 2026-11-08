@@ -58,6 +58,14 @@ export class TheatreModeButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    // Fired when theatre mode changes without a button click (e.g. a side panel
+    // opening forces the default theatre mode), keeping the icon/label correct.
+    this.eventManager.listen(events, 'syncTheatreMode', (/** @type {CustomEvent} */event) => {
+      this.theatreModeEnabled_ = event.detail
+
+      this.updateLocalisedStrings_()
+    })
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
@@ -66,10 +74,17 @@ export class TheatreModeButton extends shaka.ui.Element {
   }
 
   /** @private */
+  updateVisibility_() {
+    this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+  }
+
+  /** @private */
   updateLocalisedStrings_() {
     this.icon_.use(this.theatreModeEnabled_ ? PlayerIcons.VARIABLES_DEFAULT : PlayerIcons.RECTANGLE_DEFAULT)
 
     this.currentState_.textContent = this.localization.resolve(this.theatreModeEnabled_ ? 'ON' : 'OFF')
+    // Its label already says whether theatre mode is on, so only highlight it.
+    this.button_.classList.toggle('ft-active', this.theatreModeEnabled_)
 
     const baseAriaLabel = this.theatreModeEnabled_ ? i18n.global.t('Video.Player.Exit Theatre Mode') : i18n.global.t('Video.Player.Theatre Mode')
 
@@ -77,5 +92,10 @@ export class TheatreModeButton extends shaka.ui.Element {
       baseAriaLabel,
       KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE
     )
+  }
+
+  /** @override */
+  checkAvailability() {
+    this.updateVisibility_()
   }
 }

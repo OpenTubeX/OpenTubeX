@@ -1,0 +1,1116 @@
+import { ytDlp } from '../ytDlp'
+import { FormatUtils, Misc } from 'youtubei.js'
+
+import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './manifestTypes'
+import { fetchGoogleVideo } from './googleVideoFallback'
+import { probeStreamByteRanges } from './streamByteRanges'
+import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
+import { hasLimitedLiveDvrWindow } from './liveManifest'
+import { generateAudioTrackField } from '../api/local'
+import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
+import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
+import { capacitorHttpFetch } from '../api/capacitor-http'
+import { fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
+import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
+import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
+
+/** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
+
+/**
+ * @typedef {object} YtDlpPlaybackSource
+ * @property {string | null} manifestSrc
+ * @property {MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS} manifestMimeType
+ * @property {any[]} legacyFormats
+ * @property {Date | null} expiryDate
+ * @property {boolean} incomplete whether a timeout may have omitted formats
+ * @property {string | null} title
+ * @property {boolean} isLive
+ * @property {'EQUIRECTANGULAR' | null} [vrProjection]
+ * @property {boolean} [audioOnly] whether an external manifest has no video formats
+ * @property {boolean} [twitchSubOnlyVod]
+ * @property {string | null} [twitchVodRegistrationId]
+ * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
+ * @property {number | null} duration
+ * @property {string | null} storyboardSrc
+ * @property {import('../../../main/ytDlp').YtDlpPlaybackCaption[]} captions
+ * @property {import('../../../main/ytDlp').YtDlpPlaybackCaption[]} captionTranslations
+ * @property {boolean} subtitlesIncluded whether yt-dlp checked for automatic subtitles
+ * @property {string | null} version the yt-dlp version that extracted the streams
+ */
+
+// yt-dlp appends the audio track or a suffix like "-drc" to the itag for some formats
+const ITAG_REGEX = /^\d+/
+const URL_PROBE_TIMEOUT = 10_000
+const REJECTED_PLAYBACK_URL_STATUSES = new Set([401, 403, 404, 410])
+const playbackSourceCache = new YtDlpPlaybackSourceCache()
+const pendingPlaybackSourceLoads = new Map()
+const playbackSourceCacheChangeListeners = new Set()
+
+function notifyPlaybackSourceCacheChanged() {
+  for (const listener of playbackSourceCacheChangeListeners) listener()
+}
+
+function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls = false) {
+  return JSON.stringify(preferVrHls
+    ? [cacheKey, useAuthentication, 'vr-hls']
+    : [cacheKey, useAuthentication])
+}
+
+/**
+ * @param {() => void} listener
+ * @returns {() => void}
+ */
+export function onYtDlpPlaybackSourceCacheChange(listener) {
+  playbackSourceCacheChangeListeners.add(listener)
+  return () => playbackSourceCacheChangeListeners.delete(listener)
+}
+
+/**
+ * Returns the earliest time at which any requested source stops being safely
+ * reusable, or null when at least one source is not cached.
+ * @param {string[]} videoIds
+ * @param {string} cacheKey
+ * @param {boolean} useAuthentication
+ * @param {boolean} [requireSubtitles]
+ * @returns {number | null}
+ */
+export function getYtDlpPlaybackSourcesUsableUntil(
+  videoIds,
+  cacheKey,
+  useAuthentication,
+  requireSubtitles = true
+) {
+  const uniqueVideoIds = [...new Set(videoIds)]
+  if (uniqueVideoIds.length === 0) return null
+
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication)
+  let usableUntil = Infinity
+
+  for (const videoId of uniqueVideoIds) {
+    const sourceUsableUntil = playbackSourceCache.getUsableUntil(
+      videoId,
+      effectiveCacheKey,
+      requireSubtitles
+    )
+    if (sourceUsableUntil === null) return null
+
+    usableUntil = Math.min(usableUntil, sourceUsableUntil)
+  }
+
+  return usableUntil
+}
+
+/**
+ * Keeps every source requested by an explicit playlist preload available for
+ * the rest of the app session, even when the playlist exceeds the normal LRU
+ * limit.
+ * @param {number} entries
+ */
+export function reserveYtDlpPlaybackSourceCache(entries) {
+  playbackSourceCache.ensureCapacity(entries)
+}
+
+async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
+  if (source.isLive) return
+
+  if (playbackSourceCache.set(videoId, cacheKey, source)) {
+    notifyPlaybackSourceCacheChanged()
+  }
+  if (source.expiryDate === null) return
+
+  // Playback does not wait for the main process to serialize and write the
+  // cache file. The in-memory cache above already serves this source.
+  Promise.resolve()
+    .then(() => ytDlp.ytDlpPlaybackCacheSet(
+      videoId,
+      cacheKey,
+      source.expiryDate.getTime(),
+      source
+    ))
+    .catch(error => {
+      console.warn('Could not save the persistent yt-dlp playback cache', error)
+    })
+}
+
+/**
+ * Ensures playback-error recovery extracts fresh signed stream URLs.
+ * @param {string} videoId
+ */
+export function invalidateYtDlpPlaybackSource(videoId) {
+  if (playbackSourceCache.delete(videoId)) {
+    notifyPlaybackSourceCacheChanged()
+  }
+  ytDlp.ytDlpPlaybackCacheDelete(videoId).catch(error => {
+    console.warn('Could not remove an entry from the persistent yt-dlp playback cache', error)
+  })
+}
+
+export function invalidateAllYtDlpPlaybackSources() {
+  if (playbackSourceCache.clear()) {
+    notifyPlaybackSourceCacheChanged()
+  }
+  return ytDlp.ytDlpPlaybackCacheClear().catch(error => {
+    console.warn('Could not clear the persistent yt-dlp playback cache', error)
+    return false
+  })
+}
+
+/**
+ * Extracts one media URL without applying YouTube's client retries or cache keys.
+ * The caller keeps the original URL as the stable identity for its tab.
+ * @param {string} url
+ * @param {boolean} useAuthentication
+ */
+async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
+  const info = await ytDlp.ytDlpGetPlaybackInfo(url, true, useAuthentication)
+  if (info === null) throw new Error('yt-dlp is not available')
+  if ('error' in info) throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
+
+  const isLive = info.isLive || info.liveStatus === 'is_live'
+  const storyboardSrc = isLive || !info.storyboardVtt
+    ? null
+    : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`
+  if (info.liveStatus === 'is_upcoming' && info.formats.length === 0) {
+    return { info, source: null }
+  }
+  const audioOnly = info.formats.length > 0 && info.formats.every(format =>
+    format.vcodec === 'none' && isAudioFormat(format)
+  )
+  const httpFormats = info.formats.filter(format =>
+    ['http', 'https'].includes(format.protocol) &&
+    format.url !== null &&
+    ['mp4', 'm4a', 'webm', 'mp3', 'ogg', 'opus'].includes(format.ext)
+  )
+  const hasVideoFormats = httpFormats.some(format =>
+    isVideoFormat(format) || isExternalProgressiveVideoFormat(format)
+  )
+  // H.265 may be unavailable in Chromium, so try other codecs first.
+  const preferredHttpFormats = httpFormats.filter(format => format.vcodec !== 'h265')
+  const h265Formats = httpFormats.filter(format => format.vcodec === 'h265')
+  let legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
+    (isAudioFormat(format) && (!hasVideoFormats || isVideoFormat(format))) ||
+    isExternalProgressiveVideoFormat(format)
+  ))
+
+  const hlsFormats = info.formats.filter(format =>
+    ['m3u8', 'm3u8_native'].includes(format.protocol)
+  )
+  const hlsUrls = new Set([
+    info.hlsManifestUrl,
+    ...hlsFormats.map(format => format.manifestUrl),
+    ...hlsFormats.toSorted((a, b) => (b.height ?? 0) - (a.height ?? 0)).map(format => format.url)
+  ].filter(url => url !== null))
+  let hlsUrl = null
+  for (const candidate of hlsUrls) {
+    if (await probeYtDlpHlsManifest(candidate)) {
+      hlsUrl = candidate
+      break
+    }
+  }
+
+  if (hlsUrl !== null) {
+    return {
+      info,
+      source: {
+        manifestSrc: hlsUrl,
+        manifestMimeType: MANIFEST_TYPE_HLS,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc,
+        isLive,
+        audioOnly
+      }
+    }
+  }
+
+  const dashUrl = info.formats.find(format =>
+    ['http_dash_segments', 'dash'].includes(format.protocol) &&
+    format.manifestUrl !== null
+  )?.manifestUrl ?? null
+  if (dashUrl !== null && await probeYtDlpUrl(dashUrl)) {
+    return {
+      info,
+      source: {
+        manifestSrc: dashUrl,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc,
+        isLive,
+        audioOnly
+      }
+    }
+  }
+
+  const adaptiveFormats = preferredHttpFormats.filter(format => isVideoFormat(format) !== isAudioFormat(format))
+  const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration))
+  if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+    const manifest = await createDashManifest({ adaptive_formats: localFormats })
+    return {
+      info,
+      source: {
+        manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc,
+        isLive
+      }
+    }
+  }
+
+  if (legacyFormats.length === 0) {
+    legacyFormats = await convertLegacyFormats(h265Formats.filter(format => isAudioFormat(format)))
+  }
+  if (legacyFormats.length === 0) {
+    legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
+      isVideoFormat(format) && !isAudioFormat(format)
+    ))
+  }
+  if (legacyFormats.length > 0) {
+    const videoOnlyUrls = new Set(preferredHttpFormats.filter(format =>
+      format.acodec === 'none' && (isVideoFormat(format) || isExternalProgressiveVideoFormat(format))
+    ).map(format => format.url))
+    let separateAudioUrl = null
+    if (legacyFormats.some(format => videoOnlyUrls.has(format.url))) {
+      const audioFormats = preferredHttpFormats.filter(format =>
+        format.vcodec === 'none' && isAudioFormat(format)
+      ).toSorted((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0))
+      for (const format of audioFormats) {
+        if (await waitForYtDlpFormatAvailability(format) && await probeYtDlpUrl(format.url)) {
+          separateAudioUrl = format.url
+          break
+        }
+      }
+    }
+    return {
+      info,
+      source: {
+        manifestSrc: null,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        separateAudioUrl,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc,
+        isLive
+      }
+    }
+  }
+
+  throw new Error(info.formats.length > 0
+    ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
+    : info.noFormatsReason ?? 'yt-dlp did not return any playable formats')
+}
+
+export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+  try {
+    return await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication)
+  } catch (error) {
+    const videoId = getTwitchVodId(url)
+    if (videoId === null) throw error
+
+    try {
+      const result = process.env.IS_CAPACITOR
+        ? await fetchTwitchSubOnlyVod(videoId, capacitorHttpFetch)
+        : await window.ftElectron.twitchSubOnlyVod(videoId)
+      if (!result) throw error
+
+      const { playlist, video, storyboardVtt } = result
+      let twitchVodRegistrationId = null
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+        const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
+        twitchVodRegistrationId = registration.id
+      }
+      const owner = video.owner
+      return {
+        info: {
+          title: video.title,
+          description: video.description,
+          uploader: owner?.displayName ?? owner?.login ?? null,
+          uploaderUrl: owner?.login ? `https://www.twitch.tv/${owner.login}` : null,
+          uploaderThumbnail: owner?.profileImageURL ?? null,
+          channel: null,
+          channelUrl: null,
+          channelThumbnail: null,
+          thumbnail: video.thumbnail,
+          webpageUrl: url,
+          viewCount: video.viewCount,
+          uploadDate: null,
+          isLive: false,
+          liveStatus: 'was_live',
+          duration: video.duration,
+          externalMetadata: mapExternalPlaybackMetadata({ timestamp: video.createdAt ? Date.parse(video.createdAt) / 1000 : null }),
+          captions: [],
+          captionTranslations: [],
+          formats: []
+        },
+        source: {
+          manifestSrc: `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(playlist)}`,
+          manifestMimeType: MANIFEST_TYPE_HLS,
+          legacyFormats: [],
+          captions: [],
+          captionTranslations: [],
+          storyboardSrc: storyboardVtt ? `data:text/vtt;charset=utf-8,${encodeURIComponent(storyboardVtt)}` : null,
+          isLive: false,
+          twitchSubOnlyVod: true,
+          twitchVodRegistrationId
+        }
+      }
+    } catch {
+      throw error
+    }
+  }
+}
+
+export function releaseTwitchVodRegistration(source) {
+  if (!source?.twitchVodRegistrationId) return
+  ytDlp.ytDlpUnregisterTwitchVod(source.twitchVodRegistrationId).catch(error => {
+    console.warn('Could not unregister Twitch VOD playback', error)
+  })
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isVideoFormat(format) {
+  return format.vcodec !== null && format.vcodec !== 'none'
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isAudioFormat(format) {
+  return format.acodec !== null && format.acodec !== 'none'
+}
+
+/** Some extractors omit codec names for otherwise playable progressive video. */
+function isExternalProgressiveVideoFormat(format) {
+  return format.vcodec === null && (format.acodec === null || format.acodec === 'none') &&
+    ['mp4', 'webm'].includes(format.ext)
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ * @returns {string} e.g. `video/mp4; codecs="av01.0.12M.08"`
+ */
+function buildMimeType(format) {
+  if (format.ext === 'mp3') return 'audio/mpeg'
+  if (['ogg', 'opus'].includes(format.ext)) return 'audio/ogg'
+  const container = format.ext === 'webm' ? 'webm' : 'mp4'
+
+  if (isExternalProgressiveVideoFormat(format)) return `video/${container}`
+
+  if (isVideoFormat(format)) {
+    const codecs = isAudioFormat(format) ? `${format.vcodec}, ${format.acodec}` : format.vcodec
+    return `video/${container}; codecs="${codecs}"`
+  }
+
+  return `audio/${container}; codecs="${format.acodec}"`
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function buildQualityLabel(format) {
+  if (format.height === null) {
+    return format.formatNote ?? 'unknown'
+  }
+
+  return format.fps !== null && format.fps > 30 ? `${format.height}p${Math.round(format.fps)}` : `${format.height}p`
+}
+
+/** yt-dlp format IDs outside YouTube are often strings such as `hls-720p`. */
+function getFormatItag(formatId) {
+  const numericId = ITAG_REGEX.exec(formatId)?.[0]
+  if (numericId !== undefined) return parseInt(numericId, 10)
+
+  let hash = 2166136261
+  for (let index = 0; index < formatId.length; index++) {
+    hash = Math.imul(hash ^ formatId.charCodeAt(index), 16777619)
+  }
+  return 1_000_000 + (hash >>> 0)
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function buildColorInfo(format) {
+  switch (format.dynamicRange) {
+    case 'HDR10':
+      return {
+        primaries: 'COLOR_PRIMARIES_BT2020',
+        transferCharacteristics: 'COLOR_TRANSFER_CHARACTERISTICS_SMPTEST2084',
+        matrixCoefficients: 'COLOR_MATRIX_COEFFICIENTS_BT2020_NCL'
+      }
+    case 'HLG':
+      return {
+        primaries: 'COLOR_PRIMARIES_BT2020',
+        transferCharacteristics: 'COLOR_TRANSFER_CHARACTERISTICS_ARIB_STD_B67',
+        matrixCoefficients: 'COLOR_MATRIX_COEFFICIENTS_BT2020_NCL'
+      }
+    case 'SDR':
+    case null:
+      // Players compare the colour information to tell otherwise identical resolutions
+      // apart, so it has to be stated for SDR streams too rather than left out,
+      // which is also what YouTube's own API reports for them
+      return {
+        primaries: 'COLOR_PRIMARIES_BT709',
+        transferCharacteristics: 'COLOR_TRANSFER_CHARACTERISTICS_BT709',
+        matrixCoefficients: 'COLOR_MATRIX_COEFFICIENTS_BT709'
+      }
+    default:
+      // Claiming the wrong colour space is worse than not stating one at all,
+      // so anything we don't recognise (e.g. Dolby Vision) is left to the player
+      return undefined
+  }
+}
+
+/**
+ * @param {URL} url
+ * @returns {number | undefined} the stream duration in milliseconds
+ */
+function getApproxDurationMs(url) {
+  const duration = parseFloat(url.searchParams.get('dur'))
+
+  return Number.isFinite(duration) ? Math.round(duration * 1000) : undefined
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ * @param {import('./streamByteRanges').StreamByteRanges | null} byteRanges null for segmented Post-Live-DVR formats
+ * @param {number | null} fallbackDuration the video duration in seconds
+ * @returns {import('youtubei.js').Misc.Format}
+ */
+function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
+  const url = new URL(format.url)
+  const isVideo = isVideoFormat(format)
+
+  const localFormat = new Misc.Format({
+    itag: getFormatItag(format.formatId),
+    mimeType: buildMimeType(format),
+    bitrate: format.bitrate ?? 0,
+    ...(format.width !== null && format.height !== null ? { width: format.width, height: format.height } : {}),
+    ...(byteRanges === null
+      ? { targetDurationSec: format.targetDuration }
+      : { initRange: byteRanges.initRange, indexRange: byteRanges.indexRange }),
+    url: format.url,
+    approxDurationMs: getApproxDurationMs(url) ??
+      (fallbackDuration === null ? undefined : Math.round(fallbackDuration * 1000)),
+    ...(isVideo
+      ? {
+          fps: format.fps ?? undefined,
+          qualityLabel: buildQualityLabel(format),
+          colorInfo: buildColorInfo(format)
+        }
+      : {
+          audioQuality: 'AUDIO_QUALITY_MEDIUM',
+          audioSampleRate: format.audioSampleRate ?? undefined,
+          audioChannels: format.audioChannels ?? undefined
+        })
+  })
+
+  if (localFormat.has_audio) {
+    // googlevideo puts the audio track details into the URL rather than into yt-dlp's output
+    const xtags = (url.searchParams.get('xtags') ?? '').split(':')
+
+    localFormat.language = xtags.find(tag => tag.startsWith('lang='))?.split('=')[1] || format.language
+    localFormat.is_drc = xtags.includes('drc=1')
+
+    const audioContent = xtags.find(tag => tag.startsWith('acont='))?.split('=')[1]
+    localFormat.is_dubbed = audioContent === 'dubbed'
+    localFormat.is_descriptive = audioContent === 'descriptive'
+    localFormat.is_secondary = audioContent === 'secondary'
+    localFormat.is_auto_dubbed = audioContent === 'dubbed-auto'
+    localFormat.is_original = audioContent === 'original' ||
+      (
+        !localFormat.is_dubbed &&
+        !localFormat.is_descriptive &&
+        !localFormat.is_secondary &&
+        !localFormat.is_auto_dubbed &&
+        !localFormat.is_drc
+      )
+  }
+
+  return localFormat
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isPostLiveDvrSegmentedFormat(format) {
+  return format.protocol === 'http_dash_segments' &&
+    format.url !== null &&
+    isVideoFormat(format) !== isAudioFormat(format) &&
+    format.targetDuration !== null &&
+    Number.isFinite(format.targetDuration) &&
+    format.targetDuration > 0 &&
+    format.fragmentCount !== null &&
+    Number.isInteger(format.fragmentCount) &&
+    format.fragmentCount > 0
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function mapYtDlpLegacyFormat(format) {
+  return {
+    itag: getFormatItag(format.formatId),
+    qualityLabel: buildQualityLabel(format),
+    fps: format.fps,
+    bitrate: format.bitrate,
+    // yt-dlp's short "h264" name is not an RFC 6381 codec string. Let the
+    // browser inspect the MP4 rather than handing Shaka an invalid codec hint.
+    mimeType: ['h264', 'h265'].includes(format.vcodec) ? 'video/mp4' : buildMimeType(format),
+    height: format.height,
+    width: format.width,
+    url: format.url,
+    requiresSeparateAudio: format.acodec === 'none',
+    availableAt: format.availableAt
+  }
+}
+
+/**
+ * Checks that a stream or manifest URL is accepted before exposing it to the player.
+ * @param {string} url
+ * @param {() => void} [onTimeout]
+ */
+async function probeYtDlpUrl(url, onTimeout) {
+  try {
+    const response = await fetchGoogleVideo(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    await response.body?.cancel()
+    return response.ok
+  } catch (error) {
+    if (error.name === 'TimeoutError') onTimeout?.()
+    return false
+  }
+}
+
+/**
+ * Checks whether the exact URL that timed out is still serving stream data.
+ * @param {unknown} url
+ * @returns {Promise<'accepted' | 'rejected' | 'inconclusive'>}
+ */
+export async function checkYtDlpPlaybackUrl(url) {
+  if (typeof url !== 'string' || url.length === 0) return 'inconclusive'
+
+  try {
+    const response = await fetchGoogleVideo(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+
+    if (REJECTED_PLAYBACK_URL_STATUSES.has(response.status)) {
+      await response.body?.cancel().catch(() => {})
+      return 'rejected'
+    }
+
+    if (!response.ok || response.body === null) {
+      await response.body?.cancel().catch(() => {})
+      return 'inconclusive'
+    }
+
+    const reader = response.body.getReader()
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (value !== undefined && value.byteLength > 0) return 'accepted'
+        if (done) return 'inconclusive'
+      }
+    } finally {
+      await reader.cancel().catch(() => {})
+    }
+  } catch {
+    return 'inconclusive'
+  }
+}
+
+/**
+ * @param {YtDlpPlaybackFormat[]} formats
+ * @param {() => void} [onTimeout]
+ */
+async function convertLegacyFormats(formats, onTimeout) {
+  const results = await Promise.all(formats.map(async format => {
+    if (
+      !await waitForYtDlpFormatAvailability(format) ||
+      !await probeYtDlpUrl(format.url, onTimeout)
+    ) {
+      return null
+    }
+
+    return mapYtDlpLegacyFormat(format)
+  }))
+
+  return results.filter(format => format !== null)
+}
+
+/**
+ * Reads the byte ranges of every adaptive format in parallel and drops the ones
+ * that the byte ranges couldn't be determined for.
+ * @param {YtDlpPlaybackFormat[]} formats
+ * @param {number | null} duration
+ * @param {() => void} [onTimeout]
+ */
+async function convertAdaptiveFormats(formats, duration, onTimeout) {
+  const results = await Promise.all(formats.map(async (format) => {
+    try {
+      if (!await waitForYtDlpFormatAvailability(format)) {
+        return null
+      }
+
+      const byteRanges = await probeStreamByteRanges(format.url, format.ext === 'webm')
+
+      return byteRanges === null ? null : convertYtDlpToLocalFormat(format, byteRanges, duration)
+    } catch (error) {
+      if (error.name === 'TimeoutError') onTimeout?.()
+      console.error(`Failed to read the byte ranges of yt-dlp format ${format.formatId}`, error)
+      return null
+    }
+  }))
+
+  return addAudioTrackFields(results.filter(format => format !== null))
+}
+
+/**
+ * Converts Post-Live-DVR formats without probing byte ranges. Each `sq` fragment
+ * is a self-initializing MP4 segment, and yt-dlp provides its duration and count.
+ * @param {YtDlpPlaybackFormat[]} formats
+ * @param {number} duration
+ */
+async function convertPostLiveDvrFormats(formats, duration) {
+  const results = await Promise.all(formats.map(async format => {
+    return await waitForYtDlpFormatAvailability(format)
+      ? convertYtDlpToLocalFormat(format, null, duration)
+      : null
+  }))
+
+  return addAudioTrackFields(results.filter(format => format !== null))
+}
+
+/**
+ * @param {import('youtubei.js').Misc.Format[]} localFormats
+ */
+function addAudioTrackFields(localFormats) {
+  const audioFormats = localFormats.filter(format => format.has_audio)
+
+  // YouTube only labels the audio tracks when there is more than one to choose from
+  if (new Set(audioFormats.map(format => `${format.language}-${format.is_original}`)).size > 1) {
+    // match YouTube's local API response with English
+    const languageNames = new Intl.DisplayNames('en-US', { type: 'language', languageDisplay: 'standard' })
+
+    for (const format of audioFormats) {
+      generateAudioTrackField(format, languageNames)
+    }
+  }
+
+  return localFormats
+}
+
+/**
+ * Supplies the metadata youtubei.js normally reads from a HEAD request when it
+ * generates a Post-Live-DVR DASH timeline.
+ * @param {number} duration seconds
+ * @param {number} fragmentCount
+ */
+function createPostLiveDvrActions(duration, fragmentCount) {
+  const headers = new Headers({
+    'X-Head-Time-Millis': String(Math.round(duration * 1000)),
+    'X-Head-Seqnum': String(fragmentCount - 1)
+  })
+
+  return {
+    session: {
+      http: {
+        fetch_function: async () => ({ headers })
+      }
+    }
+  }
+}
+
+/**
+ * Uses yt-dlp to get the stream URLs for a video, which avoids YouTube's error prone
+ * SABR streaming protocol. Live streams use YouTube's HLS manifests, which keep the
+ * DVR window available, so that they can be rewound.
+ * @param {string} videoId
+ * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
+ * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
+ * @param {boolean} [useAuthentication] whether to use the explicitly configured cookie source
+ * @param {boolean} [cachedOnly] prevents a cache miss from starting a new extraction
+ * @param {boolean} [includeSubtitles] whether yt-dlp should request automatic subtitles
+ * @param {boolean} [preferVrHls] whether the backend identified a mesh video
+ * @returns {Promise<YtDlpPlaybackSource | null>}
+ */
+export function getYtDlpPlaybackSource(
+  videoId,
+  cacheKey = '',
+  onDefaultClientsFallback,
+  useAuthentication = false,
+  cachedOnly = false,
+  includeSubtitles = true,
+  preferVrHls = false
+) {
+  if (cachedOnly) {
+    return loadYtDlpPlaybackSource(
+      videoId,
+      cacheKey,
+      onDefaultClientsFallback,
+      useAuthentication,
+      true,
+      includeSubtitles,
+      preferVrHls
+    )
+  }
+
+  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles, preferVrHls])
+  const pendingLoad = pendingPlaybackSourceLoads.get(requestKey)
+  if (pendingLoad !== undefined) {
+    if (onDefaultClientsFallback !== undefined) {
+      pendingLoad.defaultClientsFallbackCallbacks.add(onDefaultClientsFallback)
+      if (pendingLoad.defaultClientsFallbackStarted) {
+        onDefaultClientsFallback()
+      }
+    }
+    return pendingLoad.promise
+  }
+
+  const defaultClientsFallbackCallbacks = new Set()
+  if (onDefaultClientsFallback !== undefined) {
+    defaultClientsFallbackCallbacks.add(onDefaultClientsFallback)
+  }
+
+  const pendingEntry = {
+    defaultClientsFallbackCallbacks,
+    defaultClientsFallbackStarted: false,
+    promise: null,
+  }
+  pendingEntry.promise = loadYtDlpPlaybackSource(
+    videoId,
+    cacheKey,
+    () => {
+      pendingEntry.defaultClientsFallbackStarted = true
+      for (const callback of defaultClientsFallbackCallbacks) callback()
+    },
+    useAuthentication,
+    false,
+    includeSubtitles,
+    preferVrHls
+  ).finally(() => {
+    if (pendingPlaybackSourceLoads.get(requestKey) === pendingEntry) {
+      pendingPlaybackSourceLoads.delete(requestKey)
+    }
+  })
+  pendingPlaybackSourceLoads.set(requestKey, pendingEntry)
+  return pendingEntry.promise
+}
+
+async function loadYtDlpPlaybackSource(
+  videoId,
+  cacheKey,
+  onDefaultClientsFallback,
+  useAuthentication,
+  cachedOnly,
+  includeSubtitles,
+  preferVrHls
+) {
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls)
+  let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
+
+  if (cachedSource === null) {
+    try {
+      const entry = await ytDlp.ytDlpPlaybackCacheGet(videoId, effectiveCacheKey)
+      if (entry !== null) {
+        const source = {
+          ...entry.source,
+          captions: entry.source.captions ?? [],
+          captionTranslations: entry.source.captionTranslations ?? [],
+          subtitlesIncluded: entry.source.subtitlesIncluded ?? false,
+          expiryDate: new Date(entry.expiryTime)
+        }
+        if (playbackSourceCache.set(videoId, effectiveCacheKey, source)) {
+          notifyPlaybackSourceCacheChanged()
+        }
+        cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
+
+        if (cachedSource === null) {
+          await ytDlp.ytDlpPlaybackCacheDelete(videoId)
+        }
+      }
+    } catch (error) {
+      console.warn('Could not read the persistent yt-dlp playback cache', error)
+    }
+  }
+
+  if (cachedSource !== null && (!includeSubtitles || cachedSource.subtitlesIncluded) &&
+    (!preferVrHls || cachedSource.vrProjection === 'EQUIRECTANGULAR')) {
+    return cachedSource
+  }
+
+  if (cachedOnly) {
+    return !preferVrHls || cachedSource?.vrProjection === 'EQUIRECTANGULAR' ? cachedSource : null
+  }
+
+  let extractionError = null
+  let limitedLiveSource = null
+  let incompleteSource = null
+  let incompleteSourceHeight = -1
+  let flatVrSource = null
+
+  // A fresh extraction with the same default clients can return working URLs after
+  // an immediately preceding extraction returned URLs that respond with 403. Give
+  // yt-dlp's defaults one bounded retry before falling back to the built-in source.
+  let defaultClientsFallbackAnnounced = false
+  for (const [attemptIndex, useDefaultClients] of [false, true, true].entries()) {
+    if (useDefaultClients && !defaultClientsFallbackAnnounced) {
+      defaultClientsFallbackAnnounced = true
+      onDefaultClientsFallback?.()
+    }
+
+    const info = await ytDlp.ytDlpGetPlaybackInfo(
+      videoId,
+      useDefaultClients,
+      // Try authenticated default clients before using the final attempt for
+      // a public DVR stream without cookies. Keep the limited source if it fails.
+      useAuthentication && (attemptIndex < 2 || limitedLiveSource === null),
+      includeSubtitles
+    )
+
+    if (info === null) {
+      extractionError = new Error('yt-dlp is not available')
+      break
+    }
+
+    if ('error' in info) {
+      if (info.error === 'ENOENT') {
+        extractionError = new Error('yt-dlp could not be found')
+        break
+      }
+
+      extractionError = new Error(info.error)
+      continue
+    }
+
+    // A renderer probe can omit formats even when yt-dlp's metadata is complete.
+    // Keep those sources out of the cache and eligible for playlist recovery.
+    let adaptiveProbeTimedOut = false
+    let legacyProbeTimedOut = false
+    const deferIncompleteSource = (source, playableFormats) => {
+      if (!source.incomplete) return false
+      const height = playableFormats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
+      const panorama = source.vrProjection === 'EQUIRECTANGULAR'
+      const previousPanorama = incompleteSource?.vrProjection === 'EQUIRECTANGULAR'
+      if ((panorama && !previousPanorama) || (panorama === previousPanorama && height > incompleteSourceHeight)) {
+        incompleteSource = source
+        incompleteSourceHeight = height
+      }
+      return true
+    }
+
+    const isLive = info.isLive || info.liveStatus === 'is_live'
+    const postLiveDvrFormats = info.liveStatus === 'post_live'
+      ? info.formats.filter(isPostLiveDvrSegmentedFormat)
+      : []
+
+    if (postLiveDvrFormats.length > 0) {
+      const fragmentCount = Math.max(...postLiveDvrFormats.map(format => format.fragmentCount))
+      const duration = info.duration !== null && info.duration > 0
+        ? info.duration
+        : Math.max(...postLiveDvrFormats.map(format => format.targetDuration * format.fragmentCount))
+      const localFormats = await convertPostLiveDvrFormats(postLiveDvrFormats, duration)
+
+      if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+        const manifest = await createDashManifest(
+          { adaptive_formats: localFormats },
+          true,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          createPostLiveDvrActions(duration, fragmentCount)
+        )
+        const source = {
+          manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats: [],
+          expiryDate: getEarliestYtDlpFormatExpiry(postLiveDvrFormats),
+          incomplete: info.incomplete === true,
+          title: info.title,
+          isLive: false,
+          vrProjection: null,
+          duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
+          version: info.version
+        }
+
+        if (deferIncompleteSource(source, localFormats)) continue
+        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+        return source
+      }
+    }
+
+    const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    preferVrHls ||= info.formats.some(format => isVideoFormat(format) && /\bmesh\b/i.test(format.formatNote ?? ''))
+    // YouTube's direct mesh streams need their embedded projection mesh to be
+    // rendered correctly. Its HLS rendition is a panorama that Shaka can show
+    // with the existing equirectangular VR renderer.
+    const needsPanorama = preferVrHls && !isLive
+    const usePanoramicHls = needsPanorama && info.hlsManifestUrl !== null
+    const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
+    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats, () => { legacyProbeTimedOut = true })
+
+    // live streams are only available as HLS, which is what makes rewinding within
+    // the DVR window possible
+    if (!isLive) {
+      const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
+      const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration, () => { adaptiveProbeTimedOut = true }))
+
+      if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+        const manifest = await createDashManifest({ adaptive_formats: localFormats })
+        const legacyFormats = await legacyFormatsPromise
+
+        const source = {
+          manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats,
+          expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
+          incomplete: info.incomplete === true || adaptiveProbeTimedOut || legacyProbeTimedOut,
+          title: info.title,
+          isLive: false,
+          vrProjection: needsPanorama ? 'MESH' : null,
+          duration: info.duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
+          version: info.version
+        }
+
+        if (deferIncompleteSource(source, [...localFormats, ...legacyFormats]) && !usePanoramicHls) continue
+        if (needsPanorama) {
+          if (!source.incomplete) flatVrSource = source
+        } else {
+          await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+          return source
+        }
+      }
+    }
+
+    if (
+      info.hlsManifestUrl !== null &&
+      await probeYtDlpHlsManifest(info.hlsManifestUrl)
+    ) {
+      const source = {
+        manifestSrc: info.hlsManifestUrl,
+        manifestMimeType: MANIFEST_TYPE_HLS,
+        legacyFormats: await legacyFormatsPromise,
+        expiryDate: getEarliestYtDlpFormatExpiry(
+          info.formats.filter(format => format.url !== null)
+        ),
+        incomplete: info.incomplete === true || legacyProbeTimedOut,
+        title: info.title,
+        isLive,
+        vrProjection: usePanoramicHls ? 'EQUIRECTANGULAR' : null,
+        duration: info.duration,
+        storyboardSrc: info.storyboardVtt === null
+          ? null
+          : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        subtitlesIncluded: includeSubtitles,
+        version: info.version
+      }
+
+      // Web clients, including authenticated defaults, can expose only the last
+      // 30 seconds of a rewindable live stream. Use the remaining retries for its
+      // full DVR manifest, preferring a complete source if those fail.
+      if (
+        isLive &&
+        hasLimitedLiveDvrWindow(info.hlsManifestUrl)
+      ) {
+        if (limitedLiveSource === null || (limitedLiveSource.incomplete && !source.incomplete)) {
+          limitedLiveSource = source
+        }
+        continue
+      }
+
+      const manifestFormats = info.formats.filter(format =>
+        format.url === info.hlsManifestUrl || format.manifestUrl === info.hlsManifestUrl
+      )
+      if (deferIncompleteSource(source, [...manifestFormats, ...source.legacyFormats])) continue
+      await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+      return source
+    }
+
+    if (!isLive) {
+      const legacyFormats = await legacyFormatsPromise
+      if (legacyFormats.length > 0) {
+        const source = {
+          manifestSrc: null,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats,
+          expiryDate: getEarliestYtDlpFormatExpiry(legacyHttpFormats),
+          incomplete: info.incomplete === true || adaptiveProbeTimedOut || legacyProbeTimedOut,
+          title: info.title,
+          isLive: false,
+          vrProjection: needsPanorama ? 'MESH' : null,
+          duration: info.duration,
+          storyboardSrc: info.storyboardVtt === null
+            ? null
+            : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
+          version: info.version
+        }
+
+        if (deferIncompleteSource(source, legacyFormats)) continue
+        if (needsPanorama) {
+          flatVrSource ??= source
+          continue
+        }
+        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+        return source
+      }
+    }
+
+    extractionError = new Error('yt-dlp did not return any playable formats')
+  }
+
+  if (limitedLiveSource !== null && !limitedLiveSource.incomplete) {
+    return limitedLiveSource
+  }
+
+  // Prefer a complete flat source to an incomplete one. An available panorama
+  // keeps priority even when some formats are missing.
+  if (flatVrSource !== null && incompleteSource?.vrProjection !== 'EQUIRECTANGULAR') {
+    return flatVrSource
+  }
+
+  if (incompleteSource !== null) {
+    return incompleteSource
+  }
+
+  if (limitedLiveSource !== null) {
+    return limitedLiveSource
+  }
+
+  cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
+  if (cachedSource !== null) {
+    return preferVrHls && cachedSource.vrProjection !== 'EQUIRECTANGULAR'
+      ? { ...cachedSource, vrProjection: 'MESH' }
+      : cachedSource
+  }
+
+  throw extractionError ?? new Error('yt-dlp did not return any playable formats')
+}
+
+/** youtubei.js writes NaN for yt-dlp audio formats without a sample rate, which ExoPlayer rejects. */
+async function createDashManifest(...args) {
+  return (await FormatUtils.toDash(...args)).replaceAll(' audioSamplingRate="NaN"', '')
+}

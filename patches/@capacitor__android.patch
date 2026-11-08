@@ -1,0 +1,102 @@
+diff --git a/capacitor/src/main/java/com/getcapacitor/Bridge.java b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..0cca9fb306c9a5ff8b7450a132bb2427cc979c2b 100644
+--- a/capacitor/src/main/java/com/getcapacitor/Bridge.java
++++ b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+@@ -939,7 +939,8 @@ public class Bridge {
+         return this.savedCalls.get(callbackId);
+     }
+ 
+-    PluginCall getPluginCallForLastActivity() {
++    /** Consume the restored call from a plugin with custom activity-result handling. */
++    public PluginCall getPluginCallForLastActivity() {
+         PluginCall pluginCallForLastActivity = this.pluginCallForLastActivity;
+         this.pluginCallForLastActivity = null;
+         return pluginCallForLastActivity;
+diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java b/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
+index 8b9de88493bd3269247cffbe9d290fc381fc088f..878cb509bd4046e920d6db1b8c1721ea13a7199f 100644
+--- a/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
++++ b/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
+@@ -211,9 +211,14 @@ public class SystemBars extends Plugin {
+                             getBottomInset(systemBarsInsets, keyboardVisible)
+                         )
+                     )
++                    // The padding above already resizes the WebView for the IME. Passing the IME
++                    // insets on makes the WebView shrink its visual viewport by the keyboard height
++                    // a second time while the keyboard opens, and Chrome scrolls the focused field
++                    // into that too-small viewport, behind fixed headers.
++                    .setInsets(WindowInsetsCompat.Type.ime(), Insets.NONE)
+                     .build();
+ 
+-                injectSafeAreaCSS(newInsets);
++                injectSafeAreaCSS(newInsets, keyboardVisible);
+ 
+                 return newInsets;
+             }
+@@ -233,19 +238,18 @@ public class SystemBars extends Plugin {
+                 .setInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout(), Insets.of(0, 0, 0, 0))
+                 .build();
+ 
+-            injectSafeAreaCSS(newInsets);
++            injectSafeAreaCSS(newInsets, keyboardVisible);
+ 
+             return newInsets;
+         });
+     }
+ 
+-    private void injectSafeAreaCSS(WindowInsetsCompat insets) {
++    private void injectSafeAreaCSS(WindowInsetsCompat insets, boolean keyboardVisible) {
+         if (!INSETS_HANDLING_CSS.equals(insetsHandling)) {
+             return;
+         }
+ 
+         Insets systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+-        boolean keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+ 
+         // Convert pixels to density-independent pixels
+         float density = getActivity().getResources().getDisplayMetrics().density;
+diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
+index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce1207a1d3e9a 100644
+--- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
++++ b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
+@@ -219,7 +219,9 @@ public class HttpRequestHandler {
+         output.put("status", statusCode);
+         output.put("headers", buildResponseHeaders(connection));
+         output.put("url", connection.getURL());
+-        output.put("data", readData(connection, responseType));
++        // HEAD and empty HTTP errors have no error stream. Reading the normal
++        // stream would throw and discard the HTTP status (e.g. a YouTube 404).
++        output.put("data", statusCode >= 400 && connection.getErrorStream() == null ? "" : readData(connection, responseType));
+ 
+         InputStream errorStream = connection.getErrorStream();
+         if (errorStream != null) {
+@@ -241,6 +243,12 @@ public class HttpRequestHandler {
+         InputStream errorStream = connection.getErrorStream();
+         String contentType = connection.getHeaderField("Content-Type");
+ 
++        // Text callers parse JSON themselves. Parsing it here as well rebuilds
++        // the whole object graph on the WebView's UI thread for every response.
++        if (responseType == ResponseType.TEXT) {
++            return readStreamAsString(errorStream != null ? errorStream : connection.getInputStream());
++        }
++
+         if (errorStream != null) {
+             if (isOneOf(contentType, MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON)) {
+                 return parseJSON(readStreamAsString(errorStream));
+@@ -423,6 +431,9 @@ public class HttpRequestHandler {
+             .openConnection();
+ 
+         CapacitorHttpUrlConnection connection = connectionBuilder.build();
++        // Publish the connection before writing a request body opens it, so
++        // callers can disconnect a request stuck in its TLS handshake.
++        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+ 
+         if (null != bridge && !isDomainExcludedFromSSL(bridge, url)) {
+             connection.setSSLSocketFactory(bridge);
+@@ -437,7 +448,6 @@ public class HttpRequestHandler {
+             }
+         }
+ 
+-        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+         connection.connect();
+ 
+         JSObject response = buildResponse(connection, responseType);

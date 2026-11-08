@@ -1,160 +1,224 @@
 .pure-material-slider {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   inline-size: 380px;
-  color: rgb(var(--primary-text-color) 0.87);
+  color: var(--primary-text-color);
   font-size: 16px;
   line-height: 1.5;
   padding: 5px;
-  margin-block: 12px;
+  margin-block: var(--settings-control-margin, 12px);
   margin-inline: 8px;
+}
+
+/* The current value is part of the label, so the text width changes while the
+   slider moves. Giving the label and its icons their own row keeps the icons
+   beside the text. Performance badges wrap with the label, letting the track
+   move down with the content instead of running through it. */
+.labelRow {
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+}
+
+.labelContent {
+  min-inline-size: 0;
+}
+
+/* Equal-width digits keep the value stable as the slider moves. */
+.label {
+  min-inline-size: 0;
+  overflow-wrap: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.value {
+  display: inline-grid;
+  white-space: nowrap;
+}
+
+.value::after {
+  content: attr(data-width-value);
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.valueText {
+  grid-area: 1 / 1;
+}
+
+.sliderControl {
+  --slider-track-height: 12px;
+  --slider-handle-height: 28px;
+  --slider-handle-width: 4px;
+  --slider-handle-gap: 4px;
+  --slider-stop-size: 4px;
+  --slider-inactive-color: var(--slider-track-color, color-mix(in srgb, var(--primary-text-color) 16%, var(--card-bg-color)));
+
+  /* Native handles travel within the track, inset by half their width. */
+  --slider-position: calc(var(--slider-progress) + var(--slider-handle-width) * (0.5 - var(--slider-fraction)));
+
+  display: block;
+  position: relative;
+  inline-size: 100%;
+}
+
+.sliderTrack {
+  position: absolute;
+  inset-block-start: 50%;
+  block-size: var(--slider-track-height);
+
+  /* Inner corners beside the handle match its rounding. */
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
+  transform: translateY(-50%);
+  pointer-events: none;
+  overflow: clip;
+}
+
+.activeTrack {
+  inset-inline-start: 0;
+  inline-size: max(0px, calc(var(--slider-position) - var(--slider-handle-width) / 2 - var(--slider-handle-gap)));
+  border-start-start-radius: calc(var(--slider-track-height) / 2 * var(--ui-roundness));
+  border-end-start-radius: calc(var(--slider-track-height) / 2 * var(--ui-roundness));
+  background-color: var(--primary-color);
+}
+
+.inactiveTrack {
+  inset-inline-end: 0;
+  inline-size: max(0px, calc(100% - var(--slider-position) - var(--slider-handle-width) / 2 - var(--slider-handle-gap)));
+  border-start-end-radius: calc(var(--slider-track-height) / 2 * var(--ui-roundness));
+  border-end-end-radius: calc(var(--slider-track-height) / 2 * var(--ui-roundness));
+  background-color: var(--slider-inactive-color);
+}
+
+.inactiveTrack::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: calc((var(--slider-track-height) - var(--slider-stop-size)) / 2);
+  inline-size: var(--slider-stop-size);
+  block-size: var(--slider-stop-size);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background-color: var(--primary-color);
 }
 
 .input {
   appearance: none;
   position: relative;
-  inset-block-start: 24px;
   display: block;
-  margin-block: 0 -36px;
-  margin-inline: 0;
+  margin: 0;
   inline-size: 100%;
   block-size: 36px;
   background-color: transparent;
   cursor: pointer;
 }
 
-/* Without Span */
-.input:last-child {
-  position: static;
-  margin: 0;
+.selectTooltip {
+  margin-inline-start: 6px;
+  vertical-align: middle;
 }
 
-.label {
-  display: inline-block;
-  margin-block-end: 36px;
-}
-/* stylelint-disable-next-line a11y/no-outline-none */
-.input:focus {
-  outline: none;
+.input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .input:disabled {
-  cursor: default;
+  cursor: not-allowed;
+}
+
+.sliderControl:has(.input:disabled) {
   opacity: 0.38;
 }
 
-.input:disabled + .label {
+.pure-material-slider:has(.input:disabled) .label {
   opacity: 0.38;
+}
+
+.pure-material-slider:has(.input[data-gamepad-active='true']) {
+  border-radius: var(--shape-corner-extra-small);
+  background-color: var(--accent-color-opacity2);
+  box-shadow: inset 0 0 0 2px var(--primary-color);
 }
 
 .input::-webkit-slider-runnable-track {
-  margin-block: 17px;
-  margin-inline: 0;
-  border-radius: 1px;
   inline-size: 100%;
-  block-size: 2px;
-  background-color: var(--accent-color-opacity4);
+  block-size: var(--slider-track-height);
+  background-color: transparent;
 }
 
 .input::-webkit-slider-thumb {
   appearance: none;
   border: 0;
-  border-radius: 50%;
-  block-size: 2px;
-  inline-size: 2px;
-  background-color: var(--accent-color);
-  transform: scale(6, 6);
-  transition: box-shadow 0.2s;
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
+  block-size: var(--slider-handle-height);
+  inline-size: var(--slider-handle-width);
+  margin-block-start: calc((var(--slider-track-height) - var(--slider-handle-height)) / 2);
+  background-color: var(--primary-color);
+  transition: background-color var(--motion-fast-effects);
 }
 
-.input:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity2);
+.input:not(:disabled):is(:hover, :focus-visible)::-webkit-slider-thumb {
+  background-color: rgb(from var(--primary-color-hover) r g b / 100%);
 }
 
-.input:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4) !important;
-}
-
-.input:disabled::-webkit-slider-thumb {
-  background-color: #000;
-  color: #fff; /* Safari */
-  box-shadow: 0 0 0 1px #fff !important;
-  transform: scale(4, 4);
-}
-
-.pure-material-slider:hover > .input::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-.pure-material-slider:hover > .input:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-.input:disabled::-webkit-slider-runnable-track {
-  background-color: rgb(0 0 0 / 38%);
+/* Custom themes may use translucent state colors, so draw them opaque to
+   keep the handle visible. */
+.input:not(:disabled):active::-webkit-slider-thumb {
+  background-color: rgb(from var(--primary-color-active) r g b / 100%);
 }
 
 .input::-moz-range-track {
-  margin-block: 0;
-  margin: 17px;
-  border-radius: 1px;
   inline-size: 100%;
-  block-size: 2px;
-  background-color: var(--accent-color-opacity4);
+  block-size: var(--slider-track-height);
+  background-color: transparent;
 }
 
 .input::-moz-range-thumb {
-  appearance: none;
   border: 0;
-  border-radius: 50%;
-  block-size: 2px;
-  inline-size: 2px;
-  background-color: var(--accent-color);
-  transform: scale(6, 6);
-  transition: box-shadow 0.2s;
+  border-radius: calc(var(--slider-handle-width) / 2 * var(--ui-roundness));
+  block-size: var(--slider-handle-height);
+  inline-size: var(--slider-handle-width);
+  background-color: var(--primary-color);
+  transition: background-color var(--motion-fast-effects);
 }
 
 .input::-moz-range-progress {
-  border-radius: 1px;
-  block-size: 2px;
-  background-color: var(--accent-color);
+  background-color: transparent;
 }
 
-.input:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity2);
+.input:not(:disabled):is(:hover, :focus-visible)::-moz-range-thumb {
+  background-color: rgb(from var(--primary-color-hover) r g b / 100%);
 }
 
-.input:active::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4) !important;
+.input:not(:disabled):active::-moz-range-thumb {
+  background-color: rgb(from var(--primary-color-active) r g b / 100%);
 }
 
-.input:disabled::-moz-range-thumb {
-  background-color: #000;
-  box-shadow: 0 0 0 1px #fff !important;
-  transform: scale(4, 4);
+@media (any-pointer: coarse), (width <= 680px) {
+  .sliderControl {
+    --slider-track-height: 16px;
+    --slider-handle-height: 44px;
+    --slider-handle-gap: 6px;
+  }
+
+  .input {
+    block-size: 48px;
+  }
 }
 
-.pure-material-slider:hover > .input:hover::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-.pure-material-slider:hover > input:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-.input:disabled::-moz-range-track {
-  background-color: rgb(0 0 0 / 38%);
-}
-
-.input:disabled::-moz-range-progress {
-  background-color: rgb(0 0 0 / 87%);
-}
-
-.input::-moz-focus-outer {
-  border: 0;
-}
-
-@media only screen and (width <= 800px) {
+@media only screen and (width <= 680px) {
   .pure-material-slider {
     inline-size: 100%;
   }
+}
+
+/* The global reduced motion rule does not reach the thumb pseudo-elements. */
+:root[data-reduced-motion='reduce'] .input::-webkit-slider-thumb {
+  transition: none;
+}
+
+:root[data-reduced-motion='reduce'] .input::-moz-range-thumb {
+  transition: none;
 }

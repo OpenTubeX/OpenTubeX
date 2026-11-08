@@ -1,0 +1,158 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+/* Keep the floating fullscreen actions next to the video instead of under the panel. */
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions {
+  --fullscreen-actions-inline-end: calc(var(--side-panel-width) + 24px);
+}
+
+/* At high UI scales a dock can fill the viewport; keep actions below its content. */
+@media (width <= 260px) {
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen) {
+    --mobile-fullscreen-actions-block-end: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
+  }
+
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen) .fullscreenActions {
+    --fullscreen-actions-inset: 12px;
+
+    inset-block-end: var(--mobile-fullscreen-actions-block-end);
+    max-block-size: 50px;
+  }
+
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen)[data-action-dock-visible='true'] {
+    --fullscreen-actions-footer-space: var(--mobile-fullscreen-actions-block-size, 50px);
+  }
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen:is(:fullscreen, .fullWindow) > .fullscreenActions {
+  inset-block-end: calc(70% + var(--mobile-fullscreen-actions-block-end, 82px));
+  max-block-size: calc(30% - var(--mobile-fullscreen-actions-block-end, 82px) - max(52px, var(--sponsorblock-notice-block-size, 0px) + 16px));
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+  bottom: min(
+    calc(70% + var(--sponsorblock-notice-bottom)),
+    calc(100% - var(--sponsorblock-notice-block-size, 0px) - 8px)
+  );
+}
+
+/* Short portrait video areas cannot fit both playback controls and panel actions. */
+@media (height <= 700px) {
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen:is(:fullscreen, .fullWindow) > .fullscreenActions {
+    inset-block-end: max(12px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    max-block-size: 50px;
+    z-index: 9;
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen[data-action-dock-visible='true'] {
+    /* The shared sheet reserves the footer for every panel, including the queue. */
+    /* stylelint-disable-next-line length-zero-no-unit */
+    --fullscreen-actions-footer-space: 0px;
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen[data-action-dock-visible='true'] :deep(.fullscreenDockSheet) {
+    padding-block-end: calc(62px + max(12px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+    z-index: 9;
+  }
+}
+
+/* Keep SponsorBlock notices inside the video area when a dock is open. */
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
+  inset-inline-end: calc(var(--side-panel-width) + 2%);
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+  inset-inline-end: min(
+    calc(var(--side-panel-width) + 2%),
+    calc(100% - var(--sponsorblock-notice-inline-size, 0px) - 8px)
+  );
+}
+
+/*
+  The control bar ends with the last visible button the user kept. Theatre and
+  full window buttons are hidden in fullscreen, and theatre mode in full window.
+*/
+/* stylelint-disable selector-max-compound-selectors */
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button)))),
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child),
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button)))),
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
+  position: relative;
+  overflow: visible;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button))))::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button))))::before {
+  /*
+    Shaka keeps the bottom controls at 98% width, so the outer edges can reach
+    the container click handler instead of the nearest edge button.
+  */
+  content: '';
+  position: absolute;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before {
+  inset: -8px -8px -8px -2vw;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button))))::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button))))::before {
+  inset: -8px -2vw -8px -8px;
+}
+/* stylelint-enable selector-max-compound-selectors */
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hideVideoTitleWhenPaused
+:deep(.playerFullscreenTitleOverlay) {
+  transition-duration: 150ms, 150ms;
+  transition-delay: 0s, 0s;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hideFullscreenActionsWhenPaused
+.fullscreenActions {
+  transition-duration: 150ms, 250ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hidePlayerControlsWhenPaused
+  :is(
+    :deep(.shaka-scrim-container),
+    :deep(.shaka-controls-button-panel),
+    :deep(.shaka-seek-bar-container),
+    :deep(.shaka-play-button-container),
+    :deep(.shaka-fast-forward-container),
+    :deep(.shaka-rewind-container)
+  ) {
+  transition-duration: 150ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused.hidePlayerControlsWhenPaused :deep(.shaka-controls-button-panel) {
+  --ft-control-fade-duration: 150ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hideVideoTitleWhenPaused
+:deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hideFullscreenActionsWhenPaused
+.fullscreenActions,
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-scrim-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-controls-button-panel),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-seek-bar-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-play-button-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-fast-forward-container),
+.ftVideoPlayer:is(:fullscreen, .fullWindow).playerPaused:not(.pausedInterfaceRevealed).hidePlayerControlsWhenPaused
+:deep(.shaka-rewind-container) {
+  opacity: 0;
+  pointer-events: none;
+}

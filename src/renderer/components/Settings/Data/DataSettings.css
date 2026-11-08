@@ -1,0 +1,56 @@
+.box {
+  justify-content: center;
+}
+
+.exportTypeButtons {
+  align-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.advancedDataSettings {
+  margin-block-start: 24px;
+}
+
+.importFormatsHint {
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+  margin-block: 0.25em 1em;
+  padding-inline: 1.5em;
+  text-align: center;
+}
+
+.takeoutSelection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1em;
+  inline-size: min(100%, 36rem);
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding: 1.5em;
+}
+
+.takeoutSelection p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.takeoutSelectionCentered {
+  align-items: center;
+  margin-block: auto;
+  text-align: center;
+}
+
+.takeoutSelectionCentered .pure-checkbox {
+  text-align: start;
+}
+
+.importHelpLink:any-link {
+  color: var(--primary-text-color);
+  text-decoration: underline;
+}
+
+.takeoutSelectionImport {
+  inline-size: min(100%, 48rem);
+}

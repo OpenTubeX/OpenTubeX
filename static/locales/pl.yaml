@@ -13,7 +13,7 @@ Toggle Developer Tools: 'Włącz/wyłącz narzędzia deweloperskie'
 Actual size: 'Rzeczywisty rozmiar'
 Zoom in: 'Powiększ'
 Zoom out: 'Zmniejsz'
-Toggle fullscreen: 'Przełącz na cały ekran'
+Toggle fullscreen: 'Przełącz na pełny ekran'
 Window: 'Okno'
 Minimize: 'Zminimalizuj'
 Close: 'Zamknij'
@@ -38,7 +38,8 @@ Global:
     Watching Count: 1 oglądający | {count} oglądających
     Like Count: Jedno polubienie | {count} polubie(ń/nia)
     Comment Count: Jeden komentarz | {count} komentarz(e/y)
-    Replies Remaining: "{' '}(pozostało 1) | {' '}(pozostało {count})"
+  Ambient Mode: Tryb otoczenia (ambientowy)
+  New: Nowe
 Search / Go to URL: 'Szukaj / Przejdź do adresu URL'
   # In Filter Button
 Search Filters:
@@ -93,11 +94,24 @@ Subscriptions:
   Load More Videos: Załaduj więcej filmów
   Error Channels: Kanały z błędami
   Disabled Automatic Fetching: Wyłączyłeś automatyczne pobieranie subskrypcji. Odśwież subskrypcje, by je zobaczyć.
-  Empty Channels: Twoje subskrypcje nie mają obecnie żadnych filmów.
+  Empty Channels: Twoje zasubskrybowane kanały nie mają obecnie żadnych filmów.
   All Subscription Tabs Hidden: Wszystkie karty subskrypcji są pochowane. Aby je zobaczyć, proszę odznaczyć ich ukrycie w podgrupie „{subsection}” grupy „{settingsSection}”.
   Subscriptions Tabs: Karty subskrypcji
   Load More Posts: Załaduj więcej wpisów
   Empty Posts: Zasubskrybowane przez Ciebie kanały nie mają żadnych wpisów.
+  Refreshing Subscription Videos: Odświeżanie subskrypcji Filmów
+  Refreshing Subscription Shorts: Odświeżanie subskrypcji Shortów
+  Refreshing Subscription Live Streams: Odświeżanie subskrypcji transmisji na żywo
+  Refreshing Subscription Posts: Odświeżanie subskrypcji wpisów
+  New Content: Nowe
+  New Feed Refresh Warning Title: Odświeżyć wszystkie subskrypcje?
+  New Feed Refresh Warning: Odświeżanie wszystkich typów treści bez RSS dla {count} subskrypcji może zająć dużo czasu. Czy chcesz kontynuować?
+  New Since Last Refresh: Nowości od ostatniego odświeżenia
+  Mark All as Seen: Oznacz wszystkie jako widziane
+  No New Content: Brak nowych treści.
+  Mark As Seen: Oznacz jako widziane
+  Newest First: Najnowsze na początku
+  Oldest First: Najstarsze na początku
   Posts:
     RSS Message: Serwis YouTube nie udostępnia kanałów RSS dla postów. Wyłącz opcję " {rssSetting}" , aby wyświetlić posty, lub włącz opcję " {hideSetting}" , aby ukryć tę zakładkę.
 Trending:
@@ -190,9 +204,14 @@ User Playlists:
   The playlist has been successfully exported: Lista odtwarzania została pomyślnie wyeksportowana
   TotalTimePlaylist: 'Całkowita długość: {duration}'
   Export list of URLs: Eksportuj listę adresów URL
-  Move Video to the Top: Przenieś film na początek
-  Move Video to the Bottom: Przenieś film na koniec
+  Quick Bookmark Icon: Ikona szybkiej zakładki
+  Save to: Zapisz do…
+  Move Video to the Top: Przenieś wideo na górę
+  Move Video to the Bottom: Przesuń wideo na dół
   This playlist is private or does not exist.: Ta playlista jest prywatna albo nie istnieje.
+  Custom Emoji: Niestandardowe emoji
+  Choose Image: Wybierz obraz
+  Use Bookmark Icon: Użyj ikony zakładki
 History:
   # On History Page
   History: 'Historia'
@@ -203,6 +222,20 @@ History:
   Case Sensitive Search: Rozróżniaj wielkość liter
   DateOldestHistory: Daty obejrzenia (od najdawniejszej)
   DateNewestHistory: Daty obejrzenia (od najświeższej)
+  Select History Age: Wybierz, jak stary musi być wpis, aby został usunięty.
+  Delete Entries Older Than: Usuwaj wpisy starsze niż
+  Number of Days: Liczba dni
+  History Cleanup Warning: Spowoduje to trwałe usunięcie pasujących wpisów w historii oglądania.
+  1 Day: 1 dzień
+  1 Week: 1 tydzień
+  1 Month: 1 miesiąc
+  3 Months: 3 miesiące
+  1 Year: 1 rok
+  Custom: Własny okres
+  History Older Than Days Removed: Historia oglądania starsza niż 1 dzień została usunięta | Historia oglądania starsza niż {days} dni została usunięta
+  Mark All As Watched: Oznacz wszystkie jako obejrzane
+  Mark All As Watched Confirmation: Czy na pewno chcesz oznaczyć wszystkie filmy w historii jako obejrzane?
+  All History Marked as Watched: Wszystkie filmy w Twojej historii zostały oznaczone jako obejrzane
 Settings:
   # On Settings Page
   Settings: 'Ustawienia'
@@ -247,10 +280,56 @@ Settings:
     Auto Load Next Page:
       Tooltip: Wczytuj kolejne strony oraz komentarze automatycznie.
       Label: Automatycznie wczytaj kolejną stronę
-    Open Deep Links In New Window: Odnośniki URL przekazane do FreeTube otwieraj w nowym oknie
+    Open Deep Links In New Window: Odnośniki URL przekazane do OpenTubeX otwieraj w nowym oknie
     Minimize to system tray: Minimalizuj do zasobnika systemowego
+    New Tab Position:
+      New Tab Position: Położenie Nowej Karty
+      At the end: Na końcu
+      After current tab: Za aktywną kartą
+      After current tab in opened order: Po bieżącej karcie, w kolejności otwierania
+    Startup Behavior:
+      Startup Behavior: Przy uruchomieniu
+      Load all tabs: Załaduj wszystkie karty
+      Load last active tab: Załaduj tylko aktywną kartę
+      Start with an empty session: Uruchom nową sesję
+      Load previously loaded tabs: Załaduj poprzednio załadowane karty
+    Avoid translation:
+      Avoid translation: Zachowaj oryginalny tekst
+      Disabled: Wyłączone
+      Entire App: Cała aplikacja
+      Watch Only: Tylko na stronie odtwarzacza
+    Confirm Before Closing App: Potwierdzaj zamknięcie OpenTubeX
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Dodatkowy przycisk akcji na miniaturze
+      None: Żaden
+      Mark as Watched: Oznacz jako obejrzany
+      Copy YouTube Link: Skopiuj odnośnik do YouTube
+      Open in YouTube: Otwórz na stronie YouTube
+    Remember Tab Navigation History: Zapamiętaj historię przeglądania na każdej karcie
+    Reduced Motion:
+      Reduced Motion: Ogranicz animacje
+      System: systemowe
+      Force On: wymuś włączenie
+      Force Off: wymuś wyłączenie
+    Show Tab Icons: Pokaż ikony kart
+    Tab Close Focus:
+      Tab Close Focus: Po zamknięciu karty
+      Previous tab: Przełącz na poprzednią kartę
+      Next tab: Przełącz na następną kartę
+    Stream Extraction Method:
+      Stream Extraction Method: Metoda ekstrakcji strumienia
+      yt-dlp: yt-dlp
+      Built-in: Wbudowany
+    Update Relative Timestamps: Aktualizuj względne znaczniki czasu
+    Confirm Before: Potwierdź przed…
+    Confirmation Options:
+      Closing App: Zamknięciem OpenTubeX
+      Closing Window: Zamknięciem okna z wieloma kartami
+      Closing Tabs: Zamknięciem wielu kart
+      Loading Tabs: Ładowaniem wielu kart
+      Unloading Tabs: Usypianiem wielu kart
   Theme Settings:
-    Theme Settings: 'Wygląd'
+    Theme Settings: 'Motyw'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
     Base Theme:
       Base Theme: 'Bazowy motyw'
@@ -275,6 +354,7 @@ Settings:
       Everforest Dark Low: Everforest Lekko Ciemny
       Everforest Light Medium: Everforest Jasny
       Catppuccin Latte: Catppuccin Latte
+      Custom: Niestandardowe
     Main Color Theme:
       Main Color Theme: 'Główny kolor motywu'
       Red: 'Czerwony'
@@ -368,7 +448,88 @@ Settings:
     Expand Side Bar by Default: Domyślnie rozwiń pasek boczny
     Disable Smooth Scrolling: Wyłącz płynne przewijanie
     Hide Side Bar Labels: Schowaj etykiety paska bocznego
-    Hide FreeTube Header Logo: Schowaj logo FreeTube z paska górnego
+    Hide OpenTubeX Header Logo: Schowaj logo OpenTubeX z paska górnego
+    Hide Side Bar on Watch Pages: Ukryj pasek boczny na stronie odtwarzacza
+    Thumbnail Size: Rozmiar miniatury
+    UI Roundness: Zaokrąglenie elementów UI
+    Always Show Scrollbars: Zawsze pokazuj paski przewijania
+    Animation Speed: Szybkość animacji
+    Show Tab Icons: Pokaż ikony kart
+    Use Fixed Tab Width: Użyj stałej szerokości kart w trybie poziomym
+    Tab Width: Szerokość karty
+    Show Toast Timeout Indicator: Pokaż wskaźnik czasu powiadomień
+    Show Progress as Notification: Pokaż postęp jako powiadomienie
+    Operation in Progress: Operacja w toku
+    Toast Position:
+      Toast Position: Pozycja powiadomienia
+      Bottom Left: Dolny lewy
+      Bottom Center: Dolny środek
+      Bottom Right: Dolny prawy
+      Top Left: Górny lewy
+      Top Center: Górny środek
+      Top Right: Górny prawy
+    Icon Pack:
+      Icon Pack: Pakiet ikon
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Czcionka aplikacji
+      System Default: Domyślna systemowa
+      Unable to Load: Nie można załadować zainstalowanych czcionek systemowych
+    Light Theme: Jasny motyw
+    Dark Theme: Ciemny motyw
+    Custom Theme:
+      Create Custom Theme: Utwórz niestandardowy motyw
+      Edit Custom Theme: Edytuj niestandardowy motyw
+      Custom Theme Creator: Kreator niestandardowych motywów
+      Theme Name: Nazwa motywu
+      Is Dark Theme: Ciemny motyw
+      Based On: Na podstawie
+      Import Theme: Importuj motyw
+      Export Theme: Eksportuj motyw
+      Delete Theme: Usuń motyw
+      Delete Theme Confirmation: Usunąć „{name}”? Tego nie będzie można już cofnąć.
+      Save and Apply: Zapisz i zastosuj
+      Discard Changes: Odrzuć zmiany
+      Reset Colors: Zresetuj kolory i efekty
+      Theme File: Plik motywu OpenTubeX
+      Theme Saved: Niestandardowy motyw został zapisany i zastosowany
+      Theme Imported: Motyw zaimportowany do edytora
+      Theme Exported: Motyw wyeksportowany
+      Theme Deleted: Motyw niestandardowy został usunięty
+      Unable to Load: Nie można załadować niestandardowego motywu
+      Unable to Save: Nie można zapisać niestandardowego motywu
+      Unable to Export: Nie można wyeksportować niestandardowego motywu
+      Unable to Delete: Nie można usunąć niestandardowego motywu
+      Invalid Theme File: Nieprawidłowy plik motywu niestandardowego
+      Colors:
+        Main text: Tekst główny
+        Secondary text: Tekst pomocniczy
+        Subtle text: Subtelny tekst
+        Borders and dividers: Granice i podziały
+        Subtle surfaces and indicators: Subtelne powierzchnie i wskaźniki
+        Title text: Tekst tytułowy
+        Logo icon: Ikona logo
+        Logo text: Tekst logo
+        Selected text background: Tło zaznaczonego tekstu
+        Selected text: Zaznaczony tekst
+        Text and icons on destructive actions: Tekst i ikony dotyczące działań destrukcyjnych
+    Move Downloads to App Header: Przenieś „pobrane” do nagłówka aplikacji
+    Move Settings to App Header: Przenieś „ustawienia” do nagłówka aplikacji
+    Scrollbar Width: Szerokość paska przewijania
+    Load Missing Tab Icons: Załaduj brakujące ikony kart
+    Loading Missing Tab Icons: Ładowanie brakujących ikon kart…
+    No Missing Tab Icons: Wszystkie obsługiwane ikony kart są już załadowane
+    Loaded Tab Icons: 'Załadowano brakującą ikonę karty: {count} | Załadowano brakujące ikony kart: {count}'
+    Loaded Tab Icons With Failures: Załadowano {loaded} ikony kart; {failed} nie udało się załadować | Załadowano {loaded} ikon kart; {failed} nie udało się załadować
+    Show Tab Previews: Pokazuj podglądy kart
+    Tab Layout:
+      Tab Layout: Układ kart
+      Horizontal Top: Poziomy na górze
+      Horizontal Bottom: Poziomy na dole
+      Vertical Left: Pionowy po lewej
+      Vertical Right: Pionowy po prawej
+    Use Grid Player Menu: Użyj menu odtwarzacza w układzie siatki
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -378,7 +539,7 @@ Settings:
     Autoplay Playlists: 'Autoodtwarzanie playlist'
     Enable Theatre Mode by Default: 'Domyślnie włącz tryb kinowy'
     Default Volume: 'Domyślna głośność'
-    Default Playback Rate: 'Domyślna szybkość odtwarzania'
+    Default Playback Rate: 'Domyślna prędkość odtwarzania'
     Default Media Format:
       Dash Formats: 'Formaty DASH'
       Legacy Formats: 'Stare formaty'
@@ -400,9 +561,9 @@ Settings:
     Scroll Volume Over Video Player: Kontroluj głośność kółkiem myszy na obszarze odtwarzacza
     Display Play Button In Video Player: Pokaż przycisk odtwarzania na odtwarzaczu
     Fast-Forward / Rewind Interval: Interwał przewijania
-    Scroll Playback Rate Over Video Player: Kontroluj szybkość odtwarzania kółkiem myszy na obszarze odtwarzacza
-    Max Video Playback Rate: Maksymalna szybkość odtwarzania
-    Video Playback Rate Interval: Przeskoki w wyborze prędkości odtwarzania
+    Scroll Playback Rate Over Video Player: Kontroluj prędkość odtwarzania kółkiem myszy na obszarze odtwarzacza
+    Max Video Playback Rate: Maksymalna prędkość odtwarzania
+    Video Playback Rate Interval: Przeskoki w prędkości odtwarzania
     Screenshot:
       Format Label: Format zrzutu
       Quality Label: Jakość zrzutu
@@ -419,7 +580,7 @@ Settings:
         Empty File Name: Pusta nazwa pliku
       Enable: Włącz zrzuty ekranu
       Mode: Tryb - zrzut ekranu
-    Enter Fullscreen on Display Rotate: Przyłącz na cały ekran przy obrocie wyświetlacza
+    Enter Fullscreen on Display Rotate: Przełącz na pełny ekran przy obrocie wyświetlacza
     Skip by Scrolling Over Video Player: Przewijaj film kółkiem myszy na obszarze odtwarzacza
     Autoplay Interruption Timer: Czas do przerwania autoodtwarzania
     Default Viewing Mode:
@@ -427,18 +588,104 @@ Settings:
       Picture in Picture: Obraz w obrazie
       External Player: Zewnętrzny odtwarzacz ({externalPlayerName})
       Default Viewing Mode: Domyślny tryb odtwarzania
-      Full Screen: Cały ekran
+      Full Screen: Pełny ekran
       Full Window (Always On): Pełne okno (zawsze włączone)
       Full Screen (Always On): Pełny ekran (zawsze włączony)
-      Tooltip: Większość z domyślnych trybów wyświetlania jest stosowana na początku każdego seansu. Zmiany zastosowane podczas seansu obowiązują do jego końca. Tryby „zawsze włączone” są stosowane za każdym razem, gdy przełączysz się do nowego filmu, cofając każdą zmianę trybu wyświetlania zastosowaną w poprzednim filmie.
+      Tooltip: Większość domyślnych trybów oglądania jest stosowana tylko na początku każdej sesji oglądania. Zmiany wprowadzone w trakcie sesji są zachowywane do jej zakończenia. Tryby oglądania „zawsze włączony” są stosowane za każdym razem, gdy przełączasz się na nowy film, niezależnie od zmian trybu oglądania dokonanych podczas oglądania poprzedniego filmu.
+    Auto Picture in Picture on Tab Change: Automatycznie włączaj obraz w obrazie podczas przełączania kart
+    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do prędkości odtwarzania
+    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do prędkości odtwarzania
+    Remember Volume: Zapamiętaj głośność odtwarzania
+    Remember Playback Speed Per Channel: Pamiętaj prędkość odtwarzania na każdym kanale
+    Auto Update Channel Playback Speed: Zapamiętuj automatycznie przy każdej zmianie
+    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru prędkości odtwarzania
+    Manage Channel Playback Speeds: Zarządzaj zapisanymi prędkościami odtwarzania
+    Channel Playback Speed Manager: Menedżer zarządzania prędkościami odtwarzania
+    No Saved Playback Speeds: Brak zapisanych prędkości odtwarzania
+    Remember Video Quality Per Channel: Zapamiętuj rozdzielczość obrazu na każdym kanale
+    Auto Update Channel Video Quality: Zapamiętuj automatycznie przy każdej zmianie
+    Manage Channel Video Qualities: Zarządzaj zapisanymi ustawieniami rozdzielczości wideo
+    Channel Video Quality Manager: Menedżer zarządzania zapisanymi rozdzielczościami wideo
+    No Saved Video Qualities: Brak zapisanych ustawień rozdzielczości
+    Playback Speed: Prędkość odtwarzania
+    Scroll Mini Player:
+      Scroll Mini Player: Mini odtwarzacz podczas przewijania
+      When Scrolling Down: Utrzymuj mini odtwarzacz na widoku podczas przewijania w dół
+    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru prędkości odtwarzania
+    Quick Playback Speed Bar Manager: Pasek wyboru prędkości odtwarzania
+    Add Playback Speed: Dodaj prędkość odtwarzania
+    Reset Quick Playback Speed Bar: Przywróć ustawienia domyślne
+    Playback Speed Name: Nazwa
+    Edit Playback Speed Name: Edytuj nazwę prędkości odtwarzania
+    Use Automatic Playback Speed Name: Użyj automatycznej nazwy prędkości odtwarzania
+    Reorder Playback Speed: Przeciągnij, aby zmienić prędkość odtwarzania
+    Caption Appearance:
+      Caption Appearance: Wygląd napisów
+      Captions: Napisy
+      Preferred Language: Preferowany język napisów
+      Application Language: Język aplikacji
+      Enable Translations: Włącz automatyczne tłumaczenie napisów
+      Text Color: Kolor tekstu
+      Background Color: Kolor tła
+      Background Opacity: Przezroczystość tła
+      Font Size: Rozmiar czcionki
+      Vertical Position: Pozycja pionowa
+      Edge Color: Kolor krawędzi
+      Anchor:
+        Anchor: Położenie
+        Top Left: Górny lewy
+        Top Center: Górny środek
+        Top Right: Górny prawy
+        Bottom Left: Dolny lewy
+        Bottom Center: Dolny środek
+        Bottom Right: Dolny prawy
+      Edge Style:
+        Edge Style: Styl krawędzi
+        None: Żaden
+        Outline: Kontur
+        Drop Shadow: Rzucający cień
+      Reset: Zresetuj wygląd napisów
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatycznie przejdź w tryb „obraz w obrazie”
+      On Tab Change: Podczas przełączania kart
+      On Window Minimize: Podczas minimalizowania okna
+      On Window Hide: Gdy okno traci skupienie lub jest przełączane
+      Wayland Minimize Unsupported: Wayland nie zgłasza aplikacjom minimalizacji okna, więc ten wyzwalacz jest niedostępny. Zamiast tego użyj opcji „Gdy okno traci skupienie lub jest przełączane”, która obejmuje również minimalizowanie.
+    Skip Silence: Pomijanie ciszy
+    Show Skip Silence Toggle: Pokaż przełącznik pomijania ciszy
+    Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
+    Automatically Open Chapters: Automatycznie otwieraj rozdziały
+    Use YouTube-style Shorts: Użyj stylu Filmów Short z YouTube
+    Loop Shorts: Zapętlaj filmy short
+    Enable Video Zoom: Włącz powiększanie wideo
+    Voice-over Translation:
+      Title: Tłumaczenie głosowe
+      Enable: Włącz tłumaczenie głosowe
+      Prepare in Background: Rozpocznij przygotowywanie tłumaczeń głosowych w tle
+      Background Preparation Tooltip: Wysyła identyfikator, czas trwania i wybrany język bieżącego filmu do usługi tłumaczeniowej natychmiast po załadowaniu obsługiwanego filmu.
+      Language: Język tłumaczenia głosowego
+      Supported Source Languages: 'Obsługiwane języki źródłowe: rosyjski, angielski, chiński, koreański, litewski, łotewski, arabski, francuski, włoski, hiszpański, niemiecki i japoński.'
+      Voice Volume: Głośność przetłumaczonego głosu
+      Original Volume: Głośność oryginalnego dźwięku
+      Russian: rosyjski
+      English: angielski
+      Kazakh: kazachski
+    Parallel Segment Loading: Równoległe ładowanie segmentów
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
-    Fetch Automatically: Automatycznie odświeżaj subskrypcje
     Confirm Before Unsubscribing: Uniknij przypadkowego usunięcia subskrypcji
 
-    To: do
+    To: Do
     'Limit the number of videos displayed for each channel': Ogranicz liczbę filmów wyświetlanych dla każdego z kanałów
+    Auto Refresh Interval: Interwał odświeżania
+    Videos Auto Refresh Interval: Interwał odświeżania filmów
+    Shorts Auto Refresh Interval: Interwał odświeżania filmów short
+    Live Auto Refresh Interval: Interwał odświeżania transmisji na żywo
+    Fetch Feed on Startup: Pobierz subskrypcje przy uruchomieniu
+    Show New Content Feed: Pokaż zakładkę z nowymi subskrypcjami
+    Show New Content Indicators: Pokaż wskaźniki nowych treści
+    Posts Auto Refresh Interval: Interwał odświeżania wpisów
   Privacy Settings:
     Watch history has been cleared: Historia oglądania została wyczyszczona
     Are you sure you want to remove your entire watch history?: Jesteś pewny/a, że chcesz usunąć całą historię oglądania?
@@ -465,6 +712,15 @@ Settings:
         Never: Nie zapisuj
         Auto: Automatyczny
       Tooltip: Automatyczny – zapisuje przy każdym zamknięciu strony odtwarzania, po zakończeniu odtwarzania oraz gdy wystąpi błąd (np. ograniczenie przesyłu, wygaśnięcie sesji odtwarzania). Półautomatyczny – podobny do automatycznego, ale bez zapisu przy zamknięciu strony oraz z możliwością ręcznego zapisu postępu przyciskiem „Zapisz postęp odtwarzania”, umieszczonym pod odtwarzaczem.
+    Automatic History Retention: Przechowywanie historii (dni)
+    Automatic History Retention Placeholder: Pozostaw puste, aby zachować na zawsze
+    Automatic History Retention Tooltip: Pozostaw puste, aby historia została zachowana na zawsze. Wpisanie liczby usuwa starsze wpisy teraz i automatycznie, gdy aplikacja jest otwierana.
+    History Retention Saved: Tryb zachowywania historii został zapisany
+    Invalid History Retention Days: Wprowadź liczbę całkowitą dni większą od zera
+    Enable Watch Statistics: Włącz statystyki oglądania
+    Week Starts On: Tydzień zaczyna się w
+    Watched Percentage Threshold: Próg oznaczenia jako „obejrzany” (%)
+    Watched Percentage Threshold Tooltip: Filmy są oznaczane jako obejrzane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one oznaczane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one oznaczane po zakończeniu odtwarzania.
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
     Unknown data key: Nieznany klucz danych
@@ -472,16 +728,16 @@ Settings:
     Unable to read file: Nie można odczytać pliku
     All watched history has been successfully exported: Cała historia oglądania została pomyślnie wyeksportowana
     All watched history has been successfully imported: Cała historia oglądania została pomyślnie zaimportowana
-    History object has insufficient data, skipping item: Obiekt historii ma niewystarczającą ilość danych. Pomijam element
+    History object has insufficient data, skipping item: Obiekt historii ma niewystarczającą ilość danych, pomijam element
     Subscriptions have been successfully exported: Subskrypcje zostały z powodzeniem wyeksportowane
     Invalid history file: Nieprawidłowy plik historii
     Invalid subscriptions file: Nieprawidłowy plik subskrypcji
     All subscriptions have been successfully imported: Wszystkie subskrypcje zostały z powodzeniem zaimportowane
     All subscriptions and profiles have been successfully imported: Wszystkie subskrypcje i profile zostały z powodzeniem zaimportowane
-    Profile object has insufficient data, skipping item: Obiekt profilu ma niewystarczającą ilość danych. Pomijam element
+    Profile object has insufficient data, skipping item: Obiekt profilu ma niewystarczającą ilość danych, pomijam element
     Export History: Wyeksportuj historię
     Import History: Zaimportuj historię
-    Export FreeTube: Eksport do FreeTube
+    Export OpenTubeX: Eksport do OpenTubeX
     Export YouTube: Eksport do YouTube
     Export NewPipe: Eksport do NewPipe
     Export Subscriptions: Wyeksportuj subskrypcje
@@ -491,30 +747,34 @@ Settings:
     Manage Subscriptions: Zarządzaj subskrypcjami
     Export Playlists: Wyeksportuj playlisty
     All playlists has been successfully exported: Wszystkie playlisty pomyślnie wyeksportowano
-    Playlist insufficient data: Niewystarczająca ilość danych dla playlisty „{playlist}”. Pomijam element
+    Playlist insufficient data: Niewystarczająca ilość danych dla playlisty „{playlist}”, pomijam element
     Import Playlists: Zaimportuj playlisty
     All playlists has been successfully imported: Wszystkie playlisty pomyślnie zaimportowano
     History File: Plik historii
     Playlist File: Plik playlist
     Subscription File: Plik subskrypcji
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Opcja ta wyeksportuje filmy ze wszystkich playlist, jako jedną playlistę o nazwie „Ulubione”.\nOto jak wyeksportować i zaimportować filmy z playlist do starszych wersji FreeTube:\n1. Wyeksportuj swoje playlisty z tą opcją włączoną.\n 2. Usuń wszystkie swoje istniejące playlisty przy użyciu opcji „Usuń wszystkie playlisty” z ustawień prywatności.\n3. Uruchom starszą wersję FreeTube, następnie zaimportuj wyeksportowane playlisty."
-      Label: Wyeksportuj playlisty dla starszych wersji FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Opcja ta wyeksportuje filmy ze wszystkich playlist, jako jedną playlistę o nazwie „Ulubione”.\nOto jak wyeksportować i zaimportować filmy z playlist do starszych wersji OpenTubeX:\n1. Wyeksportuj swoje playlisty z tą opcją włączoną.\n 2. Usuń wszystkie swoje istniejące playlisty przy użyciu opcji „Usuń wszystkie playlisty” z ustawień prywatności.\n3. Uruchom starszą wersję OpenTubeX, następnie zaimportuj wyeksportowane playlisty."
+      Label: Wyeksportuj playlisty dla starszych wersji OpenTubeX
     Search history file: Plik historii wyszukiwania
     Search history: Historia wyszukiwania
     Import search history: Zaimportuj historię wyszukiwania
     Export search history: Wyeksportuj historię wyszukiwania
     All search history has been successfully imported: Cała historia wyszukiwania została pomyślnie zaimportowana
     All search history has been successfully exported: Cała historia wyszukiwania została pomyślnie wyeksportowana
+    Import subscriptions formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup lub FreeTube export (.json)'
+    Import history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
+    Import playlists formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Settings File: Plik ustawień
     Import Settings: Zaimportuj ustawienia
     Export Settings: Wyeksportuj ustawienia
-    Settings Tooltip: Ustawienia, które są specyficzne dla systemu albo dla każdego użytkownika, oraz ustawienie eksperymentalne, nie mogą zostać ani wyeksportowane, ani zaimportowane (n.p. ustawienia proxy, ustawienia zewnętrznego odtwarzacza, lokalizacja folderu zapisu zrzutów ekranu)
-    All settings have been successfully imported: Wszystkie ustawienia zostały z powodzeniem zaimportowane
-    All settings have been successfully exported: Wszystkie ustawienia zostały z powodzeniem wyeksportowane
-    Setting object has insufficient data, skipping item: Obiekt ustawień ma niewystarczającą ilość danych. Pomijam element
+    Settings Tooltip: Ustawień specyficznych dla systemu operacyjnego/użytkownika lub eksperymentalnych nie można eksportować ani importować (np. proxy, odtwarzacz zewnętrzny, folder zrzutów ekranu...)
+    All settings have been successfully imported: Wszystkie ustawienia zostały pomyślnie zaimportowane
+    All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
     Unknown setting key: 'Nieznany klucz ustawień: {key}'
-    Non-transferable setting key: 'Klucz ustawień niepodlegający przeniesieniu: {key}'
+    Non-transferable setting key: 'Nieprzenoszalny klucz ustawień: {key}'
+    Setting object has insufficient data, skipping item: Obiekt ustawień ma niewystarczające dane, pominięto element
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
@@ -560,9 +820,10 @@ Settings:
     Hide Videos, Playlists and Channels Containing Text Placeholder: Słowo, fragment słowa, lub wyrażenie
     Hide Channel Home: Schowaj kartę kanału „Główna”
     Show Added Items: Pokaż dodane rzeczy
-    Hide Channel Courses: Ukryj kartę „Kursy” kanału
+    Hide Channel Courses: Schowaj kartę kanału „Kursy”
     Hide Channel Posts: Schowaj kartę kanału „Wpisy”
     Hide Subscriptions Posts: Schowaj wpisy z subskrypcji
+    Hide End-Screen Annotations: Ukryj adnotacje na ekranie końcowym
     Add: Dodaj
     Remove: Usuń
     Hide Channel Shows: Ukryj zakładkę „Programy” w kanale
@@ -581,11 +842,18 @@ Settings:
     Proxy Protocol: Protokół proxy
     Enable Tor / Proxy: Włącz Tor / Proxy
     Proxy Settings: Proxy
-    Proxy Warning: FreeTube nie ma wbudowanego proxy, ale może połączyć z zewnętrznym proxy. Na przykład z uruchomionym na Twoim komputerze, jak Tor, albo z uruchomionym na zewnętrznym serwerze, takim jak SOCKS5 proxy, oferowanym przez niektórych dostawców VPN. Po włączeniu upewnij się, że Twoje proxy lub Tor są skonfigurowane poprawnie, by FreeTube był w stanie wymieniać jakiekolwiek dane.
+    Proxy Warning: OpenTubeX nie ma wbudowanego proxy, ale może połączyć z zewnętrznym proxy. Na przykład z uruchomionym na Twoim komputerze, jak Tor, albo z uruchomionym na zewnętrznym serwerze, takim jak SOCKS5 proxy, oferowanym przez niektórych dostawców VPN. Po włączeniu upewnij się, że Twoje proxy lub Tor są skonfigurowane poprawnie, by OpenTubeX był w stanie wymieniać jakiekolwiek dane.
     Proxy Username: Nazwa użytkownika usługi proxy
     Proxy Password: Hasło do usługi proxy
+    IP Block Recovery Script Path: Ścieżka do skryptu omijania blokady IP
+    Select IP Block Recovery Script File: Wybierz plik skryptu omijania blokady IP
+    Running IP block recovery script: Uruchom skrypt omijania blokady IP
+    IP block recovery script failed: 'Błąd skryptu omijania blokady IP (kod błędu: {exitCode})'
+    IP block recovery script finished: Zakończono wykonywanie skryptu omijania blokady IP
+    Reloading video after IP block recovery: Przeładuj wideo po ominięciu blokady IP
+    Failed to select IP block recovery script: Nie udało się wybrać skryptu omijania blokady IP
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Powiadamiaj, kiedy segment sponsorowany zostanie pominięty
+    Notify when sponsor segment is skipped: Pokaż informację po pominięciu segmentu
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Adres URL interfejsu API SponsorBlock (Domyślnie jest https://sponsor.ajay.app)
     Enable SponsorBlock: Włącz SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -599,6 +867,15 @@ Settings:
     UseDeArrowTitles: Użyj tytułów filmów z DeArrow
     UseDeArrowThumbnails: Użyj DeArrow do miniaturek
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': URL do API generatora miniaturek DeArrow (Domyślny jest https://dearrow-thumb.ajay.app)
+    Enable SponsorBlock Submission: Włącz raportowanie SponsorBlock
+    SponsorBlock Private User ID (optional): Prywatny ID użytkownika SponsorBlock (opcjonalny)
+    SponsorBlock Private User ID Tooltip: Prywatny ID użytkownika SponsorBlock skopiowany z rozszerzenia przeglądarki. Pozostaw puste by używać ID użytkownika wygenerowane przez OpenTubeX.
+    Generated SponsorBlock User ID: Wygenerowany ID użytkownika SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Ten wygenerowany przez OpenTubeX ID użytkownika SponsorBlock może być używany w rozszerzeniu przeglądarki, lub w OpenTubeX na innym komputerze.
+    Export Generated User ID: Wyeksportuj wygenerowany ID
+    Generated SponsorBlock User ID Copy Button: Skopiuj wygenerowany ID użytkownika SponsorBlock
+    Generated SponsorBlock User ID Copied: Wygenerowany ID użytkownika SponsorBlock został skopiowany do schowka
+    Skip notification timeout: Czas trwania powiadomienia o cofnięciu pominięcia
     Excluded Channels:
       Disabled Message: Niektóre kanały zostały wykluczone na podstawie identyfikatorów i nie zostały przetworzone. Funkcja jest zablokowana na czas aktualizacji tych identyfikatorów
       Excluded Channels: Wykluczone Kanały
@@ -619,7 +896,7 @@ Settings:
     Show Family Friendly Only: Pokazuj tylko filmy przyjazne rodzinie
     Hide Search Bar: Schowaj pole wyszukiwania
     Hide Uploader on Watch page: Ukryj przesyłającego na stronie obserwowanych
-    Disable Channel Links: Wyłącz linki kanałów
+    Disable Channel Links: Wyłącz odnośniki do kanałów
   Experimental Settings:
     Replace HTTP Cache: Zastąp pamięć podręczną HTTP
     Experimental Settings: Eksperymentalne
@@ -638,6 +915,185 @@ Settings:
   SABR:
     Label: Włącz SABR jako back-end dla DASH-a
     Tooltip: W przyszłości SABR będzie jedynym back-endem DASH-a i nie będzie można go wyłączyć. Ten przełącznik został wprowadzony na wypadek, gdyby wczesna implementacja powodowała problemy.
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Wyświetlanie łapek w dół z YouTube
+    Enable Return YouTube Dislike: Włącz wyświetlanie łapek w dół z YouTube
+    Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
+  Download Settings:
+    Download Settings: Pobieranie
+    Managed Tools Download Started Template: 'Nie znaleziono wymaganego oprogramowania zewnętrznego: {tools}. Pobieranie zarządzanych kopii…'
+    Managed Tools Download Finished Template: Zakończono pobieranie {tools}
+    Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
+    Managed Tools Update Finished Template: Zakończono aktualizację {tools}
+    Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
+    Download Folder: 'Pobierane pliki zapisuj do:'
+    Choose Download Folder: Wybierz folder pobierania
+    Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+    Enable Downloads: Włącz pobieranie filmów
+    Managed Tools Update Available Template: Dostępna jest aktualizacja dla {tools}.
+    Update Managed Tools: Aktualizuj
+    Global Additional yt-dlp Arguments: Dodatkowe globalne argumenty yt-dlp
+    External Software Hint: yt-dlp, FFmpeg i FFprobe są konfigurowane w ustawieniach oprogramowania zewnętrznego.
+    Download Templates: Szablony pobierania
+    Manage Download Templates: Zarządzaj szablonami pobierania ({templateCount})
+    New Template: Nowy szablon
+    Template Source: Szablon do edycji lub wykorzystania jako baza
+    Built-in Template: '{name} (wbudowany)'
+    Custom Template Name: '{name} (niestandardowy)'
+    Create Template Copy: Utwórz kopię
+    Template Copy Name: '{name} Kopia'
+    Automatic Downloads: Automatyczne pobieranie
+    Manage Automatic Downloads: Zarządzaj automatycznym pobieraniem ({channelCount})
+    Automatic Downloads Description: Wybierz szablon pobierania i filtry dla każdego subskrybowanego kanału. Pasujące filmy będą pobierane w tle po odświeżeniu kanałów subskrypcji.
+    Automatic Downloads New Only: Włączenie kanału rozpocznie się wraz z jego kolejnym przesłaniem. Istniejące filmy i lista zaległości kanału nie zostaną pobrane.
+    Automatic Downloads No Channels: Zanim skonfigurujesz automatyczne pobieranie, zasubskrybuj kanał.
+    Search Automatic Download Channels: Wyszukaj kanały
+    No Matching Automatic Download Channels: Brak kanałów odpowiadających Twojemu wyszukiwaniu.
+    Automatic Downloads Videos: Filmy
+    Automatic Downloads Livestreams: Transmisje na żywo
+    Minimum Duration Seconds: Minimalny czas trwania (sekundy)
+    Maximum Duration Seconds: Maksymalny czas trwania (sekundy)
+    Minimum File Size MB: Minimalny rozmiar pliku (MB)
+    Maximum File Size MB: Maksymalny rozmiar pliku (MB)
+    Maximum Age Days: Maksymalny wiek (dni)
+    Title Includes: Tytuł zawiera
+    Title Excludes: Tytuł nie zawiera
+    Title Filter Hint: Oddzielaj wiele wyrażeń przecinkami. Tytuł filmu musi pasować do co najmniej jednego wyrażenia i nie może zawierać wyrażeń wykluczonych.
+  External Software Settings:
+    yt-dlp Source: Źródło yt-dlp
+    yt-dlp Channel: Kanał wersji yt-dlp
+    Sources:
+      System: System (PATH lub ścieżka niestandardowa)
+      Managed: Zarządzane przez OpenTubeX
+    Detected Version Template: 'Wykryta wersja yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System yt-dlp Missing Warning: W twoim systemie nie znaleziono yt-dlp. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download yt-dlp: Pobierz yt-dlp
+    Update yt-dlp: Zaktualizuj yt-dlp
+    Checking yt-dlp: Sprawdzanie yt-dlp…
+    Downloading yt-dlp: Pobieranie yt-dlp…
+    yt-dlp Downloaded Template: Pobrano yt-dlp w wersji {version}
+    yt-dlp Download Error Template: 'Pobieranie yt-dlp nie powiodło się: {error}'
+    FFmpeg Source: Źródło FFmpeg
+    Detected FFmpeg Version Template: 'Wykryta wersja FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System FFmpeg Missing Warning: FFmpeg nie został znaleziony w Twoim systemie. Jest on wymagany do scalania wideo i dźwięku oraz do konwersji audio. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download FFmpeg: Pobierz FFmpeg
+    Update FFmpeg: Zaktualizuj FFmpeg
+    Checking FFmpeg: Sprawdzanie FFmpeg…
+    Downloading FFmpeg: Pobieranie FFmpeg…
+    FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
+    FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
+    Managed Tool Already Current Template: '{tool} {version} jest już aktualne'
+    yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
+    FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
+    External Software Settings: Oprogramowanie zewnętrzne
+    Detected FFprobe Version Template: 'Wykryta wersja FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe nie został jeszcze pobrany. Kliknij poniższy przycisk, aby pobrać go z FFmpeg.
+    System FFprobe Missing Warning: FFprobe nie został znaleziony w Twoim systemie. Jest on wymagany do inspekcji multimediów podczas postprodukcji. Zainstaluj go obok FFmpeg lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Checking FFprobe: Sprawdzanie FFprobe…
+  Sync Settings:
+    Sync Settings: Synchronizacja
+    Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
+    Privacy Passphrase: Hasło dostępu
+    Enhanced Privacy Enabled: Włączono rozszerzoną prywatność. Serwer przechowuje tylko zaszyfrowane dane synchronizacji.
+    Enhanced Privacy Unsupported: Ostrzeżenie — ten serwer nie obsługuje rozszerzonej prywatności. Zsynchronizowane dane są widoczne dla jego operatora.
+    Password: Hasło
+    Log In: Zaloguj się
+    Register: Rejestracja
+    Disconnect: Rozłącz
+    Delete Account: Usuń konto synchronizacji
+    Delete Account Confirmation: Usunąć konto synchronizacji?
+    Delete Account Warning: To trwale usunie Twoje konto synchronizacji i wszystkie dane przechowywane na tym serwerze. Twoje lokalne dane OpenTubeX nie zostaną usunięte.
+    Confirm Delete Account: Usuwanie konta
+    Password Required: Hasło jest wymagane
+    Account Deleted: Konto synchronizacji zostało usunięte
+    Connected as: Połączono jako {username}
+    Automatic Sync: Synchronizuj automatycznie po dokonaniu zmian i co pięć minut
+    Channel Playback Speeds: Prędkości odtwarzania poszczególnych kanałów
+    Profiles: Profile
+    Settings: Ustawienia
+    Disable Setting Sync: Zatrzymaj synchronizację tego ustawienia
+    Enable Setting Sync: Zsynchronizuj to ustawienie
+    Sync Now: Zsynchronizuj teraz
+    Downloading encrypted data: Pobieranie zaszyfrowanych danych synchronizacji…
+    Syncing subscriptions: Synchronizowanie subskrypcji…
+    Syncing playlists: Synchronizowanie playlist…
+    Syncing history: Synchronizowanie historii oglądania…
+    Syncing playback speeds: Synchronizowanie prędkości odtwarzania kanałów…
+    Syncing profiles: Synchronizowanie profili…
+    Syncing settings: Synchronizowanie ustawień…
+    Uploading encrypted data: Przesyłanie zaszyfrowanych danych synchronizacji…
+    Finishing sync: Kończenie synchronizacji…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Ostatnia synchronizacja: {date}'
+    History not supported: Ta wersja serwera nie obsługuje synchronizacji historii oglądania.
+    Playback speeds not supported: Ta wersja serwera nie obsługuje synchronizacji prędkości odtwarzania kanałów.
+    Playback speeds and settings not supported: Ta wersja serwera nie obsługuje prędkości odtwarzania kanałów ani synchronizacji ustawień.
+    Settings not supported: Ta wersja serwera nie obsługuje synchronizacji ustawień.
+    Sync completed: Synchronizacja zakończona
+    Data Loss Confirmation: Potwierdzić synchronizację z ryzykiem utraty danych?
+    Data Loss Warning: Stan serwera spowoduje usunięcie {deleted} z {previous} wcześniej zsynchronizowanych elementów {collection}. Może to wskazywać na nieudaną migrację serwera lub jego reset. Kontynuuj tylko wtedy, gdy usunięcie jest celowe i masz kopię zapasową.
+    Confirm Data Loss: Usuń i kontynuuj
+    Description: Synchronizuj subskrypcje, profile, playlisty, historię oglądania, ustawienia i otwarte karty z serwerem synchronizacji OpenTubeX lub LibreTube. Serwery LibreTube mogą nie obsługiwać wszystkich funkcji synchronizacji.
+    Server URL: Adres URL serwera
+    Checking Server: Sprawdzanie serwera synchronizacji…
+    Server Unavailable: Nie można połączyć się z tym serwerem synchronizacji. Sprawdź adres URL i spróbuj ponownie.
+    Username: Nazwa użytkownika
+    Open Tabs: Otwarte karty i sesję
+    Syncing open tabs: Synchronizowanie otwartych kart i sesji…
+    Privacy Policy: Polityka prywatności dla tego serwera
+  Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
+  Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
+  Context Menu Search Settings:
+    Context Menu Search Settings: Wyszukiwanie z menu kontekstowego
+    Description: Wybierz, które wyszukiwarki będą wyświetlane po kliknięciu zaznaczonego tekstu prawym przyciskiem myszy. Wyszukiwania otwierają się w domyślnej przeglądarce.
+    Icon Hint: Włączenie wyszukiwarki powoduje nawiązanie połączenia z jej stroną internetową w celu załadowania ikony favicon.
+    Engine Name: Nazwa wyszukiwarki
+    Search URL: Adres URL wyszukiwarki
+    URL Hint: Użyj %s, gdzie adres URL powinien zawierać zakodowany zaznaczony tekst.
+    Add Custom Engine: Dodaj niestandardową wyszukiwarkę
+    Add Engine: Dodaj wyszukiwarkę
+    Remove Engine: Usuń {engine}
+    Invalid Engine: Wprowadź nazwę i prawidłowy adres URL wyszukiwania HTTP lub HTTPS zawierający %s.
+    Engine Limit: Możesz dodać maksymalnie {count} niestandardowych wyszukiwarek.
+  Quick Settings:
+    Quick Settings: Szybkie ustawienia
+    Appearance: Wygląd
+    Playback: Odtwarzanie
+    Content: Treści
+    Language and Region: Język i region
+    All Settings: Wszystkie ustawienia
+    Profile Selector Hint: Możesz również kliknąć prawym przyciskiem myszy ikonę profilu, aby przełączać profile
+  Performance Impact:
+    Show Performance Impact: Pokaż wskaźniki wpływu na wydajność
+    Moderate: Umiarkowany wpływ
+    High: Wysoki wpływ
+    Description: To ustawienie może zwiększyć wykorzystanie {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: pamięci
+      Network: transmisji danych
+      Disk: dysku
+  Channel Settings:
+    Channel Settings: Ustawienia kanału
+    Channel Settings Description: Zapamiętuje ustawienia wybrane podczas oglądania każdego kanału osobno, dzięki czemu zostaną one zastosowane ponownie przy następnym oglądaniu danego kanału.
+    Manage Saved Channels: Zarządzaj zapisanymi kanałami ({channelCount})
+    Saved Channels: Zapisane ustawienia kanału
+    Enable Saved Channel Settings Sync: Synchronizuj zapisane ustawienia kanału
+    Disable Saved Channel Settings Sync: Zatrzymaj synchronizację zapisanych ustawień kanału
+    Search Channels: Wyszukaj kanały
+    No Saved Channels: Nie zapisano jeszcze żadnych ustawień specyficznych dla kanału
+    No Matching Channels: Żadne kanały nie pasują do Twojego wyszukiwania
+    Forget Channel: Wyczyść wszystkie ustawienia dla tego kanału
+    Forget Value: Wyczyść to ustawienie
+    Add Setting: Zapamiętaj inne ustawienie dla tego kanału
+    Playback Speed: Prędkość odtwarzania
+    Video Quality: Rozdzielczość wideo
+    Subtitles State: Napisy
+    Subtitles Enabled: Napisy włączone
+    Volume: Głośność
 About:
   #On About page
   About: 'O projekcie'
@@ -646,6 +1102,7 @@ About:
   Website: Strona internetowa
   Credits: Zasługi
   FAQ: FAQ
+  Email: E-mail
   Beta: Beta
   Donate: Wesprzyj
   Help: Pomoc
@@ -657,7 +1114,7 @@ About:
   Please check for duplicates before posting: Proszę poszukać duplikatów przed wysłaniem
   GitHub issues: problemy na GitHub
   Report a problem: Zgłoś problem
-  FreeTube Wiki: Wiki FreeTube
+  OpenTubeX Wiki: Wiki OpenTubeX
   GitHub releases: Wydania na GitHub
   Downloads / Changelog: Wydania / Lista zmian
   Source code: Kod źródłowy
@@ -665,7 +1122,7 @@ About:
   AGPLv3: AGPLv3
   Licensed under the {licenseLink}: Licencjonowany na {licenseLink}
   Please read the {roomRulesLink}: Proszę przeczytać {roomRulesLink}
-  FreeTube is made possible by {creditsPageLink}: FreeTube powstał dzięki {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX powstał dzięki {creditsPageLink}
 Channel:
   Subscribe: 'Zasubskrybuj'
   Unsubscribe: 'Odsubskrybuj'
@@ -677,6 +1134,7 @@ Channel:
       Newest: 'Najnowsze'
       Oldest: 'Najstarsze'
       Most Popular: 'Najpopularniejsze'
+    This channel does not currently have any videos: 'Ten kanał nie ma obecnie żadnych filmów'
     This channel has videos but none could be displayed, try fetching more: Ten kanał zawiera filmy, ale nie udało się wyświetlić żadnego z nich. Spróbuj pobrać więcej
   Playlists:
     Playlists: 'Playlisty'
@@ -693,22 +1151,22 @@ Channel:
     Joined: Data dołączenia
     Location: Lokalizacja
     Tags:
-      Tags: Tagi
+      Tags: Tagi kanału
       Search for: Szukaj „{tag}”
     Links: Linki
   Added channel to your subscriptions: Dodano kanał do twoich subskrypcji
-  Removed subscription from {count} other channel(s): Usunięto subskrypcje z {count} pozostałych kanałów
+  Removed subscription from {count} other channel(s): Usunięto subskrypcję z 1 innego kanału | Usunięto subskrypcję z {count} innych kanałów
   Channel has been removed from your subscriptions: Kanał został usunięty z twoich subskrypcji
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Kanał ten ma ograniczenie wiekowe, dlatego nie zostanie wyświetlony we FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Kanał ten ma ograniczenie wiekowe, dlatego nie zostanie wyświetlony we OpenTubeX.
   Channel Tabs: Karty kanału
   This channel does not exist: Nie ma takiego kanału
   This channel does not allow searching: Ten kanał nie zezwala na przeszukiwanie
   Posts:
     This channel currently does not have any posts: Ten kanał nie ma obecnie żadnych wpisów
-    votes: '{votes} głosów'
+    votes: '{votes} głos | {votes} głosy | {votes} głosów'
     Reveal Answers: Pokaż odpowiedzi
     Hide Answers: Schowaj odpowiedzi
-    Video hidden by FreeTube: Film schowany przez FreeTube
+    Video hidden by OpenTubeX: Film schowany przez OpenTubeX
     View Full Post: Zobacz całe wpisy
     Viewing Posts Only Supported By Invidious: Wyświetlanie postów jest wspierane tylko przez Invidious. Możesz zobaczyć zawartość nie korzystając z Invidious, przechodząc do karty „Społeczność” danego kanału.
   Live:
@@ -728,7 +1186,7 @@ Channel:
   Courses:
     Courses: Kursy
     This channel does not currently have any courses: Na tym kanale nie ma obecnie żadnych kursów
-  View All: Zobacz wszystkie
+  View All: Wyświetl wszystko
   Shows:
     Shows: Programy
 Video:
@@ -737,7 +1195,7 @@ Video:
   Video has been marked as watched: 'Film został oznaczony jako obejrzany'
   Video has been removed from your history: 'Film został usunięty z Twojej historii'
   Open in YouTube: 'Otwórz na stronie YouTube'
-  Copy YouTube Link: 'Skopiuj odnośnik do strony YouTube'
+  Copy YouTube Link: 'Skopiuj odnośnik do YouTube'
   Open YouTube Embedded Player: 'Otwórz odtwarzacz YouTube'
   Copy YouTube Embedded Player Link: 'Skopiuj odnośnik do odtwarzacza YouTube'
   Open in Invidious: 'Otwórz na stronie Invidious'
@@ -773,14 +1231,22 @@ Video:
   Video has been saved: Film został zapisany
   Save Video: Zapisz film
   Sponsor Block category:
-    music offtopic: niemuzyczny
-    interaction: o interakcji
-    self-promotion: z własną promocją
-    outro: z ekranem końcowym
-    intro: z intrem
-    sponsor: sponsorowany
-    filler: z wypełniaczem
-    recap: z podsumowaniem
+    music offtopic: 'Muzyka: Sekcja niemuzyczna'
+    interaction: Przypomnienie o interakcji (Subskrybuj)
+    self-promotion: Nieopłacona/Własna promocja
+    outro: Ekran końcowy/Napisy
+    intro: Przerwa/Animowane intro
+    sponsor: Sponsor
+    filler: Wypełniacze/Żarty
+    recap: Zapowiedź/Podsumowanie
+    hook: Zaczepka/Powitanie
+    highlight: Wyróżnione
+    exclusive access: Dostęp na wyłączność
+  Sponsor Block category short:
+    intro: Przerwa
+    interaction: Przypomnienie o interakcji
+    music offtopic: Bez muzyki
+    filler: Wypełniacze
   External Player:
     Unsupported Actions:
       reversing playlists: odwracania playlist
@@ -828,18 +1294,110 @@ Video:
       Resolution: 'Rozdzielczość: {width}x{height}{''@''}{frameRate}'
     You appear to be offline: Zdaje się, że jesteś rozłączony.
     Playback will resume automatically when your connection comes back: Odtwarzanie zostanie wznowione, jak tylko połączenie zostanie odzyskane.
-    Skipped segment: Pominięto segment {segmentCategory}
+    Skipped segment: '{segmentCategory} — pominięto'
     Full Window: Pełne okno
     Autoplay is off: Autoodtwarzanie jest wyłączone
     Autoplay is on: Autoodtwarzanie jest włączone
+    Normal: Normalna
+    Set Default: Ustaw domyślne
+    SponsorBlock:
+      CancelCurrentSegment: Anuluj tworzenie segmentu
+      ClearSegments: Wyczyść segmenty
+      ClearSegmentsPrompt: Czy na pewno chcesz wyczyścić wszystkie utworzone segmenty SponsorBlock dla tego filmu?
+      CompleteSegmentsBeforeSubmitting: Przed wysłaniem należy dokończyć tworzenie każdego segmentu.
+      CategoryLabel: Kategoria
+      DeleteSegment: Usuń
+      DuplicateSegments: Duplikowanie segmentów roboczych jest niedozwolone.
+      EditSegment: Edytuj
+      EndAction: (Koniec)
+      EndActionLabel: Koniec
+      EndTimeAfterStart: Czas zakończenia segmentu musi przypadać po czasie rozpoczęcia.
+      EndTimeBeforeVideoEnd: Czas zakończenia segmentu musi mieścić się w czasie trwania filmu.
+      EndTimeLabel: Czas zakończenia segmentu
+      DisableAutoSkipTemporarily: Tymczasowo wyłącz automatyczne pomijanie SponsorBlock
+      EnableAutoSkipTemporarily: Włącz ponownie automatyczne pomijanie SponsorBlock
+      Guidelines: Wytyczne
+      InspectSegment: Sprawdź
+      InvalidStartTime: Wprowadź prawidłowy czas rozpoczęcia segmentu.
+      NoSegmentsToSubmit: Przed wysłaniem utwórz co najmniej jeden kompletny segment.
+      NowAction: (Teraz)
+      OpenSubmissionMenu: Otwórz menu zgłoszenia
+      PreviewRequired: Przed wysłaniem należy przejrzeć każdy segment.
+      PreviewSegment: Podgląd
+      SaveSegment: Zapisz
+      SetSegmentEndNow: Koniec segmentu
+      StartAction: (Początek)
+      StartSegmentNow: Początek segmentu
+      SubmissionBadRequest: SponsorBlock odrzucił prośbę o przesłanie zgłoszenia.
+      SubmissionDuplicate: To już zostało przesłane wcześniej.
+      SubmissionFailed: Nie udało się przesłać segmentów SponsorBlock.
+      SubmissionForbidden: SponsorBlock odrzucił zgłoszenie.
+      SubmissionRateLimited: SponsorBlock ograniczył liczbę zgłoszeń.
+      SubmissionSuccess: Segmenty SponsorBlock zostały zgłoszone.
+      SubmitSegment: Zgłoś segment
+      SubmitSegments: Wyślij
+      StartTimeLabel: Czas rozpoczęcia segmentu
+      TimeDivider: do
+      SkipPrompt: '{segmentCategory} — pominąć?'
+      SkipPromptAction: Pomiń
+      SkipToastUnskip: Cofnij
+      SkipToastReskip: Pomiń
+      SkipToHighlight: 'Przejść do Wyróżnione?'
+      SkippedToHighlight: Przewinięto do Wyróżnione
+      CloseInfoPanel: Zamknij panel SponsorBlock
+      OpenInfoPanel: Otwórz panel SponsorBlock
+      InfoPanelTitle: SponsorBlock
+      InfoPanelLoading: Segmenty nadal się ładują...
+      InfoPanelHasSegments: 'Ten film ma segmenty w bazie danych!'
+      InfoPanelNoSegments: Nie znaleziono segmentów
+      RefreshSegments: Odśwież segmenty
+      AutoSkipEnabled: Automatyczne pomijanie segmentów
+      AutoSkipOn: włączone
+      AutoSkipOff: wyłączone
+      WhitelistChannel: Dodaj kanał do białej listy
+      ChannelWhitelisted: Dodano do białej listy
+      RemoveChannelFromWhitelist: Usuń kanał z białej listy
+      SkipSegment: Pomiń segment
+      CloseSegmentActions: Zamknij działania segmentu
+      FullVideo: Cały film
+      LockedSegment: Zablokowany segment
+      DownvoteSegment: Głos przeciw
+      UpvoteSegment: Głos za
+      VoteFailed: Nie udało się przesłać oceny segmentu do SponsorBlock.
+    Scroll Mini Player:
+      Back to Top: Powrót na górę
+      Volume: Głośność
+      Play: Odtwarzaj
+      Pause: Pauza
+      Drag Handle: Przesuń mini odtwarzacz
+    Caption Appearance:
+      Options: Opcje
+      Title: Wygląd napisów
+      Sample: Napisy wyglądają tak
+    Sleep Timer:
+      Sleep Timer: Wyłącznik czasowy
+      Off: Wyłączony
+      Minutes: '{minutes} min'
+      End of video: Koniec filmu
+      Remaining: '{time} pozostało'
+      Cancel timer: Anuluj timer
+      Timer ended: Wyłącznik czasowy zakończony
+    MusicPlaybackRateOverride: Wykryto wideo z muzyką, odtwarzanie z prędkością 1x
+    Hide Annotations: Ukryj adnotacje
+    Show Annotations: Pokaż adnotacje
+    Hide: Ukryj
+    Show: Pokaż
+    Up next in {seconds}: Następny za {seconds}
+    Play now: Odtwórz teraz
+    Resize dock: Zmień rozmiar doku
   IP block: Serwis YouTube zablokował Twój adres IP, uniemożliwiając oglądanie filmów, lub ten film może zawierać treści przedstawiające osoby niepełnoletnie, do których serwis YouTube ogranicza dostęp użytkownikom niezalogowanym. Jeśli jest to blokada adresu IP, spróbuj przełączyć się na inną sieć VPN lub serwer proxy.
-  AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez FreeTube, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
-  MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez FreeTube, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
+  AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
+  MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
   Unlisted: Niepubliczny
   DeArrow:
-    Show Original Details: Pokaż szczegóły oryginału
-    Show Modified Details: Pokaż zmodyfikowane szczegóły
-  DRMProtected: FreeTube nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie. By obejrzeć ten film, możesz odwiedzić oficjalną stronę YouTube, korzystając z przeglądarki z włączoną obsługą DRM.
+    Show Original Details: Pokaż oryginał
+    Show Modified Details: Pokaż zmienione szczegóły
+  DRMProtected: OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie. By obejrzeć ten film, możesz odwiedzić oficjalną stronę YouTube, korzystając z przeglądarki z włączoną obsługą DRM.
 #& Playlists
   Watched Progress Saved: Postęp odtwarzania zapisany
   Save Watched Progress: Zapisz postęp odtwarzania
@@ -847,19 +1405,59 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Do końca reklamy z początku pozostało: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR – do przeczekania pozostało: {remindingTimeSeconds}s'
-  Private: Prywatnych filmów nie można oglądać w serwisie FreeTube, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
+  Private: Prywatnych filmów nie można oglądać w OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
+  Save Channel Playback Speed: Zapisz prędkość odtwarzania kanału
+  Channel Playback Speed Saved: Zapisano prędkość odtwarzania kanału
+  Save Channel Video Quality: Zapisz jakość wideo kanału
+  Channel Video Quality Saved: Jakość wideo kanału zapisana
+  Failed to load collaborators: Nie udało się załadować współautorów
+  AI: SI
+  AI-generated content: Treści generowane przez SI
+  Collaborators: Współautorzy
+  Transcript:
+    Title: Transkrypcja
+    Search: Wyszukaj transkrypcję
+    Language: Język transkrypcji
+    Copy: Kopiuj
+    Save: Zapisz
+    Show: Pokaż transkrypcję
+    Hide: Ukryj transkrypcję
+    Close: Zamknij transkrypcję
+    Copied: Transkrypcja skopiowana do schowka
+    Saved: Transkrypcja została zapisana
+    Save Error: Nie można zapisać transkrypcji
+    Text File: Plik tekstowy
+    Unavailable: Transkrypcja tego filmu nie jest dostępna.
+    Load Error: Nie udało się wczytać transkrypcji.
+    Empty: Ten transkrypt nie zawiera żadnego tekstu.
+    No Results: Żadne segmenty transkrypcji nie pasują do Twojego wyszukiwania.
+  Premiere: Premiera
+  Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
+  Unmark As Watched: Oznacz jako nieobejrzany
+  Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
+  Queue: Kolejka
+  Play Next: Odtwórz jako następne
+  Add to Queue: Dodaj do kolejki
+  Added to Play Next: Wideo zostanie odtworzone jako następne
+  Added to Queue: Wideo dodane do kolejki
+  Clear Queue: Wyczyść kolejkę
+  Remove from Queue: Usuń {title} z kolejki
+  Queue Video Count: '{count} film(y/ów) | {count} film(y/ów)'
+  Drag to Reorder Queue: Przeciągnij {title}, aby zmienić kolejność w kolejce
+  Metadata: Informacje o wideo
+  Close Metadata: Zamknij informacje o wideo
+  Video has been saved to {playlistName}: Film został zapisany na liście odtwarzania {playlistName}
+  Video has been removed from {playlistName}: Film został usunięty z listy odtwarzania {playlistName}
+  There was a problem saving the video to {playlistName}: Wystąpił problem z zapisaniem filmu na liście odtwarzania {playlistName}
+  There was a problem removing the video from {playlistName}: Wystąpił problem podczas usuwania filmu z listy odtwarzania {playlistName}
   Collapse Playlist: Zwiń listę odtwarzania
   Expand Playlist: Rozwiń listę odtwarzania
   Station: Stacja
-  Premiere: Premiera
   Playlist:
     Unavailable videos are hidden: 1 niedostępny film został ukryty | Ukryto {count} film(y/ów), które są niedostępne
   Enable SponsorBlock on Channel: Włącz funkcję SponsorBlock na kanale
   Disable SponsorBlock on Channel: Wyłącz funkcję SponsorBlock na kanale
-  AI: AI
-  'AI: Content was made with AI': 'AI: Treść została stworzona przy użyciu sztucznej inteligencji'
   How this was made: Jak to powstało
-  Reload Page: Przeładuj stronę
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -881,7 +1479,7 @@ Playlist:
     VideoDurationAscending: Czasu trwania (od najkrótszych)
     PublishedNewest: Daty publikacji (od najświeższej)
     PublishedOldest: Daty publikacji (od najdawniejszej)
-  Unavailable videos are hidden: Niedostępne filmy zostały ukryte
+  Close Playlist: Zamknij listę odtwarzania
 Change Format:
   Change Media Formats: 'Zmień formaty wideo'
   Use Dash Formats: 'Użyj formatów DASH'
@@ -907,10 +1505,12 @@ Share:
   Invidious Channel URL copied to clipboard: Skopiowano URL kanału na Invidious do schowka
   Share Channel: Podziel się kanałem
   Share Post: Podziel się wpisem
+  Timestamp Link Copied: Odnośnik ze znacznikiem czasu skopiowany do schowka
 Mini Player: 'Mini odtwarzacz'
 Comments:
   Comments: 'Komentarze'
   Click to View Comments: 'Kliknij, aby zobaczyć komentarze'
+  Getting comment replies, please wait: 'Pobieranie odpowiedzi do komentarza, proszę poczekać'
   Hide Comments: 'Schowaj komentarze'
   # Context: View 10 Replies, View 1 Reply
   There are no comments available for this video: 'Nie ma żadnych komentarzy odnośnie tego filmu'
@@ -925,11 +1525,13 @@ Comments:
   View {replyCount} replies: Zobacz 1 odpowiedź | Zobacz {replyCount} odpowiedzi
   Subscribed: Zasubskrybowano
   There are no comments available for this post: Nie ma żadnych komentarzy pod tym wpisem
-  Hide Replies: Ukryj odpowiedź | Ukryj odpowiedzi
+  Hide {replyCount} replies: Ukryj 1 odpowiedź | Ukryj {replyCount} odpowiedzi
   View 1 reply from {channelName}: Zobacz 1 odpowiedź od {channelName}
   View {replyCount} replies from {channelName} and others: Zobacz {replyCount} odpowiedzi od {channelName} i innych
-  Loading replies: Wczytywanie odpowiedzi...
-  Comments are turned off: Komentarze są wyłączone
+  Reload Comments: Przeładuj komentarze
+  Copy YouTube Link: Skopiuj odnośnik do YouTube
+  YouTube comment link copied to clipboard: Odnośnik do komentarza YouTube został skopiowany do schowka
+  Edited: (edytowano)
 Up Next: 'Następne'
 
 # Toast Messages
@@ -997,26 +1599,48 @@ Version {versionNumber} is now available!  Click for more details: Wersja {versi
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Ten film jest niedostępny z powodu brakujących formatów. Przyczyną może być blokada regionalna.
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Po włączeniu FreeTube będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
-    Fetch Automatically: Po włączeniu lub przy otwarciu nowego okna FreeTube będzie automatycznie odświeżał Twoje subskrypcje.
+    Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
+    Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
+    Fetch Feed on Startup: Jeśli włączone, OpenTubeX będzie automatycznie pobierał subskrypcje po uruchomieniu, lub otwarciu nowego okna.
+    Show New Content Feed: Pokazuje nową zakładkę zawierającą subskrypcje, których nie było podczas poprzedniego odświeżania.
+    Show New Content Indicators: Pokazuje małą kropkę obok subskrypcji, które nie były obecne podczas poprzedniego odświeżania.
   General Settings:
-    Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, FreeTube automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
-    Preferred API Backend: Wybierz back-end , który FreeTube użyje do uzyskiwania danych. Lokalne API jest wbudowanym ekstraktorem. API Invidious wymaga połączenia z serwerem Invidious.
+    Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
+    Preferred API Backend: Wybierz back-end , który OpenTubeX użyje do uzyskiwania danych. Lokalne API jest wbudowanym ekstraktorem. API Invidious wymaga połączenia z serwerem Invidious.
     Region for Trending: Obszar filmów „Na czasie” pozwala wybrać kraj, z którego chciałbyś zobaczyć filmy zdobywające popularność.
-    Invidious Instance: Serwer Invidious, którym FreeTube będzie się łączył do wywołań API. Zmiana tego ustawienia wpływa tylko na aktywne okno, chyba że instancja zostanie ustawiona jako domyślna.
-    Thumbnail Preference: Wszystkie miniaturki na FreeTube zostaną ukryte, rozmazane albo zastąpione klatką z filmu zamiast miniaturki domyślnej.
-    External Link Handling: "Wybierz domyślne zachowanie kiedy odnośnik, który nie może zostać otworzony w FreeTube, został kliknięty.\nDomyślnie FreeTube otworzy kliknięty odnośnik w domyślnej przeglądarce.\n"
-    Open Deep Links In New Window: Odnośniki URL przekazane do FreeTube (np. przez rozszerzenie przeglądarki, albo argumenty linii komend) są otwierane w nowym oknie.
+    Invidious Instance: Serwer Invidious, z którym OpenTubeX będzie się łączył do wywołań API. Zmiana tego ustawienia wpływa tylko na aktywne okno, chyba że instancja zostanie ustawiona jako domyślna.
+    Thumbnail Preference: Wszystkie miniaturki na OpenTubeX zostaną ukryte, rozmazane albo zastąpione klatką z filmu zamiast miniaturki domyślnej.
+    External Link Handling: "Wybierz domyślne zachowanie kiedy odnośnik, który nie może zostać otworzony w OpenTubeX, został kliknięty.\nDomyślnie OpenTubeX otworzy kliknięty odnośnik w domyślnej przeglądarce.\n"
+    Open Deep Links In New Window: Odnośniki URL przekazane do OpenTubeX (np. przez rozszerzenie przeglądarki, albo argumenty linii komend) są otwierane w nowym oknie.
+    Avoid translation: |
+      Wyłącz automatyczne tłumaczenie tytułu, opisu i rozdziałów filmu przez YouTube.
+      Może to poprawić responsywność aplikacji, a także bywa pomocne, gdy YouTube
+      niepotrzebnie tłumaczy z języka narodowego na angielski.
+    Startup Behavior: |
+      Wybierz, co OpenTubeX zrobi po uruchomieniu:
+      Opcja „Załaduj wszystkie karty” ładuje do pamięci wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
+      Opcja „Załaduj wcześniej załadowane karty” ładuje karty, które były załadowane w momencie zamknięcia OpenTubeX, i pozostawia pozostałe karty niezaładowane.
+      Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
+      Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
+    Remember Tab Navigation History: Historia nawigacji wstecz i do przodu dla każdej karty jest zapisywana i przywracana po ponownym uruchomieniu OpenTubeX.
   Player Settings:
     Default Media Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
-    Scroll Playback Rate Over Video Player: Umieść kursor nad odtwarzaczem, przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i przewijaj kółkiem myszy w górę i w dół, aby kontrolować szybkość odtwarzania. Przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i kliknij lewym przyciskiem myszy, by szybko powrócić do domyślnej wartości (1x, chyba że została zmieniona w ustawieniach).
+    Scroll Playback Rate Over Video Player: Umieść kursor nad odtwarzaczem, przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i przewijaj kółkiem myszy w górę i w dół, aby kontrolować prędkość odtwarzania. Przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i kliknij lewym przyciskiem myszy, by szybko powrócić do domyślnej wartości (1x, chyba że została zmieniona w ustawieniach).
     Skip by Scrolling Over Video Player: Użyj kółka myszy, by przewijać film tak jak w MPV.
+    Use Quick Playback Speed Bar: Wyświetla pasek szybkiego wyboru prędkości odtwarzania po prawej stronie odtwarzacza. Jeśli włączona jest funkcja ręcznego zapisywania prędkości odtwarzania dla poszczególnych kanałów, pasek zawiera również przycisk do zapisywania prędkości dla bieżącego kanału.
+    Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
+    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do prędkości odtwarzania.
+    Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
+    Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
+    Show Skip Silence Toggle: Pokazuje przełącznik pomijania ciszy w menu ustawień odtwarzacza.
+    Hold to Double Playback Speed: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo podwoić aktualną prędkość odtwarzania.
+    Ambient Mode: Rzutuje kolory odtwarzanego wideo na obszar wokół odtwarzacza.
   External Player Settings:
     Ignore Warnings: Nie pokazuj ostrzeżeń o nieobsługiwanych akcjach przez zewnętrzny odtwarzacz (n.p. odwracanie playlist, itp.).
     External Player: Wybranie zewnętrznego odtwarzacza spowoduje wyświetlenie na miniaturkach ikony, która otworzy film (playlistę, jeśli są obsługiwane) w zewnętrznym odtwarzaczu. Uwaga! Ustawienia Invidious nie mają wpływu na zewnętrzny odtwarzacz.
     Custom External Player Arguments: Wszelkie niestandardowe argumenty wiersza poleceń, które chcesz przekazać do zewnętrznego odtwarzacza.
-    Custom External Player Executable: FreeTube domyślnie przyjmie, że wybrany odtwarzacz jest do znalezienia za pomocą zmiennej środowiskowej PATH. Jeśli trzeba, można tutaj ustawić niestandardową ścieżkę.
+    Custom External Player Executable: OpenTubeX domyślnie przyjmie, że wybrany odtwarzacz jest do znalezienia za pomocą zmiennej środowiskowej PATH. Jeśli trzeba, można tutaj ustawić niestandardową ścieżkę.
     DefaultCustomArgumentsTemplate: "(Domyślnie: '{defaultCustomArguments}')"
     Ignore Default Arguments: Nie wysyłaj do zewnętrznego odtwarzacza żadnych domyślnych argumentów (takich jak prędkość odtwarzania, URL playlisty itp.), oprócz URL-u filmu. Niestandardowe argumenty zostaną wysłane.
   Experimental Settings:
@@ -1025,11 +1649,23 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Wprowadź ID kanału, aby schować wszystkie filmy i playlisty tego kanału, oraz sam kanał z wyszukiwań, z zakładek „Na czasie” i „Popularne” oraz z polecanych. ID kanału musi być dokładnym dopasowaniem, z uwzględnieniem wielkości liter.
     Hide Subscriptions Live: Ta opcja została nadpisana opcją ogólną „{appWideSetting}” z podgrupy „{subsection}” grupy „{settingsSection}”
-    Hide Videos, Playlists and Channels Containing Text: Wprowadź słowo, fragment słowa, lub wyrażenie (bez znaczenia jest wielkość liter), by schować wszystkie filmy i playlisty zawierające w tytule podane sformułowanie w całym programie FreeTube, poza Historią, Twoimi playlistami i filmami w tych playlistach.
+    Hide Videos, Playlists and Channels Containing Text: Wprowadź słowo, fragment słowa, lub wyrażenie (bez znaczenia jest wielkość liter), by schować wszystkie filmy i playlisty zawierające w tytule podane sformułowanie w całym programie OpenTubeX, poza Historią, Twoimi playlistami i filmami w tych playlistach.
     Hide Videos on Watch: Ukryj obejrzane filmy z kart „Filmy”, „Filmy Short” oraz z „Na żywo” na stronie subskrypcji oraz na stronie kanału. Opcja ta nie wpływa na kartę „Główna” ze strony kanału
   SponsorBlock Settings:
     UseDeArrowTitles: Zastąp tytuły filmów tytułami zasugerowanymi przez użytkowników DeArrow.
     UseDeArrowThumbnails: Zastąp miniaturki filmów miniaturkami z DeArrow.
+  Proxy Settings:
+    IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
+  Theme Settings:
+    Always Show Scrollbars: Utrzymuje paski przewijania widoczne przez cały czas. Po wyłączeniu, znikają one wkrótce po zatrzymaniu ruchu myszy i pojawiają się ponownie, gdy tylko ponownie nią poruszysz.
+  Download Settings:
+    Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
+    yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
+    FFmpeg Source: OpenTubeX może używać FFmpeg i FFprobe zainstalowanych w twoim systemie lub pobierać i zarządzać własnymi kompilacjami statycznymi, które są przechowywane w katalogu danych użytkownika.
+    yt-dlp Executable Path: Domyślnie OpenTubeX zakłada, że yt-dlp można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
+    FFmpeg Executable Path: FFmpeg jest wymagany do łączenia oddzielnych strumieni wideo i audio oraz do konwersji audio. Domyślnie OpenTubeX zakłada, że FFmpeg można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
@@ -1042,13 +1678,13 @@ Search Bar:
   Search: Szukaj
   Open Search Container: Otwórz pole wyszukiwania
 External link opening has been disabled in the general settings: Otwieranie zewnętrznych odnośników zostało wyłączone w ustawieniach ogólnych
-Are you sure you want to open this link?: Czy na pewno chcesz otworzyć ten link?
+Are you sure you want to open this link?: Czy na pewno chcesz otworzyć ten odnośnik?
 Screenshot Error: Wykonanie zrzutu nie powiodło się. {error}
 Screenshot Success: Zapisano zrzut ekranu jako „{filePath}”
 New Window: Nowe okno
 Channels:
   Title: Lista kanałów
-  Count: Znaleziono {number} kanał(y/ów).
+  Count: Znaleziono {number} kanał. | Znaleziono {number} kanały. | Znaleziono {number} kanałów.
   Empty: Twoja lista kanałów jest na razie pusta.
   Unsubscribe Prompt: Czy na pewno chcesz zrezygnować z subskrypcji „{channelName}”?
   Channels: Kanały
@@ -1059,6 +1695,9 @@ Clipboard:
 Chapters:
   Chapters: Rozdziały
   Key Moments: Kluczowe momenty
+  Open Chapters: Otwórz rozdziały
+  Close Chapters: Zamknij rozdziały
+  Copy Timestamp Link: Kopiuj odnośnik do {timestamp}
 Preferences: Preferencje
 Ok: Ok
 Hashtag:
@@ -1078,6 +1717,8 @@ Display Label: '{label}: {value}'
 Feed:
   Refresh Feed: Odśwież „{subscriptionName}”
   Feed Last Updated: 'Ostatnia aktualizacja „{feedName}”: {date}'
+  Next Auto Refresh: 'Następne odświeżenie: {date}'
+  Cancel Refresh: Anuluj odświeżanie
 Moments Ago: chwilę temu
 Yes, Delete: Tak, usuń
 Search character limit: Zapytanie przekroczyło limit {searchCharacterLimit} znaków
@@ -1111,6 +1752,7 @@ Autoplay Interruption Timer: Automatyczne odtwarzanie zostało anulowane, z powo
 Description:
   Expand Description: '...więcej'
   Collapse Description: Zwiń
+  Video Category: 'Kategoria wideo:'
 KeyboardShortcutPrompt:
   Keyboard Shortcuts: Skróty
   Sections:
@@ -1120,6 +1762,9 @@ KeyboardShortcutPrompt:
     App:
       Situational: 'Aplikacja: Kontekstowe'
       General: Aplikacja: Ogólne
+      Search and Page: 'Aplikacja: wyszukiwanie i strony'
+      Window and View: 'Aplikacja: Okno i widok'
+      Tabs: Aplikacja: Karty
   New Window: Otwórz nowe okno
   Navigate to Settings: Przejdź do strony Ustawień
   Navigate to History: Przejdź do strony Historii
@@ -1129,7 +1774,7 @@ KeyboardShortcutPrompt:
   History Forward: Dalej o jedną stronę
   Refresh: Wczytaj ponownie subskrypcje z nową zawartością
   History Backward: Wróć o jedną stronę
-  Fullscreen: Przełącz na cały ekran
+  Fullscreen: Przełącz na pełny ekran
   Picture in Picture: Przełącz na tryb obraz w obrazie
   Decrease Video Speed: Zwolnij odtwarzanie filmu o wartość przeskoku w wyborze prędkości odtwarzania filmu
   Full Window: Przełącz na pełne okno
@@ -1162,10 +1807,207 @@ KeyboardShortcutPrompt:
   Home: Przeskocz na początek filmu
   Skip to Next Video: Odtwórz następny film z playlisty lub z rekomendowanych filmów
   Skip to Previous Video: Odtwórz poprzedni film z playlisty lub z rekomendowanych filmów
+  Toggle Normal Playback Speed: Przełączaj się między prędkością 1x a poprzednią prędkością odtwarzania
+  Tab Switcher: Przełącznik kart
+  New Tab: Utwórz nową kartę
+  Close Tab: Zamknij bieżącą kartę
+  Reload Tab: Przeładuj bieżącą kartę
+  Reopen Closed Tab: Otwórz ponownie ostatnią zamkniętą kartę
+  Next Tab: Przejdź do następnej karty
+  Previous Tab: Przejdź do poprzedniej karty
+  Switch to Tab: Przejdź do karty 1–9
+  Find in Page: Znajdź tekst na bieżącej stronie
+  Find Next Match: Przejdź do następnego dopasowania
+  Find Previous Match: Przejdź do poprzedniego dopasowania
+  Edit Hint: Wybierz skrót, a następnie naciśnij nową kombinację klawiszy. Naciśnij Backspace lub Delete, aby usunąć przypisanie.
+  Change Shortcut: Zmień skrót dla {action}
+  Press Shortcut: Naciśnij skrót klawiszowy…
+  Unassigned: Nieprzypisany
+  Reset Shortcut: Zresetuj skrót dla {action}
+  Reset to Defaults: Przywróć ustawienia domyślne
+  Shortcut Already Assigned: Skrót jest już przypisany
+  Shortcut Conflict: '{shortcut} jest już przypisany do {actions}. Czy chcesz go ponownie przypisać?'
+  Reserved Shortcut Conflict: '{shortcut} jest zarezerwowany dla {actions} i nie można go ponownie przypisać.'
+  Reassign: Przypisz ponownie
+  Undo: Cofnij
+  Toggle Skip Silence: Przełącz pomijanie ciszy
+  Toggle Tab Orientation: Przełączanie między układami kart
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
 Screenshot Clipboard Success: Zapisano zrzut ekranu do schowka
 Screenshot Clipboard Error: Zapisanie kopii zrzutu do schowka nie powiodło się
+New Tab: Nowa karta
+Close Tab: Zamknij kartę
+Close Confirmation:
+  Title: Zamykanie OpenTubeX
+  Message: Czy na pewno chcesz wyjść z OpenTubeX?
+  Quit: Wyjdź
+  Never Ask Again: Nie pytaj ponownie
+Find in page: Znajdź na stronie
+Previous match: Poprzednie trafienie
+Next match: Następne trafienie
+Close find bar: Zamknij pasek wyszukiwania
+No matches: Brak dopasowań
+Stats:
+  Stats: Statystyki
+  Watch time summary: Podsumowanie czasu oglądania
+  Today: Dzisiaj
+  This week: W tym tygodniu
+  Total watch time: Całkowity czas oglądania
+  Daily average: Średnia dzienna
+  So far today: Do tej pory dzisiaj
+  Since: Od {day}
+  All recorded time: Cały zarejestrowany czas
+  Per calendar day: Na każdy dzień kalendarzowy
+  Day by day: Dzień po dniu
+  Highest: 'Największy: {duration}'
+  Week by week: Tydzień po tygodniu
+  Last 14 days: Ostatnie 14 dni
+  Last 8 weeks: Ostatnie 8 tygodni
+  Daily chart aria: Dzienny czas oglądania w ciągu ostatnich 14 dni
+  Weekly chart aria: Tygodniowy czas oglądania w ciągu ostatnich 8 tygodni
+  No data: Czas oglądania będzie wyświetlany tutaj, jak zaczniesz oglądać filmy.
+  Estimate note: Czas oglądania sprzed tej aktualizacji jest szacowany na podstawie zapisanego postępu odtwarzania.
+  Adjust imported watch time: Dostosuj zaimportowany czas oglądania
+  Imported watch time: Zaimportowany czas oglądania
+  Imported watch time explanation: Wybierz prędkość odtwarzania, z której zazwyczaj korzystasz. Zaimportowany czas trwania filmów zostanie podzielony przez tę prędkość, aby oszacować rzeczywisty czas spędzony na oglądaniu.
+  Playback speed: Prędkość odtwarzania
+  Channel speed note: Zamiast tego używane będą zapisane prędkości odtwarzania kanałów, jeśli są dostępne.
+  Apply playback speed: Zastosuj prędkość odtwarzania
+  Imported watch time adjusted: Zaimportowany czas oglądania został dostosowany
+  Reset statistics: Zresetuj statystyki
+  Reset: Zresetuj
+  Reset confirmation: Czy na pewno chcesz zresetować wszystkie statystyki oglądania? Tej czynności nie można cofnąć.
+  Reset success: Statystyki oglądania zostały zresetowane
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} hr'
+  Hours and minutes: '{hours} hr {minutes} min'
+Use Vertical Tabs: Używaj pionowych kart
+Use Horizontal Tabs: Używaj poziomych kart
+Resize Tab Bar: Zmień rozmiar paska kart
+Context Menu:
+  Context Menu: Menu kontekstowe
+  Cut: Wytnij
+  Copy: Kopiuj
+  Paste: Wklej
+  Select All: Zaznacz wszystko
+  Save Image As…: Zapisz obraz jako…
+  Copy Image: Kopiuj obraz
+  Copy Image Address: Kopiuj adres do obrazu
+  Reload Videos: Załaduj ponownie filmy
+  Reload Shorts: Załaduj ponownie shorty
+  Reload Live: Załaduj ponownie transmisje na żywo
+  Reload Posts: Załaduj ponownie wpisy
+  Reload All Feeds: Załaduj ponownie wszystkie subskrypcje
+  Close Tab: Zamknij kartę
+  Close Multiple Tabs: Zamknij {count} kart(y)
+  Duplicate Tab: Duplikuj kartę
+  Duplicate Multiple Tabs: Duplikuj {count} kart(y)
+  Move Tab: Przenieś kartę
+  Move Tabs: Przenieś karty
+  To Beginning: Na początek
+  To End: Na koniec
+  Close Tabs: Zamknij karty
+  To the Top: Na górę
+  To the Left: W lewo
+  To the Bottom: Na dół
+  To the Right: W prawo
+  Other Tabs: Pozostałe karty
+  Copy YouTube Link: Kopiuj odnośnik do YouTube
+  Copy YouTube Links: Kopiuj odnośniki do YouTube
+  Pin Tab: Przypnij kartę
+  Pin Tabs: Przypnij karty
+  Unpin Tab: Odepnij kartę
+  Unpin Tabs: Odepnij karty
+  Tab Color: Kolor karty
+  Default: Domyślny
+  Red: Czerwony
+  Orange: Pomarańczowy
+  Yellow: Żółty
+  Green: Zielony
+  Blue: Niebieski
+  Purple: Fioletowy
+  New Tab: Nowa karta
+  Reopen Closed Tab: Otwórz ponownie zamkniętą kartę
+  Reload Tab: Załaduj ponownie kartę
+  Reload Tabs: Załaduj ponownie karty
+  Load Tab: Załaduj kartę
+  Load Tabs: Załaduj karty
+  Unload Tab: Uśpij kartę
+  Unload Tabs: Uśpij karty
+  Move Tab to Window: Przenieś kartę do nowego okna
+  Move Tabs to Window: Przenieś karty do nowego okna
+  Open in a New Tab: Otwórz w nowej karcie
+  Open in a New Window: Otwórz w nowym oknie
+  Copy Link: Kopiuj odnośnik
+  Copy Invidious Link: Kopiuj odnośnik do Invidious
+  Search Selection in New Tab: Wyszukaj „{selection}” w nowej karcie
+  Search Selection in New Window: Wyszukaj „{selection}” w nowym oknie
+  Selection Too Long: Zaznaczona fraza jest za długa do wyszukiwania (> {count} znaków)
+  Cancel Refresh: Anuluj odświeżanie
+Downloads:
+  Download: Pobierz
+  Download Video: Pobierz wideo
+  Download Type: Typ pobierania
+  Custom yt-dlp Arguments: Niestandardowe argumenty dla yt-dlp
+  Template Name: Nazwa szablonu
+  Save Template: Zapisz szablon
+  Delete Template: Usuń szablon
+  Template Saved: Zapisano szablon pobierania „{name}”
+  Choose Folder: Zmień
+  Select Folder: Wybierz folder
+  Folder Required: Wybierz folder pobierania, aby umożliwić pobieranie.
+  System Downloads Folder: Systemowy folder pobierania
+  Processing: Przetwarzanie…
+  Download Complete: Pobieranie zakończone
+  Download Cancelled: Pobieranie anulowane
+  Download Failed: Pobieranie nie powiodło się
+  Cancel Download: Anuluj pobieranie
+  yt-dlp Not Found: Nie znaleziono yt-dlp. Zainstaluj go lub ustaw jego ścieżkę w ustawieniach pobierania.
+  Download Complete Template: Pobieranie „{title}” zostało zakończone
+  Download Failed Template: Pobieranie „{title}” nie powiodło się
+  Templates:
+    Video Best: Wideo - najlepsza jakość
+    Video Resolution: Wideo - {resolution}
+    Audio Best: Dźwięk - najlepsza jakość
+    Audio Format: Dźwięk - {format}
+    Custom Arguments: Niestandardowe argumenty dla yt-dlp
+Update to {version}: Zaktualizuj do wersji {version}
+Maximize: Maksymalizuj
+Restore: Przywróć
+Close Window Confirmation:
+  Title: Zamknąć okno?
+  Close Window: Zamknij okno
+  Message: To okno zawiera {count} karty. Czy na pewno chcesz je zamknąć? | To okno zawiera {count} kart. Czy na pewno chcesz je zamknąć?
+Confirmations:
+  Never Ask Again: Nie pytaj ponownie
+  Settings Hint: Możesz ponownie włączyć to potwierdzenie w Ustawienia → Ogólne → Potwierdź przed…
+Close Multiple Tabs Confirmation:
+  Title: Zamknąć wiele kart?
+  Message: Spowoduje to zamknięcie {count} kart.
+  Close Tabs: Zamknij {count} karty | Zamknij {count} kart
+Color Picker:
+  Hue: Odcień
+  Opacity: Nieprzezroczystość
+  Backdrop Blur: Rozmycie tła
+  Hex Color: Kolor w systemie szesnastkowym
+  Apply Color: Zastosuj
+  Reset Color: Zresetuj
+  Copy Color: Kopiuj
+  Copy From Another Color: Skopiuj z innego koloru
+  Color Copied: Kolor skopiowany
+  Invalid Color: Wprowadź prawidłowy kod szesnastkowy koloru
+  Clipboard Unavailable: Schowek niedostępny
+  Saturation and Brightness: Nasycenie i jasność
+Load Multiple Tabs Confirmation:
+  Title: Załadować wiele kart?
+  Message: Spowoduje to załadowanie {count} kart.
+  Load Tabs: Załaduj {count} karty | Załaduj {count} kart
+Unload Multiple Tabs Confirmation:
+  Title: Uśpić wiele kart?
+  Message: Spowoduje to uśpienie {count} kart.
+  Unload Tabs: Uśpij {count} karty | Uśpij {count} kart
 SponsorBlock Disabled on Channel: Funkcja SponsorBlock została wyłączona na kanale {channel}
 SponsorBlock Enabled on Channel: Funkcja SponsorBlock została włączona na kanale {channel}

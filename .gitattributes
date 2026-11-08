@@ -1,0 +1,2 @@
+# signed files must keep their exact bytes
+tests/unit/fixtures/yt-dlp/* -text

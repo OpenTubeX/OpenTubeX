@@ -1,6 +1,41 @@
+import { toRaw } from 'vue'
+import { getContinueWatchingCandidates } from '../../helpers/homeSections'
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
+import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
+import {
+  canMarkHistoryEntryAsWatched,
+  getRetentionCutoff,
+  migrateLegacyHistoryRecord,
+} from '../../helpers/history'
+
+// The datastore cannot index `timeWatched`, so its cleanup query reads every
+// record. Records without a watch time never match it.
+function hasExpiredHistory(records, cutoff) {
+  return records.some(record => record.timeWatched < cutoff)
+}
+
+const continueWatchingCache = new WeakMap()
+// Progress and last-viewed playlist saves keep every record's identity, channel
+// and watched status. Views derived from those skip the frequent playback saves.
+const PLAYBACK_MUTATIONS = new Set([
+  'updateRecordWatchProgressInHistoryCache',
+  'updateRecordLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdsInHistoryCache',
+])
+const CONTINUE_WATCHING_MUTATIONS = new Set([
+  'setHistoryCacheSorted',
+  'upsertToHistoryCache',
+  'updateRecordWatchProgressInHistoryCache',
+  'removeFromHistoryCacheById',
+  'removeMultipleFromHistoryCache',
+  'applyHistorySyncChanges',
+])
 
 const state = {
+  historyRevision: 0,
+  historyEntriesRevision: 0,
+  continueWatchingRevision: 0,
   historyCacheSorted: [],
 
   // Vuex doesn't support Maps, so we have to use an object here instead
@@ -9,6 +44,24 @@ const state = {
 }
 
 const getters = {
+  // Invalidate through mutations instead of collecting reactive dependencies
+  // on tens of thousands of records. Share the result across Home tabs/mounts.
+  getContinueWatchingHistory: state => () => {
+    const history = toRaw(state.historyCacheSorted)
+    let cached = continueWatchingCache.get(history)
+    if (!cached || cached.revision !== state.continueWatchingRevision) {
+      cached = { revision: state.continueWatchingRevision, candidates: getContinueWatchingCandidates(history), entries: [] }
+      continueWatchingCache.set(history, cached)
+    }
+    // Reopening Home must recheck premieres that started without a history
+    // mutation. Keep the unchanged shelf identity for ordinary visits.
+    const entries = cached.candidates.filter(canMarkHistoryEntryAsWatched)
+    if (entries.length !== cached.entries.length || entries.some((entry, index) => entry !== cached.entries[index])) {
+      cached.entries = entries
+    }
+    return cached.entries
+  },
+
   getHistoryCacheSorted(state) {
     return state.historyCacheSorted
   },
@@ -19,9 +72,19 @@ const getters = {
 }
 
 const actions = {
-  async grabHistory({ commit }) {
+  async grabHistory({ commit, rootGetters }) {
     try {
-      const results = await DBHistoryHandlers.find()
+      const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
+      let results = await DBHistoryHandlers.find()
+      if (cutoff !== null) {
+        if (hasExpiredHistory(results, cutoff)) {
+          await DBHistoryHandlers.deleteOlderThan(cutoff)
+          // Other windows may have changed history during the cleanup, and the
+          // main process keeps expired entries they are playing.
+          results = await DBHistoryHandlers.find()
+        }
+        removeExternalMediaPositionsBefore(cutoff)
+      }
 
       const resultsById = {}
       results.forEach(video => {
@@ -35,10 +98,22 @@ const actions = {
     }
   },
 
-  async updateHistory({ commit }, record) {
+  async updateSubscriptionHistory({ commit, dispatch }, update) {
+    const result = await DBHistoryHandlers.updateSubscriptionState(update)
+    if (result.records.length === 1) {
+      commit('upsertToHistoryCache', result.records[0])
+    } else if (result.records.length > 1) {
+      commit('applyHistorySyncChanges', { insertions: [], updates: result.records, deletions: [] })
+    }
+    if (result.seenVideos != null) await dispatch('applySubscriptionSeenVideos', result.seenVideos)
+    return update.metadata
+      ? { repaired: result.records.length, failed: result.failedCount }
+      : result.records.length
+  },
+
+  async updateHistory({ dispatch }, record) {
     try {
-      await DBHistoryHandlers.upsert(record)
-      commit('upsertToHistoryCache', record)
+      await dispatch('updateSubscriptionHistory', { records: [record] })
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -50,7 +125,10 @@ const actions = {
    */
   async overwriteHistory({ commit }, historyItems) {
     try {
-      const sortedRecords = Array.from(historyItems.values())
+      const migratedHistoryItems = new Map(
+        Array.from(historyItems, ([videoId, record]) => [videoId, migrateLegacyHistoryRecord(record)])
+      )
+      const sortedRecords = Array.from(migratedHistoryItems.values())
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
@@ -59,9 +137,35 @@ const actions = {
       await DBHistoryHandlers.overwrite(sortedRecords)
 
       commit('setHistoryCacheSorted', sortedRecords)
-      commit('setHistoryCacheById', Object.fromEntries(historyItems))
+      commit('setHistoryCacheById', Object.fromEntries(migratedHistoryItems))
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
+    }
+  },
+
+  async applyHistorySyncChanges({ commit }, changes) {
+    const migratedChanges = {
+      insertions: changes.insertions.map(migrateLegacyHistoryRecord),
+      updates: changes.updates.map(migrateLegacyHistoryRecord),
+      deletions: changes.deletions,
+    }
+    const skipped = new Set(await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive))
+    if (skipped.size > 0) migratedChanges.insertions = migratedChanges.insertions.filter(record => !skipped.has(record.videoId))
+    commit('applyHistorySyncChanges', migratedChanges)
+  },
+
+  async markAllHistoryAsWatched({ dispatch, state }) {
+    const records = state.historyCacheSorted
+      .filter(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
+      .map(record => ({ ...record, isWatched: true }))
+    if (records.length === 0) return 0
+    try {
+      return await dispatch('updateSubscriptionHistory', { records })
+    } catch (errMessage) {
+      console.error(errMessage)
+      return 0
     }
   },
 
@@ -74,13 +178,36 @@ const actions = {
     }
   },
 
+  async removeHistoryOlderThan({ commit, state }, days) {
+    const cutoff = getRetentionCutoff(days)
+    if (cutoff === null) {
+      return 0
+    }
+
+    try {
+      removeExternalMediaPositionsBefore(cutoff)
+      // The cache mirrors the datastore, so skip its full scan when nothing expired.
+      if (!hasExpiredHistory(toRaw(state.historyCacheSorted), cutoff)) return 0
+      const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
+      // Every history mutation recomputes Home and History and schedules a sync.
+      if (videoIds.length > 0) commit('removeMultipleFromHistoryCache', videoIds)
+      return videoIds.length
+    } catch (errMessage) {
+      console.error(errMessage)
+      return 0
+    }
+  },
+
   async removeAllHistory({ commit }) {
     try {
       await DBHistoryHandlers.deleteAll()
+      clearExternalMediaPositions()
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -131,17 +258,27 @@ const mutations = {
   },
 
   upsertToHistoryCache(state, record) {
-    const i = state.historyCacheSorted.findIndex((currentRecord) => {
+    // Search and shift the raw array, then publish it once. Splicing through
+    // the reactive proxy wrapped and triggered every record it moved.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex((currentRecord) => {
       return record.videoId === currentRecord.videoId
     })
 
     if (i !== -1) {
-      // Already in cache
-      // Must be hoisted to top, remove it and then unshift it
-      state.historyCacheSorted.splice(i, 1)
+      const currentRecord = history[i]
+
+      // Watched-status and other metadata-only updates keep their current position.
+      // A newer timeWatched means the video was watched again and should become the
+      // most recent history entry, which the playing video usually already is.
+      if (i === 0 || record.timeWatched === currentRecord.timeWatched) {
+        state.historyCacheSorted.splice(i, 1, record)
+        state.historyCacheById[record.videoId] = record
+        return
+      }
     }
 
-    state.historyCacheSorted.unshift(record)
+    state.historyCacheSorted = i === -1 ? [record, ...history] : [record, ...history.slice(0, i), ...history.slice(i + 1)]
     state.historyCacheById[record.videoId] = record
   },
 
@@ -201,14 +338,46 @@ const mutations = {
   },
 
   removeFromHistoryCacheById(state, videoId) {
-    for (let i = 0; i < state.historyCacheSorted.length; i++) {
-      if (state.historyCacheSorted[i].videoId === videoId) {
-        state.historyCacheSorted.splice(i, 1)
-        break
-      }
+    // Like upsertToHistoryCache, edit the raw array and publish it once.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex(record => record.videoId === videoId)
+    if (i !== -1) {
+      state.historyCacheSorted = history.slice(0, i).concat(history.slice(i + 1))
     }
 
     delete state.historyCacheById[videoId]
+  },
+
+  removeMultipleFromHistoryCache(state, videoIds) {
+    // Filtering through the proxy would store reactive proxies in the raw array.
+    const videoIdSet = new Set(videoIds)
+    state.historyCacheSorted = toRaw(state.historyCacheSorted).filter(record => !videoIdSet.has(record.videoId))
+
+    for (const videoId of videoIds) {
+      delete state.historyCacheById[videoId]
+    }
+  },
+
+  applyHistorySyncChanges(state, { insertions, updates, deletions }) {
+    const upserts = [...insertions, ...updates]
+    const deletedIds = new Set(deletions)
+    const upsertsById = new Map(upserts.map(record => [record.videoId, record]))
+    const retained = toRaw(state.historyCacheSorted)
+      .filter(record => !deletedIds.has(record.videoId))
+      .map(record => upsertsById.get(record.videoId) ?? record)
+    const retainedIds = new Set(retained.map(record => record.videoId))
+
+    // Replace existing entries in place so stable sorting preserves timestamp ties.
+    state.historyCacheSorted = retained
+      .concat(upserts.filter(record => !retainedIds.has(record.videoId)))
+      .sort((a, b) => b.timeWatched - a.timeWatched)
+
+    for (const videoId of deletions) {
+      delete state.historyCacheById[videoId]
+    }
+    for (const record of upserts) {
+      state.historyCacheById[record.videoId] = record
+    }
   }
 }
 
@@ -216,5 +385,12 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  // Only changes to shelf records invalidate selection. Playlist-only metadata
+  // edits cannot affect membership or any details displayed by Home.
+  mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
+    mutation(state, payload)
+    state.historyRevision++
+    if (!PLAYBACK_MUTATIONS.has(name)) state.historyEntriesRevision++
+    if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
+  }]))
 }

@@ -240,7 +240,7 @@ Settings:
     Auto Load Next Page:
       Label: Lataa seuraava sivu automaattisesti
       Tooltip: Lataa lisäsivut ja kommentit automaattisesti.
-    Open Deep Links In New Window: Avaa FreeTube uudelleenohjatut URL-osoitteet uudessa ikkunassa
+    Open Deep Links In New Window: Avaa OpenTubeX uudelleenohjatut URL-osoitteet uudessa ikkunassa
     Minimize to system tray: Pienennä tehtäväpalkkiin
   Theme Settings:
     Theme Settings: 'Teema'
@@ -361,7 +361,7 @@ Settings:
     Disable Smooth Scrolling: Poista tasainen vieritys käytöstä
     Expand Side Bar by Default: Laajenna sivupalkki oletusarvoisesti
     Hide Side Bar Labels: Piilota sivupalkin nimikkeet
-    Hide FreeTube Header Logo: Piilota FreeTube-otsikkologo
+    Hide OpenTubeX Header Logo: Piilota OpenTubeX-otsikkologo
   Player Settings:
     Player Settings: 'Soitin'
     Play Next Video: 'Toista automaattisesti suositellut videot'
@@ -420,7 +420,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Tilaus'
     Fetch Feeds from RSS: Nouda RSS-syöte
-    Fetch Automatically: Nouda syöte automaattisesti
     'Limit the number of videos displayed for each channel': Rajoita kanavilta näytettyjen videoiden määrää
     Confirm Before Unsubscribing: Vahvista ennen tilauksen peruuttamista
     To: Kohteeseen
@@ -468,7 +467,7 @@ Settings:
     Import History: Tuo historia
     Export NewPipe: Vie NewPipe-tilaukset
     Export YouTube: Vie YouTube-tilaukset
-    Export FreeTube: Vie FreeTube-tilaukset
+    Export OpenTubeX: Vie OpenTubeX-tilaukset
     Export Subscriptions: Vie tilaukset
     Import Subscriptions: Tuo tilaukset
     Select Export Type: Valitse Viennin tyyppi
@@ -482,8 +481,8 @@ Settings:
     Playlist File: Soittolistatiedosto
     History File: Historia-tiedosto
     Subscription File: Tilaustiedosto
-    Export Playlists For Older FreeTube Versions:
-      Label: Vie soittolistat FreeTuben vanhempiin versioihin
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Vie soittolistat OpenTubeXn vanhempiin versioihin
     Search history file: Hakuhistoriatiedosto
     Search history: Hakuhistoria
     Import search history: Tuo hakuhistoria
@@ -553,11 +552,11 @@ Settings:
     Enable Tor / Proxy: Ota käyttöön Tor / välityspalvelin
     Proxy Protocol: Välityspalvelimen protokolla
     Clicking on Test Proxy will send a request to: Napsauttamalla testaa välityspalvelinta lähettää pyynnön kohteeseen
-    Proxy Warning: FreeTubella ei ole sisäänrakennettua välityspalvelinta, mutta voit yhdistää ulkoisella välityspalvelimella, kuten Tor:lla tai jonkin VPN-tarjoajan Socks5:llä.
+    Proxy Warning: OpenTubeXlla ei ole sisäänrakennettua välityspalvelinta, mutta voit yhdistää ulkoisella välityspalvelimella, kuten Tor:lla tai jonkin VPN-tarjoajan Socks5:llä.
     Proxy Username: Välityspalvelimen käyttäjänimi
     Proxy Password: Välityspalvelimen salasana
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Ilmoita sponsoriosuuden yli hypättäessä
+    Notify when sponsor segment is skipped: Näytä ilmoitus ohitetun osion jälkeen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-sponsorieston API-ohjelmointirajapinnan Url-osoite (vakio-osoite on https://sponsor.ajay.app)
     Enable SponsorBlock: Kytke SponsorBlock-sponsoriesto päälle
     SponsorBlock Settings: SponsorBlock
@@ -621,14 +620,14 @@ About:
   GitHub releases: GitHub-julkaisut
   Downloads / Changelog: Lataukset/muutosloki
   Beta: Beta
-  FreeTube Wiki: FreeTuben wiki
+  OpenTubeX Wiki: OpenTubeXn wiki
   Donate: Lahjoita
   Source code: Lähdekoodi
   Discussions: Keskustelut
   AGPLv3: AGPLv3
   Licensed under the {licenseLink}: 'Lisenssi: {licenseLink}'
   Please read the {roomRulesLink}: 'Lue: {roomRulesLink}'
-  FreeTube is made possible by {creditsPageLink}: 'FreeTuben on mahdollistanut: {creditsPageLink}'
+  OpenTubeX is made possible by {creditsPageLink}: 'OpenTubeXn on mahdollistanut: {creditsPageLink}'
 Channel:
   Subscribe: 'Tilaa'
   Unsubscribe: 'Peruuta tilaus'
@@ -640,6 +639,7 @@ Channel:
       Newest: 'Uusimmat'
       Oldest: 'Vanhimmat'
       Most Popular: 'Suosituimmat'
+    This channel does not currently have any videos: 'Tällä kanavalla ei juuri nyt ole yhtään videota'
   Playlists:
     Playlists: 'Soittolistat'
     This channel does not currently have any playlists: 'Tällä kanavalla ei juuri nyt ole yhtään soittolistaa'
@@ -661,7 +661,7 @@ Channel:
   Removed subscription from {count} other channel(s): Poistettu tilaus {count} muulta kanavalta
   Channel has been removed from your subscriptions: Kanava on poistettu tilauksistasi
   Channel Tabs: Kanavavälilehdet
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Tämä kanava on ikärajoitettu, eikä sitä voi tällä hetkellä katsoa FreeTubessa.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Tämä kanava on ikärajoitettu, eikä sitä voi tällä hetkellä katsoa OpenTubeXssa.
   This channel does not exist: Tätä kanavaa ei ole olemassa
   This channel does not allow searching: Tämä kanava ei salli etsintää
   Posts:
@@ -669,7 +669,7 @@ Channel:
     Reveal Answers: Näytä vastaukset
     Hide Answers: Piilota vastaukset
     votes: '{votes} ääntä'
-    Video hidden by FreeTube: Video on piilotettu FreeTuben toimesta
+    Video hidden by OpenTubeX: Video on piilotettu OpenTubeXn toimesta
     View Full Post: Näytä koko julkaisu
   Live:
     Live: Livenä
@@ -741,14 +741,22 @@ Video:
     video: video
     OpenInTemplate: Avaa käyttäen {externalPlayer}
   Sponsor Block category:
-    music offtopic: Musiikki aihepiirin ulkopuolelta
-    interaction: Kanssakäyminen
-    self-promotion: Itsepromootio
-    outro: Loppu
-    intro: Alku
+    music offtopic: 'Musiikki: Musiikiton osa'
+    interaction: Vuorovaikutusmuistutus (tilaaminen)
+    self-promotion: Maksamaton/Itsensä mainostus
+    outro: Loppukortit/-tekstit
+    intro: Tauko/Introanimaatio
     sponsor: Sponsori
-    recap: Kertaus
-    filler: Täyte
+    recap: Esikatselu/Kertaus
+    filler: Toissijaiset kohtaukset/Vitsit
+    hook: Koukku/Tervehdykset
+    highlight: Kohokohta
+    exclusive access: Yksinoikeudellinen ensikatsaus
+  Sponsor Block category short:
+    intro: Tauko
+    interaction: Vuorovaikutusmuistutus
+    music offtopic: Musiikiton
+    filler: Toissijaiset kohtaukset
   Video has been removed from your saved list: Video poistettiin tallennettujen videoiden luettelostasi
   Video has been saved: Video on tallennettu
   Save Video: Tallenna video
@@ -761,16 +769,16 @@ Video:
   Hide Channel: Piilota kanava
 #& Playlists
   IP block: YouTube on estänyt IP-osoitteesi, joten et voi katsella videoita. Yritä vaihtaa toiseen VPN:ään tai välityspalvelimeen.
-  MembersOnly: Vain jäsenille suunnattuja videoita ei voida katsoa FreeTubessa, koska ne vaativat Google-kirjautumisen ja maksullisen jäsenyyden videon lataajan kanavalle.
-  AgeRestricted: Ikärajoitettuja vidoita ei voida katsoa FreeTubessa, koska ne vaativat Google-kirjautumisen ja ikävahvistetun YouTube-tilin.
-  DRMProtected: DRM-suojattuja videoita ei voida katsoa FreeTubessa, koska ne vaativat ei-vapaita, suljetun koodin osia. Jos haluat katsoa tätä videota, katso se YouTuben virallisilla verkkosivuilla DRM sallittuna verkkoselaimen asetuksista.
+  MembersOnly: Vain jäsenille suunnattuja videoita ei voida katsoa OpenTubeXssa, koska ne vaativat Google-kirjautumisen ja maksullisen jäsenyyden videon lataajan kanavalle.
+  AgeRestricted: Ikärajoitettuja vidoita ei voida katsoa OpenTubeXssa, koska ne vaativat Google-kirjautumisen ja ikävahvistetun YouTube-tilin.
+  DRMProtected: DRM-suojattuja videoita ei voida katsoa OpenTubeXssa, koska ne vaativat ei-vapaita, suljetun koodin osia. Jos haluat katsoa tätä videota, katso se YouTuben virallisilla verkkosivuilla DRM sallittuna verkkoselaimen asetuksista.
   More Options: Lisää valintoja
   Save Watched Progress: Tallenna katselun edistyminen
   Watched Progress Saved: Katselun edistyminen tallennettu
   Unlisted: Listaamaton
   DeArrow:
     Show Original Details: Näytä alkuperäiset tiedot
-    Show Modified Details: Näytä muokatut yksityiskohdat
+    Show Modified Details: Näytä muokatut tiedot
   Player:
     TranslatedCaptionTemplate: '{language} (käännetty kielestä "{originalLanguage}")'
     Autoplay is off: Automaattinen toisto on pois päältä
@@ -798,7 +806,7 @@ Video:
       Dropped Frames / Total Frames: 'Pudotetut kehykset: {droppedFrames} / Kehyksiä yhteensä: {totalFrames}'
     You appear to be offline: Näytät olevan offline-tilassa.
     Playback will resume automatically when your connection comes back: Toisto jatkuu automaattisesti, kun verkkoyhteytesi palautuu.
-    Skipped segment: Ohitettu {segmentCategory} osio
+    Skipped segment: '{segmentCategory} ohitettu'
     Audio Tracks: Ääniraitoja
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Mainosta jäljellä: {remindingTimeSeconds} s'
@@ -937,16 +945,15 @@ This video is unavailable because of missing formats. This can happen due to cou
 Download From Site: Lataa sivustolta Napsauta nähdäksesi lisää
 Tooltips:
   General Settings:
-    Preferred API Backend: Valitse taustaohjelma, jota Freetube käyttää datan noutamiseen. Paikallinen API on ohjelmiston sisäinen. Invidious API vaatii yhteyden Invidious-palvelimeen.
+    Preferred API Backend: Valitse taustaohjelma, jota OpenTubeX käyttää datan noutamiseen. Paikallinen API on ohjelmiston sisäinen. Invidious API vaatii yhteyden Invidious-palvelimeen.
     Region for Trending: Valitsee minkä maan Nousevat videot sinulle näytetään.
-    Invidious Instance: Invidious instanssi, jota Freetube käyttää.
-    Thumbnail Preference: Kaikki pikkukuvat Freetubessa korvataan ruudulla videosta sumennettuna tai piilotettuna alkuperäisen pikkukuvan sijaan.
-    Fallback to Non-Preferred Backend on Failure: Kun valitsemasi API kohtaa ongelman, Freetube yrittää automaattisestia käyttää toissijaista vaihtoehtoa.
-    External Link Handling: "Valitse oletuskäyttäytyminen, kun linkkiä, jota ei voi avata FreeTubessa, napsautetaan.\nOletusarvoisesti FreeTube avaa napsautetun linkin oletusselaimessasi.\n"
-    Open Deep Links In New Window: FreeTubeen syötetyt URL:t, esimerkiksi selaimen uudelleenohjauslisäosista tai komentoriviargumenteista johtuen, avataan uudessa ikkunassa.
+    Invidious Instance: Invidious instanssi, jota OpenTubeX käyttää.
+    Thumbnail Preference: Kaikki pikkukuvat OpenTubeXssa korvataan ruudulla videosta sumennettuna tai piilotettuna alkuperäisen pikkukuvan sijaan.
+    Fallback to Non-Preferred Backend on Failure: Kun valitsemasi API kohtaa ongelman, OpenTubeX yrittää automaattisestia käyttää toissijaista vaihtoehtoa.
+    External Link Handling: "Valitse oletuskäyttäytyminen, kun linkkiä, jota ei voi avata OpenTubeXssa, napsautetaan.\nOletusarvoisesti OpenTubeX avaa napsautetun linkin oletusselaimessasi.\n"
+    Open Deep Links In New Window: OpenTubeXen syötetyt URL:t, esimerkiksi selaimen uudelleenohjauslisäosista tai komentoriviargumenteista johtuen, avataan uudessa ikkunassa.
   Subscription Settings:
-    Fetch Feeds from RSS: Kun valittuna, FreeTube käyttää RSS-syötettä oletusmetodin sijaan tilauslistasi hakemisessa. RSS on nopeampi ja ehkäisee IP-estoa, mutta ei anna tietoja, kuten videon kesto tai livetila
-    Fetch Automatically: Kun tämä on käytössä, FreeTube hakee automaattisesti tilauksesi syötteen, kun uusi ikkuna avataan.
+    Fetch Feeds from RSS: Kun valittuna, OpenTubeX käyttää RSS-syötettä oletusmetodin sijaan tilauslistasi hakemisessa. RSS on nopeampi ja ehkäisee IP-estoa, mutta ei anna tietoja, kuten videon kesto tai livetila
   Player Settings:
     Default Media Format: Aseta videon toistamisessa käytätettävä formaatti. DASH-formaatit toistavat korkealaatuisempia videoita. Legacy-formaatit ovat rajoitettu 360p-resoluutioon, mutta käyttävät vähemmän dataa. Audioformaatit ovat vain äänistriimeihin.
     Proxy Videos Through Invidious: Yhdistää Invidious-palvelimeen suoran YouTuben-yhteyden sijaan.
@@ -955,7 +962,7 @@ Tooltips:
   External Player Settings:
     Custom External Player Arguments: Kaikki ne omavalintaiset komentorivin määreet, jotka haluat siirtää eteenpäin ulkoiselle toisto-ohjelmalle.
     Ignore Warnings: Estä varoitukset, kun käytetty ulkoinen toisto-ohjelma ei tue määrättyä toimintamallia (kuten käänteiset soittoluettelot, jne.).
-    Custom External Player Executable: Vakiollisesti FreeTube olettaa, että valittu ulkoinen toisto-ohjelma voidaan löytää PATH-polkuympäristömuuttujan kautta. Mikäli tarvetta ilmenee, voidaan asettaa omavalintainen polku tähän.
+    Custom External Player Executable: Vakiollisesti OpenTubeX olettaa, että valittu ulkoinen toisto-ohjelma voidaan löytää PATH-polkuympäristömuuttujan kautta. Mikäli tarvetta ilmenee, voidaan asettaa omavalintainen polku tähän.
     External Player: Ulkoisen soittimen valitsemisen johdosta näkyy kuvake videon avaamiseen (soittoluettelonkin avaamiseen jos tuettu) ulkoisessa toistimessa. Varoitus, Invidious-asetukset eivät vaikuta ulkoisiin toistimiin.
     DefaultCustomArgumentsTemplate: "(Oletus: '{defaultCustomArguments}')"
     Ignore Default Arguments: Älä lähetä mitään oletusargumentteja ulkoiseen toistimeen videon URL:n lisäksi (esim. toistonopeus, soittolistan URL, jne). Muokatut argumentit kuitenkin lähetetään.
@@ -964,7 +971,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Anna kanava-ID piilottaaksesi kaikki videot, soittolistat ja itse kanavan näkymästä haussa, trendaamisessa, suosituimmissa ja suositelluissa. Annetun kanava-ID:n on oltava täysin oikein ja kirjainkoolla on merkitystä.
     Hide Subscriptions Live: Tämä asetus ohitetaan koko sovelluksen laajuisella ”{appWideSetting}” asetuksella, joka on ”{subsection}” osion ”{settingsSection}” osiossa
-    Hide Videos, Playlists and Channels Containing Text: Syötä sana, sanan osa tai fraasi (kirjainkoolla merkitystä) piilottaaksesi kaikki videot, soittolistat ja kanavat, joissa piilotettava merkkijono esiintyy. Tämä asetus vaikuttaa koko FreeTubeen, poislukien historian, omat soittolistat ja soittolistojen sisällä olevat videot.
+    Hide Videos, Playlists and Channels Containing Text: Syötä sana, sanan osa tai fraasi (kirjainkoolla merkitystä) piilottaaksesi kaikki videot, soittolistat ja kanavat, joissa piilotettava merkkijono esiintyy. Tämä asetus vaikuttaa koko OpenTubeXen, poislukien historian, omat soittolistat ja soittolistojen sisällä olevat videot.
     Hide Videos on Watch: Piilottaa katsotut videot Videot, Lyhyet ja Live -välilehdistä tilaus- ja kanavasivuilla. Tämä ei vaikuta Koti-välilehteen kanavasivuilla
   SponsorBlock Settings:
     UseDeArrowTitles: Korvaa videon otsikot käyttäjien lähettämillä DeArrow’n otsikoilla.

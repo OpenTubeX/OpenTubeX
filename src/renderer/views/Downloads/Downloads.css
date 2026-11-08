@@ -1,0 +1,357 @@
+.downloadsPage {
+  box-sizing: border-box;
+  inline-size: 100%;
+  container: downloads-page / inline-size;
+}
+
+.downloadsHeader,
+.downloadRow,
+.downloadMain,
+.downloadActions {
+  align-items: center;
+  display: flex;
+}
+
+.downloadsHeader {
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  min-block-size: 40px;
+  margin-block-end: 20px;
+}
+
+.downloadsHeader p {
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.addDownloadPrompt {
+  display: grid;
+  gap: 20px;
+  min-inline-size: min(420px, 75vw);
+}
+
+.downloadHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-inline-start: auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.downloadHeaderActions :deep(.btn) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.downloadHeaderActions :deep(.btn svg) {
+  flex-shrink: 0;
+}
+
+.downloadRow h3,
+.downloadRow p {
+  margin-block: 4px;
+}
+
+.downloadSection {
+  margin-block-start: 0;
+}
+
+.downloadSection + .downloadSection {
+  margin-block-start: 28px;
+}
+
+.downloadSectionHeading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.downloadSearch {
+  margin-block-start: 12px;
+  max-inline-size: 420px;
+}
+
+.downloadFilters {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(125px, 1fr));
+  margin-block: 16px 20px;
+}
+
+.downloadFilters > * {
+  min-inline-size: 0;
+}
+
+.downloadNoResults {
+  color: var(--secondary-text-color);
+  padding-block: 24px;
+  text-align: center;
+}
+
+/* Rows of a section form one segmented group: large outer corners, tight
+   inner ones. */
+.downloadRow {
+  background: var(--secondary-card-bg-color);
+  border-radius: var(--shape-corner-extra-small);
+  gap: 20px;
+  justify-content: space-between;
+  margin-block: 0;
+  padding: 16px;
+}
+
+.videoSwipeFrame + .videoSwipeFrame {
+  margin-block-start: 2px;
+}
+
+:not(.videoSwipeFrame) + .videoSwipeFrame {
+  margin-block-start: 10px;
+}
+
+.videoSwipeFrame:last-child > .downloadRow {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+:not(.videoSwipeFrame) + .videoSwipeFrame > .downloadRow {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.downloadMain {
+  flex: 1 1 auto;
+  gap: 16px;
+  min-inline-size: 0;
+}
+
+.downloadThumbnail {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--shape-corner-medium);
+  flex: none;
+  inline-size: 144px;
+  object-fit: cover;
+}
+
+.compact.downloadRow {
+  gap: 12px;
+  padding: 12px;
+}
+
+.compact .downloadMain {
+  gap: 12px;
+}
+
+.compact .downloadThumbnail {
+  inline-size: 96px;
+}
+
+.downloadDetails {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.downloadDetails h3 {
+  overflow-wrap: anywhere;
+}
+
+.downloadChannel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.downloadStatus,
+.downloadChannel,
+.downloadAvailability,
+.downloadSpaceWarning,
+.downloadSummary,
+.destination {
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+}
+
+.downloadAvailability {
+  color: var(--primary-color);
+}
+
+.downloadAvailability.missing {
+  color: var(--error-text-color);
+}
+
+.downloadSpaceWarning {
+  color: var(--primary-color);
+}
+
+.downloadError {
+  color: var(--error-text-color);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.downloadWarning {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+}
+
+.destinationList {
+  list-style: none;
+  margin-block: 4px;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* truncating would hide the file name, which is the interesting part of the path */
+.destination {
+  overflow-wrap: anywhere;
+}
+
+.downloadActions {
+  flex: none;
+  gap: 6px;
+}
+
+.compact .downloadActions {
+  gap: 4px;
+}
+
+.progressTrack {
+  background: color-mix(in srgb, var(--accent-color) 24%, var(--secondary-card-bg-color));
+  block-size: 7px;
+  border-radius: var(--shape-corner-extra-small);
+  margin-block: 10px;
+  overflow: hidden;
+}
+
+.progressFill {
+  background: var(--accent-color);
+  block-size: 100%;
+  inline-size: 100%;
+  transform-origin: left;
+  transition: transform var(--motion-default-effects);
+}
+
+.progressFill:dir(rtl) {
+  transform-origin: right;
+}
+
+.progressFill.indeterminate {
+  animation: download-pulse 1.5s ease-in-out infinite;
+  transform: none !important;
+}
+
+.emptyDownloads {
+  color: var(--secondary-text-color);
+  padding-block: 90px;
+  text-align: center;
+}
+
+/* Tonal icon circle */
+.emptyDownloads > .ft-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1em;
+  block-size: 1em;
+  padding: 0.5em;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  color: var(--primary-color);
+  font-size: 3rem;
+}
+
+.emptyDownloads > h2,
+.downloadSection h2 {
+  letter-spacing: -0.01em;
+}
+
+@keyframes download-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@container downloads-page (width <= 600px) {
+  .downloadFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .downloadRow:not(.compact) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadRow:not(.compact) .downloadActions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .downloadThumbnail {
+    inline-size: 112px;
+  }
+
+  .compact .downloadThumbnail {
+    inline-size: 80px;
+  }
+}
+
+@container downloads-page (width <= 420px) {
+  .downloadFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compact.downloadRow {
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .compact .downloadMain {
+    gap: 8px;
+  }
+
+  .downloadRow:not(.compact) .downloadMain {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadThumbnail {
+    inline-size: min(180px, 100%);
+    margin-inline: auto;
+  }
+
+  .compact .downloadThumbnail {
+    inline-size: 64px;
+    margin-inline: 0;
+  }
+}
+
+.downloadActions :deep(.btn) {
+  margin: 0;
+}
+
+.downloadSummary {
+  overflow-wrap: anywhere;
+}
+
+.downloadMetadata {
+  inline-size: min(480px, 65vw);
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.downloadMetadata h3 {
+  white-space: normal;
+}
+
+.downloadMetadata .downloadThumbnail {
+  display: block;
+  inline-size: 144px;
+  margin-inline: auto;
+}

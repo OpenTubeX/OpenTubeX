@@ -1,4 +1,6 @@
 import { base64EncodeUtf8, createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
+import { createYatteeAuthorization } from '../../helpers/api/yattee'
+import { normalizeYatteeServerUrl } from '../../../apiBackends'
 
 const state = {
   currentInvidiousInstance: '',
@@ -22,6 +24,20 @@ const getters = {
 
   getInvidiousInstancesList(state) {
     return state.invidiousInstancesList
+  },
+
+  /** The server that Invidious-compatible API requests go to. */
+  getApiServerUrl(state, _getters, rootState) {
+    return rootState.settings.backendPreference === 'yattee'
+      ? normalizeYatteeServerUrl(rootState.settings.yatteeServerUrl)
+      : state.currentInvidiousInstanceUrl
+  },
+
+  getApiServerAuthorization(state, _getters, rootState) {
+    const { backendPreference, yatteeUsername, yatteePassword } = rootState.settings
+    return backendPreference === 'yattee'
+      ? createYatteeAuthorization(yatteeUsername, yatteePassword)
+      : state.currentInvidiousInstanceAuthorization
   }
 }
 
@@ -74,6 +90,15 @@ const actions = {
   }
 }
 
+/** @param {string} value */
+function decodeCredential(value) {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 const mutations = {
   setCurrentInvidiousInstance(state, value) {
     state.currentInvidiousInstance = value
@@ -86,14 +111,15 @@ const mutations = {
     let authorization = null
 
     if (url && (url.username.length > 0 || url.password.length > 0)) {
-      authorization = `Basic ${base64EncodeUtf8(`${url.username}:${url.password}`)}`
+      // URL percent-encodes credentials, but servers compare the raw values
+      authorization = `Basic ${base64EncodeUtf8(`${decodeCredential(url.username)}:${decodeCredential(url.password)}`)}`
     }
 
     state.currentInvidiousInstanceAuthorization = authorization
 
     let instanceUrl
 
-    if (url && authorization) {
+    if (url) {
       url.username = ''
       url.password = ''
 
@@ -103,14 +129,6 @@ const mutations = {
     }
 
     state.currentInvidiousInstanceUrl = instanceUrl
-
-    if (process.env.IS_ELECTRON) {
-      if (authorization) {
-        window.ftElectron.setInvidiousAuthorization(authorization, instanceUrl)
-      } else {
-        window.ftElectron.clearInvidiousAuthorization()
-      }
-    }
   },
 
   setInvidiousInstancesList(state, value) {

@@ -1,0 +1,272 @@
+import { expect } from '@playwright/test'
+
+import { sel } from './app.mjs'
+
+export const activeTab = '.tabContent[aria-hidden="false"]'
+
+export const mobileMiniPlayerRegions = ['thumbnail', 'title', 'uploader', 'left edge', 'right edge', 'top padding', 'bottom padding']
+
+/**
+ * Returns a rendered point in the mini-player's reopen area for touch tests.
+ * @param {HTMLElement} element
+ * @param {string} region
+ */
+export function mobileMiniPlayerReturnPoint(element, region) {
+  const bar = element.getBoundingClientRect()
+  const details = element.querySelector('.mobileMiniBarDetails').getBoundingClientRect()
+  const label = element.querySelector(region === 'uploader' ? '.mobileMiniBarUploader' : '.mobileMiniBarTitle').getBoundingClientRect()
+  return {
+    x: region === 'thumbnail'
+      ? bar.left + 60
+      : ['left edge', 'bottom padding'].includes(region)
+          ? bar.left + (region === 'bottom padding' ? 8 : 1)
+          : region === 'right edge' ? bar.right - 1 : details.left + details.width / 2,
+    y: region === 'top padding'
+      ? bar.top + 20
+      : region === 'bottom padding'
+        ? bar.bottom - 8
+        : ['title', 'uploader'].includes(region) ? label.top + label.height / 2 : bar.top + bar.height / 2
+  }
+}
+
+/**
+ * Opens a watch page and waits for its player, or skips when the live API
+ * refuses to serve it (bot checks and IP blocks on CI runners and VPNs),
+ * which leaves the page shell without any video data or replaces the player
+ * with an error message.
+ *
+ * The metadata hydrates before the streams do, so the error has to win over a
+ * loaded title: an IP block still renders the title, description and
+ * recommendations, only the player is missing.
+ */
+export async function openVideoOrSkip(test, page, video) {
+  await page.locator(sel.searchInput).fill(video.url)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${video.id}`))
+
+  const title = page.locator(`${activeTab} .videoTitle`)
+  const errorMessage = page.locator(`${activeTab} .errorMessage`)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  let state = 'waiting'
+  const settled = await expect
+    .poll(async () => {
+      if (await errorMessage.isVisible().catch(() => false)) {
+        state = (await errorMessage.textContent())?.trim() ?? 'unavailable'
+      } else if (await player.isVisible().catch(() => false)) {
+        const titleText = await title.textContent().catch(() => '') ?? ''
+        if (titleText.includes(video.title)) {
+          state = 'loaded'
+        }
+      }
+      return state === 'waiting' ? 'waiting' : 'done'
+    }, { timeout: 60_000, message: 'waiting for the watch page to load' })
+    .toBe('done')
+    .then(() => true, () => false)
+
+  test.skip(!settled || state !== 'loaded', `watch page unavailable from the live API: ${state}`)
+}
+
+/**
+ * Asserts that the scroll mini player sits in the bottom right corner.
+ *
+ * @param {import('@playwright/test').Locator} player
+ * @param {{ width: number, height: number }} viewport
+ */
+export async function expectDockedToBottomRight(player, viewport, margin = 16) {
+  // Polled because the layout animation skews the box for its first 300ms.
+  await expect.poll(async () => {
+    const box = await player.boundingBox()
+    if (!box) return null
+
+    return {
+      right: Math.round(viewport.width - (box.x + box.width)),
+      bottom: Math.round(viewport.height - (box.y + box.height))
+    }
+  }).toEqual({ right: margin, bottom: margin })
+}
+
+/**
+ * Finds the mounted Watch component. Pass this function directly to
+ * `page.evaluateHandle()` so the returned Vue component remains in the page.
+ */
+export function findWatchComponent() {
+  const app = document.querySelector('#app')?.__vue_app__
+  const find = (vnode) => {
+    if (vnode?.component?.type?.name === 'Watch' || vnode?.component?.refs?.player) return vnode.component
+    if (vnode?.component?.subTree) {
+      const match = find(vnode.component.subTree)
+      if (match) return match
+    }
+    if (Array.isArray(vnode?.children)) {
+      for (const child of vnode.children) {
+        const match = find(child)
+        if (match) return match
+      }
+    }
+    return null
+  }
+
+  return find(app?._container?._vnode)
+}
+
+/**
+ * Opens a video that is served entirely from local mocks (see
+ * `mockPlayableWatchPage` in watch.mjs), so nothing has to be skipped.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} [videoId]
+ * @param {{ waitForPlayback?: boolean }} [options] skip the wait when something
+ * holds back playback, such as a native caption track that is still loading
+ */
+export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw', { waitForPlayback: wait = true } = {}) {
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  // Switching videos keeps the previous player mounted and playing until its
+  // replacement mounts, so wait for it to leave before waiting for playback.
+  const previousPlayer = !new RegExp(`#\\/watch\\/${videoId}`).test(page.url()) && await player.count() > 0
+    ? await player.elementHandle()
+    : null
+  try {
+    await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${videoId}`))
+    if (previousPlayer) {
+      await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+    }
+  } finally {
+    await previousPlayer?.dispose()
+  }
+  await expect(player).toBeVisible({ timeout: 30_000 })
+
+  return wait ? waitForPlayback(page) : page.locator(`${activeTab} video`)
+}
+
+/**
+ * Waits until the video in the active tab plays and returns its locator.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export async function waitForPlayback(page) {
+  const video = page.locator(`${activeTab} video`)
+
+  // A restored watch position moves currentTime before autoplay starts, so
+  // also wait for media to have played. Pausing the element directly before
+  // that leaves the player's autoplay pending.
+  await expect
+    .poll(
+      () => video.evaluate((element) => element.currentTime > 0 && element.played.length > 0).catch(() => false),
+      { timeout: 60_000, message: 'waiting for playback to start' }
+    )
+    .toBe(true)
+
+  return video
+}
+
+/**
+ * Resumes a paused video once its source has loaded. The player can replace
+ * the source while it loads, which aborts an earlier `play()`.
+ *
+ * @param {import('@playwright/test').Locator} video
+ */
+export async function playWhenLoaded(video) {
+  await expect
+    .poll(() => video.evaluate(element => element.readyState), { message: 'waiting for the video metadata' })
+    .toBeGreaterThanOrEqual(1)
+  await video.evaluate(async element => {
+    if (element.paused) await element.play()
+  })
+}
+
+/**
+ * Clicks an action in the fullscreen or full-window action pill.
+ *
+ * The pill only takes the pointer while Shaka's controls are shown, and it
+ * drops below them while the seek bar or a control button is hovered, for
+ * example right after clicking the full-window button. Playwright does not
+ * move the pointer while another element intercepts a click, so move it to
+ * the player's corner first, which also reveals the controls. Pause playback
+ * beforehand: while playing, the controls hide again after a few idle seconds.
+ *
+ * @param {import('@playwright/test').Locator} player the `.ftVideoPlayer`
+ * @param {string} action selector of the action button
+ */
+export async function clickFullscreenAction(player, action) {
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+  await player.locator(action).click()
+}
+
+/**
+ * Waits for playback to start in the active tab and returns the video
+ * locator. If YouTube blocks media streaming from this IP (common on CI
+ * runners and VPNs), the test is skipped with a clear reason instead of
+ * timing out - tests that don't depend on playback keep running.
+ */
+export async function waitForPlaybackOrSkip(test, page) {
+  const video = page.locator(`${activeTab} video`)
+  // YouTube often refuses blocked runners as an unplayable video or a bot check
+  // instead, and the error can appear after the player.
+  const blocked = page.locator(`${activeTab} .errorMessage`, {
+    hasText: /blocked your IP address|^\s*\[(UNPLAYABLE|LOGIN_REQUIRED)\]/i
+  })
+
+  let state = 'waiting'
+  await expect
+    .poll(async () => {
+      if (await blocked.isVisible().catch(() => false)) {
+        state = 'blocked'
+        return 'done'
+      }
+      const currentTime = await video.evaluate((el) => el.currentTime).catch(() => 0)
+      if (currentTime > 0) {
+        state = 'playing'
+        return 'done'
+      }
+      return 'waiting'
+    }, { timeout: 60_000, message: 'waiting for playback to start or an IP-block error' })
+    .toBe('done')
+
+  test.skip(state === 'blocked', `YouTube refused playback from this IP: ${await blocked.textContent().catch(() => '')}`)
+  return video
+}
+
+/**
+ * Opens the caption languages from the open overflow menu.
+ * @param {import('@playwright/test').Locator} player
+ */
+export async function openCaptionLanguages(player) {
+  await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+  await settleMenuZoom(player)
+}
+
+/**
+ * Opens the player options and waits for them to grow in. Playwright retries a
+ * click on an entry that is still moving, and its third attempt scrolls the
+ * entry to the middle of the window, which can move the player under the top bar.
+ * @param {import('@playwright/test').Locator | import('@playwright/test').Page} player
+ */
+export async function openPlayerOptions(player) {
+  await player.locator('.shaka-overflow-menu-button').click()
+  await settleMenuZoom(player)
+}
+
+/**
+ * Waits for the overflow menu to open, or to zoom between its views, which scales its boxes.
+ * @param {import('@playwright/test').Locator | import('@playwright/test').Page} player
+ */
+export async function settleMenuZoom(player) {
+  await player.locator('.shaka-overflow-menu').evaluate(menu => Promise.all(menu.getAnimations({ subtree: true })
+    .filter(animation => /^ft-menu-(open|zoom-)/.test(animation.animationName ?? ''))
+    .map(animation => animation.finished.catch(() => {}))))
+}
+
+/**
+ * Opens a menu of the caption style from the open overflow menu, through the
+ * Options button of the captions menu, for example `.shaka-caption-font-color-button`.
+ * @param {import('@playwright/test').Locator} player
+ * @param {string} button
+ */
+export async function openCaptionStyleMenu(player, button) {
+  await openCaptionLanguages(player)
+  await player.locator('.shaka-overflow-menu .ft-caption-options-button').click()
+  await player.locator(`.shaka-overflow-menu ${button}`).click()
+}

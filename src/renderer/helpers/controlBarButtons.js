@@ -1,0 +1,78 @@
+// Buttons at the end of the player's control bar. Mobile players always use
+// the compact layout, which never shows the desktop-only buttons. The chapters
+// button stays next to the time, wherever it is in the order.
+export const CONTROL_BAR_BUTTON_DEFINITIONS = Object.freeze([
+  { id: 'chapters', labelKey: 'Chapters.Chapters', icon: ['fas', 'list'] },
+  { id: 'quality', labelKey: 'Settings.Interface Customizer.Resolution', icon: ['fas', 'sliders-h'], desktopOnly: true },
+  { id: 'audioTracks', labelKey: 'Video.Player.Audio Tracks', icon: ['fas', 'podcast'], desktopOnly: true },
+  { id: 'playbackRate', labelKey: 'Settings.Player Settings.Playback Speed', icon: ['fas', 'gauge'], desktopOnly: true },
+  { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'], desktopOnly: true },
+  { id: 'screenshot', labelKey: 'Video.Player.Take Screenshot', icon: ['fas', 'camera'], desktopOnly: true },
+  { id: 'autoplay', labelKey: 'Video.Autoplay', icon: ['fas', 'autoplay'], desktopOnly: true },
+  { id: 'captions', labelKey: 'Settings.Player Settings.Caption Appearance.Captions', icon: ['fas', 'closed-captioning'] },
+  { id: 'menu', labelKey: 'Settings.Interface Customizer.Player Menu', icon: ['fas', 'gear'], required: true },
+  { id: 'pictureInPicture', labelKey: 'Settings.Player Settings.Default Viewing Mode.Picture in Picture', icon: ['fas', 'picture-in-picture'] },
+  { id: 'theatreMode', labelKey: 'Video.Player.Theatre Mode', icon: ['fas', 'theatre-mode'], desktopOnly: true },
+  { id: 'fullWindow', labelKey: 'Video.Player.Full Window', icon: ['fas', 'full-window'], desktopOnly: true },
+  { id: 'fullscreen', labelKey: 'Settings.Interface Customizer.Fullscreen', icon: ['fas', 'fullscreen'] },
+])
+
+const IS_MOBILE = !!process.env.IS_CAPACITOR
+
+/** @param {boolean} mobile */
+export function getControlBarButtonDefinitions(mobile = IS_MOBILE) {
+  return CONTROL_BAR_BUTTON_DEFINITIONS.filter(button => !mobile || !button.desktopOnly)
+}
+
+/**
+ * Matches the layout each platform had before the buttons were customizable.
+ * @param {boolean} mobile
+ */
+export function getDefaultControlBarButtons(mobile = IS_MOBILE) {
+  return mobile
+    ? ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen']
+    : ['chapters', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen']
+}
+
+export const DEFAULT_CONTROL_BAR_BUTTONS = Object.freeze(getDefaultControlBarButtons())
+
+/**
+ * Buttons of the full control bar that are not on it, which the player menu
+ * offers instead. Capacitor tablets and TVs also use the full control bar,
+ * although their customizer only offers the compact buttons, so the
+ * desktop-only buttons that they support stay reachable this way.
+ * @param {string[]} controlBarButtons
+ * @param {boolean} capacitor
+ */
+export function getRemovedControlBarButtons(controlBarButtons, capacitor = IS_MOBILE) {
+  return getControlBarButtonDefinitions(false)
+    .map(({ id }) => id)
+    .filter(id => !controlBarButtons.includes(id) && !(capacitor && id === 'fullWindow'))
+}
+
+/**
+ * Removed control bar buttons that the Interface Customizer previews in the
+ * player menu, in their definition order. Captions have their own menu entry,
+ * and fullscreen has none. On Capacitor, phones use the compact menu, which
+ * always has autoplay but no theatre mode, and tablets and TVs only show theatre
+ * mode in wide players, so the preview leaves it out there.
+ * @param {string[]} controlBarButtons
+ * @param {boolean} capacitor
+ */
+export function getPreviewMenuControlBarButtons(controlBarButtons, capacitor = IS_MOBILE) {
+  return getRemovedControlBarButtons(controlBarButtons, capacitor)
+    .filter(id => id !== 'captions' && id !== 'fullscreen' && !(capacitor && id === 'theatreMode'))
+}
+
+/**
+ * Removes unknown and duplicate buttons while preserving the selected order.
+ * The player menu holds every other control, so it is always kept.
+ * @param {unknown} value
+ * @param {boolean} mobile
+ */
+export function normalizeControlBarButtons(value, mobile = IS_MOBILE) {
+  if (!Array.isArray(value)) return getDefaultControlBarButtons(mobile)
+  const ids = new Set(getControlBarButtonDefinitions(mobile).map(({ id }) => id))
+  const buttons = [...new Set(value.filter(id => ids.has(id)))]
+  return buttons.includes('menu') ? buttons : [...buttons, 'menu']
+}

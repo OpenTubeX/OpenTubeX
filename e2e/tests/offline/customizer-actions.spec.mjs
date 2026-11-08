@@ -1,0 +1,64 @@
+import { test, expect, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+
+for (const { uiScale, width, iconPack, colorScheme } of [
+  { uiScale: 100, width: 1100, iconPack: 'material', colorScheme: 'dark' },
+  { uiScale: 125, width: 420, iconPack: 'remix', colorScheme: 'light' },
+]) {
+  test.describe(`customizer actions at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          uiScale,
+          iconPack,
+          baseTheme: 'system',
+          systemDarkTheme: 'dark',
+          systemLightTheme: 'light',
+          mainColor: 'Red',
+          secColor: 'Blue',
+        }
+      }
+    })
+
+    for (const { subpage, tab, rowSelector, buttonCount = 3 } of [
+      { subpage: 'quick-settings', tab: 'quick settings', rowSelector: '.selectedSetting' },
+      { subpage: 'navigation', tab: 'navigation', rowSelector: '.selectedItem' },
+      { subpage: 'fullscreen-actions', tab: 'fullscreen actions', rowSelector: '.selectedAction' },
+      { subpage: 'control-bar', tab: 'control bar', rowSelector: '[data-placement-section="menu"] .placementItem', buttonCount: 4 },
+    ]) {
+      test(`keeps ${subpage} hover and focus backgrounds circular`, async ({ app, page }) => {
+        await setWindowSize(app, page, { width, height: 800 })
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await openInterfaceCustomizer(page, tab)
+        const row = page.locator(rowSelector).nth(1)
+        const buttons = row.locator('.iconButton')
+        await expect(buttons).toHaveCount(buttonCount)
+        for (const button of await buttons.all()) {
+          await button.hover()
+          await expect.poll(() => button.evaluate(element => {
+            const { width, height } = element.getBoundingClientRect()
+            return Math.abs(width - height)
+          }), 'Circular action buttons have equal width and height').toBeLessThanOrEqual(0.1)
+          await expect(button).toHaveCSS('border-radius', '50%')
+          // Disabled actions, such as moving the last row down, have no hover fill
+          if (await button.isDisabled()) continue
+          await expect.poll(() => button.evaluate(element => (
+            getComputedStyle(element).backgroundColor !==
+            getComputedStyle(element.closest('li')).backgroundColor
+          ))).toBe(true)
+        }
+        const remove = buttons.last()
+        await page.mouse.move(0, 0)
+        await remove.focus()
+        await remove.press('Tab')
+        await page.keyboard.press('Shift+Tab')
+        await expect(remove).toBeFocused()
+        await expect.poll(() => remove.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+        await expect.poll(() => remove.evaluate(element => (
+          getComputedStyle(element).backgroundColor !==
+          getComputedStyle(element.closest('li')).backgroundColor
+        ))).toBe(true)
+      })
+    }
+  })
+}

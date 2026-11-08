@@ -1,0 +1,372 @@
+.downloadPromptContent {
+  --settings-control-margin: 7px 0;
+  --input-bottom-spacing: 0;
+
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-block-size: calc(90vh - 80px);
+  overflow: hidden;
+}
+
+:deep(.downloadPromptCard) {
+  display: flex;
+  flex-direction: column;
+  inline-size: min(1180px, 94vw);
+  overflow: hidden;
+  padding-block: 0;
+}
+
+.downloadHeader {
+  box-sizing: border-box;
+  flex: none;
+  inline-size: 100%;
+  padding-block: 12px 8px;
+  padding-inline: 14px;
+  text-align: center;
+}
+
+.downloadKind {
+  color: var(--secondary-text-color);
+  font-size: 0.85rem;
+  margin-block: 0 4px;
+  margin-inline: 0;
+}
+
+.downloadVideoTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.downloadOptions {
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  max-block-size: calc(90vh - 210px);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding-block: 2px 10px;
+  padding-inline: 12px;
+  scrollbar-gutter: stable;
+}
+
+.optionSection {
+  padding-block: 10px;
+}
+
+.fixedTemplateSection {
+  --settings-control-margin: 7px 0;
+
+  flex: none;
+  padding-block: 2px 10px;
+  padding-inline: 12px;
+}
+
+.optionSection h3 {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  margin-block: 0 12px;
+  margin-inline: 0;
+}
+
+.templateControls {
+  --settings-control-margin: 7px;
+
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  inline-size: 100%;
+}
+
+.templateActionButton {
+  flex: none;
+  margin-block: 0;
+}
+
+.fullWidth {
+  flex: 1 1 300px;
+  inline-size: 100%;
+}
+
+.downloadOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: calc(100% - 40px);
+  margin-inline-end: 40px;
+}
+
+.optionGrid,
+.toggleGrid {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.optionGrid > :deep(.select) {
+  inline-size: 100%;
+}
+
+.segmentGrid {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  inline-size: min(500px, 100%);
+  margin-inline: auto;
+}
+
+.segmentGrid > :deep(.ft-input-component) {
+  min-inline-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.timeRangeSeparator {
+  margin-block-start: 7px;
+}
+
+.timeRangeSeparator::before {
+  content: '–';
+}
+
+.centeredToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 16px;
+}
+
+.centeredToggle > :deep(.switch-ctn) {
+  inline-size: auto;
+}
+
+.sponsorCategories {
+  display: grid;
+  gap: 2px 18px;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-block-start: 0;
+  margin-inline: auto;
+}
+
+.sponsorCategories :deep(.checkboxTitle) {
+  grid-column: 1 / -1;
+}
+
+.disabledOptions {
+  opacity: 0.4;
+}
+
+.saveTemplatePrompt {
+  inline-size: min(420px, 75vw);
+  padding-block: 0 10px;
+  padding-inline: 10px;
+}
+
+.subtitleLanguages {
+  margin-block-start: 23px;
+}
+
+.downloadProgress {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-block: 30px;
+  padding-inline: 20px;
+}
+
+.downloadFooter {
+  flex: none;
+  padding-block: 8px 10px;
+  padding-inline: 12px;
+}
+
+.activeDownloadFooter {
+  padding-block-start: 30px;
+}
+
+.downloadFolderRow {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-block: 0 10px;
+  margin-inline: 0;
+  min-block-size: 24px;
+  overflow-wrap: anywhere;
+}
+
+.chooseFolderButton {
+  flex: none;
+}
+
+.downloadProgressBarTrack {
+  background-color: #9e9e9e;
+  block-size: 8px;
+  border-radius: var(--shape-corner-extra-small);
+  margin-block-end: 10px;
+  overflow: hidden;
+}
+
+.downloadProgressState {
+  inline-size: min(600px, 100%);
+  margin-block-start: 20px;
+  margin-inline: auto;
+}
+
+.downloadStatusLine {
+  margin: 0;
+  text-align: center;
+}
+
+.downloadProgressBarFill {
+  background-color: var(--accent-color);
+  block-size: 100%;
+  border-radius: var(--shape-corner-extra-small);
+  inline-size: 100%;
+  transform-origin: left;
+  transition: transform var(--motion-default-effects);
+}
+
+.downloadProgressBarFill:dir(rtl) {
+  transform-origin: right;
+}
+
+.downloadProgressBarFill.indeterminate {
+  animation: download-progress-indeterminate 1.5s ease-in-out infinite;
+  transform: none !important;
+}
+
+.downloadErrorDetails {
+  color: var(--error-text-color);
+  font-family: monospace;
+  font-size: 12px;
+  inline-size: min(600px, 100%);
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+  text-align: start;
+
+  /* yt-dlp's messages are joined with newlines, which centered prose would run together */
+  white-space: pre-wrap;
+}
+
+.downloadWarning {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  margin-block-end: 0;
+  text-align: center;
+}
+
+@keyframes download-progress-indeterminate {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  :deep(.downloadPromptCard) {
+    inline-size: 88vw;
+  }
+
+  .downloadPromptContent {
+    max-block-size: calc(90vh - 70px);
+  }
+
+  .optionGrid,
+  .toggleGrid,
+  .sponsorCategories {
+    grid-template-columns: 1fr;
+  }
+}
+
+.advancedDownloadOptions summary {
+  cursor: pointer;
+  min-block-size: var(--phone-touch-target, 48px);
+  box-sizing: border-box;
+  padding-block: 12px;
+}
+
+@media (width <= 600px), (height <= 600px) {
+  :deep(.downloadPromptCard) {
+    min-block-size: 0;
+  }
+
+  .downloadPromptContent {
+    flex: 1;
+    min-block-size: 0;
+    max-block-size: none;
+  }
+
+  .downloadOptions {
+    flex: 1;
+    max-block-size: none;
+  }
+
+  .downloadVideoTitle {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .downloadFolderRow {
+    flex-wrap: wrap;
+  }
+
+  .chooseFolderButton {
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .optionGrid,
+  .toggleGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (height <= 400px) {
+  :global(.promptCard.downloadPromptCard.fixedLayout) {
+    padding-block: 0;
+  }
+
+  .downloadHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-block: 4px;
+  }
+
+  .downloadKind {
+    flex: none;
+    margin-block: 0;
+  }
+
+  .downloadVideoTitle {
+    min-inline-size: 0;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .downloadFooter:has(.downloadFolderRow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .downloadFolderRow {
+    flex-wrap: nowrap;
+    margin-block: 0;
+  }
+
+  .downloadFolderRow > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

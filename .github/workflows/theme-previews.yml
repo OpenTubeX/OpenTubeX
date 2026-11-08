@@ -1,0 +1,112 @@
+name: Theme previews
+
+on:
+  discussion:
+    types: [ created, edited, category_changed ]
+  workflow_dispatch:
+    inputs:
+      discussion:
+        description: Theme discussion number to capture or refresh
+        required: true
+        type: number
+
+permissions: {}
+
+concurrency:
+  group: theme-preview-${{ github.event.discussion.number || inputs.discussion }}
+  # Let publication finish before the next edit checks the existing comment.
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: github.event_name == 'workflow_dispatch' || github.event.discussion.category.slug == 'themes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      discussions: write
+    env:
+      THEME_PREVIEW_DIR: .tmp/theme-preview
+      DISCUSSION_NUMBER: ${{ github.event.discussion.number || inputs.discussion }}
+    steps:
+    - name: Check out trusted capture code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.repository.default_branch }}
+        persist-credentials: false
+
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache: false
+
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - run: pnpm run ci
+
+    - name: Enforce theme description and link limits
+      id: moderation
+      env:
+        # Editing another author's discussion requires the user token.
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+      run: node _scripts/themePreview.mjs moderate "$THEME_PREVIEW_DIR"
+
+    - name: Notify the author as github-actions[bot]
+      if: steps.moderation.outputs.changed == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh api graphql --input "$THEME_PREVIEW_DIR/moderation-comment.json"
+
+    - name: Check whether previews are needed
+      id: request
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: node _scripts/themePreview.mjs prepare "$THEME_PREVIEW_DIR"
+
+    - name: Install Electron
+      if: steps.request.outputs.enabled == 'true'
+      run: pnpm exec install-electron
+
+    - name: Pack the capture app
+      if: steps.request.outputs.enabled == 'true'
+      run: pnpm run test:e2e:pack
+
+    # YouTube blocks GitHub-hosted runners, so the capture replays recorded README scenes.
+    - name: Capture three previews
+      if: steps.request.outputs.enabled == 'true'
+      env:
+        LANG: en_US.UTF-8
+        LC_ALL: en_US.UTF-8
+        LANGUAGE: en_US
+      run: xvfb-run -a -s '-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/theme-previews/playwright.config.mjs
+
+    - name: Upload discussion attachments
+      if: steps.request.outputs.enabled == 'true'
+      env:
+        # Native attachments require a user token with write access to this repo.
+        # GitHub does not support attachment uploads with GITHUB_TOKEN.
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+      run: node _scripts/themePreview.mjs upload "$THEME_PREVIEW_DIR"
+
+    - name: Fill the Screenshots section in the discussion
+      if: steps.request.outputs.enabled == 'true'
+      env:
+        # GITHUB_TOKEN cannot edit another author's discussion body.
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+      run: node _scripts/themePreview.mjs publish "$THEME_PREVIEW_DIR"
+
+    - name: Keep failed capture diagnostics
+      if: failure() && steps.request.outputs.enabled == 'true'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: theme-preview-diagnostics
+        path: e2e/results/theme-previews/
+        retention-days: 7

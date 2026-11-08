@@ -1,0 +1,158 @@
+import { filterReleaseNotesForPlatforms } from './releaseNotePlatforms.js'
+
+const VERSION_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-beta|-nightly-(\d+))?$/
+const NOTE_ITEM = /^(?:[-*+]|\d+[.)]) /m
+
+/**
+ * Fetches pages of releases by following GitHub's next-page links, until a page
+ * reaches a release of the installed channel that is not newer than the
+ * installed build. GitHub lists a stable release ahead of the nightlies built
+ * on its version, so only releases of the same channel are in version order.
+ *
+ * @param {string} initialUrl
+ * @param {typeof fetch} fetchPage
+ * @param {string} installedVersion
+ * @returns {Promise<object[]>}
+ */
+export async function fetchReleasePages(initialUrl, fetchPage, installedVersion) {
+  const installed = parseVersion(installedVersion)
+  const releases = []
+  let pageUrl = initialUrl
+
+  while (pageUrl !== null) {
+    const response = await fetchPage(pageUrl)
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status}`)
+    }
+
+    /** @type {Array<{ tag_name?: string }>} */
+    const page = await response.json()
+    releases.push(...page)
+    const reachedInstalled = installed === null || page.some((release) => {
+      const version = parseVersion(release.tag_name ?? '')
+      return version?.channel === installed.channel && compareVersionParts(version.parts, installed.parts) <= 0
+    })
+    if (reachedInstalled) {
+      break
+    }
+
+    const nextLink = response.headers.get('link')
+      ?.split(',')
+      .find((link) => /\brel="next"/.test(link))
+
+    pageUrl = nextLink?.match(/<([^>]+)>/)?.[1] ?? null
+  }
+
+  return releases
+}
+
+/**
+ * @param {string} version
+ * @returns {{ channel: 'stable' | 'nightly', parts: number[] } | null}
+ */
+function parseVersion(version) {
+  const match = VERSION_PATTERN.exec(version)
+  if (match === null) {
+    return null
+  }
+
+  const nightlyBuild = match[4]
+  return {
+    channel: nightlyBuild === undefined ? 'stable' : 'nightly',
+    parts: [
+      Number.parseInt(match[1], 10),
+      Number.parseInt(match[2], 10),
+      Number.parseInt(match[3], 10),
+      nightlyBuild === undefined ? 0 : Number.parseInt(nightlyBuild, 10)
+    ]
+  }
+}
+
+/**
+ * @param {number[]} left
+ * @param {number[]} right
+ * @returns {number}
+ */
+function compareVersionParts(left, right) {
+  for (let index = 0; index < left.length; index++) {
+    const difference = left[index] - right[index]
+    if (difference !== 0) {
+      return difference
+    }
+  }
+
+  return 0
+}
+
+/**
+ * Finds all updates available to the installed build, newest first.
+ * Stable builds stay on stable releases, while nightly builds can update to a
+ * newer nightly or fall back to a newer stable version.
+ *
+ * @param {Array<{ draft?: boolean, prerelease?: boolean, tag_name?: string }>} releases
+ * @param {string} installedVersion
+ * @returns {object[]}
+ */
+export function findUpdateReleases(releases, installedVersion) {
+  const installed = parseVersion(installedVersion)
+  if (installed === null) {
+    return []
+  }
+
+  return releases
+    .map((release) => ({
+      release,
+      version: parseVersion(release.tag_name ?? '')
+    }))
+    .filter(({ release, version }) => {
+      const isNightlyRelease = release.prerelease === true
+
+      return release.draft !== true &&
+        version !== null &&
+        isNightlyRelease === (version.channel === 'nightly') &&
+        !(installed.channel === 'stable' && version.channel === 'nightly') &&
+        compareVersionParts(version.parts, installed.parts) > 0
+    })
+    .sort((left, right) => compareVersionParts(right.version.parts, left.version.parts))
+    .map(({ release }) => release)
+}
+
+/**
+ * Finds the newest update available to the installed build.
+ *
+ * @param {Array<{ draft?: boolean, prerelease?: boolean, tag_name?: string }>} releases
+ * @param {string} installedVersion
+ * @returns {object | null}
+ */
+export function findUpdateRelease(releases, installedVersion) {
+  return findUpdateReleases(releases, installedVersion)[0] ?? null
+}
+
+/**
+ * Combines release notes into a changelog with a heading for each release.
+ * A single release gets no heading, as the prompt title already names it.
+ *
+ * @param {Array<{ body?: string | null, name?: string | null, tag_name?: string }>} releases
+ * @param {string | null} platform Hides notes labeled only for other platforms.
+ * @returns {string}
+ */
+export function formatReleaseChangelog(releases, platform = null) {
+  const platforms = platform === null ? null : [platform]
+  const body = (/** @type {{ body?: string | null }} */ release) => filterReleaseNotesForPlatforms(release.body ?? '', platforms)
+
+  let changelog = body(releases[0] ?? {})
+
+  if (releases.length > 1) {
+    // Releases left without notes for this platform would only add a heading
+    // and, for nightlies, their wrapper text.
+    changelog = releases
+      .map((release) => ({ release, notes: body(release) }))
+      .filter(({ release, notes }) => NOTE_ITEM.test(notes) || !NOTE_ITEM.test(release.body ?? ''))
+      .map(({ release, notes }) => `## ${release.name ?? release.tag_name ?? ''}\n\n${notes}`)
+      .join('\n\n')
+  }
+
+  // Every note with its platform label beats an update prompt without notes.
+  // Nightly bodies keep their wrapper text, so look for note items.
+  return platform !== null && !NOTE_ITEM.test(changelog) ? formatReleaseChangelog(releases) : changelog
+}

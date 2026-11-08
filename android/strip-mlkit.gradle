@@ -1,0 +1,94 @@
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+import org.gradle.api.artifacts.transform.CacheableTransform
+import org.gradle.api.artifacts.transform.InputArtifact
+import org.gradle.api.artifacts.transform.TransformAction
+import org.gradle.api.artifacts.transform.TransformOutputs
+import org.gradle.api.artifacts.transform.TransformParameters
+
+// Pairing scans with ZXing. The barcode plugin's scanner library also ships an
+// ML Kit backend, and its scanner activity always creates the ML Kit helper,
+// so R8 keeps it even with ML Kit itself excluded. F-Droid rejects APKs that
+// reference the proprietary classes, so this transform removes the backend
+// from the library and the app provides stand-ins without ML Kit references.
+configurations.configureEach {
+    exclude group: 'com.google.mlkit', module: 'barcode-scanning'
+}
+
+@CacheableTransform
+abstract class StripBarcodeMlKit implements TransformAction<TransformParameters.None> {
+    static final java.util.regex.Pattern ML_KIT_CLASS = java.util.regex.Pattern.compile(
+        '^com/outsystems/plugins/barcode/controller/(?:helper/OSBARCMLKitHelper|OSBARCMLKitWrapper)(?:\\$.*)?\\.class$')
+
+    @InputArtifact
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract Provider<FileSystemLocation> getInputArtifact()
+
+    void transform(TransformOutputs outputs) {
+        File input = inputArtifact.get().asFile
+        boolean scannerLibrary = new java.util.zip.ZipFile(input).withCloseable { archive ->
+            def classes = archive.getEntry('classes.jar')
+            classes != null && archive.getInputStream(classes).withCloseable { content ->
+                new ZipInputStream(content).withCloseable { jar ->
+                    for (def entry = jar.nextEntry; entry != null; entry = jar.nextEntry) {
+                        if (ML_KIT_CLASS.matcher(entry.name).matches()) return true
+                    }
+                    false
+                }
+            }
+        }
+        if (!scannerLibrary) {
+            outputs.file(input)
+            return
+        }
+        new java.util.zip.ZipFile(input).withCloseable { archive ->
+            new ZipOutputStream(new FileOutputStream(outputs.file(input.name))).withCloseable { output ->
+                archive.entries().each { entry ->
+                    output.putNextEntry(fixedEntry(entry.name))
+                    archive.getInputStream(entry).withCloseable { content ->
+                        if (entry.name == 'classes.jar') {
+                            output.write(stripClasses(content))
+                        } else {
+                            content.transferTo(output)
+                        }
+                    }
+                    output.closeEntry()
+                }
+            }
+        }
+    }
+
+    static byte[] stripClasses(InputStream input) {
+        def buffer = new ByteArrayOutputStream()
+        new ZipInputStream(input).withCloseable { jar ->
+            new ZipOutputStream(buffer).withCloseable { output ->
+                for (def entry = jar.nextEntry; entry != null; entry = jar.nextEntry) {
+                    if (ML_KIT_CLASS.matcher(entry.name).matches()) continue
+                    output.putNextEntry(fixedEntry(entry.name))
+                    jar.transferTo(output)
+                    output.closeEntry()
+                }
+            }
+        }
+        return buffer.toByteArray()
+    }
+
+    static ZipEntry fixedEntry(String name) {
+        ZipEntry entry = new ZipEntry(name)
+        entry.time = 0
+        return entry
+    }
+}
+
+def strippedMlKit = Attribute.of('org.opentubex.strippedBarcodeMlKit', Boolean)
+dependencies {
+    artifactTypes.maybeCreate('aar').attributes.attribute(strippedMlKit, false)
+    registerTransform(StripBarcodeMlKit) {
+        from.attribute(strippedMlKit, false)
+        to.attribute(strippedMlKit, true)
+    }
+}
+configurations.configureEach {
+    attributes.attribute(strippedMlKit, true)
+}

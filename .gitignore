@@ -11,6 +11,7 @@ build/*
 !build/icons
 coverage
 node_modules/
+__pycache__/
 npm-debug.log
 npm-debug.log.*
 thumbs.db
@@ -25,8 +26,22 @@ __coverage__
 csak-timelog.json
 .idea/
 debug/
+!android/app/src/debug/
+!android/app/src/debug/**
 
 # Lefthook
 lefthook-local.yml
 
 locale-errors.json
+
+# E2E test output
+e2e/results/
+e2e/report/
+dist-e2e/
+
+# Local Windows share addon output
+_scripts/windows-share/build/
+
+# Generated iOS Python runtime and bundled yt-dlp wheel
+ios/App/Python.xcframework/
+ios/App/python-packages/

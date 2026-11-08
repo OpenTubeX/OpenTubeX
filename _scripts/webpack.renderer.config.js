@@ -1,25 +1,50 @@
 const path = require('path')
-const { readdirSync } = require('fs')
+const { readFileSync, readdirSync } = require('fs')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const getStartupSplash = require('./startupSplash')
+const getBuildCommit = require('./buildCommit')
 const {
   SHAKA_LOCALE_MAPPINGS,
   SHAKA_LOCALES_PREBUNDLED,
   SHAKA_LOCALES_TO_BE_BUNDLED
 } = require('./getShakaLocales')
-const { sigFrameTemplateParameters } = require('./sigFrameConfig')
 
 const isDevMode = process.env.NODE_ENV === 'development'
+const rendererPlatform = process.platform
+
+for (const [name, requestedPlatform] of [
+  ['OTX_PLATFORM', process.env.OTX_PLATFORM],
+  ['npm_config_platform', process.env.npm_config_platform]
+]) {
+  if (requestedPlatform && requestedPlatform !== rendererPlatform) {
+    throw new Error(`${name}=${requestedPlatform} does not match the packager platform ${rendererPlatform}`)
+  }
+}
+
+const { version: swiperVersion } = JSON.parse(readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
 const processLocalesPlugin = new ProcessLocalesPlugin({
   compress: !isDevMode,
   hotReload: isDevMode,
   inputDir: path.join(__dirname, '../static/locales'),
   outputDir: 'static/locales',
+})
+
+const processAILocalesPlugin = new ProcessLocalesPlugin({
+  activeLocales: processLocalesPlugin.activeLocales,
+  allowMissing: true,
+  collectMetadata: false,
+  compress: !isDevMode,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales/ai'),
+  localeSource: 'ai',
+  outputDir: 'static/locales/ai',
 })
 
 /** @type {import('webpack').Configuration} */
@@ -40,20 +65,13 @@ const config = {
     scriptType: 'text/javascript',
     path: path.join(__dirname, '../dist'),
     filename: '[name].js',
-    // Don't need to copy them in dev mode,
-    // as we configure WebpackDevServer to serve them
-    copy: isDevMode
-      ? undefined
-      : [
-          {
-            context: path.dirname(require.resolve('shaka-player/ui/locales/en.json')),
-            from: `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`,
-            to: 'static/shaka-player-locales',
-            transform: (input) => {
-              return JSON.stringify(JSON.parse(input.toString('utf-8')))
-            }
-          }
-        ]
+  },
+  // The renderer is loaded from the local Electron package, so Webpack's
+  // 250 kB web-delivery budget is not representative. Keep a realistic limit
+  // so unexpected bundle growth still produces a warning.
+  performance: {
+    maxAssetSize: 4 * 1024 * 1024,
+    maxEntrypointSize: 4 * 1024 * 1024
   },
   module: {
     rules: [
@@ -88,41 +106,38 @@ const config = {
       },
       {
         test: /\.css$/,
-        oneOf: [
+        use: [
           {
-            test: /[/\\]swiper[/\\]/,
-            type: 'asset/resource',
-            generator: {
-              filename: 'swiper-[name].[contenthash][ext]'
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
             }
-          },
+          }
+        ],
+        rules: [
           {
-            use: [
-              {
-                loader: MiniCssExtractPlugin.loader
-              },
-              {
-                loader: 'css-loader',
-                options: {
-                  esModule: false
-                }
-              }
-            ],
-            rules: [
-              {
-                resource: require.resolve('shaka-player/dist/controls.css'),
-                use: path.join(__dirname, 'patch-shaka-player-loader.js')
-              }
-            ],
-          },
-        ]
+            resource: require.resolve('shaka-player/dist/controls.css'),
+            use: path.join(__dirname, 'patch-shaka-player-loader.js')
+          }
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|tif?f|bmp|webp|svg)(\?.*)?$/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'imgs/[name][ext]'
-        }
+        oneOf: [
+          {
+            resourceQuery: /inline/,
+            type: 'asset/inline'
+          },
+          {
+            type: 'asset/resource',
+            generator: {
+              filename: 'imgs/[name][ext]'
+            }
+          }
+        ]
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
@@ -166,11 +181,17 @@ const config = {
   },
   plugins: [
     processLocalesPlugin,
+    processAILocalesPlugin,
     new webpack.DefinePlugin({
-      'process.platform': `'${process.platform}'`,
+      // build.mjs packages for the host OS, so reject mismatched target hints
+      // above instead of compiling renderer behavior for a different platform.
+      'process.platform': JSON.stringify(rendererPlatform),
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
+      'process.env.IS_CAPACITOR': false,
+      'process.env.IS_IOS': false,
       'process.env.SUPPORTS_LOCAL_API': true,
+      'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
@@ -178,23 +199,72 @@ const config = {
       __VUE_I18N_FULL_INSTALL__: 'false',
       __INTLIFY_PROD_DEVTOOLS__: 'false',
       'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
+      'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
+      'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
       'process.env.GEOLOCATION_NAMES': JSON.stringify(readdirSync(path.join(__dirname, '..', 'static', 'geolocations')).map(filename => filename.replace('.json', ''))),
+      'process.env.SWIPER_VERSION': `'${swiperVersion}'`,
       'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),
       'process.env.SHAKA_LOCALES_PREBUNDLED': JSON.stringify(SHAKA_LOCALES_PREBUNDLED)
     }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
-      templateParameters: sigFrameTemplateParameters
+      templateParameters: {
+        startupSplash: getStartupSplash()
+      }
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
+      // Route-level chunks can discover scoped Vue styles in different orders.
+      // Their selectors cannot affect one another, so no global order is needed.
+      ignoreOrder: true,
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '*/LICENSE',
+          context: path.join(__dirname, '../node_modules/@fontsource-variable'),
+          to: 'fonts/licenses/[path][name][ext]'
+        },
+        {
+          from: path.join(__dirname, '../node_modules/swiper/modules/{a11y,navigation,pagination}-element.css').replaceAll('\\', '/'),
+          to: `swiper-${swiperVersion}.css`,
+          context: path.join(__dirname, '../node_modules/swiper/modules'),
+          transformAll: (assets) => {
+            return Buffer.concat(assets.map(asset => asset.data))
+          }
+        },
+        // Don't need to copy them in dev mode,
+        // as we configure WebpackDevServer to serve them
+        ...(isDevMode
+          ? []
+          : [
+              {
+                from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
+                to: 'static/shaka-player-locales',
+                context: path.join(__dirname, '../node_modules/shaka-player/ui/locales'),
+                transform: {
+                  transformer: (input) => {
+                    return JSON.stringify(JSON.parse(input.toString('utf-8')))
+                  }
+                }
+              }
+            ])
+      ]
+    })
   ],
   resolve: {
+    fallback: {
+      // Feed parsing uses sax.parser, not its optional Node stream wrapper.
+      stream: false,
+      // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
+      // fallback is unreachable in Electron's renderer and must not be bundled.
+      crypto: false
+    },
     alias: {
+      '@root': path.resolve(__dirname, '..'),
       DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/electron.js'),
 
       'youtubei.js$': 'youtubei.js/web',
@@ -202,8 +272,7 @@ const config = {
       // change to "shaka-player.ui-es2021.debug.js" to get debug logs (update jsconfig to get updated types)
       'shaka-player$': 'shaka-player/dist/shaka-player.ui-es2021.js',
 
-      // Make @fortawesome/vue-fontawesome use the trimmed down API instead of the original @fortawesome/fontawesome-svg-core
-      '@fortawesome/fontawesome-svg-core$': path.resolve(__dirname, '../src/renderer/fontawesome-minimal.js'),
+      '@opentubex/icons$': path.resolve(__dirname, '../src/renderer/icons/iconComponents.js'),
 
       // Fix dompurify not being tree-shaking friendly
       dompurify$: path.resolve(__dirname, '_undefinedDefaultExport.mjs')
@@ -211,6 +280,27 @@ const config = {
     extensions: ['.js', '.vue']
   },
   target: 'web',
+}
+
+if (!isDevMode) {
+  // The main build emits this UMD artifact once; keep renderer and utility
+  // imports on that same implementation without sharing runtime state.
+  config.externals = { 'youtubei.js': 'window OpenTubeXYouTube' }
+  config.plugins.push({
+    apply(compiler) {
+      compiler.hooks.compilation.tap('SharedYouTubeLibrary', compilation => {
+        HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tap('SharedYouTubeLibrary', data => {
+          data.assetTags.scripts.unshift({
+            tagName: 'script',
+            voidTag: false,
+            attributes: { defer: true, src: 'youtubei.js' },
+            meta: { plugin: 'SharedYouTubeLibrary' }
+          })
+          return data
+        })
+      })
+    }
+  })
 }
 
 module.exports = config

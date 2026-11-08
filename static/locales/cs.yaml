@@ -40,7 +40,6 @@ Global:
     Watching Count: 1 sledující | {count} sledujících
     Like Count: 1 líbí se mi | {count} líbí se mi
     Comment Count: 1 komentář | {count} komentářů
-    Replies Remaining: "{' '}(zbývá 1) | {' '}(zbývá {count})"
 Version {versionNumber} is now available!  Click for more details: 'Je k dispozici verze {versionNumber}! Klikněte pro více informací'
 Download From Site: 'Stáhnout ze stránky'
 
@@ -254,7 +253,7 @@ Settings:
     Auto Load Next Page:
       Label: Automaticky načíst další stránku
       Tooltip: Automaticky načítat další stránky a komentáře.
-    Open Deep Links In New Window: Otevírat adresy předané aplikaci FreeTube v novém okně
+    Open Deep Links In New Window: Otevírat adresy předané aplikaci OpenTubeX v novém okně
     Minimize to system tray: Minimalizovat do systémové lišty
   Theme Settings:
     Theme Settings: 'Motiv'
@@ -375,7 +374,7 @@ Settings:
     Secondary Color Theme: 'Sekundární barva motivu'
         #* Main Color Theme
     Hide Side Bar Labels: Skrýt popisky na bočním panelu
-    Hide FreeTube Header Logo: Skrýt logo FreeTube v záhlaví
+    Hide OpenTubeX Header Logo: Skrýt logo OpenTubeX v záhlaví
   Player Settings:
     Player Settings: 'Přehrávač'
     Play Next Video: 'Automaticky přehrávat doporučená videa'
@@ -467,7 +466,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Odběry'
     Fetch Feeds from RSS: 'Získávat odběry z RSS'
-    Fetch Automatically: Automaticky načítat odběry
     Confirm Before Unsubscribing: Zamezit nechtěným odběrům
     To: Do
     'Limit the number of videos displayed for each channel': Omezit počet videí zobrazených u každého kanálu
@@ -527,7 +525,7 @@ Settings:
     Select Export Type: 'Vybrat typ exportu'
     Import Subscriptions: 'Importovat odběry'
     Export Subscriptions: 'Exportovat odebírané kanály'
-    Export FreeTube: 'Exportovat FreeTube'
+    Export OpenTubeX: 'Exportovat OpenTubeX'
     Export YouTube: 'Exportovat YouTube'
     Export NewPipe: 'Exportovat NewPipe'
     Import History: 'Importovat historii'
@@ -554,9 +552,9 @@ Settings:
     History File: Soubor historie
     Subscription File: Soubor odběrů
     Playlist File: Soubor playlistů
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Tato možnost exportuje videa ze všech playlistů do jednoho playlistu s názvem „Favorites“.\nJak exportovat a importovat videa z playlistů do starších verzí FreeTube:\n1. Povolte tuto možnost a exportujte své playlisty.\n2. Odstraňte všechny své stávající playlisty možností Odstranit všechny playlisty v nastavení soukromí.\n3. Spusťte starší verzi FreeTube a importujte exportované playlisty."
-      Label: Exportovat playlisty pro starší verze FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Tato možnost exportuje videa ze všech playlistů do jednoho playlistu s názvem „Favorites“.\nJak exportovat a importovat videa z playlistů do starších verzí OpenTubeX:\n1. Povolte tuto možnost a exportujte své playlisty.\n2. Odstraňte všechny své stávající playlisty možností Odstranit všechny playlisty v nastavení soukromí.\n3. Spusťte starší verzi OpenTubeX a importujte exportované playlisty."
+      Label: Exportovat playlisty pro starší verze OpenTubeX
 
     Search history file: Soubor historie vyhledávání
     Search history: Historie vyhledávání
@@ -587,11 +585,11 @@ Settings:
     Proxy Host: Adresa proxy
     Proxy Protocol: Protokol proxy
     Error getting network information. Is your proxy configured properly?: Chyba při získávání informací o síti. Je vaše proxy správně nakonfigurována?
-    Proxy Warning: FreeTube nemá vestavěný proxy server, ale může se připojit k externímu proxy serveru, například k proxy serveru běžícímu na vašem počítači, jako je Tor, nebo k externímu proxy serveru, jako je proxy server SOCKS5 poskytovaný některými sítěmi VPN. Pokud je tato funkce povolena, ujistěte se, že je proxy server/Tor správně nakonfigurován, jinak FreeTube nebude moci načítat žádná data.
+    Proxy Warning: OpenTubeX nemá vestavěný proxy server, ale může se připojit k externímu proxy serveru, například k proxy serveru běžícímu na vašem počítači, jako je Tor, nebo k externímu proxy serveru, jako je proxy server SOCKS5 poskytovaný některými sítěmi VPN. Pokud je tato funkce povolena, ujistěte se, že je proxy server/Tor správně nakonfigurován, jinak OpenTubeX nebude moci načítat žádná data.
     Proxy Username: Uživatelské jméno proxy
     Proxy Password: Heslo proxy
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Upozornit při přeskočení segmentu
+    Notify when sponsor segment is skipped: Zobrazit upozornění po přeskočení segmentu
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API SponsorBlock (výchozí je https://sponsor.ajay.app)
     Enable SponsorBlock: Zapnout SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -657,7 +655,7 @@ About:
   Mastodon: Mastodon
   Website: Webové stránky
   FAQ: Často kladené dotazy
-  FreeTube Wiki: Wiki FreeTube
+  OpenTubeX Wiki: Wiki OpenTubeX
   Downloads / Changelog: Ke stažení / Seznam změn
   Translate: Překlady
   these people and projects: těmto lidem a projektům
@@ -670,7 +668,7 @@ About:
   AGPLv3: AGPLv3
   Licensed under the {licenseLink}: Licencováno pod {licenseLink}
   Please read the {roomRulesLink}: Přečtěte si prosím {roomRulesLink}
-  FreeTube is made possible by {creditsPageLink}: FreeTube existuje díky {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX existuje díky {creditsPageLink}
 Profile:
   Profile Select: 'Výběr profilu'
   All Channels: 'Všechny kanály'
@@ -728,6 +726,7 @@ Channel:
       Newest: 'Nejnovější'
       Oldest: 'Nejstarší'
       Most Popular: 'Populární'
+    This channel does not currently have any videos: 'Tento kanál momentálně nemá žádné videa'
     This channel has videos but none could be displayed, try fetching more: Tento kanál má videa, ale žádná se nepodařilo zobrazit, zkuste načíst více
   Playlists:
     Playlists: 'Playlisty'
@@ -747,7 +746,7 @@ Channel:
     Joined: Připojeno
     Location: Umístění
     Links: Odkazy
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Tento kanál je věkově omezen a v současné době jej nelze procházet na FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Tento kanál je věkově omezen a v současné době jej nelze procházet na OpenTubeX.
   This channel does not exist: Tento kanál neexistuje
   This channel does not allow searching: Tento kanál neumožňuje vyhledávání
   Channel Tabs: Karty kanálů
@@ -756,7 +755,7 @@ Channel:
     Hide Answers: Skrýt odpovědi
     votes: '{votes} hlasů'
     Reveal Answers: Odhalit odpovědi
-    Video hidden by FreeTube: Video skryté programem FreeTube
+    Video hidden by OpenTubeX: Video skryté programem OpenTubeX
     View Full Post: Zobrazit celý příspěvek
     Viewing Posts Only Supported By Invidious: Zobrazení příspěvků je podporováno pouze službou Invidious. Přejděte do karty komunity kanálu pro zobrazení jejího obsahu bez Invidious.
   Live:
@@ -822,14 +821,22 @@ Video:
   Save Video: Uložit video
   Video has been removed from your saved list: Video bylo odstraněno z vašeho uloženého seznamu
   Sponsor Block category:
-    music offtopic: Není hudba
-    interaction: Interakce
-    self-promotion: Sebepropagace
-    outro: Závěr
-    intro: Úvod
+    music offtopic: 'Hudba: nehudební sekce'
+    interaction: Připomenutí interakce (odběr)
+    self-promotion: Neplacená / vlastní propagace
+    outro: Koncové karty / titulky
+    intro: Přestávka / úvodní animace
     sponsor: Sponzor
-    recap: Shrnutí
-    filler: Výplň
+    recap: Náhled / shrnutí
+    filler: Mimo téma / vtipy
+    hook: Zaujetí / pozdrav
+    highlight: Zvýraznění
+    exclusive access: Exkluzivní přístup
+  Sponsor Block category short:
+    intro: Přestávka
+    interaction: Připomenutí interakce
+    music offtopic: Jiné než hudba
+    filler: Mimo téma
   External Player:
     Unsupported Actions:
       opening specific video in a playlist (falling back to opening the video): Otevření specifického videa v seznamu skladeb
@@ -867,7 +874,7 @@ Video:
       Dropped Frames / Total Frames: 'Vypuštěno snímků: {droppedFrames} / Celkem snímků: {totalFrames}'
       CodecAudio: 'Kodek: {audioCodec} ({audioItag})'
       CodecsVideoAudio: 'Kodeky: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
-    Skipped segment: Přeskočen segment {segmentCategory}
+    Skipped segment: 'Segment {segmentCategory} přeskočen'
     TranslatedCaptionTemplate: '{language} (přeloženo z jazyka {originalLanguage})'
     Audio Tracks: Zvukové stopy
     Theatre Mode: Režim kina
@@ -883,12 +890,12 @@ Video:
     Autoplay is on: Automatické přehrávání je zapnuto
   IP block: YouTube zablokoval sledování videí z vaší IP adresy, nebo toto video obsahuje obsah s mladistvými, který YouTube pro odhlášené uživatele omezuje. Pokud se jedná o blokaci IP adresy, zkuste přepnout na jinou VPN nebo proxy.
   Unlisted: Neveřejné
-  MembersOnly: Videa určená pouze pro členy nelze na FreeTube sledovat, protože vyžadují přihlášení k účtu Google a placené členství v kanálu nahrávajícího.
-  AgeRestricted: Videa s věkovým omezením nelze na FreeTube sledovat, protože vyžadují přihlášení ke službě Google a použití účtu YouTube s ověřeným věkem.
+  MembersOnly: Videa určená pouze pro členy nelze na OpenTubeX sledovat, protože vyžadují přihlášení k účtu Google a placené členství v kanálu nahrávajícího.
+  AgeRestricted: Videa s věkovým omezením nelze na OpenTubeX sledovat, protože vyžadují přihlášení ke službě Google a použití účtu YouTube s ověřeným věkem.
   DeArrow:
     Show Modified Details: Zobrazit upravené podrobnosti
     Show Original Details: Zobrazit původní podrobnosti
-  DRMProtected: Videa chráněná DRM nelze v aplikaci FreeTube přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem. Pokud chcete toto video sledovat, přehrajte si ho na oficiálních stránkách YouTube ve webovém prohlížeči s podporou DRM.
+  DRMProtected: Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem. Pokud chcete toto video sledovat, přehrajte si ho na oficiálních stránkách YouTube ve webovém prohlížeči s podporou DRM.
 #& Playlists
   Save Watched Progress: Uložit průběh sledování
   Watched Progress Saved: Průběh sledování uložen
@@ -896,7 +903,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Zbývající čas prvotní reklamy: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Zbývající čas pauzy SABR: {remindingTimeSeconds} s'
   Popout Live Chat: Vyskakovací chat
-  Private: Soukromá videa nelze sledovat v aplikaci FreeTube, jelikož vyžadují přihlášení k účtu Google a vlastnictví videa.
+  Private: Soukromá videa nelze sledovat v aplikaci OpenTubeX, jelikož vyžadují přihlášení k účtu Google a vlastnictví videa.
   Collapse Playlist: Sbalit playlist
   Expand Playlist: Rozbalit playlist
   Station: Stanice
@@ -906,9 +913,8 @@ Video:
   Enable SponsorBlock on Channel: Povolit SponsorBlock u kanálu
   Disable SponsorBlock on Channel: Zakázat SponsorBlock u kanálu
   AI: AI
-  'AI: Content was made with AI': 'AI: Obsah byl vytvořen pomocí umělé inteligence'
+  AI-generated content: "AI: Obsah byl vytvořen pomocí umělé inteligence"
   How this was made: Jak byl tento obsah vytvořen
-  Reload Page: Znovu načíst stránku
 Playlist:
   #& About
   View Full Playlist: 'Zobrazit celý seznam skladeb'
@@ -968,14 +974,14 @@ Comments:
   # Context: View 10 Replies, View 1 Reply
   There are no comments available for this video: 'K tomuto videu nejsou dostupné žádné komentáře'
   Load More Comments: 'Načíst další komentáře'
-  Show More Replies: Načíst další odpovědi
+  Show More Replies: Načíst více výsledků
   Pinned by: připnuto uživatelem
   Member: Člen
   View {replyCount} replies: Zobrazit 1 odpověď | Zobrazit {replyCount} odpovědí
   Hearted: Se srdíčkem
   Subscribed: Odebíráno
   There are no comments available for this post: U tohoto příspěvku nejsou dostupné žádné komentáře
-  Hide Replies: Skrýt odpověď | Skrýt odpovědi
+  Hide {replyCount} replies: Skrýt 1 odpověď | Skrýt {replyCount} odpovědí
   View 1 reply from {channelName}: Zobrazit 1 odpověď od {channelName}
   View {replyCount} replies from {channelName} and others: Zobrazit {replyCount} odpovědí od {channelName} a dalších
   Loading replies: Načítání odpovědí…
@@ -985,28 +991,27 @@ Up Next: 'Další'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Vyberte backend, který FreeTube používá k získávání informací. Místní API má integrovaný extraktor. Invidious API vyžaduje připojení k server Invidious.'
-    Fallback to Non-Preferred Backend on Failure: 'Pokud má vaše preferované API problém, FreeTube se automaticky pokusí použít vaše nepreferované API jako záložní metodu, pokud je povoleno.'
-    Thumbnail Preference: 'Všechny miniatury v celém FreeTube budou nahrazeny snímkem z videa, rozmazány nebo skryty namísto výchozí miniatury.'
-    Invidious Instance: 'Instance Invidious, ke které se FreeTube připojí za účelem volání API. Změny tohoto nastavení se použijí pouze na toto okno, pokud nenastavíte tuto instanci jako výchozí.'
+    Preferred API Backend: 'Vyberte backend, který OpenTubeX používá k získávání informací. Místní API má integrovaný extraktor. Invidious API vyžaduje připojení k server Invidious.'
+    Fallback to Non-Preferred Backend on Failure: 'Pokud má vaše preferované API problém, OpenTubeX se automaticky pokusí použít vaše nepreferované API jako záložní metodu, pokud je povoleno.'
+    Thumbnail Preference: 'Všechny miniatury v celém OpenTubeX budou nahrazeny snímkem z videa, rozmazány nebo skryty namísto výchozí miniatury.'
+    Invidious Instance: 'Instance Invidious, ke které se OpenTubeX připojí za účelem volání API. Změny tohoto nastavení se použijí pouze na toto okno, pokud nenastavíte tuto instanci jako výchozí.'
     Region for Trending: 'Oblast pro trendy vám umožní vybrat si zemi, ze které si přejete zobrazovat videa v trendech.'
-    External Link Handling: "Zvolte výchozí chování při kliknutí na odkaz, který nelze otevřít ve FreeTube.\nVe výchozím nastavení otevře FreeTube odkaz ve vašem výchozím prohlížeči.\n"
-    Open Deep Links In New Window: Adresy předané aplikaci FreeTube, například rozšířením pro prohlížeč nebo argumenty v příkazovém řádku, budou otevřeny v novém okně.
+    External Link Handling: "Zvolte výchozí chování při kliknutí na odkaz, který nelze otevřít ve OpenTubeX.\nVe výchozím nastavení otevře OpenTubeX odkaz ve vašem výchozím prohlížeči.\n"
+    Open Deep Links In New Window: Adresy předané aplikaci OpenTubeX, například rozšířením pro prohlížeč nebo argumenty v příkazovém řádku, budou otevřeny v novém okně.
   Player Settings:
     Proxy Videos Through Invidious: 'Připojí se k Invidious, aby poskytoval videa namísto přímého připojení k YouTube.'
     Default Media Format: 'Nastavte formáty použité při přehrávání videa. Formáty DASH umožní přehrávat vyšší kvality. Starší formáty jsou omezeny na maximálně 360p, ale používají menší šířku pásma. Zvukové formáty jsou streamy obsahující pouze audio.'
     Scroll Playback Rate Over Video Player: Když je kurzor na videu, stisknutím a podržením Ctrl (Command na Mac) a posouváním kolečka myši nahoru a dolu ovládejte rychlost přehrávání. Stisknutím a podržením Ctrl (Command na Mac) a stisknutím levého tlačítka myši se rychle vrátíte na výchozí rychlost přehrávání (1x, pokud není změněná v nastavení).
     Skip by Scrolling Over Video Player: Pomocí rolovacího kolečka můžete video přeskakovat ve stylu MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: 'Je-li povoleno, FreeTube použije RSS místo své výchozí metody pro získání vašich odběrů. RSS je rychlejší a brání blokování IP, neposkytuje ale určité informace, jako je délka videa, stav vysílání nebo příspěvky'
+    Fetch Feeds from RSS: 'Je-li povoleno, OpenTubeX použije RSS místo své výchozí metody pro získání vašich odběrů. RSS je rychlejší a brání blokování IP, neposkytuje ale určité informace, jako je délka videa, stav vysílání nebo příspěvky'
 
 # Toast Messages
-    Fetch Automatically: Při povolení tohoto nastavení FreeTube po spuštění a při přepnutí profilu automaticky načte vaše nová videa od vašich odběrů.
   External Player Settings:
     Ignore Warnings: Potlačuje varování, kdy současný externí přehrávač nepodporuje aktuální akci (např. obrácení seznamů skladeb apod.).
     External Player: Volba externího přehrávače zobrazí ikonu pro otevření videa (či seznamu skladeb, pokud je podporován) v externím přehrávači, na náhledu. Varování, nastavení Invidious neovlivňují externí přehrávače.
     Custom External Player Arguments: Jakékoliv vlastní argumenty příkazové řádky, které chcete předávat externímu přehrávač.
-    Custom External Player Executable: Ve výchozím nastavení Freetube předpokládá, že vybraný externí přehrávač lze nalézt přes proměnnou prostředí cesty PATH. V případě potřeby zde lze nastavit vlastní cestu.
+    Custom External Player Executable: Ve výchozím nastavení OpenTubeX předpokládá, že vybraný externí přehrávač lze nalézt přes proměnnou prostředí cesty PATH. V případě potřeby zde lze nastavit vlastní cestu.
     DefaultCustomArgumentsTemplate: "(Výchozí: '{defaultCustomArguments}')"
     Ignore Default Arguments: Neodesílat externímu přehrávači žádné výchozí argumenty kromě adresy URL videa (např. rychlost přehrávání, adresu URL playlistu atd.). Tato možnost se nevztahuje na vlastní argumenty.
   Experimental Settings:
@@ -1015,7 +1020,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Zadejte ID kanálu pro skrytí všech videí, playlistů a samotného kanálu před zobrazením ve vyhledávání, trendech, nejpopulárnějších a doporučených. Zadané ID kanálu se musí zcela shodovat a rozlišují se v něm velká a malá písmena.
     Hide Subscriptions Live: Toto nastavení je nadřazeno nastavením celé aplikace „{appWideSetting}“ v části „{subsection}“ v části „{settingsSection}“
-    Hide Videos, Playlists and Channels Containing Text: Zadejte slovo, část slova nebo frázi (velká a malá písmena nejsou rozlišovány) pro skrytí všech videí a playlistů, jejichž původní názvy obsahují zadání, napříč celým FreeTube, vyjma historie, vašich playlistů a videí uvnitř playlistů.
+    Hide Videos, Playlists and Channels Containing Text: Zadejte slovo, část slova nebo frázi (velká a malá písmena nejsou rozlišovány) pro skrytí všech videí a playlistů, jejichž původní názvy obsahují zadání, napříč celým OpenTubeX, vyjma historie, vašich playlistů a videí uvnitř playlistů.
     Hide Videos on Watch: Skrýt zhlédnutá videa z karet Videa, Shorts a Živě na stránkách odběrů a kanálů. Toto neovlivňuje domovskou kartu na stránkách kanálů
   SponsorBlock Settings:
     UseDeArrowTitles: Nahradit názvy videí vlastními názvy od uživatelů DeArrow.

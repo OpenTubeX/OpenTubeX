@@ -3,8 +3,170 @@
   padding: 16px;
 }
 
+.card {
+  overscroll-behavior: contain;
+}
+
+.liveChatSkeleton {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.liveChatSkeletonMessage {
+  display: flex;
+  align-items: center;
+  padding-block: 5px 7px;
+  gap: 5px;
+}
+
+.liveChatSkeletonAvatar {
+  flex: 0 0 25px;
+  block-size: 25px;
+  border-radius: 50%;
+}
+
+.liveChatSkeletonContent {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.liveChatSkeletonAuthor,
+.liveChatSkeletonText {
+  block-size: 10px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.liveChatSkeletonAuthor {
+  inline-size: 24%;
+}
+
+.liveChatSkeletonText {
+  inline-size: 55%;
+}
+
+.liveChatSkeletonMessage:nth-child(3n + 1) .liveChatSkeletonText {
+  inline-size: 70%;
+}
+
+.liveChatSkeletonMessage:nth-child(3n + 2) .liveChatSkeletonText {
+  inline-size: 40%;
+}
+
 .relative {
   position: relative;
+}
+
+.card.fullscreenChat,
+.fullscreenChat > .relative {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.card.fullscreenChat {
+  block-size: 100% !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--primary-text-color);
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.fullscreenChat > .relative {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding-block: 12px 16px;
+  padding-inline: 16px;
+  overflow: hidden;
+}
+
+.fullscreenChat .liveChatSkeleton {
+  block-size: auto !important;
+  padding-block: 6px 12px;
+  padding-inline: 16px;
+}
+
+.fullscreenChat .liveChatSkeletonMessage {
+  flex: 1 1 25px;
+  min-block-size: 25px;
+  padding-block: 0;
+}
+
+.liveChatDockHeader {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.liveChatDockHeader h3 {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  margin: 0;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.liveChatDockTitleIcon {
+  display: block;
+  flex: 0 0 18px;
+  inline-size: 18px;
+  block-size: 18px;
+  color: #fff;
+}
+
+.liveChatDockActions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.liveChatDockAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.liveChatDockAction:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.liveChatDockAction:is(:hover, :focus-visible) {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.liveChatDockAction.active {
+  background-color: rgb(255 255 255 / 20%);
 }
 
 .messageContainer {
@@ -57,130 +219,316 @@
 }
 
 .superChatComments {
+  position: relative;
+
+  /* Keep chips above the opened-donation scrim. */
+  z-index: 3;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
   inline-size: 100%;
-  block-size: 50px;
-  overflow-x: auto;
+  block-size: 38px;
+  margin-block-end: 8px;
+
+  /* Horizontal chips only — overflow-y:auto (implied by overflow-x) was
+     clipping the pills under the dock header and drawing a stray scrollbar. */
+  overflow: auto hidden;
+  overscroll-behavior: contain;
   white-space: nowrap;
 }
 
 .superChat {
-  display: inline-block;
-  padding: 1px;
-  padding-inline-end: 10px;
-  margin-inline: 2px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
   block-size: 30px;
+  padding-block: 0;
+  padding-inline: 3px 10px;
+  margin-inline: 2px;
+  gap: 6px;
   cursor: pointer;
   background-color: var(--primary-color);
-  border-radius: 200px;
+
+  /* Half the chip's height rather than full, so the press morph is smooth. */
+  border-radius: calc(15px * var(--ui-roundness));
+  vertical-align: middle;
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.superChat:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .superChatContent {
-  margin-inline-start: 32px;
-  margin-block-start: -25px;
+  margin: 0;
   color: var(--text-with-main-color);
+  line-height: 1;
 }
 
 .channelThumbnail {
   inline-size: 25px;
-  border-radius: 200px;
+  block-size: 25px;
+  border-radius: 50%;
 }
 
 .channelName {
   color: var(--tertiary-text-color);
   font-weight: bold;
   padding-inline-end: 5px;
+  text-decoration: none;
+}
+
+.liveChatTimestamp {
+  color: var(--tertiary-text-color);
+  font-weight: normal;
+  margin-inline-end: 5px;
+  white-space: nowrap;
 }
 
 .superChat .channelThumbnail {
-  margin-block-start: 3px;
-  margin-inline-start: 3px;
-  block-size: 25px;
+  flex: 0 0 24px;
+  inline-size: 24px;
+  block-size: 24px;
+  margin: 0;
 }
 
 .donationAmount {
   color: var(--text-with-main-color);
 }
 
+.liveChatBody {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+/* Scrim + popup sit over the message list only, so the chip row stays above. */
 .openedSuperChat {
-  background-color: rgb(0 0 0 / 70%);
-  inline-size: 100%;
-  block-size: 415px;
   position: absolute;
-  margin-inline-start: -16px;
-  padding-inline-end: 32px;
-  inset-block-end: -15px;
-  cursor: auto;
-  z-index: 1;
+  z-index: 2;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  /* Bleed the dimming into the card/dock padding; the popup keeps its own inset. */
+  margin-inline: -16px;
+  padding-block: 12px;
+  padding-inline: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--text-with-main-color);
+  background-color: rgb(0 0 0 / 70%);
+  cursor: pointer;
+}
+
+.fullscreenChat .openedSuperChat {
+  /* Bleed into .fullscreenChat > .relative bottom padding. */
+  margin-block-end: -16px;
+  padding-block-end: 28px;
+
+  /* Match .fullscreenLiveChatOverlay */
+  border-radius: var(--shape-corner-medium);
+}
+
+/* Reach the FtCard bottom padding so the scrim is not clipped short. */
+.card:not(.fullscreenChat) .openedSuperChat {
+  margin-block-end: -16px;
+  padding-block-end: 28px;
+  border-radius: var(--shape-corner-small);
 }
 
 .superChatMessage {
+  box-sizing: border-box;
   inline-size: 90%;
-  grid-template-columns: auto;
+  margin-block: 10px;
   margin-inline: 5%;
-  margin-block: 25px 10px;
+  overflow: hidden;
   background-color: var(--primary-color);
-  border-radius: 5px;
+  border-radius: var(--shape-corner-small);
   position: relative;
 }
 
+/* Header + body stack. Absolute positioning used to float the author above the
+   card and park the amount over the body; that collided with .comment's
+   two-column grid and spilled sideways (horizontal scrollbar in the dock). */
 .upperSuperChatMessage {
-  margin-block-start: -15px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'thumb author'
+    'thumb amount';
+  gap: 2px 10px;
+  align-items: center;
+  box-sizing: border-box;
   inline-size: 100%;
-  block-size: 55px;
+  padding-block: 8px;
+  padding-inline: 10px;
   background-color: var(--primary-color-hover);
-  border-radius: 5px 5px 0 0;
+  border-start-start-radius: var(--shape-corner-small);
+  border-start-end-radius: var(--shape-corner-small);
 }
 
 .openedSuperChat .superChatMessage {
-  position: absolute;
-}
-
-.comment .superChatMessage {
-  padding: 5px;
-}
-
-.comment .upperSuperChatMessage {
-  padding: 0;
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  inline-size: auto;
+  max-inline-size: none;
+  margin-block: 0;
+  margin-inline: 16px;
+  cursor: auto;
 }
 
 .comment {
   inline-size: 100%;
+  min-inline-size: 0;
   padding-block: 5px 7px;
   display: grid;
-  grid-template-columns: min-content auto;
+  grid-template-columns: min-content minmax(0, 1fr);
   gap: 5px;
 }
 
+/* Donations are a single card, not avatar | text columns. */
+.comment.superChatMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  inline-size: 100%;
+  margin-block: 8px;
+  margin-inline: 0;
+  padding: 0;
+}
+
 .upperSuperChatMessage .channelThumbnail {
-  inline-size: 45px;
-  margin-inline-start: 10px;
-  margin-block-start: 5px;
+  grid-area: thumb;
+  inline-size: 36px;
+  block-size: 36px;
+  margin: 0;
+  border-radius: 50%;
+}
+
+.upperSuperChatMessage .superChatAuthor {
+  grid-area: author;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  min-inline-size: 0;
 }
 
 .upperSuperChatMessage .channelName {
   color: var(--text-with-main-color);
-  opacity: 0.7;
-  position: absolute;
-  inset-block-start: -20px;
-  margin-inline-start: 65px;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+.upperSuperChatMessage .liveChatTimestamp {
+  color: var(--text-with-main-color);
+  opacity: 0.85;
 }
 
 .upperSuperChatMessage .donationAmount {
+  grid-area: amount;
+  margin: 0;
   color: var(--text-with-main-color);
   font-weight: bold;
-  margin-inline-start: 65px;
-  position: absolute;
-  inset-block-start: 0;
 }
 
 .superChatMessage .chatMessage {
+  margin: 0;
+  padding-block: 8px 10px;
+  padding-inline: 10px;
   color: var(--text-with-main-color);
-  margin-inline-start: 20px;
+  overflow-wrap: anywhere;
 }
 
 .liveChatComments {
-  inline-size: 100%;
-  overflow-y: auto;
+  --live-chat-fade-size: 16px;
+
+  /* Overlay scrollbars float over the inline-end edge; keep that strip unmasked
+     and free of messages, which would not fade there. */
+  --live-chat-scrollbar-reserve: var(--scrollbar-track-width);
+
+  /* Move the strip into the card padding, as far as it reaches, so messages
+     keep their width. */
+  --live-chat-scrollbar-bleed: min(var(--live-chat-scrollbar-reserve), 12px);
+
+  inline-size: calc(100% + var(--live-chat-scrollbar-bleed));
+  min-inline-size: 0;
+  margin-inline-end: calc(-1 * var(--live-chat-scrollbar-bleed));
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+
+  /* Viewport fade for messages, plus a solid strip so the scrollbar stays sharp. */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--live-chat-fade-size),
+      #000 calc(100% - var(--live-chat-fade-size)),
+      transparent
+    ),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(100% - var(--live-chat-scrollbar-reserve)) 100%,
+    var(--live-chat-scrollbar-reserve) 100%;
+  mask-position: 0 0, 100% 0;
+  mask-repeat: no-repeat;
+  mask-composite: add;
+}
+
+.liveChatComments:dir(rtl) {
+  mask-position: 100% 0, 0 0;
+}
+
+.liveChatComments.atLiveEdge {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--live-chat-fade-size),
+      #000 100%
+    ),
+    linear-gradient(#000 0 0);
+}
+
+.liveChatCommentList {
+  display: flow-root;
+  padding-inline-end: var(--live-chat-scrollbar-reserve);
+}
+
+/* Stays within SCROLL_TO_LIVE_HOLD_MS in WatchVideoLiveChat.vue. */
+.live-chat-message-enter-active {
+  transition: opacity var(--motion-fast-effects), transform var(--motion-fast-effects);
+}
+
+.live-chat-message-enter-from {
+  opacity: 0;
+  transform: translateY(0.6em);
+}
+
+:root[data-reduced-motion='reduce'] .live-chat-message-enter-from {
+  opacity: 1;
+  transform: none;
+}
+
+.fullscreenChat .liveChatBody {
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.fullscreenChat .liveChatComments {
+  flex: 1 1 auto;
+  block-size: auto !important;
+  min-block-size: 0;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .chatContent {
@@ -199,11 +547,15 @@
 
 .owner {
   margin-inline-end: 2px;
+  padding-block: 1px;
+  padding-inline-start: 5px;
   background-color: var(--primary-color);
+  border-radius: var(--shape-corner-extra-small);
   color: var(--text-with-main-color);
 }
 
 .badgeImage {
+  block-size: 14px;
   inline-size: 14px;
 }
 
@@ -215,15 +567,18 @@
   inset-inline-start: 45%;
   inset-block-end: 20px;
   cursor: pointer;
-  border-radius: 200px;
+  border-radius: 50%;
   text-align: center;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .scrollToBottom:hover,
 .scrollToBottom:focus {
   background-color: var(--accent-color-light);
-  transition: background 0.2s ease-in;
+}
+
+.scrollToBottom:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .icon {
@@ -238,11 +593,16 @@
 }
 
 .title,
-.popoutChatButton {
+.liveChatActionButton {
   padding: 10px;
 }
 
-.popoutChatButton {
+.liveChatActionButton {
+  --icon-width: 1em;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border-style: none;
   background-color: transparent;
@@ -250,28 +610,69 @@
   color: var(--primary-text-color);
   cursor: pointer;
   font-size: 20px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
-.popoutChatButton:hover {
+.liveChatActionButton:hover,
+.liveChatActionButton:focus-visible,
+.liveChatActionButton.active {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
 }
 
-.popoutChatButton:active {
-  background-color: var(--tertiary-text-color);
+.liveChatActionButton:active {
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
 }
 
-.popoutChatIcon {
+.liveChatActionButton svg {
   inline-size: 1em;
   pointer-events: none;
+}
+
+.liveChatActions {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.liveChatSettingsMenu {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 48px);
+  padding-block: 10px;
+  padding-inline: 12px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-color);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: var(--shape-corner-large);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.liveChatFilter {
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--side-nav-hover-color);
 }
 
 .titleContainer {
   display: flex;
   justify-content: space-between;
   margin-block: 1em;
+}
+
+.card.hasError .titleContainer {
+  margin-block-start: 0;
+}
+
+.chatContent :deep(.liveChatVerifiedBadge) {
+  margin-inline: 0 5px;
+}
+
+.superChatAuthor :deep(.liveChatVerifiedBadge) {
+  margin-inline: 0;
 }

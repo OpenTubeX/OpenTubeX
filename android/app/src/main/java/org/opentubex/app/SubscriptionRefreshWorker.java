@@ -1,0 +1,405 @@
+package org.opentubex.app;
+
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.SystemClock;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.io.File;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+public final class SubscriptionRefreshWorker extends Worker {
+    private static final String LOG_TAG = "OpenTubeXFetch";
+    static final String FEED_TYPE_INPUT = "feedType";
+    private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
+    private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+    // Scheduled workers have no renderer state, but still need their last
+    // progress and notification labels when the app returns to the background.
+    private static SubscriptionRefreshState.Snapshot lastNotificationSnapshot;
+
+    static boolean isRendererActive(String token) {
+        return STATE.snapshot(token) != null;
+    }
+
+    static void observeRendererActive(Consumer<Boolean> listener) {
+        STATE.observeActive(listener);
+    }
+
+    static void removeRendererActiveListener(Consumer<Boolean> listener) {
+        STATE.removeActiveListener(listener);
+    }
+
+    @FunctionalInterface
+    interface ProfileCompletionWriter {
+        void write(SubscriptionRefreshConfiguration.Feed profileFeed) throws Exception;
+    }
+
+    public SubscriptionRefreshWorker(@NonNull Context context, @NonNull WorkerParameters parameters) {
+        super(context, parameters);
+    }
+
+    static synchronized boolean start(Context context, String token, String title, String cancelLabel) {
+        if (!SubscriptionRefreshCoordinator.begin(token)) return false;
+        STATE.begin(token, title, cancelLabel);
+        onAppVisibilityChanged(context);
+        return true;
+    }
+
+    static synchronized SubscriptionRefreshState.Snapshot rendererSnapshot() {
+        return STATE.snapshot(SubscriptionRefreshCoordinator.snapshot().token());
+    }
+
+    static synchronized void onAppVisibilityChanged(Context context) {
+        Intent service = new Intent(context, SubscriptionRefreshService.class);
+        if (AppVisibility.isVisible()) {
+            SubscriptionRefreshService.stopIfStarted(context);
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        } else if (rendererSnapshot() != null) {
+            SubscriptionRefreshState.Snapshot state = rendererSnapshot();
+            service.putExtra("token", state.token).putExtra("title", state.title)
+                .putExtra("cancelLabel", state.cancelLabel);
+            try {
+                ContextCompat.startForegroundService(context, service);
+            } catch (IllegalStateException | SecurityException error) {
+                Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
+                publishNotification(context, state);
+            }
+        } else if (lastNotificationSnapshot != null) {
+            publishNotification(context, lastNotificationSnapshot);
+        }
+    }
+
+    // Keep notification publication and cancellation in one critical section.
+    static synchronized boolean startNextFeed(Context context, String token, String title, String cancelLabel) {
+        if (SubscriptionRefreshCoordinator.isCancelled(token)) return false;
+        SubscriptionRefreshState.Snapshot snapshot = STATE.nextFeed(token, title, cancelLabel);
+        if (snapshot == null) return false;
+        publishNotification(context, snapshot);
+        return true;
+    }
+
+    static synchronized boolean update(Context context, String token, int progress) {
+        if (!STATE.update(token, progress)) return false;
+        SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
+        SubscriptionRefreshCoordinator.setProgress(token, progress);
+        if (snapshot == null) return true;
+        publishNotification(context, snapshot);
+        return true;
+    }
+
+    private static synchronized void publishNotification(Context context, SubscriptionRefreshState.Snapshot snapshot) {
+        if (!SubscriptionRefreshCoordinator.isCurrent(snapshot.token) ||
+            SubscriptionRefreshCoordinator.isCancelled(snapshot.token)) return;
+        SubscriptionRefreshCoordinator.setProgress(snapshot.token, snapshot.progress);
+        lastNotificationSnapshot = snapshot;
+        if (AppVisibility.isVisible()) return;
+        context.getSystemService(NotificationManager.class).notify(
+            SubscriptionRefreshNotification.NOTIFICATION_ID,
+            SubscriptionRefreshNotification.build(
+                context,
+                snapshot.token,
+                snapshot.title,
+                snapshot.cancelLabel,
+                snapshot.progress
+            )
+        );
+    }
+
+    static synchronized boolean finish(Context context, String token) {
+        boolean finished = STATE.finish(token);
+        if (SubscriptionRefreshCoordinator.finish(token)) lastNotificationSnapshot = null;
+        if (finished) {
+            NotificationManager notifications = context.getSystemService(NotificationManager.class);
+            notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+            SubscriptionRefreshService.stopIfStarted(context);
+        }
+        return finished;
+    }
+
+    static synchronized boolean cancel(Context context, String token) {
+        boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
+        if (STATE.finish(token)) SubscriptionRefreshCoordinator.finish(token);
+        if (cancelled) {
+            lastNotificationSnapshot = null;
+            SubscriptionRefreshService.stopIfStarted(context);
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
+        return cancelled;
+    }
+
+    static synchronized void dismissInactiveNotification(Context context) {
+        if (!SubscriptionRefreshCoordinator.isActive()) {
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
+    }
+
+    static synchronized void completeWorker(Context context, String token) {
+        STATE.finish(token);
+        if (SubscriptionRefreshCoordinator.finish(token)) {
+            lastNotificationSnapshot = null;
+            SubscriptionRefreshService.stopIfStarted(context);
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        }
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        return doScheduledWork();
+    }
+
+    private Result doScheduledWork() {
+        Context context = getApplicationContext();
+        if (AppVisibility.isVisible()) return Result.success();
+        String feedType = getInputData().getString(FEED_TYPE_INPUT);
+        if (feedType == null) return Result.failure();
+
+        List<SubscriptionRefreshConfiguration.Feed> feeds =
+            SubscriptionRefreshConfiguration.findFeeds(context, feedType);
+        if (feeds.isEmpty()) return Result.success();
+        SubscriptionRefreshConfiguration.Feed feed = feeds.get(0);
+        Set<String> channelIds = new LinkedHashSet<>();
+        for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            channelIds.addAll(profileFeed.channelIds);
+        }
+
+        String token = UUID.randomUUID().toString();
+        if (!SubscriptionRefreshCoordinator.begin(token)) return Result.retry();
+
+        SubscriptionRefreshCoordinator.update(token, feedType, 0);
+        int completed = 0;
+        int failed = 0;
+        Set<String> failedProfileIds = new LinkedHashSet<>();
+        SubscriptionRefreshNotificationProgress notificationProgress =
+            new SubscriptionRefreshNotificationProgress();
+        try {
+            List<String> orderedChannelIds = new ArrayList<>(channelIds);
+            SubscriptionRefreshCheckpoint checkpoint = SubscriptionRefreshCheckpoint.load(
+                new File(context.getFilesDir(), "subscription-refresh-" + feedType + ".properties"),
+                SubscriptionRefreshCheckpoint.configurationId(feeds),
+                orderedChannelIds.size()
+            );
+            completed = checkpoint.completed;
+            failed = checkpoint.failed;
+            failedProfileIds.addAll(checkpoint.failedProfileIds);
+            long batchStartedAt = SystemClock.elapsedRealtime();
+            // A periodic job may recreate the process while the app is closed, where
+            // Android does not allow starting WorkManager's foreground service. Keep
+            // the durable work owned by JobScheduler and make its progress visible
+            // with a regular notification instead.
+            publishNotification(context,
+                new SubscriptionRefreshState.Snapshot(
+                    token,
+                    feed.title,
+                    feed.cancelLabel,
+                    channelIds.isEmpty() ? 100 : (int) Math.round(checkpoint.nextIndex * 100.0 / channelIds.size())
+                )
+            );
+
+            int total = channelIds.size();
+            for (int index = checkpoint.nextIndex; index < orderedChannelIds.size(); index++) {
+                if (SubscriptionRefreshCoordinator.isCancelled(token)) {
+                    checkpoint.clear();
+                    return Result.success();
+                }
+                if (isStopped() || SystemClock.elapsedRealtime() - batchStartedAt >= MAXIMUM_BATCH_MILLIS) {
+                    return Result.retry();
+                }
+                String channelId = orderedChannelIds.get(index);
+                List<String> profileIds = targetProfileIds(feeds, channelId);
+                try {
+                    JSONObject payload = SubscriptionRefreshHttpClient.fetch(feed, channelId);
+                    boolean stored = false;
+                    long timestamp = System.currentTimeMillis();
+                    for (String profileId : profileIds) {
+                        try {
+                            SubscriptionRefreshResultStore.writeChannel(
+                                context,
+                                profileId,
+                                feedType,
+                                channelId,
+                                payload,
+                                timestamp
+                            );
+                            stored = true;
+                        } catch (Exception error) {
+                            failedProfileIds.add(profileId);
+                            recordFailure(
+                                context,
+                                Collections.singletonList(profileId),
+                                feedType,
+                                "Android result store",
+                                error
+                            );
+                        }
+                    }
+                    if (stored) {
+                        UploadNotifications.observePayload(context, channelId, feedType, payload);
+                        if (BuildConfig.BUNDLES_YT_DLP) try { YtDlpDownloads.get(context).discover(channelId, feedType, payload); }
+                        catch (Exception error) { android.util.Log.w("OpenTubeXYtDlp", "Unable to queue automatic downloads", error); }
+                        completed++;
+                    } else {
+                        failed++;
+                    }
+                } catch (Exception error) {
+                    failed++;
+                    failedProfileIds.addAll(profileIds);
+                    recordFailure(
+                        context,
+                        profileIds,
+                        feedType,
+                        "Subscription backend",
+                        error
+                    );
+                }
+
+                checkpoint.save(index + 1, completed, failed, failedProfileIds);
+                int progress = total == 0 ? 100 : (int) Math.round((completed + failed) * 100.0 / total);
+                if (notificationProgress.advanceTo(progress)) {
+                    publishNotification(context,
+                        new SubscriptionRefreshState.Snapshot(
+                            token,
+                            feed.title,
+                            feed.cancelLabel,
+                            progress
+                        )
+                    );
+                }
+            }
+
+            if (SubscriptionRefreshCoordinator.isCancelled(token)) {
+                checkpoint.clear();
+                return Result.success();
+            }
+            if (isStopped()) return Result.retry();
+            if (failed > 0 && completed == 0 && !channelIds.isEmpty()) {
+                checkpoint.clear();
+                return Result.retry();
+            }
+
+            long completionTimestamp = System.currentTimeMillis();
+            Set<String> completionFailedProfileIds = new LinkedHashSet<>();
+            writeProfileCompletions(
+                feeds,
+                failedProfileIds,
+                profileFeed -> {
+                    SubscriptionRefreshResultStore.clearFailure(
+                        context,
+                        profileFeed.profileId,
+                        feedType
+                    );
+                    SubscriptionRefreshResultStore.writeCompletion(
+                        context,
+                        profileFeed.profileId,
+                        feedType,
+                        completionTimestamp
+                    );
+                },
+                (profileFeed, error) -> {
+                    completionFailedProfileIds.add(profileFeed.profileId);
+                    recordFailure(
+                        context,
+                        Collections.singletonList(profileFeed.profileId),
+                        feedType,
+                        "Android result store",
+                        error
+                    );
+                }
+            );
+            if (!completionFailedProfileIds.isEmpty()) return Result.retry();
+            checkpoint.clear();
+            return Result.success();
+        } catch (Exception error) {
+            List<String> profileIds = new ArrayList<>();
+            for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+                profileIds.add(profileFeed.profileId);
+            }
+            recordFailure(
+                context,
+                profileIds,
+                feedType,
+                "Android background worker",
+                error
+            );
+            return Result.retry();
+        } finally {
+            completeWorker(context, token);
+        }
+    }
+
+    static List<String> targetProfileIds(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        String channelId
+    ) {
+        List<String> profileIds = new ArrayList<>();
+        for (SubscriptionRefreshConfiguration.Feed feed : feeds) {
+            if (feed.channelIds.contains(channelId)) profileIds.add(feed.profileId);
+        }
+        return profileIds;
+    }
+
+    static void writeProfileCompletions(
+        List<SubscriptionRefreshConfiguration.Feed> feeds,
+        Set<String> failedProfileIds,
+        ProfileCompletionWriter writer,
+        BiConsumer<SubscriptionRefreshConfiguration.Feed, Exception> onFailure
+    ) {
+        for (SubscriptionRefreshConfiguration.Feed profileFeed : feeds) {
+            if (failedProfileIds.contains(profileFeed.profileId)) continue;
+            try {
+                writer.write(profileFeed);
+            } catch (Exception error) {
+                onFailure.accept(profileFeed, error);
+            }
+        }
+    }
+
+    private static void recordFailure(
+        Context context,
+        List<String> profileIds,
+        String feedType,
+        String backend,
+        Throwable error
+    ) {
+        SubscriptionRefreshRequestDiagnostic diagnostic =
+            SubscriptionRefreshRequestDiagnostic.create(feedType, backend, error);
+        Log.w(LOG_TAG, diagnostic.toString());
+        long timestamp = System.currentTimeMillis();
+        for (String profileId : profileIds) {
+            try {
+                SubscriptionRefreshResultStore.writeFailure(
+                    context,
+                    profileId,
+                    feedType,
+                    diagnostic,
+                    timestamp
+                );
+            } catch (Exception storageError) {
+                Log.e(
+                    LOG_TAG,
+                    "Unable to persist a subscription request diagnostic: " +
+                        storageError.getClass().getSimpleName()
+                );
+            }
+        }
+    }
+}

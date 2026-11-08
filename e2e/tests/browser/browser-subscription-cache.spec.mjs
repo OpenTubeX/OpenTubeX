@@ -1,0 +1,288 @@
+import { readFile } from 'node:fs/promises'
+import { test, expect } from '@playwright/test'
+
+const source = await readFile(new URL('../../../src/datastores/browserSubscriptionCache.js', import.meta.url), 'utf8')
+const seenSource = await readFile(new URL('../../../src/subscriptionFeedState.js', import.meta.url), 'utf8')
+
+test.beforeEach(async ({ page }) => {
+  // Exercise the browser backend against Chromium's real IndexedDB, including
+  // transaction commits and structured cloning, without touching the app cache.
+  await page.route('http://subscription-cache.test/', route => route.fulfill({
+    contentType: 'text/html', body: '<!doctype html><title>Subscription cache tests</title>'
+  }))
+  await page.goto('http://subscription-cache.test/')
+  await page.evaluate(`${seenSource.replaceAll('export function', 'function')}\n${source.replace(/^import .*\n/m, '').replace('export function', 'function')}; window.createTestCache = createBrowserSubscriptionCache`)
+})
+
+for (const [tab, field, update] of [
+  ['videos', 'videos', 'updateVideosByChannelId'],
+  ['shorts', 'shorts', 'updateShortsByChannelId'],
+  ['live', 'liveStreams', 'updateLiveStreamsByChannelId'],
+  ['posts', 'communityPosts', 'updateCommunityPostsByChannelId'],
+]) {
+  test(`marking ${tab} seen tolerates malformed IndexedDB feed data`, async ({ page }) => {
+    const records = await page.evaluate(async ({ tab, field }) => {
+      const malformed = [{}, 'invalid', 1, true]
+      const cache = window.createTestCache(async () => malformed.map((value, index) => ({
+        _id: `channel-${index}`, [field]: value, [`${field}Timestamp`]: new Date(1000),
+      })), `malformed-seen-${tab}`)
+      for (let index = 0; index < malformed.length; index++) {
+        await cache.markEntriesAsSeen(`channel-${index}`, tab, [{
+          [tab === 'posts' ? 'postId' : 'videoId']: 'displayed', isNewInSubscriptionFeed: false,
+        }])
+      }
+      return cache.find()
+    }, { tab, field })
+    for (const record of records) {
+      expect(record[field]).toEqual([])
+      expect(new Date(record[`${field}Timestamp`]).getTime()).toBe(1000)
+    }
+  })
+  test(`marking ${tab} seen survives competing refreshes and reopening IndexedDB`, async ({ page }) => {
+    const result = await page.evaluate(async ({ tab, field, update }) => {
+      const name = `seen-race-${tab}`
+      const cache = window.createTestCache(async () => [], name)
+      const other = window.createTestCache(async () => [], name)
+      const idKey = tab === 'posts' ? 'postId' : 'videoId'
+      const entry = { [idKey]: 'displayed', isNewInSubscriptionFeed: true }
+      const fresh = [{ ...entry, title: 'Refreshed' }, { [idKey]: 'new', isNewInSubscriptionFeed: true }]
+      const marks = [{ ...entry, isNewInSubscriptionFeed: false }]
+      await cache[update]('channel', [entry], new Date(1000))
+      await other.find()
+      await Promise.all([
+        other[update]('channel', fresh, new Date(2000)),
+        cache.markEntriesAsSeen('channel', tab, marks),
+      ])
+      const first = (await cache.find())[0]
+      await Promise.all([
+        cache.markEntriesAsSeen('channel', tab, marks),
+        other[update]('channel', fresh, new Date(3000)),
+      ])
+      const reopened = (await window.createTestCache(async () => [], name).find())[0]
+      const originalPut = IDBObjectStore.prototype.put
+      let redundantWrites = 0
+      IDBObjectStore.prototype.put = function (...args) {
+        redundantWrites++
+        return originalPut.apply(this, args)
+      }
+      try {
+        await cache.markEntriesAsSeen('channel', tab, marks)
+        await cache.markEntriesAsSeen('channel', tab, [{ ...marks[0], [idKey]: 'absent' }])
+      } finally {
+        IDBObjectStore.prototype.put = originalPut
+      }
+      await cache.deleteAll()
+      await cache.markEntriesAsSeen('channel', tab, marks)
+      return { first, reopened, redundantWrites, cleared: await cache.find() }
+    }, { tab, field, update })
+    for (const record of [result.first, result.reopened]) {
+      expect(record[field].map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
+      expect(record[field][0].title).toBe('Refreshed')
+    }
+    expect(new Date(result.reopened[`${field}Timestamp`]).getTime()).toBe(3000)
+    expect(result.redundantWrites).toBe(0)
+    expect(result.cleared).toEqual([])
+  })
+}
+
+test('refresh writes scale with one channel instead of the entire subscription cache', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const records = Array.from({ length: 938 }, (_, index) => ({
+      _id: `channel-${index}`,
+      videosTimestamp: new Date(1000),
+      videos: Array.from({ length: 20 }, (_, video) => ({
+        videoId: `${index}-${video}`, title: 'Video title '.repeat(30), isNewInSubscriptionFeed: true
+      }))
+    }))
+    const cache = window.createTestCache(async () => records, 'cache-size-test')
+    await cache.find()
+    const original = IDBObjectStore.prototype.put
+    const sizes = []
+    IDBObjectStore.prototype.put = function (value, ...args) {
+      sizes.push(JSON.stringify(value).length)
+      return original.call(this, value, ...args)
+    }
+    const started = performance.now()
+    try {
+      await Promise.all(records.slice(0, 8).map(record => (
+        cache.updateVideosByChannelId(record._id, record.videos, new Date(2000))
+      )))
+    } finally {
+      IDBObjectStore.prototype.put = original
+    }
+    return { sizes, elapsedMs: performance.now() - started, count: (await cache.find()).length }
+  })
+  expect(result.count).toBe(938)
+  expect(result.sizes).toHaveLength(8)
+  expect(Math.max(...result.sizes)).toBeLessThan(20_000)
+})
+
+test('imports cached feeds once and keeps clear operations cleared after reopening', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const record = {
+      _id: 'channel',
+      videosTimestamp: new Date(1000),
+      videos: [{ videoId: 'video', isNewInSubscriptionFeed: false }],
+      shorts: [{ videoId: 'short', isNewInSubscriptionFeed: true }],
+      liveStreams: [],
+      communityPosts: [{ postId: 'post' }]
+    }
+    let imports = 0
+    const load = async () => { imports++; return [record] }
+    const cache = window.createTestCache(load, 'cache-import-test')
+    const other = window.createTestCache(load, 'cache-import-test')
+    const [first] = await Promise.all([cache.find(), other.find()])
+    await cache.updateVideosByChannelId('channel', [{ videoId: 'new' }], new Date(2000))
+    const reopened = window.createTestCache(load, 'cache-import-test')
+    const persisted = await reopened.find()
+    await cache.deleteAll()
+    const cleared = await window.createTestCache(load, 'cache-import-test').find()
+    return { first, persisted, cleared, imports }
+  })
+  expect(result.first[0].videos[0].isNewInSubscriptionFeed).toBe(false)
+  expect(result.first[0].shorts[0].isNewInSubscriptionFeed).toBe(true)
+  expect(result.first[0].communityPosts[0].postId).toBe('post')
+  expect(result.persisted[0].videos[0].videoId).toBe('new')
+  expect(result.persisted[0].shorts[0].videoId).toBe('short')
+  expect(result.cleared).toEqual([])
+  expect(result.imports).toBeLessThanOrEqual(2)
+})
+
+test('serializes competing feeds, stale writes and Shorts enrichment across connections', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const cache = window.createTestCache(async () => [], 'cache-race-test')
+    const other = window.createTestCache(async () => [], 'cache-race-test')
+    await Promise.all([cache.find(), other.find()])
+    await Promise.all([
+      cache.updateVideosByChannelId('channel', [{ videoId: 'video' }], new Date(3000)),
+      other.updateShortsByChannelId('channel', [{ videoId: 'short', title: 'Original', viewCount: 100 }], new Date(1000))
+    ])
+    const stale = await other.updateVideosByChannelId('channel', [], new Date(2000))
+    await Promise.all([
+      cache.updateShortsByChannelId('channel', [{ videoId: 'short', title: 'Refreshed', viewCount: 100 }, { videoId: 'new-short' }], new Date(2000)),
+      other.updateShortsWithChannelPageShortsByChannelId('channel', [{ videoId: 'short', title: 'Enriched', viewCount: 200 }])
+    ])
+    const records = await cache.find()
+    await cache.deleteMultipleChannels(['channel'])
+    return { stale, records, removed: await other.find() }
+  })
+  expect(result.stale).toBe(false)
+  expect(result.records[0].videos[0].videoId).toBe('video')
+  expect(result.records[0].shorts.map(video => video.videoId)).toEqual(['short', 'new-short'])
+  expect(result.records[0].shorts[0].title).toBe('Enriched')
+  expect(result.records[0].shorts[0].viewCount).toBe(200)
+  expect(result.removed).toEqual([])
+})
+
+test('failed imports retry atomically and failed writes reject without losing cached data', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    let invalid = true
+    const cache = window.createTestCache(async () => [
+      { _id: 'channel', videos: [{ videoId: 'old' }], videosTimestamp: new Date(1000) },
+      invalid ? { _id: 'invalid', uncloneable: () => {} } : { _id: 'second' }
+    ], 'cache-failure-test')
+    const importError = await cache.find().then(() => null, error => error.name)
+    invalid = false
+    const imported = await cache.find()
+    const original = IDBObjectStore.prototype.put
+    IDBObjectStore.prototype.put = function () {
+      throw new DOMException('Simulated storage failure', 'QuotaExceededError')
+    }
+    let writeError
+    try {
+      writeError = await cache.updateVideosByChannelId('channel', [], new Date(2000))
+        .then(() => null, error => error.name)
+    } finally {
+      IDBObjectStore.prototype.put = original
+    }
+    return { importError, writeError, imported, persisted: await cache.find() }
+  })
+  expect(result.importError).toBe('DataCloneError')
+  expect(result.imported).toHaveLength(2)
+  expect(result.writeError).toBe('QuotaExceededError')
+  expect(result.persisted.find(record => record._id === 'channel').videos[0].videoId).toBe('old')
+})
+
+test('cleans up the old log after import and retries interrupted cleanup without reimporting', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    let imports = 0
+    let cleanups = 0
+    const load = async () => {
+      imports++
+      return [{ _id: 'channel', videos: [{ videoId: 'old' }] }]
+    }
+    const cleanup = async () => {
+      cleanups++
+      if (cleanups === 1) throw new Error('Interrupted cleanup')
+    }
+    const cache = window.createTestCache(load, 'cache-cleanup-test', cleanup)
+    const error = await cache.find().then(() => null, error => error.message)
+    const reopened = window.createTestCache(load, 'cache-cleanup-test', cleanup)
+    const records = await reopened.find()
+    await reopened.deleteAll()
+    const cleared = await window.createTestCache(load, 'cache-cleanup-test', cleanup).find()
+    return { error, records, cleared, imports, cleanups }
+  })
+  expect(result.error).toBe('Interrupted cleanup')
+  expect(result.records[0].videos[0].videoId).toBe('old')
+  expect(result.imports).toBe(1)
+  expect(result.cleanups).toBe(2)
+  expect(result.cleared).toEqual([])
+})
+
+test('snapshots reactive entries before awaiting storage and preserves other feed data', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const cache = window.createTestCache(async () => [], 'cache-proxy-test')
+    const entry = { videoId: 'video', isNewInSubscriptionFeed: true }
+    const entries = new Proxy([new Proxy(entry, {})], {})
+    const update = cache.updateVideosByChannelId('channel', entries, new Date(1000))
+    entry.isNewInSubscriptionFeed = false
+    await update
+    await cache.updateLiveStreamsByChannelId('channel', [{ videoId: 'live' }], new Date(1000))
+    await cache.updateCommunityPostsByChannelId('channel', [{ postId: 'post' }], new Date(1000))
+    return cache.find()
+  })
+  expect(result[0].videos[0].isNewInSubscriptionFeed).toBe(true)
+  expect(result[0].liveStreams[0].videoId).toBe('live')
+  expect(result[0].communityPosts[0].postId).toBe('post')
+})
+
+for (const closure of ['versionchange', 'close']) {
+  test(`reopens the cache after ${closure} without letting old close events discard a new connection`, async ({ page }) => {
+    const result = await page.evaluate(async reason => {
+      const name = `cache-${reason}-test`
+      const original = IDBFactory.prototype.open
+      const connections = []
+      IDBFactory.prototype.open = function (...args) {
+        const request = original.apply(this, args)
+        if (args[0] === name) request.addEventListener('success', () => connections.push(request.result))
+        return request
+      }
+      try {
+        const cache = window.createTestCache(async () => [], name)
+        await cache.updateVideosByChannelId('channel', [{ videoId: 'old' }], new Date(1000))
+        const first = connections[0]
+        if (reason === 'versionchange') {
+          await new Promise((resolve, reject) => {
+            const request = indexedDB.deleteDatabase(name)
+            request.onsuccess = resolve
+            request.onerror = () => reject(request.error)
+          })
+        } else {
+          // Chromium has no public force-close API. Close the real connection
+          // and deliver the event emitted by an abnormal storage closure.
+          first.close()
+          first.dispatchEvent(new Event('close'))
+        }
+        await cache.updateVideosByChannelId('channel', [{ videoId: 'new' }], new Date(2000))
+        first.dispatchEvent(new Event('close'))
+        return { records: await cache.find(), opens: connections.length }
+      } finally {
+        IDBFactory.prototype.open = original
+        connections.forEach(connection => connection.close())
+      }
+    }, closure)
+    expect(result.records[0].videos[0].videoId).toBe('new')
+    expect(result.opens).toBe(2)
+  })
+}

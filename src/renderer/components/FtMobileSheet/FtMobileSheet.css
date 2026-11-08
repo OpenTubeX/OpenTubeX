@@ -1,0 +1,159 @@
+.mobileSheet {
+  color: var(--primary-text-color);
+}
+
+.mobileSheet:not([open], .mobileSheetEnabled) {
+  display: contents;
+}
+
+.mobileSheet[open] {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: var(--phone-viewport-height, 100dvh);
+  inset-block-start: var(--phone-viewport-top, 0);
+  max-block-size: 100%;
+  margin: 0;
+  padding-block: var(--safe-area-inset-top, env(safe-area-inset-top, 0)) var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
+  padding-inline: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) var(--safe-area-inset-right, env(safe-area-inset-right, 0));
+  border: 0;
+  background: var(--card-bg-color);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.mobileSheet[open].compactSheet {
+  inset-block: var(--phone-viewport-top, 0) calc(100dvh - var(--phone-viewport-top, 0) - var(--phone-viewport-height, 100dvh));
+  inline-size: min(calc(100% - 40px), 400px);
+  max-inline-size: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 32px);
+  block-size: fit-content;
+  max-block-size: calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) - 32px);
+  margin: auto;
+  padding-block: 0;
+  padding-inline: 0;
+  border-radius: var(--shape-corner-extra-large);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
+}
+
+.mobileSheet[open].compactSheet.bottomSheet {
+  inset-block: auto calc(100dvh - var(--phone-viewport-top, 0px) - var(--phone-viewport-height, 100dvh));
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
+  padding-inline: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) var(--safe-area-inset-right, env(safe-area-inset-right, 0));
+  border-radius: var(--shape-corner-extra-large) var(--shape-corner-extra-large) 0 0;
+}
+
+.compactSheet::backdrop {
+  background: rgb(0 0 0 / 55%);
+  backdrop-filter: var(--modal-backdrop-blur);
+}
+
+.mobileSheetHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-block-size: 64px;
+  box-sizing: border-box;
+  padding-block: 8px;
+  padding-inline: 20px 12px;
+  border-block-end: 1px solid var(--divider-color);
+}
+
+.mobileSheetHeader h2 {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.compactSheet .mobileSheetHeader {
+  min-block-size: 0;
+  padding-block: 12px 4px;
+  padding-inline: 24px 8px;
+  border: 0;
+}
+
+.compactSheet .mobileSheetHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mobileSheetHeader > :deep(button) {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-inline-size: var(--phone-touch-target, 48px);
+  min-block-size: var(--phone-touch-target, 48px);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.mobileSheetHeader > :deep(button:is(:hover, :active)) {
+  background: var(--side-nav-hover-color);
+}
+
+.mobileSheetHeader > :deep(button:active) {
+  border-radius: var(--shape-corner-medium);
+}
+
+.mobileSheet[open].dockedSheet {
+  z-index: 8;
+  padding-block-start: 0;
+  border-start-start-radius: var(--shape-corner-extra-large);
+  border-start-end-radius: var(--shape-corner-extra-large);
+  box-shadow: 0 -4px 20px rgb(0 0 0 / 18%);
+}
+
+.dockedSheet .mobileSheetHeader {
+  position: relative;
+  padding-block-start: 16px;
+  touch-action: none;
+}
+
+.mobileSheetHeader :deep(svg) {
+  flex: none;
+}
+
+.mobileSheet.mobileSheetEnabled:not([open]) {
+  display: none;
+}
+
+.dockedSheet .mobileSheetHeader::before {
+  content: '';
+  position: absolute;
+  inline-size: 32px;
+  block-size: 4px;
+  inset-block-start: 5px;
+  inset-inline-start: calc(50% - 16px);
+  border-radius: var(--shape-corner-full);
+  background: var(--secondary-text-color);
+  opacity: 0.5;
+}
+
+@media (height <= 600px) {
+  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow)) {
+    inline-size: 100%;
+    max-block-size: 45dvh;
+  }
+
+  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow) video) {
+    min-block-size: 0;
+    object-fit: contain;
+  }
+}

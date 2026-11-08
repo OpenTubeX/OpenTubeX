@@ -1,18 +1,26 @@
 <template>
   <div
     class="progressBar"
-    :style="{ inlineSize: progressBarPercentage + '%' }"
-  />
+  >
+    <div
+      v-show="progressBarPercentage > 0"
+      class="progressBarFill"
+      :style="{ inlineSize: progressBarPercentage + '%' }"
+    />
+  </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
-import store from '../../store/index'
-
-const progressBarPercentage = computed(() => {
-  return store.getters.getProgressBarPercentage
+const props = defineProps({
+  progress: {
+    type: Number,
+    required: true
+  }
 })
+
+const progressBarPercentage = computed(() => props.progress)
 </script>
 
 <style scoped src="./FtProgressBar.css" />

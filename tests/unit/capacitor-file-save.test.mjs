@@ -1,0 +1,228 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+
+const source = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
+const saveSource = source.match(/export async function writeFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
+
+function loadPicker(saveAndroidFile, overrides = {}) {
+  return vm.runInNewContext(`${saveSource}\nwriteFileWithPicker`, {
+    process: { env: { IS_CAPACITOR: true } },
+    window: {},
+    Blob,
+    URL: { createObjectURL: () => 'blob:screenshot', revokeObjectURL() {} },
+    document: { createElement: () => ({ click() {} }) },
+    setTimeout: callback => callback(),
+    saveAndroidFile,
+    ...overrides,
+  })
+}
+
+test('Android screenshot saving reaches native file export with the original filename and PNG bytes', async () => {
+  const calls = []
+  const image = new Blob(['PNG bytes'], { type: 'image/png' })
+  const save = loadPicker(async (...args) => { calls.push(args); return true })
+
+  assert.equal(await save('Screenshot ä.png', image, 'PNG', 'image/png', '.png'), true)
+  assert.deepEqual(calls, [['Screenshot ä.png', image, 'image/png', undefined]])
+})
+
+test('canceling the native save picker does not report a saved screenshot', async () => {
+  const save = loadPicker(async () => false)
+  assert.equal(await save('screenshot.png', new Blob(['PNG']), 'PNG', 'image/png', '.png'), false)
+})
+
+test('native exports resolve deferred backup content before calling the bridge', async () => {
+  const calls = []
+  const archive = new Blob(['ZIP bytes'], { type: 'application/zip' })
+  const save = loadPicker(async (...args) => { calls.push(args); return true })
+  assert.equal(await save('backup.zip', async () => archive, 'Backup', 'application/zip', '.zip'), true)
+  assert.deepEqual(calls, [['backup.zip', archive, 'application/zip', undefined]])
+})
+
+test('browsers without a save picker download deferred backup content', async () => {
+  const archive = new Blob(['ZIP bytes'], { type: 'application/zip' })
+  const downloads = []
+  const save = loadPicker(() => assert.fail('Browser export must not call the Android bridge'), {
+    process: { env: {} },
+    URL: { createObjectURL: blob => { assert.equal(blob, archive); return 'blob:backup' }, revokeObjectURL() {} },
+    document: { createElement: () => ({ click() { downloads.push(this.download) } }) },
+  })
+  assert.equal(await save('backup.zip', async () => archive, 'Backup', 'application/zip', '.zip'), true)
+  assert.deepEqual(downloads, ['backup.zip'])
+})
+
+test('native export errors reach the caller instead of reporting success', async () => {
+  const error = new Error('Disk full')
+  const save = loadPicker(async () => { throw error })
+  await assert.rejects(save('theme.json', '{}', 'JSON', 'application/json', '.json'), error)
+})
+
+test('passes the folder selected in settings to native export', async () => {
+  const calls = []
+  const save = loadPicker(async (...args) => { calls.push(args); return true })
+  const directory = 'content://documents/tree/primary%3APictures%2FScreenshots'
+  await save('screenshot.png', 'data', 'PNG', 'image/png', '.png', 'player-screenshots', 'pictures', directory)
+  assert.deepEqual(calls, [['screenshot.png', 'data', 'image/png', directory]])
+})
+
+const storageSource = (await readFile(new URL('../../src/renderer/helpers/androidStorage.js', import.meta.url), 'utf8'))
+  .replace(/^import .*\n/gm, '').replace(/^export /gm, '')
+
+for (const [name, mimeType, content] of [
+  ['screenshot.png', 'image/png', new Blob([new Uint8Array([0, 128, 255])], { type: 'image/png' })],
+  ['transcript.txt', 'text/plain', 'Grüße 日本語 🎥\n'],
+  ['theme.json', 'application/json', '{"name":"Grün"}\n'],
+  ['playlist.csv', 'text/csv', 'Video ID,Timestamp\nabc,2026-01-01\n'],
+  ['profiles.db', 'application/x-freetube-db', '{"name":"Öffentlich"}\n'],
+  ['empty.txt', 'text/plain', ''],
+]) {
+  test(`native export preserves the exact bytes of ${name}`, async () => {
+    const writes = []
+    const save = vm.runInNewContext(`${storageSource}\nsaveAndroidFile`, {
+      process: { env: { IS_CAPACITOR: true } },
+      Blob,
+      blobToDataUrl: async blob => `data:${blob.type};base64,${Buffer.from(await blob.arrayBuffer()).toString('base64')}`,
+      registerPlugin: () => ({ saveFile: async options => { writes.push(options); return { saved: true } } }),
+    })
+    assert.equal(await save(name, content, mimeType, 'content://documents/tree/exports'), true)
+    assert.equal(writes[0].fileName, name)
+    assert.equal(writes[0].mimeType, mimeType)
+    assert.equal(writes[0].directory, 'content://documents/tree/exports')
+    const expected = content instanceof Blob ? Buffer.from(await content.arrayBuffer()) : Buffer.from(content)
+    assert.deepEqual(Buffer.from(writes[0].data, 'base64'), expected)
+  })
+}
+
+const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const screenshotSource = playerSource.split('// #region screenshots')[1].split('// #endregion screenshots')[0]
+
+function loadScreenshot({ directory = 'content://documents/tree/screenshots', chosenDirectory, mode = 'default_folder' } = {}) {
+  const saved = []
+  const settings = []
+  const toasts = []
+  const video = { videoWidth: 1920, videoHeight: 1080, currentTime: 10, paused: false, pauseCalls: 0, pause() { this.paused = true; this.pauseCalls++ }, play() { this.paused = false } }
+  const image = new Blob(['frame'], { type: 'image/png' })
+  const takeScreenshot = vm.runInNewContext(`${screenshotSource}\ntakeScreenshot`, {
+    process: { env: { IS_CAPACITOR: true } },
+    video: { value: video },
+    capturePlayerFrame: async source => source,
+    screenshotMode: { value: mode },
+    screenshotFormat: { value: 'png' },
+    screenshotQuality: { value: 95 },
+    props: { videoId: 'video' },
+    store: {
+      getters: { getScreenshotFolderPath: directory },
+      dispatch: async (action, value) => {
+        if (action === 'parseScreenshotCustomFileName') return 'frame'
+        settings.push([action, value])
+      },
+    },
+    chooseAndroidDirectory: async () => chosenDirectory,
+    writeFileWithPicker: async (...args) => { saved.push(args); return true },
+    showToast: toast => toasts.push(toast.message),
+    t: key => key,
+    console,
+    document: { createElement: () => ({ getContext: () => ({ drawImage() {} }), toBlob: callback => callback(image), remove() {} }) },
+  })
+  return { takeScreenshot, saved, settings, video, toasts }
+}
+
+test('the player saves screenshots automatically to its configured Android folder', async () => {
+  const state = loadScreenshot()
+  await state.takeScreenshot()
+  assert.equal(state.saved[0][7], 'content://documents/tree/screenshots')
+  assert.deepEqual(state.settings, [])
+  assert.deepEqual(state.toasts, ['Screenshot Success'])
+  assert.equal(state.video.paused, false)
+  assert.equal(state.video.pauseCalls, 0)
+})
+
+test('the first automatic screenshot asks for a folder and remembers the selection', async () => {
+  const state = loadScreenshot({ directory: '', chosenDirectory: 'content://documents/tree/new' })
+  await state.takeScreenshot()
+  assert.deepEqual(state.settings, [['updateScreenshotFolderPath', 'content://documents/tree/new']])
+  assert.equal(state.saved[0][7], 'content://documents/tree/new')
+})
+
+test('canceling initial folder selection saves nothing and restores playback', async () => {
+  const state = loadScreenshot({ directory: '' })
+  await state.takeScreenshot()
+  assert.deepEqual(state.saved, [])
+  assert.deepEqual(state.toasts, [])
+  assert.equal(state.video.paused, false)
+})
+
+test('ask-path mode uses the save picker instead of the automatic screenshot folder', async () => {
+  const state = loadScreenshot({ mode: 'prompt_folder' })
+  await state.takeScreenshot()
+  assert.equal(state.saved[0][7], undefined)
+})
+
+test('Android screenshot settings offer automatic saving and persist the chosen folder', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
+  const fragment = source.slice(source.indexOf('const screenshotModeNames'), source.indexOf('const screenshotFilenamePattern'))
+  const changes = []
+  const controls = vm.runInNewContext(`${fragment}\n({ screenshotModeValues, chooseScreenshotFolder })`, {
+    process: { env: { IS_CAPACITOR: true } },
+    computed: callback => ({ get value() { return callback() } }),
+    t: key => key,
+    store: { getters: {}, dispatch: async (...args) => changes.push(args) },
+    chooseAndroidDirectory: async () => 'content://documents/tree/chosen',
+    showToast: () => assert.fail('Selecting a valid folder should succeed'),
+  })
+  assert.ok(controls.screenshotModeValues.value.includes('default_folder'))
+  await controls.chooseScreenshotFolder()
+  assert.deepEqual(changes, [['updateScreenshotFolderPath', 'content://documents/tree/chosen']])
+})
+
+test('desktop save dialogs still write and close their file stream', async () => {
+  const writes = []
+  const save = loadPicker(() => assert.fail('Desktop must not call the Android bridge'), {
+    process: { env: { IS_ELECTRON: true } },
+    window: { showSaveFilePicker: async () => ({ createWritable: async () => ({
+      write: async data => writes.push(data), close: async () => writes.push('closed'),
+    }) }) },
+  })
+  assert.equal(await save('theme.json', '{}', 'JSON', 'application/json', '.json'), true)
+  assert.deepEqual(writes, ['{}', 'closed'])
+})
+
+const pickSource = ['pickFilesWithPicker', 'pickFileWithPicker']
+  .map(name => source.match(new RegExp(`export async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0].replace('export ', ''))
+  .join('\n')
+const readSource = source.match(/export async function readFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
+
+test('iOS can select exported database files whose extension WebKit does not recognize', async () => {
+  const file = { name: 'history.db', text: async () => '{"videoId":"fixture"}\n' }
+  let accept
+  const read = vm.runInNewContext(`${pickSource}\n${readSource}\nreadFileWithPicker`, {
+    process: { env: { IS_IOS: true } },
+    window: { addEventListener() {} },
+    document: { createElement: () => ({
+      files: [file],
+      click() { accept = this.accept; this.onchange() },
+    }) },
+  })
+  const result = await read('History', { 'application/x-freetube-db': '.db', 'application/json': '.json' })
+  assert.equal(accept, '')
+  assert.equal(result.filename, file.name)
+  assert.equal(result.content, await file.text())
+})
+
+test('Android can select subtitle files on versions without MIME types for them', async () => {
+  const accepts = []
+  const pick = vm.runInNewContext(`${pickSource}\npickFileWithPicker`, {
+    process: { env: { IS_CAPACITOR: true } },
+    window: { addEventListener() {} },
+    document: { createElement: () => ({
+      files: [{ name: 'movie.srt' }],
+      click() { accepts.push(this.accept); this.onchange() },
+    }) },
+  })
+  assert.equal((await pick('Subtitle files', { 'text/vtt': '.vtt', 'application/x-subrip': '.srt' })).name, 'movie.srt')
+  // Other imports keep filtering by their file types
+  await pick('Backups', { 'application/json': '.json', 'application/zip': '.zip' })
+  assert.deepEqual(accepts, ['', '.json,.zip'])
+})

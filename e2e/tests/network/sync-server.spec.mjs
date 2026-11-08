@@ -1,0 +1,1384 @@
+import { readFile, rm } from 'node:fs/promises'
+import { randomBytes, randomUUID } from 'node:crypto'
+import path from 'node:path'
+
+import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp, readDatastore } from '../../helpers/app.mjs'
+import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
+import { decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+
+const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
+const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
+const secondChannelId = 'UC-lHJZR3Gqxm24_Vd_AJ5Yw'
+const remoteChannelId = 'UC_x5XG1OV2P6uZZ5FSM9Ttw'
+
+async function getSyncCapabilities() {
+  const response = await fetch(`${syncServerUrl}/health`)
+  if (!response.ok) return {}
+  const health = await response.json()
+  return health.capabilities ?? {}
+}
+
+function rateLimitClient(testInfo) {
+  const title = `${testInfo.file}\0${testInfo.titlePath.join('\0')}\0${testInfo.retry}`
+  let hash = 2166136261
+  for (const character of title) {
+    hash ^= character.codePointAt(0)
+    hash = Math.imul(hash, 16777619)
+  }
+  return `10.${hash & 0xff}.${(hash >>> 8) & 0xff}.${(hash >>> 16) & 0xff}`
+}
+
+test.describe('OpenTubeX sync server', () => {
+  test.skip(!syncServerUrl, 'Set OPENTUBEX_SYNC_SERVER_URL to run the local sync-server test')
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    await page.route('**/account/**', route => route.continue({
+      headers: {
+        ...route.request().headers(),
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      }
+    }))
+  })
+
+  test.use({
+    seed: {
+      settings: {
+        baseTheme: 'dark',
+        syncServerEnabled: true,
+        channelPlaybackSpeeds: JSON.stringify({ [channelId]: 1.5 })
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: channelId,
+          name: 'Rick Astley',
+          thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
+        }, {
+          id: secondChannelId,
+          name: 'PewDiePie',
+          thumbnail: 'https://yt3.googleusercontent.com/ytc/default'
+        }]
+      }, {
+        _id: 'music-profile',
+        name: 'Music',
+        bgColor: '#123456',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: channelId,
+          name: 'Rick Astley',
+          thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
+        }]
+      }, {
+        _id: 'creators-profile',
+        name: 'Creators',
+        bgColor: '#654321',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: secondChannelId,
+          name: 'PewDiePie',
+          thumbnail: 'https://yt3.googleusercontent.com/ytc/default'
+        }]
+      }],
+      playlists: [{
+        _id: 'sync-playlist',
+        playlistName: 'Synced playlist',
+        description: 'Created in OpenTubeX',
+        protected: false,
+        videos: [],
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }],
+      history: [{
+        _id: 'dQw4w9WgXcQ',
+        videoId: 'dQw4w9WgXcQ',
+        title: 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)',
+        author: 'Rick Astley',
+        authorId: channelId,
+        published: Date.now() - 60000,
+        description: '',
+        lengthSeconds: 213,
+        watchProgress: 45,
+        isWatched: false,
+        timeWatched: Date.now(),
+        isLive: false,
+        type: 'video'
+      }]
+    }
+  })
+
+  test('pushes local data from multiple profiles and pulls remote changes', async ({ app, page }, testInfo) => {
+    const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const capabilities = await getSyncCapabilities()
+    const enhancedPrivacy = capabilities.encrypted_sync === 1
+    const accountSessionsSupported = capabilities.account_sessions === 1
+    let accountPassword = 'local-test-password'
+    const bulkRequests = []
+    const playbackSpeedWrites = []
+    page.on('request', request => {
+      const pathname = new URL(request.url()).pathname
+      if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
+      if (['PUT', 'DELETE'].includes(request.method()) && (
+        pathname.includes('/channel_playback_speeds/') ||
+        pathname.endsWith('/encrypted_sync/playbackSpeeds')
+      )) playbackSpeedWrites.push(pathname)
+    })
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
+    await serverUrlInput.fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    if (enhancedPrivacy) {
+      await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    }
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    if (enhancedPrivacy) {
+      await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
+      await expect(syncSection.getByLabel('Open tabs and session')).toBeVisible()
+      expect(bulkRequests).toEqual([])
+    } else {
+      await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
+      expect(bulkRequests).toEqual(expect.arrayContaining([
+        '/v1/subscriptions/bulk',
+        '/v1/watch_history/bulk'
+      ]))
+    }
+    await expect(serverUrlInput).toHaveValue(syncServerUrl.replace(/\/$/, ''))
+
+    await expect.poll(async () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return settings.syncServerToken
+    }).not.toBe('')
+
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+    expect(settings.syncServerUrl).toBe(syncServerUrl.replace(/\/$/, ''))
+    expect(settings.syncServerPrivacyMode).toBe(enhancedPrivacy ? 'enhanced' : 'legacy')
+    expect(Boolean(settings.syncServerPrivacyKey)).toBe(enhancedPrivacy)
+    const headers = {
+      Authorization: settings.syncServerToken,
+      'Content-Type': 'application/json'
+    }
+    const versionedSubscriptionsResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, { headers })
+    const apiPrefix = versionedSubscriptionsResponse.status === 404 ? '' : '/v1'
+    if (enhancedPrivacy) {
+      expect(versionedSubscriptionsResponse.status).toBe(409)
+      const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, { headers })
+      const encryptedManifest = await encryptedResponse.json()
+      const encryptedCollectionNames = encryptedManifest.collections.map(entry => entry.collection)
+      expect(encryptedCollectionNames).toEqual(
+        expect.arrayContaining([
+          'subscriptions',
+          'playlists',
+          'history',
+          'profiles',
+          'sessionsV2',
+          'settings'
+        ])
+      )
+      expect(encryptedCollectionNames).not.toContain('playbackSpeeds')
+      for (const { collection, revision } of encryptedManifest.collections) {
+        expect(revision).toBeGreaterThan(0)
+        const collectionResponse = await fetch(
+          `${syncServerUrl}/v1/encrypted_sync/${collection}`,
+          { headers }
+        )
+        const encryptedCollection = await collectionResponse.json()
+        expect(encryptedCollection.payload).not.toContain(channelId)
+        expect(encryptedCollection.payload).not.toContain('Synced playlist')
+        expect(encryptedCollection.payload).not.toContain('dQw4w9WgXcQ')
+        expect(encryptedCollection.payload).not.toContain('Music')
+        expect(encryptedCollection.payload).not.toContain('Creators')
+        expect(encryptedCollection.payload).not.toContain('"baseTheme":"dark"')
+        expect(encryptedCollection.payload).not.toContain('app://')
+      }
+    } else {
+      const subscriptionsResponse = apiPrefix
+        ? versionedSubscriptionsResponse
+        : await fetch(`${syncServerUrl}/subscriptions/`, { headers })
+      const subscriptions = await subscriptionsResponse.json()
+      expect(subscriptions).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: channelId }),
+        expect.objectContaining({ id: secondChannelId })
+      ]))
+
+      const playlistsResponse = await fetch(`${syncServerUrl}${apiPrefix}/playlists/`, { headers })
+      expect(await playlistsResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({ title: 'Synced playlist' })
+      ]))
+
+      const historyResponse = await fetch(`${syncServerUrl}${apiPrefix}/watch_history/?page=1`, { headers })
+      expect(historyResponse.ok).toBe(true)
+      expect(await historyResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          video: expect.objectContaining({
+            id: 'dQw4w9WgXcQ',
+            uploader: expect.objectContaining({
+              avatar: 'https://yt3.googleusercontent.com/ytc/default'
+            })
+          })
+        })
+      ]))
+
+      const profilesResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/subscriptions/groups/`,
+        { headers }
+      )
+      expect(profilesResponse.ok).toBe(true)
+      expect(await profilesResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          group: expect.objectContaining({ title: 'Music' }),
+          channels: expect.arrayContaining([expect.objectContaining({ id: channelId })])
+        }),
+        expect.objectContaining({
+          group: expect.objectContaining({ title: 'Creators' }),
+          channels: expect.arrayContaining([expect.objectContaining({ id: secondChannelId })])
+        })
+      ]))
+
+      const addRemoteResponse = await fetch(`${syncServerUrl}${apiPrefix}/subscriptions/`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          id: remoteChannelId,
+          name: 'Google for Developers',
+          avatar: 'https://i.ytimg.com/vi/7V-fIGMDsmE/hqdefault.jpg',
+          verified: false
+        })
+      })
+      expect(addRemoteResponse.ok).toBe(true)
+    }
+
+    if (accountSessionsSupported) {
+      const devices = syncSection.locator('.accountManagement')
+      await expect(devices.getByRole('heading', { name: 'Devices' })).toBeVisible()
+      const currentCard = devices.locator('.sessionCard', { hasText: 'Current device' })
+      await expect(currentCard).toBeVisible()
+      await expect(currentCard.getByRole('heading')).not.toHaveText('Unknown device')
+      const lastActiveTime = currentCard.locator('.sessionDetails > div', { hasText: 'Last active' }).locator('time')
+      await expect(lastActiveTime).toHaveText(/ago|Moments ago/)
+      await expect(lastActiveTime).toHaveAttribute('title', /\b20\d{2}\b/)
+      const deviceInfo = await page.evaluate(() => window.ftElectron.getDeviceInfo())
+      await expect(currentCard).toContainText(
+        `${deviceInfo.platform}${deviceInfo.release ? ` ${deviceInfo.release}` : ''}`
+      )
+      await currentCard.getByRole('button', { name: 'Rename device' }).click()
+      const renamePrompt = page.getByRole('dialog', { name: 'Rename device' })
+      await renamePrompt.getByLabel('Device name').fill('Remote laptop')
+      await renamePrompt.getByRole('button', { name: 'Save name' }).click()
+      await expect(renamePrompt).toBeHidden()
+      await expect(currentCard.getByRole('heading')).toHaveText('Remote laptop')
+
+      const createOtherSession = async () => {
+        const response = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: username,
+            password: accountPassword,
+            device_id: randomBytes(16).toString('base64url')
+          })
+        })
+        expect(response.ok).toBe(true)
+        return (await response.json()).jwt
+      }
+
+      const revokedToken = await createOtherSession()
+      await devices.getByRole('button', { name: 'Refresh devices' }).click()
+      const unknownDevice = devices.locator('.sessionCard', { hasText: 'Unknown device' })
+      await expect(unknownDevice).toBeVisible()
+      await unknownDevice.getByRole('button', { name: 'Rename device' }).click()
+      const otherRenamePrompt = page.getByRole('dialog', { name: 'Rename device' })
+      await otherRenamePrompt.getByLabel('Device name').fill('Spare laptop')
+      await otherRenamePrompt.getByRole('button', { name: 'Save name' }).click()
+      await expect(otherRenamePrompt).toBeHidden()
+      const spareLaptop = devices.locator('.sessionCard', { hasText: 'Spare laptop' })
+      await expect(spareLaptop).toBeVisible()
+      await spareLaptop.getByRole('button', { name: 'Revoke access' }).click()
+      const revokePrompt = page.getByRole('dialog', { name: 'Revoke this session?' })
+      await expect(revokePrompt).toContainText('Spare laptop will lose access')
+      await revokePrompt.getByRole('button', { name: 'Revoke session' }).click()
+      await expect(revokePrompt).toBeHidden()
+      const revokedResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/sessions`, {
+        headers: { Authorization: revokedToken }
+      })
+      expect(revokedResponse.status).toBe(401)
+
+      const passwordRevokedToken = await createOtherSession()
+      const tokenBeforePasswordChange = headers.Authorization
+      let finishStaleSessionRequest
+      let staleSessionRequestStarted
+      let staleSessionRequestFinished
+      const staleSessionRequestPending = new Promise(resolve => {
+        finishStaleSessionRequest = resolve
+      })
+      const staleSessionRequestRequested = new Promise(resolve => {
+        staleSessionRequestStarted = resolve
+      })
+      const staleSessionRequestCompleted = new Promise(resolve => {
+        staleSessionRequestFinished = resolve
+      })
+      let holdStaleSessionRequest = true
+      await page.route('**/account/sessions', async route => {
+        const request = route.request()
+        if (!holdStaleSessionRequest || request.method() !== 'GET' ||
+            request.headers().authorization !== tokenBeforePasswordChange) {
+          await route.continue()
+          return
+        }
+        holdStaleSessionRequest = false
+        const response = await route.fetch()
+        staleSessionRequestStarted()
+        await staleSessionRequestPending
+        try {
+          await route.fulfill({ response })
+        } finally {
+          staleSessionRequestFinished()
+        }
+      })
+      await devices.getByRole('button', { name: 'Refresh devices' }).click()
+      await staleSessionRequestRequested
+      try {
+        const changePasswordButton = syncSection.getByRole('button', { name: 'Change password' })
+        await expect(changePasswordButton).toBeVisible()
+        await expect(devices.getByRole('button', { name: 'Change password' })).toHaveCount(0)
+        await changePasswordButton.click()
+        const passwordPrompt = page.getByRole('dialog', { name: 'Change password' })
+        await passwordPrompt.getByLabel('Current password').fill(accountPassword)
+        await passwordPrompt.getByLabel('New password', { exact: true }).fill('new-local-test-password')
+        await passwordPrompt.getByLabel('Confirm new password').fill('different-password')
+        await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+        await expect(passwordPrompt.getByRole('alert')).toContainText('do not match')
+
+        await passwordPrompt.getByLabel('Confirm new password').fill('new-local-test-password')
+        await passwordPrompt.getByRole('button', { name: 'Save new password' }).click()
+        await expect(passwordPrompt).toBeHidden()
+        await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+        await expect(currentCard).toBeVisible()
+        accountPassword = 'new-local-test-password'
+        await expect.poll(async () => {
+          return latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken
+        }).not.toBe(headers.Authorization)
+        headers.Authorization = latestSettings(
+          readDatastore(app.userDataDir, 'settings')
+        ).syncServerToken
+        await page.evaluate(() => {
+          const store = window.$store
+          store.commit('setSyncServerDevices', { 'new-account': { name: 'New account', platform: 'linux' } })
+        })
+      } finally {
+        finishStaleSessionRequest()
+      }
+      await staleSessionRequestCompleted
+      await expect.poll(() => page.evaluate(() => {
+        const store = window.$store
+        return store.state.syncServer.syncServerDevices
+      })).toEqual({ 'new-account': { name: 'New account', platform: 'linux' } })
+      await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+      await expect(currentCard).toBeVisible()
+
+      const passwordRevokedResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/account/sessions`,
+        { headers: { Authorization: passwordRevokedToken } }
+      )
+      expect(passwordRevokedResponse.status).toBe(401)
+      const currentSessionResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/sessions`, {
+        headers
+      })
+      expect(currentSessionResponse.ok).toBe(true)
+
+      const oldPasswordResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: username, password: 'local-test-password' })
+      })
+      expect(oldPasswordResponse.status).toBe(403)
+      const newPasswordResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: username, password: accountPassword })
+      })
+      expect(newPasswordResponse.ok).toBe(true)
+    }
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    if (!enhancedPrivacy) {
+      await expect.poll(async () => {
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+        return records
+          .filter(record => record._id === 'allChannels' && !record.$$deleted)
+          .at(-1)
+          ?.subscriptions
+          .find(channel => channel.id === remoteChannelId)
+      }).toEqual(expect.objectContaining({
+        id: remoteChannelId,
+        thumbnail: null
+      }))
+      await expect.poll(async () => {
+        const syncedSettings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+        return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
+      }).toEqual({
+        [channelId]: 1.5
+      })
+    }
+
+    await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
+    const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })
+    const deleteAccountPassword = deleteAccountPrompt.getByLabel('Password', { exact: true })
+    let finishWrongPasswordDeletion
+    let wrongPasswordDeletionStarted
+    const wrongPasswordDeletionPending = new Promise(resolve => {
+      finishWrongPasswordDeletion = resolve
+    })
+    const wrongPasswordDeletionRequested = new Promise(resolve => {
+      wrongPasswordDeletionStarted = resolve
+    })
+    await page.route('**/account/delete', async route => {
+      if (route.request().postDataJSON()?.password !== 'wrong-password') {
+        await route.continue()
+        return
+      }
+      wrongPasswordDeletionStarted()
+      await wrongPasswordDeletionPending
+      await route.continue()
+    })
+    await deleteAccountPassword.fill('wrong-password')
+    const confirmDeleteAccount = deleteAccountPrompt.getByRole('button', { name: 'Delete account' })
+    await confirmDeleteAccount.click()
+    await wrongPasswordDeletionRequested
+    try {
+      await expect(confirmDeleteAccount).toBeDisabled()
+    } finally {
+      finishWrongPasswordDeletion()
+    }
+    await expect(deleteAccountPrompt.getByRole('alert')).toBeVisible()
+    await expect(confirmDeleteAccount).toBeEnabled()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+
+    await deleteAccountPassword.fill(accountPassword)
+    await confirmDeleteAccount.click()
+    await expect(deleteAccountPrompt).toBeHidden()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
+
+    const deletedAccountLoginResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ name: username, password: accountPassword })
+    })
+    expect(deletedAccountLoginResponse.ok).toBe(false)
+
+    expect(readDatastore(app.userDataDir, 'profiles')).toContain(channelId)
+    expect(readDatastore(app.userDataDir, 'playlists')).toContain('sync-playlist')
+    expect(readDatastore(app.userDataDir, 'history')).toContain('dQw4w9WgXcQ')
+    expect(playbackSpeedWrites).toEqual([])
+  })
+
+  test('disconnects after revoking the current account session', async ({ page }, testInfo) => {
+    const capabilities = await getSyncCapabilities()
+    test.skip(
+      capabilities.encrypted_sync !== 1 || capabilities.account_sessions !== 1,
+      'Enhanced privacy and account sessions are required'
+    )
+
+    const username = `opentubex-session-${randomUUID()}`
+    const password = 'local-test-password'
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill(password)
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+
+    const currentCard = syncSection.locator('.sessionCard', { hasText: 'Current device' })
+    await currentCard.getByRole('button', { name: 'Revoke access' }).click()
+    const revokePrompt = page.getByRole('dialog', { name: 'Revoke this session?' })
+    await expect(revokePrompt).toContainText('disconnect this device')
+    await revokePrompt.getByRole('button', { name: 'Revoke session' }).click()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
+
+    const loginResponse = await fetch(`${syncServerUrl}/v1/account/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ name: username, password })
+    })
+    expect(loginResponse.ok).toBe(true)
+    const { jwt } = await loginResponse.json()
+    const deleteResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: jwt,
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ password })
+    })
+    expect(deleteResponse.ok).toBe(true)
+  })
+
+  test('syncs custom themes and their deletion', async ({ app, page }) => {
+    const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
+    test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
+
+    const username = `opentubex-themes-${randomUUID()}`
+    const theme = {
+      ...structuredClone(DEFAULT_CUSTOM_THEME),
+      id: 'synced-theme',
+      name: 'Synced Theme',
+      colors: {
+        ...DEFAULT_CUSTOM_THEME.colors,
+        background: '#123456',
+      },
+    }
+    const themePath = path.join(app.userDataDir, 'themes', `${theme.id}.json`)
+
+    await page.evaluate(async customTheme => {
+      const store = window.$store
+      await store.dispatch('updateSyncServerSyncSessions', false)
+      const themes = await window.ftElectron.saveCustomTheme(customTheme)
+      store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', `custom:${customTheme.id}`)
+    }, theme)
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect.poll(async () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
+    }).toEqual([theme])
+
+    async function syncNow() {
+      const previousSyncAt = latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
+      await syncSection.getByRole('button', { name: 'Sync now' }).click()
+      await expect.poll(async () => (
+        latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
+      )).not.toBe(previousSyncAt)
+    }
+
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('setSyncServerAutoSync', false)
+      const themes = await window.ftElectron.replaceCustomThemes([])
+      store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSystemDarkTheme', 'dark')
+      await store.dispatch('updateSyncServerSnapshot', '')
+    })
+    await syncNow()
+    await expect.poll(async () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
+    }).toEqual([theme])
+    await expect.poll(async () => JSON.parse(await readFile(themePath, 'utf8'))).toMatchObject({
+      id: theme.id,
+      name: theme.name,
+      colors: { background: '#123456' },
+    })
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getSystemDarkTheme
+    })).toBe('custom:synced-theme')
+
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateBaseTheme', 'custom:synced-theme')
+      const themes = await window.ftElectron.replaceCustomThemes([])
+      await store.dispatch('updateCustomThemes', themes)
+    })
+    await syncNow()
+
+    await page.evaluate(async customTheme => {
+      const store = window.$store
+      const themes = await window.ftElectron.replaceCustomThemes([customTheme])
+      store.commit('setCustomThemes', themes)
+      const snapshot = JSON.parse(store.state.settings.syncServerSnapshot)
+      snapshot.settings.customThemes.value = themes
+      snapshot.settings.customThemes.updatedAt = 1
+      await store.dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot))
+      await store.dispatch('updateBaseTheme', 'custom:synced-theme')
+      await store.dispatch('updateSystemDarkTheme', 'custom:synced-theme')
+    }, theme)
+    await syncNow()
+    await expect.poll(async () => readFile(themePath, 'utf8').then(
+      () => true,
+      error => error.code !== 'ENOENT'
+    )).toBe(false)
+    await expect.poll(async () => (
+      latestSettings(readDatastore(app.userDataDir, 'settings')).baseTheme
+    )).toBe(theme.basedOn)
+    await expect.poll(async () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      const snapshot = JSON.parse(settings.syncServerSnapshot).settings
+      return [settings.systemDarkTheme, snapshot.baseTheme.value, snapshot.systemDarkTheme.value]
+    }).toEqual(['dark', theme.basedOn, 'dark'])
+    await syncNow()
+    await expect.poll(async () => {
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return [settings.baseTheme, settings.systemDarkTheme]
+    }).toEqual([theme.basedOn, 'dark'])
+  })
+
+  test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {
+    const capabilities = await getSyncCapabilities()
+    const enhancedPrivacy = capabilities.encrypted_sync === 1
+    test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
+
+    const username = `opentubex-migration-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const password = 'local-test-password'
+    const registerResponse = await fetch(`${syncServerUrl}/v1/account/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ name: username, password })
+    })
+    expect(registerResponse.ok).toBe(true)
+    const { jwt } = await registerResponse.json()
+    const headers = {
+      Authorization: jwt,
+      'Content-Type': 'application/json'
+    }
+    const legacySubscriptionResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        id: remoteChannelId,
+        name: 'Google for Developers',
+        avatar: 'https://yt3.googleusercontent.com/ytc/default',
+        verified: false
+      })
+    })
+    expect(legacySubscriptionResponse.ok).toBe(true)
+
+    let legacyHistoryDownloads = 0
+    const encryptedUploadResponses = []
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (request.method() === 'GET' && url.pathname.endsWith('/watch_history/')) {
+        legacyHistoryDownloads++
+      }
+    })
+    page.on('response', response => {
+      const request = response.request()
+      const url = new URL(request.url())
+      if (request.method() === 'PUT' && url.pathname.startsWith('/v1/encrypted_sync/')) {
+        encryptedUploadResponses.push(response)
+      }
+    })
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill(password)
+    await syncSection.getByLabel(/Privacy passphrase/).fill('migration-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      return records
+        .filter(record => record._id === 'allChannels' && !record.$$deleted)
+        .at(-1)
+        ?.subscriptions
+        .some(channel => channel.id === remoteChannelId)
+    }).toBe(true)
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+
+    const settings = latestSettings(
+      readDatastore(app.userDataDir, 'settings')
+    )
+    const migratedHeaders = { Authorization: settings.syncServerToken }
+    const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, {
+      headers: migratedHeaders
+    })
+    const encryptedManifest = await encryptedResponse.json()
+    expect(encryptedManifest.legacy_data).toBe(false)
+    const subscriptionsResponse = await fetch(
+      `${syncServerUrl}/v1/encrypted_sync/subscriptions`,
+      { headers: migratedHeaders }
+    )
+    const encryptedSubscriptions = await subscriptionsResponse.json()
+    expect(encryptedSubscriptions.payload).not.toContain(remoteChannelId)
+    const envelope = JSON.parse(encryptedSubscriptions.payload)
+    expect(envelope.compression).toEqual({ name: 'gzip' })
+    expect(envelope).not.toHaveProperty('payload_length')
+    expect(legacyHistoryDownloads).toBe(1)
+    // Playback speeds migrate into settings without recreating their retired collection.
+    const encryptedUploadBodies = await Promise.all(
+      encryptedUploadResponses.map(response => response.json())
+    )
+    const expectedUploads = [
+      { collection: 'subscriptions', revision: 1, payload: null },
+      { collection: 'playlists', revision: 1, payload: null },
+      { collection: 'playlistBookmarks', revision: 1, payload: null },
+      { collection: 'history', revision: 1, payload: null },
+      { collection: 'profiles', revision: 1, payload: null },
+      { collection: 'sessionsV2', revision: 1, payload: null },
+      { collection: 'settings', revision: 1, payload: null },
+      ...(capabilities.seen_posts === 1
+        ? [{ collection: 'seenPosts', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.seen_videos === 1
+        ? [{ collection: 'seenVideos', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.seen_rss_items === 1
+        ? [{ collection: 'seenRssItems', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.external_media_positions === 1
+        ? [{ collection: 'externalMediaPositions', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.watch_stats === 1
+        ? [{ collection: 'watchStats', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.live_reminders === 1
+        ? [{ collection: 'liveReminders', revision: 1, payload: null }]
+        : [])
+    ]
+    expect(encryptedUploadBodies).toHaveLength(expectedUploads.length)
+    expect(encryptedUploadBodies).toEqual(expect.arrayContaining(expectedUploads))
+
+    const plaintextResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
+      headers: migratedHeaders
+    })
+    expect(plaintextResponse.status).toBe(409)
+  })
+
+  test('uses advertised history optimizations without rewriting unchanged local data', async ({ app, page }, testInfo) => {
+    const username = `opentubex-fast-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const bulkRequests = []
+    const historyPageSizes = []
+
+    await page.route('**/health', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      })
+    }))
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
+      if (url.pathname.endsWith('/watch_history/')) {
+        historyPageSizes.push(url.searchParams.get('page_size'))
+      }
+    })
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    expect(bulkRequests).toEqual(expect.arrayContaining([
+      '/v1/subscriptions/bulk',
+      '/v1/watch_history/bulk'
+    ]))
+    expect(historyPageSizes).toContain('1000')
+
+    const historyAfterFirstSync = readDatastore(app.userDataDir, 'history')
+    const firstSyncAt = latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
+    bulkRequests.length = 0
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect.poll(async () => {
+      return latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
+    }).toBeGreaterThan(firstSyncAt)
+
+    expect(bulkRequests).not.toContain('/v1/watch_history/bulk')
+    expect(readDatastore(app.userDataDir, 'history')).toBe(historyAfterFirstSync)
+
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+    const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: settings.syncServerToken,
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanupResponse.ok).toBe(true)
+  })
+
+  test('uploads only changed watch history entries while every device reads changes', async ({ page }, testInfo) => {
+    const capabilities = await getSyncCapabilities()
+    test.skip(capabilities.collection_changes !== 1, 'Server with collection changes required')
+    const username = `opentubex-changes-${randomUUID()}`
+    const password = 'local-test-password'
+    const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
+    let other
+
+    async function configure(clientPage) {
+      await clientPage.evaluate(async () => {
+        const store = window.$store
+        await store.dispatch('updateSyncServerAutoSync', false)
+        for (const collection of ['Subscriptions', 'Playlists', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+          await store.dispatch(`updateSyncServerSync${collection}`, false)
+        }
+      })
+      await clientPage.route('**/account/**', route => route.continue({
+        headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+      }))
+    }
+
+    async function connect(clientPage, mode) {
+      const section = await goToSettingsSection(clientPage, 'sync')
+      await section.getByLabel('Sync server URL').fill(syncServerUrl)
+      await section.getByLabel('Username').fill(username)
+      await section.getByLabel('Password', { exact: true }).fill(password)
+      await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+      await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+      await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+      await expect(section.getByText(/Last synced:/)).toBeVisible()
+      await expect(section.locator('.syncProgress')).toBeHidden()
+    }
+
+    function recordHistoryRequests(clientPage) {
+      const requests = []
+      clientPage.on('requestfinished', async request => {
+        const url = new URL(request.url())
+        if (!url.pathname.startsWith('/v1/encrypted_sync/history')) return
+        const response = await request.response()
+        requests.push({ method: request.method(), path: `${url.pathname}${url.search}`, status: response?.status(), body: request.method() === 'GET' ? await response?.json() : null })
+      })
+      return requests
+    }
+
+    async function sync(clientPage) {
+      await clientPage.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    }
+
+    async function watchProgress(clientPage) {
+      return clientPage.evaluate(() => window.$store.getters.getHistoryCacheSorted[0]?.watchProgress)
+    }
+
+    async function watchAgain(clientPage, seconds) {
+      await clientPage.evaluate(async seconds => {
+        const store = window.$store
+        const record = store.getters.getHistoryCacheSorted[0]
+        await store.dispatch('updateHistory', { ...record, timeWatched: Date.now(), watchProgress: seconds })
+      }, seconds)
+    }
+
+    try {
+      other = await launchApp(otherUserData)
+      await configure(page)
+      await configure(other.page)
+      await connect(page, 'register')
+      await connect(other.page, 'login')
+      expect(await watchProgress(other.page)).toBe(45)
+
+      const uploads = recordHistoryRequests(page)
+      await watchAgain(page, 120)
+      await sync(page)
+      expect(uploads.map(({ method, path, status }) => [method, path.replace(/\?.*/, ''), status])).toEqual([
+        ['POST', '/v1/encrypted_sync/history/changes', 200],
+      ])
+
+      const downloads = recordHistoryRequests(other.page)
+      await sync(other.page)
+      expect(await watchProgress(other.page)).toBe(120)
+      expect(downloads).toHaveLength(1)
+      expect(downloads[0].body.payload).toBeNull()
+      expect(downloads[0].body.changes).toHaveLength(1)
+
+      // Released clients read without `since` and must not get a payload
+      // that lacks the appended change.
+      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+      const fullRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/history`, { headers: { Authorization: token } })
+      expect(fullRead.status).toBe(409)
+
+      // A login that has never read changes makes the next upload a full one.
+      const released = await fetch(`${syncServerUrl}/v1/account/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+        body: JSON.stringify({ name: username, password }),
+      })
+      expect(released.ok).toBe(true)
+      const releasedToken = (await released.json()).jwt
+      uploads.length = 0
+      await watchAgain(page, 150)
+      await sync(page)
+      expect(uploads.map(({ method, path, status }) => [method, path.replace(/\?.*/, ''), status])).toEqual([
+        ['POST', '/v1/encrypted_sync/history/changes', 412],
+        ['PUT', '/v1/encrypted_sync/history', 200],
+      ])
+      const releasedRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/history`, { headers: { Authorization: releasedToken } })
+      expect(releasedRead.status).toBe(200)
+      const privacyKey = await page.evaluate(() => window.$store.state.settings.syncServerPrivacyKey)
+      const history = await decryptSyncDocument((await releasedRead.json()).payload, privacyKey)
+      expect(history.map(entry => entry.metadata.position_millis)).toEqual([150_000])
+
+      await sync(other.page)
+      expect(await watchProgress(other.page)).toBe(150)
+    } finally {
+      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+      if (token) {
+        await fetch(`${syncServerUrl}/v1/account/delete`, {
+          method: 'DELETE',
+          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+          body: JSON.stringify({ password })
+        })
+      }
+      await other?.electronApp.close()
+      await rm(otherUserData, { recursive: true, force: true })
+    }
+  })
+
+  test('syncs repaired metadata for existing playlist videos without duplicating entries', async ({ app, page }, testInfo) => {
+    const videoId = randomBytes(8).toString('base64url').slice(0, 11)
+    const repairChannelId = `UC${randomBytes(16).toString('base64url')}`
+    const username = `opentubex-repair-${Date.now()}-${randomBytes(4).toString('hex')}`
+    await page.route('**/health', route => route.fulfill({
+      json: {
+        status: 'ok', capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      }
+    }))
+    await page.evaluate(async ({ videoId, channelId }) => {
+      const store = window.$store
+      await store.dispatch('addVideos', {
+        _id: 'sync-playlist',
+        videos: [
+          { videoId, title: videoId, authorId: channelId, author: '', published: 0, lengthSeconds: 0 },
+          { videoId, title: videoId, authorId: channelId, author: '', published: 0, lengthSeconds: 0 },
+        ]
+      })
+    }, { videoId, channelId: repairChannelId })
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
+    const headers = { Authorization: settings.syncServerToken, 'Content-Type': 'application/json' }
+    const playlistHeaders = await (await fetch(`${syncServerUrl}/v1/playlists/`, { headers })).json()
+    const remoteId = playlistHeaders.find(playlist => playlist.title === 'Synced playlist').id
+    const getRemoteVideos = async () => (await (await fetch(`${syncServerUrl}/v1/playlists/${remoteId}`, { headers })).json()).videos
+    expect(await getRemoteVideos()).toEqual([expect.objectContaining({
+      id: videoId,
+      title: videoId,
+      duration: 0,
+      uploader: expect.objectContaining({ id: repairChannelId, name: repairChannelId })
+    })])
+
+    await page.route('**/youtubei/v1/player*', route => route.fulfill({
+      json: {
+        videoDetails: { videoId, title: 'Recovered playlist title', author: 'Recovered channel', channelId: repairChannelId, lengthSeconds: '120' },
+        microformat: { playerMicroformatRenderer: { publishDate: '2025-01-01' } }
+      }
+    }))
+    await page.locator('.settingsCloseButton').click()
+    await goTo(page, 'userplaylists')
+    await page.getByRole('button', { name: 'Repair Playlists', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Repair Playlists' })
+    await dialog.getByText('Synced playlist', { exact: true }).click()
+    await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
+    await expect(page.locator('.repairStatus').getByRole('status')).toContainText('Repaired 1 · Failed 0')
+    const repairedIds = await page.evaluate(() => window.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))
+    expect(new Set(repairedIds).size).toBe(2)
+    const section = await goToSettingsSection(page, 'sync')
+    await section.getByRole('button', { name: 'Sync now' }).click()
+    await expect.poll(getRemoteVideos).toEqual([expect.objectContaining({
+      id: videoId,
+      title: 'Recovered playlist title',
+      duration: 120,
+      upload_date: Date.parse('2025-01-01'),
+      uploader: expect.objectContaining({ id: repairChannelId, name: 'Recovered channel' })
+    })])
+    expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))).toEqual(repairedIds)
+    const cleanup = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: { ...headers, 'X-Forwarded-For': rateLimitClient(testInfo) },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanup.ok).toBe(true)
+  })
+
+  for (const privacy of ['legacy', 'enhanced']) {
+    test(`syncs custom playlist thumbnails between two clients with ${privacy} privacy`, async ({ page }, testInfo) => {
+      const capabilities = await getSyncCapabilities()
+      test.skip(privacy === 'enhanced' && capabilities.encrypted_sync !== 1, 'Enhanced privacy server required')
+      test.skip(privacy === 'legacy' && capabilities.playlist_thumbnails !== 1, 'Custom playlist thumbnail server required')
+      const username = `opentubex-thumbnail-${randomUUID()}`
+      const password = 'local-test-password'
+      const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
+      let other
+
+      async function configure(clientPage) {
+        await clientPage.evaluate(async () => {
+          const store = window.$store
+          await store.dispatch('updatePlaylistViewType', 'list')
+          await store.dispatch('updateSyncServerAutoSync', false)
+          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+            await store.dispatch(`updateSyncServerSync${collection}`, false)
+          }
+        })
+        await clientPage.route('**/account/**', route => route.continue({
+          headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+        }))
+        if (privacy === 'legacy') {
+          await clientPage.route('**/health', route => route.fulfill({ json: { status: 'ok', capabilities: { ...capabilities, encrypted_sync: 0 } } }))
+        }
+      }
+
+      async function connect(clientPage, mode) {
+        const section = await goToSettingsSection(clientPage, 'sync')
+        await section.getByLabel('Sync server URL').fill(syncServerUrl)
+        await section.getByLabel('Username').fill(username)
+        await section.getByLabel('Password', { exact: true }).fill(password)
+        if (privacy === 'enhanced') await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+        await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+        await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+        await expect(section.getByText(/Last synced:/)).toBeVisible()
+        await expect(section.locator('.syncProgress')).toBeHidden()
+        await clientPage.locator('.settingsCloseButton').click()
+        await expect(clientPage.locator('.settingsWindow')).toHaveCount(0)
+      }
+
+      async function sync(clientPage) {
+        const section = await goToSettingsSection(clientPage, 'sync')
+        const previous = await clientPage.evaluate(() => window.$store.getters.getSyncServerLastSyncAt)
+        await section.getByRole('button', { name: 'Sync now' }).click()
+        await expect.poll(() => clientPage.evaluate(() => window.$store.getters.getSyncServerLastSyncAt)).toBeGreaterThan(previous)
+        await expect(section.locator('.syncProgress')).toBeHidden()
+        await clientPage.locator('.settingsCloseButton').click()
+        await expect(clientPage.locator('.settingsWindow')).toHaveCount(0)
+      }
+
+      async function editCover(clientPage, file) {
+        await goTo(clientPage, 'userplaylists')
+        await clientPage.getByRole('link', { name: 'Synced playlist', exact: true }).click()
+        await clientPage.getByTitle('Edit Playlist Info').click()
+        const picker = clientPage.locator('.playlistThumbnailPicker')
+        if (file) {
+          await picker.locator('input[type="file"]').setInputFiles(file)
+          await expect(picker).toHaveAttribute('aria-busy', 'false')
+          await expect(picker.locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /^data:image\/webp;base64,/)
+        } else {
+          await picker.getByRole('button', { name: 'Restore default thumbnail' }).click()
+        }
+        const value = file ? await picker.locator('img:not(.retryImagePlaceholder)').getAttribute('src') : ''
+        await clientPage.getByRole('button', { name: 'Save Changes' }).click()
+        await expect(picker).toHaveCount(0)
+        return value
+      }
+
+      async function expectCover(clientPage, value) {
+        await goTo(clientPage, 'userplaylists')
+        const card = clientPage.locator('.ft-list-video', { has: clientPage.getByRole('link', { name: 'Synced playlist', exact: true }) })
+        await expect(card.locator('img.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', value || /thumbnail_placeholder/)
+      }
+
+      try {
+        other = await launchApp(otherUserData)
+        await configure(page)
+        await configure(other.page)
+        const original = await editCover(page, path.resolve('e2e/fixtures/images/opentubex-playlist.jpg'))
+        await connect(page, 'register')
+        if (privacy === 'enhanced') {
+          const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+          const response = await fetch(`${syncServerUrl}/v1/encrypted_sync/playlists`, { headers: { Authorization: token } })
+          expect(response.ok).toBe(true)
+          expect((await response.json()).payload).not.toContain(original)
+        }
+        await connect(other.page, 'login')
+        await expectCover(other.page, original)
+
+        const replacement = await editCover(other.page, path.resolve('e2e/fixtures/media/avatar.png'))
+        expect(replacement).not.toBe(original)
+        await page.evaluate(async () => {
+          const store = window.$store
+          const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')
+          await store.dispatch('updatePlaylist', { _id: playlist._id, description: 'Edited while the other device changed its cover' })
+        })
+        await sync(other.page)
+        await sync(page)
+        await expectCover(page, replacement)
+        await sync(other.page)
+        for (const clientPage of [page, other.page]) {
+          expect(await clientPage.evaluate(() => window.$store
+            .getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist').description))
+            .toBe('Edited while the other device changed its cover')
+        }
+
+        if (privacy === 'legacy') {
+          const { token, id } = await page.evaluate(() => {
+            const store = window.$store
+            return { token: store.getters.getSyncServerToken, id: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')._id }
+          })
+          const updated = await fetch(`${syncServerUrl}/v1/playlists/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: token, 'Content-Type': 'application/json' },
+            // Released clients know only the automatic thumbnail field.
+            body: JSON.stringify({ title: 'Synced playlist', description: 'Edited by a released client', thumbnail_url: null }),
+          })
+          expect(updated.ok).toBe(true)
+          await sync(page)
+          await sync(other.page)
+          await expectCover(page, replacement)
+          await expectCover(other.page, replacement)
+        }
+
+        const thumbnailWrites = []
+        page.on('request', request => {
+          const pathname = new URL(request.url()).pathname
+          if (['PUT', 'PATCH', 'POST'].includes(request.method()) && (
+            pathname.includes('/playlists/') || pathname.endsWith('/encrypted_sync/playlists')
+          )) thumbnailWrites.push(pathname)
+        })
+        await sync(page)
+        expect(thumbnailWrites).toEqual([])
+
+        await editCover(page, null)
+        await sync(page)
+        await sync(other.page)
+        await expectCover(other.page, '')
+        await sync(other.page)
+        await sync(page)
+        await expectCover(page, '')
+      } finally {
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+        if (token) {
+          await fetch(`${syncServerUrl}/v1/account/delete`, {
+            method: 'DELETE',
+            headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+            body: JSON.stringify({ password })
+          })
+        }
+        await other?.electronApp.close()
+        await rm(otherUserData, { recursive: true, force: true })
+      }
+    })
+  }
+
+  test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
+    const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+    await page.route('**/health', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      })
+    }))
+    await page.route('**/v1/subscriptions/', route => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ contentType: 'application/json', body: '[]' })
+      }
+      return route.continue()
+    })
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
+    await expect(warning).toBeVisible()
+    await expect(warning).toContainText('2 of 2 previously synced subscriptions')
+
+    const profiles = readDatastore(app.userDataDir, 'profiles')
+    expect(profiles).toContain(channelId)
+    expect(profiles).toContain(secondChannelId)
+    await warning.getByRole('button', { name: 'Cancel' }).click()
+
+    await expect.poll(async () => {
+      const currentSettings = latestSettings(
+        readDatastore(app.userDataDir, 'settings')
+      )
+      return currentSettings.syncServerAutoSync
+    }).toBe(false)
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(warning).toBeVisible()
+    await warning.getByRole('button', { name: 'Delete and continue' }).click()
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      return records
+        .filter(record => record._id === 'allChannels' && !record.$$deleted)
+        .at(-1)
+        ?.subscriptions.length
+    }).toBe(0)
+
+    const settings = latestSettings(
+      readDatastore(app.userDataDir, 'settings')
+    )
+    const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: settings.syncServerToken,
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo)
+      },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanupResponse.ok).toBe(true)
+  })
+
+  test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {
+    const username = `opentubex-legacy-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    let activeSubscriptionWrites = 0
+    let maxConcurrentSubscriptionWrites = 0
+    const bulkRequests = []
+    const historyPageSizes = []
+
+    await page.route('**/health', route => route.fulfill({
+      contentType: 'text/plain',
+      body: 'OK'
+    }))
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
+      if (url.pathname.endsWith('/watch_history/')) {
+        historyPageSizes.push(url.searchParams.get('page_size'))
+      }
+    })
+    await page.route('**/v1/subscriptions/', async route => {
+      if (route.request().method() === 'PUT') {
+        activeSubscriptionWrites++
+        maxConcurrentSubscriptionWrites = Math.max(
+          maxConcurrentSubscriptionWrites,
+          activeSubscriptionWrites
+        )
+        await new Promise(resolve => setTimeout(resolve, 150))
+        activeSubscriptionWrites--
+      }
+      await route.continue()
+    })
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
+    // A connection abort waits for network recovery; an HTTP error rejects
+    // this endpoint immediately because it is not a sync server.
+    await page.route('https://not-a-sync-server.invalid/**', route => route.fulfill({
+      status: 404,
+      contentType: 'text/plain',
+      body: 'Not found'
+    }))
+    await serverUrlInput.fill('https://not-a-sync-server.invalid')
+    await serverUrlInput.press('Tab')
+    await expect(syncSection.getByText(/Unable to connect to this sync server/)).toBeVisible()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    await expect(syncSection.getByLabel('Password', { exact: true })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
+
+    await serverUrlInput.fill(`${syncServerUrl}/`)
+    await serverUrlInput.press('Tab')
+    await expect(serverUrlInput).toHaveValue(syncServerUrl)
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'settings')
+      return latestSettings(contents).syncServerUrl
+    }).toBe(syncServerUrl)
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByLabel('Settings')).toBeVisible()
+    await expect(syncSection.getByLabel('Settings')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Change password' })).toHaveCount(0)
+    await expect(syncSection.getByText(/does not support settings syncing/)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    expect(maxConcurrentSubscriptionWrites).toBeGreaterThan(1)
+    expect(bulkRequests).toEqual([])
+    expect(historyPageSizes).toContain(null)
+  })
+
+  test.describe('with a large history', () => {
+    const now = Date.now()
+    test.use({
+      seed: {
+        settings: { syncServerEnabled: true },
+        // Random metadata keeps the compressed change above the server's change size limit.
+        history: Array.from({ length: 5000 }, (_, index) => ({
+          _id: `large-${index}`,
+          videoId: `large-${index}`,
+          title: `Video ${randomUUID()}`,
+          author: 'Channel',
+          authorId: `UC${randomBytes(11).toString('hex')}`,
+          published: now - index * 60000,
+          description: '',
+          lengthSeconds: 600,
+          watchProgress: 10,
+          isWatched: false,
+          timeWatched: now - index * 60000,
+          isLive: false,
+          type: 'video'
+        }))
+      }
+    })
+
+    test('uploads the full history when a change exceeds the size limit', async ({ page }, testInfo) => {
+      const capabilities = await getSyncCapabilities()
+      test.skip(capabilities.collection_changes !== 1, 'Server with collection changes required')
+      const password = 'local-test-password'
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByLabel('Sync server URL').fill(syncServerUrl)
+      await section.getByLabel('Username').fill(`opentubex-large-${randomUUID()}`)
+      await section.getByLabel('Password', { exact: true }).fill(password)
+      await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+      await section.getByRole('button', { name: 'Register' }).click()
+      await expect(section.getByText(/Last synced:/)).toBeVisible()
+      await expect(section.locator('.syncProgress')).toBeHidden()
+
+      const writes = []
+      page.on('requestfinished', async request => {
+        const url = new URL(request.url())
+        if (url.pathname.startsWith('/v1/encrypted_sync/history') && request.method() !== 'GET') {
+          writes.push([request.method(), url.pathname, (await request.response())?.status()])
+        }
+      })
+      try {
+        expect(await page.evaluate(async () => {
+          const store = window.$store
+          await store.dispatch('markAllHistoryAsWatched')
+          await store.dispatch('syncWithSyncServer')
+          return store.state.syncServer.syncServerError
+        })).toBe('')
+        expect(writes).toEqual([
+          ['POST', '/v1/encrypted_sync/history/changes', 413],
+          ['PUT', '/v1/encrypted_sync/history', 200],
+        ])
+      } finally {
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+        await fetch(`${syncServerUrl}/v1/account/delete`, {
+          method: 'DELETE',
+          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+          body: JSON.stringify({ password })
+        })
+      }
+    })
+  })
+})

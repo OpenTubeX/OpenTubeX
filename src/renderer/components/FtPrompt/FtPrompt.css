@@ -1,10 +1,12 @@
 .prompt {
+  animation: prompt-backdrop-enter var(--motion-default-effects);
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: 100%;
   block-size: 100%;
   background-color: rgb(0 0 0 / 70%);
+  backdrop-filter: var(--modal-backdrop-blur);
 
   /* Higher than components like playlist info */
   z-index: 201;
@@ -15,9 +17,75 @@
   justify-content: center;
 }
 
+:global(body.playerFullWindow .prompt) {
+  z-index: 1001;
+}
+
 .promptCard {
-  overflow-y: scroll;
+  animation: prompt-card-enter var(--motion-default-spatial);
+  overflow-y: auto;
   max-block-size: 95%;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
+}
+
+.promptCard > :deep(h2) {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.promptCard.fixedLayout {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.promptCard.fixedLayout > h2 {
+  flex: 0 0 auto;
+}
+
+.promptContentScroller {
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+.promptFixedFooter {
+  flex: 0 0 auto;
+  padding-block-start: 12px;
+}
+
+.modal-leave-active {
+  animation: prompt-backdrop-leave var(--motion-default-effects) forwards;
+  pointer-events: none;
+}
+
+.modal-leave-active > .promptCard {
+  animation: prompt-card-leave var(--motion-default-effects) forwards;
+}
+
+@keyframes prompt-backdrop-leave {
+  to {
+    opacity: 0;
+  }
+}
+
+/* The backdrop fades the card with it; fading both would compound. */
+@keyframes prompt-card-leave {
+  to {
+    transform: scale(0.95) translateY(8px);
+  }
+}
+
+@keyframes prompt-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes prompt-card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(16px);
+  }
 }
 
 .promptCard.autosize {
@@ -43,15 +111,17 @@
 
 .promptCard.slim {
   max-inline-size: 70%;
-  inset-inline-start: 15%;
   padding-block: 10px;
+}
+
+.promptCard:not(.autosize).slim {
+  inset-inline-start: 15%;
 }
 
 .promptCard.readable-width {
   max-inline-size: 50em;
   margin-inline: auto;
   inset-inline: 0;
-  padding-inline: 0;
 }
 
 .center {
@@ -67,6 +137,63 @@
 @media only screen and (width <= 500px) {
   .promptCard.slim {
     max-inline-size: 80%;
+  }
+
+  .promptCard:not(.autosize).slim {
     inset-inline-start: 10%;
   }
+}
+
+.promptContent {
+  display: flow-root;
+  min-inline-size: 0;
+}
+
+.promptContentScroller > .promptContent {
+  padding-block-start: 12px;
+}
+
+.promptCard :deep(.ft-input-component:not(:has(.inputIndicators > *))) {
+  margin-inline: auto;
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .prompt {
+    block-size: var(--phone-viewport-height, 100dvh);
+    inset-block-start: var(--phone-viewport-top, 0);
+    padding-block: max(8px, var(--safe-area-inset-top, env(safe-area-inset-top))) max(8px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+    padding-inline: max(8px, var(--safe-area-inset-left, env(safe-area-inset-left))) max(8px, var(--safe-area-inset-right, env(safe-area-inset-right)));
+  }
+
+  .promptCard.autosize,
+  .promptCard:not(.autosize),
+  .promptCard.slim,
+  .promptCard:not(.autosize).slim {
+    position: relative;
+    inset: auto;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    margin: 0;
+    padding: 12px;
+  }
+
+  .promptContentScroller {
+    flex: 1;
+  }
+}
+
+.promptManagedContent,
+.promptManagedContent > .promptContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.promptCard.autosize.content-width {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-inline: auto;
 }

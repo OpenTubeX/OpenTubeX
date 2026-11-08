@@ -1,5 +1,6 @@
 h2 {
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 h3 {
@@ -11,32 +12,192 @@ h3 {
   color: var(--tertiary-text-color);
 }
 
-.profileName,
-.colorSelection {
+.profileName {
   margin: auto;
-  inline-size: 350px;
+  inline-size: min(350px, 100%);
 }
 
-.profileEdit {
+.profileIconHeading {
+  margin-block-start: 24px;
+}
+
+.profileActions {
+  margin-block-start: 16px;
+  justify-content: center;
+  gap: 12px;
+}
+
+.profileActions :deep(.btn) {
+  margin: 0;
+}
+
+.profileIconOptions {
+  display: flex;
   flex-direction: column;
-  column-gap: 10px;
+  align-items: center;
+  gap: 10px;
 }
 
-.profileEdit > * {
-  flex: 1;
+.builtinIconOptions,
+.emojiOptions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-inline-size: min(350px, 100%);
+}
+
+.builtinIconOption,
+.emojiOption {
+  background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 2px solid transparent;
+  border-radius: var(--shape-corner-medium);
+  cursor: pointer;
+  color: var(--primary-text-color);
+  font-size: 24px;
+  block-size: 42px;
+  inline-size: 42px;
+  padding: 0;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.builtinIconOption:hover,
+.builtinIconOption:focus-visible,
+.emojiOption:hover,
+.emojiOption:focus-visible {
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.builtinIconOption:active,
+.emojiOption:active {
+  border-radius: var(--shape-corner-small);
+}
+
+/* Keep a focus indicator when outlines are hidden. */
+.builtinIconOption:focus-visible,
+.emojiOption:focus-visible {
+  border-color: var(--primary-color);
+}
+
+.builtinIconOption.selected,
+.emojiOption.selected {
+  color: var(--on-selected-container-color);
+  background: var(--selected-container-color);
+  border-color: var(--primary-color);
+}
+
+.customEmojiLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.customEmojiInput {
+  --input-bottom-spacing: 0;
+
+  inline-size: 64px;
+}
+
+.customEmojiInput :deep(.ft-input) {
+  padding-inline: 6px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.customEmojiInput :deep(.ft-input::placeholder) {
+  opacity: 0;
+}
+
+.customEmojiPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  filter: grayscale(1);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.imageInput {
+  display: none;
+}
+
+.iconActions {
+  justify-content: center;
+}
+
+.cropEditor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.cropCanvasWrapper {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #bbb 25%, transparent 25%),
+    linear-gradient(-45deg, #bbb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #bbb 75%),
+    linear-gradient(-45deg, transparent 75%, #bbb 75%);
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+  background-size: 24px 24px;
+  block-size: min(320px, calc(100vw - 80px));
+  inline-size: min(320px, calc(100vw - 80px));
+  overflow: hidden;
+  position: relative;
+}
+
+.cropCanvas {
+  block-size: 100%;
+  cursor: grab;
+  inline-size: 100%;
+  touch-action: none;
+}
+
+.cropCanvas:active {
+  cursor: grabbing;
+}
+
+.cropCircle {
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / 45%);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.cropZoom {
+  inline-size: min(320px, calc(100vw - 80px));
+  margin-block: 0;
+  margin-inline: 0;
+}
+
+.cropActions {
+  justify-content: center;
+}
+
+.profileEdit > * + * {
+  margin-block-start: 20px;
 }
 
 .colorOptions {
   margin-inline: auto;
   justify-content: center;
-  min-inline-size: 250px;
+  min-inline-size: 0;
 }
 
-.customColorSection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+.profileColorPicker {
+  inline-size: min(350px, 100%);
+  margin-inline: auto;
   margin-block-start: 5px;
 }
 
@@ -46,21 +207,42 @@ h3 {
   margin: 2px;
   cursor: pointer;
   border-radius: 50%;
+  transition: border-radius var(--motion-fast-spatial);
 }
 
-.initial {
-  font-size: 37.5px;
-  text-align: center;
-  user-select: none;
+.colorOption:active {
+  border-radius: var(--shape-corner-medium);
 }
 
-.colorOption:has(.initial) {
+.colorOption.selected {
+  outline: 3px solid var(--primary-text-color);
+  outline-offset: 2px;
+}
+
+.themeColorOption {
+  background: var(--primary-color);
+  color: var(--text-with-main-color);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.transparentColorOption {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #bbb 25%, transparent 25%),
+    linear-gradient(-45deg, #bbb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #bbb 75%),
+    linear-gradient(-45deg, transparent 75%, #bbb 75%);
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-size: 20px 20px;
+  box-sizing: border-box;
+}
+
+.profilePreviewIcon {
   inline-size: 75px;
   block-size: 75px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
+  font-size: 37.5px;
 }
 
 .profilePreviewSection {
@@ -72,19 +254,39 @@ h3 {
 }
 
 .secondEditRow {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: start;
+  gap: 24px;
+}
+
+.secondEditRow > * {
+  min-inline-size: 0;
 }
 
 .card {
   inline-size: 85%;
-  margin-block: 0 60px;
+  margin-block: 0 15px;
   margin-inline: auto;
 }
 
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 90%;
+  }
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .card {
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+
+  .builtinIconOption,
+  .emojiOption,
+  .colorOption {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
   }
 }

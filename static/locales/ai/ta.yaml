@@ -1,0 +1,2622 @@
+# Optional AI-generated translations for keys missing from ../ta.yaml.
+Color Picker:
+  Hue: நிறச்சாயல்
+  Opacity: ஒளிபுகாமை
+  Backdrop Blur: பின்னணித் தெளிவின்மை
+  Hex Color: ஹெக்ஸ் நிறம்
+  Apply Color: பயன்படுத்து
+  Reset Color: மீட்டமை
+  Copy Color: நகலெடு
+  Copy From Another Color: மற்றொரு நிறத்திலிருந்து நகலெடு
+  Color Copied: நிறம் நகலெடுக்கப்பட்டது
+  Invalid Color: சரியான ஹெக்ஸ் நிறத்தை உள்ளிடவும்
+  Clipboard Unavailable: இடைநிலைப் பலகை கிடைக்கவில்லை
+  Saturation and Brightness: நிறச்செறிவும் ஒளிர்வும்
+New Tab: புதிய தாவல்
+Maximize: பெரிதாக்கு
+Restore: மீட்டெடு
+Close Tab: தாவலை மூடு
+Close Confirmation:
+  Background Sync Warning: வெளியேறினால் பின்னணிச் சந்தா புதுப்பிப்புகள் நிறுத்தப்படும்.
+  Hide Window: சாளரத்தை மறை
+  Title: OpenTubeX-இலிருந்து வெளியேறவா?
+  Message: OpenTubeX-இலிருந்து வெளியேற விரும்புகிறீர்களா?
+  Quit: வெளியேறு
+  Never Ask Again: மீண்டும் கேட்க வேண்டாம்
+Close Window Confirmation:
+  Title: சாளரத்தை மூடவா?
+  Message: இந்தச் சாளரத்தில் {count} தாவல்கள் உள்ளன. இதை மூட விரும்புகிறீர்களா?
+  Close Window: சாளரத்தை மூடு
+Confirmations:
+  Never Ask Again: மீண்டும் கேட்க வேண்டாம்
+  Settings Hint: அமைப்புகள் → பொது → இதற்கு முன் உறுதிப்படுத்து… என்பதில் இந்த உறுதிப்படுத்தலை மீண்டும் இயக்கலாம்
+Close Multiple Tabs Confirmation:
+  Title: பல தாவல்களை மூடவா?
+  Message: இது {count} தாவல்களை மூடும்.
+  Close Tabs: '{count} தாவல்களை மூடு'
+Load Multiple Tabs Confirmation:
+  Title: பல தாவல்களை ஏற்றவா?
+  Message: இது {count} தாவல்களை ஏற்றும்.
+  Load Tabs: '{count} தாவல்களை ஏற்று'
+Unload Multiple Tabs Confirmation:
+  Title: பல தாவல்களை இறக்கவா?
+  Message: இது {count} தாவல்களை இறக்கும்.
+  Unload Tabs: '{count} தாவல்களை இறக்கு'
+Tabs Unloaded To Free Memory: நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல் இறக்கப்பட்டது | நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல்கள் இறக்கப்பட்டன
+Use Vertical Tabs: செங்குத்துத் தாவல்களைப் பயன்படுத்து
+Use Horizontal Tabs: கிடைமட்டத் தாவல்களைப் பயன்படுத்து
+Resize Tab Bar: தாவல் பட்டையின் அளவை மாற்று
+Find in page: பக்கத்தில் தேடு
+Previous match: முந்தைய பொருத்தம்
+Next match: அடுத்த பொருத்தம்
+Close find bar: தேடல் பட்டையை மூடு
+No matches: பொருத்தங்கள் இல்லை
+Version {versionNumber} is now available.: பதிப்பு {versionNumber} இப்போது கிடைக்கிறது.
+See changes and update: மாற்றங்களைப் பார்த்துப் புதுப்பி
+Dismiss: புறக்கணி
+Update to {version}: '{version}-க்குப் புதுப்பி'
+Global:
+  Ambient Mode: சூழல் பயன்முறை
+  Loading More: மேலும் ஏற்றப்படுகிறது
+  New: புதியது
+Search Listing:
+  Label:
+    Members Only: உறுப்பினர்களுக்கு மட்டும்
+    Possibly AI-generated: AI உருவாக்கியதாக இருக்கலாம்
+Search Filters:
+  Possible Age Restriction Hint: "YouTube இந்தத் தேடல் வினவலுக்கு வயதுக் கட்டுப்பாடு விதித்திருக்கலாம்."
+  Cookie Search Failed: "கட்டமைக்கப்பட்ட குக்கிகளுடன் தேடல் தோல்வியடைந்தது."
+  Showing results for: "{query} க்கான முடிவுகள் காட்டப்படுகின்றன"
+  Search instead for: "அதற்குப் பதிலாக {query} ஐத் தேடு"
+  Including results for: "{query} க்கான முடிவுகளும் அடங்கும்"
+  Search only for: "{query} ஐ மட்டும் தேடு"
+  Did you mean: "{query} என்று சொல்ல வந்தீர்களா?"
+  Prioritize:
+    Prioritize: முன்னுரிமை அளி
+Stats:
+  Left of daily limit: "உங்கள் {limit} தினசரி வரம்பில் {duration} மீதமுள்ளது"
+  Daily limit reached: "{limit} தினசரி வரம்பை எட்டியது"
+  Replace old device: "பழைய சாதனத்தை மாற்று"
+  Replacement explanation: "இரு பதிவுகளும் ஒரே சாதனத்துக்குச் சொந்தமானவை என்றால் மட்டுமே {device} ஐ இந்தச் சாதனத்துடன் இணைக்கவும்."
+  Overlapping days: "இரு வரலாறுகளிலும் உள்ள நாட்கள்: {count}"
+  Overlapping watch time: "ஒன்றுடன் ஒன்று பொருந்தும் பார்வை நேரம்"
+  Keep larger daily total: "பெரிய தினசரி மொத்தத்தை வைத்திரு"
+  Larger total explanation: "நகல் வரலாறுகளுக்கு ஏற்றது. அதே நாளின் கூடுதல் பார்வையைத் தவறவிடலாம்."
+  Add daily totals: "தினசரி மொத்தங்களைக் கூட்டு"
+  Add totals explanation: "தனித்தனி வரலாறுகளுக்கு ஏற்றது. நகல் பார்வையை இருமுறை எண்ணலாம்."
+  Replacement preservation: "ஒரு வரலாற்றில் மட்டும் உள்ள நாட்கள் வைத்திருக்கப்படும். அசல் வரலாறுகள் மறைகுறியாக்கப்பட்ட ஒத்திசைவில் சேமிக்கப்பட்டிருக்கும்."
+  Combined watch time: "இணைக்கப்பட்ட பார்வை நேரம்"
+  Replacement changed: "பார்வை நேரம் மாறியுள்ளது. புதிய மொத்தங்களைப் பார்க்க இந்த முன்னோட்டத்தை மூடி மீண்டும் திறக்கவும்."
+  Replacement success: "சாதனப் புள்ளிவிவரங்கள் இணைக்கப்பட்டன"
+  All devices: எல்லா சாதனங்களும்
+  Stats: புள்ளிவிவரங்கள்
+  Watch time summary: பார்த்த நேரத்தின் சுருக்கம்
+  Today: இன்று
+  This week: இந்த வாரம்
+  Total watch time: மொத்தப் பார்த்த நேரம்
+  Daily average: தினசரி சராசரி
+  So far today: இன்று இதுவரை
+  Since: '{day} முதல்'
+  All recorded time: பதிவான முழு நேரமும்
+  Per calendar day: நாள்காட்டி நாளொன்றுக்கு
+  Day by day: நாள் வாரியாக
+  Highest: 'அதிகபட்சம்: {duration}'
+  Week by week: வாரம் வாரியாக
+  Last 14 days: கடந்த 14 நாட்கள்
+  Last 8 weeks: கடந்த 8 வாரங்கள்
+  Daily chart aria: கடந்த 14 நாட்களின் தினசரிப் பார்த்த நேரம்
+  Weekly chart aria: கடந்த 8 வாரங்களின் வாராந்திரப் பார்த்த நேரம்
+  No data: காணொளிகளைப் பார்க்கும்போது பார்த்த நேரம் இங்கே தோன்றும்.
+  Estimate note: இந்தப் புதுப்பிப்புக்கு முந்தைய பார்த்த நேரம், சேமிக்கப்பட்ட இயக்க முன்னேற்றத்தின் அடிப்படையில் மதிப்பிடப்படுகிறது.
+  Adjust imported watch time: இறக்குமதி செய்த பார்த்த நேரத்தைச் சரிசெய்
+  Imported watch time: இறக்குமதி செய்த பார்த்த நேரம்
+  Imported watch time explanation: நீங்கள் வழக்கமாகப் பயன்படுத்திய இயக்க வேகத்தைத் தேர்ந்தெடுக்கவும். நீங்கள் உண்மையில் பார்த்த நேரத்தை மதிப்பிட, இறக்குமதி செய்த காணொளிகளின் கால அளவு இந்த வேகத்தால் வகுக்கப்படும்.
+  Playback speed: இயக்க வேகம்
+  Channel speed note: சேமித்த சேனல் இயக்க வேகங்கள் கிடைக்கும்போது அவையே பயன்படுத்தப்படும்.
+  Apply playback speed: இயக்க வேகத்தைப் பயன்படுத்து
+  Imported watch time adjusted: இறக்குமதி செய்த பார்த்த நேரம் சரிசெய்யப்பட்டது
+  Reset statistics: புள்ளிவிவரங்களை மீட்டமை
+  Reset: மீட்டமை
+  Reset confirmation: பார்த்த நேரப் புள்ளிவிவரங்கள் அனைத்தையும் மீட்டமைக்க விரும்புகிறீர்களா? இதைச் செயல்தவிர்க்க முடியாது.
+  Reset success: பார்த்த நேரப் புள்ளிவிவரங்கள் மீட்டமைக்கப்பட்டன
+  Less than a minute: 1 நிமிடத்திற்கும் குறைவு
+  Minutes: '{minutes} நிமி.'
+  Hours: '{hours} மணி'
+  Hours and minutes: '{hours} மணி {minutes} நிமி.'
+Home Page:
+  Keep disabled and hide this section: "முடக்கப்பட்ட நிலையிலேயே வைத்து இந்தப் பகுதியை மறை"
+  Familiar description: "நீங்கள் ஏற்கனவே விரும்பும் சேனல்களில் பார்க்காத காணொளிகளுக்கு முன்னுரிமை அளிக்கவும்."
+  Balanced description: "பழக்கமான சேனல்களுடன் உங்கள் ஆர்வங்களுக்கு ஏற்ற புதிய சேனல்களைக் கலக்கவும்."
+  Explore description: "உங்கள் ஆர்வங்களுடன் தொடர்புடைய புதிய சேனல்களுக்கு அதிக இடம் அளிக்கவும்."
+  Turn off recommendations: பரிந்துரைகளை முடக்கு
+  Recommended for you: "உங்களுக்கான பரிந்துரைகள்"
+  Recommendations description: "உங்கள் பார்வை வரலாற்றைப் பயன்படுத்தி உங்கள் சாதனத்திலேயே காணொளிகளைத் தரவரிசைப்படுத்துங்கள். காணொளிகளைக் கண்டறிய, சேனல் அடையாளங்களும் தலைப்பு சார்ந்த தேடல்களும் நீங்கள் தேர்ந்தெடுத்த பின்தளத்திற்கு அனுப்பப்படும்."
+  Enable recommendations: "பரிந்துரைகளை இயக்கு"
+  Recommendations need history: "பரிந்துரைகளைப் பெற, வரலாற்றை இயக்கி சில காணொளிகளைப் பாருங்கள்."
+  No recommendations: "பரிந்துரைகள் எதுவும் கிடைக்கவில்லை. மேலும் சில காணொளிகளைப் பார்த்த பிறகு புதுப்பிக்க முயலுங்கள்."
+  Recommendations unavailable: "பரிந்துரைகளை ஏற்ற முடியவில்லை. பின்னர் மீண்டும் முயலுங்கள்."
+  More like this: "இது போன்றவை மேலும்"
+  Not interested: "ஆர்வமில்லை"
+  Hide this channel: "இந்தச் சேனலை மறை"
+  Reset recommendations: "பரிந்துரைகளை மீட்டமை"
+  Discovery: "கண்டறிதல்"
+  Familiar: "பழக்கமானவை"
+  Balanced: "சமநிலை"
+  Explore: "ஆராய்க"
+  Related to: "{title} உடன் தொடர்புடையது"
+  More from: "{channel} இலிருந்து மேலும்"
+  Matches interest: "{topic} குறித்த உங்கள் ஆர்வத்துடன் பொருந்துகிறது"
+  Related discovery privacy: "தொடர்புடைய காணொளிகளைக் கண்டறிய காணொளி அடையாளங்களும் அனுப்பப்படுகின்றன."
+  Home: முகப்பு
+  Description: நீங்கள் நிறுத்திய இடத்திலிருந்து தொடர்ந்து, அண்மைய செயல்பாடுகளைப் பாருங்கள்.
+  Customize: முகப்பைத் தனிப்பயனாக்கு
+  Done: முடிந்தது
+  Customize description: எந்தப் பிரிவுகள் தோன்ற வேண்டும் என்பதைத் தேர்ந்தெடுத்து, விரும்பிய வரிசையில் அமைக்கவும்.
+  Continue watching: தொடர்ந்து பார்க்கவும்
+  New since last visit: கடைசி வருகைக்குப் பிறகு புதியவை
+  Watch queue: பார்க்கும் வரிசை
+  Recent playlists: அண்மைய இயக்கப்பட்டியல்கள்
+  Recent downloads: அண்மைய பதிவிறக்கங்கள்
+  Upcoming reminders: வரவிருக்கும் நினைவூட்டல்கள்
+  Watch statistics: பார்வைப் புள்ளிவிவரங்கள்
+  View all: அனைத்தையும் பார்
+  Previous shelf page: '{section} இன் முந்தைய பக்கம்'
+  Next shelf page: '{section} இன் அடுத்த பக்கம்'
+  Shelf page status: '{section}, பக்கம் {page} / {total}.'
+  Move section up: '{section} ஐ மேலே நகர்த்து'
+  Move section down: '{section} ஐ கீழே நகர்த்து'
+  Section moved: '{section} {total} இல் {position} ஆம் இடத்திற்கு நகர்த்தப்பட்டது.'
+  Nothing here yet: இங்கு இன்னும் எதுவுமில்லை
+  Empty description: நீங்கள் பார்க்கத் தொடங்கும் காணொளிகள், பயன்படுத்தும் இயக்கப்பட்டியல்கள், பதிவிறக்கங்கள் மற்றும் நினைவூட்டல்கள் இங்கு தோன்றும்.
+  All sections hidden: அனைத்துப் பிரிவுகளும் மறைக்கப்பட்டுள்ளன
+  All sections hidden description: ஒரு பிரிவை மீண்டும் காட்ட முகப்பைத் தனிப்பயனாக்கவும்.
+Subscriptions:
+  New video from {channel}: "{channel} இலிருந்து புதிய வீடியோ"
+  New short from {channel}: "{channel} இலிருந்து புதிய குறுகிய வீடியோ"
+  '{channel} is live': "{channel} நேரலையில் உள்ளது"
+  New post from {channel}: "{channel} இலிருந்து புதிய இடுகை"
+  Mark As Unseen: பார்க்காததாகக் குறி
+  Copy Error Details: "தொழில்நுட்ப விவரங்களை நகலெடு"
+  Refresh Errors: "புதுப்பிக்க முடியாத சேனல்கள்: {channels}. விவரங்களைக் காண கிளிக் செய்யவும்."
+  Refresh Error Channels More: "{channels} மற்றும் மேலும் {count} | {channels} மற்றும் மேலும் {count}"
+  Never show {type} from this channel in feeds again: இந்தச் சேனலின் {type} உள்ளடக்கத்தை ஊட்டங்களில் இனி ஒருபோதும் காட்டாதே
+  Refreshing Subscription Videos: சந்தாக்களின் காணொளிகள் புதுப்பிக்கப்படுகின்றன
+  Refreshing Subscription Shorts: சந்தாக்களின் Shorts புதுப்பிக்கப்படுகின்றன
+  Refreshing Subscription Live Streams: சந்தாக்களின் நேரலைகள் புதுப்பிக்கப்படுகின்றன
+  Refreshing Subscription Posts: சந்தாக்களின் இடுகைகள் புதுப்பிக்கப்படுகின்றன
+  New Content: புதிய உள்ளடக்கம்
+  New Feed Refresh Warning Title: எல்லாச் சந்தா ஊட்டங்களையும் புதுப்பிக்கவா?
+  New Feed Refresh Warning: RSS இல்லாமல் 1 சந்தாவின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா? | RSS இல்லாமல் {count} சந்தாக்களின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா?
+  New Since Last Refresh: கடைசிப் புதுப்பிப்புக்குப் பிறகு புதியவை
+  Mark As Seen: பார்த்ததாகக் குறி
+  Mark All as Seen: அனைத்தையும் பார்த்ததாகக் குறி
+  No New Content: புதிய உள்ளடக்கம் இல்லை.
+  New Content Tabs: புதிய உள்ளடக்கத் தாவல்கள்
+  Show Tabbed View: தாவல் காட்சியைக் காட்டு
+  Show Combined View: ஒருங்கிணைந்த காட்சியைக் காட்டு
+  Newest First: புதியவை முதலில்
+  Oldest First: பழையவை முதலில்
+  Posts:
+    RSS Message: 'பதிவுகளுக்கு YouTube RSS ஊட்டங்களை வழங்குவதில்லை. பதிவுகளைக் காண "{rssSetting}" அமைப்பை முடக்கவும் அல்லது இந்தத் தாவலை மறைக்க "{hideSetting}" அமைப்பை இயக்கவும்.'
+  RSS Feeds:
+    Refreshing: RSS ஊட்டங்கள் புதுப்பிக்கப்படுகின்றன
+    Tab: RSS
+    Followed Feeds: பின்தொடரும் RSS ஊட்டங்கள்
+    Add Feed: ஊட்டத்தைச் சேர்
+    Feed URL: RSS அல்லது Atom ஊட்ட URL
+    Remove Feed: '{feed} ஐ அகற்று'
+    Invalid Feed URL: http:// அல்லது https:// உடன் தொடங்கும் இணைய முகவரியை உள்ளிடவும்.
+    Feed Already Followed: இந்த ஊட்டத்தை ஏற்கனவே பின்தொடர்கிறீர்கள்.
+    Feed Could Not Be Loaded: ஊட்டத்தை ஏற்ற முடியவில்லை. முகவரி RSS அல்லது Atom ஊட்டத்தைச் சுட்டுகிறதா எனச் சரிபார்க்கவும்.
+    Feed Requires Browser Check: இந்தத் தளம் உலாவி சரிபார்ப்பைக் கேட்கிறது, அதை OpenTubeX ஆல் முடிக்க முடியாது. இந்த ஊட்டத்துக்கு வேறு முகவரி அல்லது வேறு RSSHub நிகழ்வை முயற்சிக்கவும்.
+    Refresh Errors: 1 ஊட்டத்தைப் புதுப்பிக்க முடியவில்லை. | {count} ஊட்டங்களைப் புதுப்பிக்க முடியவில்லை.
+    Description: பிற தளங்களில் உள்ள படைப்பாளர்களைப் பின்தொடர RSS அல்லது Atom ஊட்டத்தைச் சேர்க்கவும். Twitch போன்ற பல தளங்களுக்கான ஊட்டங்களை {rssHub} நிகழ்வுகள் வழங்குகின்றன.
+    Empty Items: உங்கள் ஊட்டங்களில் தற்போது உருப்படிகள் எதுவும் இல்லை.
+    No Feeds: நீங்கள் இன்னும் எந்த RSS ஊட்டத்தையும் பின்தொடரவில்லை.
+    RSSHub:
+      Browse: RSSHub-ஐ உலாவுக
+      Title: RSSHub-இலிருந்து ஊட்டத்தைச் சேர்
+      Description: ஒரு RSSHub நிகழ்வு, ஒரு சேவை மற்றும் எதைப் பின்தொடர வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும். ஊட்ட முகவரி உங்களுக்காக உருவாக்கப்படும்.
+      Instance: RSSHub நிகழ்வு
+      Service: சேவை
+      Search Services: சேவைகளைத் தேடு
+      Loading Services: சேவைகள் ஏற்றப்படுகின்றன…
+      Services Could Not Be Loaded: இந்த நிகழ்வு தனது சேவைகளைத் தரவில்லை. முகவரியைச் சரிபார்க்கவும் அல்லது வேறு நிகழ்வைத் தேர்ந்தெடுக்கவும்.
+      Feed Type: ஊட்ட வகை
+      Requires Configuration: இந்த ஊட்டத்துக்கு நிகழ்வில் கூடுதல் அமைப்பு தேவை, எனவே பொது நிகழ்வுகளில் இது வேலை செய்யாமல் போகலாம்.
+      Optional Parameter: '{parameter} (விருப்பத்தேர்வு)'
+      Not Set: அமைக்கப்படவில்லை
+    Retry Feed: '{feed} ஐ மீண்டும் முயல்'
+Trending:
+  Music: இசை
+  Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
+  Unsupported Backend: பிரபலமானவற்றுக்கு Local API தேவை. Local API-ஐத் தேர்ந்தெடுக்கவும் அல்லது பின்தள மாற்றுவழியை இயக்கவும்.
+Most Popular Feed Empty: இந்த Invidious நிகழ்வின் மிகவும் பிரபலமானவை ஊட்டம் காலியாக உள்ளது.
+Feed:
+  Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
+  Next Auto Refresh: 'அடுத்த தானியக்கப் புதுப்பிப்பு: {date}'
+User Playlists:
+  Save: "சேமி"
+  Edit: "திருத்து"
+  This playlist is private or does not exist.: "இந்தப் பிளேலிஸ்ட் தனிப்பட்டது அல்லது இல்லை."
+  Pin to Navigation: "வழிசெலுத்தலில் பொருத்து"
+  Unpin from Navigation: "வழிசெலுத்தலிலிருந்து விடுவி"
+  Reorder Hint: மறுவரிசைப்படுத்த இழுக்கவும் அல்லது அம்புக்குறி விசைகளைப் பயன்படுத்தவும்
+  Add new videos to the top (custom order): "புதிய காணொளிகளை மேலே சேர் (தனிப்பயன் வரிசை)"
+  Shuffle videos by default: "இயல்பாகக் காணொளிகளைக் கலந்து இயக்கு"
+  Repair Playlists: பிளேலிஸ்ட்களைச் சரிசெய்
+  Repair Description: YouTube Takeout ZIP கோப்பை இறக்குமதி செய்த பிறகு விடுபட்ட வீடியோ விவரங்களை மீட்டெடுக்கவும். பிளேலிஸ்ட் வரிசை மாறாது.
+  Remove Unavailable Videos: "கிடைக்காத காணொளிக்களை அகற்று"
+  Remove Unavailable Videos Confirmation: "கிடைக்காத காணொளிக்களை அகற்றவா? கண்டறியப்பட்டது: {count}. சரிபார்க்க முடியவில்லை: {uncertain}. சரிபார்க்கப்படாத காணொளிக்கள் வைக்கப்படும்."
+  Add Missing Videos: "மூல இயக்கப்பட்டியலிலிருந்து விடுபட்ட காணொளிகளைச் சேர்"
+  Source Playlist: "மூல இயக்கப்பட்டியல்"
+  Save Playlist: "பிளேலிஸ்ட்டைச் சேமி"
+  Remove Saved Playlist: "சேமித்த பிளேலிஸ்ட்டை அகற்று"
+  Load More Playlists: மேலும் பிளேலிஸ்ட்களை ஏற்று
+  Save to: இதில் சேமி…
+  Quick Bookmark Icon: விரைவுப் புத்தகக்குறி படவுரு
+  Custom Emoji: தனிப்பயன் ஈமோஜி
+  Choose Image: படத்தைத் தேர்ந்தெடு
+  Use Bookmark Icon: புத்தகக்குறி படவுருவைப் பயன்படுத்து
+  SinglePlaylistView:
+    Retry: மீண்டும் முயல்
+    This playlist could not be loaded.: இந்தப் பிளேலிஸ்ட்டை ஏற்ற முடியவில்லை.
+    More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
+  Playlist Thumbnail: "பிளேலிஸ்ட் சிறுபடம்"
+  Restore Default Thumbnail: "இயல்புநிலை சிறுபடத்தை மீட்டமை"
+  AddVideoPrompt:
+    And N more videos: 'மேலும் {count} காணொளி | மேலும் {count} காணொளிகள்'
+  Move Up: மேலே
+  Move Down: கீழே
+  Remove: அகற்று
+History:
+  From Date: 'தொடக்க தேதி'
+  To Date: 'முடிவு தேதி'
+  Channel Filter: 'சேனல்'
+  All Channels: 'அனைத்து சேனல்களும்'
+  Clear Filters: 'வடிகட்டிகளை அழி'
+  Invalid Date Range: 'தொடக்க தேதி முடிவு தேதிக்கு முந்தையதாகவோ அதே தேதியாகவோ இருக்க வேண்டும்.'
+  Empty Filter Message: 'இந்த வடிகட்டிகளுடன் பொருந்தும் காணொளிகள் உங்கள் வரலாற்றில் இல்லை.'
+  Repair Compact: "சரி"
+  Mark All Watched Compact: "யாவும் கண்டது"
+  Repair Use Cookies: "அமைக்கப்பட்ட yt-dlp குக்கீகளைப் பயன்படுத்து"
+  Repair Cookies Hint: "500-க்கும் மேற்பட்ட காணொளிகளைச் சரிபார்க்க வேண்டும். கோரிக்கைகள் கட்டுப்படுத்தப்படும் அபாயத்தைக் குறைக்க yt-dlp அமைப்புகளில் குக்கீகளை அமைத்து இங்கே இயக்கவும்."
+  Repair Description: "வரலாற்றை இறக்குமதி செய்த பிறகு, அல்லது காணொளி விவரங்கள் விடுபட்டிருந்தால் அல்லது தவறாக LIVE எனக் குறிக்கப்பட்டிருந்தால் இதைப் பயன்படுத்தவும்."
+  Repair Details: "விடுபட்ட தலைப்புகள், சேனல்கள், வெளியீட்டுத் தேதிகளை நிரப்பி, காணொளி நேரங்களையும் LIVE குறிகளையும் சரிபார்க்கிறது. உங்கள் பார்வை முன்னேற்றமும் பார்த்த நிலையும் மாறாது."
+  Repair Notice: "பெரிய வரலாறுகளுக்குச் சிறிது நேரம் ஆகலாம். தோல்வியடைந்த கோரிக்கைகள் தானாக மீண்டும் முயற்சிக்கப்படும். நீக்கப்பட்ட அல்லது தனிப்பட்ட காணொளிகளின் விவரங்கள் முழுமையடையாமல் இருக்கலாம்."
+  Start Repair: "சரிசெய்தலைத் தொடங்கு"
+  Repair Checking: "காணொளி விவரங்கள் சரிபார்க்கப்படுகின்றன"
+  Repair Waiting: "YouTube-க்காகக் காத்திருக்கிறது. சரிசெய்தல் தானாகத் தொடரும்."
+  Repair Retrying: "தோல்வியடைந்த கோரிக்கைகள் மீண்டும் முயற்சிக்கப்படுகின்றன"
+  Repair Finished: "சரிசெய்தல் முடிந்தது"
+  Repair Stopped: "சரிசெய்தல் நிறுத்தப்பட்டது"
+  Repair: "வரலாற்றைச் சரிசெய்"
+  Repair Progress: "சரிபார்க்கப்பட்டவை {checked}/{total} · சரிசெய்யப்பட்டவை {repaired} · தோல்வியடைந்தவை {failed}"
+  Mark All As Watched: அனைத்தையும் பார்த்ததாகக் குறி
+  Mark All As Watched Confirmation: வரலாற்றிலுள்ள எல்லாக் காணொளிகளையும் பார்த்ததாகக் குறிக்க விரும்புகிறீர்களா?
+  All History Marked as Watched: வரலாற்றிலுள்ள எல்லாக் காணொளிகளும் பார்த்ததாகக் குறிக்கப்பட்டன
+  Select History Age: ஓர் உள்ளீட்டை நீக்குவதற்கு அது எவ்வளவு பழையதாக இருக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.
+  Delete Entries Older Than: இதைவிடப் பழைய உள்ளீடுகளை நீக்கு
+  Number of Days: நாட்களின் எண்ணிக்கை
+  History Cleanup Warning: பொருந்தும் பார்வை வரலாற்று உள்ளீடுகளை இது நிரந்தரமாக நீக்கும்.
+  1 Day: 1 நாள்
+  1 Week: 1 வாரம்
+  1 Month: 1 மாதம்
+  3 Months: 3 மாதங்கள்
+  1 Year: 1 ஆண்டு
+  All Time: எல்லா காலமும்
+  Custom: தனிப்பயன்
+  History Older Than Days Removed: 1 நாளுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது | {days} நாட்களுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது
+Settings:
+  Diagnostics:
+    Diagnostics: கண்டறிதல்
+    Description: கண்டறிதல் பதிவு இயக்கத்தில் இருக்கும்போது, பிழை அறிக்கைகளுடன் இணைக்க OpenTubeX சமீபத்திய பதிவுச் செய்திகளை நினைவகத்தில் வைத்திருக்கிறது. அவற்றை அது ஒருபோதும் தானாகச் சேமிப்பதோ அனுப்புவதோ இல்லை, பதிவை அணைத்தால் அவை நீக்கப்படும். அறிக்கைகளில் குக்கீகள், டோக்கன்கள், IP முகவரிகள் மற்றும் URL அளவுருக்கள் இருக்காது, ஆனால் நீங்கள் இயக்கிய வீடியோக்களின் ID-கள் இருக்கலாம், எனவே பகிரும் முன் அறிக்கையைச் சரிபார்க்கவும்.
+    Enable Logging: கண்டறிதல் பதிவை இயக்கு
+    Copy Report: அறிக்கையை நகலெடு
+    Save Report: அறிக்கையைச் சேமி
+    Clear Log: பதிவை அழி
+    Report Copied: கண்டறிதல் அறிக்கை நகலெடுக்கப்பட்டது
+    Report Saved: கண்டறிதல் அறிக்கை சேமிக்கப்பட்டது
+    Report File: கண்டறிதல் அறிக்கை
+    Save Failed: கண்டறிதல் அறிக்கையைச் சேமிக்க முடியவில்லை
+    Log Cleared Message: கண்டறிதல் பதிவு அழிக்கப்பட்டது
+  Tab Unloading:
+    Automatically unload tabs: "தாவல்களைத் தானாக நினைவகத்திலிருந்து அகற்று"
+    Memory threshold: "நினைவக வரம்பு"
+    Tabs to unload: "அகற்ற வேண்டிய தாவல்கள்"
+    Automatic unloading help: "நினைவகத்தை விடுவிக்கப் பழைய பின்னணித் தாவல்களை அகற்றும். செயலில் உள்ள மற்றும் இயங்கும் தாவல்கள் ஏற்றப்பட்டே இருக்கும்."
+    Memory threshold help: "காட்சியாக்கச் செயலியின் நினைவக வரம்பின் சதவீதம்; கணினியின் மொத்த RAM அல்ல."
+  Password Settings:
+    Failed to Save Password: "கடவுச்சொல்லைச் சேமிக்க முடியவில்லை."
+    Confirm Password: "கடவுச்சொல்லை உறுதிப்படுத்தவும்"
+    Passwords Do Not Match: "கடவுச்சொற்கள் பொருந்தவில்லை."
+  Navigation and Controls: "வழிசெலுத்தல் மற்றும் கட்டுப்பாடுகள்"
+  Control Bar:
+    Title: "கட்டுப்பாட்டுப் பட்டை"
+    Customize: "கட்டுப்பாட்டுப் பட்டையைத் தனிப்பயனாக்கு"
+    Hidden: "மறைக்கப்பட்டவை"
+    Empty: "கட்டுப்பாடுகள் இல்லை"
+    Move to Control Bar: "{control} ஐக் கட்டுப்பாட்டுப் பட்டைக்கு நகர்த்து"
+    Move to Player Menu: "{control} ஐ இயக்கி பட்டியலுக்கு நகர்த்து"
+    Hide: "{control} ஐ மறை"
+  Fullscreen Actions:
+    Recommended Videos: "பரிந்துரைக்கப்பட்ட காணொளிகள்"
+    Title: "முழுத்திரைச் செயல்கள்"
+    Customize: "முழுத்திரைச் செயல்களைத் தனிப்பயனாக்கு"
+    Add Action: "செயலைச் சேர்"
+    Empty: "முழுத்திரைச் செயல்கள் எதுவும் தேர்ந்தெடுக்கப்படவில்லை"
+    Quick Bookmark: "விரைவு புத்தகக்குறி"
+    Availability Hint: "செயல்கள் அவை பொருந்தும் வீடியோக்களில் மட்டுமே தோன்றும்."
+    Disabled: "(முடக்கப்பட்டது)"
+  Quick Settings:
+    Quick Settings: விரைவு அமைப்புகள்
+    Customize Quick Settings: விரைவு அமைப்புகளைத் தனிப்பயனாக்கு
+    Add Setting: அமைப்பைச் சேர்
+    Appearance: தோற்றம்
+    Playback: இயக்கம்
+    Content: உள்ளடக்கம்
+    Language and Region: மொழியும் பிராந்தியமும்
+    All Settings: எல்லா அமைப்புகளும்
+    Profile Selector Hint: சுயவிவரங்களை மாற்ற, சுயவிவரப் படவுருவை வலது கிளிக் செய்யவும் முடியும்
+    Profile Selector Touch Hint: சுயவிவரங்களை மாற்ற, சுயவிவரப் படவுருவை நீண்ட நேரம் அழுத்தவும் முடியும்
+  Categories:
+    General Description: மொழி, தொடக்கம், தாவல்கள் மற்றும் மொழிபெயர்ப்பு
+    Appearance: தோற்றம்
+    Appearance Description: தீம், தளவமைப்பு, வழிசெலுத்தல் மற்றும் வீடியோ பட்டியல்கள்
+    Content appearance: காணொளிப் பட்டியல்களும் சிறுபடங்களும்
+    Layout: தளவமைப்பு
+    Playback Description: இயக்கியின் இயல்புநிலைகள், வசன வரிகள் மற்றும் ஒவ்வொரு சேனலுக்குமான அமைப்புகள்
+    Subscriptions Description: ஊட்டப் புதுப்பிப்பு, புதிய வீடியோ அறிவிப்புகள் மற்றும் RSS ஊட்டங்கள்
+    Downloads Description: பதிவிறக்கக் கோப்புறை, வார்ப்புருக்கள் மற்றும் தானியங்கு பதிவிறக்கங்கள்
+    Focus: கவனம்
+    Focus Description: மறைக்கப்பட்ட உள்ளடக்கம், பார்வை வரம்புகள், நினைவூட்டல்கள் மற்றும் பெற்றோர் கட்டுப்பாடு
+    Add-ons: துணை நிரல்கள்
+    Add-ons Description: SponsorBlock, DeArrow, விருப்பமின்மைகள், AiSList மற்றும் குரல்வழி மொழிபெயர்ப்பு
+    Privacy Description: வரலாறு, தேடல் பரிந்துரைகள், இணைப்புகள் மற்றும் பயன்பாட்டுக் கடவுச்சொல்
+    Online activity: இணையச் செயல்பாடு
+    Data And Storage Description: காப்புப்பிரதிகள், இறக்குமதி மற்றும் ஏற்றுமதி, வட்டுப் பயன்பாடு மற்றும் சுத்தம் செய்தல்
+    Sync Description: ஒத்திசைவு சேவையகக் கணக்கு, சாதன இணைப்பு மற்றும் ஒத்திசைக்கப்பட்ட தரவு
+    Advanced: மேம்பட்டவை
+    Advanced Description: பின்னணி சேவைகள், இடையகம், வெளிப்புறக் கருவிகள், ப்ராக்ஸி மற்றும் கண்டறிதல்
+    Alternative providers: காணொளி மற்றும் மெட்டாதரவு வழங்குநர்கள்
+  Highlight Changed Settings: இயல்புநிலையிலிருந்து மாறிய அமைப்புகளைத் தனிப்படுத்திக் காட்டு
+  Reset Setting to Default: இந்த அமைப்பை இயல்புநிலைக்கு மீட்டமை
+  Performance Impact:
+    Show Performance Impact: செயல்திறன் தாக்கக் குறிகாட்டிகளைக் காட்டு
+    Moderate: மிதமான தாக்கம்
+    High: அதிகத் தாக்கம்
+    Description: இந்த அமைப்பு {resources} பயன்பாட்டை அதிகரிக்கலாம்
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: நினைவகம்
+      Network: பிணையம்
+      Disk: வட்டு
+  General Settings:
+    Limit Titles to Two Lines: "தலைப்புகளை இரண்டு வரிகளுக்குள் கட்டுப்படுத்து"
+    Close Window With Last Tab: 'கடைசி தாவலை மூடும்போது சாளரத்தை மூடு'
+    Preferred Video Codec: விருப்பமான வீடியோ கோடெக்
+    Always Use Backup Media Server: "எப்போதும் காப்பு ஊடக சேவையகத்தைப் பயன்படுத்து"
+    Automatically switch stream extraction methods: "ஸ்ட்ரீம் பிரித்தெடுக்கும் முறைகளைத் தானாக மாற்று"
+    Enable Tabs: "தாவல்களை இயக்கு"
+    Thumbnail Swipe Gestures:
+      Left: சிறுபடங்களில் இடதுபுறம் ஸ்வைப் செய்
+      Right: சிறுபடங்களில் வலதுபுறம் ஸ்வைப் செய்
+      Description: தேர்ந்தெடுத்த செயலைச் செய்ய காணொளியின் சிறுபடத்தில் கிடைமட்டமாக ஸ்வைப் செய்து விடவும்.
+    Data Saver Thumbnails: "தரவைச் சேமிக்கும் சிறுபடங்கள்"
+    Use tray icon: "கணினித் தட்டு சின்னத்தைப் பயன்படுத்து"
+    Close to system tray: "கணினித் தட்டிற்கு மூடு"
+    Tray required for background refresh: "பின்னணியில் சந்தாக்களைப் புதுப்பித்தல் இயக்கப்பட்டிருக்கும் வரை கணினித் தட்டு சின்னம் தேவை."
+    Show Video Menu Button: காணொளி மெனு பொத்தானைக் காட்டு
+    Swipe to refresh: புதுப்பிக்க ஸ்வைப் செய்யவும்
+    Blur Thumbnails: சிறுபடங்களை மங்கலாக்கு
+    Navigation:
+      Always Show Navigation Bar: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது எப்போதும் காட்டு
+      Compact Tab Labels: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது சுருக்கமாகக் காட்டு
+      Show Active Subscriptions: பக்கப்பட்டியில் செயலில் உள்ள சந்தாக்களைக் காட்டு
+      Navigation: வழிசெலுத்தல்
+      Customize Navigation: வழிசெலுத்தலைத் தனிப்பயனாக்கு
+      Add Item: உருப்படியைச் சேர்
+    Date Format: தேதி வடிவம்
+    Time Format: நேர வடிவம்
+    Language Default: மொழி இயல்புநிலை
+    Update Relative Timestamps: சார்புநேரக் குறிப்புகளைப் புதுப்பித்தபடி வைத்திரு
+    Stream Extraction Method:
+      Stream Extraction Method: ஸ்ட்ரீம் பிரித்தெடுக்கும் முறை
+      yt-dlp: yt-dlp
+      Built-in: உள்ளமைந்தது
+    Confirm Before: இதற்கு முன் உறுதிப்படுத்து…
+    Confirmation Options:
+      Closing App: OpenTubeX-ஐ மூடுதல்
+      Closing Window: பல தாவல்களுள்ள சாளரத்தை மூடுதல்
+      Closing Tabs: பல தாவல்களை மூடுதல்
+      Loading Tabs: பல தாவல்களை ஏற்றுதல்
+      Unloading Tabs: பல தாவல்களை இறக்குதல்
+    Remember Tab Navigation History: தாவல் வழிசெலுத்தல் வரலாற்றை நினைவில் கொள்
+    New Tab Position:
+      New Tab Position: புதிய தாவலின் இடம்
+      At the end: இறுதியில்
+      After current tab: தற்போதைய தாவலுக்குப் பிறகு
+      After current tab in opened order: திறந்த வரிசையில், தற்போதைய தாவலுக்குப் பிறகு
+    Tab Close Focus:
+      Last active tab: "கடைசியாகச் செயலில் இருந்த தாவல்"
+      Next tab in tab order: "தாவல் வரிசையில் அடுத்த தாவல்"
+      Previous tab in tab order: "தாவல் வரிசையில் முந்தைய தாவல்"
+      Tab Close Focus: செயலில் உள்ள தாவலை மூடிய பிறகு
+    Startup Behavior:
+      Startup Behavior: தொடக்கத்தில்
+      Load all tabs: எல்லாத் தாவல்களையும் ஏற்று
+      Load previously loaded tabs: முன்பு ஏற்றிய தாவல்களை ஏற்று
+      Load last active tab: கடைசியாகச் செயலிலிருந்த தாவலை ஏற்று
+      Start with an empty session: காலியான அமர்வுடன் தொடங்கு
+      Load landing page, keep other tabs unloaded: தொடக்கப் பக்கத்தை ஏற்றி, மற்ற தாவல்களை ஏற்றாமல் வைத்திரு
+    Use AI Translation Completions: விடுபட்ட மொழிபெயர்ப்புகளை AI உருவாக்கிய மொழிபெயர்ப்புகளால் நிரப்பு
+    Reduced Motion:
+      Reduced Motion: குறைந்த அசைவு
+      System: கணினி அமைப்பு
+      Force On: கட்டாயமாக இயக்கு
+      Force Off: கட்டாயமாக முடக்கு
+    Comment Translation:
+      Title: கருத்து மொழிபெயர்ப்புகள்
+      Enable: கருத்து மொழிபெயர்ப்புகளை இயக்கு
+      Never Translate: இந்த மொழிக் கருத்துகளை மொழிபெயர்க்க வேண்டாம்
+      Choose Language: ஒரு மொழியைத் தேர்ந்தெடுக்கவும்
+      Description: செயலி மொழியிலுள்ள கருத்துகள் ஏற்கெனவே விலக்கப்பட்டுள்ளன. உங்களால் படிக்க முடிந்த மற்ற மொழிகளைச் சேர்க்கவும்.
+      Remove Language: '{language} கருத்துகளை மீண்டும் மொழிபெயர்'
+    Avoid translation:
+      Avoid translation: மொழிபெயர்க்காத காணொளி உரைக்கு முன்னுரிமை அளி
+      Disabled: முடக்கப்பட்டது
+      Watch Only: காணொளி இடைமுகத்தில் மட்டும்
+      Entire App: செயலி முழுவதும்
+    Playlist View Type:
+      Playlist View Type: பிளேலிஸ்ட் காட்சி வகை
+    Show Thumbnail Previews: சிறுபட முன்னோட்டங்களைக் காட்டு
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: கூடுதல் சிறுபடச் செயல் பொத்தான்
+      None: ஏதுமில்லை
+      Mark as Watched: பார்த்ததாகக் குறி
+      Copy YouTube Link: YouTube இணைப்பை நகலெடு
+      Open in YouTube: YouTube-இல் திற
+    Mobile Layout:
+      Mobile Layout: 'கைப்பேசி தளவமைப்பு'
+      Automatic: 'தானியங்கி'
+      Phone: 'தொலைபேசி'
+      Tablet: 'கைக்கணினி'
+    Video View Type:
+      Full Width: முழு அகலம்
+    Grid Columns:
+      Grid Columns: கட்ட நெடுவரிசைகள்
+      Playlist Grid Columns: பிளேலிஸ்ட் கட்ட நெடுவரிசைகள்
+      Auto: தானியங்கு
+    Preferred API Backend:
+      Yattee Server: Yattee சேவையகம்
+    Yattee Server:
+      Server URL: Yattee சேவையக URL
+      Username: பயனர்பெயர்
+      Password: கடவுச்சொல்
+      Proxy Videos: வீடியோக்களை Yattee சேவையகம் வழியாக அனுப்பு
+      Test Connection: இணைப்பைச் சோதி
+      Testing: இணைப்பு சோதிக்கப்படுகிறது…
+      Connected: Yattee சேவையகம் {version} உடன் இணைக்கப்பட்டது
+      Errors:
+        Invalid URL: https:// அல்லது http:// என்று தொடங்கும் சேவையக URL-ஐ உள்ளிடவும்.
+        Unreachable: சேவையகத்தை அணுக முடியவில்லை. URL-ஐயும் சேவையகம் இயங்குகிறதா என்பதையும் சரிபார்க்கவும்.
+        Media not allowed: 'இணைக்கப்பட்டது, ஆனால் இந்தச் செயலி வீடியோக்களை ஏற்ற சேவையகம் அனுமதிக்கவில்லை. சேவையகத்தின் சூழல் மாறிகளில் CORS_ORIGINS={origins} என அமைக்கவும்.'
+        Not a Yattee server: சேவையகம் பதிலளித்தது, ஆனால் அது Yattee சேவையகம் அல்ல.
+        Credentials required: சேவையகத்துக்குப் பயனர்பெயரும் கடவுச்சொல்லும் தேவை.
+        Invalid credentials: சேவையகம் பயனர்பெயரையோ கடவுச்சொல்லையோ நிராகரித்தது.
+        Rate limited: அதிகமான தோல்வியுற்ற முயற்சிகள் காரணமாகச் சேவையகம் உள்நுழைவுகளைத் தடுக்கிறது. பின்னர் மீண்டும் முயலுங்கள்.
+        Server error: சேவையகம் ஒரு பிழையை வழங்கியது (HTTP {status}).
+    Notifications:
+      Notifications: அறிவிப்புகள்
+      System and In-App: கணினியும் பயன்பாட்டிலும்
+      System Only: கணினி மட்டும்
+      Off: முடக்கம்
+  Context Menu Search Settings:
+    Context Menu Search Settings: சூழல் மெனுத் தேடல்
+    Description: தேர்ந்தெடுத்த உரையை வலது கிளிக் செய்யும்போது தோன்ற வேண்டிய தேடுபொறிகளைத் தேர்ந்தெடுக்கவும். தேடல்கள் உங்கள் இயல்புநிலை உலாவியில் திறக்கும்.
+    Icon Hint: ஒரு தேடுபொறியை இயக்கினால், அதன் ஃபேவிகானை ஏற்ற அந்த இணையதளத்தைத் தொடர்புகொள்ளும்.
+    Engine Name: தேடுபொறியின் பெயர்
+    Search URL: தேடல் URL
+    URL Hint: குறியாக்கப்பட்ட தேர்ந்தெடுத்த உரை URL-இல் இடம்பெற வேண்டிய இடத்தில் %s-ஐப் பயன்படுத்தவும்.
+    Add Custom Engine: தனிப்பயன் தேடுபொறியைச் சேர்
+    Add Engine: தேடுபொறியைச் சேர்
+    Remove Engine: '{engine}-ஐ அகற்று'
+    Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
+    Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
+  Theme Settings:
+    Sections:
+      Interface: "இடைமுகம்"
+      Side Bar and Header: "பக்கப்பட்டி மற்றும் தலைப்பு"
+      Tabs: "தாவல்கள்"
+      Player: "பிளேயர்"
+      Scrolling: "உருட்டல்"
+      Notifications: "அறிவிப்புகள்"
+    Only Show Important Notifications: முக்கியமான அறிவிப்புகளை மட்டும் காட்டு
+    Visible Search Suggestions: "காணக்கூடிய தேடல் பரிந்துரைகள்"
+    Material Accent Color: "Material சிறப்பம்ச நிறம்"
+    Tally Accent Color: "Tally சிறப்பம்ச நிறம்"
+    Material Wallpaper Colors: "வால்பேப்பர் வண்ணங்கள்"
+    Material System Accent Color: "கணினி சிறப்பம்ச நிறம்"
+    Tab Loading Indicator:
+      Tab Loading Indicator: தாவல் ஏற்றுதல் குறிகாட்டி
+      Bar: பட்டை
+      Dot: புள்ளி (பழைய பாணி)
+    Compact Settings Categories: "சுருக்கமான அமைப்பு வகைகள்"
+    Playlist Thumbnail Size: "பிளேலிஸ்ட் சிறுபட அளவு"
+    Compact Mobile Mini Player: "சிறிய மொபைல் மினி பிளேயர்"
+    Always Show Mobile Search Bar: "மொபைல் தேடல் பட்டியை எப்போதும் காட்டு"
+    Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ரோஸ் வாட்டர்"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato ஃபிளமிங்கோ"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato இளஞ்சிவப்பு"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato mauve"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato சிவப்பு"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato மெரூன்"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato குழிப்பேரி"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato மஞ்சள்"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato பச்சை"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato டீல்"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato வானம்"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato sapphire"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato நீலம்"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato சுகந்தி"
+    Move Downloads to App Header: பதிவிறக்கங்களைச் செயலித் தலைப்புக்கு நகர்த்து
+    Move Settings to App Header: அமைப்புகளைச் செயலித் தலைப்புக்கு நகர்த்து
+    Hide Side Bar on Watch Pages: காணொளிப் பக்கங்களில் பக்கப் பட்டையை மறை
+    UI Roundness: இடைமுக வளைவு
+    Scrollbar Width: உருள் பட்டை அகலம்
+    Scroll Speed: உருள் வேகம்
+    Animation Speed: அசைவூட்ட வேகம்
+    Thumbnail Size: சிறுபட அளவு
+    Show Tab Icons: தாவல் படவுருக்களைக் காட்டு
+    Load Missing Tab Icons: விடுபட்ட தாவல் படவுருக்களை ஏற்று
+    Loading Missing Tab Icons: விடுபட்ட தாவல் படவுருக்கள் ஏற்றப்படுகின்றன…
+    No Missing Tab Icons: ஆதரிக்கப்படும் எல்லாத் தாவல் படவுருக்களும் ஏற்கெனவே ஏற்றப்பட்டுள்ளன
+    Loaded Tab Icons: 'விடுபட்ட தாவல் படவுரு ஏற்றப்பட்டது: {count} | விடுபட்ட தாவல் படவுருக்கள் ஏற்றப்பட்டன: {count}'
+    Loaded Tab Icons With Failures: '{loaded} தாவல் படவுருக்கள் ஏற்றப்பட்டன; {failed} படவுருக்களை ஏற்ற முடியவில்லை'
+    Show Tab Previews: தாவல் முன்னோட்டங்களைக் காட்டு
+    Use Fixed Tab Width: கிடைமட்டப் பயன்முறையில் நிலையான தாவல் அகலத்தைப் பயன்படுத்து
+    Use Custom Title Bar: தனிப்பயன் தலைப்புப் பட்டையைப் பயன்படுத்து
+    Tab Width: தாவல் அகலம்
+    Vertical Tab Height: செங்குத்துத் தாவல் உயரம்
+    Tab Layout:
+      Tab Layout: தாவல் தளவமைப்பு
+      Horizontal Top: மேலே கிடைமட்டமாக
+      Horizontal Bottom: கீழே கிடைமட்டமாக
+      Vertical Left: இடப்புறம் செங்குத்தாக
+      Vertical Right: வலப்புறம் செங்குத்தாக
+    Show Toast Timeout Indicator: அறிவிப்பின் மறைவு நேரக் குறிகாட்டியைக் காட்டு
+    Use Grid Player Menu: கட்ட வடிவ இயக்கி மெனுவைப் பயன்படுத்து
+    Show Progress as Notification: முன்னேற்றத்தை அறிவிப்பாகக் காட்டு
+    Operation in Progress: செயல் நடைபெறுகிறது
+    Toast Position:
+      Test Toast: சோதனை அறிவிப்பு
+      Toast Position: அறிவிப்பு இடம்
+      Bottom Left: கீழ் இடது
+      Bottom Center: கீழ் நடு
+      Bottom Right: கீழ் வலது
+      Top Left: மேல் இடது
+      Top Center: மேல் நடு
+      Top Right: மேல் வலது
+    Icon Pack:
+      Icon Pack: படவுருத் தொகுப்பு
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: செயலி எழுத்துரு
+      System Default: கணினி இயல்புநிலை
+      Unable to Load: நிறுவப்பட்ட கணினி எழுத்துருக்களை ஏற்ற முடியவில்லை
+      Bundled Fonts: சேர்க்கப்பட்ட எழுத்துருக்கள்
+      System Fonts: கணினி எழுத்துருக்கள்
+    Always Show Scrollbars: உருள் பட்டைகளை எப்போதும் காட்டு
+    Base Theme:
+      Material Light: "Material ஒளி"
+      Material Dark: "Material இருண்ட"
+      Material Black: "Material கருப்பு"
+      Dynamic colors: மாறும் வண்ணங்கள்
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally ஒளி"
+      Tally Dark: "Tally இருண்ட"
+      Custom: தனிப்பயன்
+      Built-in Themes: உள்ளமைந்த அலங்காரங்கள்
+      Custom Themes: தனிப்பயன் அலங்காரங்கள்
+    Light Theme: வெளிர் அலங்காரம்
+    Dark Theme: கருமை அலங்காரம்
+    Custom Theme:
+      Share Restrictions Prompt: "விளக்கங்களில் Markdown உட்பட அதிகபட்சம் 500 எழுத்துகள் இருக்கலாம். இங்கே நேரடியாகப் பதிவேற்றியவை உட்பட, GitHub இல் உள்ள இணைப்புகள் மற்றும் படங்கள் மட்டுமே அனுமதிக்கப்படும். போட் வெளிப்புற இணைப்புகளையும் படங்களையும் நீக்கி, நீண்ட விளக்கங்களைச் சுருக்கி, மாற்றங்களை விளக்கும் கருத்தை இடும்."
+      Import from Clipboard: "இடைநிலைப் பலகையிலிருந்து இறக்குமதி செய்"
+      Invalid Clipboard Theme: "இடைநிலைப் பலகையில் செல்லுபடியான கருப்பொருள் இல்லை. கருப்பொருளின் JSON ஐ நகலெடுத்து மீண்டும் முயற்சிக்கவும்."
+      Create Custom Theme: தனிப்பயன் அலங்காரத்தை உருவாக்கு
+      Edit Custom Theme: தனிப்பயன் அலங்காரத்தைத் திருத்து
+      Custom Theme Creator: தனிப்பயன் அலங்கார உருவாக்கி
+      Theme Name: அலங்காரத்தின் பெயர்
+      Based On: இதன் அடிப்படையில்
+      Import Theme: அலங்காரத்தை இறக்குமதி செய்
+      Export Theme: அலங்காரத்தை ஏற்றுமதி செய்
+      Share Theme: அலங்காரத்தைப் பகிர்
+      Share Description Prompt: அலங்காரத்தையும் அதைப் பயன்படுத்துவதற்கு முன் மற்றவர்கள் அறிய வேண்டியவற்றையும் விவரிக்கவும்.
+      Share Screenshots Prompt: "ஒன்று அல்லது பல திரைப்பிடிப்புகளை இங்கே இழுத்துப் போடவும். உங்கள் தனிப்பட்ட தரவு இல்லாமல் மாதிரி உள்ளடக்கத்துடன் மூன்று முன்னோட்டங்களை பாட் சேர்க்க இந்தப் பகுதியை காலியாக விடவும்."
+      Delete Theme: அலங்காரத்தை நீக்கு
+      Delete Theme Confirmation: “{name}” அலங்காரத்தை நீக்கவா? இதைச் செயல்தவிர்க்க முடியாது.
+      Save and Apply: சேமித்துப் பயன்படுத்து
+      Discard Changes: மாற்றங்களைக் கைவிடு
+      Reset Colors: அடிப்படை அலங்காரத்திற்கு மீட்டமை
+      Theme File: OpenTubeX அலங்காரக் கோப்பு
+      Theme Saved: தனிப்பயன் அலங்காரம் சேமிக்கப்பட்டுப் பயன்படுத்தப்பட்டது
+      Theme Imported: திருத்தியில் அலங்காரம் இறக்குமதி செய்யப்பட்டது
+      Theme Exported: அலங்காரம் ஏற்றுமதி செய்யப்பட்டது
+      Theme Deleted: தனிப்பயன் அலங்காரம் நீக்கப்பட்டது
+      Unable to Load: தனிப்பயன் அலங்காரத்தை ஏற்ற முடியவில்லை
+      Unable to Save: தனிப்பயன் அலங்காரத்தைச் சேமிக்க முடியவில்லை
+      Unable to Export: தனிப்பயன் அலங்காரத்தை ஏற்றுமதி செய்ய முடியவில்லை
+      Unable to Share: தனிப்பயன் அலங்காரத்தைப் பகிர முடியவில்லை
+      Unable to Delete: தனிப்பயன் அலங்காரத்தை நீக்க முடியவில்லை
+      Invalid Theme File: தவறான தனிப்பயன் அலங்காரக் கோப்பு
+      Colors:
+        Watched thumbnail overlay: "பார்த்த காணொளிகளின் சிறுபட மேலடுக்கு"
+        Main text: முதன்மை உரை
+        Secondary text: இரண்டாம் நிலை உரை
+        Subtle text: மெல்லிய உரை
+        Borders and dividers: கரைகளும் பிரிப்பான்களும்
+        Subtle surfaces and indicators: மெல்லிய பரப்புகளும் குறிகாட்டிகளும்
+        Title text: தலைப்பு உரை
+        Selected text background: தேர்ந்தெடுத்த உரையின் பின்னணி
+        Selected text: தேர்ந்தெடுத்த உரை
+        Logo icon: சின்னப் படவுரு
+        Logo text: சின்ன உரை
+        Logo hover: சின்னத்தின் மேல் சுட்டி
+        Logo pressed: அழுத்திய சின்னம்
+        Page background: பக்கப் பின்னணி
+        Card background: அட்டைப் பின்னணி
+        Secondary card background: இரண்டாம் நிலை அட்டைப் பின்னணி
+        Favorite icon: பிடித்தவை படவுரு
+        Error color: பிழை நிறம்
+        Scrollbar thumb: உருள் பட்டைக் கைப்பிடி
+        Scrollbar thumb hover: சுட்டி மேலுள்ள உருள் பட்டைக் கைப்பிடி
+        Scrollbar thumb pressed: அழுத்திய உருள் பட்டைக் கைப்பிடி
+        Dropdown item hover text: சுட்டி மேலுள்ள கீழ்த்தோன்றல் உருப்படி உரை
+        Dropdown item hover background: சுட்டி மேலுள்ள கீழ்த்தோன்றல் உருப்படிப் பின்னணி
+        Navigation and panel background: வழிசெலுத்தல் மற்றும் பலகைப் பின்னணி
+        Neutral item hover and focus background: நடுநிலை உருப்படியின் சுட்டி மற்றும் கவனப் பின்னணி
+        Neutral item hover and focus text and icons: நடுநிலை உருப்படியின் சுட்டி மற்றும் கவன உரையும் படவுருக்களும்
+        Neutral item pressed background: அழுத்திய நடுநிலை உருப்படிப் பின்னணி
+        Neutral item pressed text and icons: அழுத்திய நடுநிலை உருப்படியின் உரையும் படவுருக்களும்
+        Header button hover and focus background: தலைப்புப் பொத்தானின் சுட்டி மற்றும் கவனப் பின்னணி
+        Header button hover and focus text and icons: தலைப்புப் பொத்தானின் சுட்டி மற்றும் கவன உரையும் படவுருக்களும்
+        Header button pressed background: அழுத்திய தலைப்புப் பொத்தான் பின்னணி
+        Header button pressed text and icons: அழுத்திய தலைப்புப் பொத்தானின் உரையும் படவுருக்களும்
+        Search and dropdown background: தேடல் மற்றும் கீழ்த்தோன்றல் பின்னணி
+        Settings search background: அமைப்புத் தேடல் பின்னணி
+        Instance menu: நிகழ்வு மெனு
+        Shadow color: நிழல் நிறம்
+        Primary controls and highlights: முதன்மைக் கட்டுப்பாடுகளும் தனிப்படுத்தல்களும்
+        Primary control hover and focus: முதன்மைக் கட்டுப்பாட்டின் சுட்டியும் கவனமும்
+        Primary control pressed: அழுத்திய முதன்மைக் கட்டுப்பாடு
+        Text and icons on primary controls: முதன்மைக் கட்டுப்பாடுகளிலுள்ள உரையும் படவுருக்களும்
+        Secondary controls and highlights: இரண்டாம் நிலைக் கட்டுப்பாடுகளும் தனிப்படுத்தல்களும்
+        Secondary control hover and focus: இரண்டாம் நிலைக் கட்டுப்பாட்டின் சுட்டியும் கவனமும்
+        Secondary control pressed: அழுத்திய இரண்டாம் நிலைக் கட்டுப்பாடு
+        Light secondary color: வெளிர் இரண்டாம் நிலை நிறம்
+        Visited accent: பார்வையிட்ட சுட்டுநிறம்
+        Text and icons on secondary controls: இரண்டாம் நிலைக் கட்டுப்பாடுகளிலுள்ள உரையும் படவுருக்களும்
+        Links: இணைப்புகள்
+        Visited links: பார்வையிட்ட இணைப்புகள்
+        Destructive action: அழிக்கும் செயல்
+        Destructive hover and focus: அழிக்கும் செயலின் சுட்டியும் கவனமும்
+        Destructive pressed: அழிக்கும் செயல் அழுத்தப்பட்டது
+        Text and icons on destructive actions: அழிக்கும் செயல்களிலுள்ள உரையும் படவுருக்களும்
+  Player Settings:
+    Mono Audio: 'மோனோ ஆடியோ'
+    Show Mono Audio Toggle: 'மோனோ ஆடியோ நிலைமாற்றியைக் காட்டு'
+    Default Media Format:
+      Default Media Format: 'இயல்புநிலை ஊடக வடிவம்'
+    Pause on Stream Recovery: "ஸ்ட்ரீம் மீட்டெடுப்பின்போது இடைநிறுத்து"
+    Buffering:
+      Buffering: இடையகப்படுத்தல்
+      Description: இயக்கி காணொளியின் எவ்வளவு பகுதியை முன்கூட்டியே ஏற்றி, ஏற்றப்பட்ட நிலையில் வைத்திருக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.
+      Buffer Ahead Hint: பெரிய முன்னோக்கிய இடையகம் நீண்ட இணைப்புத் துண்டிப்புகளின்போதும் இயக்கத்தைத் தொடரச் செய்யும், ஆனால் நீங்கள் பார்க்காமல் போகக்கூடிய காணொளியையும் பதிவிறக்கும்.
+      Rewind Buffer Hint: பெரிய பின்னோக்கிய இடையகம் மீண்டும் பதிவிறக்காமல் பின்னோக்கிச் செல்ல உதவும், ஆனால் அதிக நினைவகத்தைப் பயன்படுத்தும்.
+      Buffer Before Playing Hint: இயக்குவதற்கு முன் அதிகக் காணொளி ஏற்றப்படும் வரை காத்திருப்பது நிலையற்ற இணைப்புகளில் அடிக்கடி இடைநிற்பதைத் தடுக்கும், ஆனால் காணொளிகள் தொடங்குவதற்கும் நகர்த்திய பின் தொடர்வதற்கும் அதிக நேரம் ஆகும்.
+      Preset: இடையக முன்னமைவு
+      Presets:
+        Data Saver: தரவுச் சேமிப்பு
+        Default: இயல்புநிலை
+        Smooth Playback: சீரான இயக்கம்
+        Custom: தனிப்பயன்
+      Buffer Ahead: முன்னோக்கிய இடையகம்
+      Buffer Ahead Tooltip: 'தற்போதைய இடத்திலிருந்து எவ்வளவு தூரம் முன்னோக்கி ஏற்ற வேண்டும். உயர் தரங்களில், நினைவக வரம்புகள் மிக அதிக மதிப்புகளைக் கட்டுப்படுத்தலாம். இயல்புநிலை: {value}'
+      Rewind Buffer: பின்னோக்கிய இடையகம்
+      Rewind Buffer Tooltip: 'ஏற்கனவே பார்த்த காணொளியின் எவ்வளவு பகுதி ஏற்றப்பட்ட நிலையில் இருக்கும். இயல்புநிலை: {value}'
+      Buffer Before Playing: இயக்கத்திற்கு முந்தைய இடையகம்
+      Buffer Before Playing Tooltip: 'இயக்கம் தொடங்கும் முன்போ, இடைநின்ற பின் தொடரும் முன்போ காணொளியின் எவ்வளவு பகுதி ஏற்றப்பட வேண்டும். இயல்புநிலை: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "அளவிடப்பட்ட நெட்வொர்க்குகளில் தர வரம்பு"
+      No Limit: "வரம்பு இல்லை"
+      Tooltip: "மொபைல் டேட்டா மற்றும் பிற அளவிடப்பட்ட நெட்வொர்க்குகளில், வீடியோக்கள் இந்தத் தரத்திலோ அதைவிடக் குறைவான தரத்திலோ தொடங்கும். பிளேயரில் இன்னும் அதிகத் தரத்தைத் தேர்வுசெய்யலாம்."
+    Show Music Mode Toggle: "இசைப் பயன்முறை மாற்றியைக் காட்டு"
+    Enable DLNA Casting: "DLNA ஒளிபரப்பை இயக்கு"
+    Skip Unavailable Playlist Videos: "பிளேலிஸ்ட்களில் கிடைக்காத காணொளிகளைத் தவிர்"
+    Lights Off: விளக்குகளை அணை
+    Show Lights Off Toggle: விளக்குகளை அணைக்கும் நிலைமாற்றியைக் காட்டு
+    Show Volume Boost Toggle: "ஒலியளவு அதிகரிப்பு மாற்றியைக் காட்டு"
+    Swipe Gestures:
+      Fullscreen Brightness: முழுத்திரையில் அதிகபட்ச ஒளிர்வு
+      Left: இடப்புற ஸ்வைப்
+      Right: வலப்புற ஸ்வைப்
+      Disabled: முடக்கப்பட்டது
+      Brightness: ஒளிர்வு
+      Volume: ஒலியளவு
+      Hint: காணொளியின் ஓரத்தில் மேலே அல்லது கீழே ஸ்வைப் செய்யவும்.
+      Unavailable: இயக்கக் கட்டுப்பாடுகளைச் சரிசெய்ய முடியவில்லை.
+    yt-dlp Streaming: "yt-dlp ஸ்ட்ரீமிங்"
+    Continue Playback When Screen Is Locked: 'திரை பூட்டப்பட்டிருக்கும்போதும் இயக்கத்தைத் தொடரவும்'
+    Music Visualizer: இசைக் காட்சிப்படுத்தி
+    Automatically Open Chapters: அத்தியாயங்களைத் தானாகத் திற
+    Caption Appearance:
+      Caption Appearance: வசன வரித் தோற்றம்
+      Captions: வசன வரிகள்
+      Preferred Language: விரும்பும் வசன வரி மொழி
+      Application Language: செயலி மொழி
+      Enable Translations: வசன வரி மொழிபெயர்ப்புகளை இயக்கு
+      Text Color: உரை நிறம்
+      Background Color: பின்னணி நிறம்
+      Background Opacity: பின்னணி ஒளிபுகாமை
+      Font Size: எழுத்துரு அளவு
+      Anchor:
+        Anchor: நிலைப்புள்ளி
+        Top Left: மேல் இடது
+        Top Center: மேல் நடு
+        Top Right: மேல் வலது
+        Bottom Left: கீழ் இடது
+        Bottom Center: கீழ் நடு
+        Bottom Right: கீழ் வலது
+        Center Left: மையம் இடது
+        Center: மையம்
+        Center Right: மையம் வலது
+      Edge Style:
+        Edge Style: விளிம்பு பாணி
+        None: ஏதுமில்லை
+        Outline: வெளிக்கோடு
+        Drop Shadow: விழுநிழல்
+        Raised: உயர்த்தப்பட்டது
+        Depressed: அழுத்தப்பட்டது
+      Reset: வசன வரித் தோற்றத்தை மீட்டமை
+      Default: இயல்புநிலை
+      Text Opacity: உரை ஒளிபுகாமை
+      Font Family:
+        Font Family: எழுத்துருக் குடும்பம்
+        Monospaced Serif: சம அகல செரிஃப்
+        Proportional Serif: விகிதாசார செரிஃப்
+        Monospaced Sans-Serif: சம அகல சான்ஸ்-செரிஃப்
+        Proportional Sans-Serif: விகிதாசார சான்ஸ்-செரிஃப்
+      Colors:
+        White: வெள்ளை
+        Yellow: மஞ்சள்
+        Green: பச்சை
+        Cyan: சியான்
+        Blue: நீலம்
+        Magenta: மெஜந்தா
+        Red: சிவப்பு
+        Black: கருப்பு
+    Default Viewing Mode:
+      Tooltip: பெரும்பாலான இயல்புநிலைப் பார்வைப் பயன்முறைகள் ஒவ்வொரு பார்வை அமர்வின் தொடக்கத்தில் மட்டுமே பயன்படுத்தப்படும். அமர்வின்போது செய்த மாற்றங்கள் அது முடியும் வரை நீடிக்கும். எப்போதும் இயக்கப்படும் பார்வைப் பயன்முறைகள், முந்தைய காணொளியைப் பார்க்கும்போது செய்த மாற்றங்களைப் பொருட்படுத்தாமல், புதிய காணொளிக்கு மாறும்போதெல்லாம் பயன்படுத்தப்படும்.
+    Auto Picture in Picture:
+      Auto Picture in Picture: தானாகப் படத்திற்குள் படம் பயன்முறையை இயக்கு
+      On Tab Change: தாவல்களை மாற்றும்போது
+      On Window Minimize: சாளரத்தைக் குறுக்கும்போது
+      On Window Hide: சாளரம் கவனத்தை இழக்கும்போது அல்லது வேறு சாளரத்திற்கு மாறும்போது
+      Wayland Minimize Unsupported: சாளரத்தைக் குறுக்கியதை Wayland செயலிகளுக்குத் தெரிவிப்பதில்லை. எனவே இந்தத் தூண்டுதல் கிடைக்காது. குறுக்குவதையும் உள்ளடக்கும் "சாளரம் கவனத்தை இழக்கும்போது அல்லது வேறு சாளரத்திற்கு மாறும்போது" என்பதைப் பயன்படுத்தவும்.
+    Scroll Mini Player:
+      Scroll Mini Player: உருளும் சிறிய இயக்கி
+      When Scrolling Down: கீழே உருட்டும்போது சிறிய இயக்கியைத் திரையில் வைத்திரு
+      On All Tabs: தாவல்களை மாற்றும்போது சிறிய இயக்கியைத் திரையில் வைத்திரு
+      On Navigation: காணொளிப் பக்கத்தை விட்டு வெளியேறும்போது தொடர்ந்து இயக்கு
+    Multiply Seek Interval by Playback Rate: நகர்த்தல் இடைவெளியை இயக்க வேகத்தால் பெருக்கு
+    Show Playback Rate Adjusted Timestamp: இயக்க வேகத்திற்கேற்பச் சரிசெய்த நேரத்தைக் காட்டு
+    Use YouTube-style Shorts: YouTube பாணி Shorts-ஐப் பயன்படுத்து
+    Loop Shorts: Shorts-ஐச் சுழற்சியில் இயக்கு
+    Remember Volume: ஒலியளவை நினைவில் கொள்
+    Skip Silence: அமைதியைத் தவிர்
+    Show Skip Silence Toggle: அமைதியைத் தவிர்க்கும் நிலைமாற்றியைக் காட்டு
+    Enable Skip Silence by Default: இயல்பாக அமைதியைத் தவிர்ப்பதை இயக்கு
+    Enable Video Zoom: காணொளிப் பெரிதாக்கலை இயக்கு
+    Enable Seek History: நகர்வு வரலாற்றை இயக்கு
+    Voice-over Translation:
+      Title: குரல்வழி மொழிபெயர்ப்பு
+      Attribution: (Yandex வழங்குகிறது)
+      Enable: குரல்வழி மொழிபெயர்ப்பை இயக்கு
+      Prepare in Background: குரல்வழி மொழிபெயர்ப்புகளைப் பின்னணியில் தயாரிக்கத் தொடங்கு
+      Background Preparation Tooltip: ஆதரிக்கப்படும் காணொளி ஏற்றப்பட்டவுடன், தற்போதைய காணொளியின் ID, கால அளவு மற்றும் தேர்ந்தெடுத்த மொழியை மொழிபெயர்ப்புச் சேவைக்கு அனுப்பும்.
+      Language: குரல்வழி மொழிபெயர்ப்பு மொழி
+      Supported Source Languages: 'ஆதரிக்கப்படும் மூல மொழிகள்: ரஷ்யம், ஆங்கிலம், சீனம், கொரியம், அரபி, பிரெஞ்சு, இத்தாலியம், ஸ்பானியம், ஜெர்மன் மற்றும் ஜப்பானியம்.'
+      Voice Volume: மொழிபெயர்த்த குரலின் ஒலியளவு
+      Original Volume: அசல் ஒலியின் ஒலியளவு
+      Russian: ரஷ்யம்
+      English: ஆங்கிலம்
+      Kazakh: கசாக்
+    Hold to Double Playback Speed: இயக்க வேகத்தை இரட்டிப்பாக்க அழுத்திப் பிடி
+    Use Quick Playback Speed Bar: விரைவு இயக்க வேகப் பட்டையைப் பயன்படுத்து
+    Customize Quick Playback Speed Bar: விரைவு இயக்க வேகப் பட்டையைத் தனிப்பயனாக்கு
+    Quick Playback Speed Bar Manager: விரைவு இயக்க வேகப் பட்டை
+    Add Playback Speed: இயக்க வேகத்தைச் சேர்
+    Reset Quick Playback Speed Bar: இயல்புநிலைகளுக்கு மீட்டமை
+    Playback Speed Name: பெயர்
+    Edit Playback Speed Name: இயக்க வேகப் பெயரைத் திருத்து
+    Use Automatic Playback Speed Name: தானியக்க இயக்க வேகப் பெயரைப் பயன்படுத்து
+    Reorder Playback Speed: இயக்க வேகத்தை மறுவரிசைப்படுத்த இழுக்கவும்
+    Playback Speed: இயக்க வேகம்
+    Parallel Segment Loading: இணையாகத் துண்டுகளை ஏற்றுதல்
+    Screenshot:
+      Mode: திரைப்பிடிப்புப் பயன்முறை
+      Modes:
+        Save To Folder: கோப்புறையில் சேமி
+        Clipboard: இடைநிலைப் பலகைக்கு நகலெடு
+      Legacy Formats: "பழைய வடிவங்கள்"
+      Modern Formats: "நவீன வடிவங்கள்"
+    Rotate Wide Videos to Landscape in Fullscreen: 'முழுத்திரையில் அகலமான காணொளிகளைக் கிடைமட்டமாகச் சுழற்றவும்'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'முழுத்திரையில் நுழைய அல்லது வெளியேற மேலே அல்லது கீழே தேய்க்கவும்'
+    Preload Upcoming Videos: "அடுத்த காணொளிகளை முன்பே ஏற்று"
+    Upcoming Videos to Preload: "முன்பே ஏற்ற வேண்டிய காணொளிகளின் எண்ணிக்கை"
+    Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
+    Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
+    Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
+    Show Swipe to Seek Preview: தேட ஸ்வைப் செய்யும்போது முன்னோட்டத்தைக் காட்டு
+    Enable Google Cast: "Google Cast-ஐ இயக்கு"
+    Sections:
+      Playback: இயக்கம்
+      Autoplay: தானியங்கு இயக்கம்
+      Playback Speed: இயக்க வேகம்
+      Player Controls: பிளேயர் கட்டுப்பாடுகள்
+      Gestures: சைகைகள்
+      Viewing Modes: பார்வை முறைகள்
+      Shorts: Shorts
+      Screenshots: திரைப்பிடிப்புகள்
+    Enable FCast: "FCast-ஐ இயக்கு"
+  Channel Settings:
+    Channel Settings: சேனல் அமைப்புகள்
+    Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
+    Enable Channel Playback Settings: சேனல் இயக்க அமைப்புகளை இயக்கு
+    Auto Save Playback Speed: இயக்க வேக மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Video Quality: வீடியோ தர மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Subtitles State: துணைத்தலைப்பு நிலை மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Volume: ஒலியளவு மாற்றங்களைத் தானாகச் சேமி
+    Manage Saved Channels: சேமித்த சேனல்களை நிர்வகி ({channelCount})
+    Saved Channels: சேமித்த சேனல் அமைப்புகள்
+    Enable Saved Channel Settings Sync: சேமித்த சேனல் அமைப்புகளை ஒத்திசை
+    Disable Saved Channel Settings Sync: சேமித்த சேனல் அமைப்புகளின் ஒத்திசைவை நிறுத்து
+    Search Channels: சேனல்களைத் தேடு
+    No Saved Channels: சேனலுக்கான தனிப்பட்ட அமைப்புகள் இன்னும் சேமிக்கப்படவில்லை
+    No Matching Channels: உங்கள் தேடலுக்குப் பொருந்தும் சேனல்கள் இல்லை
+    Forget Channel: இந்தச் சேனலின் எல்லா அமைப்புகளையும் மற
+    Forget Value: இந்த அமைப்பை மற
+    Add Setting: இந்தச் சேனலுக்கான மற்றொரு அமைப்பை நினைவில் கொள்
+    Add Subscribed Channel: குழுசேர்ந்த சேனலைச் சேர்
+    Video Quality: காணொளித் தரம்
+    Subtitles Enabled: துணைத்தலைப்புகள் இயக்கப்பட்டுள்ளன
+    Volume: ஒலியளவு
+  Download Settings:
+    Download Settings: பதிவிறக்கங்கள்
+    Enable Downloads: பதிவிறக்கங்களை இயக்கு
+    Managed Tools Download Started Template: 'தேவையான வெளிப்புற மென்பொருள் கிடைக்கவில்லை: {tools}. நிர்வகிக்கப்பட்ட நகல்கள் பதிவிறக்கப்படுகின்றன…'
+    Managed Tools Download Finished Template: '{tools} பதிவிறக்கம் முடிந்தது'
+    Managed Tools Update Started Template: '{tools}-க்கான புதுப்பிப்பு கிடைத்தது. பதிவிறக்கப்படுகிறது…'
+    Managed Tools Update Finished Template: '{tools} புதுப்பிப்பு முடிந்தது'
+    Managed Tools Update Available Template: '{tools}-க்கான புதுப்பிப்பு கிடைக்கிறது.'
+    Managed Tools Update Source Notice: "OpenTubeX இதை GitHub-இலிருந்து நேரடியாகப் பதிவிறக்குகிறது, எனவே F-Droid மற்றும் பிற செயலி அங்காடிகள் இதைச் சரிபார்ப்பதில்லை."
+    Update Managed Tools: புதுப்பி
+    Managed Tools Download Error Template: 'நிர்வகிக்கப்பட்ட கருவிகளைப் பதிவிறக்க முடியவில்லை: {errors}'
+    Download Folder: பதிவிறக்கக் கோப்புறை
+    Global Additional yt-dlp Arguments: கூடுதல் yt-dlp வாதங்கள்
+    Concurrent Downloads: ஒரேநேரப் பதிவிறக்கங்கள்
+    Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s)
+    Choose Download Folder: பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடு
+    Download Templates: பதிவிறக்க வார்ப்புருக்கள்
+    Manage Download Templates: பதிவிறக்க வார்ப்புருக்களை நிர்வகி ({templateCount})
+    New Template: புதிய வார்ப்புரு
+    Template Source: திருத்த அல்லது அடிப்படையாகப் பயன்படுத்த வேண்டிய வார்ப்புரு
+    Built-in Template: '{name} (உள்ளமைந்தது)'
+    Custom Template Name: '{name} (தனிப்பயன்)'
+    Create Template Copy: நகலை உருவாக்கு
+    Template Copy Name: '{name} நகல்'
+    Automatic Downloads: தானியக்கப் பதிவிறக்கங்கள்
+    Manage Automatic Downloads: தானியக்கப் பதிவிறக்கங்களை நிர்வகி ({channelCount})
+    Automatic Downloads Description: சந்தா செலுத்திய ஒவ்வொரு சேனலுக்கும் பதிவிறக்க வார்ப்புருவையும் வடிப்பான்களையும் தேர்ந்தெடுக்கவும். சந்தா ஊட்டங்கள் புதுப்பிக்கப்படும்போது பொருந்தும் காணொளிகள் பின்னணியில் பதிவிறங்கும்.
+    Automatic Downloads New Only: சேனலை இயக்கிய பிறகு அதன் அடுத்த புதிய பதிவேற்றத்திலிருந்து தொடங்கும். ஏற்கெனவே உள்ள காணொளிகளும் சேனலின் பழைய பதிவுகளும் பதிவிறக்கப்படாது.
+    Automatic Downloads No Channels: தானியக்கப் பதிவிறக்கங்களை அமைப்பதற்கு முன் ஒரு சேனலுக்குச் சந்தா செலுத்தவும்.
+    No Matching Automatic Download Channels: உங்கள் தேடலுக்குப் பொருந்தும் சேனல்கள் இல்லை.
+    Automatic Downloads Livestreams: நேரலைகள்
+    Minimum Duration Seconds: குறைந்தபட்சக் கால அளவு (விநாடிகள்)
+    Maximum Duration Seconds: அதிகபட்சக் கால அளவு (விநாடிகள்)
+    Minimum File Size MB: குறைந்தபட்சக் கோப்பு அளவு (MB)
+    Maximum File Size MB: அதிகபட்சக் கோப்பு அளவு (MB)
+    Maximum Age Days: அதிகபட்ச வயது (நாட்கள்)
+    Title Includes: தலைப்பில் உள்ளவை
+    Title Excludes: தலைப்பில் இல்லாதவை
+    Title Filter Hint: பல தலைப்புச் சொற்களைக் காற்புள்ளிகளால் பிரிக்கவும். ஒரு காணொளி சேர்க்கப்பட்ட சொற்களில் குறைந்தது ஒன்றுடன் பொருந்த வேண்டும்; விலக்கப்பட்ட சொற்கள் எதனுடனும் பொருந்தக்கூடாது.
+    Automatic Downloads Require Unmetered Network: "அளவிடப்படாத நெட்வொர்க்குகளில் மட்டும்"
+    Automatic Downloads Require Charging: "சார்ஜ் ஆகும்போது மட்டும்"
+  External Software Settings:
+    Create YouTube session: "YouTube அமர்வை உருவாக்கு"
+    YouTube session hint: "தேவைப்பட்டால் உள்நுழைந்து அமர்வைச் சேமிக்கவும். பதிவிறக்கங்கள், இயக்கம் அல்லது வசனங்களுக்கு இதைப் பயன்படுத்த வேண்டுமா என்பதை அமைப்புகளில் தேர்வு செய்யவும்."
+    Use cookies for downloads: "பதிவிறக்கங்களுக்குக் குக்கீகளைப் பயன்படுத்து"
+    YouTube session failed: "YouTube அமர்வைச் சேமிக்க முடியவில்லை."
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe சரிபார்க்கப்படுகின்றன…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe இன்னும் பதிவிறக்கப்படவில்லை. அவற்றைப் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
+    External Software Settings: வெளிப்புற மென்பொருள்
+    yt-dlp Source: yt-dlp மூலம்
+    yt-dlp Channel: yt-dlp சேனல்
+    Sources:
+      System: கணினி (PATH அல்லது தனிப்பயன் பாதை)
+      Managed: OpenTubeX நிர்வகிப்பது
+    Detected Version Template: 'கண்டறிந்த yt-dlp பதிப்பு: {version}'
+    Managed Not Downloaded: yt-dlp இன்னும் பதிவிறக்கப்படவில்லை. அதைப் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
+    System yt-dlp Missing Warning: உங்கள் கணினியில் yt-dlp கிடைக்கவில்லை. அதை நிறுவவும், கீழே தனிப்பயன் பாதையை அமைக்கவும் அல்லது மூலத்தை "OpenTubeX நிர்வகிப்பது" என மாற்றவும்.
+    Download yt-dlp: yt-dlp-ஐப் பதிவிறக்கு
+    Update yt-dlp: yt-dlp-ஐப் புதுப்பி
+    Checking yt-dlp: yt-dlp சரிபார்க்கப்படுகிறது…
+    Downloading yt-dlp: yt-dlp பதிவிறக்கப்படுகிறது…
+    yt-dlp Downloaded Template: yt-dlp {version} பதிவிறக்கப்பட்டது
+    yt-dlp Download Error Template: 'yt-dlp பதிவிறக்கம் தோல்வியடைந்தது: {error}'
+    FFmpeg Source: FFmpeg மூலம்
+    Detected FFmpeg Version Template: 'கண்டறிந்த FFmpeg பதிப்பு: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'கண்டறிந்த FFmpeg/FFprobe பதிப்பு: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg இன்னும் பதிவிறக்கப்படவில்லை. அதைப் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
+    System FFmpeg Missing Warning: உங்கள் கணினியில் FFmpeg கிடைக்கவில்லை. காணொளியையும் ஒலியையும் ஒன்றிணைக்கவும் ஒலியை மாற்றவும் இது தேவை. அதை நிறுவவும், கீழே தனிப்பயன் பாதையை அமைக்கவும் அல்லது மூலத்தை "OpenTubeX நிர்வகிப்பது" என மாற்றவும்.
+    Download FFmpeg: FFmpeg-ஐப் பதிவிறக்கு
+    Update FFmpeg: FFmpeg-ஐப் புதுப்பி
+    Checking FFmpeg: FFmpeg சரிபார்க்கப்படுகிறது…
+    Downloading FFmpeg: FFmpeg பதிவிறக்கப்படுகிறது…
+    FFmpeg Downloaded Template: FFmpeg {version} பதிவிறக்கப்பட்டது
+    FFmpeg Download Error Template: 'FFmpeg பதிவிறக்கம் தோல்வியடைந்தது: {error}'
+    Detected FFprobe Version Template: 'கண்டறிந்த FFprobe பதிப்பு: {version}'
+    FFprobe Managed Not Downloaded: FFprobe இன்னும் பதிவிறக்கப்படவில்லை. அதை FFmpeg உடன் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
+    System FFprobe Missing Warning: உங்கள் கணினியில் FFprobe கிடைக்கவில்லை. பிந்தைய செயலாக்கத்தின்போது ஊடகத்தை ஆய்வு செய்ய இது தேவை. அதை FFmpeg-க்கு அருகில் நிறுவவும் அல்லது மூலத்தை "OpenTubeX நிர்வகிப்பது" என மாற்றவும்.
+    Checking FFprobe: FFprobe சரிபார்க்கப்படுகிறது…
+    Download FFmpeg and FFprobe: FFmpeg மற்றும் FFprobe-ஐப் பதிவிறக்கு
+    Update FFmpeg and FFprobe: FFmpeg மற்றும் FFprobe-ஐப் புதுப்பி
+    Downloading FFmpeg and FFprobe: FFmpeg மற்றும் FFprobe பதிவிறக்கப்படுகின்றன…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg மற்றும் FFprobe {version} பதிவிறக்கப்பட்டன
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg மற்றும் FFprobe பதிவிறக்கம் தோல்வியடைந்தது: {error}'
+    Managed Tool Already Current Template: '{tool} {version} ஏற்கெனவே புதுப்பித்த நிலையில் உள்ளது'
+    Managed Tool Errors:
+      Removed: 'பதிவிறக்கிய கோப்பு அகற்றப்பட்டது, பெரும்பாலும் வைரஸ் தடுப்பு மென்பொருளால்'
+      Unusable: 'பதிவிறக்கிய நிரலை இயக்க முடியவில்லை. வைரஸ் தடுப்பு மென்பொருள் அதைத் தடுக்கலாம், அல்லது அது இந்த அமைப்பை ஆதரிக்காமல் இருக்கலாம்'
+      Release Not Found: 'சமீபத்திய வெளியீட்டைக் கண்டறிய முடியவில்லை'
+      Verification Failed: 'பதிவிறக்கம் அதிகாரப்பூர்வ வெளியீடு என்பதைச் சரிபார்க்க முடியவில்லை'
+      Downgrade: 'பதிவிறக்கிய வெளியீடு நிறுவப்பட்டதை விடப் பழையது'
+      Invalid Archive: 'பதிவிறக்கிய காப்பகம் தவறானது'
+      Rollback Failed: 'புதுப்பிப்பு தோல்வியடைந்தது, முந்தைய பதிப்பை முழுமையாக மீட்டெடுக்க முடியவில்லை'
+    Managed Tool Updates: நிர்வகிக்கப்பட்ட கருவிப் புதுப்பிப்புகள்
+    Update Modes:
+      Automatic: தானாகப் புதுப்பி
+      Ask: புதுப்பிக்கும் முன் கேள்
+      Manual: கைமுறையாக மட்டும் புதுப்பி
+    yt-dlp Executable Path: yt-dlp இயக்கக்கூடிய கோப்பு
+    FFmpeg Executable Path: FFmpeg இயக்கக்கூடிய கோப்பு
+    Restricted Playback Authentication: "yt-dlp குக்கீகள்"
+    Cookie Source: குக்கீ மூலம்
+    Cookie Sources:
+      None: ஏதுமில்லை
+      File: கோப்பு
+      Browser: உலாவி
+    Cookie File: குக்கீ கோப்பு
+    Browser for Cookies: குக்கீகளுக்கான உலாவி
+    Browser Profile: உலாவிச் சுயவிவரம் (விருப்பத்தேர்வு)
+    Browser Profile Placeholder: சுயவிவரப் பெயர் அல்லது பாதை
+    Select Browser: உலாவியைத் தேர்ந்தெடுக்கவும்
+    Always Use Cookies: எப்போதும் குக்கீகளைப் பயன்படுத்து
+    Restricted Playback Authentication Hint: இயல்பாக, வயது வரம்புள்ள அல்லது உறுப்பினர்களுக்கான காணொளியில் "அமைத்த குக்கீகளுடன் முயல்" என்பதைத் தேர்ந்தெடுத்த பிறகே OpenTubeX இந்தக் குக்கீகளை yt-dlp-க்கு அனுப்பும்.
+    Restricted Playback Authentication Warning: Google கணக்குடன் yt-dlp-ஐப் பயன்படுத்துவது தற்காலிக அல்லது நிரந்தரக் கணக்குக் கட்டுப்பாடுகளுக்கு வழிவகுக்கலாம்.
+    Use cookies for subtitles: "வசன வரிகளுக்கு குக்கீகளைப் பயன்படுத்து"
+  Privacy Settings:
+    Internet Connectivity Checks: "இணைய இணைப்புச் சோதனைகள்"
+    Internet Connectivity Checks Tooltip: "இணைய அணுகலைச் சரிபார்க்க GrapheneOS வழங்கும் சேவையகத்திற்கு சிறிய கோரிக்கைகளை அனுப்புகிறது."
+    Automatic History Retention: தானியக்க வரலாற்றுத் தக்கவைப்பு (நாட்கள்)
+    Automatic History Retention Placeholder: நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும்
+    Automatic History Retention Tooltip: வரலாற்றை நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும். ஓர் எண்ணைச் சேமித்தால், பழைய உள்ளீடுகள் இப்போதும் செயலி திறந்திருக்கும் போதும் தானாக நீக்கப்படும்.
+    History Retention Saved: வரலாற்றுத் தக்கவைப்பு சேமிக்கப்பட்டது
+    Invalid History Retention Days: பூஜ்ஜியத்தைவிடப் பெரிய முழு நாள் எண்ணை உள்ளிடவும்
+    Enable Watch Statistics: பார்வைப் புள்ளிவிவரங்களை இயக்கு
+    Week Starts On: வாரம் தொடங்கும் நாள்
+    Cache Video Metadata: மெட்டாதரவு வரலாறு
+    Cache Video Metadata Tooltip: நீங்கள் பார்வையிடும் காணொளிகளுக்கான ஆதரிக்கப்படும் மெட்டாதரவின் எல்லாப் பதிப்புகளையும் வைத்திருக்கும். இதில் தலைப்புகள், சிறுபடங்கள், விளக்கங்கள் அடங்கும். உங்கள் சந்தா ஊட்டங்களில் காட்டப்படும் தலைப்புகளையும் வைத்திருக்கும். மெட்டாதரவு வரலாற்றைச் சேமிப்பது வட்டுப் பயன்பாட்டை அதிகரிப்பதால் இயல்பாக இது முடக்கப்பட்டுள்ளது.
+    Watched Percentage Threshold: பார்த்ததாகக் குறிக்கும் சதவீத வரம்பு
+    Watched Percentage Threshold Tooltip: தேர்ந்தெடுத்த சதவீதத்தை அடைந்து, 2 நிமிடங்களுக்கு மேல் மீதமில்லாதபோது காணொளிகள் பார்த்ததாகக் குறிக்கப்படும். 0%-இல் இயக்கம் தொடங்கும்போதும், 100%-இல் இயக்கம் முடியும் போதும் குறிக்கப்படும்.
+    Clear Video Metadata Cache: காணொளி மெட்டாதரவுத் தேக்ககத்தை அழி
+    Are you sure you want to clear the video metadata cache?: தேக்கப்பட்ட காணொளித் தலைப்புகள், சிறுபடங்கள் மற்றும் விளக்கங்களை அழிக்க விரும்புகிறீர்களா?
+    Failed to clear video metadata cache: காணொளி மெட்டாதரவுத் தேக்ககத்தை அழிக்க முடியவில்லை
+    Video metadata cache has been cleared: காணொளி மெட்டாதரவுத் தேக்ககம் அழிக்கப்பட்டது
+    Video Metadata Cache Size: 'காணொளி மெட்டாதரவுத் தேக்ககம்: {size}'
+  Storage Settings:
+    Storage: சேமிப்பகம்
+    Downloaded Media: கண்காணிக்கப்படும் பதிவிறக்கிய ஊடகம்
+    Storage Breakdown: சேமிப்பக விவரம்
+    Shown Total: காட்டப்பட்ட மொத்தம்
+    Calculating: கணக்கிடப்படுகிறது…
+    Not Available: சரியான அளவு கிடைக்கவில்லை
+    At Least: குறைந்தது {size}
+    Failed To Read Storage: சில சேமிப்பக அளவுகளைப் படிக்க முடியவில்லை
+    Downloaded Media Description: பதிவிறக்க வரலாறு இன்னும் கண்காணிக்கும் காணொளி, ஒலி மற்றும் துணைத்தலைப்புக் கோப்புகள்.
+    Selected Download Folders: பயனர் தேர்ந்தெடுத்த பதிவிறக்கக் கோப்புறைகள்
+    Download History Records: பதிவிறக்க வரலாற்றுப் பதிவுகள்
+    Download History Records Description: '{count} முடிந்த பதிவிறக்கப் பதிவு. இந்தப் பதிவு நிலை மற்றும் கோப்பு இருப்பிடங்களைக் கண்காணிக்கும்; பதிவிறக்கிய ஊடகம் இதில் இல்லை. | {count} முடிந்த பதிவிறக்கப் பதிவுகள். இவை நிலை மற்றும் கோப்பு இருப்பிடங்களைக் கண்காணிக்கும்; பதிவிறக்கிய ஊடகம் இவற்றில் இல்லை.'
+    Clear Download History Records: பதிவிறக்க வரலாற்றுப் பதிவுகளை அழி
+    Clear Download History Confirmation: முடிந்த பதிவிறக்கப் பதிவுகள் அனைத்தையும் அழிக்கவா?
+    Download Files Stay On Disk: பதிவிறக்கிய கோப்புகள் வட்டில் இருக்கும். ஆனால் பதிவிறக்கங்கள் பக்கத்தில் இனி தோன்றாது.
+    Clear Records: பதிவுகளை அழி
+    Replaceable Caches: மீண்டும் உருவாக்கக்கூடிய தேக்ககங்கள்
+    Application Caches: செயலித் தேக்ககங்கள்
+    Browser Caches: உலாவித் தேக்ககங்கள்
+    Browser Caches Hint: Chromium-இன் HTTP, GPU, நிரல், shader, service-worker மற்றும் அகராதித் தேக்ககங்கள்.
+    Clear Android Cache Confirmation: Android உலாவித் தேக்ககத்தை அழிக்கவா?
+    Stored App Data: சேமித்த செயலித் தரவு
+    Included In App Data: மேலே காட்டப்பட்ட செயலித் தரவில் சேர்க்கப்பட்டுள்ளது
+    Browser Runtime Data: உலாவி இயக்கநேரத் தரவு
+    Browser Runtime Data Hint: Chromium-இன் அமர்வு மற்றும் உள்ளகச் சேமிப்பகம், குக்கீகள், தனியுரிமை மற்றும் பிணைய நிலை, செயலிழப்புக் கோப்புகள்.
+    Subscription Feed Cache: சந்தா மற்றும் ஊட்டத் தேக்ககம்
+    Subscription Feed Cache Description: பெறப்பட்ட சந்தாக் காணொளிகள், Shorts, நேரலைகள் மற்றும் இடுகைகளைச் சேமிக்கும். அடுத்த ஊட்டப் புதுப்பிப்பில் OpenTubeX இதை மீண்டும் உருவாக்கும்.
+    Clear Subscription Feed Cache: சந்தா மற்றும் ஊட்டத் தேக்ககத்தை அழி
+    Clear Subscription Feed Cache Confirmation: சந்தா மற்றும் ஊட்டத் தேக்ககத்தை அழிக்கவா?
+    Subscription Feed Cache Effect: புதுப்பிக்கப்படும் வரை சந்தா ஊட்டங்கள் காலியாகத் தோன்றலாம். உங்கள் சந்தாக்களும் சுயவிவரங்களும் மாறாது.
+    Session Search Cache: அமர்வுத் தேடல் தேக்ககம்
+    In Memory: நினைவகத்தில்
+    Session Search Cache Description: 'வேகமாகப் பின்னால் செல்ல {count} தேடல் நினைவகத்தில் தேக்கப்படுகிறது. OpenTubeX மூடப்படும்போது இந்தத் தேக்ககம் கைவிடப்படும். | வேகமாகப் பின்னால் செல்ல {count} தேடல்கள் நினைவகத்தில் தேக்கப்படுகின்றன. OpenTubeX மூடப்படும்போது இந்தத் தேக்ககம் கைவிடப்படும்.'
+    Clear Session Search Cache: அமர்வுத் தேடல் தேக்ககத்தை அழி
+    Clear Session Search Cache Confirmation: அமர்வுத் தேடல் தேக்ககத்தை அழிக்கவா?
+    Session Search Cache Effect: தேக்கப்பட்ட முடிவுப் பக்கங்கள் கைவிடப்படும். சேமித்த தேடல் வரலாறு மாறாது.
+    HTTP Cache: HTTP தேக்ககம்
+    HTTP Cache Description: ஒரே தரவை மீண்டும் பதிவிறக்காமல் தொடர்ந்த கோரிக்கைகளை ஏற்ற, Electron பிணையப் பதில்களை வட்டில் சேமிக்கும். தேவைக்கேற்ப OpenTubeX இந்தத் தேக்ககத்தை மீண்டும் உருவாக்கும்.
+    Managed By Electron: Electron நிர்வகிப்பது
+    Clear HTTP Cache: HTTP தேக்ககத்தை அழி
+    Clear HTTP Cache Confirmation: Electron-இன் HTTP தேக்ககத்தை அழிக்கவா?
+    HTTP Cache Effect: தேக்ககம் மீண்டும் உருவாகும்போது படங்களும் பிற பிணைய வளங்களும் ஒருமுறை மெதுவாக ஏறலாம்.
+    Tab Image Cache: தாவல் சிறுபடங்களும் சேனல் அவதார்களும்
+    Tab Image Cache Description: திறந்த மற்றும் மீட்டெடுத்த தாவல்களின் முன்னோட்டப் படங்களையும் சேனல் அவதார்களையும் சேமிக்கும். தாவல்களைப் பயன்படுத்தும்போது OpenTubeX இவற்றை மீண்டும் உருவாக்கும்.
+    Clear Tab Image Cache: தாவல் படத் தேக்ககத்தை அழி
+    Clear Tab Image Cache Confirmation: தாவல் சிறுபடங்களையும் சேனல் அவதார்களையும் அழிக்கவா?
+    Tab Image Cache Effect: தாவல் படங்கள் சிறிது நேரம் மறையலாம். தாவல்களைப் பயன்படுத்தும்போது அவை மீண்டும் உருவாக்கப்படும்.
+    Playback Caches: இயக்கத் தேக்ககங்கள்
+    Playback Caches Description: செயலி அமர்வுகளுக்கு இடையே yt-dlp ஸ்ட்ரீம் URL-களையும் YouTube இயக்கிக் கோப்புகளையும் சேமிக்கும். URL தேக்ககம் yt-dlp மூலம் பெற்ற ஸ்ட்ரீம்களுக்கு மட்டுமே பொருந்தும்.
+    Playback URL Cache Entry Size: yt-dlp ஸ்ட்ரீம் URL தேக்கக வரம்பு
+    Playback URL Cache Entry Size Tooltip: தேக்கப்படும் ஒவ்வொரு yt-dlp ஸ்ட்ரீம் உள்ளீட்டின் அதிகபட்ச அளவை அமைக்கும். yt-dlp ஸ்ட்ரீம்களுக்கான நிலையான தேக்கத்தை முடக்க 0 MB என அமைக்கவும்.
+    Clear Playback Caches: இயக்கத் தேக்ககங்களை அழி
+    Clear Playback Caches Confirmation: yt-dlp மற்றும் இயக்கித் தேக்ககங்களை அழிக்கவா?
+    Playback Caches Effect: ஸ்ட்ரீம் மற்றும் இயக்கித் தரவு மீண்டும் பெறப்படுவதால் அடுத்த உள்ளக இயக்கக் கோரிக்கைக்கு அதிக நேரமாகலாம்.
+    Clear Cache: தேக்ககத்தை அழி
+    History Data: சேமித்த வரலாறுகள்
+    Video Metadata Description: ஆதரிக்கப்படும் காணொளிகளின் பழைய தலைப்புகள், சிறுபடங்கள் மற்றும் விளக்கங்களைச் சேமிக்கும். நீக்கிய பிறகு பழைய திருத்தங்களை மீண்டும் உருவாக்க முடியாது.
+    Video Metadata Effect: சேமித்த மெட்டாதரவுத் திருத்தங்கள் நிரந்தரமாக நீக்கப்படும். தற்போதைய காணொளி விவரங்களை மீண்டும் பெற முடியும்.
+    Watch History: பார்வை வரலாறும் புள்ளிவிவரங்களும்
+    Watch History Description: பார்த்த காணொளிகளையும் முன்னேற்றத்தையும் பார்வை வரலாறு பதிவு செய்யும். தினசரிப் பார்வை மொத்தங்களைப் பார்வைப் புள்ளிவிவரங்கள் சேமிக்கும். தக்கவைப்பு பார்வை வரலாற்றுக்கு மட்டுமே பொருந்தும்.
+    Clear Watch Statistics: பார்வைப் புள்ளிவிவரங்களை அழி
+    Watch History Effect: பார்த்த காணொளிப் பதிவுகளும் சேமித்த முன்னேற்றமும் நீக்கப்படும். பார்வைப் புள்ளிவிவரங்கள் இருக்கும்.
+    Clear Watch Statistics Confirmation: எல்லாப் பார்வைப் புள்ளிவிவரங்களையும் நீக்கவா?
+    Watch Statistics Effect: தினசரிப் பார்வை மொத்தங்கள் நீக்கப்படும். பார்வை வரலாறு இருக்கும்.
+    Search History: தேடல் வரலாறு
+    Search History Description: நீங்கள் நினைவில் வைத்திருக்கத் தேர்ந்தெடுத்த தேடல்களைச் சேமிக்கும்.
+    Delete Search History: தேடல் வரலாற்றை நீக்கு
+    Delete Search History Confirmation: சேமித்த தேடல் வரலாறு முழுவதையும் நீக்கவா?
+    Search History Effect: உங்கள் முந்தைய தேடல்களிலிருந்து சேமித்த தேடல் பரிந்துரைகள் மறையும். தற்போதைய அமர்வுத் தேக்ககம் இருக்கும்.
+    Other User Data: பிற பயனர் தரவு
+    Other Profile Files: பிற சுயவிவரக் கோப்புகள்
+    Other Profile Files Hint: OpenTubeX இன்னும் அறியாத காப்புநகல்கள், தற்காலிகக் கோப்புகள் மற்றும் சுயவிவர உள்ளீடுகள்.
+    Subscriptions And Profiles: சந்தாக்களும் சுயவிவரங்களும்
+    Subscriptions And Profiles Description: சந்தா செலுத்திய சேனல்கள், சுயவிவரப் பெயர்கள் மற்றும் சுயவிவர உறுப்பினர்களைச் சேமிக்கும்.
+    Subscriptions And Profiles Effect: எல்லாச் சந்தாக்களும் கூடுதல் சுயவிவரங்களும் நிரந்தரமாக நீக்கப்படும். ஊட்டத் தேக்கத் தரவும் அழிக்கப்படும்.
+    Playlists Description: பிளேலிஸ்ட் பெயர்கள், விளக்கங்கள் மற்றும் சேமித்த காணொளிகளைச் சேமிக்கும்.
+    Playlists Effect: ஒவ்வொரு பிளேலிஸ்ட்டும் அதன் சேமித்த காணொளிப் பட்டியலும் நிரந்தரமாக நீக்கப்படும். பதிவிறக்கிய ஊடகக் கோப்புகள் இருக்கும்.
+    Settings And Sessions: அமைப்புகள், தாவல் அமர்வுகள் மற்றும் நினைவூட்டல்கள்
+    Settings And Sessions Description: செயலி விருப்பங்கள், மீட்டெடுக்கக்கூடிய தாவல்கள் மற்றும் நேரலை நினைவூட்டல்களைச் சேமிக்கும். இந்தக் கோப்புகளை ஆய்வு செய்ய அல்லது காப்பெடுக்கச் சுயவிவரக் கோப்புறையைத் திறக்கவும். இந்தப் பக்கம் அவற்றை நீக்காது.
+    Cleanup Complete: சேமிப்பகச் சுத்தம் முடிந்தது
+    Cleanup Failed: சேமிப்பகச் சுத்தம் தோல்வியடைந்தது
+  Subscription Settings:
+    Fetch Feed on Startup: தொடக்கத்தில் ஊட்டத்தைப் பெறு
+    Show New Content Feed: புதிய உள்ளடக்க ஊட்டத்தைக் காட்டு
+    RSS Feeds: RSS ஊட்டங்கள்
+    Enable RSS Feeds: பிற தளங்களுக்கான RSS ஊட்டங்களை இயக்கவும்
+    Manage RSS Feeds: RSS ஊட்டங்களை நிர்வகிக்கவும்
+    Show New Content Indicators: புதிய உள்ளடக்கக் குறிகாட்டிகளைக் காட்டு
+    Show Scheduled Live Streams / Premieres First: திட்டமிட்ட நேரலைகள் / முதல் காட்சிகளை முதலில் காட்டு
+    Auto Refresh Interval: தானியக்கப் புதுப்பிப்பு இடைவெளி
+    Videos Auto Refresh Interval: காணொளித் தானியக்கப் புதுப்பிப்பு இடைவெளி
+    Shorts Auto Refresh Interval: Shorts தானியக்கப் புதுப்பிப்பு இடைவெளி
+    Live Auto Refresh Interval: நேரலைத் தானியக்கப் புதுப்பிப்பு இடைவெளி
+    Posts Auto Refresh Interval: இடுகைத் தானியக்கப் புதுப்பிப்பு இடைவெளி
+    Refresh Subscriptions While App Is Closed: "செயலி மூடியிருக்கும்போது சந்தாக்களைப் புதுப்பி"
+    Notify About New Uploads: புதிய பதிவேற்றங்களைப் பற்றி அறிவி
+    RSS Feeds Auto Refresh Interval: RSS ஊட்டங்களின் தானியக்கப் புதுப்பிப்பு இடைவெளி
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "பார்க்கும் நேரத்தைக் கணக்கிடும் சாதனங்கள்"
+      Break Reminder Action: "இடைவேளைக்கான நேரம் வரும்போது"
+      Grayscale: "சாம்பல் நிறம்"
+      Off: "அணை"
+      Always: "எப்போதும்"
+      During Bedtime: "உறங்கும் நேரத்தில்"
+      After the Daily Limit: "தினசரி வரம்புக்குப் பிறகு"
+      Daily Watch Time Limit: "தினசரிப் பார்க்கும் நேர வரம்பு"
+      Daily Shorts Limit: "தினசரி Shorts வரம்பு"
+      When a Limit Is Reached: "வரம்பை எட்டும்போது"
+      Remind Me: "எனக்கு நினைவூட்டு"
+      Pause Playback: "இயக்கத்தை இடைநிறுத்து"
+      Take a Break Reminder: "இடைவேளை நினைவூட்டல்"
+      Every: "ஒவ்வொரு {duration} இடைவெளியிலும்"
+      Bedtime Reminder: "உறங்கும் நேர நினைவூட்டல்"
+      Bedtime Start: "உறங்கும் நேரத் தொடக்கம்"
+      Bedtime End: "உறங்கும் நேர முடிவு"
+      Wait Until the Video Ends: "காணொளி முடியும் வரை காத்திரு"
+      Silence Upload Notifications at Bedtime: "உறங்கும் நேரத்தில் பதிவேற்ற அறிவிப்புகளை அமைதியாக்கு"
+      Stop Autoplay at Bedtime and After the Daily Limit: "உறங்கும் நேரத்திலும் தினசரி வரம்புக்குப் பிறகும் தானியங்கு இயக்கத்தை நிறுத்து"
+    Hide Popularity Graph: "பிரபலத்தன்மை வரைபடத்தை மறை"
+    Enable Block Lists: "தடைப் பட்டியல்களை இயக்கு"
+    AI Video Summaries: AI காணொளிச் சுருக்கங்கள்
+    Hide: மறை
+    Collapsed: சுருக்கப்பட்டது
+    Expanded: விரிவாக்கப்பட்டது
+    Video Descriptions: காணொளி விளக்கங்கள்
+    Video Description Modes:
+      Hide: மறை
+      Collapsed: சுருக்கப்பட்டது
+      Expanded: விரிவாக்கப்பட்டது
+    Playing Interface Hide Delay: இயக்கத்தின்போது இடைமுகத்தை மறைப்பதற்கான தாமதம்
+    Hide Startup Splash: தொடக்கத் திரையை மறை
+    Hide Header Sync Indicator: பயன்பாட்டுத் தலைப்பில் ஒத்திசைவு காட்டியை மறை
+    Hide Repeat Stats: மீளியக்கப் புள்ளிவிவரங்களை மறை
+    Sections:
+      Digital Wellbeing: "டிஜிட்டல் நலவாழ்வு"
+      Visible While Paused: முழுச் சாளரம் / முழுத்திரையில் இடைநிறுத்தியிருக்கும்போது தெரிபவை
+    Hide Channel Avatars: சேனல் அவதார்களை மறை
+    Shorten View Counts: பார்வை, கருத்து மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கு
+    Hide Live Chat Replay: நேரலை அரட்டை மறுஇயக்கத்தை மறை
+    Hide Home: முகப்பை மறை
+    Disable A-B Repeat: A-B மீளியக்கத்தை முடக்கு
+    Hide End-Screen Annotations: இறுதித் திரைக் குறிப்புகளை மறை
+    Hide End-Screen Recommendations: "இறுதித் திரைப் பரிந்துரைகளை மறை"
+    Hide Paid Promotion Badge: கட்டண விளம்பர அடையாளத்தை மறை
+    Show Player Controls: இயக்கிக் கட்டுப்பாடுகளைக் காட்டு
+    Show Video Title: காணொளித் தலைப்பைக் காட்டு
+    Show Bottom Right Actions Dock: கீழ் வலது செயல் பலகையைக் காட்டு
+    Paused Interface Hide Delay: இடைநிறுத்திய இடைமுகம் மறையும் தாமதம்
+    Add: சேர்
+    Remove: அகற்று
+    Hide Channel Shows: சேனல் "நிகழ்ச்சிகள்" தாவலை மறைக்கவும்
+  Data Settings:
+    Scheduled backups: "திட்டமிட்ட காப்புப்பிரதிகள்"
+    Scheduled backup description: "OpenTubeX திறந்திருக்கும் போது முழுமையான ZIP காப்புப்பிரதிகளைச் சேமிக்கவும். தவறிய காப்புப்பிரதிகள் தொடக்கத்தில் உருவாக்கப்படும். வரம்பு இந்தக் கோப்புறையில் உள்ள திட்டமிட்ட காப்புப்பிரதிகளுக்கு மட்டுமே பொருந்தும்."
+    Choose backup folder: "காப்புப்பிரதி கோப்புறையைத் தேர்ந்தெடு"
+    No backup folder selected: "காப்புப்பிரதி கோப்புறை தேர்ந்தெடுக்கப்படவில்லை"
+    Enable scheduled backups: "திட்டமிட்ட காப்புப்பிரதிகளை இயக்கு"
+    Backup frequency: "காப்புப்பிரதி இடைவெளி"
+    Backups to keep: "வைத்திருக்க வேண்டிய காப்புப்பிரதிகள்"
+    Daily: "தினமும்"
+    Weekly: "வாரந்தோறும்"
+    Every 30 days: "30 நாட்களுக்கு ஒருமுறை"
+    Last scheduled backup: "கடைசி திட்டமிட்ட காப்புப்பிரதி: {date}"
+    No scheduled backup yet: "திட்டமிட்ட காப்புப்பிரதி இன்னும் இல்லை"
+    Scheduled backup failed: "காப்புப்பிரதி தோல்வியடைந்தது. கோப்புறையில் எழுத முடியுமா எனச் சரிபார்க்கவும். ஐந்து நிமிடங்களில் மீண்டும் முயற்சிக்கப்படும்."
+    Import Preview:
+      Title: மாற்றங்களின் முன்னோட்டம்
+      New: "புதியவை: {count}"
+      Existing: "ஏற்கெனவே உள்ளவை: {count}"
+      Skipped: "தவிர்க்கப்பட்டவை: {count}"
+      Unreadable files: "படிக்க முடியாத கோப்புகள்: {count}"
+      Settings effect: பொருந்தும் அமைப்புகள் மாற்றப்படும். தனிப்பட்ட மற்றும் தெரியாத அமைப்புகள் தவிர்க்கப்படும்.
+      Details effect: ஏற்கெனவே உள்ள சந்தாக்கள் அல்லது காணொளிகள் தக்கவைக்கப்படும். இறக்குமதி செய்யப்பட்ட சுயவிவர அல்லது இயக்கப்பட்டியல் விவரங்கள் தற்போதைய விவரங்களை மாற்றும்.
+      Merge effect: ஏற்கெனவே உள்ள தரவு தக்கவைக்கப்பட்டு பொருந்தும் பதிவுகளுடன் இணைக்கப்படும்.
+      Subscriptions effect: ஏற்கெனவே உள்ள சந்தாக்கள் தக்கவைக்கப்படும். புதிய சேனல்கள் மட்டுமே சேர்க்கப்படும்.
+      History replace effect: பொருந்தும் காணொளிகளின் பார்வை வரலாறு மாற்றப்படும். பிற வரலாறு தக்கவைக்கப்படும்.
+    Select export data: "ஏற்றுமதி செய்ய வேண்டிய தரவைத் தேர்ந்தெடுக்கவும்"
+    Export selected data: "தேர்ந்தெடுத்த தரவை ஏற்றுமதி செய்"
+    Complete backup: "முழுமையான காப்புப்பிரதி"
+    Import backup: "காப்புப்பிரதியை இறக்குமதி செய்யவும்"
+    Export backup: "காப்புப்பிரதியை ஏற்றுமதி செய்யவும்"
+    Backup description: "சுயவிவரங்கள், பிளேலிஸ்ட்கள், வரலாறு, புள்ளிவிவரங்கள் மற்றும் பரிமாற்றக்கூடிய அமைப்புகளை ஒரு ஜிப் கோப்பில் சேமிக்கவும். இறக்குமதி செய்வது ஏற்கனவே இந்த சாதனத்தில் உள்ள தரவுகளுடன் அவற்றை ஒன்றிணைக்கிறது."
+    Select backup data: "இறக்குமதி செய்ய தரவைத் தேர்ந்தெடுக்கவும்"
+    Profiles and subscriptions: "சுயவிவரங்கள் மற்றும் சந்தாக்கள்"
+    Backup exported: "காப்புப்பிரதி வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டது"
+    Backup imported: "காப்புப்பிரதி வெற்றிகரமாக இறக்குமதி செய்யப்பட்டது"
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP ஐ இறக்குமதி செய்"
+    Select Takeout data: "இறக்குமதி செய்ய வேண்டிய தரவைத் தேர்ந்தெடுக்கவும்"
+    Import selected data: "தேர்ந்தெடுத்த தரவை இறக்குமதி செய்"
+    No supported Takeout data: "இந்த ZIP இல் ஆதரிக்கப்படும் YouTube தரவு எதுவும் இல்லை."
+    Data And Storage: தரவும் சேமிப்பகமும்
+    Profile Directory: சுயவிவரக் கோப்புறை
+    Open Profile Directory: சுயவிவரக் கோப்புறையைத் திற
+    Settings File: அமைப்புக் கோப்பு
+    Import Settings: அமைப்புகளை இறக்குமதி செய்
+    Export Settings: அமைப்புகளை ஏற்றுமதி செய்
+    Settings Tooltip: OS/பயனருக்கே உரிய அல்லது சோதனை அமைப்புகளை ஏற்றுமதி செய்யவோ இறக்குமதி செய்யவோ முடியாது. எடுத்துக்காட்டு, பதிலாள், வெளிப்புற இயக்கி, திரைப்பிடிப்புக் கோப்புறை...
+    Invalid JSON row, skipping item: வரிசை {row}-இல் தவறான JSON உள்ளது; உருப்படி தவிர்க்கப்படுகிறது
+    All settings have been successfully imported: எல்லா அமைப்புகளும் வெற்றிகரமாக இறக்குமதி செய்யப்பட்டன
+    All settings have been successfully exported: எல்லா அமைப்புகளும் வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டன
+    Setting object has insufficient data, skipping item: அமைப்புப் பொருளில் போதிய தரவு இல்லை; உருப்படி தவிர்க்கப்படுகிறது
+    Unknown setting key: 'அறியாத அமைப்புச் சாவி: {key}'
+    Non-transferable setting key: 'மாற்ற முடியாத அமைப்புச் சாவி: {key}'
+    Import subscriptions formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube காப்புநகல் அல்லது FreeTube ஏற்றுமதி (.json)'
+    Import history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube காப்புநகல் (.json)'
+    Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "சேனல் இயக்க வேகங்கள்"
+    Import channel playback speeds: "சேனல் இயக்க வேகங்களை இறக்குமதி செய்"
+    Channel playback speeds file: "சேனல் இயக்க வேகக் கோப்பு"
+    Import channel playback speeds formats: "ஆதரிக்கப்படும் வடிவங்கள்: {script} பயனர் ஸ்கிரிப்ட் சேமிப்பகம் (.json)"
+    Invalid channel playback speeds file: "இந்தக் கோப்பில் சேனல் இயக்க வேகங்கள் எதுவும் கிடைக்கவில்லை"
+    Channel playback speeds imported: "{count} சேனலின் இயக்க வேகம் இறக்குமதி செய்யப்பட்டது | {count} சேனல்களின் இயக்க வேகங்கள் இறக்குமதி செய்யப்பட்டன"
+    Channels not found: "{count} சேனலைக் கண்டறிய முடியவில்லை | {count} சேனல்களைக் கண்டறிய முடியவில்லை"
+  Sync Settings:
+    Revoke Session Tabs Warning: "இந்தச் சாதனத்தின் ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகளும் நீக்கப்படும்."
+    Revoke Session Partial Failure: "ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகள் நீக்கப்பட்டன, ஆனால் அணுகல் ரத்துசெய்யப்பட்டதை உறுதிப்படுத்த முடியவில்லை. அணுகலை ரத்துசெய்ய மீண்டும் முயற்சிக்கவும்."
+    Tab Sync Revocation Pending: "இந்த உள்நுழைவின் அணுகல் ரத்து நிலுவையில் உள்ளதால் தாவல் ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது. ஒத்திசைவு அமைப்புகளில் அணுகல் ரத்துசெய்தலை மீண்டும் முயற்சிக்கவும்."
+    Show More: "மேலும் காட்டு"
+    Watch stats: "பார்வைப் புள்ளிவிவரங்கள்"
+    Syncing statistics: பார்வை புள்ளிவிவரங்கள் ஒத்திசைக்கப்படுகின்றன…
+    Sync Automatically: "தானாக ஒத்திசை"
+    Activity: "கணக்குச் செயல்பாடு"
+    No Activity: "சமீபத்திய செயல்பாடு இல்லை"
+    Clear Activity: "இந்தச் சாதனத்தில் அழி"
+    Clear Activity Hint: "இந்தச் சாதனத்தில் உள்ள கணக்கின் தற்போதைய செயல்பாட்டை மறைக்கவும். சேவையகத்திலும் பிற சாதனங்களிலும் உள்ள செயல்பாடு மாறாது. புதிய செயல்பாடு தொடர்ந்து தோன்றும்."
+    Setting Changed: "{device}, {setting} என்பதை {value} ஆக மாற்றியது"
+    Item Updated: "{device}, {setting} என்பதைப் புதுப்பித்தது"
+    Item Added: "{device} {item} என்பதை {setting} இல் சேர்த்தது"
+    Item Removed: "{device} {item} என்பதை {setting} இலிருந்து நீக்கியது"
+    Item Renamed: "{device} {item} என்பதன் பெயரை {value} என மாற்றியது"
+    Saved Playlists: "சேமித்த பிளேலிஸ்ட்கள்"
+    No Feed Types: "ஏதுமில்லை"
+    Open On Device: "வேறொரு சாதனத்தில் திற"
+    Video Sent: "காணொளி அனுப்பப்பட்டது. இணையத்தில் இல்லாத சாதனங்கள் 24 மணி நேரத்திற்குள் மீண்டும் இணைந்தால் அதைப் பெறும்."
+    Video Received: "பெறப்பட்ட காணொளி: {title}"
+    Previous Auto Sync Notice: "தானியங்கியான ஒத்திசைவு முடக்கப்பட்டுள்ளது. தரவு இழப்பைத் தடுக்க முந்தைய பதிப்பு அதை முடக்கியிருக்கலாம்."
+    Enable Automatic Sync: "தானியங்கியான ஒத்திசைவை இயக்கு"
+    Destructive Sync Blocked: "தரவு இழப்பைத் தடுக்க ஒத்திசைவு நிறுத்தப்பட்டது. தானியங்கி ஒத்திசைவு முடக்கப்பட்டுள்ளது. நீக்கங்களைச் சரிபார்க்க ஒத்திசைவு அமைப்புகளைத் திறக்கவும்."
+    Turn Flashlight On: கைவிளக்கை இயக்கு
+    Turn Flashlight Off: கைவிளக்கை அணை
+    Devices: "சாதனங்கள்"
+    Devices Hint: "இந்த ஒத்திசைவு கணக்கை அணுகக்கூடிய சாதனங்களை மதிப்பாய்வு செய்யவும்."
+    Change Password: "கடவுச்சொல்லை மாற்று"
+    Refresh Devices: "சாதனங்களைப் புதுப்பி"
+    Current Device: "தற்போதைய சாதனம்"
+    Revoke Session: "அணுகலை ரத்துசெய்"
+    Session Created: "உருவாக்கப்பட்டது"
+    Last Active: "கடைசியாக செயலில் இருந்தது"
+    Session Expires: "காலாவதியாகும்"
+    Unknown Device: "அறியப்படாத சாதனம்"
+    Operating System: "இயக்க முறைமை"
+    Rename Device: "சாதனத்தின் பெயரை மாற்று"
+    Save Device Name: "பெயரைச் சேமி"
+    Device Name Invalid: "சாதனப் பெயர்கள் அதிகபட்சம் 80 எழுத்துகளைக் கொண்டிருக்கலாம்; கட்டுப்பாட்டு எழுத்துகள் அனுமதிக்கப்படாது."
+    Device Renamed: "சாதனத்தின் பெயர் மாற்றப்பட்டது"
+    Revoke Session Confirmation: "இந்த அமர்வை ரத்துசெய்யவா?"
+    Revoke Current Session Warning: "இந்த அமர்வை ரத்துசெய்தால் இந்தச் சாதனம் ஒத்திசைவு கணக்கிலிருந்து துண்டிக்கப்படும்."
+    Revoke Session Warning: "{device} இந்த ஒத்திசைவு கணக்கிற்கான அணுகலை இழக்கும்."
+    Confirm Revoke Session: "அமர்வை ரத்துசெய்"
+    Session Revoked: "அமர்வு ரத்துசெய்யப்பட்டது"
+    Change Password Warning: "கடவுச்சொல்லை மாற்றினால் மற்ற எல்லாச் சாதனங்களிலிருந்தும் வெளியேற்றப்படும். இந்தச் சாதனம் இணைந்தே இருக்கும்."
+    Current Password: "தற்போதைய கடவுச்சொல்"
+    New Password: "புதிய கடவுச்சொல்"
+    Confirm New Password: "புதிய கடவுச்சொல்லை உறுதிப்படுத்து"
+    Save New Password: "புதிய கடவுச்சொல்லைச் சேமி"
+    Account Management Failed: "ஒத்திசைவு கணக்கு விவரங்களை ஏற்ற முடியவில்லை."
+    All Password Fields Required: "அனைத்து கடவுச்சொல் புலங்களையும் நிரப்பவும்."
+    New Password Too Short: "புதிய கடவுச்சொல் குறைந்தது 8 எழுத்துகளைக் கொண்டிருக்க வேண்டும்."
+    New Passwords Do Not Match: "புதிய கடவுச்சொற்கள் பொருந்தவில்லை."
+    Password Changed: "கடவுச்சொல் மாற்றப்பட்டது. மற்ற சாதனங்கள் வெளியேற்றப்பட்டன."
+    Sync Settings: ஒத்திசைவு
+    Enable Sync: ஒத்திசைவை இயக்கு
+    Privacy Passphrase: தனியுரிமைக் கடவுச்சொற்றொடர்
+    Privacy Passphrase Hint: உங்கள் கணக்குக் கடவுச்சொல்லிலிருந்து வேறான கடவுச்சொற்றொடரைப் பயன்படுத்தவும். இது இந்தச் சாதனத்தை விட்டு வெளியேறாது; எல்லாச் சாதனங்களிலும் தேவைப்படும். இதை இழந்தால் மறையாக்கப்பட்ட ஒத்திசைவுத் தரவை மீட்க முடியாது.
+    Privacy Policy: இந்தச் சேவையகத்தின் தனியுரிமைக் கொள்கை
+    Enhanced Privacy Enabled: மேம்பட்ட தனியுரிமை இயக்கப்பட்டுள்ளது. சேவையகம் மறையாக்கப்பட்ட ஒத்திசைவுத் தரவை மட்டுமே சேமிக்கும்.
+    Enhanced Privacy Unsupported: 'எச்சரிக்கை: இந்தச் சேவையகம் மேம்பட்ட தனியுரிமையை ஆதரிக்காது. ஒத்திசைத்த தரவை அதன் இயக்குநர் பார்க்க முடியும்.'
+    Description: 'OpenTubeX அல்லது LibreTube ஒத்திசைவு சேவையகத்துடன் சந்தாக்கள், சுயவிவரங்கள், இயக்கப்பட்டியல்கள், பார்த்த வரலாறு மற்றும் ஆதரிக்கப்படும் அமைப்புகளை ஒத்திசைக்கவும். LibreTube சேவையகங்கள் எல்லா ஒத்திசைவு அம்சங்களையும் ஆதரிக்காமல் இருக்கலாம்.'
+    Server URL: ஒத்திசைவு சேவையக URL
+    Checking Server: ஒத்திசைவுச் சேவையகம் சரிபார்க்கப்படுகிறது…
+    Server Unavailable: இந்த ஒத்திசைவுச் சேவையகத்துடன் இணைக்க முடியவில்லை. URL-ஐச் சரிபார்த்து மீண்டும் முயலவும்.
+    Username: பயனர்பெயர்
+    Log In: உள்நுழை
+    Register: பதிவுசெய்
+    Pair Another Device: மற்றொரு சாதனத்தை இணை
+    Pair With Existing Device: ஏற்கெனவே உள்ள சாதனத்துடன் இணை
+    Device Name: சாதனப் பெயர்
+    This Device: இந்தச் சாதனம்
+    Device Name Required: இந்தச் சாதனத்திற்கான பெயரை உள்ளிடவும்.
+    Pairing Device Name Hint: இந்தக் கோரிக்கையை ஏற்கும் சாதனத்தில் நீங்கள் அடையாளம் காணக்கூடிய பெயரைத் தேர்ந்தெடுக்கவும்.
+    Create Pairing Code: இணைப்புக் குறியீட்டை உருவாக்கு
+    Creating Pairing Code: பாதுகாப்பான இணைப்புக் குறியீடு உருவாக்கப்படுகிறது…
+    Pairing QR Alt: '{device}-க்கான இணைப்பு QR குறியீடு'
+    Scan Pairing Code: ஏற்கெனவே இணைந்த சாதனத்தில் "மற்றொரு சாதனத்தை இணை" என்பதைத் திறந்து இந்தக் குறியீட்டை வருடவும்.
+    Pairing Code: இணைப்புக் குறியீடு
+    Use Text Pairing Code: பதிலாக உரைக் குறியீட்டைப் பயன்படுத்து
+    Show QR Code: QR குறியீட்டைக் காட்டு
+    Text Pairing Code Hint: இந்தக் குறியீட்டை ஏற்கெனவே உள்ள சாதனத்திற்கு நகலெடுக்கவும். இதில் இணைப்பு ரகசியம் உள்ளது. எனவே இணைத்த பிறகு இடைநிலைப் பலகை வரலாற்றிலிருந்து இதை அழிக்கவும்.
+    Pairing QR Warning: இந்தக் கோரிக்கையை ஏற்கவுள்ள நம்பகமான, ஏற்கெனவே இணைந்த சாதனத்திற்கு மட்டும் இந்தக் குறியீட்டைக் காட்டவும். இது இரண்டு நிமிடங்களில் காலாவதியாகும்.
+    Pairing Expires: இணைப்புக் குறியீடு {time}-க்கு காலாவதியாகும்.
+    Verifying Pairing: மாற்றிய தனியுரிமைச் சாவி சரிபார்க்கப்படுகிறது…
+    Completing Pairing: சாதன இணைப்பு முடிக்கப்படுகிறது…
+    Compare Pairing Codes: இணைப்புக் குறியீடுகளை ஒப்பிடு
+    Pairing Code Match Hint: இந்தக் குறியீடு ஏற்கெனவே உள்ள சாதனத்தின் குறியீட்டுடன் பொருந்தினால் மட்டும் உறுதிப்படுத்தவும்.
+    Pairing Codes Match: குறியீடுகள் பொருந்துகின்றன
+    Pairing Approval Code Hint: இந்தச் சாளரத்தைத் திறந்தபடி வைத்து, இந்தக் குறியீட்டைப் புதிய சாதனத்துடன் ஒப்பிடவும். குறியீடுகள் வேறுபட்டால் புதிய சாதனம் தொடரக்கூடாது.
+    Pairing Scan Hint: நீங்கள் சேர்க்கும் சாதனத்தில் காட்டப்படும் இணைப்புக் குறியீட்டை வருடவும்.
+    Enter Pairing Code: குறியீட்டைக் கைமுறையாக உள்ளிடு
+    Pairing Code Entry Hint: நீங்கள் சேர்க்கும் சாதனத்தில் காட்டப்படும் இணைப்புக் குறியீட்டை ஒட்டவும்.
+    Check Pairing Code: குறியீட்டைச் சரிபார்
+    Scan QR Code: QR குறியீட்டை வருடு
+    Waiting For Pairing Code: இணைப்புக் குறியீட்டிற்காகக் காத்திருக்கிறது…
+    Checking Pairing Request: இணைப்புக் கோரிக்கை சரிபார்க்கப்படுகிறது…
+    Approving Pairing Request: தனியுரிமைச் சாவி மறையாக்கப்பட்டு அனுப்பப்படுகிறது…
+    Pairing Approval Warning: நீங்கள் சேர்க்கும் சாதனத்தில் இந்தக் கோரிக்கையைப் பார்க்க முடிந்தால் மட்டும் ஏற்கவும். இணைப்பது கணக்கு அணுகலை வழங்கி, தனியுரிமைச் சாவியை மாற்றும்.
+    Approve Pairing: இணைப்பை ஏற்றுக்கொள்
+    Try Again: மீண்டும் முயல்
+    Scan Again: மீண்டும் வருடு
+    Camera Unavailable: OpenTubeX-ஆல் கேமராவை அணுக முடியவில்லை. கேமரா அனுமதியைச் சரிபார்க்கவும் அல்லது இணைப்புக் குறியீட்டைக் கைமுறையாக உள்ளிடவும்.
+    Pairing Unsupported: இந்த ஒத்திசைவுச் சேவையகம் பாதுகாப்பான சாதன இணைப்பை ஆதரிக்காது.
+    Pairing Failed: சாதன இணைப்பு தோல்வியடைந்தது. புதிய குறியீட்டுடன் மீண்டும் முயலவும்.
+    Pairing Request Changed: இணைப்புக் கோரிக்கை மாறிவிட்டது, காலாவதியாகிவிட்டது அல்லது ஏற்கெனவே பயன்படுத்தப்பட்டது. புதிய குறியீட்டை உருவாக்கவும்.
+    Pairing Server Mismatch: இந்தக் குறியீடு வேறொரு ஒத்திசைவுச் சேவையகத்திற்குரியது.
+    Pairing Verification Unavailable: மாற்றிய சாவியைச் சரிபார்க்க மறையாக்கப்பட்ட ஒத்திசைவுத் தொகுப்பு எதுவும் இல்லை. ஏற்கெனவே உள்ள சாதனத்தை ஒத்திசைத்து, மீண்டும் முயலவும்.
+    Pairing Completed: சாதன இணைப்பு முடிந்தது
+    Pairing Approved: சாதன இணைப்பு ஏற்கப்பட்டது
+    Use Pairing Invite: இணைந்த சாதனத்தின் குறியீட்டைப் பயன்படுத்து
+    Show Pairing Invite: இணைப்புக் குறியீட்டைக் காட்டு
+    Scan Pairing Invite: நீங்கள் சேர்க்கும் சாதனத்தில் "ஏற்கெனவே உள்ள சாதனத்துடன் இணை" என்பதைத் திறந்து, "இணைந்த சாதனத்தின் குறியீட்டைப் பயன்படுத்து" என்பதைத் தேர்ந்தெடுத்து, இந்தக் குறியீட்டை வருடவும்.
+    Pairing Invite QR Alt: நீங்கள் சேர்க்கும் சாதனத்துக்கான இணைப்பு QR குறியீடு
+    Pairing Invite Text Hint: இந்தக் குறியீட்டை நீங்கள் சேர்க்கும் சாதனத்துக்கு நகலெடுக்கவும். இதன் மூலம் ஒரு சாதனம் உங்கள் கணக்கை அணுகக் கோர முடியும், எனவே இணைத்த பிறகு இதை இடைநிலை வரலாற்றிலிருந்து அழிக்கவும்.
+    Pairing Invite Warning: இந்தக் குறியீட்டை நீங்கள் சேர்க்கும் சாதனத்துக்கு மட்டும் காட்டவும். அதன் கோரிக்கையை இந்தச் சாதனத்தில் நீங்கள் இன்னும் ஏற்க வேண்டும்.
+    Pairing Invite Scan Hint: இணைந்த சாதனத்தில் காட்டப்படும் இணைப்புக் குறியீட்டை வருடவும்.
+    Pairing Invite Entry Hint: இணைந்த சாதனத்தில் காட்டப்படும் இணைப்புக் குறியீட்டை ஒட்டவும்.
+    Pairing Invite Code Hint: இணைந்த சாதனம் இந்தக் குறியீட்டைக் காட்டினால் மட்டும் அதில் கோரிக்கையை ஏற்கவும். பின்னர் இணைப்பு தானாக நிறைவடையும்.
+    Pairing Invite Approval Hint: நீங்கள் சேர்க்கும் சாதனம் இந்தக் குறியீட்டைக் காட்டினால் மட்டும் ஏற்கவும்.
+    Pairing Invite Approved: இணைப்பு ஏற்கப்பட்டது. புதிய சாதனம் இணைப்பைத் தானாக நிறைவு செய்யும்.
+    Disconnect: இணைப்பைத் துண்டி
+    Delete Account: ஒத்திசைவுக் கணக்கை நீக்கு
+    Delete Account Confirmation: ஒத்திசைவுக் கணக்கை நீக்கவா?
+    Delete Account Warning: இது உங்கள் ஒத்திசைவுக் கணக்கையும் இந்தச் சேவையகத்தில் சேமித்த எல்லாத் தரவையும் நிரந்தரமாக நீக்கும். உங்கள் உள்ளக OpenTubeX தரவு நீக்கப்படாது.
+    Confirm Delete Account: கணக்கை நீக்கு
+    Password Required: கடவுச்சொல் தேவை
+    Account Deleted: ஒத்திசைவுக் கணக்கு நீக்கப்பட்டது
+    Connected as: '{username} ஆக இணைக்கப்பட்டுள்ளது'
+    Profiles: சுயவிவரங்கள்
+    Open Tabs: திறந்த தாவல்களும் அமர்வும்
+    Disable Setting Sync: இந்த அமைப்பின் ஒத்திசைவை நிறுத்து
+    Enable Setting Sync: இந்த அமைப்பை ஒத்திசை
+    Sync Now: இப்போது ஒத்திசை
+    Downloading encrypted data: மறையாக்கப்பட்ட ஒத்திசைவுத் தரவு பதிவிறக்கப்படுகிறது…
+    Syncing subscriptions: சந்தாக்கள் ஒத்திசைக்கப்படுகின்றன…
+    Syncing playlists: பிளேலிஸ்ட்கள் ஒத்திசைக்கப்படுகின்றன…
+    Syncing history: பார்வை வரலாறு ஒத்திசைக்கப்படுகிறது…
+    Syncing profiles: சுயவிவரங்கள் ஒத்திசைக்கப்படுகின்றன…
+    Syncing open tabs: திறந்த தாவல்களும் அமர்வும் ஒத்திசைக்கப்படுகின்றன…
+    Syncing settings: அமைப்புகள் ஒத்திசைக்கப்படுகின்றன…
+    Uploading encrypted data: மறையாக்கப்பட்ட ஒத்திசைவுத் தரவு பதிவேற்றப்படுகிறது…
+    Finishing sync: ஒத்திசைவு முடிக்கப்படுகிறது…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'கடைசியாக ஒத்திசைத்தது: {date}'
+    History not supported: இந்தச் சேவையகப் பதிப்பு பார்வை வரலாற்று ஒத்திசைவை ஆதரிக்காது.
+    Settings not supported: இந்தச் சேவையகப் பதிப்பு அமைப்பு ஒத்திசைவை ஆதரிக்காது.
+    Sync completed: ஒத்திசைவு முடிந்தது
+    Sync failed: 'ஒத்திசைவு தோல்வியடைந்தது: {error}'
+    Data Loss Confirmation: தரவை அழிக்கும் ஒத்திசைவை உறுதிப்படுத்தவா?
+    Data Loss Warning: சேவையக நிலை, முன்பு ஒத்திசைத்த {previous} {collection} உருப்படிகளில் {deleted} உருப்படிகளை நீக்கும். சேவையக இடமாற்றம் அல்லது மீட்டமைப்பு தோல்வியடைந்ததை இது குறிக்கலாம். இந்த நீக்கம் வேண்டுமென்றே செய்யப்படுவதோடு உங்களிடம் காப்புநகல் இருந்தால் மட்டும் தொடரவும்.
+    Confirm Data Loss: நீக்கித் தொடர்
+    Use Shared Tabs: 'சாதனங்கள் முழுவதும் ஒரே பகிரப்பட்ட தாவல் தொகுப்பைப் பயன்படுத்தவும்'
+    Shared Tabs Warning: 'இந்தச் சாதனத்தில் திறந்திருக்கும் தாவல்கள் பகிரப்பட்ட தொகுப்பாக மாறும். மற்ற சாதனங்கள் ஒத்திசைக்கும்போது தங்கள் திறந்த தாவல்களை இந்தத் தொகுப்பால் மாற்றும்; வெவ்வேறு சாதனங்களின் தாவல்கள் ஒன்றிணைக்கப்படாது.'
+    Tabs From Other Devices: 'பிற சாதனங்களின் தாவல்கள்'
+    Device Tab Session: '{platform} · {count} தாவல்கள்'
+    Mobile Device: 'கைப்பேசி'
+    Desktop Device: 'கணினி'
+    Open All Tabs: 'எல்லா தாவல்களையும் திறக்கவும்'
+    Open All Tabs Confirmation: "எல்லா தாவல்களையும் திறக்கவா?"
+    Server Update Required: "மறையாக்கப்பட்ட நேரடி ஒத்திசைவை ஆதரிக்க இந்தச் சேவையகத்தைப் புதுப்பிக்கவும்."
+  Proxy Settings:
+    IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரல்
+    Select IP Block Recovery Script File: IP தடுப்பு மீட்பு நிரலாக்கக் கோப்பைத் தேர்ந்தெடு
+    Running IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கம் இயங்குகிறது
+    IP block recovery script failed: 'IP தடுப்பு மீட்பு நிரலாக்கம் தோல்வியடைந்தது (வெளியேற்றக் குறியீடு: {exitCode})'
+    IP block recovery script finished: IP தடுப்பு மீட்பு நிரலாக்கம் முடிந்தது
+    Reloading video after IP block recovery: IP தடுப்பு மீட்புக்குப் பிறகு காணொளி மீண்டும் ஏற்றப்படுகிறது
+    Failed to select IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கத்தைத் தேர்ந்தெடுக்க முடியவில்லை
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "விலக்கப்பட்ட சேனல்கள்"
+      Tooltip: "அந்தச் சேனலின் காணொளிகளில் SponsorBlock பகுதிகள் தவிர்க்கப்படாமல் இருக்க சேனல் ID-ஐ உள்ளிடவும். ID எழுத்து வடிவத்துடன் துல்லியமாகப் பொருந்த வேண்டும்."
+    Enable SponsorBlock Submission: SponsorBlock சமர்ப்பிப்பை இயக்கு
+    SponsorBlock Private User ID (optional): தனிப்பட்ட பயனர் ID (விருப்பம்)
+    SponsorBlock Private User ID Tooltip: உலாவி நீட்சியிலிருந்து தனிப்பட்ட SponsorBlock பயனர் ID-ஐ ஒட்டவும். செயலி உருவாக்கிய ID-ஐப் பயன்படுத்த இதைக் காலியாக விடவும்.
+    Generated SponsorBlock User ID: உருவாக்கிய SponsorBlock பயனர் ID
+    Generated SponsorBlock User ID Tooltip: செயலி உருவாக்கிய இந்த SponsorBlock பயனர் ID-ஐ உலாவி நீட்சியிலும் மற்றொரு கணினியில் செயலியைப் பயன்படுத்தும்போதும் பயன்படுத்தலாம்.
+    Reveal Generated User ID: உருவாக்கிய பயனர் ID-ஐக் காட்டு
+    Generated SponsorBlock User ID Copy Button: உருவாக்கிய SponsorBlock பயனர் ID-ஐ நகலெடு
+    Generated SponsorBlock User ID Copied: உருவாக்கிய SponsorBlock பயனர் ID இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
+    Skip notification timeout: தவிர்ப்பு அறிவிப்பு மறையும் நேரம்
+    Custom Color: தனிப்பயன் நிறம்
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike-ஐ இயக்கு
+    Return YouTube Dislike Url: API URL
+  Parental Control Settings:
+    Disable Channel Links: சேனல் இணைப்புகளை முடக்கு
+  Password Dialog:
+    Incorrect Password: தவறான கடவுச்சொல்
+    Unlock: பூட்டைத் திற
+    Unlocking: பூட்டு திறக்கப்படுகிறது…
+  Search Settings: அமைப்புகளைத் தேடு
+  No Settings Found: அமைப்புகள் எதுவும் கிடைக்கவில்லை
+  Experimental Settings:
+    Disable Hardware Acceleration: வன்பொருள் முடுக்கத்தை முடக்கு
+  Interface Customizer:
+    Customize Interface: "இடைமுகத்தைத் தனிப்பயனாக்கு"
+    Preview: "முன்னோட்டம்"
+    Player: "இயக்கி"
+    Desktop: "கணினி"
+    Mobile: "மொபைல்"
+    Playing: "இயங்குகிறது"
+    Player Menu: "இயக்கி பட்டியல்"
+    Fullscreen: "முழுத்திரை"
+    Paused: "இடைநிறுத்தப்பட்டது"
+    Controls: "கட்டுப்பாடுகள்"
+    Example Video Title: "மாதிரி காணொளி"
+    Resolution: "தெளிவுத்திறன்"
+    Loop: "மீண்டும் இயக்கு"
+    Off: "அணை"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: தரமற்ற AI உள்ளடக்க சேனல்களை மறை
+    Hide AI Slop Channels Tooltip: சமூகம் பராமரிக்கும் AiSList தடுப்புப் பட்டியலில் (aisloplist.com) உள்ள சேனல்களைத் தேடல் முடிவுகள், டிரெண்டிங் மற்றும் பரிந்துரைகளிலிருந்து மறைக்கிறது, மேலும் அதன் எச்சரிக்கைப் பட்டியலில் உள்ள சேனல்களின் காணொளிகளுக்குக் குறியிடுகிறது. சந்தாக்கள் பாதிக்கப்படாது. பட்டியல்கள் நாளொன்றுக்கு ஒருமுறை GitHub இலிருந்து பதிவிறக்கப்படுகின்றன, மேலும் உள்ளக பநிஇ மூலம் ஏற்றப்பட்ட முடிவுகளுக்கு மட்டுமே பொருந்தும்.
+    Downloading: பட்டியல்கள் பதிவிறக்கப்படுகின்றன…
+    Failed to Download: பட்டியல்களைப் பதிவிறக்க முடியவில்லை
+    Loaded Status: "தடுக்கப்பட்ட சேனல்கள்: {blocked} · குறிக்கப்பட்ட சேனல்கள்: {warned} · புதுப்பிக்கப்பட்டது: {date}"
+Tutorial:
+  Skip: தவிர்
+  Next: அடுத்து
+  Finish: முடி
+  Welcome:
+    Title: OpenTubeX-க்கு வரவேற்கிறோம்
+    Description: செயலியைப் பயன்படுத்தத் தொடங்க உதவும் சில கட்டுப்பாடுகள் இதோ.
+  Navigation:
+    Title: உங்கள் நூலகம் எப்போதும் அருகில்
+    Description: சந்தாக்கள், பிளேலிஸ்ட்கள், வரலாறு போன்றவற்றை அடைய வழிசெலுத்தலைப் பயன்படுத்தவும்.
+  Search:
+    Title: தேடவும் அல்லது இணைப்பை ஒட்டவும்
+    Description: காணொளிகளையும் சேனல்களையும் தேடலாம் அல்லது ஆதரிக்கப்படும் காணொளி URL-ஐ நேரடியாகத் தேடல் புலத்தில் ஒட்டலாம்.
+  Tabs:
+    Title: பக்கங்களைத் தாவல்களில் திறந்து வைத்திருங்கள்
+    Description: இருந்த இடத்தை இழக்காமல் ஒரே நேரத்தில் பல பக்கங்களைத் திறக்கலாம். உங்கள் தளவமைப்பில் தாவல்களுக்கு ஏற்ற இடத்தைத் தேர்ந்தெடுக்கவும்.
+  Quick Settings:
+    Title: உங்கள் விருப்பப்படி அமைத்துக்கொள்ளுங்கள்
+    Description: அலங்காரத்தையும் இயல்புநிலைக் காணொளித் தரத்தையும் தேர்ந்தெடுக்கவும். இவற்றையும் பிற விருப்பங்களையும் எப்போது வேண்டுமானாலும் சுயவிவர மெனுவிலிருந்து மாற்றலாம். சுயவிவரங்களை மாற்ற அதை வலது கிளிக் செய்யவும்.
+    Touch Description: அலங்காரத்தையும் இயல்புநிலைக் காணொளித் தரத்தையும் தேர்ந்தெடுக்கவும். இவற்றையும் பிற விருப்பங்களையும் எப்போது வேண்டுமானாலும் சுயவிவர மெனுவிலிருந்து மாற்றலாம். சுயவிவரங்களை மாற்ற அதை நீண்ட நேரம் அழுத்தவும்.
+  Import Data:
+    Title: உங்கள் தரவை இறக்குமதி செய்யுங்கள்
+    Description: ஆதரிக்கப்படும் மற்றொரு செயலி அல்லது காப்புநகலிலிருந்து சந்தாக்கள், வரலாறு, பிளேலிஸ்ட்கள், தேடல் வரலாறு அல்லது அமைப்புகளை விருப்பப்பட்டால் இறக்குமதி செய்யலாம்.
+    Action: தரவை இறக்குமதி செய்
+    Not Now: இப்போது வேண்டாம்
+About:
+  Documentation: ஆவணங்கள்
+  Downloads: பதிவிறக்கங்கள்
+  Changelog: மாற்றப் பதிவு
+  Commit: கமிட்
+  Fluxer: எங்கள் Fluxer சமூகத்தில் இணையுங்கள்
+  Matrix: Matrix
+  Email: மின்னஞ்சல்
+  Support the development of OpenTubeX: "OpenTubeX மேம்பாட்டை ஆதரியுங்கள்"
+Profile:
+  Customization: தனிப்பயனாக்கம்
+  Manage Profile Subscriptions: சுயவிவரச் சந்தாக்களை நிர்வகி
+  Icon Names:
+    Person: நபர்
+    People: மக்கள்
+    Headphones: தலைக்கேட்பிகள்
+    Gaming: விளையாட்டு
+    Film: திரைப்படம்
+    Art: கலை
+    Science: அறிவியல்
+    Globe: புவிக்கோளம்
+    Heart: இதயம்
+    Sun: சூரியன்
+    Moon: நிலவு
+    Trophy: கோப்பை
+  Profile Icon: சுயவிவரப் படவுரு
+  Choose an Emoji: ஈமோஜியைத் தேர்ந்தெடுக்கவும்
+  Custom Emoji: தனிப்பயன் ஈமோஜி
+  Emoji: ஈமோஜி
+  Choose Image: படத்தைத் தேர்ந்தெடு
+  Crop Image: படத்தை வெட்டு
+  Zoom: பெரிதாக்கம்
+  Apply Crop: வெட்டைப் பயன்படுத்து
+  Transparent: ஒளிபுகும்
+  Use Initial: முதலெழுத்தைப் பயன்படுத்து
+  The selected image could not be loaded: தேர்ந்தெடுத்த படத்தை ஏற்ற முடியவில்லை
+  Theme Color: அலங்கார நிறம்
+  Go To Profile Manager: சுயவிவர மேலாளருக்குச் செல்
+Channel:
+  Fewer videos per day: "நாளுக்குக் குறைவான காணொளிகள்"
+  More videos per day: "நாளுக்கு அதிகமான காணொளிகள்"
+  Verified: சரிபார்க்கப்பட்டது
+  Official Artist Channel: அதிகாரப்பூர்வ கலைஞர் சேனல்
+  About:
+    Links: இணைப்புகள்
+  Subscription settings: சந்தா அமைப்புகள்
+  Failed to save subscription settings: சேனல் அமைப்புகளைச் சேமிக்க முடியவில்லை
+  Videos per day: ஒரு நாளுக்கான காணொளிகள்
+  Use global setting: பொதுவான அமைப்பைப் பயன்படுத்து
+  Unlimited: வரம்பற்றது
+  More videos hidden: '+{count} மேலும் | +{count} மேலும்'
+  Show in subscription feed: சந்தா ஊட்டத்தில் காட்டு
+  Notify about new uploads: புதிய பதிவேற்றங்களைப் பற்றி அறிவி
+  Show members-only videos: உறுப்பினர்களுக்கு மட்டுமான வீடியோக்களைக் காட்டு
+  Upload Notifications On: "உங்கள் சந்தாக்கள் புதுப்பிக்கப்படும்போது {channelName} இன் புதிய பதிவேற்றங்கள் பற்றி அறிவிக்கப்படும்"
+  Upload Notifications Off: "{channelName} இன் புதிய பதிவேற்றங்கள் பற்றி அறிவிக்கப்படாது"
+  Upload Notifications Disabled In Settings: "{channelName} க்கான அறிவிப்புகள் இயக்கத்தில் உள்ளன, ஆனால் புதிய பதிவேற்ற அறிவிப்புகள் உங்கள் அமைப்புகளில் முடக்கப்பட்டுள்ளன"
+  Turn On Upload Notifications: "இயக்கு"
+  Channel Name Unavailable: சேனல் பெயர் கிடைக்கவில்லை
+  Search Result Types: தேடல் முடிவு வகைகள்
+  All Results: அனைத்தும்
+  View All: அனைத்தையும் பார்
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "இந்தச் சேனலில் காணொளிகள் உள்ளன, ஆனால் எதையும் காட்ட முடியவில்லை. மேலும் காணொளிகளை ஏற்ற முயற்சிக்கவும்"
+  Posts:
+    Original post unavailable: "அசல் இடுகை கிடைக்கவில்லை"
+    Members-only video hidden by OpenTubeX: "உறுப்பினர்களுக்கு மட்டுமான வீடியோ OpenTubeX ஆல் மறைக்கப்பட்டது"
+    Video hidden by OpenTubeX because of its title: "தலைப்பில் மறைக்கப்பட்ட உரை இருப்பதால் வீடியோ OpenTubeX ஆல் மறைக்கப்பட்டது"
+  Shows:
+    Shows: நிகழ்ச்சிகள்
+    This channel does not currently have any shows: இந்த சேனலில் தற்போது எந்த நிகழ்ச்சிகளும் இல்லை
+Video:
+  Info panel source: 'மூலம்: {source}'
+  External DRM Protected: "டி.ஆர்.எம் பாதுகாக்கப்பட்ட வீடியோக்களை OpenTubeX-இல் இயக்க முடியாது, ஏனெனில் அவற்றுக்கு தனியுரிம, மூடிய மூல கூறுகள் தேவைப்படுகின்றன."
+  Invalid Media URL: "தவறான ஊடக URL"
+  Mark As Fully Watched: முழுமையாகப் பார்த்ததாகக் குறி
+  AI-generated video summary: "AI உருவாக்கிய காணொளிச் சுருக்கம்"
+  Quality and accuracy may vary: "தரமும் துல்லியமும் மாறுபடலாம்"
+  Includes paid promotion: கட்டண விளம்பரம் உள்ளது
+  Age Restricted Badge: வயது வரம்புள்ளது
+  Music Video Badge: இசை வீடியோ
+  Queue: வரிசை
+  Play Next: அடுத்து இயக்கு
+  Add to Queue: வரிசையில் சேர்
+  Added to Play Next: காணொளி அடுத்து இயக்கப்படும்
+  Added to Queue: காணொளி வரிசையில் சேர்க்கப்பட்டது
+  Clear Queue: வரிசையை அழி
+  Queue Video Count: '{count} காணொளி | {count} காணொளிகள்'
+  Remove from Queue: வரிசையிலிருந்து {title}-ஐ அகற்று
+  Remove Video from Queue: வரிசையிலிருந்து அகற்று
+  Drag to Reorder Queue: வரிசையை மறுவரிசைப்படுத்த {title}-ஐ இழுக்கவும்
+  Reorder Queue Item: '{title}-ஐ மறுவரிசைப்படுத்து'
+  Reorder Queue Item Instructions: வரிசையில் இந்தக் காணொளியை நகர்த்த மேல் மற்றும் கீழ் அம்புக்குறி விசைகளைப் பயன்படுத்தவும்.
+  Queue Item Moved: '{title}, {total} இடங்களில் {position}-ஆம் இடத்திற்கு நகர்த்தப்பட்டது.'
+  Queue Item Cannot Move Up: '{title}-ஐ மேலே நகர்த்த முடியாது. அது ஏற்கெனவே {total} இடங்களில் முதல் இடத்தில் உள்ளது.'
+  Queue Item Cannot Move Down: '{title}-ஐக் கீழே நகர்த்த முடியாது. அது ஏற்கெனவே {total} இடங்களில் {total}-ஆம் இடத்தில் உள்ளது.'
+  Metadata: காணொளித் தகவல்
+  Close Metadata: காணொளித் தகவலை மூடு
+  Metadata Cache:
+    Title History: தலைப்பு வரலாறு
+    Thumbnail History: சிறுபட வரலாறு
+    Description History: விளக்க வரலாறு
+    Previous Version: முந்தையது {number}
+    Empty: (காலி)
+  Fetching Streams: yt-dlp மூலம் ஸ்ட்ரீம்கள் பெறப்படுகின்றன…
+  Transcript:
+    Title: உரைநகல்
+    Search: உரைநகலில் தேடு
+    Language: உரைநகல் மொழி
+    Save: சேமி
+    Show: உரைநகலைக் காட்டு
+    Hide: உரைநகலை மறை
+    Close: உரைநகலை மூடு
+    Copied: உரைநகல் இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
+    Saved: உரைநகல் சேமிக்கப்பட்டது
+    Save Error: உரைநகலைச் சேமிக்க முடியவில்லை
+    Text File: உரைக் கோப்பு
+    Unavailable: இந்தக் காணொளிக்கு உரைநகல் கிடைக்கவில்லை.
+    Load Error: உரைநகலை ஏற்ற முடியவில்லை.
+    Empty: இந்த உரைநகலில் உரை எதுவும் இல்லை.
+    No Results: உங்கள் தேடலுக்குப் பொருந்தும் உரைநகல் பகுதிகள் இல்லை.
+  Retry With Built-in Extraction: உள்ளமைந்த பிரித்தெடுப்புடன் மீண்டும் முயல்
+  Retry With yt-dlp Extraction: yt-dlp பிரித்தெடுப்புடன் மீண்டும் முயல்
+  Reloading video after streaming URL error: ஸ்ட்ரீமிங் URL பிழைக்குப் பிறகு காணொளி மீண்டும் ஏற்றப்படுகிறது
+  Configure Restricted Playback Cookies Hint: "அமைப்புகள் → மேம்பட்டவை → வெளிப்புற மென்பொருள் → yt-dlp குக்கீகள் என்பதில் குக்கீகளை அமைக்கவும்."
+  Try With Configured Cookies: அமைத்த குக்கீகளுடன் முயல்
+  Restricted Playback Authentication Failed Template: 'அமைத்த குக்கீகளுடன் yt-dlp-ஆல் இந்தக் காணொளியை அணுக முடியவில்லை: {error}'
+  Private: தனிப்பட்ட காணொளிகளுக்கு Google உள்நுழைவும் காணொளியின் உரிமையும் தேவைப்படுவதால் அவற்றை OpenTubeX-இல் பார்க்க முடியாது.
+  Collapse Playlist: இயக்கப்பட்டியலைச் சுருக்கு
+  Expand Playlist: இயக்கப்பட்டியலை விரி
+  Unmark As Watched: பார்த்த குறியை நீக்கு
+  Video has been unmarked as watched: காணொளியின் பார்த்த குறி நீக்கப்பட்டது
+  Save Channel Playback Speed: சேனல் இயக்க வேகத்தைச் சேமி
+  Channel Playback Speed Saved: சேனல் இயக்க வேகம் சேமிக்கப்பட்டது
+  Save Channel Video Quality: சேனல் காணொளித் தரத்தைச் சேமி
+  Channel Video Quality Saved: சேனல் காணொளித் தரம் சேமிக்கப்பட்டது
+  Save Channel Subtitles State: சேனல் துணைத்தலைப்பு நிலையைச் சேமி
+  Channel Subtitles State Saved: சேனல் துணைத்தலைப்பு நிலை சேமிக்கப்பட்டது
+  Save Channel Volume: சேனல் ஒலியளவைச் சேமி
+  Channel Volume Saved: சேனல் ஒலியளவு சேமிக்கப்பட்டது
+  Save Channel Setting: சேனல் அமைப்பைச் சேமி…
+  Channel Setting Already Set: '{setting} ஏற்கெனவே {value} என அமைக்கப்பட்டுள்ளது'
+  Video has been saved to {playlistName}: காணொளி {playlistName}-இல் சேமிக்கப்பட்டது
+  Video has been removed from {playlistName}: காணொளி {playlistName}-இலிருந்து அகற்றப்பட்டது
+  There was a problem saving the video to {playlistName}: காணொளியை {playlistName}-இல் சேமிப்பதில் சிக்கல் ஏற்பட்டது
+  There was a problem removing the video from {playlistName}: காணொளியை {playlistName}-இலிருந்து அகற்றுவதில் சிக்கல் ஏற்பட்டது
+  Failed to load collaborators: கூட்டாளர்களை ஏற்ற முடியவில்லை
+  Notify me: எனக்கு அறிவி
+  Notification on: அறிவிப்பு இயக்கத்தில் உள்ளது
+  Notification enabled: இந்தக் காணொளி தொடங்கும்போது உங்களுக்கு அறிவிக்கப்படும்
+  Notification cancelled: தொடக்க அறிவிப்பு ரத்துசெய்யப்பட்டது
+  Notification unavailable: கணினி அறிவிப்புகள் கிடைக்கவில்லை
+  Scheduled video starting: திட்டமிட்ட காணொளி தொடங்குகிறது
+  Live notification body: '{videoTitle} இப்போது தொடங்குகிறது'
+  Premiere: முதல் காட்சி
+  AI: AI
+  AI-generated content: AI உருவாக்கிய உள்ளடக்கம்
+  Collaborators: கூட்டாளர்கள்
+  Live Chat Replay: நேரலை அரட்டை மறுஇயக்கம்
+  Show Live Chat: நேரலை அரட்டையைக் காட்டு
+  Show Live Chat Replay: நேரலை அரட்டை மறுஇயக்கத்தைக் காட்டு
+  Close Live Chat: நேரலை அரட்டையை மூடு
+  Close Live Chat Replay: நேரலை அரட்டை மறுஇயக்கத்தை மூடு
+  Live Chat Settings: நேரலை அரட்டை அமைப்புகள்
+  Show Live Chat Timestamps: நேரக் குறிப்புகளைக் காட்டு
+  Chat Filter: அரட்டை வடிப்பான்
+  Top Chat: முன்னணி அரட்டை
+  All Messages: எல்லாச் செய்திகளும்
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: நேரலை அரட்டை மறுஇயக்கம் இயக்கப்பட்டுள்ளது. காணொளி இயங்கும்போது அரட்டைச் செய்திகள் இங்கே தோன்றும்.
+  Premiere started: முதல் காட்சி நடைபெறுகிறது. {timeAgo} தொடங்கியது
+  Sponsor Block category:
+    hook: ஈர்ப்பு/வாழ்த்துகள்
+  Sponsor Block category short:
+    filler: தொடர்பற்றவை
+  Player:
+    Playing in Picture-in-Picture: படத்திற்குள் படம் பயன்முறையில் இயங்குகிறது
+    Stream Recovery:
+      DASH Fallback: "ஆடியோ ஸ்ட்ரீம் தோல்வியடைந்தது, DASH வடிவங்களுக்கு மாற்றப்படுகிறது: {error}"
+      Error Copied: "பிழை கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது"
+      Legacy Fallback: "ஸ்ட்ரீம் தோல்வியடைந்தது, பழைய வடிவங்களுக்கு மாற்றப்படுகிறது: {error}"
+    Caption Timing:
+      Adjust Timing: நேரத்தைச் சரிசெய்…
+      Caption Timing: வசன நேரம்
+      Offset: நேர மாற்றம் (விநாடிகள்)
+      Hint: எதிர்மறை மதிப்புகள் வசனங்களை முன்னதாகவும், நேர்மறை மதிப்புகள் பின்னதாகவும் காட்டும். இந்தக் காணொளிக்கு மட்டுமே பொருந்தும்.
+      Earlier: முன்னதாக
+      Later: பின்னதாக
+      Reset: மீட்டமை
+    Most Replayed: "அதிகம் மீண்டும் பார்க்கப்பட்டது"
+    Pull up for precise seeking: "துல்லியமாகத் தேட மேலே இழுக்கவும்"
+    Precise seeking, drag down to exit: "துல்லியமான தேடல் · வெளியேற கீழே இழுக்கவும்"
+    Cast: "ஒளிபரப்பு"
+    Music Mode: "இசை முறை"
+    Music Mode Description: "இந்தத் தாவலில் காணொளிகளை 1× வேகத்தில் இயக்கி, புதிய காணொளிகளைத் தொடக்கத்திலிருந்து தொடங்கவும். சேமிக்கப்பட்ட இயல்புநிலை இயக்க அமைப்புகள் மாறாது."
+    DLNA:
+      Cast: "DLNA சாதனத்திற்கு ஒளிபரப்பு"
+      Stop: "ஒளிபரப்பை நிறுத்து"
+      No Devices: "DLNA சாதனங்கள் எதுவும் கிடைக்கவில்லை"
+      No MP4 Source: "இந்தக் காணொளிக்கு இணக்கமான MP4 ஓடை இல்லை"
+      Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
+    Repeat Stats:
+      Repeat Stats: மீளியக்கப் புள்ளிவிவரங்கள்
+      Looping: மீளியக்கம் செயலில்
+      Repeats: மீளியக்கம் | மீளியக்கங்கள்
+      Time Spent: பார்த்த நேரம்
+    Voice-over Translation:
+      Start: மொழிபெயர்
+      Cancel: ரத்துசெய்
+      Progress: குரல்வழி மொழிபெயர்ப்பு தயாராகிறது…
+      Retry: மீண்டும் முயல்
+      Error: குரல்வழி மொழிபெயர்ப்பு தோல்வியடைந்தது. பிறகு மீண்டும் முயலவும்.
+      Duration Error: நான்கு மணிநேரம் வரை நீளமுள்ள காணொளிகளுக்கு மட்டுமே குரல்வழி மொழிபெயர்ப்பு கிடைக்கும்.
+    Caption Appearance:
+      Options: விருப்பங்கள்
+      Sample: வசன வரிகள் இவ்வாறு தோன்றும்
+    Auto-translate: தானியக்க மொழிபெயர்ப்பு
+    Sleep Timer:
+      Sleep Timer: உறக்க நேரக்கருவி
+      'Off': முடக்கம்
+      Minutes: '{minutes} நிமிடங்கள்'
+      End of video: காணொளியின் முடிவில்
+      End of current chapter: தற்போதைய அத்தியாயத்தின் முடிவு
+      Remaining: '{time} மீதம்'
+      Cancel timer: நேரக்கருவியை ரத்துசெய்
+      Timer ended: உறக்க நேரக்கருவி முடிந்தது
+    A-B Repeat:
+      A-B Repeat: A-B மீளியக்கம்
+      'On': இயக்கு
+      'Off': முடக்கு
+      Point A: A புள்ளி
+      Point B: B புள்ளி
+      Set Repeat Start: மீளியக்கத் தொடக்கத்தை அமை
+      Set Repeat End: மீளியக்க முடிவை அமை
+      Pause Repeat: A-B மீளியக்கத்தை இடைநிறுத்து
+      Resume Repeat: A-B மீளியக்கத்தைத் தொடர்
+      Adjust Point: 'தற்போது {timestamp} இல் உள்ள {point} புள்ளியைச் சரிசெய்'
+      Clear Range: A-B மீளியக்க வரம்பை அழி
+      End Before Start: B புள்ளி A புள்ளிக்குப் பிறகு இருக்க வேண்டும்.
+      Outside Duration: நேர முத்திரை காணொளிக்குள் இருக்க வேண்டும்.
+      Cleared: A-B மீளியக்கம் அழிக்கப்பட்டது
+    Seek History:
+      Seek History: நகர்வு வரலாறு
+      Positions: '{count} நிலை | {count} நிலைகள்'
+      Nothing to undo: செயல்தவிர்க்க எதுவும் இல்லை
+      Nothing to redo: மீண்டும் செய்ய எதுவும் இல்லை
+    Zoom:
+      Zoom: பெரிதாக்கம்
+      'Off': முடக்கம்
+    Volume Boost:
+      Volume Boost: "ஒலியளவு அதிகரிப்பு"
+      'Off': "முடக்கம்"
+    Auto-generated Caption Template: '{language} (தானாக உருவானது)'
+    Up next in {seconds}: அடுத்தது {seconds}-இல்
+    Resize dock: பலகையின் அளவை மாற்று
+    Play now: இப்போது இயக்கு
+    MusicPlaybackRateOverride: இசைக் காணொளி கண்டறியப்பட்டது; 1x வேகத்தில் இயக்கப்படுகிறது
+    Normal: இயல்பு
+    Set Default: இயல்புநிலையாக அமை
+    Hide Annotations: குறிப்புகளை மறை
+    Show Annotations: குறிப்புகளைக் காட்டு
+    Hide: மறை
+    Show: காட்டு
+    Scroll Mini Player:
+      Collapse Controls: "கட்டுப்பாடுகளைச் சுருக்கு"
+      Expand Controls: "கட்டுப்பாடுகளை விரிவாக்கு"
+      Back to Top: மேலே செல்
+      Return to Video Tab: காணொளித் தாவலுக்குத் திரும்பு
+      Hide: சிறு இயக்கியை மறை
+      Play: இயக்கு
+      Pause: இடைநிறுத்து
+      Drag Handle: சிறிய இயக்கியை நகர்த்து
+      Rewind 10 seconds: 10 விநாடிகள் பின்னோக்கி
+      Forward 10 seconds: 10 விநாடிகள் முன்னோக்கி
+    SponsorBlock:
+      CancelCurrentSegment: பகுதியை உருவாக்குவதை ரத்துசெய்
+      ClearSegments: பகுதிகளை அழி
+      ClearSegmentsPrompt: இந்தக் காணொளிக்காக வரைந்த எல்லா SponsorBlock பகுதிகளையும் அழிக்க விரும்புகிறீர்களா?
+      CompleteSegmentsBeforeSubmitting: சமர்ப்பிக்கும் முன் வரைந்த ஒவ்வொரு பகுதியையும் நிறைவுசெய்யவும்.
+      CategoryLabel: வகை
+      ActionTypeLabel: பகுதி வகை
+      DuplicateSegments: ஒரே மாதிரியான வரைவு பகுதிகளைச் சேர்க்க முடியாது.
+      EndAction: (முடிவு)
+      EndActionLabel: முடிவு
+      EndTimeAfterStart: பகுதியின் முடிவு நேரம் தொடக்க நேரத்திற்குப் பிறகு இருக்க வேண்டும்.
+      EndTimeBeforeVideoEnd: பகுதியின் முடிவு நேரம் காணொளியின் கால அளவுக்குள் இருக்க வேண்டும்.
+      EndTimeLabel: பகுதி முடிவு நேரம்
+      DisableAutoSkipTemporarily: SponsorBlock தானியக்கத் தவிர்ப்பைத் தற்காலிகமாக முடக்கு
+      EnableAutoSkipTemporarily: SponsorBlock தானியக்கத் தவிர்ப்பை மீண்டும் இயக்கு
+      Guidelines: வழிகாட்டுதல்கள்
+      InspectSegment: ஆய்வுசெய்
+      InvalidStartTime: சரியான பகுதி தொடக்க நேரத்தை உள்ளிடவும்.
+      NoSegmentsToSubmit: சமர்ப்பிக்கும் முன் குறைந்தது ஒரு முழுமையான பகுதியை உருவாக்கவும்.
+      NowAction: (இப்போது)
+      CloseInfoPanel: SponsorBlock தகவலை மூடு
+      OpenInfoPanel: SponsorBlock தகவலைத் திற
+      OpenSubmissionMenu: சமர்ப்பிப்பு மெனுவைத் திற
+      PreviewRequired: சமர்ப்பிக்கும் முன் ஒவ்வொரு பகுதியையும் முன்னோட்டமிடவும்.
+      PreviewSegment: முன்னோட்டம்
+      SaveSegment: சேமி
+      SetSegmentEndNow: பகுதியை இப்போது முடி
+      StartAction: (தொடக்கம்)
+      StartSegmentNow: பகுதியை இப்போது தொடங்கு
+      SubmissionBadRequest: சமர்ப்பிப்புக் கோரிக்கையை SponsorBlock நிராகரித்தது.
+      SubmissionDuplicate: இது ஏற்கெனவே சமர்ப்பிக்கப்பட்டுள்ளது.
+      SubmissionFailed: SponsorBlock பகுதிகளைச் சமர்ப்பிக்க முடியவில்லை.
+      SubmissionForbidden: சமர்ப்பிப்பை SponsorBlock நிராகரித்தது.
+      SubmissionRateLimited: இந்தச் சமர்ப்பிப்பிற்கு SponsorBlock விகித வரம்பு விதித்தது.
+      SubmissionSuccess: SponsorBlock பகுதிகள் சமர்ப்பிக்கப்பட்டன.
+      SubmitSegment: பகுதியைச் சமர்ப்பி
+      SubmitSegments: சமர்ப்பி
+      StartTimeLabel: பகுதி தொடக்க நேரம்
+      TimeDivider: முதல்
+      SkipPrompt: '{segmentCategory}-ஐத் தவிர்க்கவா?'
+      SkipPromptAction: தவிர்
+      SkipToHighlight: சிறப்புப் பகுதிக்குச் செல்லவா?
+      SkippedToHighlight: சிறப்புப் பகுதிக்குச் சென்றது
+      SkipToastUnskip: தவிர்ப்பை நீக்கு
+      SkipToastReskip: மீண்டும் தவிர்
+      MutedSegment: '{segmentCategory} ஒலியடக்கப்பட்டது'
+      MuteToastUnmute: ஒலியடக்கத்தை நீக்கு
+      InfoPanelLoading: பகுதிகள் இன்னும் ஏற்றப்படுகின்றன...
+      InfoPanelHasSegments: இந்தக் காணொளிக்கான பகுதிகள் தரவுத்தளத்தில் உள்ளன!
+      InfoPanelNoSegments: பகுதிகள் எதுவும் கிடைக்கவில்லை
+      RefreshSegments: பகுதிகளைப் புதுப்பி
+      RefreshInfo: SponsorBlock தகவலைப் புதுப்பி
+      ContributionStatsTitle: உங்கள் பங்களிப்புகள்
+      ContributionStatsLoading: பங்களிப்புப் புள்ளிவிவரங்கள் ஏற்றப்படுகின்றன...
+      ContributionStatsError: பங்களிப்புப் புள்ளிவிவரங்கள் கிடைக்கவில்லை. புதுப்பித்து முயலவும்.
+      ContributionStatsNoUserId: பங்களிப்புப் புள்ளிவிவரங்களைப் பார்க்க ஒரு பகுதியைச் சமர்ப்பிக்கவும் அல்லது உங்கள் SponsorBlock பயனர் ID-ஐ இறக்குமதி செய்யவும்.
+      Submissions: சமர்ப்பிப்புகள்
+      Segments: பகுதிகள்
+      TimeSaved: சேமித்த நேரம்
+      AutoSkipEnabled: பகுதிகளைத் தானாகத் தவிர்
+      AutoSkipOn: இயக்கம்
+      AutoSkipOff: முடக்கம்
+      WhitelistChannel: அனுமதிப் பட்டியலில் சேனலைச் சேர்
+      ChannelWhitelisted: அனுமதிப் பட்டியலில் சேர்க்கப்பட்டது
+      RemoveChannelFromWhitelist: அனுமதிப் பட்டியலிலிருந்து சேனலை அகற்று
+      MuteSegment: பகுதியின் ஒலியை அடக்கு
+      SkipSegment: பகுதியைத் தவிர்
+      CloseSegmentActions: பகுதிச் செயல்களை மூடு
+      FullVideo: முழுக் காணொளி
+      FullVideoLabel: '{segmentCategory} · முழுக் காணொளி'
+      MuteActionType: ஒலியடக்கு
+      MutePrompt: '{segmentCategory}-இன் ஒலியை அடக்கவா?'
+      SkipActionType: தவிர்
+      LockedSegment: பூட்டிய பகுதி
+      UpvoteSegment: ஆதரவு வாக்கு
+      DownvoteSegment: எதிர்ப்பு வாக்கு
+      VoteFailed: SponsorBlock வாக்கைச் சமர்ப்பிக்க முடியவில்லை.
+      ChangeCategory: வகையை மாற்று
+      CopyAndDownvote: நகலெடுத்து எதிராக வாக்களி
+      SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
+      CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
+    Google Cast:
+      Position: "இயக்க நிலை"
+      Invalid Authentication: "பெறுநர் செல்லாத அங்கீகாரப் பதிலை அனுப்பியது."
+      Authentication Declined: "பெறுநர் அங்கீகாரத்தை நிராகரித்தது."
+      Audio Only Receiver: "பெறுநர் ஒலி ஒளிபரப்பை மட்டுமே ஆதரிக்கிறது."
+      Disconnected: "பெறுநரின் இணைப்பு துண்டிக்கப்பட்டது."
+      Timeout: "பெறுநர் பதிலளிக்கவில்லை."
+      Busy: "மற்றொரு சாளரம் ஏற்கனவே ஒளிபரப்புகிறது."
+      Not Authorized: "இந்தச் சாளரத்தைச் செயல்படுத்தி மீண்டும் முயலவும்."
+      Invalid Request: "செல்லாத ஒளிபரப்புக் கோரிக்கை."
+      IPv4 Required: "IPv4 இணைப்பு தேவை."
+      Launch Failed: "பெறுநரைத் தொடங்க முடியவில்லை."
+      Load Failed: "பெறுநரால் காணொளியை ஏற்ற முடியவில்லை."
+      Cancelled: "ஒளிபரப்பு ரத்து செய்யப்பட்டது."
+      Private Not Authorized: "தனிப்பட்ட ஊடக அணுகல் அங்கீகரிக்கப்படவில்லை."
+      Invalid Subtitles: "செல்லாத ஒளிபரப்பு வசனங்கள்."
+      Discovery Failed: "பெறுநர்களைத் தேட முடியவில்லை."
+      Preparing Video: "அனுப்புவதற்காகக் காணொளியைத் தயார்செய்கிறது…"
+      Connecting: "{device} உடன் இணைக்கிறது…"
+      Starting Receiver: "Cast பெறுநரைத் தொடங்குகிறது…"
+      Loading Video: "பெறுநரில் காணொளியை ஏற்றுகிறது…"
+      Buffering: "{device} இல் இடையகப்படுத்துகிறது…"
+      Allow Private Instance: "இந்த ஒளிபரப்பு தனிப்பட்ட Invidious சேவையான {instance} இலிருந்து ஊடகத்தைப் படிக்க அனுமதிக்கவா?"
+      Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
+      Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
+      Rewind: "10 வினாடிகள் பின்னால்"
+      Forward: "10 வினாடிகள் முன்னால்"
+      Subtitles Off: "வசன வரிகளை அணை"
+      Return: "உள்ளூர் இயக்கத்திற்குத் திரும்பு"
+      No Devices: "Google Cast சாதனங்கள் கிடைக்கவில்லை"
+      No Source: "Google Cast-க்கு இணக்கமான ஓடை இல்லை"
+      Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
+      Error With Details: "காணொளியை ஒளிபரப்ப முடியவில்லை: {error}"
+      Untrusted Receiver: "பெறுநரின் சான்றிதழ் நம்பகமானது அல்ல. அங்கீகரிக்கப்பட்ட Google Cast பெறுநரைப் பயன்படுத்தவும்."
+    FCast:
+      Cast: "FCast பெறுநருக்கு ஒளிபரப்பு"
+      No Devices: "FCast பெறுநர்கள் கிடைக்கவில்லை"
+      No Source: "FCast-க்கு இணக்கமான ஓடை இல்லை"
+    Secondary Captions: இரண்டாம் வசனங்கள்
+    Subtitle File:
+      Load: "வசனக் கோப்பை ஏற்று…"
+      Subtitle Files: "வசனக் கோப்புகள்"
+      Error: "வசனக் கோப்பை ஏற்ற முடியவில்லை. SRT அல்லது WebVTT கோப்பைத் தேர்ந்தெடுக்கவும்."
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
+  Station: நிலையம்
+  Playlist:
+    Unavailable videos are hidden: கிடைக்காத 1 காணொளி மறைக்கப்பட்டுள்ளது | கிடைக்காத {count} காணொளிகள் மறைக்கப்பட்டுள்ளன
+  External Media:
+    Dislikes: "விருப்பமின்மை | விருப்பமின்மைகள்"
+    Reposts: "மறுபதிவு | மறுபதிவுகள்"
+    Saves: "சேமிப்பு | சேமிப்புகள்"
+    Series: "தொடர்"
+    Season: "பருவம்"
+    Season Number: "பருவ எண்"
+    Episode: "பகுதி"
+    Episode Number: "பகுதி எண்"
+    Track: "மியூசிக் ட்ராக்"
+    Track Number: "ட்ராக் எண்"
+    Artists: "கலைஞர்கள்"
+    Album: "ஆல்பம்"
+    Genres: "வகைகள்"
+    Media Type: "மீடியா வகை"
+    Availability: "கிடைக்கும் தன்மை"
+    Age Limit: "வயது வரம்பு"
+    Release Date: "வெளியீட்டு தேதி"
+    Availability Values:
+      public: "பொது"
+      private: "தனிப்பட்டது"
+      premium_only: "பிரீமியம் மட்டும்"
+      subscriber_only: "சந்தாதாரர்கள் மட்டும்"
+      needs_auth: "உள்நுழைவு தேவை"
+      unlisted: "பட்டியலிடப்படாதது"
+  How this was made: இது எப்படி உருவாக்கப்பட்டது
+  Save Queue to Playlist: "வரிசையை பிளேலிச்ட்டில் சேமி"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: நேரடி அரட்டை தற்போது Yattee சேவையகத்துடன் ஆதரிக்கப்படவில்லை. YouTube உடன் நேரடி இணைப்பு தேவை.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} ஐத் தொடங்க முடியவில்லை. அது நிறுவப்பட்டுள்ளதா எனச் சரிபார்க்கவும், அல்லது வெளிப்புற இயக்கி அமைப்புகளில் அதன் இயக்கக்கூடிய கோப்பின் பாதையை அமைக்கவும்."
+Playlist:
+  Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
+  Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"
+  Close Playlist: பிளேலிஸ்ட்டை மூடு
+  Preload Playlist: "அனைத்து காணொளிகளையும் முன்பே ஏற்று"
+  Preloading Playlist: "அனைத்து காணொளிகளும் முன்பே ஏற்றப்படுகின்றன..."
+  Playlist Preload Complete: "முன்பே ஏற்றப்பட்ட காணொளிகள்: {count}."
+  Playlist Preload Partial: "{requested} காணொளிகளில் {preloaded} முன்பே ஏற்றப்பட்டன. {failed} ஏற்ற முடியவில்லை."
+  Playlist Preload Pagination Failed: "முழு இயக்கப்பட்டியலை ஏற்ற முடியாததால் முன்பே ஏற்றுவது நிறுத்தப்பட்டது."
+  Unavailable videos are hidden: கிடைக்காத காணொளிகள் மறைக்கப்பட்டுள்ளன
+  Add Playlist to Queue: "பிளேலிச்ட்டை வரிசையில் சேர்"
+  Playlist Added to Queue: "பிளேலிச்ட் வரிசையில் சேர்க்கப்பட்டது"
+Change Format:
+  yt-dlp Error Template: "yt-dlp ஸ்ட்ரீம்களை வழங்க முடியவில்லை: {error}"
+  Local Video File: உள்ளகக் காணொளிக் கோப்பு
+  Local Audio File: உள்ளக ஒலிக் கோப்பு
+  Online Video: இணையக் காணொளி
+  Stream Source: ஸ்ட்ரீம் மூலம்
+  Stream Extraction Method: ஸ்ட்ரீம் பிரித்தெடுக்கும் முறை
+  Playback Engine: இயக்கப் பொறி
+  Streaming Protocol: ஸ்ட்ரீமிங் நெறிமுறை
+  Not Available For This Video: இந்தக் காணொளிக்குக் கிடைக்கவில்லை
+  Protocols:
+    Progressive: தொடர்முறை
+  Descriptions:
+    Local File: இந்தச் சாதனத்தில் பதிவிறக்கிய கோப்பிலிருந்து நேரடியாக இயக்கப்படும்
+    Online Video: அமைத்த இணைய மூலத்திலிருந்து ஸ்ட்ரீமிங் வடிவங்களை ஏற்றும்
+    Dash: மாறும் தரம், பல ஒலித் தடங்கள் மற்றும் உயர்ந்த தெளிவுத்திறன்கள்
+    Legacy: காணொளியும் ஒலியும் இணைந்த ஒரே கோப்பு; குறைந்த தெளிவுத்திறன்களுக்கு மட்டும்
+    Audio: ஒலி மட்டும்; அலைவரிசையைச் சேமிக்கவும் பின்னணியில் கேட்கவும் பயன்படும்
+  yt-dlp Fallback Template: 'yt-dlp-ஆல் ஸ்ட்ரீம்களை வழங்க முடியவில்லை; பதிலாக உள்ளமைந்த பொறி பயன்படுத்தப்படுகிறது: {error}'
+  yt-dlp Default Clients Fallback: விரும்பிய yt-dlp கிளையன்ட்களால் இயக்கக்கூடிய ஸ்ட்ரீம்களை வழங்க முடியவில்லை; பதிலாக yt-dlp-இன் இயல்புநிலைக் கிளையன்ட்கள் முயற்சிக்கப்படுகின்றன
+  Built-in Fallback Template: 'உள்ளமைந்த பொறியால் ஸ்ட்ரீமை இயக்க முடியவில்லை; பதிலாக yt-dlp முயற்சிக்கப்படுகிறது: {error}'
+Share:
+  Shared YouTube Link: "பகிரப்பட்ட YouTube இணைப்பு"
+  Open in Player: "இயக்கியில் திற"
+  No YouTube Link: "பகிரப்பட்ட உரையில் ஆதரிக்கப்படும் YouTube இணைப்பு இல்லை."
+  Loading Video Information: "காணொளித் தகவலை ஏற்றுகிறது…"
+  Video Information Failed: "காணொளித் தகவலை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது இணைப்பைத் திறக்கவும்."
+  Share Link: "இணைப்பைப் பகிர்"
+  Share failed: "இணைப்பைப் பகிர முடியவில்லை"
+  Timestamp Link Copied: நேரக் குறிப்பு இணைப்பு இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
+Context Menu:
+  Opened in a Background Tab: "பின்னணித் தாவலில் திறக்கப்பட்டது"
+  Open in a Background Tab: "பின்னணித் தாவலில் திற"
+  Select Tab: தாவலைத் தேர்ந்தெடு
+  Close Tabs Before: முந்தைய தாவல்களை மூடு
+  Close Tabs After: பின்வரும் தாவல்களை மூடு
+  Close Other Tabs: மற்ற தாவல்களை மூடு
+  Copy {service} link without playlist: "இயக்கப்பட்டியல் இல்லாமல் {service} இணைப்பை நகலெடு"
+  Context Menu: சூழல் மெனு
+  Select All: அனைத்தையும் தேர்ந்தெடு
+  Save Image As…: படத்தை இவ்வாறு சேமி…
+  Copy Image: படத்தை நகலெடு
+  Copy Image Address: பட முகவரியை நகலெடு
+  Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
+  Reload Videos: காணொளிகளை மீண்டும் ஏற்று
+  Reload Shorts: Shorts-ஐ மீண்டும் ஏற்று
+  Reload Live: நேரலைகளை மீண்டும் ஏற்று
+  Reload Posts: இடுகைகளை மீண்டும் ஏற்று
+  Reload All Feeds: எல்லா ஊட்டங்களையும் மீண்டும் ஏற்று
+  Reload RSS Feeds: RSS ஊட்டங்களை மீண்டும் ஏற்று
+  Close Multiple Tabs: '{count} தாவல்களை மூடு'
+  Duplicate Tab: தாவலை நகலெடு
+  Duplicate Multiple Tabs: '{count} தாவல்களை நகலெடு'
+  Move Tab: தாவலை நகர்த்து
+  Move Tabs: தாவல்களை நகர்த்து
+  Move Tab to Group: தாவலைக் குழுவுக்கு நகர்த்து
+  Collapse Group: குழுவைச் சுருக்கு
+  Expand Group: குழுவை விரி
+  Move Tabs to Group: தாவல்களைக் குழுவுக்கு நகர்த்து
+  Manage Tab Groups…: தாவல் குழுக்களை நிர்வகி…
+  To Beginning: தொடக்கத்திற்கு
+  To End: இறுதிக்கு
+  Close Tabs: தாவல்களை மூடு
+  To the Top: மேலே
+  To the Left: இடப்புறம்
+  To the Bottom: கீழே
+  To the Right: வலப்புறம்
+  Other Tabs: பிற தாவல்கள்
+  Copy YouTube Link: YouTube இணைப்பை நகலெடு
+  Copy YouTube Links: YouTube இணைப்புகளை நகலெடு
+  Pin Tab: தாவலைப் பொருத்து
+  Pin Tabs: தாவல்களைப் பொருத்து
+  Unpin Tab: தாவலை விடுவி
+  Unpin Tabs: தாவல்களை விடுவி
+  Tab Color: தாவல் நிறம்
+  Default: இயல்புநிலை
+  Purple: ஊதா
+  Reopen Closed Tab: மூடிய தாவலை மீண்டும் திற
+  Reload Tab: தாவலை மீண்டும் ஏற்று
+  Reload Tabs: தாவல்களை மீண்டும் ஏற்று
+  Load Tab: தாவலை ஏற்று
+  Load Tabs: தாவல்களை ஏற்று
+  Unload Tab: தாவலை இறக்கு
+  Unload Tabs: தாவல்களை இறக்கு
+  Unload Tabs Failed: "தேர்ந்தெடுத்த தாவல்களை நினைவகத்திலிருந்து நீக்க முடியவில்லை."
+  Move Tab to Window: தாவலைச் சாளரத்திற்கு நகர்த்து
+  Move Tabs to Window: தாவல்களைச் சாளரத்திற்கு நகர்த்து
+  Open in a New Tab: புதிய தாவலில் திற
+  Open in a New Window: புதிய சாளரத்தில் திற
+  Copy Link: இணைப்பை நகலெடு
+  Copy Invidious Link: Invidious இணைப்பை நகலெடு
+  Search Selection in New Tab: புதிய தாவலில் "{selection}" என்பதைத் தேடு
+  Search Selection in New Window: புதிய சாளரத்தில் "{selection}" என்பதைத் தேடு
+  Search With: '{engine} மூலம் தேடு'
+  Search With Multiple: இதன் மூலம் தேடு...
+  Selection Too Long: தேடுவதற்குத் தேர்வு மிக நீளமாக உள்ளது (> {count} எழுத்துகள்)
+  Background Tab: பின்னணித் தாவல்
+Tab Organizer:
+  Tab History: "தாவல் வரலாறு"
+  Current Page: "தற்போதைய பக்கம்"
+  Icon Labels:
+    Podcast: 'வலையொலி'
+    Clock: 'கடிகாரம்'
+    Puzzle Piece: 'புதிர்த் துண்டு'
+    People: 'மக்கள்'
+    Chart: 'விளக்கப்படம்'
+    Calendar: 'நாட்காட்டி'
+    Images: 'படங்கள்'
+    Music: 'இசை'
+    Folder: கோப்புறை
+    Bookmark: புக்மார்க்
+    Favorites: பிடித்தவை
+    Videos: காணொளிகள்
+    Gaming: விளையாட்டுகள்
+    Research: ஆராய்ச்சி
+    Art: கலை
+    Travel: பயணம்
+  Group Icon: குழு சின்னம்
+  Title: தாவல் ஒருங்கிணைப்பான்
+  Open Tab Count: '{count} திறந்த தாவல் | {count} திறந்த தாவல்கள்'
+  Search Label: தாவல்களைத் தேடு
+  Selected Count: '{count} தாவல் தேர்ந்தெடுக்கப்பட்டது | {count} தாவல்கள் தேர்ந்தெடுக்கப்பட்டன'
+  Tab Count: '{count} தாவல் | {count} தாவல்கள்'
+  Select All: அனைத்தையும் தேர்ந்தெடு
+  Select None: எதையும் தேர்ந்தெடுக்க வேண்டாம்
+  Move To Group: தேர்ந்தெடுத்த தாவல்களைக் குழுவுக்கு நகர்த்து
+  Choose Group: குழுவைத் தேர்ந்தெடுக்கவும்
+  Ungrouped: குழுவில் இல்லாதவை
+  Pin: பொருத்து
+  Unpin: விடுவி
+  Load: ஏற்று
+  Unload: இறக்கு
+  Unload All: அனைத்தையும் இறக்கு
+  Close All: அனைத்தையும் மூடு
+  Ungroup: குழுவிலிருந்து பிரி
+  Group Name: குழுப் பெயர்
+  Color: நிறம்
+  No Color: நிறமில்லை
+  Create Group: குழுவை உருவாக்கு
+  Expand Group: குழுவை விரி
+  Collapse Group: குழுவைச் சுருக்கு
+  Expand Group Label: '{name} குழுவை விரி, {count} தாவல் | {name} குழுவை விரி, {count} தாவல்கள்'
+  Rename Group: '{name} குழுவின் பெயரை மாற்று'
+  Change Group Color: '{name} குழுவின் நிறத்தை மாற்று'
+  Move To Window: சாளரத்திற்கு நகர்த்து
+  Choose Window: சாளரத்தைத் தேர்ந்தெடுக்கவும்
+  Select Tab: '{title}-ஐத் தேர்ந்தெடு'
+  Active: செயலில் உள்ளது
+  Pinned: பொருத்தப்பட்டது
+  Unloaded: இறக்கப்பட்டது
+  Playing: இயங்குகிறது
+  Close Tab: '{title}-ஐ மூடு'
+  No Open Results: இந்தத் தேடலுக்குப் பொருந்தும் திறந்த தாவல்கள் இல்லை.
+  Recently Closed: அண்மையில் மூடியவை
+  Clear: அழி
+  No Closed Results: இந்தத் தேடலுக்குப் பொருந்தும் அண்மையில் மூடிய தாவல்கள் இல்லை.
+  Drag Tab: குழுவுக்கு நகர்த்த இழுக்கவும்
+Chapters:
+  Open Chapters: அத்தியாயங்களைத் திற
+  Close Chapters: அத்தியாயங்களை மூடு
+  Copy Timestamp Link: '{timestamp}-இல் உள்ள இணைப்பை நகலெடு'
+  Loop Chapter: 'அத்தியாயத்தை மீண்டும் இயக்கு: {chapter}'
+  Looping Chapter: 'அத்தியாயம் மீண்டும் இயக்கப்படுகிறது: {chapter}'
+  Chapter Loop Stopped: 'அத்தியாயத்தை மீண்டும் இயக்குவது நிறுத்தப்பட்டது'
+Comments:
+  Image unavailable: "படம் கிடைக்கவில்லை"
+  Comment Count: 1 கருத்து | {count} கருத்துகள்
+  Show Comments: கருத்துகளைக் காட்டு
+  Getting comment replies, please wait: கருத்துப் பதில்கள் பெறப்படுகின்றன, காத்திருக்கவும்
+  Reload Comments: கருத்துகளை மீண்டும் ஏற்று
+  Reply Count: 1 பதில் | {replyCount} பதில்கள்
+  Comments are turned off: கருத்துகள் முடக்கப்பட்டுள்ளன
+  YouTube did not provide advertised replies: இந்தக் கருத்துக்குப் பதில்கள் இருப்பதாக YouTube காட்டியது. ஆனால் அவற்றை வழங்கவில்லை. அவை நீக்கப்பட்டிருக்கலாம் அல்லது மறைக்கப்பட்டிருக்கலாம். எனவே பதில் பொத்தான் அகற்றப்பட்டது.
+  Pinned by you: நீங்கள் பொருத்தியது
+  A reply is pinned: ஒரு பதில் பொருத்தப்பட்டுள்ளது
+  Filter loaded comments: ஏற்றிய கருத்துகளை வடிகட்டு
+  Comment filters: கருத்து வடிப்பான்கள்
+  From creator: படைப்பாளரிடமிருந்து
+  Contains timestamps: நேரக் குறிப்புகள் உள்ளவை
+  Pin comment by author: '{author}-இன் கருத்தைப் பொருத்து'
+  Unpin comment by author: '{author}-இன் கருத்தை விடுவி'
+  Edited: (திருத்தப்பட்டது)
+  Highlighted comment: தனிப்படுத்திய கருத்து
+  Highlighted reply: தனிப்படுத்திய பதில்
+  Search loaded comments: ஏற்றிய கருத்துகளில் தேடு
+  Loaded comment search result count: ஏற்றிய {total} கருத்துகளில் 1 | ஏற்றிய {total} கருத்துகளில் {count}
+  No loaded comments match your filters: ஏற்றிய கருத்துகளில் உங்கள் வடிப்பான்களுக்குப் பொருந்துபவை இல்லை
+  YouTube comment link copied to clipboard: YouTube கருத்து இணைப்பு இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
+  Translate to {language}: '{language}-க்கு மொழிபெயர்'
+  Show original: அசலைக் காட்டு
+  Translating comment, please wait: கருத்து மொழிபெயர்க்கப்படுகிறது, காத்திருக்கவும்
+  Comment translation failed: கருத்து மொழிபெயர்ப்பு தோல்வியடைந்தது
+Description:
+  Title: விளக்கம்
+  Copy Description: விளக்கத்தை நகலெடு
+  Description Copied: விளக்கம் இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
+  Video Category: 'காணொளி வகை:'
+  Video Tags: காணொளிக் குறிச்சொற்கள்
+  Games: விளையாட்டுகள்
+  Music: இசை
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "பட்டியல்கள் மற்றும் கட்டங்களில் உள்ள காணொளி மற்றும் பிளேலிஸ்ட் தலைப்புகளை முப்புள்ளியுடன் இரண்டு வரிகளாகச் சுருக்கி, அட்டைகளை ஒரே சீராகக் காட்டுகிறது. முழுத் தலைப்பைக் காண அதன் மேல் சுட்டியை வைக்கவும்."
+    Close Window With Last Tab: 'முடக்கப்பட்டால், கடைசி தாவலை மூடுவது அதற்குப் பதிலாக புதிய தாவலைத் திறக்கும், எனவே நீங்கள் மூடும் வரை சாளரம் திறந்தே இருக்கும்.'
+    Preferred Video Codec: |
+      தானியங்கி பயன்முறை உங்கள் சாதனம் வன்பொருள் மூலம் குறிவிலக்கக்கூடிய கோடெக்குகளை முன்னுரிமைப்படுத்துகிறது.
+      AV1: குறைந்த தரவில் சிறந்த தரம், ஆனால் எல்லா வீடியோக்களிலும் இது இருக்காது. வன்பொருள் குறிவிலக்கம் இல்லையெனில் பேட்டரியை விரைவாகத் தீர்க்கலாம் அல்லது ஃப்ரேம்களைத் தவறவிடலாம்.
+      VP9: திறனும் இணக்கத்தன்மையும் சமநிலையில் உள்ளது, பொதுவாக அதிகபட்ச தெளிவுத்திறன் வரை கிடைக்கும்.
+      H.264: கிட்டத்தட்ட எந்தச் சாதனத்திலும் குறிவிலக்க எளிதானது, ஆனால் அதிக தரவைப் பயன்படுத்தும், பொதுவாக 1080p வரை மட்டுமே.
+      மாற்றங்கள் அடுத்த வீடியோவிலிருந்து பொருந்தும். விருப்பமான கோடெக் கிடைக்கவில்லையெனில், வேறொன்று பயன்படுத்தப்படும்.
+    Always Use Backup Media Server: "ஒதுக்கப்பட்ட சேவையகத்திற்குப் பதிலாக YouTube குறிப்பிடும் காப்பு சேவையகத்திலிருந்து காணொளிகளை இயக்குகிறது, உதாரணமாக உங்கள் இணைய வழங்குநரின் தற்காலிக சேமிப்பு அடிக்கடி மெதுவாக இருக்கும்போது. இல்லையெனில் ஒதுக்கப்பட்ட சேவையகம் பதிலளிக்காதபோது மட்டுமே OpenTubeX மாறும்."
+    Automatically switch stream extraction methods: "உள்ளமைந்த இயக்கம் தோல்வியடைந்தால் yt-dlp ஐ முயற்சிக்கவும்; yt-dlp தோல்வியடைந்தால் உள்ளமைந்த இயக்கத்தை முயற்சிக்கவும்."
+    Enable Tabs: "தற்போதைய பக்கம் திறந்தே இருக்கும். செயலியை மறுதொடக்கம் செய்யும் வரை மற்ற தாவல்கள் சேமிக்கப்படும்; அவற்றை மீட்டெடுக்க தாவல்களை மீண்டும் இயக்கவும்."
+    Data Saver Thumbnails: "தரவுப் பயன்பாட்டைக் குறைக்க குறைந்த தெளிவுத்திறன் கொண்ட சிறுபடங்களைப் பயன்படுத்தவும்."
+    Use AI Translation Completions: மனித மொழிபெயர்ப்புகளில் உள்ள இடைவெளிகளை AI உருவாக்கிய உரையால் நிரப்பும். மனித மொழிபெயர்ப்புகளுக்கே எப்போதும் முன்னுரிமை.
+    Update Relative Timestamps: ஒரு பக்கம் திறந்திருக்கும் வரை செயலி முழுவதும் சார்புநேரக் குறிப்புகளைப் புதுப்பிக்கும். முடக்கியிருந்தால், பக்கத்தை மீண்டும் ஏற்றிய அல்லது பார்வையிட்ட பிறகே அவை புதுப்பிக்கப்படும்.
+    Stream Extraction Method: |
+      OpenTubeX காணொளி ஸ்ட்ரீம்களை எவ்வாறு பெற வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும். yt-dlp-ஐத் தேர்ந்தெடுத்தால் அது கிடைக்க வேண்டும்.
+      yt-dlp-ஐப் பயன்படுத்தும்போது காணொளிகள் தொடங்க அதிக நேரமாகலாம்.
+      உள்ளமைந்த முறை நேரலைகளிலும் முதல் காட்சிகளிலும் நேரத்தை நகர்த்துவதை ஆதரிக்காது.
+    Avoid translation: |
+      காணொளியின் தலைப்பு, விளக்கம் மற்றும் அத்தியாயங்களை YouTube தானாக மொழிபெயர்ப்பதை முடக்கும்.
+      பட்டியல்கள் முழுவதும் காணொளித் தலைப்புகளைப் பெறுவது போன்ற மிக அதிகக் கோரிக்கைகள் செயலியின்
+      நம்பகத்தன்மையைத் தற்காலிகமாகப் பாதிக்கலாம்.
+    Show Thumbnail Previews: காணொளிச் சிறுபடங்களின் மேல் சுட்டியை வைக்கும்போது அசையும் முன்னோட்டங்களைக் காட்டு.
+    Startup Behavior: |
+      OpenTubeX தொடங்கும்போது என்ன செய்ய வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.
+      எல்லாத் தாவல்களையும் ஏற்று என்பது சேமித்த ஒவ்வொரு தாவலையும் உடனே மீட்டெடுக்கும். பின்னணித் தாவல்களில் காணொளிகள் தானாக இயங்காது.
+      முன்பு ஏற்றிய தாவல்களை ஏற்று என்பது OpenTubeX மூடப்பட்டபோது ஏற்றப்பட்டிருந்த தாவல்களை மீண்டும் ஏற்றி, மற்றவற்றை இறக்கியபடி வைத்திருக்கும்.
+      கடைசியாகச் செயலிலிருந்த தாவலை ஏற்று என்பது மற்ற தாவல்களைத் திறந்து ஆனால் இறக்கிய நிலையில் வைத்து முந்தைய அமர்வை மீட்டெடுக்கும். அவற்றைக் கிளிக் செய்யும்போது ஏற்றப்படும்.
+      காலியான அமர்வுடன் தொடங்கு என்பது சேமித்த தாவல்களைத் தவிர்த்துப் புதிய சாளரத்தைத் திறக்கும்.
+    Remember Tab Navigation History: ஒவ்வொரு தாவலின் பின் மற்றும் முன் வழிசெலுத்தல் வரலாறும் சேமிக்கப்பட்டு, OpenTubeX மீண்டும் தொடங்கும்போது மீட்டெடுக்கப்படும்.
+    Yattee Server: OpenTubeX வீடியோக்கள், சேனல்கள், பிளேலிச்ட்கள், தேடல் முடிவுகள் ஆகியவற்றை ஏற்றும் yattee-server சேவையகம். பயனர்பெயரும் கடவுச்சொல்லும் இந்தச் சாதனத்தில் மட்டுமே சேமிக்கப்படும்.
+    Proxy Videos Through Yattee Server: வீடியோ, ஒலி ஸ்ட்ரீம்களைச் சேவையகம் வழியாக அனுப்புகிறது. சேவையகம் உங்கள் இணைய இணைப்பையே பயன்படுத்தினால் தவிர இதை இயக்கத்திலேயே வைத்திருங்கள், ஏனெனில் கோரிய முகவரிக்கு மட்டுமே YouTube ஸ்ட்ரீம்களை வழங்குகிறது. சிறுபடங்கள் எப்போதும் YouTube-இலிருந்து நேரடியாக ஏற்றப்படும்.
+    Notifications: நேரலைகள், புதிய பதிவேற்றங்கள், தானியங்கி பதிவிறக்கங்கள் பற்றி OpenTubeX உங்களுக்கு எப்படி அறிவிக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும். கணினியும் பயன்பாட்டிலும் என்பதில், OpenTubeX ஐப் பயன்படுத்தும்போது அறிவிப்புகள் அதற்குள்ளும், இல்லையெனில் கணினி அறிவிப்புகளாகவும் தோன்றும், மணி அவற்றை வைத்திருக்கும். முடக்கம் அறிவிப்பு விருப்பங்களையும் மறைக்கும்.
+  Proxy Settings:
+    IP Block Recovery Script Path: IP தடுப்பு கண்டறியப்படும்போது இயக்க வேண்டிய நிரலாக்கக் கோப்புப் பாதை. அது முடியும் வரை OpenTubeX காத்திருந்து, காணொளியை மீண்டும் ஏற்றும். மாற்றுவழி இயக்கப்பட்டிருந்தால் அதுவும் தோல்வியடையும்போது மட்டுமே நிரலாக்கம் இயங்கும்.
+  Player Settings:
+    Mono Audio: 'இடது மற்றும் வலது ஆடியோ சேனல்களை இரண்டு காதுகளிலும் இயக்கும். வீடியோவின் ஒலி உங்கள் ஹெட்ஃபோன்களின் ஒரு பக்கத்தில் மட்டும் வரும்போது இதைப் பயன்படுத்தவும்.'
+    Pause on Stream Recovery: "வீடியோ ஸ்ட்ரீம் தோல்வியடைந்து, பிளேயர் அதை மீண்டும் ஏற்றும்போது அல்லது வேறு வடிவம் அல்லது இயந்திரத்துக்கு மாறும்போது, இயக்கம் இடைநிறுத்தப்பட்டு நீங்கள் மூடும் வரை பிழை பிளேயரின் மேலே இருக்கும். முடக்கப்பட்டால், இயக்கம் தொடரும், பிழை சிறிது நேரம் அறிவிப்பாகத் தோன்றும்."
+    Continue Playback When Screen Is Locked: 'பின்னணியில் ஒலியைத் தொடர்ந்து இயக்கி Android ஊடகக் கட்டுப்பாடுகளை வழங்குகிறது. செயலி தெரியாதபோது இடைநிறுத்த இதை அணைக்கவும்.'
+    Enable Caption Translations: இதை இயக்கியதும், காணொளியில் பொருந்தும் அசல் தடம் இல்லாதபோது வசன வரிப் பொத்தானும் C குறுக்குவழியும் விரும்பும் வசன வரி மொழிக்கு தானாக மொழிபெயர்த்த தடத்துக்கு முன்னுரிமை அளிக்கும்.
+    Use Quick Playback Speed Bar: வலப்புற இயக்கிக் கட்டுப்பாடுகளில் விரைவு இயக்க வேகப் பட்டையைக் காட்டும். ஒவ்வொரு சேனலுக்கும் இயக்க வேகத்தைக் கைமுறையாகச் சேமிப்பது இயக்கப்பட்டிருந்தால், தற்போதைய சேனலின் வேகத்தைச் சேமிக்கும் பொத்தானும் பட்டையில் இருக்கும்.
+    Multiply Seek Interval by Playback Rate: இயக்கப்பட்டால், நகர்த்தல் இடைவெளிகள் (அம்புக்குறி விசைகள் மற்றும் J/L) தற்போதைய இயக்க வேகத்தால் பெருக்கப்படும். முடக்கப்பட்டால், இயக்க வேகத்தைப் பொருட்படுத்தாமல் இடைவெளிகள் மாறாது.
+    Show Playback Rate Adjusted Timestamp: இயக்கப்பட்டு இயக்க வேகம் 1x-இலிருந்து வேறுபட்டால், இயல்பான நேரக் குறிப்புக்குப் பிறகு அடைப்புக்குறிக்குள் இயக்க வேகத்திற்கேற்பச் சரிசெய்த நேரக் குறிப்பை இயக்கி காட்டும்.
+    Use YouTube-style Shorts: சந்தா மற்றும் சேனல் பக்கங்களில் Shorts-ஐ செங்குத்துக் கட்டத்தில் காட்டி, YouTube பாணி Shorts இயக்கியைப் பயன்படுத்தும்.
+    Loop Shorts: இயக்கப்பட்டால் Shorts தானாக மீண்டும் தொடங்கும். முடக்கப்பட்டால் முடிவில் நின்று, மறுஇயக்கப் பொத்தானைக் காட்டும்.
+    Show Skip Silence Toggle: இயக்கி அமைப்பு மெனுவில் அமைதியைத் தவிர்ப்பதற்கான இயக்கு/முடக்கு நிலைமாற்றியைக் காட்டும்.
+    Enable Skip Silence by Default: புதிய தாவல்களுக்கு அமைதியைத் தவிர்ப்பதை இயக்கும். ஒரு தாவலில் மாற்றுவது மற்ற தாவல்களைப் பாதிக்காது.
+    Enable Video Zoom: இயக்கி அமைப்பு மெனுவில் பெரிதாக்கக் கட்டுப்பாட்டைக் காட்டி, அதன் விசைப்பலகைக் குறுக்குவழிகளையும் நகர்த்தல் கட்டுப்பாடுகளையும் இயக்கும்.
+    Enable Seek History: செயலி மூடப்படும் வரை ஒவ்வொரு காணொளியிலும் நீங்கள் எங்கிருந்து நகர்ந்தீர்கள் என்பதை நினைவில் வைக்கிறது. பிளேயரின் அமைப்புகள் மெனுவில் நகர்வு வரலாற்றுப் பட்டியலைக் காட்டி, அதன் விசைப்பலகைக் குறுக்குவழிகளை இயக்குகிறது.
+    Voice-over Translation: நீங்கள் மொழிபெயர்ப்பைக் கோரும்போது காணொளி ID, கால அளவு மற்றும் தேர்ந்தெடுத்த மொழியை அதிகாரப்பூர்வமற்ற Yandex குரல்வழி மொழிபெயர்ப்புச் சேவைக்கு அனுப்பும். இயல்பாக முடக்கப்பட்டுள்ளது.
+    Hold to Double Playback Speed: தற்போதைய இயக்க வேகத்தைத் தற்காலிகமாக இரட்டிப்பாக்க, இயக்கியின் மேல் Spacebar அல்லது இடது சுட்டிப் பொத்தானை அழுத்திப் பிடிக்கவும்.
+    Ambient Mode: காணொளியின் நிறங்களை இயக்கியைச் சுற்றியுள்ள பகுதியில் கலக்கும்.
+    Default Volume: ஒலியளவை நினைவில் கொள் இயக்கப்பட்டிருக்கும்போது இது முடக்கப்படும். ஒவ்வொரு காணொளிக்கும் நிலையான தொடக்க ஒலியளவை அமைக்க ஒலியளவை நினைவில் கொள் என்பதை முடக்கவும்.
+    Parallel Segment Loading: |
+      இயக்கத்திற்கு முன்னதாக ஒரே நேரத்தில் எத்தனை காணொளி மற்றும் ஒலிப் பகுதிகளை ஏற்ற வேண்டும்.
+      அதிக மதிப்புகள் மெதுவான அல்லது நிலையற்ற இணைப்புகளில் உதவலாம். ஆனால் அதிக அலைவரிசையையும் நினைவகத்தையும் பயன்படுத்தும்.
+      இணைப்பு வேகத்தைத் தானியக்கத் தேர்வு குறைவாக மதிப்பிட்டு, குறைந்த தரத்தைத் தேர்ந்தெடுக்கவும் அவை காரணமாகலாம்.
+      ஒரே நேரத்தில் ஒரு கோரிக்கைக்கு வரம்பிடப்பட்ட ஸ்ட்ரீம்கள் இந்த அமைப்பைப் பொருட்படுத்தாது.
+    Preload Upcoming Videos: "அடுத்த காணொளிகளின் yt-dlp முகவரிகளைப் பெற்று தற்காலிகமாக சேமிக்கிறது. வரிசைக்கு இயக்கப்பட்டியல் மற்றும் பரிந்துரைகளை விட முன்னுரிமை உண்டு."
+    Upcoming Videos to Preload: "பின்னணியில் yt-dlp முகவரிகள் பெறப்படும் அடுத்த காணொளிகளின் அதிகபட்ச எண்ணிக்கை."
+    Concurrent Preloads: "ஒரே நேரத்தில் காணொளிகளை முன் ஏற்றப் பயன்படுத்தப்படும் yt-dlp செயல்முறைகளின் அதிகபட்ச எண்ணிக்கை. அதிக மதிப்புகள் கூடுதல் CPU, நினைவகம் மற்றும் பிணைய அலைவரிசையைப் பயன்படுத்தும்."
+    Ignore System Rotation Lock for Fullscreen: Android தானியங்கிச் சுழற்சி முடக்கப்பட்டிருந்தாலும், சாதனத்தைச் சுழற்றி முழுத்திரைக்குச் செல்லவும் அதிலிருந்து வெளியேறவும் முடியும்.
+  Download Settings:
+    Download Folder: காணொளிகள் இந்தக் கோப்புறையில் சேமிக்கப்படும். உங்கள் கணினியின் பதிவிறக்கங்கள் கோப்புறையைப் பயன்படுத்தக் காலியாக விடவும்.
+    Global Additional yt-dlp Arguments: ஒவ்வொரு பதிவிறக்கத்திற்கும் yt-dlp-க்குக் கொடுக்கப்படும் கூடுதல் கட்டளைவரி அளவுருக்கள். எடுத்துக்காட்டு, --cookies-from-browser firefox.
+    Concurrent Downloads: ஒரே நேரத்தில் இயங்கக்கூடிய yt-dlp பணிகளின் அதிகபட்ச எண்ணிக்கை.
+    Bandwidth Limit: ஒரேநேரப் பணிகளுக்கு இடையே இந்த வரம்பைப் பிரித்து, வரிசையின் மொத்தப் பரிமாற்ற வேகத்தைக் கட்டுப்படுத்தும். வரம்பு வேண்டாமெனில் 0-ஐ உள்ளிடவும்.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX உங்கள் கணினியில் நிறுவிய yt-dlp-ஐப் பயன்படுத்தலாம் அல்லது தனக்கான yt-dlp நகலைப் பதிவிறக்கி நிர்வகிக்கலாம். அந்த நகல் பயனர் தரவுக் கோப்புறையில் சேமிக்கப்படும்.
+    yt-dlp Channel: OpenTubeX எந்த yt-dlp வெளியீட்டுச் சேனலைப் பதிவிறக்கி நிர்வகிக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும். பெரும்பாலான பயனர்களுக்கு Stable பரிந்துரைக்கப்படுகிறது.
+    FFmpeg Source: OpenTubeX உங்கள் கணினியில் நிறுவிய FFmpeg மற்றும் FFprobe-ஐப் பயன்படுத்தலாம் அல்லது தனக்கான நிலையான உருவாக்கங்களைப் பதிவிறக்கி நிர்வகிக்கலாம். அவை பயனர் தரவுக் கோப்புறையில் சேமிக்கப்படும்.
+    Managed Tool Updates: நிர்வகிக்கப்பட்ட கருவிகள் தானாகப் புதுப்பிக்க வேண்டுமா, புதுப்பிக்கும் முன் கேட்க வேண்டுமா அல்லது கைமுறைப் பொத்தான்கள் மூலம் மட்டும் புதுப்பிக்க வேண்டுமா என்பதைத் தேர்ந்தெடுக்கவும். விடுபட்ட கருவிகள் தேவைப்படும்போது பதிவிறக்கப்படும்.
+    yt-dlp Executable Path: இயல்பாக, PATH சூழல் மாறி மூலம் yt-dlp கிடைக்கும் என OpenTubeX கருதும். தேவைப்பட்டால் இங்கே தனிப்பயன் பாதையை அமைக்கலாம்.
+    Cookie Source: அங்கீகரித்த இயக்கத்திற்காக Netscape குக்கீ கோப்பையா அல்லது நிறுவிய உலாவியின் குக்கீகளையா yt-dlp படிக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.
+    Cookie File: அங்கீகரித்த இயக்கத்திற்காக Netscape வடிவிலான குக்கீ கோப்பைத் தேர்ந்தெடுக்கவும்.
+    Browser for Cookies: தேர்ந்தெடுத்த yt-dlp இயக்கக்கூடிய கோப்பிலிருந்து உலாவி ஆதரவு படிக்கப்படும். அங்கீகரித்த இயக்கம் கோரப்படும்போது இந்த உலாவியைப் படிக்குமாறு yt-dlp-யிடம் OpenTubeX கோரும்.
+    Browser Profile: விருப்பத்தேர்வான உலாவிச் சுயவிவரப் பெயர் அல்லது கோப்புறை. அண்மையில் அணுகிய சுயவிவரத்தைப் பயன்படுத்தக் காலியாக விடவும்.
+    Always Use Cookies: "பதிவிறக்கங்கள், வசனங்கள் மற்றும் yt-dlp ஸ்ட்ரீம்களைப் பிரித்தெடுக்கும் போதெல்லாம் கட்டமைக்கப்பட்ட குக்கீகளைப் பயன்படுத்தவும். இது ஸ்ட்ரீம் பிரித்தெடுக்கும் முறையை yt-dlp-க்கு மாற்றாது. yt-dlp தேர்ந்தெடுக்கப்பட்டால், கணக்குக்கு அணுகல் இருக்கும்போது YouTube Premium-இன் மேம்பட்ட பிட்வீதம் உட்பட கணக்குக்கு மட்டுமான வடிவங்கள் கிடைக்கலாம்."
+    FFmpeg Executable Path: தனித்தனி காணொளி மற்றும் ஒலி ஸ்ட்ரீம்களை ஒன்றிணைக்கவும் ஒலியை மாற்றவும் FFmpeg தேவை. இயல்பாக, PATH சூழல் மாறி மூலம் FFmpeg கிடைக்கும் என OpenTubeX கருதும். தேவைப்பட்டால் இங்கே தனிப்பயன் பாதையை அமைக்கலாம்.
+    Use cookies for subtitles: "வசன வரிகளுக்கும் தானியங்கி மொழிபெயர்ப்புகளுக்கும் அமைக்கப்பட்ட குக்கீகளைப் பயன்படுத்தவும். “எப்போதும் குக்கீகளைப் பயன்படுத்து” என்பதும் இதை இயக்கும்."
+  Distraction Free Settings:
+    Count Watch Time From: "\"எல்லா சாதனங்களும்\" விருப்பம் பார்வைப் புள்ளிவிவரங்களை ஒத்திசைக்கும் ஒவ்வொரு சாதனத்தையும் கணக்கிடுகிறது. \"இந்தச் சாதனம்\" இங்கே நீங்கள் பார்ப்பதை மட்டும் கணக்கிடுகிறது."
+    When a Limit Is Reached: "\"இயக்கத்தை இடைநிறுத்து\" விருப்பம் 15 நிமிடங்களைச் சேர்க்கவோ இன்றைக்கு வரம்பைப் புறக்கணிக்கவோ உதவுகிறது. அமைப்புகள் கடவுச்சொல் இருந்தால், அமைப்புகளில் மட்டுமே வரம்பை உயர்த்த முடியும்."
+    Grayscale: "காணொளிகள் உட்பட முழுச் செயலியையும் சாம்பல் நிறங்களில் காட்டுகிறது, இதனால் அது குறைவாகக் கவனத்தை ஈர்க்கும். \"உறங்கும் நேரத்தில்\" விருப்பம் உறங்கும் நேர நினைவூட்டலின் அட்டவணையைப் பின்பற்றும்."
+    Daily Watch Time Limit: "பார்வைப் புள்ளிவிவரங்களை ஒத்திசைக்கும் எல்லாச் சாதனங்களிலும் இன்று நீங்கள் பார்த்தவற்றை, Shorts உட்பட, கணக்கிடுகிறது."
+    Daily Shorts Limit: "இந்தச் சாதனத்தில் இன்று நீங்கள் பார்த்த Shorts-ஐக் கணக்கிடுகிறது."
+    Take a Break Reminder: "இவ்வளவு நேரம் பார்த்த பிறகு காணொளியை இடைநிறுத்துகிறது. 10 நிமிடங்கள் அல்லது அதற்கு மேலான இடைநிறுத்தம் கணக்கை மீண்டும் தொடங்குகிறது."
+    Bedtime Reminder: "தொடக்க மற்றும் முடிவு நேரங்களுக்கு இடையில் காணொளியை இடைநிறுத்தி, பார்ப்பதை நிறுத்த உங்களுக்கு நினைவூட்டுகிறது."
+    Shorten View Counts: YouTube ஏற்கெனவே முழுமைப்படுத்திய பார்வை, கருத்து மற்றும் கருத்து விருப்ப எண்ணிக்கைகளைச் சுருக்கமாகக் காட்டும். எடுத்துக்காட்டாக, 14,000 என்பதற்குப் பதில் 14K. துல்லியமான எண்ணிக்கைகள் எப்போதும் முழுமையாகக் காட்டப்படும்.
+  Subscription Settings:
+    Fetch Feed on Startup: இயக்கப்பட்டால், தொடக்கத்திலும் புதிய சாளரம் திறக்கப்படும்போதும் உங்கள் சந்தா ஊட்டத்தை OpenTubeX தானாகப் பெறும்.
+    Show New Content Feed: முந்தைய பெறுதலின்போது இல்லாத சந்தா ஊட்ட உருப்படிகளைக் கொண்ட புதியது தாவலைக் காட்டும்.
+    Enable RSS Feeds: சந்தாக்கள் பக்கத்தில் RSS அல்லது Atom ஊட்டங்களின் உருப்படிகளுடன் RSS தாவலைக் காட்டும், இதனால் பிற தளங்களில் உள்ள படைப்பாளர்களைப் பின்தொடரலாம். அதன் உருப்படிகள் yt-dlp மூலம் திறக்கப்படும்.
+    Show New Content Indicators: முந்தைய பெறுதலின்போது இல்லாத சந்தா ஊட்ட உருப்படிகளுக்கு அருகில் ஒரு சிறிய புள்ளியைக் காட்டும்.
+    Show Scheduled Live Streams / Premieres First: வரவிருக்கும் நேரலைகளையும் முதல் காட்சிகளையும் சந்தா ஊட்டத்தின் மேலே வைத்திருக்கும். முடக்கப்பட்டால் அவை தொடங்கும் வரை அறிவிக்கப்பட்ட இடத்திலேயே இருக்கும். ஏற்கெனவே திட்டமிட்ட உள்ளீடுகளின் அறிவிப்புத் தேதிகளைப் பெற, முடக்கிய பிறகு சந்தா ஊட்டத்தை ஒருமுறை புதுப்பிக்கவும்.
+    Auto Refresh Interval: "செயலி திறந்திருக்கும் போது உங்கள் சந்தா ஊட்டத்தை OpenTubeX எவ்வளவு இடைவெளியில் தானாகப் புதுப்பிக்க வேண்டும். Android-இல், பூஜ்ஜியமற்ற இடைவெளி செயலி மூடப்பட்டிருக்கும்போதும் ஊட்டத்தைப் புதுப்பிக்கும்."
+    Refresh Subscriptions While App Is Closed: "தேர்ந்தெடுத்த அமைப்புகளின்படி ஊட்டங்களைப் புதுப்பிக்கும். கணினியில், நீங்கள் வெளியேறும் வரை OpenTubeX கணினித் தட்டில் இருக்கும். பின்னணிப் புதுப்பிப்புகள் இயங்கும் நேரத்தை Android கட்டுப்படுத்தும்."
+    Notify About New Uploads: சந்தா அமைப்புகளில் அறிவிப்புகளை இயக்கிய சேனல்களுக்கு இந்தச் சாதனத்தில் கணினி அறிவிப்புகளைக் காட்டுகிறது. சந்தாக்கள் புதுப்பிக்கப்படும்போது OpenTubeX புதிய உள்ளடக்கத்தைச் சரிபார்க்கிறது, எனவே தானியக்கப் புதுப்பிப்பு இடைவெளியைத் தேர்ந்தெடுக்கவும். செயலி மூடியிருக்கும்போதும் அறிவிப்புகளைப் பெற, செயலி மூடியிருக்கும்போது புதுப்பித்தலையும் இயக்கவும்.
+    RSS Feeds Auto Refresh Interval: பயன்பாடு திறந்திருக்கும்போது OpenTubeX உங்கள் RSS ஊட்டங்களை எவ்வளவு அடிக்கடி தானாகப் புதுப்பிக்கிறது என்பது.
+  Theme Settings:
+    Only Show Important Notifications: ஒரு செயலை உறுதிப்படுத்தும் அல்லது நிலையைத் தெரிவிக்கும் பயன்பாட்டு அறிவிப்புகளை மறைக்கிறது. பிழைகள், எச்சரிக்கைகள், நீங்கள் அமைத்த நினைவூட்டல்கள் மற்றும் செயல்தவிர் போன்ற செயலை வழங்கும் அறிவிப்புகள் தொடர்ந்து தோன்றும். சந்தாக்களைப் புதுப்பித்தல் போன்ற பின்னணி செயல்பாடுகளின் முன்னேற்றம் அறிவிப்புக்குப் பதிலாக பொது முன்னேற்றப் பட்டியில் காட்டப்படும். கணினி அறிவிப்புகள் பாதிக்கப்படாது.
+    Visible Search Suggestions: "தேடல் பட்டியை உருட்ட வேண்டிய முன் அது எத்தனை தேடல் வரலாற்றுப் பதிவுகளையும் பரிந்துரைகளையும் காட்டும் என்பதை அமைக்கிறது. பட்டியல் ஒருபோதும் சாளரத்தின் கீழ் விளிம்பைத் தாண்டாது."
+    Thumbnail Size: "கட்டங்களிலும் பட்டியல்களிலும் உள்ள காணொளி சிறுபடங்களின் அளவை மாற்றுகிறது. நிலையான நெடுவரிசை எண்ணிக்கை அல்லது முழு அகலக் காட்சி கொண்ட கட்டங்கள் அதற்குப் பதிலாக ஒவ்வொரு வரிசையையும் நிரப்பும், எனவே அங்கு பட்டியல் சிறுபடங்களையும் Shorts-ஐயும் மட்டுமே மாற்றும். தொலைபேசி அளவிலான சாளரங்களில் கட்ட சிறுபடங்கள் 100% வரை மட்டுமே."
+    Playlist Thumbnail Size: "பிளேலிஸ்ட் பக்கங்களில் உள்ள காணொளி சிறுபடங்களின் அளவை மாற்றுகிறது. நிலையான நெடுவரிசை எண்ணிக்கை அல்லது முழு அகலக் காட்சி கொண்ட கட்டங்கள் அதற்குப் பதிலாக ஒவ்வொரு வரிசையையும் நிரப்பும், எனவே அங்கு பட்டியல் சிறுபடங்களையும் Shorts-ஐயும் மட்டுமே மாற்றும். தொலைபேசி அளவிலான சாளரங்களில் கட்ட சிறுபடங்கள் 100% வரை மட்டுமே."
+    Compact Settings Categories: "விளக்கங்களை மறைத்து அமைப்பு வகைகளின் உயரத்தைக் குறைக்கிறது."
+    Show Progress as Notification: பொதுவான முன்னேற்றப் பட்டையைப் பயன்படுத்தாமல், சந்தா புதுப்பிப்புகள் மற்றும் நிர்வகிக்கப்பட்ட கருவிப் பதிவிறக்கங்கள் போன்ற பின்னணிச் செயல்களின் நேரடி முன்னேற்றத்துடன் நிலையான அறிவிப்பைக் காட்டும்.
+    Always Show Scrollbars: உருள் பட்டைகளை எப்போதும் தெரியும்படி வைத்திருக்கும். முடக்கப்பட்டால் சுட்டியை நகர்த்துவதை நிறுத்திய சிறிது நேரத்தில் அவை மறைந்து, மீண்டும் நகர்த்தியவுடன் தோன்றும்.
+    Scroll Speed: சுட்டிச் சக்கரம் மற்றும் தொடுதள உருள் சைகைகள் எவ்வளவு தூரம் உருளும் என்பதை மாற்றும்.
+    Use Fixed Tab Width: கிடைமட்டத் தாவல் பட்டையில் ஒவ்வொரு தாவலுக்கும் அதன் தலைப்புக்கேற்ப அளவிடாமல் ஒரே அகலத்தை வழங்கும்.
+    Use Custom Title Bar: செங்குத்து இடத்தைச் சேமிக்க, கணினியின் தலைப்புப் பட்டைக்குப் பதிலாகத் தாவல் பட்டையை, அல்லது தாவல்கள் மேலே இல்லாதபோது மேல் வழிசெலுத்தலைக் காட்டும். சாளரக் கட்டுப்பாடுகள் அந்தப் பட்டையின் மூலையில் தோன்றும்.
+    Use Grid Player Menu: காணொளி இயக்கியின் அமைப்பு மெனுவை வரிசைப் பட்டியலுக்குப் பதிலாக ஓடுகளின் கட்டமாக அமைக்கும்.
+  Experimental Settings:
+    Disable Hardware Acceleration: GPU வன்பொருள் முடுக்கத்தை முடக்குகிறது. வரைகலைச் சிக்கல்களைச் சரிசெய்யலாம், ஆனால் செயல்திறன் குறையக்கூடும்.
+The playlist is at the beginning. Enable loop to continue playing: பிளேலிஸ்ட் தொடக்கத்தில் உள்ளது. தொடர்ந்து இயக்கச் சுழற்சியை இயக்கு
+External link opening has been disabled in Settings → Privacy: அமைப்புகள் → தனியுரிமை என்பதில் வெளிப்புற இணைப்புகளைத் திறப்பது முடக்கப்பட்டுள்ளது
+Screenshot Clipboard Success: திரைப்பிடிப்பு இடைநிலைப் பலகையில் சேமிக்கப்பட்டது
+Screenshot Clipboard Error: திரைப்பிடிப்பை இடைநிலைப் பலகைக்கு நகலெடுக்க முடியவில்லை
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: விரைவான புத்தகக்குறி பிளேலிஸ்ட்டில் சேர் அல்லது அதிலிருந்து நீக்கு
+  Reopen Closed Window: கடைசியாக மூடிய சாளரத்தை மீண்டும் திறக்கவும்
+  Edit Hint: குறுக்குவழியைத் தேர்ந்தெடுத்து, புதிய விசைச் சேர்க்கையை அழுத்தவும். ஒதுக்கீட்டை நீக்க Backspace அல்லது Delete-ஐ அழுத்தவும்.
+  Change Shortcut: '{action} செயலுக்கான குறுக்குவழியை மாற்று'
+  Press Shortcut: குறுக்குவழியை அழுத்தவும்…
+  Unassigned: ஒதுக்கப்படவில்லை
+  Reset Shortcut: '{action} செயலுக்கான குறுக்குவழியை மீட்டமை'
+  Reset to Defaults: இயல்புநிலைகளுக்கு மீட்டமை
+  Shortcut Already Assigned: குறுக்குவழி ஏற்கெனவே ஒதுக்கப்பட்டுள்ளது
+  Shortcut Conflict: '{shortcut} ஏற்கெனவே {actions} செயல்களுக்கு ஒதுக்கப்பட்டுள்ளது. அதை மீண்டும் ஒதுக்கவா?'
+  Reserved Shortcut Conflict: '{shortcut}, {actions} செயல்களுக்கு ஒதுக்கப்பட்டிருப்பதால் அதை மீண்டும் ஒதுக்க முடியாது.'
+  Reassign: மீண்டும் ஒதுக்கு
+  Sections:
+    App:
+      Tabs: "செயலி:\_தாவல்கள்"
+      Search and Page: "செயலி:\_தேடலும் பக்கமும்"
+      Window and View: "செயலி:\_சாளரமும் காட்சியும்"
+  New Tab: புதிய தாவலை உருவாக்கு
+  Close Tab: தற்போதைய தாவலை மூடு
+  Reload Tab: தற்போதைய தாவலை மீண்டும் ஏற்று
+  Reopen Closed Tab: கடைசியாக மூடிய தாவலை மீண்டும் திற
+  Next Tab: அடுத்த தாவலுக்கு மாறு
+  Previous Tab: முந்தைய தாவலுக்கு மாறு
+  Switch to Tab: 1–9 தாவலுக்கு மாறு
+  Toggle Tab Orientation: தாவல் தளவமைப்புகளுக்கு இடையே மாறு
+  Find in Page: தற்போதைய பக்கத்தில் உரையைத் தேடு
+  Find Next Match: அடுத்த பொருத்தத்திற்குச் செல்
+  Find Previous Match: முந்தைய பொருத்தத்திற்குச் செல்
+  Toggle Normal Playback Speed: 1x வேகத்திற்கும் முந்தைய இயக்க வேகத்திற்கும் இடையே மாறு
+  Toggle Skip Silence: அமைதியைத் தவிர்ப்பதை நிலைமாற்று
+  Set A-B Repeat Point A: A-B மீளியக்க A புள்ளியை அமை
+  Set A-B Repeat Point B: A-B மீளியக்க B புள்ளியை அமை
+  Clear A-B Repeat: A-B மீளியக்கத்தை அழி
+  Video Zoom In: காணொளியைப் பெரிதாக்கு
+  Video Zoom Out: காணொளியைச் சிறிதாக்கு
+  Tab Switcher: தாவல் மாற்றி
+  Undo Seek: கடைசி நகர்வைச் செயல்தவிர்
+  Redo Seek: செயல்தவிர்த்த நகர்வை மீண்டும் செய்
+CommandPalette:
+  Title: கட்டளைத் தட்டு
+  Open: கட்டளைத் தட்டைத் திற
+  Search Label: "கட்டளைகள், அமைப்புகள் மற்றும் உள்ளூர் காணொளிகளைத் தேடுங்கள்"
+  Search Placeholder: கட்டளைகள், அமைப்புகள் மற்றும் உள்ளூர் காணொளிகளைத் தேடுங்கள்…
+  Results: "முடிவுகள்"
+  No Results: "பொருந்தும் முடிவுகள் இல்லை"
+  Result Count: "முடிவுகள்: {count} | முடிவுகள்: {count}"
+  Move: நகர்த்து
+  Run: இயக்கு
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'தாவலுக்கு மாறு: {title}'
+  Switch Profile: 'சுயவிவரத்திற்கு மாறு: {name}'
+  Open Playlist: 'பிளேலிஸ்ட்டைத் திற: {name}'
+  Cancel Download: 'பதிவிறக்கத்தை ரத்துசெய்: {title}'
+  Groups:
+    App: செயலி
+    Navigation: வழிசெலுத்தல்
+    Tabs: தாவல்கள்
+    Local Videos: உள்ளூர் காணொளிகள்
+  Unavailable:
+    Current Page: ஏற்கெனவே இந்தப் பக்கத்தில் உள்ளீர்கள்
+    No History: இந்தத் திசையில் பக்கம் இல்லை
+    Desktop: மேசைத்தளச் செயலியில் மட்டுமே கிடைக்கும்
+    Build: இந்த உருவாக்கத்தில் கிடைக்காது
+    One Tab: முதலில் மற்றொரு தாவலைத் திறக்கவும்
+    Active Tab: இது செயலிலுள்ள தாவல்
+    Active Profile: இது செயலிலுள்ள சுயவிவரம்
+    Download Finished: இந்தப் பதிவிறக்கம் இனி இயங்கவில்லை
+    Video: முதலில் ஒரு காணொளியைத் திறக்கவும்
+Downloads:
+  Search Completed: "தலைப்பு அல்லது சேனல் மூலம் முடிந்த பதிவிறக்கங்களைத் தேடு"
+  Format: "வடிவம்"
+  All Formats: "அனைத்து வடிவங்களும்"
+  Largest First: "பெரியவை முதலில்"
+  Smallest First: "சிறியவை முதலில்"
+  No Matching Downloads: "பொருந்தும் முடிந்த பதிவிறக்கங்கள் இல்லை. வேறு தேடல் அல்லது வடிகட்டியை முயற்சிக்கவும்."
+  Add Download: பதிவிறக்கத்தைச் சேர்
+  Preparing: தயாராகிறது…
+  Export Failed: "பதிவிறக்கிய கோப்பைச் சேமிக்க முடியவில்லை. எழுத அனுமதியுள்ள பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடுத்து மீண்டும் முயற்சிக்கவும்."
+  Remove File Permanently Warning: "இது \"{title}\" என்பதை நிரந்தரமாக நீக்கும்."
+  Download: பதிவிறக்கு
+  Download Video: காணொளியைப் பதிவிறக்கு
+  Download Playlist: பிளேலிஸ்ட்டைப் பதிவிறக்கு
+  Downloading: பதிவிறக்கப்படுகிறது
+  Queue: வரிசை
+  Downloaded: பதிவிறக்கப்பட்டது
+  Canceled: ரத்துசெய்யப்பட்டது
+  Open Downloads: பதிவிறக்கங்களைத் திற
+  No Downloads: இன்னும் பதிவிறக்கங்கள் இல்லை
+  No Downloads Description: நீங்கள் தொடங்கும் பதிவிறக்கங்கள் இங்கே தோன்றும்.
+  Clear Failed Canceled Skipped And Missing: தோல்வியடைந்த, ரத்துசெய்த, தவிர்த்த மற்றும் காணாமல் போனவற்றை அழி
+  Clear From List: பட்டியலிலிருந்து அழி
+  Show in Folder: கோப்புறையில் காட்டு
+  Play Download: பதிவிறக்கத்தை இயக்கு
+  Retry Download: பதிவிறக்கத்தை மீண்டும் முயல்
+  Pause Download: பதிவிறக்கத்தை இடைநிறுத்து
+  Resume Download: பதிவிறக்கத்தைத் தொடர்
+  Move Earlier: முன்னால் நகர்த்து
+  Move Later: பின்னால் நகர்த்து
+  Pause All: அனைத்தையும் இடைநிறுத்து
+  Resume All: அனைத்தையும் தொடர்
+  Retry All: தோல்வியடைந்த எல்லாப் பதிவிறக்கங்களையும் மீண்டும் முயல்
+  Total Size: 'மொத்த அளவு: {size}'
+  Local File: உள்ளகக் கோப்பு
+  Available Offline: இணையமின்றிக் கிடைக்கும்
+  Remove File: கோப்பை அகற்று
+  Remove File Confirmation: பதிவிறக்கிய கோப்பை அகற்றவா?
+  Remove File Warning: இது "{title}" கோப்பை உங்கள் சாதனத்தின் குப்பைக்கு நகர்த்தும்.
+  File Not Found: பதிவிறக்கிய கோப்பைக் கண்டுபிடிக்க முடியவில்லை.
+  Download Missing: பதிவிறக்கம் கிடைக்கவில்லை
+  Files Missing: பதிவிறக்கிய கோப்பு இனி கோப்பு முறைமையில் கிடைக்கவில்லை. | பதிவிறக்கிய கோப்புகள் இனி கோப்பு முறைமையில் கிடைக்கவில்லை.
+  Files Available: பதிவிறக்கிய {total} கோப்புகளில் {available} கிடைக்கின்றன.
+  More Files: மேலும் 1 கோப்பு | மேலும் {count} கோப்புகள்
+  Template Used: 'வார்ப்புரு: {name}'
+  Download Type: பதிவிறக்க வகை
+  Template: வார்ப்புரு
+  Unsaved: சேமிக்கப்படவில்லை
+  Media Type: ஊடக வகை
+  Video: காணொளி
+  Audio: ஒலி
+  Maximum Resolution: அதிகபட்சத் தெளிவுத்திறன்
+  Best Available: கிடைப்பதில் சிறந்தது
+  Automatic: தானியக்கம்
+  Container: கொள்கலன்
+  Video Codec: காணொளிக் கோடெக்
+  Audio Codec: ஒலிக் கோடெக்
+  File Name Template: கோப்புப் பெயர் வார்ப்புரு
+  File Name Template Help: 'கிடைக்கும் புலங்கள்: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: நேர வரம்பும் அத்தியாயங்களும்
+  Start Time: தொடக்க நேரம்
+  End Time: முடிவு நேரம்
+  Split by Chapters: அத்தியாயம் வாரியாகத் தனிக் கோப்புகளாகப் பிரி
+  Remove Segments: பகுதிகளை அகற்று
+  Subtitles and Metadata: துணைத்தலைப்புகளும் மெட்டாதரவும்
+  Include Subtitles: துணைத்தலைப்புகளைச் சேர்
+  Embed Subtitles: ஊடகக் கோப்பில் துணைத்தலைப்புகளைப் பொதி
+  Subtitle Format: துணைத்தலைப்பு வடிவம்
+  Subtitle Languages: துணைத்தலைப்பு மொழிகள்
+  Subtitle Languages Help: 'காற்புள்ளியால் பிரித்த yt-dlp மொழித் தேர்விகள். எடுத்துக்காட்டு: en.*,de.*'
+  Embed Cover Art: சிறுபடத்தை அட்டைப் படமாகப் பொதி
+  Embed Metadata: தலைப்பு, ஆசிரியர், விளக்கம் மற்றும் அத்தியாயங்களைப் பொதி
+  Additional yt-dlp Arguments: கூடுதல் yt-dlp அளவுருக்கள்
+  Custom yt-dlp Arguments: தனிப்பயன் yt-dlp அளவுருக்கள்
+  Template Name: வார்ப்புருப் பெயர்
+  Save Template: வார்ப்புருவைச் சேமி
+  Delete Template: வார்ப்புருவை நீக்கு
+  Template Saved: பதிவிறக்க வார்ப்புரு "{name}" சேமிக்கப்பட்டது
+  Template Name Exists: '"{name}" என்ற பதிவிறக்க வார்ப்புரு ஏற்கெனவே உள்ளது.'
+  Choose Folder: மாற்று
+  Select Folder: கோப்புறையைத் தேர்ந்தெடு
+  Folder Required: பதிவிறக்கங்களை இயக்க ஒரு பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடுக்கவும்.
+  System Downloads Folder: கணினிப் பதிவிறக்கங்கள் கோப்புறை
+  Processing: செயலாக்கப்படுகிறது…
+  Queued: வரிசையில் உள்ளது
+  Queued Position: வரிசையில், இடம் {position}
+  Paused: இடைநிறுத்தப்பட்டது
+  Pausing: தற்போதைய பணி முடிந்ததும் வரிசை இடைநிறுத்தப்படும்
+  Download Complete: பதிவிறக்கம் முடிந்தது
+  Download Cancelled: பதிவிறக்கம் ரத்துசெய்யப்பட்டது
+  Download Failed: பதிவிறக்கம் தோல்வியடைந்தது
+  File Name Shortened: காணொளித் தலைப்பு மிக நீளமாக இருந்ததால் கோப்புப் பெயர் சுருக்கப்பட்டது.
+  Insufficient Disk Space: வட்டில் போதிய இடமில்லை. சுமார் {required} தேவை; {available} கிடைக்கிறது.
+  Unknown Download Size: பதிவிறக்க அளவு தெரியவில்லை. இலக்குக் கோப்பு முறைமையில் {available} கிடைக்கிறது.
+  Disk Space Check Unavailable: இந்தப் பதிவிறக்கத்தைத் தொடங்கும் முன் கிடைக்கும் வட்டு இடத்தைச் சரிபார்க்க முடியவில்லை.
+  Download Failure Hint: '{issuesLink}-ஐச் சரிபார்த்து, அமைப்புகள் → மேம்பட்டவை → வெளிப்புற மென்பொருள் என்பதில் yt-dlp சேனலை Nightly அல்லது Master-க்கு மாற்றி முயலவும்.'
+  yt-dlp YouTube Issues: YouTube-க்கான அண்மைய yt-dlp சிக்கல்கள்
+  Automatic Download Started: தானியக்கப் பதிவிறக்கம் தொடங்கியது
+  Automatic Download Started Body: '{channel}-இலிருந்து "{title}" பின்னணியில் பதிவிறக்கப்படுகிறது.'
+  Automatic Download Complete: தானியக்கப் பதிவிறக்கம் முடிந்தது
+  Automatic Download Failed: தானியக்கப் பதிவிறக்கம் தோல்வியடைந்தது
+  Automatic Download Could Not Start: '"{title}" தானியக்கப் பதிவிறக்கத்தைத் தொடங்க முடியவில்லை.'
+  Automatic Download Skipped: தானியக்கப் பதிவிறக்க வடிப்பான்களால் தவிர்க்கப்பட்டது
+  Cancel Download: பதிவிறக்கத்தை ரத்துசெய்
+  yt-dlp Not Found: yt-dlp கிடைக்கவில்லை. அதை நிறுவவும் அல்லது அமைப்புகள் → மேம்பட்டவை → வெளிப்புற மென்பொருள் என்பதில் அதன் பாதையை அமைக்கவும்.
+  Download Complete Template: '"{title}" பதிவிறக்கம் முடிந்தது'
+  Download Failed Template: '"{title}" பதிவிறக்கம் தோல்வியடைந்தது'
+  Templates:
+    Video Best: காணொளி - சிறந்த தரம்
+    Video Resolution: காணொளி - {resolution}
+    Audio Best: ஒலி - சிறந்த தரம்
+    Audio Format: ஒலி - {format}
+    Subtitles Format: துணைத்தலைப்புகள் - {format}
+  Waiting for Unmetered Network: "அளவிடப்படாத நெட்வொர்க்கிற்காகக் காத்திருக்கிறது"
+  Waiting for Charging: "சார்ஜருக்காகக் காத்திருக்கிறது"
+  Remove File Failed: பதிவிறக்கிய கோப்பை அகற்ற முடியவில்லை.
+Channels:
+  Load More Channels: "மேலும் சேனல்களை ஏற்று"
+Search Bar:
+  Use Suggestion: பரிந்துரையைப் பயன்படுத்து
+  Open Search Container: தேடல் பெட்டியைத் திற
+  Search: தேடு
+Theme Discovery:
+  Discover Themes: "தீம்களைக் கண்டறி"
+  Refresh: "புதுப்பி"
+  View on GitHub: "GitHub இல் காண்க"
+  Load Error: "தீம்களை ஏற்ற முடியவில்லை. புதுப்பித்து முயற்சிக்கவும்."
+  Loading: "ஏற்றுகிறது…"
+  No Themes: "நிறுவக்கூடிய தீம்கள் எதுவும் இல்லை."
+  No Preview: "திரைப்பிடிப்பு கிடைக்கவில்லை"
+  Load More: "மேலும் ஏற்று"
+  Applied: "பயன்படுத்தப்பட்டது"
+  Apply Theme: "தீமைப் பயன்படுத்து"
+  Install and Apply: "நிறுவிப் பயன்படுத்து"
+  Update and Apply: "புதுப்பித்துப் பயன்படுத்து"
+
+Connection:
+  Offline: இணைய இணைப்பு இல்லை
+  Reconnecting: "இணைப்பு துண்டிக்கப்பட்டது. மீண்டும் இணைக்க முயல்கிறது…"
+  Back Online: "மீண்டும் இணையத்தில்"
+
+App Icon:
+  Restart: "செயலியை மீண்டும் தொடங்கு"
+  Saved Message: "சின்னம் சேமிக்கப்பட்டது. உங்கள் முகப்புத் திரை புதுப்பிக்கச் சிறிது நேரம் ஆகலாம்."
+  Title: "செயலி சின்னம்"
+  Error: "செயலி சின்னத்தை ஏற்றவோ மாற்றவோ முடியவில்லை"
+
+Tray:
+  Hide All Windows: "அனைத்து சாளரங்களையும் மறை"
+  Show All Windows: "அனைத்து சாளரங்களையும் காட்டு"
+
+Tray Icon:
+  Title: "கணினித் தட்டு சின்னம்"
+  Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
+
+Form Inputs:
+  Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
+  Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
+  Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
+  Encryption Passphrase Hint: "உங்கள் குறியாக்கக் கடவுச்சொற்றொடரை உள்ளிடவும்"
+  Show Password: "கடவுச்சொல்லைக் காட்டு"
+  Hide Password: "கடவுச்சொல்லை மறை"
+  Search Text Hint: "தேடல் சொற்களை உள்ளிடவும்"
+  Playlist Description Hint: "இந்த இயக்கப்பட்டியலை விவரிக்கவும்"
+  Filename Preview: "கோப்புப் பெயர் முன்னோட்டம்"
+  Enter Channels: "சேனல்களை உள்ளிடவும்"
+  Enter Text: "உரையை உள்ளிடவும்"
+  Video URL: வீடியோ அல்லது இயக்கப்பட்டியல் URL
+  Paste Link: வீடியோ அல்லது இயக்கப்பட்டியல் இணைப்பை ஒட்டவும்
+  Example: எ.கா. {example}
+  No Minimum: குறைந்தபட்சம் இல்லை
+  No Maximum: அதிகபட்சம் இல்லை
+  Any Age: எந்த வயதும்
+  Included Terms Example: எ.கா. பயிற்சி, விமர்சனம்
+  Excluded Terms Example: எ.கா. முன்னோட்டம், அறிமுகம்
+  Download Folder Hint: பதிவிறக்கக் கோப்புறையைப் பயன்படுத்த காலியாக விடவும்
+  Global Arguments Hint: ஒவ்வொரு பதிவிறக்கத்திற்கும் விருப்ப வாதங்கள்
+  Unlimited Hint: வரம்பற்றதற்கு 0
+  Add Argument: ஒரு வாதத்தைச் சேர்க்கவும்
+  Template Name Example: எ.கா. ஒலி மட்டும்
+  Download Arguments Hint: இந்தப் பதிவிறக்கத்திற்கான விருப்ப வாதங்கள்
+  Generated ID Hint: ID உருவாக்க காலியாக விடவும்
+  Default Value: "இயல்புநிலை: {value}"
+
+Storage Startup Error:
+  Title: "செயலித் தரவை ஏற்ற முடியவில்லை"
+  Message: "சாதனத்தில் சேமிப்பிடத்தை விடுவித்து மீண்டும் முயற்சிக்கவும். உங்கள் தரவு ஏற்றப்படும் வரை ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது."
+  Retry: "மீண்டும் முயற்சி"
+Native Permissions:
+  Local Network Denied: "அருகிலுள்ள சாதனங்களுக்கான அனுமதி மறுக்கப்பட்டது."
+  Local Network: "உங்கள் உள்ளூர் வலையமைப்பில் சாதனங்களைக் கண்டறிந்து அவற்றுக்கு காணொளிகளை அனுப்பவும், சாதனங்களுக்கு இடையே அமைப்புகள் மற்றும் தரவை ஒத்திசைக்கவும்."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "முகப்பு"
+  subscriptions: "சந்தா"
+  userplaylists: "பட்டியல்"
+  history: "வரலாறு"
+  subscribedchannels: "சேனல்"
+  trending: "போக்கு"
+  popular: "பிரபலம்"
+  stats: "புள்ளிவி."
+  more: "மேலும்"
+
+Installer:
+  Create Desktop Shortcut: பணிமேடையில் குறுக்குவழியை உருவாக்கு
+Older Version Changes:
+  Title: "பழைய பதிப்பிலிருந்து மாற்றங்கள்"
+  Message: "OpenTubeX இன் பழைய பதிப்பில் நீங்கள் செய்த மாற்றங்கள் உங்கள் நூலகத்தில் பயன்படுத்தப்பட்டன."
+  Detail: "ஒரு உருப்படி இரண்டு பதிப்புகளிலும் மாற்றப்பட்டிருந்தால், பழைய பதிப்பின் மாற்றம் வைக்கப்பட்டது. உங்கள் முந்தைய நூலகத்தின் காப்புப்பிரதி உங்கள் சுயவிவரக் கோப்புறையில் உள்ளது."
+Library Format Changed:
+  Title: "நூலகம் புதிய வடிவத்திற்கு மாற்றப்பட்டது"
+  Message: "உங்கள் நூலகம் இப்போது புதிய சேமிப்பக வடிவத்தைப் பயன்படுத்துகிறது."
+  Detail: "OpenTubeX இன் பழைய பதிப்புகள் உங்கள் நூலகத்தை இன்னும் திறக்கலாம், ஆனால் இந்த புதுப்பிப்புக்கு முன்பு இருந்தபடியே காட்டும். பழைய பதிப்பில் நீங்கள் செய்யும் மாற்றங்கள் இந்தப் பதிப்புக்குத் திரும்பும்போது சேர்க்கப்படும்."
+Invidious Fallback Warning: "இந்தக் கோரிக்கை நீங்கள் கட்டமைத்த Invidious சேவையகத்தைத் தவிர்த்து நேரடியாக YouTube உடன் இணைகிறது. இதனால் உங்கள் IP முகவரி வெளிப்படும்."
+Automatically unloaded to free memory: "நினைவகத்தை விடுவிக்கத் தானாக அகற்றப்பட்டது"
+Home Widgets:
+  Continue Watching: "தொடர்ந்து பார்க்கவும்"
+  Continue Watching Description: "பார்க்கத் தொடங்கிய வீடியோக்களைத் தொடரவும்"
+  Continue Watching Empty: "நீங்கள் பார்க்கத் தொடங்கும் வீடியோக்கள் இங்கே தோன்றும்"
+  Quick Access: "விரைவு அணுகல்"
+  Quick Access Description: "தேடல், சந்தாக்கள் அல்லது பின்னர் பார்க்க என்பதைத் திறக்கவும்"
+  Search: "தேடு"
+  Subscriptions: "சந்தாக்கள்"
+  Watch Later: "பின்னர் பார்க்க"
+Subscription Groups:
+  Groups: குழுக்கள்
+  All: அனைத்தும்
+  New Group: புதிய குழு
+  Edit Group: குழுவைத் திருத்து
+  Group Name: குழுப் பெயர்
+  Create: உருவாக்கு
+  Save: சேமி
+  Delete Group: குழுவை நீக்கு
+  Delete Prompt: '"{groupName}" குழுவை நீக்கவா? அதிலுள்ள சேனல்களுக்கான சந்தாக்கள் தொடரும்.'
+  Empty Group: இந்தக் குழுவில் தற்போதைய சுயவிவரத்தின் சேனல்கள் எதுவும் இல்லை.
+  Save Failed: குழுவைச் சேமிக்க முடியவில்லை.
+  Delete Failed: குழுவை நீக்க முடியவில்லை.
+  Group Icon: குழு சின்னம்
+  No Icon: சின்னம் இல்லை
+Yattee Server:
+  API Error (Click to copy): Yattee சேவையகப் பிழை (நகலெடுக்க சொடுக்கு செய்க)
+  Unsupported page: இந்தப் பக்கம் Yattee சேவையகத்துடன் கிடைக்காது. உள்ளக பநிஇ மூலம் இதை ஏற்ற “{fallbackSetting}” என்பதை இயக்கவும்.
+  Posts unavailable: Yattee சேவையகங்கள் இடுகைகளை வழங்குவதில்லை. உள்ளக பநிஇ மூலம் அவற்றை ஏற்ற “{fallbackSetting}” என்பதை இயக்கவும்.
+  Errors:
+    Invalid credentials: Yattee சேவையகம் பயனர்பெயரையோ கடவுச்சொல்லையோ நிராகரித்தது. அவற்றை அமைப்புகள் → மேம்பட்டவை என்பதில் சரிபார்க்கவும்.
+    Rate limited: அதிகமான தோல்வியுற்ற முயற்சிகள் காரணமாக Yattee சேவையகம் உள்நுழைவுகளைத் தடுக்கிறது. பின்னர் மீண்டும் முயலுங்கள்.
+    Streams not relayed: இந்த வீடியோவின் ஸ்ட்ரீம்களை Yattee சேவையகம் அனுப்பவில்லை. வீடியோக்கள் சேவையகம் வழியாக அனுப்பப்படும்போது OpenTubeX நேரடியாக YouTube உடன் இணைவதில்லை.
+    Not configured: அமைப்புகள் → மேம்பட்டவை என்பதில் உங்கள் Yattee சேவையகத்தின் URL-ஐ உள்ளிடவும்.
+    HTTPS required: HTTPS-ஐப் பயன்படுத்தும் Yattee சேவையகங்களிலிருந்து மட்டுமே Android வீடியோக்களை இயக்க முடியும்.
+    Streams unavailable: இந்தக் காணொளியின் ஓடைகளை Yattee சேவையகத்திலிருந்து ஏற்ற முடியவில்லை. சேவையகத்தைச் சரிபார்க்க அமைப்புகள் → மேம்பட்டவை என்பதில் “இணைப்பைச் சோதி” என்பதைப் பயன்படுத்தவும்.
+Yattee Fallback Warning: இந்தக் கோரிக்கை நீங்கள் கட்டமைத்த Yattee சேவையகத்தைத் தவிர்த்து நேரடியாக YouTube உடன் இணைகிறது. இதனால் உங்கள் IP முகவரி வெளிப்படும்.
+Update With Package Manager: '{packageManager} மூலம் புதுப்பிக்கவும்:'
+Update Command Copied: 'புதுப்பிப்புக் கட்டளை நகலெடுக்கப்பட்டது'
+Digital Wellbeing:
+  Watch time limit almost reached: "உங்கள் தினசரிப் பார்க்கும் நேர வரம்பில் {duration} மீதமுள்ளது"
+  Shorts limit almost reached: "உங்கள் தினசரி Shorts வரம்பில் {duration} மீதமுள்ளது"
+  Daily watch time limit reached: "தினசரிப் பார்க்கும் நேர வரம்பை எட்டியது"
+  Daily Shorts limit reached: "தினசரி Shorts வரம்பை எட்டியது"
+  Watched today: "இன்று நீங்கள் {duration} பார்த்துள்ளீர்கள்."
+  Shorts watched today: "இன்று நீங்கள் {duration} Shorts பார்த்துள்ளீர்கள்."
+  15 More Minutes: "இன்னும் 15 நிமிடங்கள்"
+  Ignore for Today: "இன்றைக்குப் புறக்கணி"
+  Time to take a break: "இடைவேளை எடுக்கும் நேரம்"
+  Watching for: "நீங்கள் {duration} நேரமாகப் பார்த்துக்கொண்டிருக்கிறீர்கள்."
+  Time for bed: "உறங்கும் நேரம் வந்துவிட்டது"
+  Bedtime started at: "உங்கள் உறங்கும் நேரம் {time} மணிக்குத் தொடங்கியது."
+  Remind Me in 10 Minutes: "10 நிமிடங்களில் நினைவூட்டு"
+Notification Center:
+  Notifications: "அறிவிப்புகள்"
+  Notifications With Unread: "அறிவிப்புகள் (படிக்காதவை: {count})"
+  Mark as Read: "படித்ததாகக் குறி"
+  Mark All as Read: "அனைத்தையும் படித்ததாகக் குறி"
+  Clear All: "அனைத்தையும் அழி"
+  Clear: "அழி"
+  Empty: "இன்னும் அறிவிப்புகள் இல்லை"
+  Empty Hint: "நேரலை நினைவூட்டல்களும் அறிவிப்புகள் இயக்கப்பட்ட சேனல்களின் புதிய பதிவேற்றங்களும் இங்கே தோன்றும்."

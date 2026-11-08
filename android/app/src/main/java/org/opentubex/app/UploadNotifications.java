@@ -1,0 +1,581 @@
+package org.opentubex.app;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
+import android.os.Build;
+import android.service.notification.StatusBarNotification;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+/**
+ * Android's single source of truth for new-upload notifications, shared by
+ * foreground refreshes and scheduled refreshes. Mirrors src/newUploadNotifications.js.
+ */
+final class UploadNotifications {
+    private static final String PREFERENCES = "upload-notifications";
+    private static final String CONFIGURATION_KEY = "configuration";
+    private static final String STATE_FILE = "upload-notifications.json";
+    private static final String SHOWN_FILE = "shown-upload-notifications.json";
+    static final String ACTION_QUEUED = "org.opentubex.app.action.UPLOAD_NOTIFICATIONS_QUEUED";
+    // Matches the in-app notification history limit.
+    private static final int SHOWN_LIMIT = 100;
+    // Loads notification thumbnails one at a time; the thread ends when idle.
+    private static final ThreadPoolExecutor THUMBNAILS = new ThreadPoolExecutor(0, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    private static final String TAG = "new-upload";
+    // Silent notifications share a group whose (absent) summary is the only member allowed to alert.
+    private static final String QUIET_GROUP = "quiet-new-uploads";
+    private static final int KNOWN_ID_LIMIT = 200;
+    private static final int NOTIFIED_ID_LIMIT = 1000;
+    // Feeds can surface older entries, for example when a video becomes public.
+    private static final long MAXIMUM_AGE_MILLIS = 7L * 86_400_000L;
+    private static final int ORIGINAL_TITLE_TIMEOUT_MILLIS = 5_000;
+
+    private UploadNotifications() {}
+
+    static synchronized void configure(Context context, JSONObject configuration) {
+        preferences(context).edit().putString(CONFIGURATION_KEY, configuration.toString()).apply();
+        // Start from a fresh baseline when notifications are enabled again.
+        if (!configuration.optBoolean("enabled")) {
+            stateFile(context).delete();
+            return;
+        }
+        try {
+            JSONObject state = readState(context);
+            if (forgetUnconfiguredFeeds(state, configuration)) writeState(context, state);
+        } catch (Exception error) {
+            android.util.Log.w("OpenTubeXUploads", "Unable to update upload notification state", error);
+        }
+    }
+
+    /** Drops baselines of feeds whose notifications are off. Mirrors forgetUnconfiguredFeeds. */
+    static boolean forgetUnconfiguredFeeds(JSONObject state, JSONObject configuration) {
+        JSONObject known = state.optJSONObject("known");
+        if (known == null) known = new JSONObject();
+        JSONObject channels = configuration.optJSONObject("channels");
+        List<String> removed = new ArrayList<>();
+        for (Iterator<String> keys = known.keys(); keys.hasNext();) {
+            String key = keys.next();
+            int separator = key.lastIndexOf(':');
+            JSONObject channel = channels == null || separator < 0 ? null : channels.optJSONObject(key.substring(0, separator));
+            if (channel == null || !contains(channel.optJSONArray("feedTypes"), key.substring(separator + 1))) removed.add(key);
+        }
+        for (String key : removed) known.remove(key);
+        boolean changed = !removed.isEmpty();
+        JSONObject withheld = state.optJSONObject("withheld");
+        if (withheld == null) return changed;
+        List<String> forgotten = new ArrayList<>();
+        for (Iterator<String> keys = withheld.keys(); keys.hasNext();) {
+            String channelId = keys.next();
+            JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
+            JSONArray feedTypes = channel == null ? null : channel.optJSONArray("feedTypes");
+            if (feedTypes == null || feedTypes.length() == 0) forgotten.add(channelId);
+        }
+        for (String channelId : forgotten) withheld.remove(channelId);
+        return changed || !forgotten.isEmpty();
+    }
+
+    /** Checks a raw response saved by the scheduled refresh worker. */
+    static void observePayload(Context context, String channelId, String feedType, JSONObject payload) {
+        try {
+            observe(context, channelId, feedType, entries(feedType, payload, System.currentTimeMillis()));
+        } catch (Exception error) {
+            android.util.Log.w("OpenTubeXUploads", "Unable to check for new uploads", error);
+        }
+    }
+
+    static void observe(Context context, String channelId, String feedType, JSONArray entries) throws Exception {
+        List<JSONObject> available = new ArrayList<>();
+        for (int i = 0; i < entries.length(); i++) {
+            JSONObject entry = entries.optJSONObject(i);
+            if (entry != null) available.add(entry);
+        }
+
+        List<JSONObject> uploads = takeAndSave(context, channelId, feedType, available);
+        if (uploads.isEmpty()) return;
+
+        boolean originalTitles = configuration(context).optBoolean("originalTitles") && !feedType.equals("posts");
+        for (JSONObject upload : uploads) {
+            String original = originalTitles ? fetchOriginalTitle(upload.getString("id")) : null;
+            showUpload(context, channelId, feedType, upload, original != null ? original : upload.optString("title"));
+        }
+    }
+
+    /** Holds the monitor shared with configure, so notifications turned off during the lookup stay off. */
+    private static synchronized void showUpload(Context context, String channelId, String feedType,
+        JSONObject upload, String body) throws Exception {
+        JSONObject configuration = configuration(context);
+        JSONObject channel = configuredChannel(configuration, channelId, feedType);
+        if (channel == null) return;
+        JSONObject titles = configuration.optJSONObject("titles");
+        String name = channel.optString("name");
+        // Ended streams in the live feed are announced like videos.
+        String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
+        String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
+            .replace("{channel}", name.isEmpty() ? channelId : name);
+        boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
+        // With both, the app keeps a history and shows notifications itself while visible.
+        boolean history = "both".equals(configuration.optString("mode", "both"));
+        boolean inApp = history && AppVisibility.isVisible();
+        String thumbnail = thumbnailUrl(configuration, feedType, upload.getString("id"));
+        if (history) {
+            try {
+                recordShown(shownFile(context), new JSONArray().put(new JSONObject()
+                    .put("feedType", feedType)
+                    .put("id", upload.getString("id"))
+                    .put("live", upload.optBoolean("live"))
+                    .put("title", title)
+                    .put("body", body)
+                    .put("createdAt", System.currentTimeMillis())
+                    .put("inApp", inApp)
+                    .putOpt("thumbnail", thumbnail)));
+            } catch (Exception error) {
+                android.util.Log.w("OpenTubeXUploads", "Unable to record a shown upload notification", error);
+                // The app has nothing to collect, so the system shows it instead.
+                inApp = false;
+            }
+        }
+        if (inApp) {
+            // The visible app shows it, also when a background refresh finds it.
+            context.sendBroadcast(new Intent(ACTION_QUEUED).setPackage(context.getPackageName()));
+            return;
+        }
+        try {
+            show(context, title, body, url(feedType, upload.getString("id")), silent, thumbnail);
+        } catch (RuntimeException error) {
+            // One failed notification must not skip the others.
+            android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
+        }
+    }
+
+    /** Queues notifications until the app adds them to its notification history. */
+    static void recordShown(File file, JSONArray notifications) throws Exception {
+        JSONArray queued = readArray(file);
+        for (int i = 0; i < notifications.length(); i++) queued.put(notifications.get(i));
+        JSONArray kept = new JSONArray();
+        for (int i = Math.max(0, queued.length() - SHOWN_LIMIT); i < queued.length(); i++) kept.put(queued.get(i));
+        writeAtomically(file, kept.toString());
+    }
+
+    /** Returns the notifications shown since the last call, oldest first. */
+    static synchronized JSONArray takeShown(Context context) throws Exception {
+        return takeShown(shownFile(context));
+    }
+
+    static JSONArray takeShown(File file) throws Exception {
+        JSONArray queued = readArray(file);
+        Files.deleteIfExists(file.toPath());
+        return queued;
+    }
+
+    private static JSONArray readArray(File file) throws java.io.IOException {
+        if (!file.exists()) return new JSONArray();
+        try {
+            return new JSONArray(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+        } catch (org.json.JSONException invalid) {
+            return new JSONArray();
+        }
+    }
+
+    private static File shownFile(Context context) {
+        return new File(context.getFilesDir(), SHOWN_FILE);
+    }
+
+    /**
+     * Only the state update is synchronized, like configure, so title lookups do not
+     * hold up other feeds and a disabled configuration cannot recreate the state.
+     */
+    private static synchronized List<JSONObject> takeAndSave(Context context, String channelId, String feedType,
+        List<JSONObject> available) throws Exception {
+        JSONObject channel = configuredChannel(configuration(context), channelId, feedType);
+        if (channel == null) return new ArrayList<>();
+        JSONObject state = readState(context);
+        List<JSONObject> uploads = takeVisibleUploads(state, channelId, feedType, available,
+            channel.optBoolean("membersOnly"), System.currentTimeMillis());
+        writeState(context, state);
+        return uploads;
+    }
+
+    private static JSONObject configuration(Context context) throws Exception {
+        String saved = preferences(context).getString(CONFIGURATION_KEY, null);
+        return saved == null ? new JSONObject() : new JSONObject(saved);
+    }
+
+    private static JSONObject configuredChannel(JSONObject configuration, String channelId, String feedType) {
+        if (!configuration.optBoolean("enabled")) return null;
+        JSONObject channels = configuration.optJSONObject("channels");
+        JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
+        return channel != null && contains(channel.optJSONArray("feedTypes"), feedType) ? channel : null;
+    }
+
+    /** Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one. */
+    private static String fetchOriginalTitle(String videoId) {
+        HttpURLConnection connection = null;
+        // Timeouts apply per connect and read, so a body that keeps streaming also has a deadline.
+        long deadline = System.nanoTime() + ORIGINAL_TITLE_TIMEOUT_MILLIS * 1_000_000L;
+        try {
+            String video = "https://www.youtube.com/watch?v=" + Uri.encode(videoId);
+            connection = (HttpURLConnection) new URL("https://www.youtube.com/oembed?url=" + Uri.encode(video)).openConnection();
+            connection.setConnectTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
+            connection.setReadTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) return null;
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            try (InputStream input = connection.getInputStream()) {
+                byte[] buffer = new byte[8192];
+                for (int count; (count = input.read(buffer)) >= 0;) {
+                    if (System.nanoTime() > deadline) return null;
+                    output.write(buffer, 0, count);
+                }
+            }
+            String title = new JSONObject(output.toString(StandardCharsets.UTF_8.name())).optString("title");
+            return title.isEmpty() ? null : title;
+        } catch (Exception error) {
+            // Keep the feed title when the video is unavailable or the request fails.
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    /**
+     * Records a channel feed and returns its entries that appeared since the last
+     * observation. The first observation of a feed only establishes a baseline,
+     * and a response without overlap is treated as a replaced list, not as uploads.
+     */
+    static List<JSONObject> takeNewUploads(JSONObject state, String channelId, String feedType, List<JSONObject> entries, long now) throws Exception {
+        String key = channelId + ":" + feedType;
+        List<JSONObject> available = new ArrayList<>();
+        for (JSONObject entry : entries) {
+            if (!entry.optBoolean("upcoming") && !entry.optString("id").isEmpty()) available.add(entry);
+        }
+        JSONObject knownByFeed = state.optJSONObject("known");
+        if (knownByFeed == null) state.put("known", knownByFeed = new JSONObject());
+        JSONArray notified = state.optJSONArray("notified");
+        if (notified == null) notified = new JSONArray();
+        JSONArray known = knownByFeed.optJSONArray(key);
+        // Shorts and streams can move between feeds, so IDs another feed of the channel
+        // already recorded are not new, even when this feed's baseline is younger.
+        Set<String> knownElsewhere = new HashSet<>();
+        for (Iterator<String> keys = knownByFeed.keys(); keys.hasNext();) {
+            String otherKey = keys.next();
+            if (otherKey.equals(key) || !otherKey.startsWith(channelId + ":")) continue;
+            JSONArray ids = knownByFeed.optJSONArray(otherKey);
+            if (ids != null) for (int i = 0; i < ids.length(); i++) knownElsewhere.add(ids.optString(i));
+        }
+
+        Set<String> knownIds = new HashSet<>();
+        LinkedHashSet<String> updated = new LinkedHashSet<>();
+        for (JSONObject entry : available) updated.add(entry.getString("id"));
+        if (known != null) for (int i = 0; i < known.length(); i++) {
+            knownIds.add(known.getString(i));
+            updated.add(known.getString(i));
+        }
+        knownByFeed.put(key, limit(updated, KNOWN_ID_LIMIT));
+        List<JSONObject> uploads = new ArrayList<>();
+        if (known == null) return uploads;
+
+        int firstKnownIndex = known.length() == 0 ? available.size() : -1;
+        for (int i = 0; firstKnownIndex < 0 && i < available.size(); i++) {
+            if (knownIds.contains(available.get(i).getString("id"))) firstKnownIndex = i;
+        }
+        if (firstKnownIndex < 0) return uploads;
+
+        // Shorts and streams can also appear in another feed of the same channel.
+        Set<String> notifiedIds = new HashSet<>();
+        for (int i = 0; i < notified.length(); i++) notifiedIds.add(notified.getString(i));
+        LinkedHashSet<String> nextNotified = new LinkedHashSet<>();
+        for (JSONObject entry : available.subList(0, firstKnownIndex)) {
+            long published = entry.optLong("published");
+            if (notifiedIds.contains(entry.getString("id")) || knownElsewhere.contains(entry.getString("id")) ||
+                !(entry.optBoolean("live") || published == 0 || now - published <= MAXIMUM_AGE_MILLIS)) continue;
+            uploads.add(entry);
+            nextNotified.add(entry.getString("id"));
+        }
+        for (int i = 0; i < notified.length(); i++) nextNotified.add(notified.getString(i));
+        state.put("notified", limit(nextNotified, NOTIFIED_ID_LIMIT));
+        return uploads;
+    }
+
+    /** Mirrors takeVisibleUploads: withholds members-only uploads and notifies them once public. */
+    static List<JSONObject> takeVisibleUploads(JSONObject state, String channelId, String feedType, List<JSONObject> entries,
+                                               boolean showMembersOnly, long now) throws Exception {
+        // Kept per channel because shorts and streams can move between its feeds.
+        String key = channelId;
+        JSONObject withheldByFeed = state.optJSONObject("withheld");
+        if (withheldByFeed == null) state.put("withheld", withheldByFeed = new JSONObject());
+        // Once members-only content is shown, withheld uploads are already accessible.
+        JSONArray withheld = showMembersOnly ? null : withheldByFeed.optJSONArray(key);
+        Set<String> withheldIds = new LinkedHashSet<>();
+        if (withheld != null) for (int i = 0; i < withheld.length(); i++) withheldIds.add(withheld.getString(i));
+        List<JSONObject> released = new ArrayList<>();
+        Set<String> releasedIds = new HashSet<>();
+        for (JSONObject entry : entries) {
+            String id = entry.optString("id");
+            if (!entry.optBoolean("membersOnly") && !entry.optBoolean("upcoming") && withheldIds.contains(id) && releasedIds.add(id)) {
+                released.add(entry);
+            }
+        }
+        List<JSONObject> uploads = takeNewUploads(state, channelId, feedType, entries, now);
+        LinkedHashSet<String> nextWithheld = new LinkedHashSet<>();
+        List<JSONObject> result = new ArrayList<>(released);
+        for (JSONObject upload : uploads) {
+            if (!showMembersOnly && upload.optBoolean("membersOnly")) nextWithheld.add(upload.getString("id"));
+            else if (!releasedIds.contains(upload.getString("id"))) result.add(upload);
+        }
+        for (String id : withheldIds) if (!releasedIds.contains(id)) nextWithheld.add(id);
+        if (nextWithheld.isEmpty()) withheldByFeed.remove(key);
+        else withheldByFeed.put(key, limit(nextWithheld, KNOWN_ID_LIMIT));
+        return result;
+    }
+
+    /** Converts a saved refresh response into the entries produced by normalizeUploadEntries. */
+    static JSONArray entries(String feedType, JSONObject payload, long now) throws Exception {
+        JSONArray result = new JSONArray();
+        if (feedType.equals("posts")) {
+            JSONArray comments = payload.optJSONArray("comments");
+            if (comments != null) {
+                for (int i = 0; i < comments.length(); i++) {
+                    JSONObject comment = comments.getJSONObject(i);
+                    // Match the foreground parser, which reads contentHtml and publishedText.
+                    String text = comment.optString("content");
+                    if (text.isEmpty()) text = htmlToText(comment.optString("contentHtml"));
+                    long published = comment.optLong("published");
+                    if (published <= 0) published = SubscriptionRefreshDownloadMetadata.published(comment.optString("publishedText"), now);
+                    result.put(new JSONObject()
+                        .put("id", comment.optString("commentId"))
+                        .put("title", text)
+                        .put("published", published * 1000));
+                }
+            } else if (payload.optString("backgroundFormat").equals("local")) {
+                collectPosts(payload.optJSONObject("data"), result, now);
+            }
+            return result;
+        }
+        JSONArray videos = SubscriptionRefreshDownloadMetadata.forDownloads(payload, now).optJSONArray("videos");
+        if (videos == null) return result;
+        for (int i = 0; i < videos.length(); i++) {
+            JSONObject video = videos.getJSONObject(i);
+            result.put(new JSONObject()
+                .put("id", video.optString("videoId"))
+                .put("title", video.optString("title"))
+                .put("published", video.optLong("published") * 1000)
+                .put("live", video.optBoolean("liveNow"))
+                .put("upcoming", video.optBoolean("isUpcoming"))
+                .put("membersOnly", video.optBoolean("isMembersOnly")));
+        }
+        return result;
+    }
+
+    private static void collectPosts(Object node, JSONArray posts, long now) throws Exception {
+        if (node instanceof JSONArray array) {
+            for (int i = 0; i < array.length(); i++) collectPosts(array.get(i), posts, now);
+        } else if (node instanceof JSONObject object) {
+            // Like the foreground parser, notify about the shared post rather than the original inside it.
+            JSONObject shared = object.optJSONObject("sharedPostRenderer");
+            JSONObject post = shared != null ? shared : object.optJSONObject("backstagePostRenderer");
+            if (post == null) post = object.optJSONObject("postRenderer");
+            if (post != null) {
+                posts.put(new JSONObject()
+                    .put("id", post.optString("postId"))
+                    .put("title", SubscriptionRefreshDownloadMetadata.label(post.optJSONObject(shared != null ? "content" : "contentText")))
+                    .put("published", SubscriptionRefreshDownloadMetadata.published(
+                        SubscriptionRefreshDownloadMetadata.label(post.optJSONObject("publishedTimeText")), now) * 1000));
+                return;
+            }
+            for (Iterator<String> keys = object.keys(); keys.hasNext();) collectPosts(object.get(keys.next()), posts, now);
+        }
+    }
+
+    /** Mirrors htmlToText in src/newUploadNotifications.js. */
+    static String htmlToText(String html) {
+        String breaks = html.replaceAll("(?i)<br\\s*/?>", "\n");
+        // Scan instead of matching <[^>]*>, which retries every unclosed '<' to the end.
+        // One pass removes each '<' through the next '>'; any '<' left has no '>' after it.
+        StringBuilder stripped = new StringBuilder(breaks.length());
+        for (int index = 0; index < breaks.length();) {
+            int open = breaks.indexOf('<', index);
+            int close = open < 0 ? -1 : breaks.indexOf('>', open);
+            if (close < 0) { stripped.append(breaks, index, breaks.length()); break; }
+            stripped.append(breaks, index, open);
+            index = close + 1;
+        }
+        String text = stripped.toString();
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+            .compile("(?i)&(?:#(\\d+)|#x([\\da-f]+)|(amp|lt|gt|quot|apos|nbsp));").matcher(text);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            String replacement = matcher.group();
+            if (matcher.group(3) != null) {
+                switch (matcher.group(3).toLowerCase(java.util.Locale.ROOT)) {
+                    case "amp": replacement = "&"; break;
+                    case "lt": replacement = "<"; break;
+                    case "gt": replacement = ">"; break;
+                    case "quot": replacement = "\""; break;
+                    case "apos": replacement = "'"; break;
+                    default: replacement = "\u00A0";
+                }
+            } else {
+                try {
+                    int codePoint = matcher.group(1) != null ? Integer.parseInt(matcher.group(1)) : Integer.parseInt(matcher.group(2), 16);
+                    if (Character.isValidCodePoint(codePoint)) replacement = new String(Character.toChars(codePoint));
+                } catch (NumberFormatException tooLarge) {
+                    // Leave out-of-range references unchanged, like the renderer.
+                }
+            }
+            matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    /** Mirrors isWithinQuietHours in src/newUploadNotifications.js. */
+    static boolean isWithinQuietHours(JSONObject quietHours, LocalTime time) {
+        if (quietHours == null || !quietHours.has("start") || !quietHours.has("end")) return false;
+        int start = quietHours.optInt("start", -1);
+        int end = quietHours.optInt("end", -1);
+        if (start < 0 || end < 0 || start == end) return false;
+        int minute = time.getHour() * 60 + time.getMinute();
+        return start < end ? minute >= start && minute < end : minute >= start || minute < end;
+    }
+
+    static String url(String feedType, String id) {
+        String encoded = Uri.encode(id);
+        if (feedType.equals("posts")) return "https://www.youtube.com/post/" + encoded;
+        if (feedType.equals("shorts")) return "https://www.youtube.com/shorts/" + encoded;
+        return "https://www.youtube.com/watch?v=" + encoded;
+    }
+
+    private static void show(Context context, String title, String body, String url, boolean silent, String thumbnail) {
+        OpenTubeXNotificationChannels.createAll(context);
+        Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+            ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
+            : new Notification.Builder(context);
+        // MainActivity forwards YouTube links to the renderer, including on cold start.
+        Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), context, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+            context,
+            url.hashCode(),
+            open,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        builder
+            .setSmallIcon(R.drawable.ic_stat_opentubex)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(new Notification.BigTextStyle().bigText(body))
+            .setContentIntent(contentIntent)
+            .setAutoCancel(true);
+        if (silent) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        manager.notify(TAG, url.hashCode(), builder.build());
+        if (thumbnail == null) return;
+        // Show the notification right away and add the thumbnail once it loads.
+        THUMBNAILS.execute(() -> {
+            Bitmap image = AndroidMediaArtwork.loadBlocking(thumbnail);
+            if (image == null) {
+                // Proxies can fail a connection now and then; retry once shortly after.
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                image = AndroidMediaArtwork.loadBlocking(thumbnail);
+            }
+            if (image == null || !isActive(manager, url.hashCode())) return;
+            builder.setLargeIcon(image)
+                .setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Icon) null).setSummaryText(body))
+                .setOnlyAlertOnce(true);
+            try {
+                manager.notify(TAG, url.hashCode(), builder.build());
+            } catch (RuntimeException error) {
+                android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+            }
+        });
+    }
+
+    /** Whether a notification is still shown, so adding its thumbnail does not bring back a dismissed one. */
+    private static boolean isActive(NotificationManager manager, int id) {
+        for (StatusBarNotification notification : manager.getActiveNotifications()) {
+            if (notification.getId() == id && TAG.equals(notification.getTag())) return true;
+        }
+        return false;
+    }
+
+    static String thumbnailUrl(JSONObject configuration, String feedType, String id) {
+        String template = configuration.optString("thumbnailUrl", "");
+        if (feedType.equals("posts") || !template.contains("{id}")) return null;
+        String url = template.replace("{id}", Uri.encode(id));
+        return url.startsWith("https://") || url.startsWith("http://") ? url : null;
+    }
+
+    private static boolean contains(JSONArray values, String value) {
+        if (values == null) return false;
+        for (int i = 0; i < values.length(); i++) if (value.equals(values.optString(i))) return true;
+        return false;
+    }
+
+    private static JSONArray limit(Set<String> values, int size) {
+        JSONArray result = new JSONArray();
+        for (String value : values) {
+            if (result.length() == size) break;
+            result.put(value);
+        }
+        return result;
+    }
+
+    /** Starts fresh for a missing or corrupt file; other read errors propagate so state is not overwritten. */
+    private static JSONObject readState(Context context) throws java.io.IOException {
+        File file = stateFile(context);
+        if (!file.exists()) return new JSONObject();
+        String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+        try {
+            return new JSONObject(text);
+        } catch (org.json.JSONException invalid) {
+            return new JSONObject();
+        }
+    }
+
+    private static void writeState(Context context, JSONObject state) throws Exception {
+        writeAtomically(stateFile(context), state.toString());
+    }
+
+    private static void writeAtomically(File file, String text) throws Exception {
+        File temporary = new File(file.getPath() + ".tmp");
+        Files.write(temporary.toPath(), text.getBytes(StandardCharsets.UTF_8));
+        Files.move(temporary.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+    }
+
+    private static File stateFile(Context context) {
+        return new File(context.getFilesDir(), STATE_FILE);
+    }
+
+    private static android.content.SharedPreferences preferences(Context context) {
+        return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+    }
+}

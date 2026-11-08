@@ -1,19 +1,27 @@
 <template>
   <FtAutoGrid
-    :grid="displayValue !== 'list'"
+    :appear="appear"
+    :grid="effectiveDisplayValue !== 'list'"
+    :item-count="data.length"
+    :item-keys="resultKeys"
+    :youtube-style-shorts="youtubeStyleShorts"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
-      :key="`${dataType || result.type}-${result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title}-${result.playlistItemId || index}-${result.lastUpdatedAt || 0}`"
-      appearance="result"
-      :data="result"
+      :key="resultKeys[index]"
+      :data-feed-item-key="resultKeys[index]"
+      :appearance="youtubeStyleShorts ? 'youtubeShort' : 'result'"
+      :data="reactive(result)"
+      :data-overrides="dataOverrides"
       :data-type="dataType || result.type"
       :first-screen="!renderAllItemsLazily && index < 16"
-      :layout="displayValue"
+      :layout="effectiveDisplayValue"
       :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
+      :show-watched-style-in-history="showWatchedStyleInHistory"
       :use-channels-hidden-preference="useChannelsHiddenPreference"
       :use-hide-upcoming-premieres-preference="useHideUpcomingPremieresPreference"
       :hide-forbidden-titles="hideForbiddenTitles"
+      :hide-members-only="hideMembersOnly"
       :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
       :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
       :can-move-video-up="canMoveVideoUp && index > 0"
@@ -39,7 +47,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, provide, reactive } from 'vue'
+import { subscriptionFeedTypeKey } from '../../composables/useHideSubscriptionFeedType'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
 import FtListLazyWrapper from '../FtListLazyWrapper/FtListLazyWrapper.vue'
@@ -47,6 +56,18 @@ import FtListLazyWrapper from '../FtListLazyWrapper/FtListLazyWrapper.vue'
 import store from '../../store/index'
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
+  subscriptionFeedType: {
+    type: String,
+    default: null
+  },
+  appear: {
+    type: Boolean,
+    default: false
+  },
   data: {
     type: Array,
     required: true
@@ -54,6 +75,10 @@ const props = defineProps({
   dataType: {
     type: String,
     default: null,
+  },
+  stableItemKeys: {
+    type: Boolean,
+    default: false
   },
   renderAllItemsLazily: {
     type: Boolean,
@@ -68,6 +93,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
+  },
   useChannelsHiddenPreference: {
     type: Boolean,
     default: true,
@@ -77,6 +106,10 @@ const props = defineProps({
     default: true,
   },
   hideForbiddenTitles: {
+    type: Boolean,
+    default: true
+  },
+  hideMembersOnly: {
     type: Boolean,
     default: true
   },
@@ -129,7 +162,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+provide(subscriptionFeedTypeKey, computed(() => props.subscriptionFeedType))
 
 const emit = defineEmits([
   'move-dragged-video',
@@ -142,15 +181,31 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const listType = computed(() => {
   return store.getters.getListType
 })
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const displayValue = computed(() => {
   return props.display === '' ? listType.value : props.display
 })
+
+// Full width is a single-column grid, so its items render as grid cards.
+/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+const effectiveDisplayValue = computed(() => {
+  return props.youtubeStyleShorts || displayValue.value !== 'list' ? 'grid' : 'list'
+})
+
+function getResultKey(result, index) {
+  const type = props.dataType || result.type
+  const id = result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title
+  const occurrence = props.stableItemKeys ? '' : result.playlistItemId || index
+
+  return `${type}-${id}-${occurrence}-${result.lastUpdatedAt || 0}`
+}
+
+const resultKeys = computed(() => props.data.map(getResultKey))
 
 /**
  * @param {string} videoId

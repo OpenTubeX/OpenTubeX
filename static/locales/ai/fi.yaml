@@ -1,0 +1,2619 @@
+# Optional AI-generated translations for keys missing from ../fi.yaml.
+Color Picker:
+  Hue: Sävy
+  Opacity: Peittävyys
+  Backdrop Blur: Taustan sumennus
+  Hex Color: Heksaväri
+  Apply Color: Käytä
+  Reset Color: Palauta
+  Copy Color: Kopioi
+  Copy From Another Color: Kopioi toisesta väristä
+  Color Copied: Väri kopioitu
+  Invalid Color: Anna kelvollinen heksaväri
+  Clipboard Unavailable: Leikepöytä ei ole käytettävissä
+  Saturation and Brightness: Kylläisyys ja kirkkaus
+New Tab: Uusi välilehti
+Maximize: Suurenna
+Restore: Palauta
+Close Tab: Sulje välilehti
+Close Confirmation:
+  Background Sync Warning: Lopettaminen pysäyttää tilausten päivittämisen taustalla.
+  Hide Window: Piilota ikkuna
+  Title: Lopetetaanko OpenTubeX?
+  Message: Haluatko varmasti lopettaa OpenTubeX-sovelluksen?
+  Quit: Lopeta
+  Never Ask Again: Älä kysy uudelleen
+Close Window Confirmation:
+  Title: Suljetaanko ikkuna?
+  Message: Tässä ikkunassa on {count} välilehteä. Haluatko varmasti sulkea sen?
+  Close Window: Sulje ikkuna
+Confirmations:
+  Never Ask Again: Älä kysy uudelleen
+  Settings Hint: Voit ottaa tämän vahvistuksen uudelleen käyttöön kohdassa Asetukset → Yleiset → Vahvista ennen…
+Close Multiple Tabs Confirmation:
+  Title: Suljetaanko useita välilehtiä?
+  Message: Tämä sulkee {count} välilehteä.
+  Close Tabs: Sulje {count} välilehteä
+Load Multiple Tabs Confirmation:
+  Title: Ladataanko useita välilehtiä?
+  Message: Tämä lataa {count} välilehteä.
+  Load Tabs: Lataa {count} välilehteä
+Unload Multiple Tabs Confirmation:
+  Title: Poistetaanko useita välilehtiä muistista?
+  Message: Tämä poistaa {count} välilehteä muistista.
+  Unload Tabs: Poista {count} välilehteä muistista
+Tabs Unloaded To Free Memory: Muistin vapauttamiseksi poistettiin {count} välilehti, jota et ole käyttänyt äskettäin | Muistin vapauttamiseksi poistettiin {count} välilehteä, joita et ole käyttänyt äskettäin
+Use Vertical Tabs: Käytä pystysuuntaisia välilehtiä
+Use Horizontal Tabs: Käytä vaakasuuntaisia välilehtiä
+Resize Tab Bar: Muuta välilehtipalkin kokoa
+Find in page: Hae sivulta
+Previous match: Edellinen osuma
+Next match: Seuraava osuma
+Close find bar: Sulje hakupalkki
+No matches: Ei osumia
+Version {versionNumber} is now available.: Versio {versionNumber} on nyt saatavilla.
+See changes and update: Katso muutokset ja päivitä
+Dismiss: Ohita
+Update to {version}: Päivitä versioon {version}
+Global:
+  Ambient Mode: Tunnelmavalaistus
+  Loading More: Ladataan lisää
+  New: Uusi
+Search Listing:
+  Label:
+    Members Only: Vain jäsenille
+    Possibly AI-generated: Mahdollisesti tekoälyn tuottama
+Stats:
+  Left of daily limit: "{duration} jäljellä päivittäisestä rajastasi ({limit})"
+  Daily limit reached: "Päivittäinen raja ({limit}) täyttyi"
+  Replace old device: "Korvaa vanha laite"
+  Replacement explanation: "Yhdistä {device} tähän laitteeseen vain, jos molemmat merkinnät kuuluvat samalle fyysiselle laitteelle."
+  Overlapping days: "Päivät molemmissa historioissa: {count}"
+  Overlapping watch time: "Päällekkäinen katseluaika"
+  Keep larger daily total: "Säilytä suurempi päiväsumma"
+  Larger total explanation: "Kaksoishistorioille. Voi jättää saman päivän lisäkatselun huomioimatta."
+  Add daily totals: "Laske päiväsummat yhteen"
+  Add totals explanation: "Erillisille historioille. Voi laskea saman katselun kahdesti."
+  Replacement preservation: "Vain yhdessä historiassa olevat päivät säilytetään. Alkuperäiset historiat pysyvät tallessa salatussa synkronoinnissa."
+  Combined watch time: "Yhdistetty katseluaika"
+  Replacement changed: "Katseluaika muuttui. Sulje esikatselu ja avaa se uudelleen tarkistaaksesi uudet summat."
+  Replacement success: "Laitetilastot yhdistetty"
+  All devices: Kaikki laitteet
+  Stats: Tilastot
+  Watch time summary: Katseluajan yhteenveto
+  Today: Tänään
+  This week: Tämä viikko
+  Total watch time: Katseluaika yhteensä
+  Daily average: Päivittäinen keskiarvo
+  So far today: Tänään tähän mennessä
+  Since: Alkaen {day}
+  All recorded time: Koko tallennettu aika
+  Per calendar day: Kalenteripäivää kohden
+  Day by day: Päivittäin
+  Highest: 'Suurin: {duration}'
+  Week by week: Viikoittain
+  Last 14 days: Viimeiset 14 päivää
+  Last 8 weeks: Viimeiset 8 viikkoa
+  Daily chart aria: Päivittäinen katseluaika viimeisten 14 päivän ajalta
+  Weekly chart aria: Viikoittainen katseluaika viimeisten 8 viikon ajalta
+  No data: Katseluaika näkyy täällä, kun katsot videoita.
+  Estimate note: Ennen tätä päivitystä kertynyt katseluaika on arvioitu tallennetun katselukohdan perusteella.
+  Adjust imported watch time: Säädä tuotua katseluaikaa
+  Imported watch time: Tuotu katseluaika
+  Imported watch time explanation: Valitse tavallisesti käyttämäsi toistonopeus. Videoiden tuodut kestot jaetaan tällä nopeudella, jotta todellinen katseluaika voidaan arvioida.
+  Playback speed: Toistonopeus
+  Channel speed note: Tallennettuja kanavakohtaisia toistonopeuksia käytetään niiden ollessa saatavilla.
+  Apply playback speed: Käytä toistonopeutta
+  Imported watch time adjusted: Tuotua katseluaikaa on säädetty
+  Reset statistics: Nollaa tilastot
+  Reset: Nollaa
+  Reset confirmation: Haluatko varmasti nollata kaikki katselutilastot? Toimintoa ei voi kumota.
+  Reset success: Katselutilastot on nollattu
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} t'
+  Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Keep disabled and hide this section: "Pidä poissa käytöstä ja piilota tämä osio"
+  Familiar description: "Suosi katsomattomia videoita kanavilta, joista jo pidät."
+  Balanced description: "Yhdistä tuttuja kanavia uusiin, kiinnostuksenkohteitasi vastaaviin kanaviin."
+  Explore description: "Anna enemmän tilaa uusille kanaville, jotka liittyvät kiinnostuksenkohteisiisi."
+  Turn off recommendations: Poista suositukset käytöstä
+  Recommended for you: "Sinulle suositeltua"
+  Recommendations description: "Järjestä videot laitteellasi katseluhistoriasi perusteella. Kanavatunnukset ja aihehaut lähetetään valitsemaasi taustapalveluun videoiden löytämiseksi."
+  Enable recommendations: "Ota suositukset käyttöön"
+  Recommendations need history: "Saat suosituksia katsomalla videoita katseluhistorian ollessa käytössä."
+  No recommendations: "Suosituksia ei löytynyt. Kokeile päivittää, kun olet katsonut lisää videoita."
+  Recommendations unavailable: "Suosituksia ei voitu ladata. Yritä myöhemmin uudelleen."
+  More like this: "Lisää tällaista"
+  Not interested: "Ei kiinnosta"
+  Hide this channel: "Piilota tämä kanava"
+  Reset recommendations: "Nollaa suositukset"
+  Discovery: "Löytäminen"
+  Familiar: "Tuttua"
+  Balanced: "Tasapainoinen"
+  Explore: "Tutki"
+  Related to: "Liittyy videoon {title}"
+  More from: "Lisää kanavalta {channel}"
+  Matches interest: "Vastaa kiinnostustasi aiheeseen {topic}"
+  Related discovery privacy: "Myös videotunnuksia lähetetään liittyvien videoiden löytämiseksi."
+  Home: Etusivu
+  Description: Jatka siitä, mihin jäit, ja katso viimeaikaiset tapahtumat.
+  Customize: Mukauta etusivua
+  Done: Valmis
+  Customize description: Valitse näytettävät osiot ja järjestä ne haluamaasi järjestykseen.
+  Continue watching: Jatka katselua
+  New since last visit: Uutta edellisen käynnin jälkeen
+  Watch queue: Katselujono
+  Recent playlists: Viimeisimmät soittolistat
+  Recent downloads: Viimeisimmät lataukset
+  Upcoming reminders: Tulevat muistutukset
+  Watch statistics: Katselutilastot
+  View all: Näytä kaikki
+  Previous shelf page: Edellinen {section}-osion sivu
+  Next shelf page: Seuraava {section}-osion sivu
+  Shelf page status: '{section}, sivu {page}/{total}.'
+  Move section up: Siirrä {section} ylöspäin
+  Move section down: Siirrä {section} alaspäin
+  Section moved: '{section} siirrettiin sijalle {position}/{total}.'
+  Nothing here yet: Täällä ei ole vielä mitään
+  Empty description: Aloittamasi videot, käyttämäsi soittolistat, lataukset ja muistutukset näkyvät täällä.
+  All sections hidden: Kaikki osiot on piilotettu
+  All sections hidden description: Mukauta etusivua, jotta voit näyttää osion uudelleen.
+Subscriptions:
+  New video from {channel}: Uusi video kanavalta {channel}
+  New short from {channel}: Uusi Short kanavalta {channel}
+  '{channel} is live': "{channel} on livenä"
+  New post from {channel}: Uusi postaus kanavalta {channel}
+  Mark As Unseen: Merkitse näkemättömäksi
+  Copy Error Details: "Kopioi tekniset tiedot"
+  Refresh Errors: "Kanavat, joita ei voitu päivittää: {channels}. Näytä tiedot napsauttamalla."
+  Refresh Error Channels More: "{channels} ja {count} muuta | {channels} ja {count} muuta"
+  Never show {type} from this channel in feeds again: Älä enää näytä tämän kanavan sisältöä tyypillä {type} syötteissä
+  Refreshing Subscription Videos: Päivitetään tilausten videoita
+  Refreshing Subscription Shorts: Päivitetään tilausten Shorts-videoita
+  Refreshing Subscription Live Streams: Päivitetään tilausten suoria lähetyksiä
+  Refreshing Subscription Posts: Päivitetään tilausten julkaisuja
+  New Content: Uusi sisältö
+  New Feed Refresh Warning Title: Päivitetäänkö kaikki tilaussyötteet?
+  New Feed Refresh Warning: Kun RSS ei ole käytössä, yhden tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa? | Kun RSS ei ole käytössä, {count} tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa?
+  New Since Last Refresh: Uutta viime päivityksen jälkeen
+  Mark As Seen: Merkitse nähdyksi
+  Mark All as Seen: Merkitse kaikki nähdyiksi
+  No New Content: Uutta sisältöä ei ole.
+  New Content Tabs: Uuden sisällön välilehdet
+  Show Tabbed View: Näytä välilehdittäin
+  Show Combined View: Näytä yhdistettynä
+  Newest First: Uusimmat ensin
+  Oldest First: Vanhimmat ensin
+  Posts:
+    RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
+  RSS Feeds:
+    Refreshing: Päivitetään RSS-syötteitä
+    Tab: RSS
+    Followed Feeds: Seuratut RSS-syötteet
+    Add Feed: Lisää syöte
+    Feed URL: RSS- tai Atom-syötteen URL
+    Remove Feed: Poista {feed}
+    Invalid Feed URL: Anna verkko-osoite, joka alkaa http:// tai https://.
+    Feed Already Followed: Seuraat jo tätä syötettä.
+    Feed Could Not Be Loaded: Syötettä ei voitu ladata. Tarkista, että osoite osoittaa RSS- tai Atom-syötteeseen.
+    Feed Requires Browser Check: Tämä sivusto vaatii selaintarkistuksen, jota OpenTubeX ei pysty suorittamaan. Kokeile tälle syötteelle toista osoitetta tai RSSHub-instanssia.
+    Refresh Errors: 1 syötettä ei voitu päivittää. | {count} syötettä ei voitu päivittää.
+    Description: Lisää RSS- tai Atom-syöte seurataksesi sisällöntuottajia muilla alustoilla. {rssHub}-instanssit tarjoavat syötteitä monille sivustoille, kuten Twitchille.
+    Empty Items: Syötteissäsi ei ole tällä hetkellä kohteita.
+    No Feeds: Et seuraa vielä yhtään RSS-syötettä.
+    RSSHub:
+      Browse: Selaa RSSHubia
+      Title: Lisää syöte RSSHubista
+      Description: Valitse RSSHub-instanssi, palvelu ja mitä haluat seurata. Syötteen osoite muodostetaan puolestasi.
+      Instance: RSSHub-instanssi
+      Service: Palvelu
+      Search Services: Hae palveluita
+      Loading Services: Ladataan palveluita…
+      Services Could Not Be Loaded: Tämä instanssi ei palauttanut palveluitaan. Tarkista osoite tai valitse toinen instanssi.
+      Feed Type: Syötteen tyyppi
+      Requires Configuration: Tämä syöte vaatii instanssilla lisäasetuksia, joten se ei ehkä toimi julkisilla instansseilla.
+      Optional Parameter: '{parameter} (valinnainen)'
+      Not Set: Ei asetettu
+    Retry Feed: Yritä ladata {feed} uudelleen
+Trending:
+  Music: Musiikki
+  Load Error: Nousussa olevia videoita ei voitu ladata.
+  Unsupported Backend: Nousussa olevat videot edellyttävät paikallista APIa. Valitse paikallinen API tai ota käyttöön varajärjestelmä.
+Most Popular Feed Empty: Tämän Invidious-instanssin Suosituimmat-syöte on tyhjä.
+Feed:
+  Cancel Refresh: Peruuta päivitys
+  Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
+User Playlists:
+  Save: "Tallenna"
+  Edit: "Muokkaa"
+  This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."
+  Pin to Navigation: "Kiinnitä navigointiin"
+  Unpin from Navigation: "Irrota navigoinnista"
+  Reorder Hint: Järjestä uudelleen vetämällä tai nuolinäppäimillä
+  Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
+  Shuffle videos by default: "Toista videot oletuksena satunnaisessa järjestyksessä"
+  Repair Playlists: Korjaa soittolistat
+  Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
+  Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"
+  Remove Unavailable Videos Confirmation: "Poistetaanko videot, jotka eivät ole käytettävissä? Löytyi: {count}. Ei voitu tarkistaa: {uncertain}. Tarkistamattomat videot säilytetään."
+  Add Missing Videos: "Lisää puuttuvat videot alkuperäisestä soittolistasta"
+  Source Playlist: "Alkuperäinen soittolista"
+  Save Playlist: "Tallenna soittolista"
+  Remove Saved Playlist: "Poista tallennettu soittolista"
+  Load More Playlists: Lataa lisää soittolistoja
+  Save to: Tallenna kohteeseen…
+  Move Video to the Top: Siirrä video ylimmäksi
+  Move Video to the Bottom: Siirrä video alimmaksi
+  Quick Bookmark Icon: Pikakirjanmerkin kuvake
+  Custom Emoji: Mukautettu emoji
+  Choose Image: Valitse kuva
+  Use Bookmark Icon: Käytä kirjanmerkkikuvaketta
+  SinglePlaylistView:
+    Retry: Yritä uudelleen
+    This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
+    More videos could not be loaded.: Lisää videoita ei voitu ladata.
+  Playlist Thumbnail: "Soittolistan pikkukuva"
+  Restore Default Thumbnail: "Palauta oletuspikkukuva"
+  AddVideoPrompt:
+    And N more videos: 'ja {count} muu video | ja {count} muuta videota'
+  Move Up: Ylös
+  Move Down: Alas
+  Remove: Poista
+History:
+  From Date: 'Alkaen'
+  To Date: 'Asti'
+  Channel Filter: 'Kanava'
+  All Channels: 'Kaikki kanavat'
+  Clear Filters: 'Tyhjennä suodattimet'
+  Invalid Date Range: 'Alkupäivän on oltava ennen loppupäivää tai sama kuin loppupäivä.'
+  Empty Filter Message: 'Katseluhistoriassasi ei ole videoita, jotka vastaavat näitä suodattimia.'
+  Repair Compact: "Korjaa"
+  Mark All Watched Compact: "Kaikki katsottu"
+  Repair Use Cookies: "Käytä määritettyjä yt-dlp-evästeitä"
+  Repair Cookies Hint: "Yli 500 videota on tarkistettava. Määritä evästeet yt-dlp-asetuksissa ja ota ne käyttöön tässä vähentääksesi pyyntöjen rajoittamisen riskiä."
+  Repair Description: "Käytä tätä historian tuonnin jälkeen tai kun videoista puuttuu tietoja tai niissä on virheellinen LIVE-merkintä."
+  Repair Details: "Täydentää puuttuvat otsikot, kanavat ja julkaisupäivät sekä tarkistaa kestot ja LIVE-merkinnät. Katselun edistyminen ja katsotuksi merkitseminen säilyvät ennallaan."
+  Repair Notice: "Suuren historian käsittely voi kestää. Epäonnistuneita pyyntöjä yritetään automaattisesti uudelleen. Poistettujen tai yksityisten videoiden tiedot voivat jäädä puutteellisiksi."
+  Start Repair: "Aloita korjaus"
+  Repair Checking: "Tarkistetaan videotietoja"
+  Repair Waiting: "Odotetaan YouTubea. Korjaus jatkuu automaattisesti."
+  Repair Retrying: "Yritetään epäonnistuneita pyyntöjä uudelleen"
+  Repair Finished: "Korjaus valmis"
+  Repair Stopped: "Korjaus pysäytetty"
+  Repair: "Korjaa historia"
+  Repair Progress: "Tarkistettu: {checked}/{total} · Korjattu: {repaired} · Epäonnistuneet: {failed}"
+  Mark All As Watched: Merkitse kaikki katsotuiksi
+  Mark All As Watched Confirmation: Haluatko varmasti merkitä kaikki katseluhistoriasi videot katsotuiksi?
+  All History Marked as Watched: Kaikki katseluhistoriasi videot on merkitty katsotuiksi
+  Select History Age: Valitse, kuinka vanha merkinnän on oltava ennen poistamista.
+  Delete Entries Older Than: Poista tätä vanhemmat merkinnät
+  Number of Days: Päivien määrä
+  History Cleanup Warning: Tämä poistaa vastaavat katseluhistorian merkinnät pysyvästi.
+  1 Day: 1 päivä
+  1 Week: 1 viikko
+  1 Month: 1 kuukausi
+  3 Months: 3 kuukautta
+  1 Year: 1 vuosi
+  All Time: Koko ajalta
+  Custom: Mukautettu
+  History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
+Settings:
+  Diagnostics:
+    Diagnostics: Vianmääritys
+    Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
+    Enable Logging: Ota vianmääritysloki käyttöön
+    Copy Report: Kopioi raportti
+    Save Report: Tallenna raportti
+    Clear Log: Tyhjennä loki
+    Report Copied: Vianmääritysraportti kopioitu
+    Report Saved: Vianmääritysraportti tallennettu
+    Report File: Vianmääritysraportti
+    Save Failed: Vianmääritysraporttia ei voitu tallentaa
+    Log Cleared Message: Vianmääritysloki tyhjennetty
+  Tab Unloading:
+    Automatically unload tabs: "Poista välilehdet muistista automaattisesti"
+    Memory threshold: "Muistikynnys"
+    Tabs to unload: "Muistista poistettavat välilehdet"
+    Automatic unloading help: "Poista vanhimmat taustavälilehdet muistista. Aktiiviset ja toistavat välilehdet pysyvät ladattuina."
+    Memory threshold help: "Prosenttiosuus renderöintiprosessin muistirajasta, ei järjestelmän koko RAM-muistista."
+  Password Settings:
+    Failed to Save Password: "Salasanan tallentaminen epäonnistui."
+    Confirm Password: "Vahvista salasana"
+    Passwords Do Not Match: "Salasanat eivät täsmää."
+  Navigation and Controls: "Navigointi ja säätimet"
+  Control Bar:
+    Title: "Ohjauspalkki"
+    Customize: "Mukauta ohjauspalkkia"
+    Hidden: "Piilotetut"
+    Empty: "Ei säätimiä"
+    Move to Control Bar: "Siirrä {control} ohjauspalkkiin"
+    Move to Player Menu: "Siirrä {control} soittimen valikkoon"
+    Hide: "Piilota {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Suositellut videot"
+    Title: "Koko näytön toiminnot"
+    Customize: "Mukauta koko näytön toimintoja"
+    Add Action: "Lisää toiminto"
+    Empty: "Koko näytön toimintoja ei ole valittu"
+    Quick Bookmark: "Pikakirjanmerkki"
+    Availability Hint: "Toiminnot näkyvät vain videoissa, joihin ne soveltuvat."
+    Disabled: "(poistettu käytöstä)"
+  Quick Settings:
+    Quick Settings: Pika-asetukset
+    Customize Quick Settings: Mukauta pika-asetuksia
+    Add Setting: Lisää asetus
+    Appearance: Ulkoasu
+    Playback: Toisto
+    Content: Sisältö
+    Language and Region: Kieli ja alue
+    All Settings: Kaikki asetukset
+    Profile Selector Hint: Voit vaihtaa profiilia myös napsauttamalla profiilikuvaketta hiiren kakkospainikkeella
+    Profile Selector Touch Hint: Voit vaihtaa profiilia myös painamalla profiilikuvaketta pitkään
+  Categories:
+    General Description: Kieli, käynnistys, välilehdet ja kääntäminen
+    Appearance: Ulkoasu
+    Appearance Description: Teema, asettelu, navigointi ja videoluettelot
+    Content appearance: Videoluettelot ja pikkukuvat
+    Layout: Asettelu
+    Playback Description: Soittimen oletukset, tekstitykset ja kanavakohtaiset asetukset
+    Subscriptions Description: Syötteiden päivitys, ilmoitukset uusista videoista ja RSS-syötteet
+    Downloads Description: Latauskansio, mallit ja automaattiset lataukset
+    Focus: Keskittyminen
+    Focus Description: Piilotettu sisältö, katselurajat, muistutukset ja perheasetukset
+    Add-ons: Lisäosat
+    Add-ons Description: SponsorBlock, DeArrow, ei-tykkäysten määrät, AiSList ja puhekäännös
+    Privacy Description: Historia, hakuehdotukset, linkit ja sovelluksen salasana
+    Online activity: Verkkotoiminta
+    Data And Storage Description: Varmuuskopiot, tuonti ja vienti, levyn käyttö ja siivous
+    Sync Description: Synkronointipalvelimen tili, laitteiden yhdistäminen ja synkronoidut tiedot
+    Advanced: Lisäasetukset
+    Advanced Description: Taustapalvelut, puskurointi, ulkoiset työkalut, välityspalvelin ja vianmääritys
+    Alternative providers: Video- ja metatietojen palveluntarjoajat
+  Highlight Changed Settings: Korosta oletuksista poikkeavat asetukset
+  Reset Setting to Default: Palauta tämä asetus oletusarvoon
+  Performance Impact:
+    Show Performance Impact: Näytä suorituskykyvaikutuksen ilmaisimet
+    Moderate: Kohtalainen vaikutus
+    High: Suuri vaikutus
+    Description: Tämä asetus voi lisätä resurssien käyttöä ({resources})
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: muisti
+      Network: verkko
+      Disk: levytila
+  General Settings:
+    Limit Titles to Two Lines: "Rajoita otsikot kahteen riviin"
+    Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
+    Preferred Video Codec: Ensisijainen videokoodekki
+    Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
+    Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
+    Enable Tabs: "Ota välilehdet käyttöön"
+    Thumbnail Swipe Gestures:
+      Left: Pyyhkäisy vasemmalle pikkukuvissa
+      Right: Pyyhkäisy oikealle pikkukuvissa
+      Description: Pyyhkäise videon pikkukuvaa vaakasuunnassa ja vapauta suorittaaksesi valitun toiminnon.
+    Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
+    Use tray icon: "Käytä ilmoitusalueen kuvaketta"
+    Close to system tray: "Sulje ilmoitusalueelle"
+    Tray required for background refresh: "Ilmoitusalueen kuvake tarvitaan, kun tilausten päivitys taustalla on käytössä."
+    Show Video Menu Button: Näytä videovalikon painike
+    Swipe to refresh: Päivitä pyyhkäisemällä
+    Blur Thumbnails: Sumenna pikkukuvat
+    Navigation:
+      Always Show Navigation Bar: Näytä navigointipalkki aina, kun se on alareunassa
+      Compact Tab Labels: Tiivis navigointipalkki, kun se on alareunassa
+      Show Active Subscriptions: Näytä aktiiviset tilaukset sivupalkissa
+      Navigation: Navigointi
+      Customize Navigation: Mukauta navigointia
+      Add Item: Lisää kohde
+    Date Format: Päivämäärän muoto
+    Time Format: Ajan muoto
+    Language Default: Kielen oletus
+    Update Relative Timestamps: Pidä suhteelliset aikaleimat ajan tasalla
+    Stream Extraction Method:
+      Stream Extraction Method: Suoratoiston poimintatapa
+      yt-dlp: yt-dlp
+      Built-in: Sisäänrakennettu
+    Confirm Before: Vahvista ennen…
+    Confirmation Options:
+      Closing App: OpenTubeX-sovelluksen sulkemista
+      Closing Window: Useita välilehtiä sisältävän ikkunan sulkemista
+      Closing Tabs: Useiden välilehtien sulkemista
+      Loading Tabs: Useiden välilehtien lataamista
+      Unloading Tabs: Useiden välilehtien poistamista muistista
+    Remember Tab Navigation History: Muista välilehtien selaushistoria
+    New Tab Position:
+      New Tab Position: Uuden välilehden sijainti
+      At the end: Lopussa
+      After current tab: Nykyisen välilehden jälkeen
+      After current tab in opened order: Nykyisen välilehden jälkeen avaamisjärjestyksessä
+    Tab Close Focus:
+      Last active tab: "Viimeksi aktiivinen välilehti"
+      Next tab in tab order: "Seuraava välilehti välilehtijärjestyksessä"
+      Previous tab in tab order: "Edellinen välilehti välilehtijärjestyksessä"
+      Tab Close Focus: Aktiivisen välilehden sulkemisen jälkeen
+    Startup Behavior:
+      Startup Behavior: Käynnistettäessä
+      Load all tabs: Lataa kaikki välilehdet
+      Load previously loaded tabs: Lataa aiemmin ladatut välilehdet
+      Load last active tab: Lataa viimeksi aktiivinen välilehti
+      Start with an empty session: Aloita tyhjällä istunnolla
+      Load landing page, keep other tabs unloaded: Lataa aloitussivu, jätä muut välilehdet lataamatta
+    Use AI Translation Completions: Täydennä puuttuvat käännökset tekoälyn tuottamilla käännöksillä
+    Reduced Motion:
+      Reduced Motion: Vähennetty liike
+      System: Järjestelmän asetus
+      Force On: Pakota käyttöön
+      Force Off: Pakota pois käytöstä
+    Comment Translation:
+      Title: Kommenttien käännökset
+      Enable: Ota kommenttien käännökset käyttöön
+      Never Translate: Älä koskaan käännä näillä kielillä kirjoitettuja kommentteja
+      Choose Language: Valitse kieli
+      Description: Sovelluksen kielellä kirjoitettuja kommentteja ei käännetä. Lisää muut kielet, joita osaat lukea.
+      Remove Language: Käännä taas kommentit, joiden kieli on {language}
+    Avoid translation:
+      Avoid translation: Suosi kääntämättömiä videotekstejä
+      Disabled: Ei käytössä
+      Watch Only: Vain videon käyttöliittymässä
+      Entire App: Koko sovelluksessa
+    Playlist View Type:
+      Playlist View Type: Soittolistan näkymätyyppi
+    Show Thumbnail Previews: Näytä pikkukuvien esikatselut
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Pikkukuvan lisätoimintopainike
+      None: Ei mitään
+      Mark as Watched: Merkitse katsotuksi
+      Copy YouTube Link: Kopioi YouTube-linkki
+      Open in YouTube: Avaa YouTubessa
+    Mobile Layout:
+      Mobile Layout: 'Mobiiliasettelu'
+      Automatic: 'Automaattinen'
+      Phone: 'Puhelin'
+      Tablet: 'Tabletti'
+    Video View Type:
+      Full Width: Koko leveys
+    Grid Columns:
+      Grid Columns: Ruudukon sarakkeet
+      Playlist Grid Columns: Soittolistojen ruudukon sarakkeet
+      Auto: Automaattinen
+    Preferred API Backend:
+      Yattee Server: Yattee-palvelin
+    Yattee Server:
+      Server URL: Yattee-palvelimen URL
+      Username: Käyttäjänimi
+      Password: Salasana
+      Proxy Videos: Välitä videot Yattee-palvelimen kautta
+      Test Connection: Testaa yhteys
+      Testing: Testataan yhteyttä…
+      Connected: Yhdistetty Yattee-palvelimeen {version}
+      Errors:
+        Invalid URL: Anna palvelimen URL-osoite, jonka alussa on https:// tai http://.
+        Unreachable: Palvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja että palvelin on käynnissä.
+        Media not allowed: 'Yhdistetty, mutta palvelin ei salli tämän sovelluksen ladata videoita. Aseta CORS_ORIGINS={origins} palvelimen ympäristömuuttujiin.'
+        Not a Yattee server: Palvelin vastasi, mutta se ei ole Yattee-palvelin.
+        Credentials required: Palvelin vaatii käyttäjänimen ja salasanan.
+        Invalid credentials: Palvelin hylkäsi käyttäjänimen tai salasanan.
+        Rate limited: Palvelin estää kirjautumiset liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.
+        Server error: Palvelin palautti virheen (HTTP {status}).
+    Notifications:
+      Notifications: Ilmoitukset
+      System and In-App: Järjestelmä ja sovelluksessa
+      System Only: Vain järjestelmä
+      Off: Pois
+  Context Menu Search Settings:
+    Context Menu Search Settings: Pikavalikon haku
+    Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
+    Icon Hint: Hakukoneen käyttöönotto muodostaa yhteyden sen verkkosivustoon faviconin lataamista varten.
+    Engine Name: Hakukoneen nimi
+    Search URL: Haun URL-osoite
+    URL Hint: Merkitse koodatun valitun tekstin paikka URL-osoitteessa merkkijonolla %s.
+    Add Custom Engine: Lisää mukautettu hakukone
+    Add Engine: Lisää hakukone
+    Remove Engine: Poista {engine}
+    Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
+    Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
+  Theme Settings:
+    Sections:
+      Interface: "Käyttöliittymä"
+      Side Bar and Header: "Sivupalkki ja otsake"
+      Tabs: "Välilehdet"
+      Player: "Soitin"
+      Scrolling: "Vieritys"
+      Notifications: "Ilmoitukset"
+    Only Show Important Notifications: Näytä vain tärkeät ilmoitukset
+    Visible Search Suggestions: "Näkyvät hakuehdotukset"
+    Material Accent Color: "Material-korostusväri"
+    Tally Accent Color: "Tally-korostusväri"
+    Material Wallpaper Colors: "Taustakuvan värit"
+    Material System Accent Color: "Järjestelmän korostusväri"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Välilehden latausilmaisin
+      Bar: Palkki
+      Dot: Piste (perinteinen)
+    Compact Settings Categories: "Tiiviit asetuskategoriat"
+    Playlist Thumbnail Size: "Soittolistan pikkukuvien koko"
+    Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
+    Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
+    Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater -teema"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo -teema"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Pink -teema"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Mauve -teema"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Red -teema"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Maroon -teema"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Peach -teema"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Yellow -teema"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Green -teema"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Teal -teema"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Sky -teema"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Sapphire -teema"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Blue -teema"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavender -teema"
+    Move Downloads to App Header: Siirrä lataukset sovelluksen yläpalkkiin
+    Move Settings to App Header: Siirrä asetukset sovelluksen yläpalkkiin
+    Hide Side Bar on Watch Pages: Piilota sivupalkki katselusivuilla
+    UI Roundness: Käyttöliittymän pyöristys
+    Scrollbar Width: Vierityspalkin leveys
+    Scroll Speed: Vieritysnopeus
+    Animation Speed: Animaatioiden nopeus
+    Thumbnail Size: Pikkukuvan koko
+    Show Tab Icons: Näytä välilehtien kuvakkeet
+    Load Missing Tab Icons: Lataa puuttuvat välilehtikuvakkeet
+    Loading Missing Tab Icons: Ladataan puuttuvia välilehtikuvakkeita…
+    No Missing Tab Icons: Kaikki tuetut välilehtikuvakkeet on jo ladattu
+    Loaded Tab Icons: 'Puuttuva välilehtikuvake ladattu: {count} | Puuttuvat välilehtikuvakkeet ladattu: {count}'
+    Loaded Tab Icons With Failures: Ladattiin {loaded} välilehtikuvaketta; {failed} kuvaketta ei voitu ladata
+    Show Tab Previews: Näytä välilehtien esikatselut
+    Use Fixed Tab Width: Käytä vaakasuuntaisessa tilassa kiinteälevyisiä välilehtiä
+    Use Custom Title Bar: Käytä mukautettua otsikkopalkkia
+    Tab Width: Välilehden leveys
+    Vertical Tab Height: Pystysuuntaisten välilehtien korkeus
+    Tab Layout:
+      Tab Layout: Välilehtien asettelu
+      Horizontal Top: Vaakasuuntaisesti ylhäällä
+      Horizontal Bottom: Vaakasuuntaisesti alhaalla
+      Vertical Left: Pystysuuntaisesti vasemmalla
+      Vertical Right: Pystysuuntaisesti oikealla
+    Show Toast Timeout Indicator: Näytä ponnahdusilmoituksen jäljellä oleva aika
+    Use Grid Player Menu: Käytä soittimen ruudukkovalikkoa
+    Show Progress as Notification: Näytä edistyminen ilmoituksena
+    Operation in Progress: Toiminto on käynnissä
+    Toast Position:
+      Test Toast: Testi-ilmoitus
+      Toast Position: Ponnahdusilmoituksen sijainti
+      Bottom Left: Alhaalla vasemmalla
+      Bottom Center: Alhaalla keskellä
+      Bottom Right: Alhaalla oikealla
+      Top Left: Ylhäällä vasemmalla
+      Top Center: Ylhäällä keskellä
+      Top Right: Ylhäällä oikealla
+    Icon Pack:
+      Icon Pack: Kuvakepaketti
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Sovelluksen fontti
+      System Default: Järjestelmän oletus
+      Unable to Load: Asennettuja järjestelmäfontteja ei voitu ladata
+      Bundled Fonts: Mukana tulevat fontit
+      System Fonts: Järjestelmän fontit
+    Always Show Scrollbars: Näytä vierityspalkit aina
+    Base Theme:
+      Material Light: "Material Vaalea"
+      Material Dark: "Material Tumma"
+      Material Black: "Material Musta"
+      Dynamic colors: Dynaamiset värit
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Vaalea"
+      Tally Dark: "Tally Tumma"
+      Custom: Mukautettu
+      Built-in Themes: Sisäänrakennetut teemat
+      Custom Themes: Mukautetut teemat
+    Light Theme: Vaalea teema
+    Dark Theme: Tumma teema
+    Custom Theme:
+      Share Restrictions Prompt: "Kuvaus saa sisältää enintään 500 merkkiä, Markdown mukaan lukien. Vain GitHubissa sijaitsevat linkit ja kuvat ovat sallittuja, myös suoraan tähän ladatut tiedostot. Botti poistaa ulkoiset linkit ja kuvat, lyhentää pitkät kuvaukset ja jättää muutokset selittävän kommentin."
+      Import from Clipboard: "Tuo leikepöydältä"
+      Invalid Clipboard Theme: "Leikepöydällä ei ole kelvollista teemaa. Kopioi teeman JSON ja yritä uudelleen."
+      Create Custom Theme: Luo mukautettu teema
+      Edit Custom Theme: Muokkaa mukautettua teemaa
+      Custom Theme Creator: Mukautetun teeman luonti
+      Theme Name: Teeman nimi
+      Based On: Pohjana
+      Import Theme: Tuo teema
+      Export Theme: Vie teema
+      Share Theme: Jaa teema
+      Share Description Prompt: Kuvaile teemaa ja kerro, mitä käyttäjän on hyvä tietää ennen sen käyttöönottoa.
+      Share Screenshots Prompt: "Vedä ja pudota tähän yksi tai useampi kuvakaappaus. Jätä tämä osio tyhjäksi, niin botti lisää kolme esikatselua esimerkkisisällöllä ilman henkilötietojasi."
+      Delete Theme: Poista teema
+      Delete Theme Confirmation: Poistetaanko ”{name}”? Toimintoa ei voi kumota.
+      Save and Apply: Tallenna ja ota käyttöön
+      Discard Changes: Hylkää muutokset
+      Reset Colors: Palauta pohjateeman värit
+      Theme File: OpenTubeX-teematiedosto
+      Theme Saved: Mukautettu teema tallennettiin ja otettiin käyttöön
+      Theme Imported: Teema tuotiin muokkaimeen
+      Theme Exported: Teema vietiin
+      Theme Deleted: Mukautettu teema poistettiin
+      Unable to Load: Mukautettua teemaa ei voitu ladata
+      Unable to Save: Mukautettua teemaa ei voitu tallentaa
+      Unable to Export: Mukautettua teemaa ei voitu viedä
+      Unable to Share: Mukautettua teemaa ei voitu jakaa
+      Unable to Delete: Mukautettua teemaa ei voitu poistaa
+      Invalid Theme File: Virheellinen mukautettu teematiedosto
+      Colors:
+        Watched thumbnail overlay: "Katsottujen videoiden pikkukuvien peite"
+        Main text: Pääteksti
+        Secondary text: Toissijainen teksti
+        Subtle text: Hillitty teksti
+        Borders and dividers: Reunukset ja erottimet
+        Subtle surfaces and indicators: Hillityt pinnat ja ilmaisimet
+        Title text: Otsikkoteksti
+        Selected text background: Valitun tekstin tausta
+        Selected text: Valittu teksti
+        Logo icon: Logokuvake
+        Logo text: Logoteksti
+        Logo hover: Logo osoitettaessa
+        Logo pressed: Logo painettaessa
+        Page background: Sivun tausta
+        Card background: Kortin tausta
+        Secondary card background: Toissijaisen kortin tausta
+        Favorite icon: Suosikkikuvake
+        Error color: Virheen väri
+        Scrollbar thumb: Vierityspalkin liukusäädin
+        Scrollbar thumb hover: Vierityspalkin liukusäädin osoitettaessa
+        Scrollbar thumb pressed: Vierityspalkin liukusäädin painettaessa
+        Dropdown item hover text: Pudotusvalikon kohteen teksti osoitettaessa
+        Dropdown item hover background: Pudotusvalikon kohteen tausta osoitettaessa
+        Navigation and panel background: Navigoinnin ja paneelin tausta
+        Neutral item hover and focus background: Neutraalin kohteen tausta osoitettaessa ja kohdistettaessa
+        Neutral item hover and focus text and icons: Neutraalin kohteen teksti ja kuvakkeet osoitettaessa ja kohdistettaessa
+        Neutral item pressed background: Neutraalin kohteen tausta painettaessa
+        Neutral item pressed text and icons: Neutraalin kohteen teksti ja kuvakkeet painettaessa
+        Header button hover and focus background: Otsakepainikkeen tausta osoitettaessa ja kohdistettaessa
+        Header button hover and focus text and icons: Otsakepainikkeen teksti ja kuvakkeet osoitettaessa ja kohdistettaessa
+        Header button pressed background: Otsakepainikkeen tausta painettaessa
+        Header button pressed text and icons: Otsakepainikkeen teksti ja kuvakkeet painettaessa
+        Search and dropdown background: Haun ja pudotusvalikon tausta
+        Settings search background: Asetushaun tausta
+        Instance menu: Instanssivalikko
+        Shadow color: Varjon väri
+        Primary controls and highlights: Ensisijaiset säätimet ja korostukset
+        Primary control hover and focus: Ensisijainen säädin osoitettaessa ja kohdistettaessa
+        Primary control pressed: Ensisijainen säädin painettaessa
+        Text and icons on primary controls: Ensisijaisten säädinten teksti ja kuvakkeet
+        Secondary controls and highlights: Toissijaiset säätimet ja korostukset
+        Secondary control hover and focus: Toissijainen säädin osoitettaessa ja kohdistettaessa
+        Secondary control pressed: Toissijainen säädin painettaessa
+        Light secondary color: Vaalea toissijainen väri
+        Visited accent: Avatun kohteen korostusväri
+        Text and icons on secondary controls: Toissijaisten säädinten teksti ja kuvakkeet
+        Links: Linkit
+        Visited links: Avatut linkit
+        Destructive action: Poistava toiminto
+        Destructive hover and focus: Poistava toiminto osoitettaessa ja kohdistettaessa
+        Destructive pressed: Poistava toiminto painettaessa
+        Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
+  Player Settings:
+    Mono Audio: 'Monoääni'
+    Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
+    Default Media Format:
+      Default Media Format: 'Median oletusmuoto'
+    Pause on Stream Recovery: "Keskeytä striimin palautuksessa"
+    Buffering:
+      Buffering: Puskurointi
+      Description: Valitse, kuinka paljon videota soitin lataa etukäteen ja pitää ladattuna.
+      Buffer Ahead Hint: Suurempi ennakkopuskuri pitää toiston käynnissä pidempienkin yhteyskatkosten ajan, mutta lataa videota, jota et ehkä katso.
+      Rewind Buffer Hint: Suurempi taaksekelauspuskuri antaa hypätä taaksepäin lataamatta uudelleen, mutta käyttää enemmän muistia.
+      Buffer Before Playing Hint: Kun odotat ennen toistoa, että videota latautuu enemmän, toistuvat katkot epävakailla yhteyksillä estyvät, mutta videot alkavat ja jatkuvat kelauksen jälkeen hitaammin.
+      Preset: Puskuroinnin esiasetus
+      Presets:
+        Data Saver: Datansäästö
+        Default: Oletus
+        Smooth Playback: Sujuva toisto
+        Custom: Mukautettu
+      Buffer Ahead: Ennakkopuskuri
+      Buffer Ahead Tooltip: 'Kuinka pitkälle nykyisen kohdan edelle ladataan. Korkeilla laaduilla muistirajat voivat rajoittaa hyvin suuria arvoja. Oletus: {value}'
+      Rewind Buffer: Taaksekelauspuskuri
+      Rewind Buffer Tooltip: 'Kuinka paljon jo katsomastasi videosta pysyy ladattuna. Oletus: {value}'
+      Buffer Before Playing: Puskuri ennen toistoa
+      Buffer Before Playing Tooltip: 'Kuinka paljon videota on ladattava ennen kuin toisto alkaa tai jatkuu puskurin tyhjennyttyä. Oletus: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Laaturaja rajoitetuissa verkoissa"
+      No Limit: "Ei rajaa"
+      Tooltip: "Mobiilidatassa ja muissa rajoitetuissa verkoissa videot alkavat tällä tai heikommalla laadulla. Voit silti valita soittimessa paremman laadun."
+    Show Music Mode Toggle: "Näytä musiikkitilan kytkin"
+    Enable DLNA Casting: "Ota DLNA-suoratoisto käyttöön"
+    Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
+    Lights Off: Valot pois
+    Show Lights Off Toggle: Näytä valojen sammutuskytkin
+    Show Volume Boost Toggle: "Näytä äänenvoimakkuuden vahvistuksen valitsin"
+    Swipe Gestures:
+      Fullscreen Brightness: Täysi kirkkaus koko näytössä
+      Left: Pyyhkäisy vasemmalla
+      Right: Pyyhkäisy oikealla
+      Disabled: Pois käytöstä
+      Brightness: Kirkkaus
+      Volume: Äänenvoimakkuus
+      Hint: Pyyhkäise ylös tai alas videon reunalla.
+      Unavailable: Toiston säätimiä ei voitu säätää.
+    yt-dlp Streaming: "yt-dlp-suoratoisto"
+    Continue Playback When Screen Is Locked: 'Jatka toistoa näytön ollessa lukittuna'
+    Music Visualizer: Musiikkivisualisointi
+    Automatically Open Chapters: Avaa luvut automaattisesti
+    Caption Appearance:
+      Caption Appearance: Tekstityksen ulkoasu
+      Captions: Tekstitys
+      Preferred Language: Ensisijainen tekstityskieli
+      Application Language: Sovelluksen kieli
+      Enable Translations: Ota tekstityskäännökset käyttöön
+      Text Color: Tekstin väri
+      Background Color: Taustan väri
+      Background Opacity: Taustan peittävyys
+      Font Size: Fonttikoko
+      Anchor:
+        Anchor: Kiinnityskohta
+        Top Left: Ylhäällä vasemmalla
+        Top Center: Ylhäällä keskellä
+        Top Right: Ylhäällä oikealla
+        Bottom Left: Alhaalla vasemmalla
+        Bottom Center: Alhaalla keskellä
+        Bottom Right: Alhaalla oikealla
+        Center Left: Keskellä vasemmalla
+        Center: Keskellä
+        Center Right: Keskellä oikealla
+      Edge Style:
+        Edge Style: Reunatyyli
+        None: Ei mitään
+        Outline: Ääriviiva
+        Drop Shadow: Heittovarjo
+        Raised: Korotettu
+        Depressed: Upotettu
+      Reset: Palauta tekstityksen ulkoasu
+      Default: Oletus
+      Text Opacity: Fontin läpinäkymättömyys
+      Font Family:
+        Font Family: Fonttiperhe
+        Monospaced Serif: Tasalevyinen Serif
+        Proportional Serif: Suhteellinen Serif
+        Monospaced Sans-Serif: Tasalevyinen Sans-Serif
+        Proportional Sans-Serif: Suhteellinen Sans-Serif
+      Colors:
+        White: Valkoinen
+        Yellow: Keltainen
+        Green: Vihreä
+        Cyan: Syaani
+        Blue: Sininen
+        Magenta: Magenta
+        Red: Punainen
+        Black: Musta
+    Default Viewing Mode:
+      Full Window (Always On): Koko ikkuna (aina käytössä)
+      Full Screen (Always On): Koko näyttö (aina käytössä)
+      Tooltip: Useimmat oletuskatselutilat otetaan käyttöön vain katselukerran alussa. Katselun aikana tehdyt muutokset pysyvät voimassa katselukerran loppuun. Aina käytössä olevat katselutilat otetaan käyttöön aina uuteen videoon siirryttäessä riippumatta edellisen videon katselutilaan tehdyistä muutoksista.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Siirry automaattisesti kuva kuvassa -tilaan
+      On Tab Change: Välilehteä vaihdettaessa
+      On Window Minimize: Ikkunaa pienennettäessä
+      On Window Hide: Kun ikkuna menettää kohdistuksen tai siitä siirrytään pois
+      Wayland Minimize Unsupported: Wayland ei ilmoita ikkunan pienentämisestä sovelluksille, joten tämä käynnistin ei ole käytettävissä. Käytä sen sijaan asetusta "Kun ikkuna menettää kohdistuksen tai siitä siirrytään pois", joka kattaa myös pienentämisen.
+    Scroll Mini Player:
+      Scroll Mini Player: Vierityksen minisoitin
+      When Scrolling Down: Pidä minisoitin näkyvissä alaspäin vieritettäessä
+      On All Tabs: Pidä minisoitin näkyvissä välilehteä vaihdettaessa
+      On Navigation: Jatka toistoa poistuttaessa videosivulta
+    Multiply Seek Interval by Playback Rate: Kerro siirtymisväli toistonopeudella
+    Show Playback Rate Adjusted Timestamp: Näytä toistonopeuteen mukautettu aikaleima
+    Use YouTube-style Shorts: Käytä YouTube-tyylisiä Shortseja
+    Loop Shorts: Toista Shorts-videot jatkuvasti
+    Remember Volume: Muista äänenvoimakkuus
+    Skip Silence: Ohita hiljaisuus
+    Show Skip Silence Toggle: Näytä hiljaisuuden ohituksen kytkin
+    Enable Skip Silence by Default: Ota hiljaisuuden ohitus oletuksena käyttöön
+    Enable Video Zoom: Ota videon zoomaus käyttöön
+    Enable Seek History: Ota siirtymähistoria käyttöön
+    Voice-over Translation:
+      Title: Päällepuhuttu käännös
+      Attribution: (Yandexin tarjoama)
+      Enable: Ota päällepuhuttu käännös käyttöön
+      Prepare in Background: Aloita päällepuhuttujen käännösten valmistelu taustalla
+      Background Preparation Tooltip: Lähettää nykyisen videon tunnisteen, keston ja valitun kielen käännöspalveluun heti, kun tuettu video latautuu.
+      Language: Päällepuhutun käännöksen kieli
+      Supported Source Languages: 'Tuetut lähdekielet: venäjä, englanti, kiina, korea, arabia, ranska, italia, espanja, saksa ja japani.'
+      Voice Volume: Käännetyn puheen äänenvoimakkuus
+      Original Volume: Alkuperäisen äänen voimakkuus
+      Russian: Venäjä
+      English: Englanti
+      Kazakh: Kazakki
+    Hold to Double Playback Speed: Pidä painettuna käyttääksesi kaksinkertaista toistonopeutta
+    Use Quick Playback Speed Bar: Käytä toistonopeuden pikapalkkia
+    Customize Quick Playback Speed Bar: Mukauta toistonopeuden pikapalkkia
+    Quick Playback Speed Bar Manager: Toistonopeuden pikapalkki
+    Add Playback Speed: Lisää toistonopeus
+    Reset Quick Playback Speed Bar: Palauta oletukset
+    Playback Speed Name: Nimi
+    Edit Playback Speed Name: Muokkaa toistonopeuden nimeä
+    Use Automatic Playback Speed Name: Käytä automaattista toistonopeuden nimeä
+    Reorder Playback Speed: Muuta toistonopeuksien järjestystä vetämällä
+    Playback Speed: Toistonopeus
+    Parallel Segment Loading: Osien rinnakkainen lataus
+    Screenshot:
+      Mode: Kuvakaappaustila
+      Modes:
+        Save To Folder: Tallenna kansioon
+        Clipboard: Kopioi leikepöydälle
+      Legacy Formats: "Vanhemmat muodot"
+      Modern Formats: "Nykyaikaiset muodot"
+    Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Siirry koko näytön tilaan tai poistu siitä pyyhkäisemällä ylös tai alas'
+    Preload Upcoming Videos: "Esilataa seuraavat videot"
+    Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
+    Concurrent Preloads: "Samanaikaiset esilataukset"
+    Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
+    Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
+    Show Swipe to Seek Preview: Näytä esikatselu pyyhkäisemällä kelattaessa
+    Enable Google Cast: "Ota Google Cast käyttöön"
+    Sections:
+      Playback: Toisto
+      Autoplay: Automaattinen toisto
+      Playback Speed: Toistonopeus
+      Player Controls: Soittimen säätimet
+      Gestures: Eleet
+      Viewing Modes: Katselutilat
+      Shorts: Shorts
+      Screenshots: Kuvakaappaukset
+    Enable FCast: "Ota FCast käyttöön"
+  Channel Settings:
+    Channel Settings: Kanava-asetukset
+    Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
+    Enable Channel Playback Settings: Ota kanavakohtaiset toistoasetukset käyttöön
+    Auto Save Playback Speed: Tallenna toistonopeuden muutokset automaattisesti
+    Auto Save Video Quality: Tallenna videon laadun muutokset automaattisesti
+    Auto Save Subtitles State: Tallenna tekstityksen tilan muutokset automaattisesti
+    Auto Save Volume: Tallenna äänenvoimakkuuden muutokset automaattisesti
+    Manage Saved Channels: Hallitse tallennettuja kanavia ({channelCount})
+    Saved Channels: Tallennetut kanava-asetukset
+    Enable Saved Channel Settings Sync: Synkronoi tallennetut kanava-asetukset
+    Disable Saved Channel Settings Sync: Lopeta tallennettujen kanava-asetusten synkronointi
+    Search Channels: Hae kanavia
+    No Saved Channels: Kanavakohtaisia asetuksia ei ole vielä tallennettu
+    No Matching Channels: Hakuasi vastaavia kanavia ei ole
+    Forget Channel: Poista tämän kanavan kaikki asetukset
+    Forget Value: Poista tämä asetus
+    Add Setting: Muista toinen asetus tälle kanavalle
+    Add Subscribed Channel: Lisää tilattu kanava
+    Video Quality: Videon laatu
+    Subtitles Enabled: Tekstitys käytössä
+    Volume: Äänenvoimakkuus
+  Download Settings:
+    Download Settings: Lataukset
+    Enable Downloads: Ota lataukset käyttöön
+    Managed Tools Download Started Template: 'Tarvittavaa ulkoista ohjelmistoa ei löytynyt: {tools}. Ladataan hallitut kopiot…'
+    Managed Tools Download Finished Template: Kohteen {tools} lataus valmis
+    Managed Tools Update Started Template: Kohteelle {tools} löytyi päivitys. Ladataan…
+    Managed Tools Update Finished Template: Kohteen {tools} päivitys valmis
+    Managed Tools Update Available Template: Kohteelle {tools} on saatavilla päivitys.
+    Managed Tools Update Source Notice: "OpenTubeX lataa sen suoraan GitHubista, joten F-Droid ja muut sovelluskaupat eivät tarkista sitä."
+    Update Managed Tools: Päivitä
+    Managed Tools Download Error Template: 'Hallittuja työkaluja ei voitu ladata: {errors}'
+    Download Folder: Latauskansio
+    Global Additional yt-dlp Arguments: Ylimääräiset yt-dlp-argumentit
+    Concurrent Downloads: Samanaikaiset lataukset
+    Bandwidth Limit: Kaistanleveysrajoitus (KiB/s)
+    Choose Download Folder: Valitse latauskansio
+    Download Templates: Latausmallit
+    Manage Download Templates: Hallitse latausmalleja ({templateCount})
+    New Template: Uusi malli
+    Template Source: Muokattava tai pohjana käytettävä malli
+    Built-in Template: '{name} (sisäänrakennettu)'
+    Custom Template Name: '{name} (mukautettu)'
+    Create Template Copy: Luo kopio
+    Template Copy Name: '{name}, kopio'
+    Automatic Downloads: Automaattiset lataukset
+    Manage Automatic Downloads: Hallitse automaattisia latauksia ({channelCount})
+    Automatic Downloads Description: Valitse kullekin tilatulle kanavalle latausmalli ja suodattimet. Ehdot täyttävät videot ladataan taustalla tilaussyötteiden päivittyessä.
+    Automatic Downloads New Only: Kun kanava otetaan käyttöön, lataaminen alkaa sen seuraavasta uudesta videosta. Olemassa olevia videoita ja kanavan vanhempaa sisältöä ei ladata.
+    Automatic Downloads No Channels: Tilaa kanava ennen automaattisten latausten määrittämistä.
+    No Matching Automatic Download Channels: Hakuasi vastaavia kanavia ei ole.
+    Automatic Downloads Livestreams: Suorat lähetykset
+    Minimum Duration Seconds: Vähimmäiskesto (sekuntia)
+    Maximum Duration Seconds: Enimmäiskesto (sekuntia)
+    Minimum File Size MB: Tiedoston vähimmäiskoko (MB)
+    Maximum File Size MB: Tiedoston enimmäiskoko (MB)
+    Maximum Age Days: Enimmäisikä (päivää)
+    Title Includes: Otsikko sisältää
+    Title Excludes: Otsikko ei sisällä
+    Title Filter Hint: Erota otsikon hakusanat pilkuilla. Videon otsikossa on oltava vähintään yksi mukaan otettava hakusana, eikä siinä saa olla yhtäkään pois rajattavaa hakusanaa.
+    Automatic Downloads Require Unmetered Network: "Vain rajoittamattomissa verkoissa"
+    Automatic Downloads Require Charging: "Vain latauksen aikana"
+  External Software Settings:
+    Create YouTube session: "Luo YouTube-istunto"
+    YouTube session hint: "Kirjaudu tarvittaessa sisään ja tallenna istunto. Valitse asetuksista, käytetäänkö sitä latauksiin, toistoon vai tekstityksiin."
+    Use cookies for downloads: "Käytä evästeitä latauksissa"
+    YouTube session failed: "YouTube-istunnon tallentaminen epäonnistui."
+    Checking FFmpeg and FFprobe: Tarkistetaan FFmpeg- ja FFprobe-ohjelmia…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg- ja FFprobe-ohjelmia ei ole vielä ladattu. Lataa ne napsauttamalla alla olevaa painiketta.
+    External Software Settings: Ulkoiset ohjelmistot
+    yt-dlp Source: yt-dlp-lähde
+    yt-dlp Channel: yt-dlp:n julkaisukanava
+    Sources:
+      System: Järjestelmästä (PATH tai mukautettu polku)
+      Managed: OpenTubeX:n hallitsema
+    Detected Version Template: 'Havaittu yt-dlp:n versio: {version}'
+    Managed Not Downloaded: yt-dlp:tä ei ole vielä ladattu. Lataa se napsauttamalla alla olevaa painiketta.
+    System yt-dlp Missing Warning: yt-dlp:tä ei löytynyt järjestelmästä. Asenna se, määritä mukautettu polku alla tai vaihda lähteeksi "OpenTubeX:n hallitsema".
+    Download yt-dlp: Lataa yt-dlp
+    Update yt-dlp: Päivitä yt-dlp
+    Checking yt-dlp: Tarkistetaan yt-dlp:tä…
+    Downloading yt-dlp: Ladataan yt-dlp:tä…
+    yt-dlp Downloaded Template: yt-dlp {version} ladattiin
+    yt-dlp Download Error Template: 'yt-dlp:n lataus epäonnistui: {error}'
+    FFmpeg Source: FFmpeg-lähde
+    Detected FFmpeg Version Template: 'Havaittu FFmpeg-versio: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Havaittu FFmpeg-/FFprobe-versio: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg-ohjelmaa ei ole vielä ladattu. Lataa se napsauttamalla alla olevaa painiketta.
+    System FFmpeg Missing Warning: FFmpeg-ohjelmaa ei löytynyt järjestelmästä. Sitä tarvitaan videon ja äänen yhdistämiseen sekä äänen muuntamiseen. Asenna se, määritä mukautettu polku alla tai vaihda lähteeksi "OpenTubeX:n hallitsema".
+    Download FFmpeg: Lataa FFmpeg
+    Update FFmpeg: Päivitä FFmpeg
+    Checking FFmpeg: Tarkistetaan FFmpeg-ohjelmaa…
+    Downloading FFmpeg: Ladataan FFmpeg-ohjelmaa…
+    FFmpeg Downloaded Template: FFmpeg {version} ladattiin
+    FFmpeg Download Error Template: 'FFmpeg-ohjelman lataus epäonnistui: {error}'
+    Detected FFprobe Version Template: 'Havaittu FFprobe-versio: {version}'
+    FFprobe Managed Not Downloaded: FFprobe-ohjelmaa ei ole vielä ladattu. Lataa se FFmpeg-ohjelman kanssa napsauttamalla alla olevaa painiketta.
+    System FFprobe Missing Warning: FFprobe-ohjelmaa ei löytynyt järjestelmästä. Sitä tarvitaan mediatiedostojen tutkimiseen jälkikäsittelyn aikana. Asenna se FFmpeg-ohjelman viereen tai vaihda lähteeksi "OpenTubeX:n hallitsema".
+    Checking FFprobe: Tarkistetaan FFprobe-ohjelmaa…
+    Download FFmpeg and FFprobe: Lataa FFmpeg ja FFprobe
+    Update FFmpeg and FFprobe: Päivitä FFmpeg ja FFprobe
+    Downloading FFmpeg and FFprobe: Ladataan FFmpeg- ja FFprobe-ohjelmia…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg ja FFprobe {version} ladattiin
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg- ja FFprobe-ohjelmien lataus epäonnistui: {error}'
+    Managed Tool Already Current Template: '{tool} {version} on jo ajan tasalla'
+    Managed Tool Errors:
+      Removed: 'Ladattu tiedosto poistettiin, todennäköisesti virustorjuntaohjelmiston toimesta'
+      Unusable: 'Ladattua ohjelmaa ei voitu suorittaa. Virustorjuntaohjelmisto saattaa estää sen, tai se ei tue tätä järjestelmää'
+      Release Not Found: 'Uusinta julkaisua ei löytynyt'
+      Verification Failed: 'Latausta ei voitu vahvistaa viralliseksi julkaisuksi'
+      Downgrade: 'Ladattu julkaisu on asennettua vanhempi'
+      Invalid Archive: 'Ladattu arkisto on virheellinen'
+      Rollback Failed: 'Päivitys epäonnistui, eikä aiempaa versiota voitu palauttaa kokonaan'
+    Managed Tool Updates: Hallittujen työkalujen päivitykset
+    Update Modes:
+      Automatic: Päivitä automaattisesti
+      Ask: Kysy ennen päivittämistä
+      Manual: Päivitä vain manuaalisesti
+    yt-dlp Executable Path: yt-dlp-ohjelmatiedosto
+    FFmpeg Executable Path: FFmpeg-ohjelmatiedosto
+    Restricted Playback Authentication: "yt-dlp-evästeet"
+    Cookie Source: Evästeiden lähde
+    Cookie Sources:
+      None: Ei mitään
+      File: Tiedosto
+      Browser: Selain
+    Cookie File: Evästetiedosto
+    Browser for Cookies: Selain, josta evästeet haetaan
+    Browser Profile: Selainprofiili (valinnainen)
+    Browser Profile Placeholder: Profiilin nimi tai polku
+    Select Browser: Valitse selain
+    Always Use Cookies: Käytä evästeitä aina
+    Restricted Playback Authentication Hint: OpenTubeX välittää nämä evästeet oletuksena yt-dlp:lle vasta, kun valitset ikärajoitetun tai vain jäsenille tarkoitetun videon kohdalla "Yritä määritetyillä evästeillä".
+    Restricted Playback Authentication Warning: yt-dlp:n käyttäminen Google-tilillä voi johtaa tilin tilapäisiin tai pysyviin rajoituksiin.
+    Use cookies for subtitles: "Käytä evästeitä tekstityksiin"
+  Privacy Settings:
+    Internet Connectivity Checks: "Internet-yhteyden tarkistukset"
+    Internet Connectivity Checks Tooltip: "Lähettää pieniä pyyntöjä GrapheneOS:n ylläpitämälle palvelimelle internet-yhteyden tarkistamiseksi."
+    Automatic History Retention: Historian automaattinen säilytysaika (päivää)
+    Automatic History Retention Placeholder: Jätä tyhjäksi säilyttääksesi historian pysyvästi
+    Automatic History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää historian pysyvästi. Kun tallennat luvun, sitä vanhemmat merkinnät poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
+    History Retention Saved: Historian säilytysaika tallennettiin
+    Invalid History Retention Days: Anna päivien määräksi nollaa suurempi kokonaisluku
+    Enable Watch Statistics: Ota katselutilastot käyttöön
+    Week Starts On: Viikon ensimmäinen päivä
+    Cache Video Metadata: Metatietohistoria
+    Cache Video Metadata Tooltip: Säilyttää tuettujen videoiden metatietojen kaikki versiot, kuten nimet, pikkukuvat ja kuvaukset. Säilyttää myös tilausten syötteissä näkyvät nimet. Tämä on oletuksena poissa käytöstä, koska metatietohistoria vie enemmän levytilaa.
+    Watched Percentage Threshold: Katsotuksi merkitsemisen raja
+    Watched Percentage Threshold Tooltip: Video merkitään katsotuksi, kun valittu prosenttiosuus on saavutettu ja videota on jäljellä enintään 2 minuuttia. Jos rajaksi valitaan 0 %, video merkitään katsotuksi toiston alkaessa. Jos rajaksi valitaan 100 %, video merkitään katsotuksi toiston päättyessä.
+    Clear Video Metadata Cache: Tyhjennä videon metatietovälimuisti
+    Are you sure you want to clear the video metadata cache?: Haluatko varmasti poistaa välimuistissa olevat videoiden nimet, pikkukuvat ja kuvaukset?
+    Failed to clear video metadata cache: Videon metatietovälimuistin tyhjentäminen epäonnistui
+    Video metadata cache has been cleared: Videon metatietovälimuisti on tyhjennetty
+    Video Metadata Cache Size: 'Videon metatietovälimuisti: {size}'
+  Storage Settings:
+    Storage: Tallennustila
+    Downloaded Media: Seuratut ladatut mediatiedostot
+    Storage Breakdown: Tallennustilan erittely
+    Shown Total: Näytetty yhteensä
+    Calculating: Lasketaan…
+    Not Available: Tarkkaa kokoa ei ole saatavilla
+    At Least: Vähintään {size}
+    Failed To Read Storage: Joidenkin kohteiden kokoa ei voitu lukea
+    Downloaded Media Description: Video-, ääni- ja tekstitystiedostot, joita lataushistoria seuraa edelleen.
+    Selected Download Folders: Käyttäjän valitsemat latauskansiot
+    Download History Records: Lataushistorian tietueet
+    Download History Records Description: '{count} valmistuneen latauksen tietue. Tietue sisältää tilan ja tiedostojen sijainnit mutta ei ladattua mediaa. | {count} valmistuneen latauksen tietuetta. Tietueet sisältävät tilan ja tiedostojen sijainnit mutta eivät ladattua mediaa.'
+    Clear Download History Records: Tyhjennä lataushistorian tietueet
+    Clear Download History Confirmation: Tyhjennetäänkö kaikki valmistuneiden latausten tietueet?
+    Download Files Stay On Disk: Ladatut tiedostot säilyvät levyllä, mutta ne eivät enää näy Lataukset-sivulla.
+    Clear Records: Tyhjennä tietueet
+    Replaceable Caches: Korvattavat välimuistit
+    Application Caches: Sovelluksen välimuistit
+    Browser Caches: Selaimen välimuistit
+    Browser Caches Hint: Chromiumin HTTP-, GPU-, koodi-, varjostin-, service worker- ja sanastovälimuistit.
+    Clear Android Cache Confirmation: Tyhjennetäänkö Androidin selaimen välimuisti?
+    Stored App Data: Tallennetut sovellustiedot
+    Included In App Data: Sisältyy yllä näkyviin sovellustietoihin
+    Browser Runtime Data: Selaimen ajonaikaiset tiedot
+    Browser Runtime Data Hint: Chromiumin istunto- ja paikallinen tallennustila, evästeet, tietosuoja- ja verkkotila sekä kaatumistiedostot.
+    Subscription Feed Cache: Tilausten ja syötteiden välimuisti
+    Subscription Feed Cache Description: Tallentaa haetut tilausvideot, Shorts-videot, suorat lähetykset ja julkaisut. OpenTubeX luo välimuistin uudelleen, kun syöte päivitetään seuraavan kerran.
+    Clear Subscription Feed Cache: Tyhjennä tilausten ja syötteiden välimuisti
+    Clear Subscription Feed Cache Confirmation: Tyhjennetäänkö tilausten ja syötteiden välimuisti?
+    Subscription Feed Cache Effect: Tilaussyötteet saattavat näyttää tyhjiltä seuraavaan päivitykseen asti. Tilaukset ja profiilit eivät muutu.
+    Session Search Cache: Istunnon hakuvälimuisti
+    In Memory: Muistissa
+    Session Search Cache Description: '{count} haku on tallennettu muistiin, jotta takaisin siirtyminen olisi nopeampaa. Välimuisti tyhjennetään, kun OpenTubeX suljetaan. | {count} hakua on tallennettu muistiin, jotta takaisin siirtyminen olisi nopeampaa. Välimuisti tyhjennetään, kun OpenTubeX suljetaan.'
+    Clear Session Search Cache: Tyhjennä istunnon hakuvälimuisti
+    Clear Session Search Cache Confirmation: Tyhjennetäänkö istunnon hakuvälimuisti?
+    Session Search Cache Effect: Välimuistissa olevat tulossivut poistetaan. Tallennettu hakuhistoria säilyy ennallaan.
+    HTTP Cache: HTTP-välimuisti
+    HTTP Cache Description: Electron tallentaa verkkovastaukset levylle, jotta toistuvat pyynnöt voidaan ladata lataamatta samoja tietoja uudelleen. OpenTubeX luo välimuistin tarvittaessa uudelleen.
+    Managed By Electron: Electronin hallinnoima
+    Clear HTTP Cache: Tyhjennä HTTP-välimuisti
+    Clear HTTP Cache Confirmation: Tyhjennetäänkö Electronin HTTP-välimuisti?
+    HTTP Cache Effect: Kuvat ja muut verkkoresurssit saattavat latautua kerran tavallista hitaammin, kun välimuisti luodaan uudelleen.
+    Tab Image Cache: Välilehtien pikkukuvat ja kanavien profiilikuvat
+    Tab Image Cache Description: Tallentaa avointen ja palautettujen välilehtien esikatselukuvat ja kanavien profiilikuvat. OpenTubeX luo ne uudelleen välilehtiä käytettäessä.
+    Clear Tab Image Cache: Tyhjennä välilehtien kuvavälimuisti
+    Clear Tab Image Cache Confirmation: Tyhjennetäänkö välilehtien pikkukuvat ja kanavien profiilikuvat?
+    Tab Image Cache Effect: Välilehtien kuvat saattavat kadota hetkeksi. Ne luodaan uudelleen, kun välilehtiä käytetään.
+    Playback Caches: Toiston välimuistit
+    Playback Caches Description: Tallentaa yt-dlp-suoratoisto-osoitteet sovelluksen istuntojen välillä sekä YouTube-soittimen tiedostot. URL-välimuisti koskee vain yt-dlp:llä haettuja suoratoistoja.
+    Playback URL Cache Entry Size: yt-dlp-suoratoisto-osoitteen välimuistiraja
+    Playback URL Cache Entry Size Tooltip: Määrittää kunkin välimuistiin tallennetun yt-dlp-suoratoistotietueen enimmäiskoon. Poista yt-dlp-suoratoistojen pysyvä välimuisti käytöstä asettamalla arvoksi 0 Mt.
+    Clear Playback Caches: Tyhjennä toiston välimuistit
+    Clear Playback Caches Confirmation: Tyhjennetäänkö yt-dlp:n ja soittimen välimuistit?
+    Playback Caches Effect: Seuraava paikallinen toistopyyntö saattaa kestää tavallista kauemmin, kun suoratoisto- ja soitintiedot haetaan uudelleen.
+    Clear Cache: Tyhjennä välimuisti
+    History Data: Tallennetut historiatiedot
+    Video Metadata Description: Tallentaa tuettujen videoiden aiemmat nimet, pikkukuvat ja kuvaukset. Vanhoja versioita ei voi luoda uudelleen poistamisen jälkeen.
+    Video Metadata Effect: Tallennetut metatietoversiot poistetaan pysyvästi. Videon nykyiset tiedot voidaan edelleen hakea uudelleen.
+    Watch History: Katseluhistoria ja tilastot
+    Watch History Description: Katseluhistoria tallentaa katsotut videot ja katselukohdan. Katselutilastot sisältävät päivittäiset katseluajat. Säilytysaika koskee vain katseluhistoriaa.
+    Clear Watch Statistics: Tyhjennä katselutilastot
+    Watch History Effect: Katsottujen videoiden tietueet ja tallennetut katselukohdat poistetaan. Katselutilastot säilyvät.
+    Clear Watch Statistics Confirmation: Poistetaanko kaikki katselutilastot?
+    Watch Statistics Effect: Päivittäiset katseluajat poistetaan. Katseluhistoria säilyy.
+    Search History: Hakuhistoria
+    Search History Description: Tallentaa muistettavaksi valitsemasi haut.
+    Delete Search History: Poista hakuhistoria
+    Delete Search History Confirmation: Poistetaanko koko tallennettu hakuhistoria?
+    Search History Effect: Aiempien hakujesi tallennetut hakuehdotukset katoavat. Nykyisen istunnon välimuisti säilyy.
+    Other User Data: Muut käyttäjätiedot
+    Other Profile Files: Muut profiilitiedostot
+    Other Profile Files Hint: Varmuuskopiot, tilapäiset tiedostot ja profiilikohteet, joita OpenTubeX ei vielä tunnista.
+    Subscriptions And Profiles: Tilaukset ja profiilit
+    Subscriptions And Profiles Description: Tallentaa tilatut kanavat, profiilien nimet ja profiilien jäsenyydet.
+    Subscriptions And Profiles Effect: Kaikki tilaukset ja lisäprofiilit poistetaan pysyvästi. Myös syötteen välimuisti tyhjennetään.
+    Playlists Description: Tallentaa soittolistojen nimet, kuvaukset ja tallennetut videot.
+    Playlists Effect: Kaikki soittolistat ja niiden tallennettujen videoiden luettelot poistetaan pysyvästi. Ladatut mediatiedostot säilyvät.
+    Settings And Sessions: Asetukset, välilehti-istunnot ja muistutukset
+    Settings And Sessions Description: Tallentaa sovellusasetukset, palautettavat välilehdet ja suorien lähetysten muistutukset. Voit tarkastella tai varmuuskopioida tiedostoja avaamalla profiilikansion. Niitä ei poisteta tältä sivulta.
+    Cleanup Complete: Tallennustilan siivous valmistui
+    Cleanup Failed: Tallennustilan siivous epäonnistui
+  Subscription Settings:
+    Fetch Feed on Startup: Hae syöte käynnistettäessä
+    Show New Content Feed: Näytä uuden sisällön syöte
+    RSS Feeds: RSS-syötteet
+    Enable RSS Feeds: Ota RSS-syötteet käyttöön muille alustoille
+    Manage RSS Feeds: Hallitse RSS-syötteitä
+    Show New Content Indicators: Näytä uuden sisällön ilmaisimet
+    Show Scheduled Live Streams / Premieres First: Näytä ajastetut suorat lähetykset ja ensi-illat ensin
+    Auto Refresh Interval: Automaattisen päivityksen aikaväli
+    Videos Auto Refresh Interval: Videoiden automaattisen päivityksen aikaväli
+    Shorts Auto Refresh Interval: Shorts-videoiden automaattisen päivityksen aikaväli
+    Live Auto Refresh Interval: Suorien lähetysten automaattisen päivityksen aikaväli
+    Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
+    Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
+    Notify About New Uploads: Ilmoita uusista latauksista
+    RSS Feeds Auto Refresh Interval: RSS-syötteiden automaattisen päivityksen aikaväli
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Katseluaika lasketaan"
+      Break Reminder Action: "Kun on tauon aika"
+      Grayscale: "Harmaasävy"
+      Off: "Pois"
+      Always: "Aina"
+      During Bedtime: "Nukkumaanmenoaikana"
+      After the Daily Limit: "Päivittäisen rajan jälkeen"
+      Daily Watch Time Limit: "Päivittäinen katseluaikaraja"
+      Daily Shorts Limit: "Päivittäinen Shorts-raja"
+      When a Limit Is Reached: "Kun raja täyttyy"
+      Remind Me: "Muistuta"
+      Pause Playback: "Keskeytä toisto"
+      Take a Break Reminder: "Taukomuistutus"
+      Every: "{duration} välein"
+      Bedtime Reminder: "Nukkumaanmenomuistutus"
+      Bedtime Start: "Nukkumaanmenoajan alku"
+      Bedtime End: "Nukkumaanmenoajan loppu"
+      Wait Until the Video Ends: "Odota videon loppuun"
+      Silence Upload Notifications at Bedtime: "Mykistä uusien latausten ilmoitukset nukkumaanmenoaikana"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Lopeta automaattinen toisto nukkumaanmenoaikana ja päivittäisen rajan jälkeen"
+    Hide Popularity Graph: "Piilota suosiokaavio"
+    Enable Block Lists: "Ota estolistat käyttöön"
+    AI Video Summaries: Tekoälyn videoyhteenvedot
+    Hide: Piilota
+    Collapsed: Supistettu
+    Expanded: Laajennettu
+    Video Descriptions: Videoiden kuvaukset
+    Video Description Modes:
+      Hide: Piilota
+      Collapsed: Supistettu
+      Expanded: Laajennettu
+    Playing Interface Hide Delay: Käyttöliittymän piilotusviive toiston aikana
+    Hide Startup Splash: Piilota käynnistysruutu
+    Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin
+    Hide Repeat Stats: Piilota toistotilastot
+    Sections:
+      Digital Wellbeing: "Digitaalinen hyvinvointi"
+      Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa
+    Hide Channel Avatars: Piilota kanavien profiilikuvat
+    Shorten View Counts: Lyhennä katselukertojen, kommenttien ja kommenttien tykkäysten määrät
+    Hide Live Chat Replay: Piilota livekeskustelun tallenne
+    Hide Home: Piilota etusivu
+    Disable A-B Repeat: Poista A-B-toisto käytöstä
+    Hide End-Screen Annotations: Piilota loppuruudun merkinnät
+    Hide End-Screen Recommendations: "Piilota loppunäytön suositukset"
+    Hide Paid Promotion Badge: Piilota maksetun mainonnan tunnus
+    Show Player Controls: Näytä soittimen säätimet
+    Show Video Title: Näytä videon nimi
+    Show Bottom Right Actions Dock: Näytä toimintopalkki oikeassa alakulmassa
+    Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
+    Add: Lisää
+    Remove: Poista
+    Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
+  Data Settings:
+    Scheduled backups: "Ajastetut varmuuskopiot"
+    Scheduled backup description: "Tallenna täydellisiä ZIP-varmuuskopioita, kun OpenTubeX on auki. Väliin jääneet kopiot luodaan käynnistyessä. Raja koskee vain tämän kansion ajastettuja kopioita."
+    Choose backup folder: "Valitse varmuuskopioiden kansio"
+    No backup folder selected: "Varmuuskopioiden kansiota ei ole valittu"
+    Enable scheduled backups: "Ota ajastetut varmuuskopiot käyttöön"
+    Backup frequency: "Varmuuskopioinnin tiheys"
+    Backups to keep: "Säilytettävien kopioiden määrä"
+    Daily: "Päivittäin"
+    Weekly: "Viikoittain"
+    Every 30 days: "30 päivän välein"
+    Last scheduled backup: "Viimeisin ajastettu varmuuskopio: {date}"
+    No scheduled backup yet: "Ei vielä ajastettua varmuuskopiota"
+    Scheduled backup failed: "Varmuuskopiointi epäonnistui. Tarkista kansion kirjoitusoikeus. Uusi yritys viiden minuutin kuluttua."
+    Import Preview:
+      Title: Esikatsele muutoksia
+      New: "Uudet: {count}"
+      Existing: "Olemassa olevat: {count}"
+      Skipped: "Ohitetut: {count}"
+      Unreadable files: "Lukukelvottomat tiedostot: {count}"
+      Settings effect: Vastaavat asetukset korvataan. Yksityiset ja tuntemattomat asetukset ohitetaan.
+      Details effect: Nykyiset tilaukset tai videot säilytetään. Tuodut profiilien tai soittolistojen tiedot korvaavat nykyiset tiedot.
+      Merge effect: Nykyiset tiedot säilytetään ja yhdistetään vastaaviin tietueisiin.
+      Subscriptions effect: Nykyiset tilaukset säilytetään. Vain uudet kanavat lisätään.
+      History replace effect: Vastaavien videoiden katseluhistoria korvataan. Muu historia säilytetään.
+    Select export data: "Valitse vietävät tiedot"
+    Export selected data: "Vie valitut tiedot"
+    Complete backup: "Täydellinen varmuuskopiointi"
+    Import backup: "Tuo varmuuskopio"
+    Export backup: "Vie varmuuskopio"
+    Backup description: "Tallenna profiilit, soittolistat, historia, tilastot ja siirrettävät asetukset yhteen ZIP-TIEDOSTOON. Tuonti yhdistää ne tällä laitteella jo oleviin tietoihin."
+    Select backup data: "Valitse tuotavat tiedot"
+    Profiles and subscriptions: "Profiilit ja tilaukset"
+    Backup exported: "Varmuuskopion vienti onnistui"
+    Backup imported: "Varmuuskopion tuonti onnistui"
+    Import YouTube Takeout ZIP: "Tuo YouTube Takeout ZIP"
+    Select Takeout data: "Valitse tuotavat tiedot"
+    Import selected data: "Tuo valitut tiedot"
+    No supported Takeout data: "Tästä ZIP-tiedostosta ei löytynyt tuettuja YouTube-tietoja."
+    Data And Storage: Tiedot ja tallennustila
+    Profile Directory: Profiilikansio
+    Open Profile Directory: Avaa profiilikansio
+    Settings File: Asetustiedosto
+    Import Settings: Tuo asetukset
+    Export Settings: Vie asetukset
+    Settings Tooltip: Käyttöjärjestelmä- tai käyttäjäkohtaisia ja kokeellisia asetuksia ei voi viedä tai tuoda (esim. välityspalvelin, ulkoinen soitin, kuvakaappauskansio...)
+    Invalid JSON row, skipping item: Virheellinen JSON rivillä {row}, ohitetaan kohde
+    All settings have been successfully imported: Kaikki asetukset tuotiin onnistuneesti
+    All settings have been successfully exported: Kaikki asetukset vietiin onnistuneesti
+    Setting object has insufficient data, skipping item: Asetusobjektissa ei ole riittävästi tietoja, ohitetaan kohde
+    Unknown setting key: 'Tuntematon asetusavain: {key}'
+    Non-transferable setting key: 'Asetusavainta ei voi siirtää: {key}'
+    Import subscriptions formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-varmuuskopio tai FreeTube-vienti (.json)'
+    Import history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-varmuuskopio (.json)'
+    Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kanavien toistonopeudet"
+    Import channel playback speeds: "Tuo kanavien toistonopeudet"
+    Channel playback speeds file: "Kanavien toistonopeustiedosto"
+    Import channel playback speeds formats: "Tuetut muodot: {script} -käyttäjäskriptin tallennustila (.json)"
+    Invalid channel playback speeds file: "Tiedostosta ei löytynyt kanavien toistonopeuksia"
+    Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
+    Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
+  Sync Settings:
+    Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
+    Revoke Session Partial Failure: "Synkronoidut välilehtijoukot poistettiin, mutta käyttöoikeuden peruuttamista ei voitu vahvistaa. Yritä peruuttaa käyttöoikeus uudelleen."
+    Tab Sync Revocation Pending: "Välilehtien synkronointi on keskeytetty, kun tämän kirjautumisen peruminen on kesken. Yritä perumista uudelleen synkronointiasetuksissa."
+    Show More: "Näytä lisää"
+    Sync Automatically: "Synkronoi automaattisesti"
+    Activity: "Tilin tapahtumat"
+    No Activity: "Ei viimeaikaisia tapahtumia"
+    Clear Activity: "Tyhjennä tällä laitteella"
+    Clear Activity Hint: "Piilota tilin nykyinen toiminta tällä laitteella. Palvelimen ja muiden laitteiden toiminta ei muutu. Uusi toiminta näkyy edelleen."
+    Setting Changed: "{device} muutti asetuksen {setting} arvoksi {value}"
+    Item Updated: "{device} päivitti asetuksen {setting}"
+    Item Added: "{device} lisäsi kohteen {item} kohteeseen {setting}"
+    Item Removed: "{device} poisti kohteen {item} kohteesta {setting}"
+    Item Renamed: "{device} nimesi kohteen {item} uudelleen nimeksi {value}"
+    Saved Playlists: "Tallennetut soittolistat"
+    No Feed Types: "Ei mitään"
+    Open On Device: "Avaa toisella laitteella"
+    Video Sent: "Video lähetetty. Yhteydettömät laitteet saavat sen muodostaessaan yhteyden 24 tunnin kuluessa."
+    Video Received: "Vastaanotettu video: {title}"
+    Previous Auto Sync Notice: "Automaattinen synkronointi on pois käytöstä. Aiempi versio on saattanut poistaa sen käytöstä tietojen menetyksen estämiseksi."
+    Enable Automatic Sync: "Ota automaattinen synkronointi käyttöön"
+    Destructive Sync Blocked: "Synkronointi pysäytettiin tietojen menetyksen estämiseksi. Automaattinen synkronointi on pois käytöstä. Tarkista poistot avaamalla synkronointiasetukset."
+    Turn Flashlight On: Sytytä taskulamppu
+    Turn Flashlight Off: Sammuta taskulamppu
+    Devices: "Laitteet"
+    Devices Hint: "Tarkista laitteet, joilla on tämän synkronointitilin käyttöoikeus."
+    Change Password: "Vaihda salasana"
+    Refresh Devices: "Päivitä laitteet"
+    Current Device: "Nykyinen laite"
+    Revoke Session: "Peruuta käyttöoikeus"
+    Session Created: "Luotu"
+    Last Active: "Viimeksi aktiivinen"
+    Session Expires: "Vanhenee"
+    Unknown Device: "Tuntematon laite"
+    Operating System: "Käyttöjärjestelmä"
+    Rename Device: "Nimeä laite uudelleen"
+    Save Device Name: "Tallenna nimi"
+    Device Name Invalid: "Laitteen nimessä voi olla enintään 80 merkkiä, eikä se saa sisältää ohjausmerkkejä."
+    Device Renamed: "Laite nimetty uudelleen"
+    Revoke Session Confirmation: "Peruutetaanko tämä istunto?"
+    Revoke Current Session Warning: "Tämän istunnon peruuttaminen katkaisee tämän laitteen yhteyden synkronointitiliin."
+    Revoke Session Warning: "{device} menettää tämän synkronointitilin käyttöoikeuden."
+    Confirm Revoke Session: "Peruuta istunto"
+    Session Revoked: "Istunto peruutettu"
+    Change Password Warning: "Salasanan vaihtaminen kirjaa kaikki muut laitteet ulos. Tämä laite pysyy yhdistettynä."
+    Current Password: "Nykyinen salasana"
+    New Password: "Uusi salasana"
+    Confirm New Password: "Vahvista uusi salasana"
+    Save New Password: "Tallenna uusi salasana"
+    Account Management Failed: "Synkronointitilin tietoja ei voitu ladata."
+    All Password Fields Required: "Täytä kaikki salasanakentät."
+    New Password Too Short: "Uudessa salasanassa on oltava vähintään 8 merkkiä."
+    New Passwords Do Not Match: "Uudet salasanat eivät täsmää."
+    Password Changed: "Salasana vaihdettu. Muut laitteet on kirjattu ulos."
+    Sync Settings: Synkronointi
+    Watch stats: "Katselutilastot"
+    Enable Sync: Ota synkronointi käyttöön
+    Privacy Passphrase: Tietosuojan tunnuslause
+    Privacy Passphrase Hint: Käytä eri tunnuslausetta kuin tilisi salasanaa. Tunnuslause ei koskaan poistu tältä laitteelta, ja sitä tarvitaan kaikilla laitteilla. Jos kadotat sen, salattuja synkronointitietoja ei voi palauttaa.
+    Privacy Policy: Tämän palvelimen tietosuojakäytäntö
+    Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
+    Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.
+    Description: 'Synkronoi tilaukset, profiilit, soittolistat, katseluhistoria ja tuetut asetukset OpenTubeX- tai LibreTube-synkronointipalvelimen kanssa. LibreTube-palvelimet eivät välttämättä tue kaikkia synkronointiominaisuuksia.'
+    Server URL: Synkronointipalvelimen URL
+    Checking Server: Tarkistetaan synkronointipalvelinta…
+    Server Unavailable: Synkronointipalvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja yritä uudelleen.
+    Username: Käyttäjänimi
+    Log In: Kirjaudu sisään
+    Register: Rekisteröidy
+    Pair Another Device: Parita toinen laite
+    Pair With Existing Device: Parita olemassa olevan laitteen kanssa
+    Device Name: Laitteen nimi
+    This Device: Tämä laite
+    Device Name Required: Anna tälle laitteelle nimi.
+    Pairing Device Name Hint: Valitse nimi, jonka tunnistat pyynnön hyväksyvässä laitteessa.
+    Create Pairing Code: Luo parituskoodi
+    Creating Pairing Code: Luodaan suojattua parituskoodia…
+    Pairing QR Alt: Laitteen {device} parituksen QR-koodi
+    Scan Pairing Code: Avaa jo yhdistetyssä laitteessa "Parita toinen laite" ja skannaa tämä koodi.
+    Pairing Code: Parituskoodi
+    Use Text Pairing Code: Käytä sen sijaan tekstikoodia
+    Show QR Code: Näytä QR-koodi
+    Text Pairing Code Hint: Kopioi tämä koodi olemassa olevaan laitteeseen. Se sisältää paritussalaisuuden, joten poista se leikepöydän historiasta parituksen jälkeen.
+    Pairing QR Warning: Näytä tämä koodi vain luotetulle, jo yhdistetylle laitteelle, joka hyväksyy pyynnön. Koodi vanhenee kahden minuutin kuluttua.
+    Pairing Expires: Parituskoodi vanhenee {time}.
+    Verifying Pairing: Vahvistetaan siirrettyä tietosuoja-avainta…
+    Completing Pairing: Viimeistellään laitteiden paritusta…
+    Compare Pairing Codes: Vertaa parituskoodeja
+    Pairing Code Match Hint: Vahvista vain, jos tämä koodi vastaa olemassa olevassa laitteessa näkyvää koodia.
+    Pairing Codes Match: Koodit täsmäävät
+    Pairing Approval Code Hint: Pidä tämä ikkuna auki ja vertaa koodia uuden laitteen koodiin. Uudella laitteella ei saa jatkaa, jos koodit eivät täsmää.
+    Pairing Scan Hint: Skannaa lisättävässä laitteessa näkyvä parituskoodi.
+    Enter Pairing Code: Anna koodi käsin
+    Pairing Code Entry Hint: Liitä lisättävässä laitteessa näkyvä parituskoodi.
+    Check Pairing Code: Tarkista koodi
+    Scan QR Code: Skannaa QR-koodi
+    Waiting For Pairing Code: Odotetaan parituskoodia…
+    Checking Pairing Request: Tarkistetaan parituspyyntöä…
+    Approving Pairing Request: Salataan ja lähetetään tietosuoja-avainta…
+    Pairing Approval Warning: Hyväksy vain, jos näet tämän pyynnön lisättävässä laitteessa. Paritus antaa tilin käyttöoikeuden ja siirtää tietosuoja-avaimen.
+    Approve Pairing: Hyväksy paritus
+    Try Again: Yritä uudelleen
+    Scan Again: Skannaa uudelleen
+    Camera Unavailable: OpenTubeX ei voinut käyttää kameraa. Tarkista kameran käyttöoikeus tai anna parituskoodi käsin.
+    Pairing Unsupported: Tämä synkronointipalvelin ei tue suojattua laiteparitusta.
+    Pairing Failed: Laitteen paritus epäonnistui. Yritä uudelleen uudella koodilla.
+    Pairing Request Changed: Parituspyyntö muuttui, vanheni tai oli jo käytetty. Luo uusi koodi.
+    Pairing Server Mismatch: Tämä koodi kuuluu toiselle synkronointipalvelimelle.
+    Pairing Verification Unavailable: Siirrettyä avainta ei voi vahvistaa, koska salattua synkronointikokoelmaa ei ole saatavilla. Synkronoi olemassa oleva laite ja yritä sitten uudelleen.
+    Pairing Completed: Laitteen paritus on valmis
+    Pairing Approved: Laitteen paritus hyväksyttiin
+    Use Pairing Invite: Käytä yhdistetyn laitteen koodia
+    Show Pairing Invite: Näytä parituskoodi
+    Scan Pairing Invite: Avaa lisättävässä laitteessa "Parita olemassa olevan laitteen kanssa", valitse "Käytä yhdistetyn laitteen koodia" ja skannaa tämä koodi.
+    Pairing Invite QR Alt: Lisättävän laitteen parituksen QR-koodi
+    Pairing Invite Text Hint: Kopioi tämä koodi lisättävään laitteeseen. Sen avulla laite voi pyytää pääsyä tiliisi, joten poista se leikepöydän historiasta parituksen jälkeen.
+    Pairing Invite Warning: Näytä tämä koodi vain lisättävälle laitteelle. Sinun on silti hyväksyttävä sen pyyntö tässä laitteessa.
+    Pairing Invite Scan Hint: Skannaa yhdistetyssä laitteessasi näkyvä parituskoodi.
+    Pairing Invite Entry Hint: Liitä yhdistetyssä laitteessasi näkyvä parituskoodi.
+    Pairing Invite Code Hint: Hyväksy pyyntö yhdistetyssä laitteessasi vain, jos siinä näkyy tämä koodi. Paritus valmistuu sen jälkeen automaattisesti.
+    Pairing Invite Approval Hint: Hyväksy vain, jos lisättävä laite näyttää tämän koodin.
+    Pairing Invite Approved: Paritus hyväksyttiin. Uusi laite viimeistelee parituksen automaattisesti.
+    Disconnect: Katkaise yhteys
+    Delete Account: Poista synkronointitili
+    Delete Account Confirmation: Poistetaanko synkronointitili?
+    Delete Account Warning: Tämä poistaa synkronointitilisi ja kaikki tälle palvelimelle tallennetut tiedot pysyvästi. Paikallisia OpenTubeX-tietojasi ei poisteta.
+    Confirm Delete Account: Poista tili
+    Password Required: Salasana vaaditaan
+    Account Deleted: Synkronointitili poistettu
+    Connected as: Yhdistetty käyttäjänä {username}
+    Profiles: Profiilit
+    Open Tabs: Avoimet välilehdet ja istunto
+    Disable Setting Sync: Lopeta tämän asetuksen synkronointi
+    Enable Setting Sync: Synkronoi tämä asetus
+    Sync Now: Synkronoi nyt
+    Downloading encrypted data: Ladataan salattuja synkronointitietoja…
+    Syncing subscriptions: Synkronoidaan tilauksia…
+    Syncing playlists: Synkronoidaan soittolistoja…
+    Syncing history: Synkronoidaan katseluhistoriaa…
+    Syncing statistics: Synkronoidaan katselutilastoja…
+    Syncing profiles: Synkronoidaan profiileja…
+    Syncing open tabs: Synkronoidaan avoimia välilehtiä ja istuntoa…
+    Syncing settings: Synkronoidaan asetuksia…
+    Uploading encrypted data: Lähetetään salattuja synkronointitietoja…
+    Finishing sync: Viimeistellään synkronointia…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Synkronoitu viimeksi: {date}'
+    History not supported: Tämä palvelinversio ei tue katseluhistorian synkronointia.
+    Settings not supported: Tämä palvelinversio ei tue asetusten synkronointia.
+    Sync completed: Synkronointi valmistui
+    Sync failed: 'Synkronointi epäonnistui: {error}'
+    Data Loss Confirmation: Vahvistetaanko tietoja poistava synkronointi?
+    Data Loss Warning: Palvelimen tila poistaisi {deleted}/{previous} aiemmin synkronoitua {collection}-kohdetta. Tämä voi johtua epäonnistuneesta palvelimen siirrosta tai nollauksesta. Jatka vain, jos poisto on tarkoituksellinen ja sinulla on varmuuskopio.
+    Confirm Data Loss: Poista ja jatka
+    Use Shared Tabs: 'Käytä yhtä jaettua välilehtijoukkoa kaikilla laitteilla'
+    Shared Tabs Warning: 'Tällä laitteella avoinna olevista välilehdistä tulee yhteinen välilehtijoukko. Muut laitteet korvaavat avoimet välilehtensä tällä joukolla synkronoidessaan; eri laitteiden välilehtiä ei yhdistetä.'
+    Tabs From Other Devices: 'Muiden laitteiden välilehdet'
+    Device Tab Session: '{platform} · {count} välilehteä'
+    Mobile Device: 'Mobiililaite'
+    Desktop Device: 'Tietokone'
+    Open All Tabs: 'Avaa kaikki välilehdet'
+    Open All Tabs Confirmation: "Avataanko kaikki välilehdet?"
+    Server Update Required: "Päivitä tämä palvelin tukemaan salattua reaaliaikaista synkronointia."
+  Proxy Settings:
+    IP Block Recovery Script Path: IP-eston palautusskripti
+    Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto
+    Running IP block recovery script: Suoritetaan IP-eston palautuskomentosarjaa
+    IP block recovery script failed: 'IP-eston palautuskomentosarja epäonnistui (poistumiskoodi: {exitCode})'
+    IP block recovery script finished: IP-eston palautuskomentosarja valmistui
+    Reloading video after IP block recovery: Ladataan video uudelleen IP-eston palautuksen jälkeen
+    Failed to select IP block recovery script: IP-eston palautuskomentosarjan valitseminen epäonnistui
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Poissuljetut kanavat"
+      Tooltip: "Anna kanavan tunnus, jotta SponsorBlock-jaksoja ei ohiteta sen videoissa. Tunnuksen on vastattava täsmälleen, kirjainkoko mukaan lukien."
+    Enable SponsorBlock Submission: Ota SponsorBlock-ilmoitusten lähetys käyttöön
+    SponsorBlock Private User ID (optional): Yksityinen käyttäjätunnus (valinnainen)
+    SponsorBlock Private User ID Tooltip: Liitä selainlaajennuksen yksityinen SponsorBlock-käyttäjätunnus. Jätä kenttä tyhjäksi, jos haluat käyttää sovelluksen luomaa tunnusta.
+    Generated SponsorBlock User ID: Luotu SponsorBlock-käyttäjätunnus
+    Generated SponsorBlock User ID Tooltip: Sovelluksen luomaa SponsorBlock-käyttäjätunnusta voi käyttää selainlaajennuksessa tai toisella tietokoneella käytettävässä sovelluksessa.
+    Reveal Generated User ID: Näytä luotu käyttäjätunnus
+    Generated SponsorBlock User ID Copy Button: Kopioi luotu SponsorBlock-käyttäjätunnus
+    Generated SponsorBlock User ID Copied: Luotu SponsorBlock-käyttäjätunnus kopioitiin leikepöydälle
+    Skip notification timeout: Ohitusilmoituksen näyttöaika
+    Custom Color: Mukautettu väri
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Ota Return YouTube Dislike käyttöön
+    Return YouTube Dislike Url: API-URL
+  Parental Control Settings:
+    Disable Channel Links: Poista kanavalinkit käytöstä
+  Password Dialog:
+    Incorrect Password: Virheellinen salasana
+    Unlock: Avaa lukitus
+    Unlocking: Avataan lukitusta…
+  Search Settings: Hae asetuksista
+  No Settings Found: Asetuksia ei löytynyt
+  Experimental Settings:
+    Disable Hardware Acceleration: Poista laitteistokiihdytys käytöstä
+  Interface Customizer:
+    Customize Interface: "Mukauta käyttöliittymää"
+    Preview: "Esikatselu"
+    Player: "Soitin"
+    Desktop: "Tietokone"
+    Mobile: "Mobiili"
+    Playing: "Toistetaan"
+    Player Menu: "Soittimen valikko"
+    Fullscreen: "Koko näyttö"
+    Paused: "Keskeytetty"
+    Controls: "Säätimet"
+    Example Video Title: "Esimerkkivideo"
+    Resolution: "Resoluutio"
+    Loop: "Toista uudelleen"
+    Off: "Pois"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Piilota tekoälyroskaa julkaisevat kanavat
+    Hide AI Slop Channels Tooltip: Piilottaa yhteisön ylläpitämällä AiSList-estolistalla (aisloplist.com) olevat kanavat hakutuloksista, Nousussa-osiosta ja suosituksista sekä merkitsee sen varoituslistalla olevien kanavien videot. Tilauksiin tämä ei vaikuta. Listat ladataan GitHubista kerran päivässä, ja ne koskevat vain paikallisella API:lla ladattuja tuloksia.
+    Downloading: Ladataan listoja…
+    Failed to Download: Listojen lataaminen epäonnistui
+    Loaded Status: "Estetyt kanavat: {blocked} · Merkityt kanavat: {warned} · Päivitetty: {date}"
+Tutorial:
+  Skip: Ohita
+  Next: Seuraava
+  Finish: Valmis
+  Welcome:
+    Title: Tervetuloa OpenTubeX-sovellukseen
+    Description: Näillä toiminnoilla pääset alkuun.
+  Navigation:
+    Title: Kirjastosi on aina lähellä
+    Description: Siirry siirtymisvalikosta tilauksiin, soittolistoihin, historiaan ja muihin näkymiin.
+  Search:
+    Title: Hae tai liitä linkki
+    Description: Etsi videoita ja kanavia tai liitä tuetun videon URL-osoite suoraan hakukenttään.
+  Tabs:
+    Title: Pidä sivut auki välilehdissä
+    Description: Avaa useita sivuja yhtä aikaa kadottamatta kohtaasi. Valitse välilehdille asettelussasi parhaiten sopiva paikka.
+  Quick Settings:
+    Title: Tee sovelluksesta omasi
+    Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia napsauttamalla valikkoa hiiren kakkospainikkeella.
+    Touch Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia painamalla valikkoa pitkään.
+  Import Data:
+    Title: Tuo tietosi mukanasi
+    Description: Voit halutessasi tuoda tilaukset, historian, soittolistat, hakuhistorian tai asetukset toisesta tuetusta sovelluksesta tai varmuuskopiosta.
+    Action: Tuo tiedot
+    Not Now: Ei nyt
+About:
+  Documentation: Dokumentaatio
+  Downloads: Lataukset
+  Changelog: Muutosloki
+  Commit: Kommitti
+  Fluxer: Liity Fluxer-yhteisöömme
+  Matrix: Matrix
+  Email: Sähköposti
+  Support the development of OpenTubeX: "Tue OpenTubeXin kehitystä"
+Profile:
+  Customization: Mukauttaminen
+  Manage Profile Subscriptions: Hallitse profiilin tilauksia
+  Icon Names:
+    Person: Henkilö
+    People: Ihmiset
+    Headphones: Kuulokkeet
+    Gaming: Pelaaminen
+    Film: Elokuva
+    Art: Taide
+    Science: Tiede
+    Globe: Maapallo
+    Heart: Sydän
+    Sun: Aurinko
+    Moon: Kuu
+    Trophy: Pokaali
+  Profile Icon: Profiilikuvake
+  Choose an Emoji: Valitse emoji
+  Custom Emoji: Mukautettu emoji
+  Emoji: Emoji
+  Choose Image: Valitse kuva
+  Crop Image: Rajaa kuva
+  Zoom: Zoomaus
+  Apply Crop: Käytä rajausta
+  Transparent: Läpinäkyvä
+  Use Initial: Käytä alkukirjainta
+  The selected image could not be loaded: Valittua kuvaa ei voitu ladata
+  Theme Color: Teemaväri
+  Go To Profile Manager: Siirry profiilien hallintaan
+Channel:
+  Fewer videos per day: "Vähemmän videoita päivässä"
+  More videos per day: "Enemmän videoita päivässä"
+  Verified: Vahvistettu
+  Official Artist Channel: Virallinen artistikanava
+  About:
+    Links: Linkit
+  Subscription settings: Tilausasetukset
+  Failed to save subscription settings: Kanava-asetusten tallentaminen epäonnistui
+  Videos per day: Videoita päivässä
+  Use global setting: Käytä yleistä asetusta
+  Unlimited: Rajoittamaton
+  More videos hidden: '+{count} lisää | +{count} lisää'
+  Show in subscription feed: Näytä tilaussyötteessä
+  Notify about new uploads: Ilmoita uusista latauksista
+  Show members-only videos: Näytä vain jäsenille tarkoitetut videot
+  Upload Notifications On: "Saat ilmoituksen kanavan {channelName} uusista latauksista, kun tilaukset päivittyvät"
+  Upload Notifications Off: "Et saa ilmoituksia kanavan {channelName} uusista latauksista"
+  Upload Notifications Disabled In Settings: "Kanavan {channelName} ilmoitukset ovat päällä, mutta uusien latausten ilmoitukset on poistettu käytöstä asetuksissa"
+  Turn On Upload Notifications: "Ota käyttöön"
+  Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
+  Search Result Types: Hakutulosten tyypit
+  All Results: Kaikki
+  View All: Näytä kaikki
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Tällä kanavalla on videoita, mutta yhtäkään ei voitu näyttää. Yritä ladata lisää"
+  Posts:
+    Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
+    Members-only video hidden by OpenTubeX: "OpenTubeX piilotti vain jäsenille tarkoitetun videon"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX piilotti videon, koska sen otsikko sisältää piilotettua tekstiä"
+  Shows:
+    Shows: Ohjelmat
+    This channel does not currently have any shows: Tällä kanavalla ei ole tällä hetkellä ohjelmia
+Video:
+  Info panel source: 'Lähde: {source}'
+  External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."
+  Invalid Media URL: "Virheellinen median URL-osoite"
+  Mark As Fully Watched: Merkitse kokonaan katsotuksi
+  AI-generated video summary: "Tekoälyn luoma videoyhteenveto"
+  Quality and accuracy may vary: "Laatu ja tarkkuus voivat vaihdella"
+  Includes paid promotion: Sisältää maksettua mainontaa
+  Age Restricted Badge: Ikärajoitettu
+  Music Video Badge: Musiikkivideo
+  Queue: Jono
+  Play Next: Toista seuraavaksi
+  Add to Queue: Lisää jonoon
+  Added to Play Next: Video toistetaan seuraavaksi
+  Added to Queue: Video lisättiin jonoon
+  Clear Queue: Tyhjennä jono
+  Queue Video Count: '{count} video | {count} videota'
+  Remove from Queue: Poista {title} jonosta
+  Remove Video from Queue: Poista jonosta
+  Drag to Reorder Queue: Muuta videon {title} paikkaa jonossa vetämällä
+  Reorder Queue Item: Muuta videon {title} paikkaa
+  Reorder Queue Item Instructions: Siirrä tätä videota jonossa ylä- ja alanuolinäppäimillä.
+  Queue Item Moved: Video {title} siirrettiin kohtaan {position}/{total}.
+  Queue Item Cannot Move Up: Videota {title} ei voi siirtää ylemmäs. Se on jo kohdassa 1/{total}.
+  Queue Item Cannot Move Down: Videota {title} ei voi siirtää alemmas. Se on jo kohdassa {total}/{total}.
+  Metadata: Videon tiedot
+  Close Metadata: Sulje videon tiedot
+  Metadata Cache:
+    Title History: Otsikkohistoria
+    Thumbnail History: Pikkukuvahistoria
+    Description History: Kuvaushistoria
+    Previous Version: Edellinen {number}
+    Empty: (tyhjä)
+  Fetching Streams: Haetaan mediavirtoja yt-dlp:llä…
+  Transcript:
+    Title: Litterointi
+    Search: Hae litteroinnista
+    Language: Litteroinnin kieli
+    Save: Tallenna
+    Show: Näytä litterointi
+    Hide: Piilota litterointi
+    Close: Sulje litterointi
+    Copied: Litterointi kopioitiin leikepöydälle
+    Saved: Litterointi tallennettiin
+    Save Error: Litterointia ei voitu tallentaa
+    Text File: Tekstitiedosto
+    Unavailable: Tästä videosta ei ole saatavilla litterointia.
+    Load Error: Litterointia ei voitu ladata.
+    Empty: Tässä litteroinnissa ei ole tekstiä.
+    No Results: Mikään litteroinnin kohta ei vastaa hakuasi.
+  Retry With Built-in Extraction: Yritä uudelleen sisäisellä poiminnalla
+  Retry With yt-dlp Extraction: Yritä uudelleen yt-dlp-poiminnalla
+  Reloading video after streaming URL error: Video ladataan uudelleen suoratoisto-osoitteen virheen jälkeen
+  Configure Restricted Playback Cookies Hint: "Määritä evästeet kohdassa Asetukset → Lisäasetukset → Ulkoiset ohjelmistot → yt-dlp-evästeet."
+  Try With Configured Cookies: Yritä määritetyillä evästeillä
+  Restricted Playback Authentication Failed Template: 'yt-dlp ei voinut avata tätä videota määritetyillä evästeillä: {error}'
+  Private: Yksityisiä videoita ei voi katsoa OpenTubeXissä, koska ne edellyttävät Google-kirjautumista ja videon omistajuutta.
+  Collapse Playlist: Kutista soittolista
+  Expand Playlist: Laajenna soittolista
+  Unmark As Watched: Merkitse katsomattomaksi
+  Video has been unmarked as watched: Video merkittiin katsomattomaksi
+  Save Channel Playback Speed: Tallenna kanavan toistonopeus
+  Channel Playback Speed Saved: Kanavan toistonopeus tallennettiin
+  Save Channel Video Quality: Tallenna kanavan videolaatu
+  Channel Video Quality Saved: Kanavan videolaatu tallennettiin
+  Save Channel Subtitles State: Tallenna kanavan tekstityksen tila
+  Channel Subtitles State Saved: Kanavan tekstityksen tila tallennettiin
+  Save Channel Volume: Tallenna kanavan äänenvoimakkuus
+  Channel Volume Saved: Kanavan äänenvoimakkuus tallennettiin
+  Save Channel Setting: Tallenna kanavan asetus…
+  Channel Setting Already Set: '{setting} on jo asetettu arvoon {value}'
+  Video has been saved to {playlistName}: Video tallennettiin soittolistaan {playlistName}
+  Video has been removed from {playlistName}: Video poistettiin soittolistasta {playlistName}
+  There was a problem saving the video to {playlistName}: Videon tallentamisessa soittolistaan {playlistName} ilmeni ongelma
+  There was a problem removing the video from {playlistName}: Videon poistamisessa soittolistasta {playlistName} ilmeni ongelma
+  Failed to load collaborators: Yhteistyökumppaneita ei voitu ladata
+  Notify me: Ilmoita minulle
+  Notification on: Ilmoitus käytössä
+  Notification enabled: Saat ilmoituksen, kun tämä video alkaa
+  Notification cancelled: Aloitusilmoitus peruttiin
+  Notification unavailable: Järjestelmäilmoitukset eivät ole käytettävissä
+  Scheduled video starting: Ajastettu video alkaa
+  Live notification body: '{videoTitle} alkaa nyt'
+  Premiere: Ensi-ilta
+  AI: AI
+  AI-generated content: Tekoälyllä luotu sisältö
+  Collaborators: Yhteistyökumppanit
+  Live Chat Replay: Livechatin tallenne
+  Show Live Chat: Näytä livechat
+  Show Live Chat Replay: Näytä livechatin tallenne
+  Close Live Chat: Sulje livechat
+  Close Live Chat Replay: Sulje livechatin tallenne
+  Live Chat Settings: Livechatin asetukset
+  Show Live Chat Timestamps: Näytä aikaleimat
+  Chat Filter: Chat-suodatin
+  Top Chat: Suosituimmat chat-viestit
+  All Messages: Kaikki viestit
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Livechatin tallenne on käytössä.  Chat-viestit näkyvät tässä videon toiston aikana.
+  Premiere started: Ensi-ilta on käynnissä. Alkoi {timeAgo}
+  Player:
+    Playing in Picture-in-Picture: Toistetaan kuva kuvassa -tilassa
+    Stream Recovery:
+      DASH Fallback: "Äänistriimi epäonnistui, vaihdetaan DASH-formaatteihin: {error}"
+      Error Copied: "Virhe kopioitu leikepöydälle"
+      Legacy Fallback: "Striimi epäonnistui, vaihdetaan vanhoihin formaatteihin: {error}"
+    Caption Timing:
+      Adjust Timing: Säädä ajoitusta…
+      Caption Timing: Tekstityksen ajoitus
+      Offset: Siirtymä (sekuntia)
+      Hint: Negatiiviset arvot näyttävät tekstityksen aiemmin ja positiiviset myöhemmin. Koskee vain tätä videota.
+      Earlier: Aiemmin
+      Later: Myöhemmin
+      Reset: Palauta
+    Most Replayed: "Eniten uudelleen katsottu"
+    Pull up for precise seeking: "Vedä ylös tarkkaa siirtymistä varten"
+    Precise seeking, drag down to exit: "Tarkka siirtyminen · Poistu vetämällä alas"
+    Cast: "Suoratoista"
+    Music Mode: "Musiikkitila"
+    Music Mode Description: "Toista videot nopeudella 1× ja aloita uudet videot alusta tässä välilehdessä. Tallennetut toiston oletusasetukset pysyvät ennallaan."
+    DLNA:
+      Cast: "Lähetä DLNA-laitteeseen"
+      Stop: "Lopeta lähetys"
+      No Devices: "DLNA-laitteita ei löytynyt"
+      No MP4 Source: "Tälle videolle ei ole yhteensopivaa MP4-suoratoistoa"
+      Error: "Videon lähetys epäonnistui"
+    Repeat Stats:
+      Repeat Stats: Toistotilastot
+      Looping: Jatkuva toisto
+      Repeats: Toistokerta | Toistokerrat
+      Time Spent: Katseluaika
+    Voice-over Translation:
+      Start: Käännä
+      Cancel: Peruuta
+      Progress: Valmistellaan selostuskäännöstä…
+      Retry: Yritä uudelleen
+      Error: Selostuskäännös epäonnistui. Yritä myöhemmin uudelleen.
+      Duration Error: Selostuskäännös on käytettävissä vain enintään neljän tunnin videoissa.
+    Caption Appearance:
+      Options: Asetukset
+      Sample: Tekstitys näyttää tältä
+    Auto-translate: Automaattinen käännös
+    Sleep Timer:
+      Sleep Timer: Uniajastin
+      'Off': 'Pois käytöstä'
+      Minutes: '{minutes} minuuttia'
+      End of video: Videon lopussa
+      End of current chapter: Nykyisen luvun lopussa
+      Remaining: '{time} jäljellä'
+      Cancel timer: Peruuta ajastin
+      Timer ended: Uniajastin päättyi
+    A-B Repeat:
+      A-B Repeat: A-B-toisto
+      'On': Käytössä
+      'Off': Pois käytöstä
+      Point A: Piste A
+      Point B: Piste B
+      Set Repeat Start: Aseta toiston alku
+      Set Repeat End: Aseta toiston loppu
+      Pause Repeat: Keskeytä A-B-toisto
+      Resume Repeat: Jatka A-B-toistoa
+      Adjust Point: 'Säädä pistettä {point}, nykyinen aika {timestamp}'
+      Clear Range: Tyhjennä A-B-toistoalue
+      End Before Start: Pisteen B on oltava pisteen A jälkeen.
+      Outside Duration: Aikaleiman on oltava videon sisällä.
+      Cleared: A-B-toisto tyhjennetty
+    Seek History:
+      Seek History: Siirtymähistoria
+      Positions: '{count} kohta | {count} kohtaa'
+      Nothing to undo: Ei mitään kumottavaa
+      Nothing to redo: Ei mitään uudelleen tehtävää
+    Zoom:
+      Zoom: Zoomaus
+      'Off': 'Pois käytöstä'
+    Volume Boost:
+      Volume Boost: "Äänenvoimakkuuden vahvistus"
+      'Off': "Pois käytöstä"
+    Auto-generated Caption Template: '{language} (luotu automaattisesti)'
+    Up next in {seconds}: Seuraavaksi {seconds} kuluttua
+    Resize dock: Muuta telakan kokoa
+    Play now: Toista nyt
+    MusicPlaybackRateOverride: Musiikkivideo havaittu, toistonopeus on 1×
+    Normal: Normaali
+    Set Default: Aseta oletukseksi
+    Hide Annotations: Piilota merkinnät
+    Show Annotations: Näytä merkinnät
+    Hide: Piilota
+    Show: Näytä
+    Scroll Mini Player:
+      Collapse Controls: "Supista säätimet"
+      Expand Controls: "Laajenna säätimet"
+      Back to Top: Takaisin ylös
+      Return to Video Tab: Palaa videovälilehteen
+      Hide: Piilota pienoissoitin
+      Play: Toista
+      Pause: Keskeytä
+      Drag Handle: Siirrä minisoitinta
+      Rewind 10 seconds: Kelaa 10 sekuntia taaksepäin
+      Forward 10 seconds: Kelaa 10 sekuntia eteenpäin
+    SponsorBlock:
+      CancelCurrentSegment: Peru osuuden luominen
+      ClearSegments: Tyhjennä osuudet
+      ClearSegmentsPrompt: Haluatko varmasti tyhjentää kaikki tämän videon luonnostellut SponsorBlock-osuudet?
+      CompleteSegmentsBeforeSubmitting: Viimeistele kaikki luonnostellut osuudet ennen lähettämistä.
+      CategoryLabel: Luokka
+      ActionTypeLabel: Osuuden tyyppi
+      DuplicateSegments: Luonnosteltujen osuuksien kaksoiskappaleita ei sallita.
+      EndAction: (Loppu)
+      EndActionLabel: Loppu
+      EndTimeAfterStart: Osuuden lopetusajan on oltava aloitusajan jälkeen.
+      EndTimeBeforeVideoEnd: Osuuden lopetusajan on oltava videon keston sisällä.
+      EndTimeLabel: Osuuden lopetusaika
+      DisableAutoSkipTemporarily: Poista SponsorBlockin automaattinen ohitus väliaikaisesti käytöstä
+      EnableAutoSkipTemporarily: Ota SponsorBlockin automaattinen ohitus uudelleen käyttöön
+      Guidelines: Ohjeet
+      InspectSegment: Tarkastele
+      InvalidStartTime: Anna kelvollinen osuuden aloitusaika.
+      NoSegmentsToSubmit: Luo vähintään yksi valmis osuus ennen lähettämistä.
+      NowAction: (Nyt)
+      CloseInfoPanel: Sulje SponsorBlock-tiedot
+      OpenInfoPanel: Avaa SponsorBlock-tiedot
+      OpenSubmissionMenu: Avaa lähetysvalikko
+      PreviewRequired: Esikatsele jokainen osuus ennen lähettämistä.
+      PreviewSegment: Esikatsele
+      SaveSegment: Tallenna
+      SetSegmentEndNow: Lopeta osuus nyt
+      StartAction: (Alku)
+      StartSegmentNow: Aloita osuus nyt
+      SubmissionBadRequest: SponsorBlock hylkäsi lähetyspyynnön.
+      SubmissionDuplicate: Tämä on jo lähetetty.
+      SubmissionFailed: SponsorBlock-osuuksien lähettäminen epäonnistui.
+      SubmissionForbidden: SponsorBlock hylkäsi lähetyksen.
+      SubmissionRateLimited: SponsorBlockin lähetysraja ylittyi.
+      SubmissionSuccess: SponsorBlock-osuudet lähetettiin.
+      SubmitSegment: Lähetä osuus
+      SubmitSegments: Lähetä
+      StartTimeLabel: Osuuden aloitusaika
+      TimeDivider: –
+      SkipPrompt: Ohitetaanko {segmentCategory}?
+      SkipPromptAction: Ohita
+      SkipToHighlight: Siirrytäänkö kohokohtaan?
+      SkippedToHighlight: Siirryttiin kohokohtaan
+      SkipToastUnskip: Peru ohitus
+      SkipToastReskip: Ohita uudelleen
+      MutedSegment: '{segmentCategory} mykistetty'
+      MuteToastUnmute: Poista mykistys
+      InfoPanelLoading: Osuuksia ladataan yhä...
+      InfoPanelHasSegments: Tälle videolle on osuuksia tietokannassa!
+      InfoPanelNoSegments: Osuuksia ei löytynyt
+      RefreshSegments: Päivitä osuudet
+      RefreshInfo: Päivitä SponsorBlock-tiedot
+      ContributionStatsTitle: Omat osallistumistiedot
+      ContributionStatsLoading: Ladataan osallistumistilastoja...
+      ContributionStatsError: Osallistumistilastoja ei ole saatavilla. Yritä päivittää.
+      ContributionStatsNoUserId: Lähetä osuus tai tuo SponsorBlock-käyttäjätunnuksesi, jotta näet osallistumistilastot.
+      Submissions: Lähetykset
+      Segments: Osuudet
+      TimeSaved: Säästetty aika
+      AutoSkipEnabled: Ohita osuudet automaattisesti
+      AutoSkipOn: 'Käytössä'
+      AutoSkipOff: 'Pois käytöstä'
+      WhitelistChannel: Lisää kanava sallittujen luetteloon
+      ChannelWhitelisted: Sallittujen luettelossa
+      RemoveChannelFromWhitelist: Poista kanava sallittujen luettelosta
+      MuteSegment: Mykistä osuus
+      SkipSegment: Ohita osuus
+      CloseSegmentActions: Sulje osuuden toiminnot
+      FullVideo: Koko video
+      FullVideoLabel: '{segmentCategory} · Koko video'
+      MuteActionType: Mykistä
+      MutePrompt: Mykistetäänkö {segmentCategory}?
+      SkipActionType: Ohita
+      LockedSegment: Lukittu osuus
+      UpvoteSegment: Äänestä puolesta
+      DownvoteSegment: Äänestä vastaan
+      VoteFailed: SponsorBlock-äänen lähettäminen epäonnistui.
+      ChangeCategory: Vaihda luokkaa
+      CopyAndDownvote: Kopioi ja anna miinusääni
+      SubmitCategoryVote: Lähetä luokkaääni
+      CategoryVoteSuccess: Luokkaääni lähetetty.
+    Google Cast:
+      Position: "Toistokohta"
+      Invalid Authentication: "Vastaanottaja lähetti virheellisen todennusvastauksen."
+      Authentication Declined: "Vastaanottaja hylkäsi todennuksen."
+      Audio Only Receiver: "Vastaanottaja tukee vain äänen lähettämistä."
+      Disconnected: "Vastaanottajan yhteys katkesi."
+      Timeout: "Vastaanottaja ei vastannut."
+      Busy: "Toinen ikkuna lähettää jo."
+      Not Authorized: "Aktivoi tämä ikkuna ja yritä uudelleen."
+      Invalid Request: "Virheellinen lähetyspyyntö."
+      IPv4 Required: "IPv4-yhteys vaaditaan."
+      Launch Failed: "Vastaanottajaa ei voitu käynnistää."
+      Load Failed: "Vastaanottaja ei voinut ladata videota."
+      Cancelled: "Lähetys peruttiin."
+      Private Not Authorized: "Yksityisten medioiden käyttöä ei hyväksytty."
+      Invalid Subtitles: "Virheelliset lähetyksen tekstitykset."
+      Discovery Failed: "Vastaanottajia ei voitu etsiä."
+      Preparing Video: "Valmistellaan videota lähetettäväksi…"
+      Connecting: "Yhdistetään laitteeseen {device}…"
+      Starting Receiver: "Käynnistetään Cast-vastaanotinta…"
+      Loading Video: "Ladataan videota vastaanottimessa…"
+      Buffering: "Puskuroidaan laitteessa {device}…"
+      Allow Private Instance: "Sallitaanko tämän lähetyksen lukea mediaa yksityisestä Invidious-palvelusta {instance}?"
+      Cast: "Lähetä Google Cast -laitteeseen"
+      Connected: "Lähetetään laitteeseen {device}"
+      Rewind: "Kelaa 10 sekuntia taaksepäin"
+      Forward: "Kelaa 10 sekuntia eteenpäin"
+      Subtitles Off: "Poista tekstitys käytöstä"
+      Return: "Palaa paikalliseen toistoon"
+      No Devices: "Google Cast -laitteita ei löytynyt"
+      No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
+      Error: "Videon lähetys epäonnistui"
+      Error With Details: "Videon lähetys epäonnistui: {error}"
+      Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
+    FCast:
+      Cast: "Lähetä FCast-vastaanottimeen"
+      No Devices: "FCast-vastaanottimia ei löytynyt"
+      No Source: "Ei yhteensopivaa suoratoistoa FCastille"
+    Secondary Captions: Toissijaiset tekstitykset
+    Subtitle File:
+      Load: "Lataa tekstitystiedosto…"
+      Subtitle Files: "Tekstitystiedostot"
+      Error: "Tekstitystiedostoa ei voitu ladata. Valitse SRT- tai WebVTT-tiedosto."
+  Station: Asema
+  Playlist:
+    Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
+  External Media:
+    Dislikes: "Ei-tykkäys | Ei-tykkäystä"
+    Reposts: "Uudelleenjulkaisu | Uudelleenjulkaisua"
+    Saves: "Tallennus | Tallennusta"
+    Series: "Sarja"
+    Season: "Kausi"
+    Season Number: "Kauden numero"
+    Episode: "Jakso"
+    Episode Number: "Jakson numero"
+    Track: "Musiikkikappale"
+    Track Number: "Raidan numero"
+    Artists: "Taiteilijat"
+    Album: "Albumi"
+    Genres: "Lajityypit"
+    Media Type: "Mediatyyppi"
+    Availability: "Saatavuus"
+    Age Limit: "Ikäraja"
+    Release Date: "Julkaisupäivä"
+    Availability Values:
+      public: "Julkinen"
+      private: "Yksityinen"
+      premium_only: "Vain Premium"
+      subscriber_only: "Vain tilaajat"
+      needs_auth: "Kirjautuminen vaaditaan"
+      unlisted: "Listaamaton"
+  How this was made: Miten tämä tehtiin
+  Save Queue to Playlist: "Tallenna jono soittolistalle"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
+  External Player:
+    LaunchFailedTemplate: Kohdetta {externalPlayer} ei voitu käynnistää. Varmista, että se on asennettu, tai määritä suoritettavan tiedoston polku ulkoisen soittimen asetuksissa.
+Playlist:
+  Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
+  Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
+  Close Playlist: Sulje soittolista
+  Preload Playlist: "Esilataa kaikki videot"
+  Preloading Playlist: "Esiladataan kaikkia videoita..."
+  Playlist Preload Complete: "Esiladattuja videoita: {count}."
+  Playlist Preload Partial: "Esiladattiin {preloaded}/{requested} videota. {failed} videon esilataus epäonnistui."
+  Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
+  Unavailable videos are hidden: Videot, jotka eivät ole saatavilla, on piilotettu
+  Add Playlist to Queue: "Lisää soittolista jonoon"
+  Playlist Added to Queue: "Soittolista lisättiin jonoon"
+Change Format:
+  yt-dlp Error Template: "yt-dlp ei voinut toimittaa suoratoistovirtoja: {error}"
+  Local Video File: Paikallinen videotiedosto
+  Local Audio File: Paikallinen äänitiedosto
+  Online Video: Verkkovideo
+  Stream Source: Suoratoiston lähde
+  Stream Extraction Method: Mediavirran poimintatapa
+  Playback Engine: Toistomoottori
+  Streaming Protocol: Suoratoistoprotokolla
+  Not Available For This Video: Ei käytettävissä tässä videossa
+  Protocols:
+    Progressive: Progressiivinen
+  Descriptions:
+    Local File: Toistetaan suoraan tälle laitteelle ladatusta tiedostosta
+    Online Video: Ladataan suoratoistomuodot määritetystä verkkolähteestä
+    Dash: Mukautuva laatu, useita ääniraitoja ja suurimmat tarkkuudet
+    Legacy: Video ja ääni yhdessä tiedostossa, käytettävissä vain pienemmillä tarkkuuksilla
+    Audio: Vain ääni, säästää tiedonsiirtoa ja sopii taustakuunteluun
+  yt-dlp Fallback Template: 'yt-dlp ei voinut tarjota mediavirtoja, joten käytetään sisäistä moottoria: {error}'
+  yt-dlp Default Clients Fallback: Ensisijaiset yt-dlp-asiakasohjelmat eivät tarjonneet toistettavia mediavirtoja, joten yritetään yt-dlp:n oletusasiakasohjelmia
+  Built-in Fallback Template: 'Sisäinen moottori ei voinut toistaa mediavirtaa, joten yritetään yt-dlp:tä: {error}'
+Share:
+  Shared YouTube Link: "Jaettu YouTube-linkki"
+  Open in Player: "Avaa soittimessa"
+  No YouTube Link: "Jaettu teksti ei sisällä tuettua YouTube-linkkiä."
+  Loading Video Information: "Ladataan videon tietoja…"
+  Video Information Failed: "Videon tietoja ei voitu ladata. Yritä uudelleen tai avaa linkki."
+  Share Link: "Jaa linkki"
+  Share failed: "Linkin jakaminen epäonnistui"
+  Timestamp Link Copied: Aikaleiman sisältävä linkki kopioitiin leikepöydälle
+Context Menu:
+  Opened in a Background Tab: "Avattu taustavälilehdelle"
+  Open in a Background Tab: "Avaa taustavälilehdessä"
+  Select Tab: Valitse välilehti
+  Close Tabs Before: Sulje edeltävät välilehdet
+  Close Tabs After: Sulje seuraavat välilehdet
+  Close Other Tabs: Sulje muut välilehdet
+  Copy {service} link without playlist: "Kopioi {service}-linkki ilman soittolistaa"
+  Context Menu: Pikavalikko
+  Select All: Valitse kaikki
+  Save Image As…: Tallenna kuva nimellä…
+  Copy Image: Kopioi kuva
+  Copy Image Address: Kopioi kuvan osoite
+  Cancel Refresh: Peruuta päivitys
+  Reload Videos: Lataa videot uudelleen
+  Reload Shorts: Lataa Shorts-videot uudelleen
+  Reload Live: Lataa suorat lähetykset uudelleen
+  Reload Posts: Lataa julkaisut uudelleen
+  Reload All Feeds: Lataa kaikki syötteet uudelleen
+  Reload RSS Feeds: Lataa RSS-syötteet uudelleen
+  Close Multiple Tabs: Sulje {count} välilehteä
+  Duplicate Tab: Monista välilehti
+  Duplicate Multiple Tabs: Monista {count} välilehteä
+  Move Tab: Siirrä välilehti
+  Move Tabs: Siirrä välilehdet
+  Move Tab to Group: Siirrä välilehti ryhmään
+  Collapse Group: Kutista ryhmä
+  Expand Group: Laajenna ryhmä
+  Move Tabs to Group: Siirrä välilehdet ryhmään
+  Manage Tab Groups…: Hallitse välilehtiryhmiä…
+  To Beginning: Alkuun
+  To End: Loppuun
+  Close Tabs: Sulje välilehdet
+  To the Top: Ylös
+  To the Left: Vasemmalle
+  To the Bottom: Alas
+  To the Right: Oikealle
+  Other Tabs: Muut välilehdet
+  Copy YouTube Link: Kopioi YouTube-linkki
+  Copy YouTube Links: Kopioi YouTube-linkit
+  Pin Tab: Kiinnitä välilehti
+  Pin Tabs: Kiinnitä välilehdet
+  Unpin Tab: Irrota välilehti
+  Unpin Tabs: Irrota välilehdet
+  Tab Color: Välilehden väri
+  Default: Oletus
+  Purple: Violetti
+  Reopen Closed Tab: Avaa suljettu välilehti uudelleen
+  Reload Tab: Lataa välilehti uudelleen
+  Reload Tabs: Lataa välilehdet uudelleen
+  Load Tab: Lataa välilehti
+  Load Tabs: Lataa välilehdet
+  Unload Tab: Poista välilehti muistista
+  Unload Tabs: Poista välilehdet muistista
+  Unload Tabs Failed: "Valittuja välilehti ei voitu poistaa muistista."
+  Move Tab to Window: Siirrä välilehti ikkunaan
+  Move Tabs to Window: Siirrä välilehdet ikkunaan
+  Open in a New Tab: Avaa uudessa välilehdessä
+  Open in a New Window: Avaa uudessa ikkunassa
+  Copy Link: Kopioi linkki
+  Copy Invidious Link: Kopioi Invidious-linkki
+  Search Selection in New Tab: Hae tekstiä "{selection}" uudessa välilehdessä
+  Search Selection in New Window: Hae tekstiä "{selection}" uudessa ikkunassa
+  Search With: Hae hakukoneella {engine}
+  Search With Multiple: Hae hakukoneella...
+  Selection Too Long: Valinta on liian pitkä haettavaksi (> {count} merkkiä)
+  Background Tab: Taustavälilehti
+Tab Organizer:
+  Tab History: "Välilehden historia"
+  Current Page: "Nykyinen sivu"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Kello'
+    Puzzle Piece: 'Palapelin pala'
+    People: 'Ihmiset'
+    Chart: 'Kaavio'
+    Calendar: 'Kalenteri'
+    Images: 'Kuvat'
+    Music: 'Musiikki'
+    Folder: Kansio
+    Bookmark: Kirjanmerkki
+    Favorites: Suosikit
+    Videos: Videot
+    Gaming: Pelit
+    Research: Tutkimus
+    Art: Taide
+    Travel: Matkailu
+  Group Icon: Ryhmän kuvake
+  Title: Välilehtien järjestely
+  Open Tab Count: '{count} avoin välilehti | {count} avointa välilehteä'
+  Search Label: Hae välilehtiä
+  Selected Count: '{count} välilehti valittu | {count} välilehteä valittu'
+  Tab Count: '{count} välilehti | {count} välilehteä'
+  Select All: Valitse kaikki
+  Select None: Poista kaikki valinnat
+  Move To Group: Siirrä valitut välilehdet ryhmään
+  Choose Group: Valitse ryhmä
+  Ungrouped: Ryhmittelemättömät
+  Pin: Kiinnitä
+  Unpin: Irrota
+  Load: Lataa
+  Unload: Poista muistista
+  Unload All: Poista kaikki muistista
+  Close All: Sulje kaikki
+  Ungroup: Pura ryhmä
+  Group Name: Ryhmän nimi
+  Color: Väri
+  No Color: Ei väriä
+  Create Group: Luo ryhmä
+  Expand Group: Laajenna ryhmä
+  Collapse Group: Supista ryhmä
+  Expand Group Label: Laajenna {name}, {count} välilehti | Laajenna {name}, {count} välilehteä
+  Rename Group: Nimeä {name} uudelleen
+  Change Group Color: Vaihda ryhmän {name} väri
+  Move To Window: Siirrä ikkunaan
+  Choose Window: Valitse ikkuna
+  Select Tab: Valitse {title}
+  Active: Aktiivinen
+  Pinned: Kiinnitetty
+  Unloaded: Poistettu muistista
+  Playing: Toistetaan
+  Close Tab: Sulje {title}
+  No Open Results: Yksikään avoin välilehti ei vastaa hakua.
+  Recently Closed: Viimeksi suljetut
+  Clear: Tyhjennä
+  No Closed Results: Yksikään viimeksi suljettu välilehti ei vastaa hakua.
+  Drag Tab: Siirrä ryhmään vetämällä
+Chapters:
+  Open Chapters: Avaa luvut
+  Close Chapters: Sulje luvut
+  Copy Timestamp Link: Kopioi linkki kohdasta {timestamp}
+  Loop Chapter: 'Toista lukua jatkuvasti: {chapter}'
+  Looping Chapter: 'Lukua toistetaan: {chapter}'
+  Chapter Loop Stopped: 'Luvun toisto lopetettu'
+Comments:
+  Image unavailable: "Kuva ei ole saatavilla"
+  Comment Count: 1 kommentti | {count} kommenttia
+  Show Comments: Näytä kommentit
+  Getting comment replies, please wait: Haetaan kommentin vastauksia, odota
+  Reload Comments: Lataa kommentit uudelleen
+  Reply Count: 1 vastaus | {replyCount} vastausta
+  Comments are turned off: Kommentit on poistettu käytöstä
+  YouTube did not provide advertised replies: YouTube ilmoitti, että kommenttiin on vastauksia, mutta ei toimittanut niitä. Ne on ehkä poistettu tai piilotettu, joten vastauspainike poistettiin.
+  Pinned by you: Sinun kiinnittämäsi
+  A reply is pinned: Vastaus on kiinnitetty
+  Filter loaded comments: Suodata ladattuja kommentteja
+  Comment filters: Kommenttisuodattimet
+  From creator: Sisällöntuottajalta
+  Contains timestamps: Sisältää aikaleimoja
+  Pin comment by author: Kiinnitä käyttäjän {author} kommentti
+  Unpin comment by author: Irrota käyttäjän {author} kommentti
+  Edited: (muokattu)
+  Highlighted comment: Korostettu kommentti
+  Highlighted reply: Korostettu vastaus
+  Search loaded comments: Hae ladatuista kommenteista
+  Loaded comment search result count: 1/{total} ladatusta kommentista | {count}/{total} ladatusta kommentista
+  No loaded comments match your filters: Yksikään ladattu kommentti ei vastaa suodattimia
+  YouTube comment link copied to clipboard: YouTube-kommentin linkki kopioitiin leikepöydälle
+  Translate to {language}: Käännä kielelle {language}
+  Show original: Näytä alkuperäinen
+  Translating comment, please wait: Kommenttia käännetään, odota
+  Comment translation failed: Kommentin kääntäminen epäonnistui
+Description:
+  Title: Kuvaus
+  Copy Description: Kopioi kuvaus
+  Description Copied: Kuvaus kopioitiin leikepöydälle
+  Video Category: 'Videon luokka:'
+  Video Tags: Videon tunnisteet
+  Games: Pelit
+  Music: Musiikki
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Lyhentää videoiden ja soittolistojen otsikot luetteloissa ja ruudukoissa kahteen riviin kolmella pisteellä, jotta kortit ovat yhtenäisempiä. Näet koko otsikon viemällä osoittimen sen päälle."
+    Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
+    Preferred Video Codec: |
+      Automaattinen tila suosii koodekkeja, joita laitteesi voi purkaa laitteistolla.
+      AV1: paras laatu pienimmällä datamäärällä, mutta kaikissa videoissa sitä ei ole. Ilman laitteistopurkua se voi kuluttaa akkua tai pudottaa ruutuja.
+      VP9: tasapaino tehokkuuden ja yhteensopivuuden välillä, yleensä saatavilla korkeimpaan resoluutioon asti.
+      H.264: helpoin purkaa lähes millä tahansa laitteella, mutta kuluttaa enemmän dataa ja jää yleensä 1080p:hen.
+      Muutokset koskevat seuraavaa videota. Jos ensisijainen koodekki ei ole saatavilla, käytetään toista.
+    Always Use Backup Media Server: "Toistaa videot YouTuben ilmoittamalta varapalvelimelta määritetyn palvelimen sijaan, esimerkiksi kun internetpalveluntarjoajasi välimuisti on usein hidas. Muuten OpenTubeX vaihtaa palvelinta vain, kun määritetty palvelin ei vastaa."
+    Automatically switch stream extraction methods: "Kokeile yt-dlp:tä, jos sisäänrakennettu toisto epäonnistuu, tai sisäänrakennettua toistoa, jos yt-dlp epäonnistuu."
+    Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
+    Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
+    Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.
+    Update Relative Timestamps: Päivittää suhteellisia aikaleimoja kaikkialla sovelluksessa sivun ollessa avoinna. Jos asetus on poistettu käytöstä, ne päivittyvät vasta, kun sivu ladataan uudelleen tai sillä käydään uudelleen.
+    Stream Extraction Method: |
+      Valitse, miten OpenTubeX hakee videovirrat. Jos yt-dlp valitaan, sen on oltava käytettävissä.
+      Videoiden toiston alkaminen voi kestää kauemmin yt-dlp:tä käytettäessä.
+      Sisäänrakennettu menetelmä ei tue suorien lähetysten eikä ensi-iltojen kelaamista.
+    Avoid translation: |
+      Estä YouTubea kääntämästä automaattisesti videon nimeä, kuvausta ja lukuja.
+      Liian monet pyynnöt, kuten videoiden nimien hakeminen luetteloihin, voivat tilapäisesti
+      heikentää sovelluksen toimintavarmuutta.
+    Show Thumbnail Previews: Näytä animoitu esikatselu, kun osoitin viedään videon pikkukuvan päälle.
+    Startup Behavior: |
+      Valitse, mitä OpenTubeX tekee käynnistyessään.
+      Kaikkien välilehtien lataaminen palauttaa kaikki tallennetut välilehdet heti, mutta taustavälilehtien videoita ei toisteta automaattisesti.
+      Aiemmin ladattujen välilehtien lataaminen lataa uudelleen välilehdet, jotka olivat ladattuina OpenTubeX:n sulkeutuessa, ja jättää muut lataamatta.
+      Viimeksi aktiivisen välilehden lataaminen palauttaa edellisen istunnon niin, että muut välilehdet avataan mutta jätetään lataamatta. Ne latautuvat, kun niitä napsautetaan.
+      Tyhjän istunnon aloittaminen ohittaa tallennetut välilehdet ja avaa uuden ikkunan.
+    Remember Tab Navigation History: Kunkin välilehden taakse- ja eteenpäin siirtymisen historia tallennetaan ja palautetaan, kun OpenTubeX käynnistyy uudelleen.
+    Yattee Server: yattee-server-instanssi, josta OpenTubeX lataa videot, kanavat, soittolistat ja hakutulokset. Käyttäjänimi ja salasana tallennetaan vain tälle laitteelle.
+    Proxy Videos Through Yattee Server: Välittää video- ja äänivirrat palvelimen kautta. Pidä tämä päällä, ellei palvelin käytä samaa internetyhteyttä kuin sinä, sillä YouTube toimittaa mediavirrat vain osoitteeseen, joka pyysi niitä. Pikkukuvat ladataan aina suoraan YouTubesta.
+    Notifications: Valitse, miten OpenTubeX ilmoittaa suoratoistoista, uusista latauksista ja automaattisista latauksista. Asetuksella Järjestelmä ja sovelluksessa ilmoitukset näkyvät OpenTubeXissa, kun käytät sitä, ja muuten järjestelmäilmoituksina, ja kello säilyttää ne. Pois piilottaa myös ilmoitusasetukset.
+  Proxy Settings:
+    IP Block Recovery Script Path: Komentosarjatiedosto, joka suoritetaan IP-eston havaitsemisen jälkeen. OpenTubeX odottaa suorituksen päättymistä ja lataa sitten videon uudelleen. Jos varamenetelmä on käytössä, komentosarja suoritetaan vain, jos myös varamenetelmä epäonnistuu.
+  Player Settings:
+    Mono Audio: 'Toistaa vasemman ja oikean äänikanavan molempiin korviin. Käytä tätä, kun videon ääni kuuluu vain kuulokkeiden toiselta puolelta.'
+    Pause on Stream Recovery: "Kun videostriimi epäonnistuu ja soitin lataa sen uudelleen tai vaihtaa toiseen formaattiin tai moottoriin, toisto keskeytetään ja virhe näkyy soittimen yläosassa, kunnes suljet sen. Kun asetus on pois päältä, toisto jatkuu ja virhe näkyy hetken ilmoituksena."
+    Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
+    Enable Caption Translations: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa.
+    Use Quick Playback Speed Bar: Näyttää toistonopeuden pikapalkin soittimen säätimien oikeassa reunassa. Jos kanavakohtaisen toistonopeuden manuaalinen tallennus on käytössä, palkissa on myös painike nykyisen kanavan nopeuden tallentamiseen.
+    Multiply Seek Interval by Playback Rate: Kun asetus on käytössä, siirtymäväli kerrotaan nykyisellä toistonopeudella käytettäessä nuolinäppäimiä tai J/L-näppäimiä. Kun asetus on poistettu käytöstä, siirtymäväli pysyy samana toistonopeudesta riippumatta.
+    Show Playback Rate Adjusted Timestamp: Kun asetus on käytössä ja toistonopeus poikkeaa nopeudesta 1x, soitin näyttää tavallisen aikaleiman jälkeen sulkeissa toistonopeuteen suhteutetun aikaleiman.
+    Use YouTube-style Shorts: Näyttää Shorts-videot pystysuuntaisessa ruudukossa tilausten ja kanavien sivuilla sekä käyttää YouTube-tyylistä Shorts-soitinta.
+    Loop Shorts: Kun asetus on käytössä, Shorts-videot alkavat automaattisesti alusta. Muussa tapauksessa ne pysähtyvät lopussa ja näyttävät uudelleentoistopainikkeen.
+    Show Skip Silence Toggle: Näyttää hiljaisuuden ohittamisen käyttöönottokytkimen soittimen asetusvalikossa.
+    Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
+    Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
+    Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.
+    Voice-over Translation: Lähettää videon tunnuksen, keston ja valitun kielen epäviralliseen Yandexin selostuskäännöspalveluun, kun pyydät käännöstä. Oletusarvoisesti pois käytöstä.
+    Hold to Double Playback Speed: Voit kaksinkertaistaa nykyisen toistonopeuden tilapäisesti pitämällä välilyöntiä tai soittimen päällä olevaa hiiren ykköspainiketta painettuna.
+    Ambient Mode: Sulauttaa videon värit soitinta ympäröivään alueeseen.
+    Default Volume: Ei käytettävissä, kun äänenvoimakkuuden muistaminen on käytössä. Poista äänenvoimakkuuden muistaminen käytöstä, jos haluat määrittää videoille kiinteän aloitusäänenvoimakkuuden.
+    Parallel Segment Loading: |
+      Samanaikaisesti ennen toistoa ladattavien video- ja äänisegmenttien määrä.
+      Suuremmat arvot voivat auttaa hitailla tai epävakailla yhteyksillä, mutta ne käyttävät enemmän kaistanleveyttä ja muistia.
+      Ne voivat myös saada automaattisen asetuksen aliarvioimaan yhteysnopeuden ja valitsemaan heikomman laadun.
+      Tämä asetus ei vaikuta suoratoistovirtoihin, joissa sallitaan vain yksi pyyntö kerrallaan.
+    Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
+    Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
+    Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
+    Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
+  Download Settings:
+    Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
+    Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.
+    Concurrent Downloads: Samanaikaisesti suoritettavien yt-dlp-töiden enimmäismäärä.
+    Bandwidth Limit: Rajoittaa jonon yhteenlaskettua siirtonopeutta jakamalla tämän rajan samanaikaisten töiden kesken. Arvo 0 poistaa rajoituksen.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX voi käyttää järjestelmään asennettua yt-dlp:tä tai ladata ja ylläpitää omaa yt-dlp-kopiotaan, joka tallennetaan käyttäjätietokansioon.
+    yt-dlp Channel: Valitse OpenTubeX:n lataaman ja ylläpitämän yt-dlp-julkaisun kanava. Stable sopii useimmille käyttäjille.
+    FFmpeg Source: OpenTubeX voi käyttää järjestelmään asennettuja FFmpeg- ja FFprobe-ohjelmia tai ladata ja ylläpitää omia staattisia koontiversioitaan, jotka tallennetaan käyttäjätietokansioon.
+    Managed Tool Updates: Valitse, päivitetäänkö ylläpidetyt työkalut automaattisesti, kysytäänkö lupa ennen päivitystä vai päivitetäänkö ne vain manuaalisilla painikkeilla. Puuttuvat työkalut ladataan silti tarvittaessa.
+    yt-dlp Executable Path: OpenTubeX olettaa oletusarvoisesti, että yt-dlp löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
+    Cookie Source: Valitse, lukeeko yt-dlp Netscape-evästetiedostoa vai asennetun selaimen evästeitä tunnistautumista vaativaa toistoa varten.
+    Cookie File: Valitse Netscape-muotoinen evästetiedosto tunnistautumista vaativaa toistoa varten.
+    Browser for Cookies: Selaintuki luetaan valitusta yt-dlp-ohjelmatiedostosta. OpenTubeX pyytää yt-dlp:tä lukemaan tämän selaimen evästeet, kun tunnistautumista vaativaa toistoa pyydetään.
+    Browser Profile: Valinnainen selainprofiilin nimi tai kansio. Jos kenttä jätetään tyhjäksi, käytetään viimeksi avattua profiilia.
+    Always Use Cookies: "Käytä määritettyjä evästeitä latauksiin, tekstityksiin ja aina, kun yt-dlp hakee suoratoistoja. Tämä ei vaihda suoratoistovirtojen hakumenetelmäksi yt-dlp:tä. Kun yt-dlp on valittu, vain tilille tarkoitetut muodot voivat tulla saataville. Niihin kuuluu YouTube Premiumin parannettu bittinopeus, jos tilillä on sen käyttöoikeus."
+    FFmpeg Executable Path: FFmpeg tarvitaan erillisten video- ja äänivirtojen yhdistämiseen sekä äänen muuntamiseen. OpenTubeX olettaa oletusarvoisesti, että FFmpeg löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
+    Use cookies for subtitles: "Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin. Myös ”Käytä aina evästeitä” ottaa tämän käyttöön."
+  Distraction Free Settings:
+    Count Watch Time From: "”Kaikki laitteet” laskee jokaisen laitteen, joka synkronoi katselutilastot. ”Tämä laite” laskee vain sen, mitä katsot täällä."
+    When a Limit Is Reached: "”Keskeytä toisto” antaa lisätä 15 minuuttia tai ohittaa rajan tältä päivältä. Kun asetuksilla on salasana, voit nostaa rajaa vain asetuksissa."
+    Grayscale: "Näyttää koko sovelluksen videoineen harmaasävyinä, jotta se vie vähemmän huomiota. ”Nukkumaanmenoaikana” noudattaa nukkumaanmenomuistutuksen aikataulua."
+    Daily Watch Time Limit: "Laskee, mitä olet katsonut tänään kaikilla laitteilla, jotka synkronoivat katselutilastot, Shorts-videot mukaan lukien."
+    Daily Shorts Limit: "Laskee Shorts-videot, jotka olet katsonut tänään tällä laitteella."
+    Take a Break Reminder: "Keskeyttää videon, kun olet katsonut näin kauan. Vähintään 10 minuutin tauko aloittaa laskennan alusta."
+    Bedtime Reminder: "Keskeyttää videon ja muistuttaa sinua lopettamaan katselun alku- ja loppuajan välillä."
+    Shorten View Counts: Näyttää katselu-, kommentti- ja kommenttien tykkäysmäärät YouTuben valmiiksi pyöristämässä lyhyessä muodossa, esimerkiksi 14 t. 14 000:n sijaan. Tarkat määrät näytetään aina kokonaisina.
+  Subscription Settings:
+    Fetch Feed on Startup: Kun asetus on käytössä, OpenTubeX hakee tilausnäkymän automaattisesti käynnistyessään ja uuden ikkunan avautuessa.
+    Show New Content Feed: Näyttää Uudet-välilehden, joka sisältää tilausnäkymän kohteet, joita ei ollut edellisellä hakukerralla.
+    Enable RSS Feeds: Näyttää Tilaukset-sivulla RSS-välilehden, jossa on RSS- tai Atom-syötteiden kohteet, jotta voit seurata sisällöntuottajia muilla alustoilla. Sen kohteet avataan yt-dlp:llä.
+    Show New Content Indicators: Näyttää pienen pisteen niiden tilausnäkymän kohteiden vieressä, joita ei ollut edellisellä hakukerralla.
+    Show Scheduled Live Streams / Premieres First: Pitää tulevat suorat lähetykset ja ensi-illat tilausnäkymän alussa. Kun asetus on poistettu käytöstä, ne pysyvät ilmoitusajankohdan mukaisella paikallaan alkamiseensa asti. Päivitä tilausnäkymä kerran asetuksen poistamisen jälkeen, jotta olemassa olevien ajastettujen kohteiden ilmoituspäivät haetaan.
+    Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."
+    Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
+    Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
+    RSS Feeds Auto Refresh Interval: Kuinka usein OpenTubeX päivittää RSS-syötteesi automaattisesti, kun sovellus on auki.
+  Theme Settings:
+    Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta. Virheet, varoitukset, asettamasi muistutukset ja toimintoa tarjoavat ilmoitukset, kuten Kumoa, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
+    Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
+    Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
+    Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
+    Compact Settings Categories: "Piilottaa kuvaukset ja pienentää asetuskategorioiden korkeutta."
+    Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
+    Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.
+    Scroll Speed: Muuttaa hiiren rullan ja kosketuslevyn vierityseleiden vieritysmatkaa.
+    Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
+    Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
+    Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
+  Experimental Settings:
+    Disable Hardware Acceleration: Poistaa GPU:n laitteistokiihdytyksen käytöstä. Saattaa korjata grafiikkaongelmia, mutta todennäköisesti heikentää suorituskykyä.
+The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
+External link opening has been disabled in Settings → Privacy: Ulkoisten linkkien avaaminen on poistettu käytöstä kohdassa Asetukset → Tietosuoja
+Screenshot Clipboard Success: Kuvakaappaus tallennettiin leikepöydälle
+Screenshot Clipboard Error: Kuvakaappauksen kopiointi leikepöydälle epäonnistui
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Lisää pikakirjanmerkin soittolistaan tai poista siitä
+  Reopen Closed Window: Avaa viimeksi suljettu ikkuna uudelleen
+  Edit Hint: Valitse pikanäppäin ja paina sitten uutta näppäinyhdistelmää. Poista määritys painamalla Backspace- tai Delete-näppäintä.
+  Change Shortcut: Vaihda toiminnon {action} pikanäppäin
+  Press Shortcut: Paina pikanäppäintä…
+  Unassigned: Ei määritetty
+  Reset Shortcut: Palauta toiminnon {action} pikanäppäin
+  Reset to Defaults: Palauta oletukset
+  Shortcut Already Assigned: Pikanäppäin on jo määritetty
+  Shortcut Conflict: 'Pikanäppäin {shortcut} on jo määritetty toiminnoille {actions}. Haluatko määrittää sen uudelleen?'
+  Reserved Shortcut Conflict: 'Pikanäppäin {shortcut} on varattu toiminnoille {actions}, eikä sitä voi määrittää uudelleen.'
+  Reassign: Määritä uudelleen
+  Sections:
+    App:
+      Tabs: "Sovellus:\_Välilehdet"
+      Search and Page: "Sovellus:\_Haku ja sivu"
+      Window and View: "Sovellus:\_Ikkuna ja näkymä"
+  New Tab: Luo uusi välilehti
+  Close Tab: Sulje nykyinen välilehti
+  Reload Tab: Lataa nykyinen välilehti uudelleen
+  Reopen Closed Tab: Avaa viimeksi suljettu välilehti uudelleen
+  Next Tab: Siirry seuraavaan välilehteen
+  Previous Tab: Siirry edelliseen välilehteen
+  Switch to Tab: Siirry välilehteen 1–9
+  Toggle Tab Orientation: Vaihda välilehtiasettelua
+  Find in Page: Etsi tekstiä nykyiseltä sivulta
+  Find Next Match: Siirry seuraavaan osumaan
+  Find Previous Match: Siirry edelliseen osumaan
+  Toggle Normal Playback Speed: Vaihda nopeuden 1x ja edellisen toistonopeuden välillä
+  Toggle Skip Silence: Ota hiljaisuuden ohittaminen käyttöön tai poista se käytöstä
+  Set A-B Repeat Point A: Aseta A-B-toiston piste A
+  Set A-B Repeat Point B: Aseta A-B-toiston piste B
+  Clear A-B Repeat: Tyhjennä A-B-toisto
+  Video Zoom In: Lähennä videota
+  Video Zoom Out: Loitonna videota
+  Tab Switcher: Välilehtivalitsin
+  Undo Seek: Kumoa viimeisin siirtymä
+  Redo Seek: Tee kumottu siirtymä uudelleen
+CommandPalette:
+  Title: Komentopaletti
+  Open: Avaa komentopaletti
+  Search Label: "Hae komentoja, asetuksia ja paikallisia videoita"
+  Search Placeholder: Hae komentoja, asetuksia ja paikallisia videoita…
+  Results: "Tulokset"
+  No Results: "Ei vastaavia tuloksia"
+  Result Count: "Tulokset: {count} | Tulokset: {count}"
+  Move: Siirrä
+  Run: Suorita
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Siirry välilehteen: {title}'
+  Switch Profile: 'Vaihda profiilia: {name}'
+  Open Playlist: 'Avaa soittolista: {name}'
+  Cancel Download: 'Peruuta lataus: {title}'
+  Groups:
+    App: Sovellus
+    Navigation: Siirtyminen
+    Tabs: Välilehdet
+    Local Videos: Paikalliset videot
+  Unavailable:
+    Current Page: Olet jo tällä sivulla
+    No History: Tähän suuntaan ei voi siirtyä
+    Desktop: Käytettävissä vain työpöytäsovelluksessa
+    Build: Ei käytettävissä tässä koontiversiossa
+    One Tab: Avaa ensin toinen välilehti
+    Active Tab: Tämä on aktiivinen välilehti
+    Active Profile: Tämä on aktiivinen profiili
+    Download Finished: Tämä lataus ei ole enää käynnissä
+    Video: Avaa ensin video
+Downloads:
+  Search Completed: "Hae valmiita latauksia otsikon tai kanavan perusteella"
+  Format: "Muoto"
+  All Formats: "Kaikki muodot"
+  Largest First: "Suurimmat ensin"
+  Smallest First: "Pienimmät ensin"
+  No Matching Downloads: "Vastaavia valmiita latauksia ei löytynyt. Kokeile toista hakua tai suodatinta."
+  Add Download: Lisää lataus
+  Preparing: Valmistellaan…
+  Export Failed: "Ladattua tiedostoa ei voitu tallentaa. Valitse latauskansio, johon on kirjoitusoikeus, ja yritä uudelleen."
+  Remove File Permanently Warning: "Tämä poistaa kohteen ”{title}” pysyvästi."
+  Download: Lataa
+  Download Video: Lataa video
+  Download Playlist: Lataa soittolista
+  Downloading: Ladataan
+  Queue: Jono
+  Downloaded: Ladattu
+  Canceled: Peruutettu
+  Open Downloads: Avaa lataukset
+  No Downloads: Ei vielä latauksia
+  No Downloads Description: Aloittamasi lataukset näkyvät täällä.
+  Clear Failed Canceled Skipped And Missing: Poista epäonnistuneet, peruutetut, ohitetut ja puuttuvat
+  Clear From List: Poista luettelosta
+  Show in Folder: Näytä kansiossa
+  Play Download: Toista ladattu tiedosto
+  Retry Download: Yritä latausta uudelleen
+  Pause Download: Keskeytä lataus
+  Resume Download: Jatka latausta
+  Move Earlier: Siirrä aiemmaksi
+  Move Later: Siirrä myöhemmäksi
+  Pause All: Keskeytä kaikki
+  Resume All: Jatka kaikkia
+  Retry All: Yritä kaikkia epäonnistuneita latauksia uudelleen
+  Total Size: 'Yhteiskoko: {size}'
+  Local File: Paikallinen tiedosto
+  Available Offline: Käytettävissä ilman verkkoyhteyttä
+  Remove File: Poista tiedosto
+  Remove File Confirmation: Poistetaanko ladattu tiedosto?
+  Remove File Warning: Tämä siirtää tiedoston "{title}" laitteen roskakoriin.
+  File Not Found: Ladattua tiedostoa ei löytynyt.
+  Download Missing: Lataus ei ole käytettävissä
+  Files Missing: Ladattu tiedosto ei ole enää käytettävissä tiedostojärjestelmässä. | Ladatut tiedostot eivät ole enää käytettävissä tiedostojärjestelmässä.
+  Files Available: '{available}/{total} ladatusta tiedostosta on käytettävissä.'
+  More Files: 1 tiedosto lisää | {count} tiedostoa lisää
+  Template Used: 'Mallipohja: {name}'
+  Download Type: Latauksen tyyppi
+  Template: Mallipohja
+  Unsaved: Tallentamaton
+  Media Type: Median tyyppi
+  Video: Video
+  Audio: Ääni
+  Maximum Resolution: Suurin tarkkuus
+  Best Available: Paras saatavilla oleva
+  Automatic: Automaattinen
+  Container: Säilömuoto
+  Video Codec: Videokoodekki
+  Audio Codec: Äänikoodekki
+  File Name Template: Tiedostonimen mallipohja
+  File Name Template Help: 'Käytettävissä olevat kentät: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Aikaväli ja luvut
+  Start Time: Aloitusaika
+  End Time: Lopetusaika
+  Split by Chapters: Jaa luvut erillisiksi tiedostoiksi
+  Remove Segments: Poista segmenttejä
+  Subtitles and Metadata: Tekstitykset ja metatiedot
+  Include Subtitles: Sisällytä tekstitykset
+  Embed Subtitles: Upota tekstitykset mediatiedostoon
+  Subtitle Format: Tekstitysmuoto
+  Subtitle Languages: Tekstityskielet
+  Subtitle Languages Help: 'Pilkuilla erotetut yt-dlp:n kielivalitsimet, esimerkiksi: en.*,de.*'
+  Embed Cover Art: Upota pikkukuva kansikuvaksi
+  Embed Metadata: Upota nimi, tekijä, kuvaus ja luvut
+  Additional yt-dlp Arguments: yt-dlp:n lisäargumentit
+  Custom yt-dlp Arguments: Mukautetut yt-dlp-argumentit
+  Template Name: Mallipohjan nimi
+  Save Template: Tallenna mallipohja
+  Delete Template: Poista mallipohja
+  Template Saved: Latauksen mallipohja "{name}" tallennettiin
+  Template Name Exists: Latauksen mallipohja nimeltä "{name}" on jo olemassa.
+  Choose Folder: Vaihda
+  Select Folder: Valitse kansio
+  Folder Required: Ota lataukset käyttöön valitsemalla latauskansio.
+  System Downloads Folder: Järjestelmän Lataukset-kansio
+  Processing: Käsitellään…
+  Queued: Jonossa
+  Queued Position: Jonossa sijalla {position}
+  Paused: Keskeytetty
+  Pausing: Nykyinen lataustehtävä suoritetaan loppuun, minkä jälkeen jono keskeytetään
+  Download Complete: Lataus valmis
+  Download Cancelled: Lataus peruutettu
+  Download Failed: Lataus epäonnistui
+  File Name Shortened: Tiedostonimeä lyhennettiin, koska videon nimi oli liian pitkä.
+  Insufficient Disk Space: Levytilaa ei ole tarpeeksi. Tilaa tarvitaan noin {required}, ja {available} on vapaana.
+  Unknown Download Size: Latauksen kokoa ei tiedetä. Kohdetiedostojärjestelmässä on vapaana {available}.
+  Disk Space Check Unavailable: Vapaan levytilan määrää ei voitu tarkistaa ennen tämän latauksen aloittamista.
+  Download Failure Hint: Tarkista {issuesLink} ja kokeile sitten vaihtaa yt-dlp-kanavaksi Nightly tai Master kohdassa Asetukset → Lisäasetukset → Ulkoiset ohjelmistot.
+  yt-dlp YouTube Issues: yt-dlp:n viimeaikaiset YouTubea koskevat ongelmat
+  Automatic Download Started: Automaattinen lataus alkoi
+  Automatic Download Started Body: Videota "{title}" kanavalta {channel} ladataan taustalla.
+  Automatic Download Complete: Automaattinen lataus valmis
+  Automatic Download Failed: Automaattinen lataus epäonnistui
+  Automatic Download Could Not Start: Videon "{title}" automaattista latausta ei voitu aloittaa.
+  Automatic Download Skipped: Automaattisen latauksen suodattimet ohittivat kohteen
+  Cancel Download: Peruuta lataus
+  yt-dlp Not Found: yt-dlp:tä ei löytynyt. Asenna se tai määritä sen polku kohdassa Asetukset → Lisäasetukset → Ulkoiset ohjelmistot.
+  Download Complete Template: Kohteen "{title}" lataus on valmis
+  Download Failed Template: Kohteen "{title}" lataus epäonnistui
+  Templates:
+    Video Best: Video - paras laatu
+    Video Resolution: Video - {resolution}
+    Audio Best: Ääni - paras laatu
+    Audio Format: Ääni - {format}
+    Subtitles Format: Tekstitykset - {format}
+  Waiting for Unmetered Network: "Odotetaan rajoittamatonta verkkoa"
+  Waiting for Charging: "Odotetaan laturia"
+  Remove File Failed: Ladattua tiedostoa ei voitu poistaa.
+Channels:
+  Load More Channels: "Lataa lisää kanavia"
+Search Bar:
+  Use Suggestion: Käytä ehdotusta
+  Open Search Container: Avaa hakukenttä
+  Search: Hae
+Theme Discovery:
+  Discover Themes: "Löydä teemoja"
+  Refresh: "Päivitä"
+  View on GitHub: "Näytä GitHubissa"
+  Load Error: "Teemoja ei voitu ladata. Kokeile päivittää."
+  Loading: "Ladataan…"
+  No Themes: "Asennettavia teemoja ei löytynyt."
+  No Preview: "Kuvakaappaus ei ole saatavilla"
+  Load More: "Lataa lisää"
+  Applied: "Käytössä"
+  Apply Theme: "Ota teema käyttöön"
+  Install and Apply: "Asenna ja ota käyttöön"
+  Update and Apply: "Päivitä ja ota käyttöön"
+
+Connection:
+  Offline: Offline
+  Reconnecting: "Yhteys katkesi. Yritetään yhdistää uudelleen…"
+  Back Online: "Jälleen verkossa"
+
+App Icon:
+  Restart: "Käynnistä sovellus uudelleen"
+  Saved Message: "Kuvake tallennettu. Käynnistyssovelluksen päivittyminen voi kestää hetken."
+  Title: "Sovelluskuvake"
+  Error: "Sovelluskuvaketta ei voitu ladata tai vaihtaa"
+
+Tray:
+  Hide All Windows: "Piilota kaikki ikkunat"
+  Show All Windows: "Näytä kaikki ikkunat"
+
+Tray Icon:
+  Title: "Ilmoitusalueen kuvake"
+  Follow App Theme: "Seuraa sovelluksen teemaa"
+
+Form Inputs:
+  Enter Password Hint: "Anna salasanasi"
+  Choose Password Hint: "Valitse salasana"
+  Confirm Password Hint: "Toista uusi salasanasi"
+  Encryption Passphrase Hint: "Anna salauksen tunnuslauseesi"
+  Show Password: "Näytä salasana"
+  Hide Password: "Piilota salasana"
+  Search Text Hint: "Kirjoita hakusanat"
+  Playlist Description Hint: "Kuvaile tätä soittolistaa"
+  Filename Preview: "Tiedostonimen esikatselu"
+  Enter Channels: "Syötä kanavat"
+  Enter Text: "Syötä teksti"
+  Video URL: Videon tai soittolistan URL
+  Paste Link: Liitä videon tai soittolistan linkki
+  Example: esim. {example}
+  No Minimum: Ei vähimmäisrajaa
+  No Maximum: Ei enimmäisrajaa
+  Any Age: Mikä tahansa ikä
+  Included Terms Example: esim. ohje, arvostelu
+  Excluded Terms Example: esim. traileri, esikatselu
+  Download Folder Hint: Jätä tyhjäksi käyttääksesi Lataukset-kansiota
+  Global Arguments Hint: Valinnaiset argumentit jokaiselle lataukselle
+  Unlimited Hint: 0 tarkoittaa rajoittamatonta
+  Add Argument: Lisää argumentti
+  Template Name Example: esim. Vain ääni
+  Download Arguments Hint: Valinnaiset argumentit tälle lataukselle
+  Generated ID Hint: Jätä tyhjäksi luodaksesi tunnuksen
+  Default Value: "Oletus: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube on saattanut asettaa tälle hakukyselylle ikärajoituksen."
+  Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
+  Showing results for: "Näytetään tulokset haulle {query}"
+  Search instead for: "Hae sen sijaan {query}"
+  Including results for: "Sisältää tuloksia haulle {query}"
+  Search only for: "Hae vain {query}"
+  Did you mean: "Tarkoititko {query}?"
+
+Storage Startup Error:
+  Title: "Sovelluksen tietoja ei voitu ladata"
+  Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
+  Retry: "Yritä uudelleen"
+Native Permissions:
+  Local Network Denied: "Lähellä olevien laitteiden käyttöoikeus evättiin."
+  Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Koti"
+  subscriptions: "Tilaukset"
+  userplaylists: "Listat"
+  history: "Historia"
+  subscribedchannels: "Kanavat"
+  trending: "Nousussa"
+  popular: "Suositut"
+  stats: "Tilastot"
+  more: "Lisää"
+
+Installer:
+  Create Desktop Shortcut: Luo työpöydälle pikakuvake
+Older Version Changes:
+  Title: "Muutokset vanhemmasta versiosta"
+  Message: "OpenTubeX:n vanhemmassa versiossa tekemäsi muutokset otettiin käyttöön kirjastossasi."
+  Detail: "Jos kohdetta muutettiin molemmissa versioissa, vanhemman version muutos säilytettiin. Varmuuskopio aiemmasta kirjastostasi on profiilikansiossasi."
+Library Format Changed:
+  Title: "Kirjasto siirrettiin uuteen muotoon"
+  Message: "Kirjastosi käyttää nyt uutta tallennusmuotoa."
+  Detail: "OpenTubeX:n vanhemmat versiot voivat yhä avata kirjastosi, mutta ne näyttävät sen sellaisena kuin se oli ennen tätä päivitystä. Vanhemmassa versiossa tekemäsi muutokset lisätään, kun palaat tähän versioon."
+Invidious Fallback Warning: "Tämä pyyntö ohittaa määrittämäsi Invidious-instanssin ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi."
+Automatically unloaded to free memory: "Poistettu muistista automaattisesti muistin vapauttamiseksi"
+Home Widgets:
+  Continue Watching: "Jatka katselua"
+  Continue Watching Description: "Jatka videoita, joiden katselun aloitit"
+  Continue Watching Empty: "Videot, joiden katselun aloitat, näkyvät täällä"
+  Quick Access: "Pikakäyttö"
+  Quick Access Description: "Avaa Haku, Tilaukset tai Katso myöhemmin"
+  Search: "Hae"
+  Subscriptions: "Tilaukset"
+  Watch Later: "Katso myöhemmin"
+Subscription Groups:
+  Groups: Ryhmät
+  All: Kaikki
+  New Group: Uusi ryhmä
+  Edit Group: Muokkaa ryhmää
+  Group Name: Ryhmän nimi
+  Create: Luo
+  Save: Tallenna
+  Delete Group: Poista ryhmä
+  Delete Prompt: Poistetaanko ryhmä ”{groupName}”? Sen kanavien tilaukset säilyvät.
+  Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
+  Save Failed: Ryhmää ei voitu tallentaa.
+  Delete Failed: Ryhmää ei voitu poistaa.
+  Group Icon: Ryhmän kuvake
+  No Icon: Ei kuvaketta
+Yattee Server:
+  API Error (Click to copy): Yattee-palvelimen virhe (Kopioi napsauttamalla)
+  Unsupported page: Tämä sivu ei ole käytettävissä Yattee-palvelimen kanssa. Ota käyttöön ”{fallbackSetting}”, niin sivu ladataan paikallisella API:lla.
+  Posts unavailable: Yattee-palvelimet eivät tarjoa postauksia. Ota käyttöön ”{fallbackSetting}”, niin postaukset ladataan paikallisella API:lla.
+  Errors:
+    Invalid credentials: Yattee-palvelin hylkäsi käyttäjänimen tai salasanan. Tarkista ne kohdassa Asetukset → Lisäasetukset.
+    Rate limited: Yattee-palvelin estää kirjautumiset liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.
+    Streams not relayed: Yattee-palvelin ei välittänyt tämän videon mediavirtoja. Kun videot välitetään palvelimen kautta, OpenTubeX ei muodosta suoraa yhteyttä YouTubeen.
+    Not configured: Anna Yattee-palvelimesi URL-osoite kohdassa Asetukset → Lisäasetukset.
+    HTTPS required: Android voi toistaa videoita vain Yattee-palvelimilta, jotka käyttävät HTTPS:ää.
+    Streams unavailable: Tämän videon striimejä ei voitu ladata Yattee-palvelimelta. Tarkista palvelin toiminnolla ”Testaa yhteys” kohdassa Asetukset → Lisäasetukset.
+Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.
+Update With Package Manager: 'Päivitä käyttäen {packageManager}:'
+Update Command Copied: 'Päivityskomento kopioitu'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} jäljellä päivittäisestä katseluaikarajastasi"
+  Shorts limit almost reached: "{duration} jäljellä päivittäisestä Shorts-rajastasi"
+  Daily watch time limit reached: "Päivittäinen katseluaikaraja täyttyi"
+  Daily Shorts limit reached: "Päivittäinen Shorts-raja täyttyi"
+  Watched today: "Olet katsonut tänään {duration}."
+  Shorts watched today: "Olet katsonut Shorts-videoita tänään {duration}."
+  15 More Minutes: "15 minuuttia lisää"
+  Ignore for Today: "Ohita tältä päivältä"
+  Time to take a break: "Aika pitää tauko"
+  Watching for: "Olet katsonut jo {duration}."
+  Time for bed: "On aika mennä nukkumaan"
+  Bedtime started at: "Nukkumaanmenoaikasi alkoi klo {time}."
+  Remind Me in 10 Minutes: "Muistuta 10 minuutin kuluttua"
+Notification Center:
+  Notifications: "Ilmoitukset"
+  Notifications With Unread: "Ilmoitukset (lukemattomia: {count})"
+  Mark as Read: "Merkitse luetuksi"
+  Mark All as Read: "Merkitse kaikki luetuiksi"
+  Clear All: "Tyhjennä kaikki"
+  Clear: "Tyhjennä"
+  Empty: "Ei vielä ilmoituksia"
+  Empty Hint: "Suoratoistojen muistutukset ja uudet lataukset kanavilta, joiden ilmoitukset ovat päällä, näkyvät täällä."

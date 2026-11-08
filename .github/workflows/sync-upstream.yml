@@ -1,0 +1,156 @@
+name: Sync upstream
+
+# The sync branch carries upstream's workflow files, so it lives in a fork with
+# Actions disabled. Pushed here, they would run with this repository's secrets
+# before the PR is reviewed; a fork's PR runs without them.
+# The fork's PR gets no pull_request runs, so the analyze job runs CodeQL on it
+# here; OpenSSF Scorecard counts merged PRs without a CodeQL check against SAST.
+# UPSTREAM_SYNC_TOKEN needs Contents and Workflows write access to SYNC_FORK,
+# Pull requests write access here, plus Checks and Commit statuses read access.
+# A separate token lets PRs run CI.
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      number: ${{ steps.pull_request.outputs.number }}
+      sha: ${{ steps.push.outputs.sha }}
+      analyze: ${{ steps.codeql.outputs.missing }}
+    env:
+      GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+      SYNC_FORK: OpenTubeX/OpenTubeX-upstream-sync
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check authentication
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Set the UPSTREAM_SYNC_TOKEN repository secret before running upstream sync."
+            exit 1
+          fi
+
+      - name: Checkout fork
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The PR branch is upstream's development itself; merging it preserves fork
+      # changes and upstream commit history, including on conflicting PRs.
+      - name: Push upstream to the sync fork
+        id: push
+        run: |
+          git fetch --no-tags https://github.com/FreeTubeApp/FreeTube.git development
+          if git merge-base --is-ancestor FETCH_HEAD HEAD; then
+            echo "development already contains upstream development."
+            exit 0
+          fi
+          gh auth setup-git
+          git push --force "https://github.com/$SYNC_FORK.git" FETCH_HEAD:refs/heads/upstream-sync
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Create upstream pull request
+        id: pull_request
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          BODY: |
+            Sync [FreeTubeApp/FreeTube:development](https://github.com/FreeTubeApp/FreeTube/tree/development) into `development`.
+
+            Merge with a **merge commit** to preserve fork changes and shared upstream history.
+
+            @coderabbitai ignore
+          CREATE_PULL_REQUEST: |
+            mutation($repository: ID!, $fork: ID!, $title: String!, $body: String!) {
+              createPullRequest(input: {repositoryId: $repository, headRepositoryId: $fork,
+                baseRefName: "development", headRefName: "upstream-sync", title: $title, body: $body}) {
+                pullRequest { number }
+              }
+            }
+        run: |
+          # Pushing to the fork already updated an open PR.
+          number=$(gh pr list --repo "$GITHUB_REPOSITORY" --base development --head upstream-sync --state open \
+            --json number,headRepositoryOwner,headRepository \
+            --jq "[.[] | select(.headRepositoryOwner.login + \"/\" + .headRepository.name == \"$SYNC_FORK\")][0].number // empty")
+          if [[ -z "$number" ]]; then
+            # The fork has the same owner as this repository, so name its node explicitly
+            number=$(gh api graphql \
+              -f repository="$(gh api "repos/$GITHUB_REPOSITORY" --jq .node_id)" \
+              -f fork="$(gh api "repos/$SYNC_FORK" --jq .node_id)" \
+              -f title="chore: sync development from FreeTubeApp/FreeTube" -f body="$BODY" \
+              -f query="$CREATE_PULL_REQUEST" --jq .data.createPullRequest.pullRequest.number)
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Check for a CodeQL analysis
+        id: codeql
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          SHA: ${{ steps.push.outputs.sha }}
+        run: |
+          count=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?check_name=CodeQL" --jq .total_count)
+          if [[ "$count" -eq 0 ]]; then
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Assignment by the PAT owner is self-activity and does not notify them.
+      - name: Assign new upstream pull request as the Actions bot
+        if: steps.pull_request.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pull_request.outputs.number }}
+        run: gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-assignee D3SOX
+
+  analyze:
+    needs: sync
+    if: needs.sync.outputs.analyze == 'true'
+    name: Analyze upstream (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript]
+    steps:
+      - name: Checkout upstream
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: FreeTubeApp/FreeTube
+          ref: ${{ needs.sync.outputs.sha }}
+          persist-credentials: false
+
+      # Build mode none only extracts sources, so no upstream code runs here.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: "/language:${{ matrix.language }}"
+          ref: refs/pull/${{ needs.sync.outputs.number }}/head
+          sha: ${{ needs.sync.outputs.sha }}

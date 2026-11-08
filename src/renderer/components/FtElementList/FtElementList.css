@@ -1,3 +1,20 @@
 .maxWidth {
   inline-size: 100%;
 }
+
+/* applied by the TransitionGroup in FtAutoGrid: existing items glide to
+   their new position while newly inserted items fade in */
+.feed-move {
+  transition: transform var(--feed-transition-duration, 300ms) ease;
+}
+
+.feed-enter-active {
+  transition:
+    opacity var(--feed-transition-duration, 300ms) ease,
+    transform var(--feed-transition-duration, 300ms) ease;
+}
+
+.feed-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}

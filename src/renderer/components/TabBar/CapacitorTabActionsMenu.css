@@ -1,0 +1,116 @@
+.capacitorTabActionsBackdrop {
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: end;
+  background-color: rgb(0 0 0 / 48%);
+  backdrop-filter: var(--modal-backdrop-blur);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorTabActionsBackdrop.mode-phone {
+  position: absolute;
+  z-index: 3;
+}
+
+.capacitorTabActionsBackdrop.mode-tablet {
+  position: fixed;
+}
+
+.capacitorTabActions {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-block-size: min(100%, calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - 24px));
+  gap: 4px;
+  padding-block: 0 max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  padding-inline: 16px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  border-start-start-radius: var(--shape-corner-extra-large);
+  border-start-end-radius: var(--shape-corner-extra-large);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorTabActionList {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.capacitorTabActions strong {
+  min-inline-size: 0;
+  padding: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitorTabActions button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  padding: 12px;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  font: inherit;
+  text-align: start;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.capacitorTabActions button:is(:active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+/* Touch WebViews emulate hover at a held touch point, which would highlight
+   whatever action the sheet opens beneath the finger. */
+@media (hover: hover) {
+  .capacitorTabActions button:hover {
+    background-color: var(--side-nav-hover-color);
+  }
+}
+
+.capacitorTabActions button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.capacitorTabActions button:disabled:is(:hover, :active, :focus-visible) {
+  background-color: transparent;
+}
+
+.capacitorTabActions button:not(:disabled):active {
+  border-radius: var(--shape-corner-small);
+}
+
+.capacitorTabActions .dangerAction {
+  color: var(--error-color, #d84f4f);
+}
+
+.capacitorTabActionContent {
+  display: grid;
+  gap: 4px;
+}
+
+.capacitorTabActionHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.submenuBack {
+  inline-size: 100%;
+}
+
+.capacitorTabActions .submenuTrigger {
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+}

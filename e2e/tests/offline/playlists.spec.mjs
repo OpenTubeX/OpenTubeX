@@ -1,0 +1,1256 @@
+import { chmod, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+
+import { IpcChannels } from '../../../src/constants.js'
+import { test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
+
+const seededPremiereStart = Date.now() + 86_400_000
+
+async function dispatchStoreAction(page, action, payload) {
+  await page.evaluate(async ({ action, payload }) => {
+    const store = window.$store
+    await store.dispatch(action, payload)
+  }, { action, payload })
+}
+
+async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
+  const sources = await playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)').evaluateAll(images => images.map(image => image.src))
+  return sources.length > 0 && sources.every(source => source.includes(expectedUrlPart))
+}
+
+test.describe('playlist creation', () => {
+  test('a playlist can be created through the UI', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    await page.getByTitle('Create New Playlist').click()
+    const createDialog = page.getByRole('dialog')
+    await expect(createDialog).toBeVisible()
+    expect(await createDialog.getByRole('button', { name: 'Cancel', exact: true }).evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
+    await expect(createDialog.getByText('Quick bookmark icon')).toHaveCount(0)
+    await createDialog.locator('.playlistNameInput input').fill('Created via UI')
+    await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
+
+    await expect(page.getByRole('link', { name: 'Created via UI' })).toBeVisible()
+  })
+})
+
+test.describe('seeded playlists', () => {
+  test.use({
+    seed: {
+      settings: {
+        hideUpcomingPremieres: true,
+        quickBookmarkTargetPlaylistId: 'favorites',
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true
+      },
+      playlists: [
+        {
+          _id: 'favorites',
+          playlistName: 'Favorites',
+          protected: true,
+          description: 'Quick bookmark target',
+          videos: [],
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        },
+        {
+          _id: 'e2eseeded',
+          playlistName: 'My seeded playlist',
+          protected: false,
+          description: 'Playlist created by the E2E seed',
+          videos: [
+            {
+              videoId: 'ccccccccccc',
+              title: 'Seeded video one',
+              author: 'Test Channel',
+              authorId: 'UC-test-channel-id',
+              lengthSeconds: 120,
+              published: Date.now() - 86_400_000,
+              timeAdded: Date.now(),
+              playlistItemId: 'e2e-item-1',
+              type: 'video'
+            },
+            {
+              videoId: 'ddddddddddd',
+              title: 'Upcoming seeded premiere',
+              author: 'Test Channel',
+              authorId: 'UC-test-channel-id',
+              lengthSeconds: 120,
+              published: seededPremiereStart,
+              isUpcoming: true,
+              isPremiere: true,
+              premiereDate: new Date(seededPremiereStart).toISOString(),
+              timeAdded: Date.now(),
+              playlistItemId: 'e2e-item-2',
+              type: 'video'
+            }
+          ],
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        },
+        {
+          _id: 'secondary',
+          playlistName: 'Secondary preload playlist',
+          protected: false,
+          description: 'Playlist used to test switching during preloading',
+          videos: [
+            {
+              videoId: 'eeeeeeeeeee',
+              title: 'Secondary seeded video',
+              author: 'Test Channel',
+              authorId: 'UC-test-channel-id',
+              lengthSeconds: 120,
+              published: Date.now() - 86_400_000,
+              timeAdded: Date.now(),
+              playlistItemId: 'e2e-item-3',
+              type: 'video'
+            }
+          ],
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        }
+      ]
+    }
+  })
+
+  test('a seeded playlist with videos renders and opens', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await expect(page.getByText('My seeded playlist')).toBeVisible()
+
+    await page.getByText('My seeded playlist').click()
+    await expect(page).toHaveURL(/#\/playlist\//)
+    await expect(page.getByText('Seeded video one')).toBeVisible()
+    // Local playlists intentionally ignore the global hide-upcoming setting.
+    await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('updates a playlist card video count while the list remains open', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.locator('.ft-list-video', {
+      has: page.getByRole('link', { name: 'My seeded playlist', exact: true })
+    })
+    const thumbnail = playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')
+    const displayedVideoCounts = async () => {
+      const counts = await playlistCard.locator('.videoCountContainer').allTextContents()
+      return [...new Set(counts)]
+    }
+    await expect.poll(displayedVideoCounts).toEqual(['2'])
+    await expect(thumbnail).toHaveAttribute('src', /ccccccccccc/)
+
+    await dispatchStoreAction(page, 'removeAllVideos', 'e2eseeded')
+    await expect.poll(displayedVideoCounts).toEqual(['0'])
+    await expect(thumbnail).toHaveAttribute('src', /thumbnail_placeholder/)
+
+    await dispatchStoreAction(page, 'addVideo', {
+      _id: 'e2eseeded',
+      videoData: {
+        videoId: 'fffffffffff',
+        title: 'New playlist video',
+        playlistItemId: 'e2e-item-4',
+        type: 'video'
+      }
+    })
+    await expect.poll(displayedVideoCounts).toEqual(['1'])
+    await expect.poll(() => allThumbnailsInclude(playlistCard, 'fffffffffff')).toBe(true)
+
+    await dispatchStoreAction(page, 'removeVideo', {
+      _id: 'e2eseeded',
+      videoId: 'fffffffffff',
+      playlistItemId: 'e2e-item-4'
+    })
+    await expect.poll(displayedVideoCounts).toEqual(['0'])
+    await expect.poll(() => allThumbnailsInclude(playlistCard, 'thumbnail_placeholder')).toBe(true)
+  })
+
+  test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {
+    await dispatchStoreAction(page, 'updateYtDlpPreloadEnabled', true)
+    await dispatchStoreAction(page, 'updateYtDlpPreloadCount', 0)
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpPreloadVideoIds = []
+      globalThis.__ytDlpPreloadResolvers = []
+      const requestCounts = new Map()
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpPreloadVideoIds.push(videoId)
+        const requestCount = (requestCounts.get(videoId) ?? 0) + 1
+        requestCounts.set(videoId, requestCount)
+        if (requestCount === 1) {
+          return new Promise(resolve => globalThis.__ytDlpPreloadResolvers.push(resolve))
+        }
+        return { error: 'mock failure' }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc'])
+
+    await expect(await openPlaylistMenuItem(page, 'Preloading all videos...')).toBeDisabled()
+    await page.keyboard.press('Escape')
+
+    const progressToast = page.getByTestId('progress-toast')
+    await expect(progressToast).toContainText('Preloading videos: 0 of 2')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
+
+    await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
+    await expect(progressToast).toContainText('Preloading videos: 0 of 2')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
+
+    await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
+    await expect(page.getByText(
+      'Preloaded 0 of 2 videos. 2 could not be preloaded.'
+    )).toBeVisible()
+    await expect(progressToast).toHaveCount(0)
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
+  })
+
+  test('recovers full playlist metadata after repeated partial yt-dlp timeouts', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+    const executable = path.join(app.userDataDir, 'playlist-timeout-yt-dlp.sh')
+    const callsFile = path.join(app.userDataDir, 'playlist-timeout-calls.txt')
+    const metadata = height => ({
+      title: `Playlist video ${height}p`,
+      is_live: false,
+      live_status: 'not_live',
+      duration: 60,
+      manifest_url: `https://example.invalid/${height}.m3u8?expire=4102444800`,
+      formats: [{
+        protocol: 'm3u8_native',
+        url: `https://example.invalid/${height}.m3u8?expire=4102444800`,
+        height,
+      }],
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      'for arg do videoUrl="$arg"; done',
+      'case "$videoUrl" in *ccccccccccc)',
+      `count=$(cat '${callsFile}' 2>/dev/null || printf 0)`,
+      'count=$((count + 1))',
+      `printf '%s' "$count" > '${callsFile}'`,
+      'if [ "$count" -le 6 ]; then',
+      "printf '%s\\n' 'WARNING: [youtube] Unable to download web client API page: The read operation timed out' >&2",
+      `printf '%s\\n' '${JSON.stringify(metadata(360))}'`,
+      'exit; fi;; esac',
+      `printf '%s\\n' '${JSON.stringify(metadata(1080))}'`,
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.route('https://example.invalid/**', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n',
+    }))
+    await dispatchStoreAction(page, 'updateYtDlpSource', 'system')
+    await dispatchStoreAction(page, 'updateYtDlpPath', executable)
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 32)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    expect(Number(await readFile(callsFile, 'utf8'))).toBe(7)
+    const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
+    expect(entries).toHaveLength(2)
+    expect(entries.every(entry => entry.source.manifestSrc.includes('/1080.m3u8'))).toBe(true)
+  })
+
+  test('retries timed-out stream format probes before completing a playlist preload', async ({ app, page, attachScreenshot }) => {
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpProbeExtractions = []
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpProbeExtractions.push(videoId)
+        return {
+          isLive: false,
+          liveStatus: 'not_live',
+          hlsManifestUrl: null,
+          duration: 60,
+          storyboardVtt: null,
+          captions: [],
+          captionTranslations: [],
+          title: videoId,
+          version: 'test',
+          incomplete: false,
+          formats: [
+            { formatId: '18', width: 640, height: 360, vcodec: 'avc1.42001E', acodec: 'mp4a.40.2' },
+            { formatId: '137', width: 1920, height: 1080, vcodec: 'avc1.640028', acodec: 'none' },
+            { formatId: '140', width: null, height: null, vcodec: 'none', acodec: 'mp4a.40.2' },
+          ].map(format => ({
+            ...format,
+            protocol: 'https',
+            ext: 'mp4',
+            url: `https://playlist-probe.test/${videoId}/${format.formatId}?expire=4102444800`,
+            fps: 30,
+            bitrate: 100_000,
+            audioSampleRate: 44_100,
+            audioChannels: 2,
+            language: null,
+            dynamicRange: 'SDR',
+            availableAt: null,
+          })),
+        }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+    await page.route('https://playlist-probe.test/**', route => route.fulfill({
+      contentType: 'video/mp4',
+      // Minimal moov and sidx boxes provide the DASH initialization and index ranges.
+      body: Buffer.from('000000086d6f6f760000000873696478', 'hex'),
+    }))
+    await page.evaluate(() => {
+      const originalFetch = window.fetch
+      let attempts = 0
+      window.fetch = (input, options) => {
+        if (String(input).includes('playlist-probe.test/ccccccccccc/137?') && ++attempts <= 3) {
+          return Promise.reject(new DOMException('signal timed out', 'TimeoutError'))
+        }
+        return originalFetch(input, options)
+      }
+    })
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpProbeExtractions)).toEqual([
+      'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ddddddddddd', 'ccccccccccc',
+    ])
+    await expect(async () => {
+      const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
+      expect(entries).toHaveLength(2)
+      expect(entries.every(entry => !entry.source.incomplete && decodeURIComponent(entry.source.manifestSrc).includes('height="1080"'))).toBe(true)
+    }).toPass({ timeout: 15_000 })
+    await attachScreenshot('Playlist preload recovered all formats')
+  })
+
+  test('keeps a successfully preloaded playlist disabled', async ({ app, page }) => {
+    await routeDemoMedia(page)
+    await app.electronApp.evaluate(({ ipcMain }, { channel, mediaUrl }) => {
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => ({
+        isLive: false,
+        liveStatus: 'not_live',
+        hlsManifestUrl: null,
+        formats: [{
+          formatId: '43',
+          url: `${mediaUrl}&expire=4102444800`,
+          manifestUrl: null,
+          protocol: 'https',
+          ext: 'webm',
+          container: 'webm',
+          vcodec: 'vp9',
+          acodec: 'opus',
+          width: 640,
+          height: 360,
+          fps: 15,
+          bitrate: 200_000,
+          audioSampleRate: 48_000,
+          audioChannels: 2,
+          language: null,
+          formatNote: '360p',
+          dynamicRange: 'SDR',
+          availableAt: null,
+        }],
+        duration: 30,
+        storyboardVtt: null,
+        captions: [],
+        captionTranslations: [],
+        title: videoId,
+        version: 'test',
+      }))
+    }, {
+      channel: IpcChannels.YT_DLP_GET_PLAYBACK_INFO,
+      mediaUrl: DEMO_MEDIA_URL,
+    })
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    await page.keyboard.press('Escape')
+
+    await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
+      BrowserWindow.getAllWindows()[0].webContents.send(channel)
+    }, IpcChannels.YT_DLP_BINARY_UPDATED)
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
+  })
+
+  test('releases stale preload UI when switching playlists', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpPreloadVideoIds = []
+      globalThis.__ytDlpPreloadResolvers = []
+      const requestCounts = new Map()
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpPreloadVideoIds.push(videoId)
+        const requestCount = (requestCounts.get(videoId) ?? 0) + 1
+        requestCounts.set(videoId, requestCount)
+        if (requestCount === 1) {
+          return new Promise(resolve => globalThis.__ytDlpPreloadResolvers.push({ videoId, resolve }))
+        }
+        return { error: 'mock failure' }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd'])
+
+    await page.locator(sel.searchInput).fill(
+      'https://www.youtube.com/playlist?list=secondary&playlistType=user'
+    )
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByRole('heading', { name: 'Secondary preload playlist' })).toBeVisible()
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+
+    const secondaryPreloadButton = await openPlaylistMenuItem(page, 'Preload all videos')
+    await expect(secondaryPreloadButton).toBeEnabled()
+    await secondaryPreloadButton.click()
+    await expect(page.getByTestId('progress-toast')).toContainText('Preloading videos: 0 of 1')
+
+    await app.electronApp.evaluate(() => {
+      for (const entry of globalThis.__ytDlpPreloadResolvers.splice(0)) {
+        entry.resolve({ error: 'mock failure' })
+      }
+    })
+    await expect.poll(() => app.electronApp.evaluate(
+      () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
+    )).toEqual(['ccccccccccc', 'ddddddddddd', 'eeeeeeeeeee'])
+
+    await app.electronApp.evaluate(() => {
+      for (const entry of globalThis.__ytDlpPreloadResolvers.splice(0)) {
+        entry.resolve({ error: 'mock failure' })
+      }
+    })
+    await expect(page.getByText(
+      'Preloaded 0 of 1 videos. 1 could not be preloaded.'
+    )).toBeVisible()
+    await expect(page.getByTestId('progress-toast')).toHaveCount(0)
+  })
+
+  test('keeps normal title styling when a premiere reaches its scheduled time', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.clock.install({ time: seededPremiereStart - 86_400_000 })
+    await page.getByText('My seeded playlist').click()
+
+    const card = page.locator('.ft-list-video').filter({ hasText: 'Upcoming seeded premiere' })
+    const title = card.getByText('Upcoming seeded premiere', { exact: true })
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--primary-text-color', '#123456')
+      element.style.setProperty('--tertiary-text-color', '#654321')
+    })
+    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
+
+    await page.clock.fastForward(86_400_001)
+
+    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
+  })
+
+  test('playlist artwork crops square images into a 16:9 frame', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+
+    const thumbnail = page.locator('.playlistThumbnail img:not(.retryImagePlaceholder)')
+    await page.addStyleTag({ content: '.playlistThumbnail { display: block !important; }' })
+    await thumbnail.evaluate(async (image) => {
+      image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"/>'
+      await image.decode()
+    })
+    await expect(thumbnail).toBeVisible()
+    await expect(thumbnail).toHaveJSProperty('naturalWidth', 120)
+    await expect(thumbnail).toHaveJSProperty('naturalHeight', 120)
+    await expect(thumbnail).toHaveCSS('object-fit', 'cover')
+
+    const bounds = await thumbnail.boundingBox()
+    expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
+  })
+
+  test('keeps the playlist title when switching tabs', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await expect(page.locator(sel.activeTab)).toContainText('My seeded playlist')
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    // Wait for the new tab to settle on its landing page before switching back.
+    // Clicking while its title is still resolving races the tab bar re-render,
+    // and the switch can be lost on a loaded machine.
+    await expect(page.locator(sel.activeTab)).toContainText('Subscriptions')
+    await expect(page.locator(sel.activeTab)).not.toContainText('My seeded playlist')
+    await page.locator(sel.tabs).filter({ hasText: 'My seeded playlist' }).click()
+
+    await expect(page.locator(sel.activeTab)).toContainText('My seeded playlist')
+  })
+
+  test('playlist edits and deletion persist across restarts', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+
+    await page.getByTitle('Edit Playlist Info').click()
+    await page.getByRole('textbox', { name: 'Playlist name' }).fill('Renamed seeded playlist')
+    await page.locator('.descriptionInput input').fill('Updated through E2E')
+    await page.getByRole('button', { name: 'Save Changes' }).click()
+
+    await expect(page.locator('.playlistTitle')).toHaveText('Renamed seeded playlist')
+    await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Renamed seeded playlist').click()
+    await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
+
+    await (await openPlaylistMenuItem(page, 'Delete Playlist')).click()
+    await page.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page).toHaveURL(/#\/userplaylists\/?$/)
+    await expect(page.locator(sel.activeTab).locator('[data-icon="bookmark"]')).toBeVisible()
+    await expect(page.getByText('Renamed seeded playlist')).toHaveCount(0)
+
+    await expect.poll(async () => {
+      const contents = readDatastore(app.userDataDir, 'playlists')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => record._id === 'e2eseeded')
+    }).toBe(false)
+  })
+
+  test('a custom quick bookmark emoji persists across restarts', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Favorites').click()
+
+    await page.getByTitle('Edit Playlist Info').click()
+    expect((await page.getByLabel('Custom emoji').boundingBox()).width).toBeLessThanOrEqual(64)
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCSS('filter', 'grayscale(1)')
+    await page.getByLabel('Custom emoji').fill('❤️‍🔥')
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Save Changes' }).click()
+
+    const quickBookmarkItem = await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')
+    await expect(quickBookmarkItem.locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Favorites').click()
+    await expect((await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')).locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+  })
+})
+
+test.describe('playlist cleanup', () => {
+  const video = (videoId, playlistItemId) => ({
+    videoId,
+    playlistItemId,
+    title: videoId,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    lengthSeconds: 60,
+    type: 'video',
+    timeAdded: Date.now(),
+  })
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        defaultInvidiousInstance: 'https://playlist-cleanup.test',
+      },
+      playlists: [{
+        _id: 'cleanup',
+        playlistName: 'Cleanup test',
+        description: '',
+        sourcePlaylistId: 'source-playlist',
+        quickBookmarkIcon: 'clock',
+        protected: false,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now(),
+        videos: [
+          video('dead0000000', 'dead-1'), video('live0000000', 'live-1'),
+          video('dead0000000', 'dead-2'), video('unknown00000', 'unknown-1'),
+        ],
+      }],
+      history: [{
+        _id: 'live0000000',
+        videoId: 'live0000000',
+        title: 'Watched video',
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        isWatched: true,
+        watchProgress: 60,
+        lengthSeconds: 60,
+        timeWatched: Date.now(),
+        type: 'video',
+      }],
+    }
+  })
+
+  test('removes confirmed unavailable entries, then watched entries, without changing history', async ({ page }) => {
+    await page.route('https://playlist-cleanup.test/api/v1/videos/**', route => {
+      const id = new URL(route.request().url()).pathname.split('/').at(-1)
+      if (id === 'dead0000000') return route.fulfill({ status: 404, json: { error: 'This video has been removed' } })
+      if (id === 'unknown00000') return route.fulfill({ status: 503, json: { error: 'Instance unavailable' } })
+      return route.fulfill({ json: { videoId: id } })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('Found: 2')
+    await expect(dialog).toContainText('Could not check: 1')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page.getByText('dead0000000')).toHaveCount(0)
+
+    await (await openPlaylistMenuItem(page, 'Remove Watched Videos')).click()
+    await expect(dialog).toContainText('remove 1 watched video')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page.getByText('live0000000')).toHaveCount(0)
+    const state = await page.evaluate(() => {
+      const store = window.$store
+      return {
+        ids: store.getters.getPlaylist('cleanup').videos.map(video => video.videoId),
+        watched: store.getters.getHistoryCacheById.live0000000?.isWatched,
+        sourcePlaylistId: store.getters.getPlaylist('cleanup').sourcePlaylistId,
+        quickBookmarkIcon: store.getters.getPlaylist('cleanup').quickBookmarkIcon,
+      }
+    })
+    expect(state).toEqual({
+      ids: ['unknown00000'],
+      watched: true,
+      sourcePlaylistId: 'source-playlist',
+      quickBookmarkIcon: 'clock',
+    })
+  })
+
+  test('checks private videos with the Local API and keeps videos whose check fails', async ({ page }) => {
+    await page.route('**/youtubei/v1/player*', route => {
+      const id = JSON.parse(route.request().postData()).videoId
+      if (id === 'dead0000000') return route.fulfill({ json: { playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Private video' } } })
+      if (id === 'unknown00000') return route.fulfill({ status: 503, body: 'Service unavailable' })
+      return route.fulfill({ json: { videoDetails: { videoId: id }, playabilityStatus: { status: 'OK' } } })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+    await dispatchStoreAction(page, 'updateBackendPreference', 'local')
+
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('Found: 2')
+    await expect(dialog).toContainText('Could not check: 1')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId)))
+      .toEqual(['live0000000', 'unknown00000'])
+  })
+})
+
+test.describe('saved playlist metadata', () => {
+  test.use({
+    seed: {
+      settings: {
+        playlistBookmarks: [{
+          playlist: {
+            id: 'saved-playlist',
+            title: 'Saved playlist',
+            description: '',
+            thumbnail_url: 'https://i.ytimg.com/vi/ggggggggggg/mqdefault.jpg',
+            video_count: 4
+          },
+          uploader: {
+            id: 'UC-saved-playlist',
+            name: 'Saved channel',
+            avatar: null,
+            verified: false
+          },
+          savedAt: 1
+        }]
+      }
+    }
+  })
+
+  test('updates saved playlist card metadata while the list remains open', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.locator('.ft-list-video', {
+      has: page.locator('a.title[href*="/playlist/saved-playlist"]')
+    })
+    await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist')
+    await expect(playlistCard.locator('.channelNameText')).toHaveText('Saved channel')
+    await expect(playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', /ggggggggggg/)
+    await expect(playlistCard.locator('.videoCountContainer')).toHaveText('4')
+
+    await dispatchStoreAction(page, 'savePlaylistBookmark', {
+      playlist: {
+        id: 'saved-playlist',
+        title: 'Saved playlist updated',
+        description: 'Updated metadata',
+        thumbnail_url: 'https://i.ytimg.com/vi/hhhhhhhhhhh/mqdefault.jpg',
+        video_count: 5
+      },
+      uploader: {
+        id: 'UC-updated-saved-playlist',
+        name: 'Updated saved channel',
+        avatar: null,
+        verified: false
+      },
+      savedAt: 1
+    })
+
+    await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist updated')
+    await expect(playlistCard.locator('.channelNameText')).toHaveText('Updated saved channel')
+    await expect(playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', /hhhhhhhhhhh/)
+    await expect(playlistCard.locator('.videoCountContainer')).toHaveText('5')
+    await expect(playlistCard.locator('.channelName')).toHaveAttribute('href', '#/channel/UC-updated-saved-playlist')
+  })
+})
+
+test.describe('playlist view type', () => {
+  test.use({
+    seed: {
+      settings: {
+        listType: 'list'
+      },
+      playlists: [{
+        _id: 'playlist-view-type',
+        playlistName: 'Playlist view type',
+        protected: false,
+        description: '',
+        videos: [{
+          videoId: 'eeeeeeeeeee',
+          title: 'Playlist view video',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          lengthSeconds: 120,
+          published: Date.now() - 86_400_000,
+          timeAdded: Date.now(),
+          playlistItemId: 'playlist-view-item',
+          type: 'video'
+        }],
+        createdAt: Date.now() - 86_400_000,
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('defaults to grid independently and persists list view', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Playlist view type').click()
+    await expect(page.locator('.playlistPage')).toHaveClass(/grid/)
+
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const playlistViewSetting = appearance.locator('.select').filter({
+      has: page.getByRole('combobox', { name: 'Playlist View Type' })
+    })
+    const playlistViewSelect = playlistViewSetting.locator('select')
+    await expect(playlistViewSelect).toHaveValue('grid')
+    await playlistViewSelect.selectOption('list')
+    await page.locator('.settingsCloseButton').click()
+
+    await expect(page.locator('.playlistPage')).toHaveClass(/list/)
+    await expect(page.locator('.playlistItems')).toBeVisible()
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Playlist view type').click()
+    await expect(page.locator('.playlistPage')).toHaveClass(/list/)
+  })
+})
+
+test.describe('custom playlists overview order', () => {
+  const seededPlaylist = (name, ageDays) => ({
+    _id: `custom-overview-${name.toLowerCase()}`,
+    playlistName: `Overview ${name}`,
+    protected: false,
+    description: '',
+    videos: [],
+    createdAt: Date.now() - ageDays * 86_400_000,
+    lastUpdatedAt: Date.now()
+  })
+
+  test.use({
+    seed: {
+      settings: { userPlaylistsSortBy: 'custom' },
+      playlists: [seededPlaylist('A', 3), seededPlaylist('B', 2), seededPlaylist('C', 1)]
+    }
+  })
+
+  for (const layout of ['grid', 'list']) {
+    test(`reorders ${layout} playlists by keyboard and drag and drop @scale`, async ({ app, page }) => {
+      await dispatchStoreAction(page, 'updateListType', layout)
+      await goTo(page, 'userplaylists')
+
+      const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+      const handleOf = name => page.locator('.playlistList [data-playlist-drag-item]')
+        .filter({ hasText: `Overview ${name}` })
+        .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+      // Playlists without a saved position start newest first.
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+      await handleOf('C').focus()
+      await page.keyboard.press('ArrowDown')
+      await expect(titles).toHaveText(['Overview B', 'Overview C', 'Overview A'])
+      await expect(handleOf('C')).toBeFocused()
+      await page.keyboard.press('End')
+      await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+      await expect(handleOf('C')).toBeFocused()
+      await page.keyboard.press('Home')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      await page.keyboard.press('ArrowUp')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      // Repeated keys build on the unsaved order instead of repeating the first move.
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+        .toEqual(['custom-overview-b', 'custom-overview-a', 'custom-overview-c'])
+      await page.keyboard.press('Home')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+      // DOM order updates before the cards finish gliding to their new positions.
+      await expect.poll(() => page.locator('.playlistList').evaluate(list =>
+        list.getAnimations({ subtree: true }).filter(animation => animation.playState === 'running' || animation.pending).length
+      )).toBe(0)
+      await handleOf('A').dragTo(handleOf('C'))
+      await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+        .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
+
+      // Reordering is unavailable while the list is filtered.
+      await page.locator('.playlistSearch input').fill('Overview')
+      await expect(page.locator('.playlistList .grabBar')).toHaveCount(0)
+      await page.locator('.playlistSearch input').fill('')
+      await expect(page.locator('.playlistList .grabBar')).toHaveCount(3)
+
+      ;({ page } = await app.relaunch())
+      await goTo(page, 'userplaylists')
+      await expect(page.locator('.playlistList [data-playlist-drag-item] .h3Title'))
+        .toHaveText(['Overview A', 'Overview C', 'Overview B'])
+    })
+  }
+
+  test('keeps a drag move when the cursor enters the gliding target again', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+    await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+    // After A takes C's place, C glides away beneath the cursor and fires
+    // dragenter again once the move throttle has passed.
+    await page.evaluate(async () => {
+      const card = name => [...document.querySelectorAll('.playlistList [data-playlist-drag-item]')]
+        .find(element => element.textContent.includes(`Overview ${name}`))
+      const dataTransfer = new DataTransfer()
+      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
+      const source = card('A')
+      fire(source, 'dragstart')
+      // The cards receive the dragged playlist on the next render.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      fire(card('C'), 'dragenter')
+      await new Promise(resolve => setTimeout(resolve, 150))
+      fire(card('C').querySelector('.h3Title'), 'dragenter')
+      fire(source, 'dragend')
+    })
+
+    await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+      .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
+  })
+
+  test('pins playlists to the side navigation in the overview order', async ({ app, page }) => {
+    const pinned = page.locator('.sideNav .pinnedPlaylists .navChannel')
+    const pinnedTitles = () => pinned.evaluateAll(links => links.map(link => link.title))
+    async function togglePin(name, action) {
+      await goTo(page, 'userplaylists')
+      await page.getByRole('link', { name: `Overview ${name}` }).first().click()
+      await (await openPlaylistMenuItem(page, action)).click()
+      await expect(await openPlaylistMenuItem(page, action === 'Pin to Navigation' ? 'Unpin from Navigation' : 'Pin to Navigation')).toBeVisible()
+      await page.keyboard.press('Escape')
+    }
+
+    await expect(pinned).toHaveCount(0)
+    await togglePin('A', 'Pin to Navigation')
+    await togglePin('B', 'Pin to Navigation')
+    // Playlists without a saved position start newest first.
+    await expect.poll(pinnedTitles).toEqual(['Overview B', 'Overview A'])
+
+    await goTo(page, 'userplaylists')
+    await page.locator('.playlistList [data-playlist-drag-item]')
+      .filter({ hasText: 'Overview A' })
+      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+      .focus()
+    await page.keyboard.press('Home')
+    await expect.poll(pinnedTitles).toEqual(['Overview A', 'Overview B'])
+
+    await goTo(page, 'history')
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]').click()
+    await expect(page).toHaveURL(/#\/playlist\/custom-overview-b\?playlistType=user/)
+    await expect(page.locator('.playlistInfo')).toContainText('Overview B')
+
+    await togglePin('A', 'Unpin from Navigation')
+    await expect.poll(pinnedTitles).toEqual(['Overview B'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-b'])
+
+    ;({ page } = await app.relaunch())
+    await expect.poll(() => page.locator('.sideNav .pinnedPlaylists .navChannel').evaluateAll(links => links.map(link => link.title)))
+      .toEqual(['Overview B'])
+
+    // Quick successive pins build on each other before the first save finishes.
+    expect(await page.evaluate(async () => {
+      const store = window.$store
+      const pin = id => store.dispatch('updatePinnedPlaylistIds', [...store.getters.getPinnedPlaylistIds, id])
+      await Promise.all([pin('custom-overview-c'), pin('custom-overview-a')])
+      return store.getters.getPinnedPlaylistIds
+    })).toEqual(['custom-overview-b', 'custom-overview-c', 'custom-overview-a'])
+
+    // Deleting a pinned playlist also removes it from the synced setting.
+    await dispatchStoreAction(page, 'removePlaylist', 'custom-overview-b')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-c', 'custom-overview-a'])
+    await expect(page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]')).toHaveCount(0)
+  })
+})
+
+test.describe('switching between pinned playlists', () => {
+  const pinnedPlaylist = (name, titles) => ({
+    _id: `pinned-${name.toLowerCase()}`,
+    playlistName: `Pinned ${name}`,
+    protected: false,
+    description: '',
+    videos: titles.map((title, index) => ({
+      videoId: `pinned${name}${index}`.padEnd(11, '0'),
+      title,
+      author: 'Test Channel',
+      authorId: 'UC-test-channel-id',
+      lengthSeconds: 120,
+      timeAdded: Date.now() - index,
+      playlistItemId: `pinned-${name}-${index}`,
+      type: 'video'
+    })),
+    createdAt: Date.now(),
+    lastUpdatedAt: Date.now()
+  })
+
+  test.use({
+    seed: {
+      settings: { pinnedPlaylistIds: ['pinned-a', 'pinned-b'] },
+      playlists: [pinnedPlaylist('A', ['Linux news', 'Cooking show']), pinnedPlaylist('B', ['Garden tour', 'Bike repair'])]
+    }
+  })
+
+  test('a search typed on one playlist does not filter the next one', async ({ page }) => {
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Pinned A"]').click()
+    const search = page.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await search.fill('linux')
+    await expect(page).toHaveURL(/searchQueryText=linux/)
+    await expect(page.getByText('Cooking show')).toHaveCount(0)
+
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Pinned B"]').click()
+    await expect(page.locator('.playlistInfo')).toContainText('Pinned B')
+    await expect(search).toHaveValue('')
+    await expect(page.getByText('Garden tour')).toBeVisible()
+    await expect(page.getByText('Bike repair')).toBeVisible()
+  })
+})
+
+test.describe('custom playlist order', () => {
+  test.use({
+    seed: {
+      settings: {
+        listType: 'grid',
+        userPlaylistSortOrder: 'custom'
+      },
+      playlists: [
+        {
+          _id: 'large-custom-playlist',
+          playlistName: 'Large custom playlist',
+          protected: false,
+          description: '',
+          videos: Array.from({ length: 101 }, (_, index) => ({
+            videoId: String(index).padStart(11, '0'),
+            title: `Custom playlist video ${index + 1}`,
+            author: 'Test Channel',
+            authorId: 'UC-test-channel-id',
+            lengthSeconds: 120,
+            published: Date.now() - 86_400_000,
+            timeAdded: Date.now() - index,
+            playlistItemId: `custom-playlist-item-${index}`,
+            type: 'video'
+          })),
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        }
+      ]
+    }
+  })
+
+  for (const layout of ['list', 'grid']) {
+    test(`touch reorders ${layout} playlists without hiding the row`, { tag: '@scale' }, async ({ page, uiScale }) => {
+      await page.setViewportSize({ width: layout === 'grid' ? 900 : 430, height: 1000 })
+      await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+
+      const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+      const grip = rows.first().locator('.grabBar')
+      await expect(grip).toBeVisible()
+      const from = await grip.boundingBox()
+      const to = await rows.nth(1).boundingBox()
+      const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: x == null ? [] : [{ x, y, id: 0 }]
+      })
+      await touch('touchStart', from.x + from.width / 2, from.y + from.height / 2)
+      await expect(rows.first()).toHaveClass(/pointerDragging/)
+      await expect(rows.first()).toHaveCSS('opacity', '0.6')
+      // Outlast the long-press delay to prove the drag does not open the link actions sheet.
+      await page.waitForTimeout(600)
+      await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
+      await touch('touchMove', to.x + to.width / 2, to.y + to.height / 2)
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+      await touch('touchEnd')
+      await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => {
+        return window.$store
+          .getters.getPlaylist('large-custom-playlist').videos[0].title
+      })).toBe('Custom playlist video 2')
+
+      // Cancelling a subsequent gesture releases capture and leaves reordering usable.
+      const next = await rows.first().locator('.grabBar').boundingBox()
+      await touch('touchStart', next.x + next.width / 2, next.y + next.height / 2)
+      await touch('touchCancel')
+      await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+      if (layout === 'list' && uiScale === 100) {
+        const handle = await rows.first().locator('.grabBar').boundingBox()
+        const initialScroll = await page.evaluate(() => window.scrollY)
+        await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
+        await touch('touchMove', handle.x + handle.width / 2, 990)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll + 100)
+        await expect.poll(() => rows.evaluateAll(elements => elements.findIndex(element => element.classList.contains('pointerDragging')))).toBeGreaterThan(2)
+        await touch('touchCancel')
+        await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+        const stoppedScroll = await page.evaluate(() => window.scrollY)
+        await page.waitForTimeout(150)
+        expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
+      }
+    })
+  }
+
+  for (const layout of ['list', 'grid']) {
+    test(`keyboard reorders ${layout} playlists and keeps the handle focused`, async ({ page }) => {
+      await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+
+      const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
+      const handle = page.getByRole('button', { name: 'Drag or use the arrow keys to reorder' }).first()
+      const storedTitle = index => page.evaluate(index => {
+        return window.$store.getters.getPlaylist('large-custom-playlist').videos.at(index).title
+      }, index)
+      await handle.focus()
+
+      await page.keyboard.press('ArrowDown')
+      await expect(titles.first()).toHaveText('Custom playlist video 2')
+      await expect.poll(() => storedTitle(1)).toBe('Custom playlist video 1')
+      await expect(page.locator(':focus')).toHaveAccessibleName('Drag or use the arrow keys to reorder')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 1')
+
+      await page.keyboard.press('ArrowUp')
+      await expect(titles.first()).toHaveText('Custom playlist video 1')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 1')
+
+      await page.locator('.playlistItemsCard [data-playlist-drag-item]')
+        .filter({ has: page.getByText('Custom playlist video 3', { exact: true }) })
+        .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+        .focus()
+      await page.keyboard.press('Home')
+      await expect(titles.first()).toHaveText('Custom playlist video 3')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 3')
+
+      // The bottom is beyond the first page, so only the saved order is observable.
+      await page.keyboard.press('End')
+      await expect.poll(() => storedTitle(-1)).toBe('Custom playlist video 3')
+    })
+  }
+
+  test('a drag keeps a video added to the playlist during the drag', async ({ app, page }) => {
+    await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+    const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
+    await expect(titles.first()).toHaveText('Custom playlist video 1')
+
+    await page.evaluate(async () => {
+      const row = index => document.querySelectorAll('.playlistItemsCard [data-playlist-drag-item]')[index]
+      const dataTransfer = new DataTransfer()
+      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
+      const source = row(0)
+      fire(source, 'dragstart')
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      fire(row(1), 'dragenter')
+      // Another window adds a video while the drag is still in progress
+      await window.$store.dispatch('addVideo', {
+        _id: 'large-custom-playlist',
+        videoData: { videoId: 'addedduring', title: 'Added during the drag', author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60 }
+      })
+      fire(source, 'dragend')
+    })
+
+    await expect(titles.first()).toHaveText('Custom playlist video 2')
+    const expected = ['Custom playlist video 2', 'Custom playlist video 1', 'Custom playlist video 3']
+    await expect.poll(() => page.evaluate(() => {
+      const { videos } = window.$store.getters.getPlaylist('large-custom-playlist')
+      return [videos.length, ...videos.slice(0, 3).map(video => video.title), videos.at(-1).title]
+    })).toEqual([102, ...expected, 'Added during the drag'])
+    await expect.poll(async () => {
+      const { videos } = readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
+        .find(playlist => playlist._id === 'large-custom-playlist')
+      return [videos.length, ...videos.slice(0, 3).map(video => video.title), videos.at(-1).title]
+    }).toEqual([102, ...expected, 'Added during the drag'])
+  })
+
+  test('touch honors a fast final destination before release', async ({ page }) => {
+    await page.setViewportSize({ width: 430, height: 1000 })
+    await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+    const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    const from = await rows.first().locator('.grabBar').boundingBox()
+    const second = await rows.nth(1).boundingBox()
+    const third = await rows.nth(2).boundingBox()
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: point ? [{ x: point.x + point.width / 2, y: point.y + point.height / 2, id: 0 }] : []
+    })
+    await touch('touchStart', from)
+    await touch('touchMove', second)
+    await touch('touchMove', third)
+    await touch('touchEnd')
+    await expect(rows.nth(2).locator('.h3Title')).toHaveText('Custom playlist video 1')
+    await expect.poll(() => page.evaluate(() => window.$store
+      .getters.getPlaylist('large-custom-playlist').videos[2].title)).toBe('Custom playlist video 1')
+  })
+
+  test('keeps the grid grab bars in place during the removal undo period', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const secondVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 2', { exact: true })
+    })
+    await expect(secondVideo.locator('.grabBar')).toBeVisible()
+    await secondVideo.getByTitle('Remove from Playlist').click()
+
+    await expect(secondVideo).toHaveCount(0)
+    await expect(page.locator('.playlistItemsCard .grid.draggable .grabBar').first()).toBeVisible()
+
+    const thirdVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 3', { exact: true })
+    })
+    await thirdVideo.getByTitle('Move Video Up').click()
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+  })
+
+  test('keeps the playlist header below the navigation while scrolling the grid', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const expectHeaderBelowNavigation = async () => {
+      const playlistHeader = page.locator('.playlistInfoContainer')
+      await expect(playlistHeader).toBeVisible()
+      await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+      await expect.poll(async () => page.evaluate(() => {
+        const previousScrollY = window.scrollY
+        window.scrollTo(0, Number.MAX_SAFE_INTEGER)
+        return window.scrollY - previousScrollY
+      })).toBe(0)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+
+      await expect.poll(async () => {
+        const [header, navigation, viewportHeight] = await Promise.all([
+          playlistHeader.boundingBox(),
+          page.locator('.topNav').boundingBox(),
+          page.evaluate(() => window.innerHeight)
+        ])
+        return header != null && navigation != null &&
+          header.y >= navigation.y + navigation.height &&
+          header.y < viewportHeight && header.y + header.height > 0
+      }).toBe(true)
+    }
+
+    await expectHeaderBelowNavigation()
+
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await expectHeaderBelowNavigation()
+  })
+
+  for (const position of ['top', 'bottom']) {
+    test(`list playlist header clears overflowing ${position} tabs`, { tag: '@scale' }, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1350, height: 750 })
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+      await page.evaluate(async (position) => {
+        const store = window.$store
+        store.commit('setPlaylistViewType', 'list')
+        store.commit('setTabBarPosition', position)
+        store.commit('setScrollbarThumbWidth', 20)
+        for (let index = 0; index < 18; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+        }
+      }, position)
+      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+      await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+      const header = page.locator('.playlistInfoContainer')
+      await expect.poll(() => header.evaluate((element, position) => {
+        const box = element.getBoundingClientRect()
+        const navigation = document.querySelector('.topNav').getBoundingClientRect()
+        const boundary = position === 'bottom' ? document.querySelector('.tabBar').getBoundingClientRect().top : innerHeight
+        return {
+          belowNavigation: box.top >= navigation.bottom - 1,
+          clearOfBottom: box.bottom <= boundary - 35
+        }
+      }, position)).toEqual({ belowNavigation: true, clearOfBottom: true })
+    })
+  }
+
+  test('moves a video to the top from its options menu', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const thirdVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 3', { exact: true })
+    })
+    await thirdVideo.locator('.title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Move Video to the Top' }).click()
+
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+  })
+})

@@ -1,37 +1,79 @@
 <template>
   <FtPrompt
     theme="flex-column"
+    fixed-layout
     :label="title"
     :inert="showingCreatePlaylistPrompt"
     @click="hide"
   >
-    <p class="selected-count">
-      {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
-        playlistCount: selectedPlaylistCount,
-      }, selectedPlaylistCount) }}
-    </p>
-    <template
-      v-if="allPlaylists.length > 1"
-    >
+    <template #label="{ labelId }">
+      <h2
+        :id="labelId"
+        class="playlistPromptHeading"
+      >
+        {{ title }}
+      </h2>
+      <ul class="videoSummary">
+        <li
+          v-for="(video, index) in previewVideos"
+          :key="index"
+          class="videoSummaryItem"
+        >
+          <img
+            v-if="video.thumbnail"
+            :src="video.thumbnail"
+            class="videoSummaryThumbnail"
+            alt=""
+          >
+          <div class="videoSummaryText">
+            <span class="videoSummaryTitle">{{ video.title }}</span>
+            <span
+              v-if="video.author"
+              class="videoSummaryAuthor"
+            >{{ video.author }}</span>
+          </div>
+        </li>
+        <li
+          v-if="hiddenVideoCount > 0"
+          class="videoSummaryMore"
+        >
+          {{ t('User Playlists.AddVideoPrompt.And N more videos', { count: hiddenVideoCount }, hiddenVideoCount) }}
+        </li>
+      </ul>
+      <p class="selected-count">
+        {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
+          playlistCount: selectedPlaylistCount,
+        }, selectedPlaylistCount) }}
+      </p>
       <div
-        class="searchInputsRow"
+        v-if="allPlaylists.length > 1"
+        class="controlsRow"
       >
         <FtInput
           ref="searchBar"
-          :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-          :show-clear-text-button="true"
+          class="searchInput"
+          input-type="search"
+          :label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
+          :icon="['fas', 'search']"
+          :placeholder="t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :maxlength="255"
           @input="updateQueryDebounce"
-          @clear="updateQueryDebounce('')"
+        />
+        <div
+          :id="optionsTargetId"
+          class="optionsTarget"
         />
       </div>
-      <div
-        class="optionsRow"
-      >
-        <div
-          class="tightOptions"
-        >
+    </template>
+    <Teleport
+      v-if="allPlaylists.length > 1"
+      defer
+      :to="`#${optionsTargetId}`"
+      :disabled="phoneLayout"
+    >
+      <div class="optionsRow">
+        <div class="optionToggles">
           <FtToggleSwitch
             class="matchingVideoToggle"
             :label="t('User Playlists.Playlists with Matching Videos')"
@@ -58,8 +100,10 @@
           @change="sortBy = $event"
         />
       </div>
-    </template>
-    <div class="playlists-container">
+    </Teleport>
+    <div
+      class="playlists-container"
+    >
       <FtFlexBox>
         <div
           v-for="playlist in activePlaylists"
@@ -81,31 +125,39 @@
         </div>
       </FtFlexBox>
     </div>
-    <div class="actions-container">
-      <FtFlexBox>
-        <FtButton
-          :label="t('User Playlists.Create New Playlist')"
-          @click="openCreatePlaylistPrompt"
-        />
-        <FtButton
-          :label="t('User Playlists.AddVideoPrompt.Save')"
-          @click="addSelectedToPlaylists"
-        />
-        <FtButton
-          :label="t('User Playlists.Cancel')"
-          :text-color="null"
-          :background-color="null"
-          @click="hide"
-        />
-      </FtFlexBox>
-    </div>
+    <template #footer>
+      <div class="actions-container">
+        <FtButtonGroup>
+          <FtButton
+            :label="t('User Playlists.Create New Playlist')"
+            :icon="['fas', 'playlist-add']"
+            @click="openCreatePlaylistPrompt"
+          />
+          <FtButton
+            theme="primary"
+            :label="t('User Playlists.AddVideoPrompt.Save')"
+            :icon="['fas', 'floppy-disk']"
+            :disabled="saving"
+            @click="addSelectedToPlaylists"
+          />
+          <FtButton
+            :label="t('User Playlists.Cancel')"
+            :icon="['fas', 'xmark']"
+            :text-color="null"
+            :background-color="null"
+            @click="hide"
+          />
+        </FtButtonGroup>
+      </div>
+    </template>
   </FtPrompt>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -115,15 +167,21 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import {
   debounce,
   showToast,
   ctrlFHandler,
-  getIconForSortPreference
+  getIconForSortPreference,
+  getVideoThumbnailUrl
 } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
+
+// Phones keep the playlist options in the scrolling content and preview fewer videos, so the fixed header leaves room for the playlists
+const phoneLayout = usePhoneLayout()
+const optionsTargetId = useId()
 
 const SORT_BY_VALUES = {
   NameAscending: 'name_ascending',
@@ -183,10 +241,29 @@ const title = computed(() => {
 
 const selectedPlaylistCount = computed(() => selectedPlaylistIdList.value.length)
 
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
+const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
+
 /** @type {import('vue').ComputedRef<{ videoId: string, [key: string]: any }[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
 const toBeAddedToPlaylistVideoCount = computed(() => toBeAddedToPlaylistVideoList.value.length)
+
+// Phones only preview one video, so the playlists keep enough room
+const maxPreviewVideos = computed(() => phoneLayout.value ? 1 : 3)
+
+const previewVideos = computed(() => {
+  return toBeAddedToPlaylistVideoList.value.slice(0, maxPreviewVideos.value).map((video) => ({
+    title: video.title,
+    author: video.author,
+    thumbnail: getVideoThumbnailUrl(video.videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+  }))
+})
+
+const hiddenVideoCount = computed(() => Math.max(0, toBeAddedToPlaylistVideoCount.value - maxPreviewVideos.value))
 
 const toBeAddedToPlaylistVideoIdList = computed(() => {
   return toBeAddedToPlaylistVideoList.value.map((v) => v.videoId)
@@ -376,44 +453,78 @@ function countSelected(playlistId) {
   }
 }
 
-function addSelectedToPlaylists() {
+const saving = ref(false)
+
+async function addSelectedToPlaylists() {
+  if (saving.value) return
   const addedPlaylistIds = new Set()
 
   if (selectedPlaylistIdList.value.length === 0) {
-    showToast(t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'))
+    showToast({
+      message: t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
-  const allPlaylists_ = allPlaylists.value
-  const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+  saving.value = true
+  try {
+    const allPlaylists_ = allPlaylists.value
+    const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+    const allowDuplicates = addingDuplicateVideosEnabled.value
+    const failedPlaylistNames = []
 
-  selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
-    const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null) { return }
+    for (const selectedPlaylistId of [...selectedPlaylistIdList.value]) {
+      const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
+      if (playlist == null) {
+        failedPlaylistNames.push(null)
+        continue
+      }
 
-    let videosToBeAdded
+      let videosToBeAdded
 
-    if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
-    } else {
-      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      if (!allowDuplicates) {
+        const playlistVideoIds = playlist.videos.map((v) => v.videoId)
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
+      } else {
+        // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      }
+
+      if (videosToBeAdded.length === 0) continue
+
+      const saved = await store.dispatch('addVideos', {
+        _id: playlist._id,
+        videos: videosToBeAdded,
+      })
+      if (saved) addedPlaylistIds.add(playlist._id)
+      else failedPlaylistNames.push(playlist.playlistName)
     }
 
-    store.dispatch('addVideos', {
-      _id: playlist._id,
-      videos: videosToBeAdded,
-    })
+    if (addedPlaylistIds.size > 0) {
+      showToast({
+        message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
+          playlistCount: addedPlaylistIds.size,
+        }, addedPlaylistIds.size),
+        // Show the thumbnail when a single video was added
+        image: toBeAddedToPlaylistVideoList_.length === 1
+          ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
+          : null,
+        icon: ['fac', 'playlist-check'],
+      })
+    }
+    for (const playlistName of failedPlaylistNames) {
+      const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
+      showToast({
+        message: playlistName == null ? message : `${playlistName}: ${message}`,
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
 
-    addedPlaylistIds.add(playlist._id)
-  })
-
-  showToast(t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-    playlistCount: addedPlaylistIds.size,
-  }, addedPlaylistIds.size))
-
-  hide()
+    hide()
+  } finally {
+    saving.value = false
+  }
 }
 
 /** @type {import('vue').ComputedRef<object>} */
@@ -422,6 +533,8 @@ const newPlaylistDefaultProperties = computed(() => store.getters.getNewPlaylist
 function openCreatePlaylistPrompt() {
   store.dispatch('showCreatePlaylistPrompt', {
     title: newPlaylistDefaultProperties.value.title || '',
+    description: newPlaylistDefaultProperties.value.description || '',
+    sourcePlaylistId: newPlaylistDefaultProperties.value.sourcePlaylistId,
   })
 }
 

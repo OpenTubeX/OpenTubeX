@@ -1,0 +1,242 @@
+.capacitorTabletTabBar {
+  box-sizing: border-box;
+  display: none;
+  align-items: stretch;
+  gap: 4px;
+  position: sticky;
+  inset-block-start: var(--app-safe-area-inset-top, 0);
+  z-index: 8;
+  inline-size: 100%;
+  block-size: var(--top-tab-bar-height, 48px);
+  min-block-size: var(--top-tab-bar-height, 48px);
+  padding-inline: 4px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-color);
+  box-shadow: 0 1px 0 var(--primary-shadow-color);
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.capacitorTabletTabBar * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capacitorTabletTabBar:has(.capacitorTabSelectionControls) {
+  overflow: visible;
+}
+
+.capacitorTabletTabsViewport {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: auto hidden;
+}
+
+.capacitorTabletTabs {
+  display: flex;
+  gap: 4px;
+  min-inline-size: max-content;
+  block-size: 100%;
+}
+
+.capacitorTabletTab {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex: 0 0 auto;
+  align-items: stretch;
+  inline-size: max-content;
+  min-inline-size: var(--fixed-tab-width, 100px);
+  max-inline-size: var(--fixed-tab-width, 200px);
+  background-color: transparent;
+  border-radius: calc(24px * var(--ui-roundness));
+  overflow: clip;
+  transition: background-color var(--motion-fast-effects), transform 160ms ease;
+}
+
+.capacitorTabletTab.dragging,
+.capacitorTabletTab.noTransition {
+  transition: none;
+}
+
+.capacitorTabletTab.holding {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.capacitorTabletTab:is(.dragging, .settling) {
+  z-index: 3;
+  background-color: var(--card-bg-color);
+  box-shadow: 0 0 8px var(--primary-shadow-color);
+
+}
+
+.capacitorTabletTab.active {
+  background-color: var(--card-bg-color);
+}
+
+.capacitorTabletTab.active::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset-block-end: 0;
+  inset-inline: 16px;
+  block-size: 3px;
+  border-radius: var(--shape-corner-full);
+  background-color: var(--primary-text-color);
+  pointer-events: none;
+}
+
+.capacitorTabletTabTarget,
+.capacitorTabletTabClose,
+.capacitorTabletNewTab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 48px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.capacitorTabletTabTarget {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  gap: 10px;
+  min-inline-size: 0;
+  padding-inline: 14px 6px;
+}
+
+.capacitorTabletTabClose,
+.capacitorTabletNewTab {
+  flex: 0 0 48px;
+  inline-size: 48px;
+  font-size: 16px;
+
+  /* Half of the 48px target, so the press morph starts moving at once. */
+  border-radius: calc(24px * var(--ui-roundness));
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.capacitorTabletTabClose :deep(.ft-icon),
+.capacitorTabletNewTab :deep(.ft-icon) {
+  display: block;
+  inline-size: 1em;
+  block-size: 1em;
+  margin: auto;
+  line-height: 1;
+}
+
+.capacitorTabletNewTab {
+  align-self: stretch;
+}
+
+.capacitorTabletTabClose:active,
+.capacitorTabletNewTab:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.capacitorTabletTab:has(.capacitorTabletTabTarget:is(:hover, :active)),
+.capacitorTabletNewTab:hover,
+.capacitorTabletNewTab:active {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.capacitorTabletTabClose:is(:hover, :active) {
+  background-color: color-mix(in srgb, var(--destructive-color) 25%, transparent);
+  color: var(--destructive-color);
+}
+
+.capacitorTabletTabTarget:focus-visible,
+.capacitorTabletTabClose:focus-visible,
+.capacitorTabletNewTab:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+.capacitorTabletTab.unloaded .capacitorTabletTabTarget {
+  color: var(--secondary-text-color);
+}
+
+.capacitorTabletTabIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--secondary-text-color);
+}
+
+.capacitorTabletTabIcon :deep(.ft-icon) {
+  display: grid;
+  place-items: center;
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.capacitorTabletTabAvatar {
+  display: block;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.capacitorTabletTabTitle {
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.capacitorTabletTab.dragging .capacitorTabletTabTarget {
+  cursor: grabbing;
+}
+
+@media only screen and (width >= 768px) {
+  .capacitorTabletTabBar {
+    display: flex;
+  }
+}
+
+:global(.capacitorPhoneLayout .capacitorTabletTabBar) {
+  display: none;
+}
+
+:global(.capacitorTabletLayout .capacitorTabletTabBar) {
+  display: flex;
+}
+
+:root[data-reduced-motion='reduce'] .capacitorTabletTab {
+  transition: none;
+}
+
+.capacitorTabletTabSelection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 48px;
+  min-block-size: 48px;
+  cursor: pointer;
+}
+
+.capacitorTabletTabSelection input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.capacitorTabletTabSelection input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}

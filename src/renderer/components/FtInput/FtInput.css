@@ -1,113 +1,122 @@
 /* stylelint-disable no-descending-specificity */
 .ft-input-component {
+  --input-label-scale: 1;
+  --input-label-reserved-space: 32px;
+  --input-container-color: color-mix(in srgb, var(--primary-text-color) 4%, var(--search-bar-color));
+
   position: relative;
+  margin-block: var(--settings-control-margin, 0);
+  max-inline-size: 100%;
+  min-inline-size: 0;
 }
 
-body[dir='rtl'] .ft-input-component.search.showClearTextButton .inputAction {
-  inset-inline-end: -30px;
+.floatingLabel {
+  inline-size: fit-content;
+  min-inline-size: min(340px, 100%);
 }
 
-body[dir='rtl'] .ft-input-component.search.clearTextButtonVisible .inputAction,
-body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inputAction {
-  inset-inline-end: 0;
+.hasSupportingText .inputWrapper {
+  margin-block-end: 0;
 }
 
-.ft-input-component.search.showClearTextButton {
-  padding-inline-start: 30px;
+.ft-input-component:has(.ft-input[type='search']),
+.ft-input-component.search {
+  inline-size: 100%;
 }
 
-.ft-input-component.search.clearTextButtonVisible,
-.ft-input-component.search.showClearTextButton:focus-within {
-  padding-inline-start: 0;
+.supportingText {
+  margin-block: 4px var(--input-bottom-spacing, 20px);
+  padding-inline: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--secondary-text-color);
+  overflow-wrap: anywhere;
 }
 
-.ft-input-component.showClearTextButton:not(.search) .ft-input {
-  padding-inline-start: 46px;
+.selectTooltip {
+  vertical-align: middle;
 }
 
-/* Main search input */
-.clearTextButtonVisible.search .ft-input,
-.ft-input-component.search.showClearTextButton:focus-within .ft-input {
-  padding-inline-start: 46px;
+.selectLabel.hasIcon {
+  align-items: center;
+  display: inline-flex;
+  margin-block-end: 4px;
 }
 
-.ft-input-component:focus-within .clearInputTextButton,
-.ft-input-component.showOptions .clearInputTextButton {
-  opacity: 0.5;
+.selectLabelIcon {
+  flex: 0 0 auto;
+  block-size: 14px;
+  font-size: 14px;
+  inline-size: 14px;
+  margin-inline-end: 6px;
 }
 
-
-.ft-input-component.inputDataPresent .clearInputTextButton.visible,
-.clearTextButtonVisible:not(.showOptions) .clearInputTextButton.visible,
-.ft-input-component:focus-within:not(.showOptions) .clearInputTextButton.visible {
-  cursor: pointer;
-  opacity: 1;
+.selectLabelIcon :deep(.ft-icon__glyph) {
+  translate: 0 -1px;
 }
 
-.disabled {
-  opacity: 0.4;
+.ft-input.disabled,
+.selectLabel.disabled > * {
+  opacity: 0.38;
+}
+
+.ft-input.disabled,
+.selectLabel.disabled {
   cursor: not-allowed;
 }
 
-.clearInputTextButton {
-  position: absolute;
-  inset-block-start: 5px;
-  inset-inline-start: 0;
-
-  /* To be higher than `.inputWrapper` */
-  z-index: 1;
-  margin-block: 0;
-  margin-inline: 3px;
-  padding: 10px;
-  border-radius: 100%;
-  border-style: none;
-  background-color: transparent;
-  color: var(--primary-text-color);
-  font-size: 1em;
-  line-height: 1em;
-  opacity: 0;
-  transition: background 0.2s ease-in;
-}
-
-.clearInputTextButton.visible:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.forceTextColor .clearInputTextButton:hover {
-  background-color: var(--primary-color-hover);
-}
-
-.clearInputTextButton.visible:active {
-  background-color: var(--tertiary-text-color);
-  color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
-}
-
-.search .clearInputTextButton {
-  inset-block-start: 12px;
-}
-
-.forceTextColor .clearInputTextButton {
-  color: #eee;
-}
-
-.forceTextColor .clearInputTextButton:active {
-  background-color: var(--primary-color-active);
-}
-
 .ft-input {
+  display: block;
   box-sizing: border-box;
-  outline: none;
   inline-size: 100%;
   padding: 1rem;
   border: 0;
-  margin-block-end: 10px;
+  border-block-end: 1px solid var(--secondary-text-color);
+  margin-block-end: 0;
   font-size: 16px;
-  block-size: 45px;
-  color: var(--secondary-text-color);
-  border-radius: 5px;
+  block-size: var(--form-control-height);
+  font-family: inherit;
+  line-height: 20px;
+  color: var(--primary-text-color);
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
   background-color: var(--search-bar-color);
+  box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+  backdrop-filter: var(--search-bar-blur, none);
+  transition: border-color var(--motion-fast-effects), background-color var(--motion-fast-effects);
+}
+
+.ft-input-component:not(.floatingLabel, .search) .ft-input:not(.multiline) {
+  padding-block: 0;
+}
+
+.ft-input:not(:disabled):hover {
+  border-block-end-color: var(--primary-text-color);
+}
+
+.ft-input-component:not(.search, .outlined) .ft-input:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--input-container-color));
+}
+
+.ft-input-component:not(.search) .ft-input {
+  caret-color: var(--primary-color);
+  background-color: var(--input-container-color);
+  box-shadow: none;
+}
+
+/* Material fields provide their own focus indicator instead of the global
+   keyboard-focus box. Keep the filled field's lower corners square on focus. */
+/* stylelint-disable-next-line a11y/no-outline-none */
+.ft-input-component:not(.search) .ft-input:focus {
+  outline: none;
+}
+
+.ft-input-component:not(.search, .outlined) .ft-input:focus {
+  border-block-end-color: var(--primary-color);
+  border-radius: var(--shape-corner-extra-small) var(--shape-corner-extra-small) 0 0;
+
+  /* Material Web uses a 3px focus indicator. Paint the extra thickness inward
+     so the value and label do not move when focus changes. */
+  box-shadow: inset 0 -2px 0 var(--primary-color);
 }
 
 .ftcomponent ::placeholder {
@@ -115,22 +124,261 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   user-select: none;
 }
 
-.forceTextColor .ft-input {
-  color: #eee;
-  background-color: var(--primary-input-color);
-}
-
-.forceTextColor .ft-input:focus {
-  box-shadow: 0 0 1rem 0 var(--primary-input-color);
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-.forceTextColor ::placeholder {
-  color: #eee;
-}
-
 .inputWrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   position: relative;
+  margin-block-end: var(--input-bottom-spacing, 20px);
+}
+
+.inputWrapper > .ft-input {
+  grid-area: 1 / 1;
+}
+
+.floatingLabel .ft-input {
+  padding-block: var(--form-control-value-padding);
+}
+
+.floatingLabel .selectLabel {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: start;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  inline-size: max-content;
+  max-inline-size: calc((100% - var(--input-label-reserved-space)) / var(--input-label-scale));
+  display: inline-flex;
+  align-items: center;
+  margin-block: 0;
+  margin-inline: 16px;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--secondary-text-color);
+  transform: translateY(-50%);
+  transform-origin: left top;
+  transition:
+    inset-block-start var(--motion-fast-spatial),
+    transform var(--motion-fast-spatial),
+    color var(--motion-fast-effects);
+}
+
+.floatingLabel .selectLabel:dir(rtl) {
+  transform-origin: right top;
+}
+
+.floatingLabel .selectLabelText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.showActionButton {
+  --input-label-reserved-space: 64px;
+}
+
+.inputIndicators {
+  position: absolute;
+  inset-inline-start: calc(100% + 8px);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ft-input-component:has(.inputIndicators > *) {
+  margin-inline-end: 70px;
+}
+
+.inputIndicators :deep(.button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inputIndicators :deep(.syncedSettingIndicator),
+.inputIndicators :deep(.changedSettingIndicator),
+.inputIndicators :deep(.changedSettingIndicatorPlaceholder) {
+  line-height: 1;
+  margin-inline-start: 0;
+}
+
+.floatingLabel:focus-within,
+.floatingLabel.hasValue {
+  --input-label-scale: 0.75;
+}
+
+.floatingLabel:focus-within .selectLabel,
+.floatingLabel.hasValue .selectLabel {
+  inset-block-start: var(--form-control-label-top);
+
+  /* Scale the label visually so intrinsic field widths stay fixed on focus. */
+  transform: scale(0.75);
+}
+
+.floatingLabel:focus-within .selectLabel {
+  color: var(--primary-color);
+}
+
+.floatingLabel:not(.outlined, .search, :focus-within) .ft-input::placeholder {
+  color: transparent;
+}
+
+.ft-input-component.outlined .ft-input {
+  border: 1px solid var(--secondary-text-color);
+  border-radius: var(--shape-corner-extra-small);
+  background-color: transparent;
+}
+
+.outlined.floatingLabel .ft-input {
+  /* The label floats into the outline; the value stays vertically centered. */
+  padding-block: 0;
+  border-color: transparent;
+}
+
+.outlined:not(.floatingLabel) .ft-input:not(:disabled):hover {
+  border-color: var(--primary-text-color);
+}
+
+.ft-input-component.outlined .ft-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+.outlined.floatingLabel {
+  --input-label-scale: 1;
+}
+
+.inputOutline,
+.inputLegend {
+  display: contents;
+}
+
+/* A legend leaves a real notch, revealing any surrounding surface. */
+.outlined .inputOutline {
+  display: block;
+  position: absolute;
+  grid-area: 1 / 1 / 2 / 2;
+  inset-block: -7px 0;
+  inset-inline: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--secondary-text-color);
+  border-radius: var(--shape-corner-extra-small);
+  text-align: start;
+  pointer-events: none;
+  transition: border-color var(--motion-fast-effects);
+}
+
+.outlined .inputLegend {
+  display: block;
+  min-block-size: 14px;
+  max-inline-size: calc(100% - var(--input-label-reserved-space));
+  margin-inline-start: 12px;
+  padding: 0;
+}
+
+.outlined.floatingLabel .selectLabel {
+  display: flex;
+  position: static;
+  max-inline-size: 100%;
+  padding-inline: 4px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 14px;
+  transform: none;
+  pointer-events: auto;
+}
+
+.outlined.floatingLabel .ft-input:not(:disabled):hover ~ .inputOutline {
+  border-color: var(--primary-text-color);
+}
+
+.outlined.floatingLabel .ft-input:not(:disabled):focus ~ .inputOutline {
+  border-color: var(--primary-color);
+  border-block-width: var(--focus-border-width);
+}
+
+/* The fieldset draws the notched top and bottom. Thicken its sides inward
+   without changing the legend's position, including at fractional zoom. */
+.outlined.floatingLabel .ft-input:focus {
+  border-color: transparent;
+  box-shadow: inset calc(var(--focus-border-width) / 2) 0 var(--primary-color), inset calc(var(--focus-border-width) / -2) 0 var(--primary-color);
+}
+
+.outlined .selectLabelIcon :deep(.ft-icon__glyph) {
+  translate: none;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .outlined .inputOutline {
+    inset-block-start: -9px;
+  }
+
+  .outlined .inputLegend {
+    min-block-size: 18px;
+  }
+
+  .outlined.floatingLabel .selectLabel {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .outlined .selectLabelIcon {
+    inline-size: 16px;
+    block-size: 16px;
+    font-size: 16px;
+  }
+}
+
+.search .inputWrapper {
+  display: block;
+  block-size: 45px;
+  margin-block-end: 0;
+}
+
+.search.floatingLabel {
+  --input-label-scale: 1;
+
+  min-inline-size: 0;
+}
+
+.search.floatingLabel .selectLabel {
+  position: absolute;
+  inset-block-start: 4px;
+  font-size: 12px;
+  line-height: 14px;
+  transform: none;
+}
+
+.search .selectLabelIcon {
+  inline-size: 12px;
+  block-size: 12px;
+  font-size: 12px;
+}
+
+.search .ft-input {
+  display: block;
+  block-size: 45px;
+  border: 0;
+  border-radius: var(--shape-corner-extra-large);
+
+  /* Keep themed text selection close to the glyphs while the padding centers
+     the line and compensates for taller fallback fonts. */
+  padding-block:
+    var(--search-input-padding-block-start, 12.5px)
+    var(--search-input-padding-block-end, 12.5px);
+  font-family: inherit;
+  line-height: 20px;
+  margin-block-end: 0;
+}
+
+@media (forced-colors: active) {
+  .ft-input-component:not(.search) .ft-input:focus {
+    outline: 3px solid Highlight;
+    outline-offset: -3px;
+  }
 }
 
 .buttonIcon {
@@ -138,11 +386,15 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 }
 
 .inputAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   margin-block: 0;
   margin-inline: 3px;
   padding: 10px;
-  inset-block-start: -8px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
   inset-inline-end: 0;
   border-style: none;
   border-radius: 100%;
@@ -153,6 +405,12 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 
   /* this should look disabled by default */
   opacity: 0.5;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.search .inputAction {
+  inset-block-start: 50%;
+  transform: translateY(-50%);
 }
 
 .inputAction.enabled {
@@ -162,13 +420,8 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   cursor: pointer;
 }
 
-
 .search ::-webkit-calendar-picker-indicator {
   display: none;
-}
-
-.forceTextColor .inputAction {
-  color: #eee;
 }
 
 .ft-input-component.showActionButton .ft-input {
@@ -179,38 +432,88 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   padding-inline-end: calc(36px + 6px);
 }
 
+.showPasswordToggle {
+  --password-toggle-size: 40px;
+  --password-input-height: var(--form-control-height);
+  --input-label-reserved-space: calc(var(--password-toggle-size) + 24px);
+}
+
+.showPasswordToggle.showActionButton {
+  --input-label-reserved-space: calc(var(--password-toggle-size) + 66px);
+}
+
+.passwordVisibilityToggle {
+  box-sizing: border-box;
+  background-clip: content-box;
+  inline-size: var(--password-toggle-size);
+  block-size: var(--password-toggle-size);
+  padding: 4px;
+  font-size: 20px;
+}
+
+.showActionButton .passwordVisibilityToggle {
+  inset-inline-end: 42px;
+}
+
+.showPasswordToggle .ft-input {
+  padding-inline-end: calc(var(--password-toggle-size) + 6px);
+}
+
+.showPasswordToggle.showActionButton .ft-input {
+  padding-inline-end: calc(var(--password-toggle-size) + 48px);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .showPasswordToggle {
+    --password-toggle-size: 48px;
+    --password-input-height: max(56px, var(--phone-touch-target, 48px));
+  }
+
+  .showPasswordToggle .ft-input {
+    min-block-size: var(--password-input-height);
+  }
+
+  .passwordVisibilityToggle {
+    font-size: 24px;
+  }
+}
+
 .inputAction.enabled:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
-}
-
-.forceTextColor .inputAction.enabled:hover {
-  background-color: var(--primary-color-hover);
 }
 
 .inputAction.enabled:active {
-  background-color: var(--tertiary-text-color);
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
-}
-
-.forceTextColor .inputAction.enabled:active {
-  background-color: var(--primary-color-active);
 }
 
 .list {
   position: absolute;
+  overflow-anchor: none;
   inline-size: 100%;
   list-style: none;
   margin: 0;
   padding-block: 5px;
   padding-inline: 0;
   z-index: 10;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
   overflow-wrap: break-word;
-  box-shadow: 0 0 10px var(--scrollbar-color-hover);
+  box-shadow: 0 0 10px var(--dropdown-item-hover-color);
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
+
+  /* The handle crosses hovered rows because this is an overlay scrollbar.
+     Match the row highlight instead of drawing a darker stripe through it. */
+  --scrollbar-color: var(--dropdown-item-hover-color);
+}
+
+.search .list {
+  --search-option-row-size: 2rem;
+
+  max-block-size: min(50vh, 20rem);
+  overflow-y: scroll;
 }
 
 .list li {
@@ -218,17 +521,24 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   justify-content: space-between;
   padding-block: 0;
   line-height: 2rem;
-  padding-inline: 15px;
+  padding-inline: 15px 10px;
 }
 
 .optionWrapper {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   overflow: hidden;
+  flex: 1;
+  min-inline-size: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
-.optionWrapper span {
+.optionWrapper span,
+.optionWrapper bdi {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .searchResultIcon {
@@ -236,21 +546,66 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   padding-inline-end: 10px;
   inline-size: 16px;
   block-size: 16px;
+  flex-shrink: 0;
 }
 
+.acceptSuggestionButton,
 .removeButton {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-start: 8px;
+  padding-block: 6px;
+  padding-inline: 8px 0;
   text-decoration: none;
-  float: inline-end;
-  font-size: 13px;
+  font-size: 14px;
+  opacity: 0.65;
 }
 
+.acceptSuggestionButton {
+  justify-content: center;
+  inline-size: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.acceptSuggestionButton:hover,
+.acceptSuggestionButton:focus-visible,
 .removeButton:hover,
 .removeButtonSelected {
-  text-decoration: underline;
-  font-weight: bold;
+  opacity: 1;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .search .list {
+    --search-option-row-size: 48px;
+  }
+
+  .search .list li {
+    min-block-size: var(--search-option-row-size);
+  }
+
+  .search .acceptSuggestionButton,
+  .search .removeButton {
+    min-inline-size: 48px;
+    justify-content: center;
+    padding-inline: 0;
+  }
 }
 
 .hover {
-  background-color: var(--scrollbar-color-hover);
-  color: var(--scrollbar-text-color-hover);
+  background-color: var(--dropdown-item-hover-color);
+  color: var(--dropdown-item-hover-text-color);
+}
+
+.ft-input-component .ft-input.multiline {
+  padding-block: 16px;
+  block-size: auto;
+  min-block-size: 8rem;
+  field-sizing: content;
+  overflow: hidden;
+  resize: none;
 }

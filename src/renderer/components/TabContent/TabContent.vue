@@ -1,0 +1,474 @@
+<template>
+  <div
+    v-show="isPresented || isSwipeFrom || isSwipeTarget || isPrewarmed"
+    ref="tabContentRef"
+    class="tabContent"
+    :class="{
+      pageSwipeFrom: isSwipeFrom,
+      pageSwipeTo: isSwipeTarget,
+      pageSwipePresented: isPresented && isCapacitor,
+      pageSwipePrewarm: isPrewarmed,
+      pageSwipeSettling: pageSwipe?.settling,
+      hasWatchPreview: watchPreviewing
+    }"
+    :style="pageSwipeStyle"
+    :data-tab-id="tab.id"
+    :inert="!isPresented"
+    :aria-hidden="String(!isPresented)"
+  >
+    <div
+      v-if="isCapacitor && isSwipeTarget && !initialized"
+      class="pageSwipePlaceholder"
+    >
+      <CapacitorTabPreview :tab="tab" />
+      <span dir="auto">{{ formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath) }}</span>
+    </div>
+    <KeepAlive
+      include="AboutRoute"
+      :max="1"
+    >
+      <component
+        :is="resolvedComponent"
+        v-if="browsingInitialized && resolvedComponent"
+        :key="resolvedComponentKey"
+        class="routerView"
+        :class="{ browsingBehindWatch: isWatchRoute }"
+        :inert="isWatchRoute"
+        :aria-hidden="String(isWatchRoute)"
+      />
+    </KeepAlive>
+    <TabWatchContent
+      v-if="initialized"
+      :key="tab.refreshKey || 0"
+      :tab-id="tab.id"
+      :route="resolvedRoute"
+      :presented="isPresented"
+      @preview="watchPreviewing = $event"
+    />
+  </div>
+</template>
+
+<script setup>
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onErrorCaptured,
+  onMounted,
+  provide,
+  reactive,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { routeLocationKey, routerKey } from 'vue-router'
+import TabWatchContent from './TabWatchContent.vue'
+import CapacitorTabPreview from '../TabBar/CapacitorTabPreview.vue'
+
+import store from '../../store/index'
+import { resolveRouteComponent } from '../../router/index'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
+import { tabLifecycleService } from '../../tabs/TabLifecycleService'
+import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
+import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
+import { formatTabTitle } from '../../tabs/tabTitle'
+import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+
+const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
+const TAB_LOADER_LOADING_SOURCE = 'loader'
+const TAB_LOADER_SETTLE_DELAY_MS = 100
+const CACHED_ROUTE_NAMES = new Set(['about'])
+
+const props = defineProps({
+  tab: {
+    type: Object,
+    required: true
+  },
+  pageSwipe: {
+    type: Object,
+    default: null
+  },
+  prewarm: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const isCapacitor = process.env.IS_CAPACITOR
+const navigation = getTabNavigationService()
+const tabContentRef = useTemplateRef('tabContentRef')
+const isPresented = computed(() => store.getters.getPresentedTabId === props.tab.id)
+const isSwipeFrom = computed(() => props.pageSwipe?.fromId === props.tab.id)
+const isSwipeTarget = computed(() => props.pageSwipe?.toId === props.tab.id)
+const isPrewarmed = computed(() => props.prewarm && !isPresented.value && !isSwipeFrom.value && !isSwipeTarget.value)
+const pageSwipeStyle = computed(() => {
+  if (isSwipeFrom.value) return { left: `${props.pageSwipe.offset}px` }
+  if (isSwipeTarget.value) {
+    const startingEdge = props.pageSwipe.direction
+    const left = `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px`
+    // The document keeps the outgoing tab's scroll position. Offset the
+    // incoming tab so it shows its own, which presentation then restores.
+    if (isPresented.value) return { left, right: 'auto' }
+    const savedTop = initialized.value ? props.tab.history[props.tab.historyIndex]?.scroll?.top ?? 0 : 0
+    return { left, right: 'auto', top: `${props.pageSwipe.scrollTop - savedTop}px` }
+  }
+  return undefined
+})
+const shouldMount = computed(() => !props.tab.mountDeferred && props.tab.loadState !== 'unloaded' && props.tab.loadState !== 'unloading')
+const initialized = ref(shouldMount.value)
+const routerFacade = navigation.createRouterFacade(props.tab.id)
+// Main metadata snapshots replace the containing tab object frequently (title,
+// loading, preview, playback, etc.). Resolve from the serialized fullPath so a
+// metadata-only update does not manufacture a new route object and retrigger
+// every deep route watcher in the mounted page.
+const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
+const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
+const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
+const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
+const browsingInitialized = ref(false)
+const watchPreviewing = ref(false)
+// Background Watch tabs only need to preload the video. Mount their browsing
+// page on first presentation, then retain it so a dock gesture can reveal it
+// without mounting a route while the video is moving. Mobile swipe prewarming
+// continues to prepare both views.
+watch([initialized, isPresented, isWatchRoute], ([mounted, presented, watchRoute]) => {
+  if (!mounted) {
+    browsingInitialized.value = false
+  } else if (isCapacitor || presented || !watchRoute) {
+    browsingInitialized.value = true
+  }
+}, { immediate: true })
+
+function getBrowsingRoute(route) {
+  if (!route.path.startsWith('/watch/')) return route
+  return navigation.resolve(getPreviousBrowsingRoute(props.tab) || '/subscriptions')
+}
+const browsingRoute = shallowRef(getBrowsingRoute(resolvedRoute.value))
+const resolvedComponentKey = computed(() => {
+  const refreshKey = props.tab.refreshKey || 0
+  return CACHED_ROUTE_NAMES.has(browsingRoute.value?.name)
+    ? `${browsingRoute.value.name}:${refreshKey}`
+    : refreshKey
+})
+const injectedRoute = reactive({})
+const resolvedComponent = computed(() => browsingRoute.value && resolveRouteComponent(browsingRoute.value))
+
+provide(tabIdKey, props.tab.id)
+provide(tabPresentedKey, isBrowsingPresented)
+provide(tabLifecycleKey, tabLifecycleService)
+provide('tabId', props.tab.id)
+provide('isTabActive', isBrowsingPresented)
+provide('tabRoute', injectedRoute)
+provide(routeLocationKey, injectedRoute)
+provide(routerKey, routerFacade)
+
+watch(resolvedRoute, (route) => {
+  const browsing = getBrowsingRoute(route)
+  if (browsingRoute.value.fullPath !== browsing.fullPath) browsingRoute.value = browsing
+  if (injectedRoute.fullPath === browsing.fullPath) return
+  for (const key of Object.keys(injectedRoute)) {
+    if (!(key in browsing)) {
+      delete injectedRoute[key]
+    }
+  }
+  Object.assign(injectedRoute, browsing)
+}, { immediate: true })
+
+let removeRootRegistration = null
+let loaderObserver = null
+let loaderAnimationFrameId = null
+let loaderSettleTimeoutId = null
+let acknowledgedMountRevision = 0
+let previousRefreshKey = props.tab.refreshKey ?? 0
+let lifecycleRevision = 0
+// Guards against notifying `beforeDispose` twice for the same mounted instance:
+// the unload watcher and onBeforeUnmount can both fire for one instance. Reset
+// when the tab mounts again so a subsequent mount receives one notification.
+let disposalNotified = false
+let pictureInPictureExitRequested = false
+
+async function disposeMountedContent() {
+  const pictureInPictureElement = document.pictureInPictureElement
+  let exitPictureInPicture = Promise.resolve()
+  if (
+    !pictureInPictureExitRequested &&
+    pictureInPictureElement &&
+    tabContentRef.value?.contains(pictureInPictureElement)
+  ) {
+    pictureInPictureExitRequested = true
+    try {
+      exitPictureInPicture = document.exitPictureInPicture().catch(error => {
+        console.error(`Failed to exit Picture-in-Picture for logical tab ${props.tab.id}:`, error)
+      }).finally(() => {
+        pictureInPictureExitRequested = false
+      })
+    } catch (error) {
+      pictureInPictureExitRequested = false
+      console.error(`Failed to exit Picture-in-Picture for logical tab ${props.tab.id}:`, error)
+    }
+  }
+
+  const notifyBeforeDispose = disposalNotified
+    ? Promise.resolve()
+    : tabLifecycleService.run(props.tab.id, 'beforeDispose')
+
+  disposalNotified = true
+  await Promise.all([exitPictureInPicture, notifyBeforeDispose])
+}
+
+watch(
+  [shouldMount, () => props.tab.mountRevision, () => props.tab.refreshKey],
+  async ([mount, mountRevision, refreshKey]) => {
+    const revision = ++lifecycleRevision
+    if (!mount) {
+      if (initialized.value && !disposalNotified) {
+        await disposeMountedContent()
+        if (revision !== lifecycleRevision || shouldMount.value) return
+        initialized.value = false
+      }
+      navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
+      return
+    }
+
+    if (refreshKey !== previousRefreshKey) {
+      await tabLifecycleService.run(props.tab.id, 'beforeReload')
+      if (revision !== lifecycleRevision) return
+      previousRefreshKey = refreshKey
+      initialized.value = false
+      await nextTick()
+      if (revision !== lifecycleRevision) return
+      store.commit('applyPendingReloadRoute', props.tab.id)
+    }
+
+    if (!shouldMount.value || mountRevision !== props.tab.mountRevision || refreshKey !== props.tab.refreshKey) {
+      return
+    }
+
+    initialized.value = true
+    disposalNotified = false
+    pictureInPictureExitRequested = false
+    await nextTick()
+    updateLoaderState()
+    if (mountRevision > acknowledgedMountRevision) {
+      acknowledgedMountRevision = mountRevision
+      tabRuntimeRegistry.markMounted(props.tab.id, mountRevision)
+      window.ftElectron?.tabs?.mountReady?.(props.tab.id, mountRevision)
+      if (process.env.IS_CAPACITOR) {
+        getCapacitorTabService().markTabMounted(props.tab.id, mountRevision)
+      }
+      // Mount readiness can race the initial active-tab watcher. Retry now that
+      // the runtime is guaranteed to exist so the tab cannot remain hidden.
+      if (
+        store.getters.getActiveTabId === props.tab.id &&
+        store.getters.getPresentedTabId !== props.tab.id
+      ) {
+        navigation.requestPresentation(props.tab.id, store.state.tabs.selectionRevision)
+      }
+    }
+    scheduleLoaderUpdate()
+  },
+  { immediate: true }
+)
+
+watch(isWatchRoute, scheduleLoaderUpdate)
+
+onMounted(() => {
+  if (tabContentRef.value) {
+    removeRootRegistration = tabRuntimeRegistry.registerRoot(props.tab.id, tabContentRef.value)
+  }
+
+  if (typeof MutationObserver === 'function' && tabContentRef.value) {
+    loaderObserver = new MutationObserver(scheduleLoaderUpdate)
+    loaderObserver.observe(tabContentRef.value, {
+      attributes: true,
+      attributeFilter: ['data-tab-loading-indicator'],
+      childList: true,
+      subtree: true
+    })
+  }
+  scheduleLoaderUpdate()
+})
+
+onErrorCaptured((error) => {
+  console.error(`Logical tab ${props.tab.id} failed to render:`, error)
+  const mountRevision = props.tab.mountRevision
+  // Only treat this as a mount failure while the current mount revision has not
+  // yet been acknowledged as mounted. A later descendant render error on an
+  // already-mounted tab is logged but must not flip the tab back to failed.
+  if (mountRevision > acknowledgedMountRevision) {
+    tabRuntimeRegistry.markMountFailed(props.tab.id, mountRevision)
+    window.ftElectron?.tabs?.mountFailed?.(props.tab.id, mountRevision)
+    if (process.env.IS_CAPACITOR) {
+      getCapacitorTabService().markTabMountFailed(props.tab.id, mountRevision)
+    }
+  }
+  // Return undefined (not false) so the error still propagates to the app-level
+  // errorHandler in main.js after our IPC notification, preserving observability.
+})
+
+onBeforeUnmount(() => {
+  lifecycleRevision += 1
+  disposeMountedContent().catch(error => {
+    console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
+  })
+  loaderObserver?.disconnect()
+  loaderObserver = null
+  if (loaderAnimationFrameId != null) {
+    window.cancelAnimationFrame(loaderAnimationFrameId)
+    loaderAnimationFrameId = null
+  }
+  cancelLoaderSettle()
+  removeRootRegistration?.()
+  navigation.disposeTab(props.tab.id)
+})
+
+function scheduleLoaderUpdate() {
+  if (loaderAnimationFrameId != null) {
+    return
+  }
+
+  loaderAnimationFrameId = window.requestAnimationFrame(() => {
+    loaderAnimationFrameId = null
+    updateLoaderState()
+  })
+}
+
+function hasCurrentPageLoader() {
+  // Watch tabs keep a browsing page mounted beneath the video.
+  const currentPage = tabContentRef.value?.querySelector(isWatchRoute.value ? '.watchPreviewHost' : '.routerView')
+  return currentPage?.querySelector(TAB_LOADER_SELECTOR) != null
+}
+
+function updateLoaderState() {
+  if (hasCurrentPageLoader()) {
+    cancelLoaderSettle()
+    navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
+    return
+  }
+
+  // Async route placeholders and the mounted view can hand loading indicators
+  // off across adjacent renders. Require a short indicator-free quiet period
+  // before clearing this source so the tab bar cannot flash cached metadata.
+  if (loaderSettleTimeoutId == null) {
+    loaderSettleTimeoutId = window.setTimeout(settleLoaderState, TAB_LOADER_SETTLE_DELAY_MS)
+  }
+}
+
+function settleLoaderState() {
+  loaderSettleTimeoutId = null
+  if (hasCurrentPageLoader()) {
+    navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
+    return
+  }
+
+  navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
+}
+
+function cancelLoaderSettle() {
+  if (loaderSettleTimeoutId != null) {
+    window.clearTimeout(loaderSettleTimeoutId)
+    loaderSettleTimeoutId = null
+  }
+}
+</script>
+
+<style scoped>
+.tabContent {
+  position: relative;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.browsingBehindWatch {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  inline-size: 100%;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Retained browsing content must not extend the Watch page's scroll range. */
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch {
+  overflow: clip;
+}
+
+/* Keep positioned items in the browsing page below the returning Watch preview. */
+.tabContent.hasWatchPreview > .routerView:not(.browsingBehindWatch) {
+  position: relative;
+  z-index: 0;
+}
+
+.tabContent.hasWatchPreview .browsingBehindWatch {
+  position: relative;
+  inset: auto;
+  visibility: visible;
+}
+
+.pageSwipePresented {
+  position: relative;
+  z-index: 1;
+}
+
+.pageSwipePrewarm {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Keep neighbors laid out for swiping without painting through short pages
+     or allowing their fixed-position children to show over the active tab. */
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Android WebView ticks animations under this opacity: 0 layer on the main
+   thread. A spinner in a neighbor would otherwise render a frame per refresh. */
+.pageSwipePrewarm,
+.pageSwipePrewarm :deep(*),
+.pageSwipePrewarm :deep(*::before),
+.pageSwipePrewarm :deep(*::after) {
+  animation-play-state: paused !important;
+}
+
+.pageSwipePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-block-size: calc(100dvh - var(--top-nav-height) - var(--app-safe-area-inset-top) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  gap: 16px;
+  padding: 24px;
+  color: var(--primary-text-color);
+  font-size: 20px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pageSwipePlaceholder :deep(.capacitorTabPreview) {
+  max-inline-size: 320px;
+  border-radius: var(--shape-corner-medium);
+}
+
+.pageSwipeFrom {
+  position: relative;
+  z-index: 2;
+}
+
+.pageSwipeTo {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1;
+}
+
+.pageSwipeSettling {
+  transition: left 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root[data-reduced-motion='reduce'] .pageSwipeSettling {
+  transition-duration: 0ms;
+}
+</style>

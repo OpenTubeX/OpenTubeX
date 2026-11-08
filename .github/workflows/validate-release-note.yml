@@ -1,0 +1,42 @@
+name: Validate Release Note
+
+on:
+  pull_request_target:
+    types: [opened, edited, labeled, unlabeled, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-release-note:
+    name: Release Note
+    if: >-
+      ${{
+        github.event.pull_request.user.login != 'dependabot[bot]' &&
+        github.head_ref != 'weblate-translations' &&
+        github.head_ref != 'upstream-sync' &&
+        !(
+          github.event.pull_request.user.login == 'pull[bot]' &&
+          github.event.pull_request.head.repo.full_name == 'FreeTubeApp/FreeTube' &&
+          github.event.pull_request.head.ref == 'development' &&
+          github.event.pull_request.base.ref == 'development'
+        )
+      }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Validate release note
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: node _scripts/releaseNotes.mjs validate-event "$GITHUB_EVENT_PATH"
