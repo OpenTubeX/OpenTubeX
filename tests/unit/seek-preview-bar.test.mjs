@@ -49,7 +49,7 @@ function fixture() {
     }
     onChangeStart(fromTouchEvent = false) { this.changeStartedFromTouch = fromTouchEvent }
     onChange() {}
-    onChangeEnd() {}
+    onChangeEnd() { this.changeEnds = (this.changeEnds ?? 0) + 1 }
     release() { this.released = true }
   }
   class SeekFilmstrip {
@@ -87,6 +87,8 @@ function fixture() {
     hideUI() { this.hidden++ },
     getConfig() { return this.config },
     getVideoContainer() { return { matches: selector => selector === ':hover' && controls.hovered } },
+    barAttached: true,
+    getControlsContainer() { return { contains: element => element === bar.bar && controls.barAttached } },
     dispatchEvent(event) { this.events.push(event) },
   }
   const bar = factory.create({}, controls)
@@ -242,13 +244,25 @@ test('a mouse drag from anywhere on the track shows the filmstrip and keeps the 
   bar.onChangeEnd()
   assert.deepEqual([controls.shown, controls.hidden], [1, 1], 'Releasing outside hides them like leaving the player')
 
-  // Shaka rebuilds its controls without ending the drag.
+  // Shaka rebuilds its controls without ending the drag, after emptying them.
   press()
   drag(28)
+  const ended = bar.changeEnds
+  controls.barAttached = false
   bar.release()
   assert.equal(bar.released, true)
+  assert.equal(bar.changeEnds, ended + 1, 'The drag ends as a release would, so the controls stop seeking')
   assert.equal(controls.config.showUIAlways, false, 'The rebuilt controls must not stay forced up')
-  assert.deepEqual([controls.shown, controls.hidden], [1, 1])
+  assert.deepEqual([controls.shown, controls.hidden], [1, 2])
+
+  // Destroying the controls releases the bar inside them, after stopping their timers.
+  controls.barAttached = true
+  press()
+  drag(29)
+  bar.release()
+  assert.equal(bar.changeEnds, ended + 1, 'Ending the drag would use the stopped timers')
+  assert.equal(controls.config.showUIAlways, false)
+  assert.deepEqual([controls.shown, controls.hidden], [1, 2])
 
   // Touch input has no mouse press, and Shaka keeps showing the controls for it.
   bar.setValue(15)
@@ -257,7 +271,7 @@ test('a mouse drag from anywhere on the track shows the filmstrip and keeps the 
   assert.equal(bar.filmstrip.time, 20)
   assert.equal(controls.config.showUIAlways, false)
   bar.onChangeEnd()
-  assert.deepEqual([controls.shown, controls.hidden], [1, 1])
+  assert.deepEqual([controls.shown, controls.hidden], [1, 2])
 })
 
 test('pulling up starts precise seeking from the last dragged time, not a pending strip render', () => {

@@ -446,6 +446,60 @@ test.describe('with a short interface hide delay', () => {
   })
 })
 
+test('rebuilding the controls mid-drag ends the drag so play and pause keep working', async ({ app, page }) => {
+  // A finger does not focus the bar, so no blur ends its drag when the bar is replaced.
+  const touch = await page.context().newCDPSession(page)
+  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+  await mockPlayableWatchPage(app, page)
+  await routeDemoMedia(page)
+  await mockCapacitorPhoneLayout(page)
+  const { video, duration } = await openVideoWithStoryboard(page)
+  await video.evaluate(element => element.play())
+
+  const player = page.locator('.ftVideoPlayer')
+  const bar = player.locator('.shaka-seek-bar')
+  await player.hover()
+  await expect(bar).toBeEnabled()
+  const bounds = await bar.boundingBox()
+  const pointAt = fraction => ({ x: bounds.x + 6 + fraction * (bounds.width - 12), y: bounds.y + bounds.height / 2 })
+  const isSeeking = () => video.evaluate(element => element.ui.getControls().isSeeking())
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [pointAt(0.3)] })
+  for (let step = 1; step <= 4; step++) {
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [pointAt(0.3 + 0.05 * step)] })
+  }
+  await expect.poll(isSeeking).toBe(true)
+
+  // A setting change rebuilds every control, including the seek bar under the finger.
+  await page.evaluate(() => window.$store.dispatch('updateDefaultSkipInterval', 7))
+  await expect.poll(isSeeking).toBe(false)
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+
+  // The drag ends as a release would: it seeks and resumes the playing video.
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThan(duration * 0.4)
+
+  // The play button acts on the video again.
+  await video.evaluate(element => element.ui.getControls().showUI())
+  const playButton = player.locator('.shaka-play-button').first()
+  await expect(playButton).toHaveAttribute('aria-label', /^Pause/)
+  await playButton.evaluate(button => button.click())
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  await expect(playButton).toHaveAttribute('aria-label', /^Play/)
+
+  // Destroying the controls mid-drag has no drag to finish and must not fail,
+  // also after Vue has removed the player from the page, as an unmount does.
+  await expect(bar).toBeEnabled()
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [pointAt(0.6)] })
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [pointAt(0.65)] })
+  await expect.poll(isSeeking).toBe(true)
+  expect(await video.evaluate(element => {
+    const { ui } = element
+    element.closest('.ftVideoPlayer').remove()
+    return ui.destroy().then(() => 'destroyed', error => String(error))
+  })).toBe('destroyed')
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+})
+
 test('fullscreen swipe-to-seek shows the seek bar preview over paused controls', async ({ app, page }) => {
   const touch = await page.context().newCDPSession(page)
   await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
