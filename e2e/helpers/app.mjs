@@ -253,7 +253,10 @@ export async function expectOverlayScrollRange(scroller) {
     let scrollbarMatches
     if (realMaximum <= 1) scrollbarMatches = scrollbar?.classList.contains('os-scrollbar-unusable')
     else if (element.scrollTop >= realMaximum - 2) scrollbarMatches = thumb && track && Math.abs(thumb.bottom - track.bottom) <= 2
-    else scrollbarMatches = thumb && track && thumb.bottom < track.bottom - 2
+    else if (thumb && track) {
+      const expectedOffset = element.scrollTop / realMaximum * (track.height - thumb.height)
+      scrollbarMatches = Math.abs(thumb.top - track.top - expectedOffset) <= 2
+    }
     return {
       validOffset: element.scrollTop <= realMaximum + 2,
       noEmptySpace: element.scrollHeight - element.clientHeight <= realMaximum + 2,
