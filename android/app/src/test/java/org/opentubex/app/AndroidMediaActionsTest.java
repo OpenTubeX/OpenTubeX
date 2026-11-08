@@ -14,4 +14,14 @@ public class AndroidMediaActionsTest {
         assertFalse(AndroidMediaActions.isSupported("reload"));
         assertFalse(AndroidMediaActions.isSupported(""));
     }
+
+    @Test
+    public void identifiesActionsThatStartPlayback() {
+        assertTrue(AndroidMediaActions.startsPlayback(AndroidMediaActions.PLAY));
+        assertTrue(AndroidMediaActions.startsPlayback(AndroidMediaActions.PREVIOUS));
+        assertTrue(AndroidMediaActions.startsPlayback(AndroidMediaActions.NEXT));
+        assertFalse(AndroidMediaActions.startsPlayback(AndroidMediaActions.PAUSE));
+        assertFalse(AndroidMediaActions.startsPlayback(AndroidMediaActions.STOP));
+        assertFalse(AndroidMediaActions.startsPlayback(AndroidMediaActions.SEEK_TO));
+    }
 }
