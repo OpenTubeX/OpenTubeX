@@ -158,6 +158,9 @@ final class AndroidProxy {
         }
     }
 
+    /** The current routing policy. A BotGuard attestation is bound to the route it was made on. */
+    static synchronized ProxyConfiguration configuration() { return configuration; }
+
     static synchronized JSObject getConfiguration() {
         return new JSObject().put("enabled", configuration.enabled)
             .put("protocol", configuration.protocol).put("hostname", configuration.hostname)

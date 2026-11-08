@@ -1,22 +1,25 @@
 import { registerPlugin } from '@capacitor/core'
 
+import { mintAttestedPoToken } from '../../../main/attestedPoToken'
+
 const PoToken = registerPlugin('PoToken')
 
 /**
- * Runs YouTube's BotGuard program in an isolated native WebView.
+ * Runs YouTube's BotGuard program in an isolated native WebView. Android keeps
+ * an attested BotGuard run and mints later tokens from it until it expires.
  * @param {string} videoId
  * @param {import('youtubei.js').Session['context']} context
  * @param {object} initialAttestationData
  * @param {object} ytConfig
  * @returns {Promise<string>}
  */
-export async function generateCapacitorPoToken(videoId, context, initialAttestationData, ytConfig) {
-  const { token } = await PoToken.generate({
+export function generateCapacitorPoToken(videoId, context, initialAttestationData, ytConfig) {
+  const options = {
     videoId,
     sessionContext: JSON.stringify(context),
     initialAttestationData: JSON.stringify(initialAttestationData),
     ytConfig: JSON.stringify(ytConfig)
-  })
+  }
 
-  return token
+  return mintAttestedPoToken(async () => (await PoToken.generate(options)).token)
 }
