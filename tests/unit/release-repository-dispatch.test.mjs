@@ -99,49 +99,53 @@ async function calls (setup) {
   return (await readFile(setup.requests, 'utf8')).trim().split('\n').map(line => JSON.parse(line))
 }
 
-const stableConsumers = {
-  flatpak: /-linux-(x64|arm64)-portable\.zip$/,
-  'aur-update': /_beta_(amd64|arm64)\.deb$/,
-  'rpm-update': /\.(amd64|arm64)\.rpm$/,
-  'apt-update': /\.deb$/,
-  'arch-update': /_beta_(amd64|arm64)\.deb$/,
-  'snap-update': /_beta_(amd64|arm64)\.deb$/,
-  'fdroid-update': /\.apk$/,
-  'sidestore-update': /-ios-unsigned\.ipa$/,
-  'nix-update': /(_beta_(amd64|arm64)\.deb|-mac-(x64|arm64)\.zip)$/,
-  'homebrew-update': /-mac-(x64|arm64)\.zip$/,
-  'scoop-update': /-win-(x64|arm64)-portable\.zip$/,
+async function stableJob () {
+  const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
+  return workflow.jobs['notify-package-repositories']
 }
 
-for (const [consumer, pattern] of Object.entries(stableConsumers)) {
-  test(`stable ${consumer} waits for its downloads before notifying the publisher`, async (t) => {
-    const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
-    const job = workflow.jobs[`trigger-${consumer}`]
-    assert.equal(job.needs, 'publish-release')
-    assert.equal(job.if, 'inputs.publishRelease')
-    const setup = await fixture(t, 'v0.35.2-beta')
-    setup.env.FAIL_PATTERN = pattern.source
+async function stableSetup (t, slot) {
+  const setup = await fixture(t, 'v0.35.2-beta')
+  Object.assign(setup.env, { REPOSITORY: slot.repository, ASSET_PATTERN: slot.pattern, ASSET_COUNT: String(slot.count) })
+  return setup
+}
+
+test('stable publishers wait for their downloads before they are notified', async (t) => {
+  const job = await stableJob()
+  assert.equal(job.needs, 'publish-release')
+  assert.equal(job.if, 'inputs.publishRelease')
+  assert.equal(job.strategy['fail-fast'], false)
+  assert.deepEqual(job.strategy.matrix.include.map(slot => slot.repository), ['flatpak', 'aur', 'rpm', 'apt', 'arch', 'snap', 'fdroid', 'sidestore', 'nix', 'homebrew-tap', 'scoop-bucket'])
+  assert.match(job.steps.at(-1).env.GH_TOKEN, /secrets\.PUSH_TOKEN/)
+  for (const slot of job.strategy.matrix.include) {
+    const setup = await stableSetup(t, slot)
+    setup.env.FAIL_PATTERN = slot.pattern
     const result = runSteps(setup, job.steps)
     assert.equal(result.status, 0, result.stderr)
     const requests = await calls(setup)
     const probes = requests.filter(call => call[0] === 'wget').map(call => call.at(-1))
-    const expected = setup.names.filter(name => pattern.test(name)).map(name => setup.base + name)
+    const expected = setup.names.filter(name => new RegExp(slot.pattern).test(name)).map(name => setup.base + name)
+    assert.equal(expected.length, slot.count, slot.repository)
     assert.deepEqual(probes, [expected[0], ...expected])
-    assert.equal(requests.at(-1)[0], 'gh')
-    assert.ok(requests.at(-1).includes('--method') || requests.at(-1).includes('run'))
-  })
+    assert.deepEqual(requests.at(-1), [
+      'gh', 'api', `repos/OpenTubeX/${slot.repository}/dispatches`, '--method', 'POST',
+      '-f', 'event_type=opentubex-release', '-f', `client_payload[tag]=${setup.env.TAG}`,
+    ])
+  }
+})
 
-  test(`stable ${consumer} does not notify while its downloads are unavailable`, async (t) => {
-    const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
-    const setup = await fixture(t, 'v0.35.2-beta')
-    setup.env.FAIL_PATTERN = pattern.source
+test('stable publishers are not notified while their downloads are unavailable', async (t) => {
+  const job = await stableJob()
+  for (const slot of job.strategy.matrix.include) {
+    const setup = await stableSetup(t, slot)
+    setup.env.FAIL_PATTERN = slot.pattern
     setup.env.FAIL_MODE = 'always'
-    const result = runSteps(setup, workflow.jobs[`trigger-${consumer}`].steps)
+    const result = runSteps(setup, job.steps)
     assert.notEqual(result.status, 0)
     assert.match(result.stderr, /did not become available before dispatch/)
-    assert.ok((await calls(setup)).every(call => !call.includes('POST') && !call.includes('run')))
-  })
-}
+    assert.ok((await calls(setup)).every(call => !call.includes('POST')))
+  }
+})
 
 test('nightly publishers wait independently so a missing IPA cannot suppress other notifications', async (t) => {
   const workflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
@@ -177,10 +181,10 @@ test('nightly publishers wait independently so a missing IPA cannot suppress oth
 })
 
 test('incomplete release metadata is retried before probing downloads and notifying SideStore', async (t) => {
-  const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
-  const setup = await fixture(t, 'v0.35.2-beta')
+  const job = await stableJob()
+  const setup = await stableSetup(t, job.strategy.matrix.include.find(slot => slot.repository === 'sidestore'))
   setup.env.INCOMPLETE_METADATA = 'once'
-  const result = runSteps(setup, workflow.jobs['trigger-sidestore-update'].steps)
+  const result = runSteps(setup, job.steps)
   assert.equal(result.status, 0, result.stderr)
   const requests = await calls(setup)
   assert.equal(requests.filter(call => call[0] === 'gh' && call[2].endsWith('/releases/42') && !call.includes('--jq')).length, 2)

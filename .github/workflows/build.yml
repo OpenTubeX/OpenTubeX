@@ -35,7 +35,6 @@ on:
       - '.github/workflows/conflicts.yml'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/e2e-flaky.yml'
-      - '.github/workflows/flatpak.yml'
       - '.github/workflows/label-issue.yml'
       - '.github/workflows/label-pr.yml'
       - '.github/workflows/linter.yml'

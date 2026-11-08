@@ -441,6 +441,8 @@ jobs:
     name: Publish draft release
     needs: [build, upload-ios]
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.assets.outputs.tag }}
 
     permissions:
       attestations: write
@@ -511,55 +513,8 @@ jobs:
             --silent
         fi
 
-  trigger-flatpak:
-    name: Trigger Flatpak build
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      actions: write
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-linux-(x64|arm64)-portable[.]zip$' 2
-
-    - name: Trigger flatpak workflow
-      env:
-        GH_TOKEN: ${{ github.token }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh workflow run flatpak.yml \
-          --repo "$GITHUB_REPOSITORY" \
-          --ref "$GITHUB_REF_NAME" \
-          -f "releaseTag=$TAG"
-
-  trigger-aur-update:
-    name: Trigger AUR repository update
+  notify-package-repositories:
+    name: Notify ${{ matrix.repository }} of release
     needs: publish-release
     if: inputs.publishRelease
     runs-on: ubuntu-latest
@@ -567,453 +522,66 @@ jobs:
     permissions:
       contents: read
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: flatpak
+            pattern: '-linux-(x64|arm64)-portable[.]zip$'
+            count: 2
+          - repository: aur
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: rpm
+            pattern: '[.](amd64|arm64)[.]rpm$'
+            count: 2
+          - repository: apt
+            pattern: '[.]deb$'
+            count: 2
+          - repository: arch
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: snap
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: fdroid
+            pattern: '[.]apk$'
+            count: 10
+          - repository: sidestore
+            pattern: '-ios-unsigned[.]ipa$'
+            count: 1
+          - repository: nix
+            pattern: '(_(amd64|arm64)[.]deb|-mac-(x64|arm64)[.]zip)$'
+            count: 4
+          - repository: homebrew-tap
+            pattern: '-mac-(x64|arm64)[.]zip$'
+            count: 2
+          - repository: scoop-bucket
+            pattern: '-win-(x64|arm64)-portable[.]zip$'
+            count: 2
+
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
     - name: Wait for public release assets
       env:
         GH_TOKEN: ${{ github.token }}
         RELEASE_ID: ${{ inputs.releaseId }}
+        ASSET_PATTERN: ${{ matrix.pattern }}
+        ASSET_COUNT: ${{ matrix.count }}
       shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '_beta_(amd64|arm64)[.]deb$' 2
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" "$ASSET_PATTERN" "$ASSET_COUNT"
 
-    - name: Trigger AUR repository workflow
+    - name: Notify package repository
       env:
         GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
+        REPOSITORY: ${{ matrix.repository }}
+        TAG: ${{ needs.publish-release.outputs.tag }}
       shell: bash
       run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/aur/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-rpm-update:
-    name: Trigger RPM repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.](amd64|arm64)[.]rpm$' 2
-
-    - name: Trigger RPM repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/rpm/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-apt-update:
-    name: Trigger APT repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]deb$' 2
-
-    - name: Trigger APT repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/apt/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-arch-update:
-    name: Trigger Arch repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '_beta_(amd64|arm64)[.]deb$' 2
-
-    - name: Trigger Arch repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/arch/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-snap-update:
-    name: Trigger Snap package update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '_beta_(amd64|arm64)[.]deb$' 2
-
-    - name: Trigger Snap package workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/snap/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-fdroid-update:
-    name: Trigger F-Droid repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]apk$' 10
-
-    - name: Trigger F-Droid repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/fdroid/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-sidestore-update:
-    name: Trigger SideStore repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-ios-unsigned[.]ipa$' 1
-
-    - name: Trigger SideStore repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/sidestore/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-nix-update:
-    name: Trigger Nix repository update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '(_beta_(amd64|arm64)[.]deb|-mac-(x64|arm64)[.]zip)$' 4
-
-    - name: Trigger Nix repository workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/nix/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-homebrew-update:
-    name: Trigger Homebrew tap update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-mac-(x64|arm64)[.]zip$' 2
-
-    - name: Trigger Homebrew tap workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/homebrew-tap/dispatches \
-          --method POST \
-          -f event_type=opentubex-release \
-          -f "client_payload[tag]=$TAG"
-
-  trigger-scoop-update:
-    name: Trigger Scoop bucket update
-    needs: publish-release
-    if: inputs.publishRelease
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-    - name: Wait for public release assets
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-win-(x64|arm64)-portable[.]zip$' 2
-
-    - name: Trigger Scoop bucket workflow
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        gh api repos/OpenTubeX/scoop-bucket/dispatches \
+        gh api "repos/OpenTubeX/${REPOSITORY}/dispatches" \
           --method POST \
           -f event_type=opentubex-release \
           -f "client_payload[tag]=$TAG"
@@ -1028,22 +596,10 @@ jobs:
       contents: read
 
     steps:
-    - name: Resolve release tag
-      id: release
-      env:
-        GH_TOKEN: ${{ github.token }}
-        RELEASE_ID: ${{ inputs.releaseId }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
-        echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
     - name: Trigger website update workflow
       env:
         GH_TOKEN: ${{ github.token }}
-        TAG: ${{ steps.release.outputs.tag }}
+        TAG: ${{ needs.publish-release.outputs.tag }}
       shell: bash
       run: |
         set -euo pipefail
