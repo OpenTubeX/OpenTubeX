@@ -305,6 +305,17 @@
     calc(var(--visible-search-suggestions) * var(--search-option-row-size)),
     calc(100dvh - var(--top-nav-sticky-offset, 60px) - 20px)
   );
+
+  // The open dropdown continues the search field as one rounded panel.
+  border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
+
+  // The field casts the panel's upper shadow, so keep this one off it.
+  clip-path: inset(0 -10px -10px);
+}
+
+.searchInput:has(.list) :deep(.ft-input) {
+  border-radius: var(--shape-corner-large) var(--shape-corner-large) 0 0;
+  box-shadow: inset 0 0 0 1px var(--input-border-color, transparent), 0 0 10px var(--dropdown-item-hover-color);
 }
 
 
@@ -395,6 +406,11 @@
       background-color: var(--search-bar-color);
       border-radius: var(--shape-corner-full);
       box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+
+      &:has(.list) {
+        border-radius: var(--shape-corner-large) var(--shape-corner-large) 0 0;
+        box-shadow: inset 0 0 0 1px var(--input-border-color, transparent), 0 0 10px var(--dropdown-item-hover-color);
+      }
     }
 
     .closeMobileSearch {

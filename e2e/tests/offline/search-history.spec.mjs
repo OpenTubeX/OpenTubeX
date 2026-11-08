@@ -513,3 +513,55 @@ test.describe('search suggestion remove button layout', () => {
     }).toBeLessThanOrEqual(1.5)
   })
 })
+
+test.describe('search history dropdown shape', () => {
+  test('the open dropdown attaches to the search field as one rounded panel', { tag: '@scale' }, async ({ page }) => {
+    const input = page.locator(sel.searchInput)
+    const list = page.locator('.topNav .searchInput .list')
+    const shape = () => input.evaluate(element => {
+      const field = element.getBoundingClientRect()
+      const fieldStyle = getComputedStyle(element)
+      const list = document.querySelector('.topNav .searchInput .list')
+      const listBounds = list?.getBoundingClientRect()
+      const listStyle = list && getComputedStyle(list)
+      return {
+        fieldBottomCorners: [fieldStyle.borderEndStartRadius, fieldStyle.borderEndEndRadius],
+        fieldTopCorner: Math.min(parseFloat(fieldStyle.borderStartStartRadius), field.height / 2),
+        listTopCorners: listStyle && [listStyle.borderStartStartRadius, listStyle.borderStartEndRadius],
+        listBottomCorner: listStyle && parseFloat(listStyle.borderEndStartRadius),
+        sharedShadow: !!listStyle && fieldStyle.boxShadow.includes(listStyle.boxShadow),
+        gap: listBounds && Math.abs(listBounds.top - field.bottom),
+        inlineOffset: listBounds && Math.max(
+          Math.abs(listBounds.left - field.left),
+          Math.abs(listBounds.right - field.right)
+        )
+      }
+    })
+
+    await input.click()
+    await expect(list).toBeVisible()
+    await expect.poll(async () => {
+      const { fieldBottomCorners, fieldTopCorner, listTopCorners, listBottomCorner, sharedShadow, gap, inlineOffset } = await shape()
+      return {
+        fieldBottomCorners,
+        listTopCorners,
+        sharedShadow,
+        cornersMatch: Math.abs(listBottomCorner - fieldTopCorner) < 0.1,
+        attached: gap < 0.1 && inlineOffset < 0.1
+      }
+    }).toEqual({
+      fieldBottomCorners: ['0px', '0px'],
+      listTopCorners: ['0px', '0px'],
+      sharedShadow: true,
+      cornersMatch: true,
+      attached: true
+    })
+
+    await input.blur()
+    await expect(list).toHaveCount(0)
+    await expect.poll(async () => {
+      const { fieldBottomCorners, fieldTopCorner } = await shape()
+      return fieldBottomCorners.map(parseFloat).every(corner => Math.min(corner, fieldTopCorner) === fieldTopCorner)
+    }).toBe(true)
+  })
+})
