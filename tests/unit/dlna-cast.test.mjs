@@ -213,6 +213,26 @@ test('refuses media hosts and redirects the resolver does not allow', async t =>
   assert.equal(destinationRequests, 0)
 })
 
+test('refuses to relay media when the user routes it through a proxy', async t => {
+  let upstreamRequests = 0
+  const upstream = createServer((request, response) => {
+    upstreamRequests++
+    response.writeHead(200).end('video')
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+
+  const proxied = []
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', undefined, allowLoopback,
+    async url => { proxied.push(url); return 'SOCKS5 127.0.0.1:9050' })
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  assert.equal((await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).status, 502)
+  assert.deepEqual(proxied, [`http://127.0.0.1:${upstreamPort}/video`])
+  assert.equal(upstreamRequests, 0)
+})
+
 test('reads the renderer SOAP playback position for cast recovery', async t => {
   const xml = '<response><RelTime>00:00:08</RelTime></response>'
   const renderer = createServer((request, response) => {

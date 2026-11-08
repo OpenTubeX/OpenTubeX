@@ -96,15 +96,18 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
       } catch (error) { return { error: error.message, muxUnavailable: true } }
     }
     const { resolveAddresses } = await createMediaAddressResolver(event.sender, 'dlna')
+    const resolveProxy = url => session.defaultSession.resolveProxy(url)
     // Validate before the renderer requests media, so a refused source cannot start a cast
     // and a private instance's dialog cannot outlast the renderer's timeout.
     for (const sourceUrl of [payload?.mediaUrl, payload?.audioUrl]) {
       let url
       try { url = new URL(sourceUrl) } catch { continue /* startDlnaCast reports an invalid URL. */ }
+      // Like Google Cast and FCast, the relay cannot pin DNS through a proxy, so it refuses one.
+      if (await resolveProxy(url.href) !== 'DIRECT') return { error: 'Cast media requires a direct route for validated DNS' }
       if (!await resolveAddresses(url)) return { error: 'Media address is not allowed' }
     }
     if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
-    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders, muxOptions, resolveAddresses)
+    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders, muxOptions, resolveAddresses, resolveProxy)
     if (result.castId) {
       if (event.sender.isDestroyed()) {
         stopDlnaCast(event.sender.id).catch(console.error)
