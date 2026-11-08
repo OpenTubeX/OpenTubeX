@@ -2836,6 +2836,9 @@ test.describe('scroll mini player', () => {
 
     test('keeps the most recently left video visible across tabs', async ({ app, page, attachScreenshot }) => {
       const video = await openDemoVideo({ app, page })
+      // An ended video leaves the mini player, and this test can outlast the
+      // short demo clip on a busy machine.
+      await video.evaluate(element => { element.loop = true })
       const playbackTimeBeforeSwitch = await video.evaluate(element => element.currentTime)
 
       const player = page.locator('.ftVideoPlayer')
@@ -2862,7 +2865,15 @@ test.describe('scroll mini player', () => {
         .toBeGreaterThan(playbackTimeBeforeSwitch)
 
       const playPauseButton = player.locator('.scrollMiniPlayPause')
-      await playPauseButton.click()
+      // The button hides after three seconds of playback, which the steps above
+      // can outlast on a busy machine, and click() does not move the pointer far
+      // enough to reveal it. Move over it and click right away, as a user would;
+      // click()'s actionability checks can outlast the next three seconds too.
+      const { x, y, width, height } = await playPauseButton.boundingBox()
+      await page.mouse.move(x + width / 2 - 10, y + height / 2)
+      await page.mouse.move(x + width / 2, y + height / 2)
+      await page.mouse.down()
+      await page.mouse.up()
       await expect.poll(() => floatingVideo.evaluate(element => element.paused)).toBe(true)
       await playPauseButton.click()
       await expect.poll(() => floatingVideo.evaluate(element => element.paused)).toBe(false)
