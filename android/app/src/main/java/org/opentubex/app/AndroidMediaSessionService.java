@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +30,7 @@ public class AndroidMediaSessionService extends Service {
     static final String ACTION_STOP = "org.opentubex.app.media.STOP";
     static final String EXTRA_STATE = "state";
 
+    private static final String TAG = "AndroidMediaSession";
     private static final String ACTION_CONTROL_PREFIX = "org.opentubex.app.media.CONTROL.";
     private static final String CHANNEL_ID = OpenTubeXNotificationChannels.MEDIA_PLAYBACK_ID;
     private static final int NOTIFICATION_ID = 0x4d454449;
@@ -66,7 +68,7 @@ public class AndroidMediaSessionService extends Service {
         mediaSession.setCallback(new MediaSession.Callback() {
             @Override
             public void onPlay() {
-                AndroidMediaSessionPlugin.emitAction(AndroidMediaActions.PLAY);
+                startPlaybackAction(AndroidMediaActions.PLAY);
             }
 
             @Override
@@ -81,12 +83,12 @@ public class AndroidMediaSessionService extends Service {
 
             @Override
             public void onSkipToPrevious() {
-                AndroidMediaSessionPlugin.emitAction(AndroidMediaActions.PREVIOUS);
+                startPlaybackAction(AndroidMediaActions.PREVIOUS);
             }
 
             @Override
             public void onSkipToNext() {
-                AndroidMediaSessionPlugin.emitAction(AndroidMediaActions.NEXT);
+                startPlaybackAction(AndroidMediaActions.NEXT);
             }
 
             @Override
@@ -209,9 +211,22 @@ public class AndroidMediaSessionService extends Service {
         );
         // Every startForegroundService request needs an acknowledgement, even
         // when Android demoted an existing service whose notification is unchanged.
-        if (startId != 0 || !nextNotificationSignature.equals(notificationSignature)) {
-            startForeground(NOTIFICATION_ID, buildNotification(state, actions));
+        if ((startId != 0 || !nextNotificationSignature.equals(notificationSignature)) &&
+            enterForeground(state, actions)) {
             notificationSignature = nextNotificationSignature;
+        }
+    }
+
+    private boolean enterForeground(JSONObject state, Set<String> actions) {
+        try {
+            startForeground(NOTIFICATION_ID, buildNotification(state, actions));
+            return true;
+        } catch (IllegalStateException error) {
+            // Android 12+ refuses this in the background, including after it
+            // demoted a paused session. An update admitted just before that
+            // demotion must not crash; the next media control promotes again.
+            Log.w(TAG, "Android did not allow the playback service in the foreground", error);
+            return false;
         }
     }
 
@@ -319,9 +334,32 @@ public class AndroidMediaSessionService extends Service {
         if (!AndroidMediaActions.isSupported(action)) return;
         if (AndroidMediaActions.SEEK_BACKWARD.equals(action) || AndroidMediaActions.SEEK_FORWARD.equals(action)) {
             AndroidMediaSessionPlugin.emitAction(action, null, DEFAULT_SEEK_SECONDS);
+        } else if (AndroidMediaActions.startsPlayback(action)) {
+            startPlaybackAction(action);
         } else {
             AndroidMediaSessionPlugin.emitAction(action);
         }
+    }
+
+    private void startPlaybackAction(String action) {
+        promoteForPlayback();
+        AndroidMediaSessionPlugin.emitAction(action);
+    }
+
+    /**
+     * Android 16+ demotes a media service that stays paused, which lets the app
+     * be cached and frozen while its notification remains. A media control only
+     * grants a brief exemption to start a foreground service and thaws the app
+     * briefly. Promote the service right away, because the renderer may not
+     * reach its own playing update before that window ends.
+     */
+    private void promoteForPlayback() {
+        if (currentState == null ||
+            !enterForeground(currentState, readActions(currentState.optJSONArray("actions")))) return;
+        // Keep the CPU awake until the renderer reports playback.
+        mainHandler.removeCallbacks(releasePlaybackWakeLock);
+        if (!playbackWakeLock.isHeld()) playbackWakeLock.acquire();
+        mainHandler.postDelayed(releasePlaybackWakeLock, PAUSED_WAKE_LOCK_GRACE_MS);
     }
 
     private List<String> notificationActions(Set<String> actions, String playbackState) {

@@ -31,4 +31,8 @@ final class AndroidMediaActions {
     static boolean isSupported(String action) {
         return SUPPORTED.contains(action);
     }
+
+    static boolean startsPlayback(String action) {
+        return PLAY.equals(action) || PREVIOUS.equals(action) || NEXT.equals(action);
+    }
 }
