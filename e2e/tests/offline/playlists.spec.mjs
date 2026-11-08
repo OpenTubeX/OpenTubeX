@@ -1193,7 +1193,7 @@ test.describe('custom playlist order with hidden videos', () => {
     }
   })
 
-  test('drops a grid video next to the video shown before it', async ({ page }) => {
+  test('drops a grid video next to the video shown before it', { tag: '@scale' }, async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Hidden order playlist').click()
     const cards = page.locator('.playlistItemsCard [data-playlist-drag-item]')
@@ -1389,7 +1389,7 @@ test.describe('custom playlist order', () => {
     await expect(titles.first()).toHaveText('Custom playlist video 1')
   })
 
-  test('a drag continues while the next page of videos loads', async ({ page }) => {
+  test('a drag continues while the next page of videos loads', { tag: '@scale' }, async ({ page }) => {
     await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()

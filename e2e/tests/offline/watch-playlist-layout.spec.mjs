@@ -579,11 +579,12 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await watch.dispose()
 })
 
-test('drags watch playlist videos while the other rows slide aside', { tag: '@scale' }, async ({ app, page }) => {
+test('drags watch playlist videos while the other rows slide aside', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  // Keep the playlist beside the video at every UI scale, so the page itself does not scroll.
+  if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
   const watch = await openPlaylist(app, page)
   const rows = page.locator('.watchVideoPlaylist .playlistItem')
   const titles = rows.locator('.h3Title')
-  await rows.nth(1).locator('.videoIndexArea').scrollIntoViewIfNeeded()
   const handle = await rows.nth(1).locator('.videoIndexArea').boundingBox()
   const first = await rows.first().boundingBox()
   const second = await rows.nth(1).boundingBox()
@@ -603,7 +604,9 @@ test('drags watch playlist videos while the other rows slide aside', { tag: '@sc
   await watch.dispose()
 })
 
-test('scrolls the watch playlist while a dragged video nears its edge', async ({ app, page }) => {
+test('scrolls the watch playlist while a dragged video nears its edge', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  // Keep the playlist beside the video at every UI scale, so the page itself does not scroll.
+  if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
   const watch = await openPlaylist(app, page)
   const panel = page.locator('.watchVideoPlaylist .playlistItemsWrapper')
   const rows = page.locator('.watchVideoPlaylist .playlistItem')
@@ -619,9 +622,9 @@ test('scrolls the watch playlist while a dragged video nears its edge', async ({
   expect(dragged.y + dragged.height).toBeGreaterThan(bounds.y + bounds.height - dragged.height)
   await page.mouse.up()
   await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
-  const index = await page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.findIndex(video => video.title === 'Playlist video 2'))
-  expect(index).toBeGreaterThan(3)
-  await expect(rows.nth(index).locator('.h3Title')).toHaveText('Playlist video 2')
+  const storedIndex = () => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.findIndex(video => video.title === 'Playlist video 2'))
+  await expect.poll(storedIndex).toBeGreaterThan(3)
+  await expect(rows.nth(await storedIndex()).locator('.h3Title')).toHaveText('Playlist video 2')
   await watch.dispose()
 })
 
