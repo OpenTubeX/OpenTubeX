@@ -221,6 +221,20 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
       await expect(dropdown).toHaveCSS('background-attachment', /^scroll(, scroll)*$/)
     })
 
+    test('command palette and Tab Organizer use the card gradient', async ({ page }) => {
+      await page.keyboard.press('ControlOrMeta+k')
+      const palette = page.locator('.commandPalette')
+      await expect(palette).toBeVisible()
+      await expect(palette).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
+      await page.keyboard.press('Escape')
+      await expect(palette).toBeHidden()
+
+      await page.locator('.tabOrganizerButton').click()
+      const organizer = page.locator('.tabOrganizer')
+      await expect(organizer).toBeVisible()
+      await expect(organizer).toHaveCSS('background-image', /radial-gradient.*linear-gradient/)
+    })
+
     test('Profile Manager and About cards stay solid on the settings window gradient', async ({ app, page }, testInfo) => {
       const window = page.locator('.settingsWindow')
       const expectSolidCards = async cards => {

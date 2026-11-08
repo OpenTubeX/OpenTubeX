@@ -20,7 +20,8 @@
   --organizer-tonal: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 16%, var(--card-bg-color));
   --organizer-selected: color-mix(in srgb, var(--primary-color) 22%, var(--card-bg-color));
 
-  background: var(--card-bg-color);
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
   border-radius: var(--shape-corner-extra-large);
   box-shadow: 0 16px 48px rgb(0 0 0 / 38%);
   color: var(--primary-text-color);
