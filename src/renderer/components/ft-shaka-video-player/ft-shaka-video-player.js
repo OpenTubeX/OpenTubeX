@@ -6480,7 +6480,11 @@ export default defineComponent({
          */
         const encodeScreenshot = () => format === 'jxl'
           ? encodeJxl(context.getImageData(0, 0, width, height), screenshotQuality.value)
-          : new Promise((resolve) => canvas.toBlob(resolve, mimeType, imageQuality))
+          : new Promise((resolve, reject) => canvas.toBlob(
+              blob => blob ? resolve(blob) : reject(new Error('Image encoding failed')),
+              mimeType,
+              imageQuality
+            ))
 
         if (screenshotMode.value === 'clipboard') {
           await copyToClipboard(await encodeScreenshot(), { messageOnSuccess: t('Screenshot Clipboard Success'), messageOnError: t('Screenshot Clipboard Error') })
