@@ -272,6 +272,7 @@
       :label="deletePromptLabel"
       :option-names="deletePromptNames"
       :option-values="DELETE_PROMPT_VALUES"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       :is-first-option-destructive="true"
       @click="handleDeletePrompt"
     />

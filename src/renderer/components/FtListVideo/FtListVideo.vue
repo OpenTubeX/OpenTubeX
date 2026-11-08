@@ -518,6 +518,7 @@
       :extra-labels="[IS_CAPACITOR ? t('Downloads.Remove File Permanently Warning', { title: pendingSwipeRemoval.title }) : t('Downloads.Remove File Warning', { title: pendingSwipeRemoval.title })]"
       :option-names="[t('Downloads.Remove File'), t('Cancel')]"
       :option-values="['remove', 'cancel']"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       @click="removeSwipeDownload"
     />
     <WatchVideoDownloadPrompt

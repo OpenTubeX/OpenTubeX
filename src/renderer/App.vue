@@ -206,6 +206,7 @@
       :extra-labels="[multipleTabsActionPromptMessage, t('Confirmations.Settings Hint')]"
       :option-names="multipleTabsActionPromptNames"
       :option-values="MULTIPLE_TABS_ACTION_PROMPT_VALUES"
+      :option-icons="multipleTabsActionPromptIcons"
       @click="handleMultipleTabsActionPromptAnswer"
     />
     <FtPrompt
@@ -237,6 +238,7 @@
       :extra-labels="[t('Close Confirmation.Message')]"
       :option-names="androidExitPromptNames"
       :option-values="ANDROID_EXIT_PROMPT_VALUES"
+      :option-icons="[['fas', 'power-off'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
       @click="handleAndroidExitPromptAnswer"
     />
     <FtSearchFilters
@@ -3747,6 +3749,11 @@ const multipleTabsActionPromptNames = computed(() => [
         ),
   t('Cancel'),
   t('Confirmations.Never Ask Again')
+])
+const multipleTabsActionPromptIcons = computed(() => [
+  ['fas', { load: 'download', unload: 'right-from-bracket' }[multipleTabsActionPrompt.value] ?? 'rectangle-xmark'],
+  ['fas', 'xmark'],
+  ['fas', 'eye-slash']
 ])
 
 /**

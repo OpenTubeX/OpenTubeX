@@ -678,6 +678,7 @@
     :extra-labels="[formatDeviceSessionLabel(sessionToDelete, t)]"
     :option-names="[t('Delete'), t('Cancel')]"
     :option-values="['delete', 'cancel']"
+    :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
     is-first-option-destructive
     autosize
     @click="handleDeleteSessionPrompt"

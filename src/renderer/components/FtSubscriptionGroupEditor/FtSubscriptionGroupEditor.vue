@@ -132,6 +132,7 @@
     :label="t('Subscription Groups.Delete Prompt', { groupName: group.name })"
     :option-names="[t('Yes, Delete'), t('Cancel')]"
     :option-values="['delete', 'cancel']"
+    :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
     is-first-option-destructive
     autosize
     @click="handleDeletePrompt"

@@ -132,6 +132,7 @@
         :label="t('Settings.Theme Settings.Custom Theme.Delete Theme Confirmation', { name: draft.name })"
         :option-names="[t('Settings.Theme Settings.Custom Theme.Delete Theme'), t('Cancel')]"
         :option-values="['delete', 'cancel']"
+        :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
         autosize
         is-first-option-destructive
         @click="handleDeletePrompt"
