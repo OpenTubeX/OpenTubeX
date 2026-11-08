@@ -52,7 +52,7 @@ export function loadPlaylistVideos(id, { icon, message }) {
   }).then((snapshot) => {
     const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
     return snapshot.videos.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
-  }, (error) => {
+  }).catch((error) => {
     if (!controller.signal.aborted) {
       console.error(error)
       showToast({
