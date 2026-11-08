@@ -1,4 +1,10 @@
+import { decodeHTMLAttribute } from 'entities'
+
 import { getFaviconUrl } from '../searchEngines.js'
+
+const MAX_ICON_BYTES = 262_144
+// Icons are declared in <head>, so the start of a page is enough to find them.
+const MAX_HTML_BYTES = 524_288
 
 /**
  * @param {string} tag
@@ -9,7 +15,7 @@ function parseAttributes(tag) {
   const pattern = /([^\s=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g
 
   for (const match of tag.matchAll(pattern)) {
-    attributes[match[1].toLowerCase()] = match[2] ?? match[3] ?? match[4] ?? ''
+    attributes[match[1].toLowerCase()] = decodeHTMLAttribute(match[2] ?? match[3] ?? match[4] ?? '')
   }
 
   return attributes
@@ -62,6 +68,33 @@ export function extractFaviconUrl(html, pageUrl) {
 }
 
 /**
+ * Reads at most `limit` bytes of a response body and cancels the rest.
+ * @param {Response} response
+ * @param {number} limit
+ * @returns {Promise<{ data: Buffer, complete: boolean }>}
+ */
+async function readAtMost(response, limit) {
+  const chunks = []
+  let size = 0
+  if (!response.body) return { data: Buffer.alloc(0), complete: true }
+
+  const reader = response.body.getReader()
+  try {
+    for (let read = await reader.read(); !read.done; read = await reader.read()) {
+      chunks.push(read.value)
+      size += read.value.byteLength
+      if (size > limit) {
+        reader.cancel().catch(() => {})
+        return { data: Buffer.concat(chunks).subarray(0, limit), complete: false }
+      }
+    }
+  } finally {
+    reader.releaseLock()
+  }
+  return { data: Buffer.concat(chunks), complete: true }
+}
+
+/**
  * @param {string} searchUrl
  * @param {(input: string, init: RequestInit) => Promise<Response>} fetchPage
  * @returns {Promise<string>}
@@ -79,7 +112,8 @@ export async function resolveFaviconUrl(searchUrl, fetchPage) {
     const contentType = response.headers.get('content-type') ?? ''
     if (!contentType.includes('text/html')) return fallback
 
-    return extractFaviconUrl(await response.text(), response.url || homepage) ?? fallback
+    const { data } = await readAtMost(response, MAX_HTML_BYTES)
+    return extractFaviconUrl(new TextDecoder().decode(data), response.url || homepage) ?? fallback
   } catch {
     return fallback
   }
@@ -102,8 +136,8 @@ export async function fetchFaviconDataUrl(iconUrl, fetchIcon) {
     const contentType = response.headers.get('content-type')?.split(';')[0] ?? ''
     if (!response.ok || !contentType.startsWith('image/')) return iconUrl
 
-    const data = Buffer.from(await response.arrayBuffer())
-    if (data.length === 0 || data.length > 262_144) return iconUrl
+    const { data, complete } = await readAtMost(response, MAX_ICON_BYTES)
+    if (data.length === 0 || !complete) return iconUrl
 
     return `data:${contentType};base64,${data.toString('base64')}`
   } catch {
