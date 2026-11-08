@@ -1,7 +1,6 @@
 import dbus from 'dbus-native'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+
+import { createKwinScriptFile, getKwinScriptPluginName, getKwinWindowOwner, isKwinWindowOwnedBy } from './kwinScripts.js'
 
 const KDE_DESKTOP_PATTERN = /(?:^|[:;/_-])(?:kde|plasma(?:wayland)?)(?:$|[:;/_-])/i
 const KWIN_SERVICE = 'org.kde.KWin'
@@ -81,6 +80,7 @@ export function shouldMonitorKdeWaylandWindowState({
  *   caption: string,
  *   minimized: boolean,
  *   pid: number,
+ *   desktopFile: string,
  *   width: number,
  *   height: number
  * }} KwinWindowInfo
@@ -101,13 +101,14 @@ export function shouldMonitorKdeWaylandWindowState({
 export function normalizeKwinWindowInfo(value) {
   if (value === null || typeof value !== 'object') return null
 
-  const { uuid, caption, minimized, pid, width, height } = value
+  const { uuid, caption, minimized, pid, desktopFile = '', width, height } = value
   const numericPid = typeof pid === 'bigint' ? Number(pid) : pid
   if (
     typeof uuid !== 'string' ||
     typeof caption !== 'string' ||
     typeof minimized !== 'boolean' ||
     !Number.isSafeInteger(numericPid) ||
+    typeof desktopFile !== 'string' ||
     ![width, height].every(Number.isSafeInteger)
   ) {
     return null
@@ -118,6 +119,7 @@ export function normalizeKwinWindowInfo(value) {
     caption,
     minimized,
     pid: numericPid,
+    desktopFile,
     width,
     height,
   }
@@ -202,14 +204,14 @@ async function queryKwinWindow(kwin, uuid) {
 /**
  * @param {import('dbus-native').DBusInterface} kwin
  * @param {import('dbus-native').DBusInterface} runner
- * @param {number} processId
+ * @param {import('./kwinScripts.js').KwinWindowOwner} owner
  * @returns {Promise<KwinWindowInfo[]>}
  */
-async function queryKwinWindows(kwin, runner, processId) {
+async function queryKwinWindows(kwin, runner, owner) {
   const handles = [...new Set(extractKwinWindowHandles(await runner.Match(WINDOW_SEARCH_TERM)))]
   const windows = await Promise.all(handles.map(handle => queryKwinWindow(kwin, handle)))
 
-  return windows.filter(window => window?.pid === processId)
+  return windows.filter(window => window !== null && isKwinWindowOwnedBy(window, owner))
 }
 
 /**
@@ -217,24 +219,26 @@ async function queryKwinWindows(kwin, runner, processId) {
  * used by the monitor. Retries while the bus times out.
  *
  * @param {number[]} [retryDelays]
+ * @param {NodeJS.ProcessEnv} [environment]
  * @returns {ReturnType<typeof connectKdeWaylandWindowStateBackend>}
  */
-export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_RETRY_DELAYS) {
+export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_RETRY_DELAYS, environment = process.env) {
   for (const delay of retryDelays) {
     try {
-      return await connectKdeWaylandWindowStateBackend()
+      return await connectKdeWaylandWindowStateBackend(environment)
     } catch {
       await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
-  return connectKdeWaylandWindowStateBackend().catch(() => null)
+  return connectKdeWaylandWindowStateBackend(environment).catch(() => null)
 }
 
 /**
+ * @param {NodeJS.ProcessEnv} environment
  * @returns {Promise<{
  *   close: () => Promise<void>,
  *   queryWindow: (uuid: string) => Promise<KwinWindowInfo | null>,
- *   queryWindows: (processId: number) => Promise<KwinWindowInfo[]>,
+ *   queryWindows: (owner: import('./kwinScripts.js').KwinWindowOwner) => Promise<KwinWindowInfo[]>,
  *   watchActiveWindow: (listener: (window: KwinActiveWindowInfo) => void) => {
  *     activeWindow: KwinActiveWindowInfo | null,
  *     stop: () => void
@@ -242,11 +246,11 @@ export async function createKdeWaylandWindowStateBackend(retryDelays = BACKEND_R
  *   watchWindowMinimized: (listener: (uuid: string, minimized: boolean) => void) => () => void
  * } | null>}
  */
-async function connectKdeWaylandWindowStateBackend() {
+async function connectKdeWaylandWindowStateBackend(environment) {
   let bus
-  let scriptDirectory
+  let scriptFile
   let scripting
-  let scriptPluginName
+  const scriptPluginName = getKwinScriptPluginName(KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX, getKwinWindowOwner(environment))
 
   try {
     bus = dbus.sessionBus({ reconnect: true, timeout: 2_000 })
@@ -261,9 +265,7 @@ async function connectKdeWaylandWindowStateBackend() {
     await runner.Match(WINDOW_SEARCH_TERM)
     if (typeof bus.name !== 'string') throw new Error('D-Bus connection has no unique name')
 
-    scriptDirectory = await mkdtemp(join(tmpdir(), 'opentubex-kwin-'))
-    const scriptPath = join(scriptDirectory, 'active-window.js')
-    scriptPluginName = `${KWIN_ACTIVE_WINDOW_SCRIPT_PREFIX}-${process.pid}`
+    scriptFile = await createKwinScriptFile('active-window.js', environment)
     /** @type {KwinActiveWindowInfo | null} */
     let activeWindow = null
     let closed = false
@@ -340,7 +342,7 @@ const watchMinimized = window => {
 workspace.windowList().forEach(window => watchMinimized(window)())
 workspace.windowAdded.connect(watchMinimized)
 `
-      await writeFile(scriptPath, script, 'utf8')
+      await scriptFile.write(script)
       if (closed) return
 
       const scriptId = await bus.invoke({
@@ -349,7 +351,7 @@ workspace.windowAdded.connect(watchMinimized)
         interface: KWIN_SCRIPTING_INTERFACE,
         member: 'loadScript',
         signature: 'ss',
-        body: [scriptPath, scriptPluginName],
+        body: [scriptFile.path, scriptPluginName],
       })
       if (!Number.isInteger(scriptId) || scriptId < 0) {
         throw new Error('KWin rejected the active-window script')
@@ -399,7 +401,7 @@ workspace.windowAdded.connect(watchMinimized)
         await scriptReload
         await scripting.unloadScript(scriptPluginName).catch(() => {})
         bus.unexportInterface(ACTIVE_WINDOW_REPORT_PATH, ACTIVE_WINDOW_REPORT_INTERFACE)
-        await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
+        await scriptFile.remove()
         await bus.close()
       },
       watchActiveWindow: listener => {
@@ -416,15 +418,11 @@ workspace.windowAdded.connect(watchMinimized)
         return () => minimizedListeners.delete(listener)
       },
       queryWindow: uuid => queryKwinWindow(kwin, uuid),
-      queryWindows: processId => queryKwinWindows(kwin, runner, processId),
+      queryWindows: owner => queryKwinWindows(kwin, runner, owner),
     }
   } catch (error) {
-    if (scripting !== undefined && scriptPluginName !== undefined) {
-      await scripting.unloadScript(scriptPluginName).catch(() => {})
-    }
-    if (scriptDirectory !== undefined) {
-      await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
-    }
+    await scripting?.unloadScript(scriptPluginName).catch(() => {})
+    await scriptFile?.remove()
     await bus?.close().catch(() => {})
     // A slow bus can answer later. A missing or refusing KWin fails at once
     // and stays that way, so only timeouts are retried.
@@ -445,7 +443,7 @@ workspace.windowAdded.connect(watchMinimized)
  *   onFocusedState?: (focused: boolean) => void,
  *   onMinimizedState: (minimized: boolean) => void,
  *   releaseWindowIdentity?: () => void,
- *   processId?: number,
+ *   owner?: import('./kwinScripts.js').KwinWindowOwner,
  *   detectionDelay?: number,
  *   focusHandoffDelay?: number
  * }} options
@@ -458,7 +456,7 @@ export function monitorKdeWaylandWindowState({
   onFocusedState = () => {},
   onMinimizedState,
   releaseWindowIdentity = () => {},
-  processId = process.pid,
+  owner = getKwinWindowOwner(),
   detectionDelay = 100,
   focusHandoffDelay = 100,
 }) {
@@ -495,7 +493,7 @@ export function monitorKdeWaylandWindowState({
       caption: browserWindow.getTitle(),
       bounds: browserWindow.getBounds(),
     }
-    const pending = backend.then(value => value?.queryWindows(processId) ?? [])
+    const pending = backend.then(value => value?.queryWindows(owner) ?? [])
     pending.then(windows => {
       if (!stopped && generation === token && !minimized && browserWindow.isFocused()) {
         baseline = windows
@@ -604,7 +602,7 @@ export function monitorKdeWaylandWindowState({
         caption: browserWindow.getTitle(),
         bounds: browserWindow.getBounds(),
       }
-      const current = await value.queryWindows(processId)
+      const current = await value.queryWindows(owner)
       if (stopped || generation !== token) return
 
       baseline = current

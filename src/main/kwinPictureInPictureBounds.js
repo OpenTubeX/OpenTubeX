@@ -1,9 +1,7 @@
 // @ts-check
 import dbus from 'dbus-native'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 
+import { createKwinScriptFile, createKwinWindowOwnerCheck, getKwinScriptPluginName, getKwinWindowOwner } from './kwinScripts.js'
 import { fitPictureInPictureBounds } from './pictureInPictureBounds.js'
 
 const KWIN_SERVICE = 'org.kde.KWin'
@@ -13,20 +11,21 @@ const REPORT_PATH = '/io/github/OpenTubeX/KWinPictureInPicture'
 const REPORT_INTERFACE = 'io.github.OpenTubeX.KWinPictureInPicture'
 
 /**
- * Builds the KWin script that restores and reports the bounds of this
- * process's Picture-in-Picture windows. KWin creates a new window each time
+ * Builds the KWin script that restores and reports the bounds of the
+ * owner's Picture-in-Picture windows. KWin creates a new window each time
  * one shows, so the script also keeps the bounds for the rest of the session.
  *
  * @param {{
- *   processId: number,
+ *   owner: import('./kwinScripts.js').KwinWindowOwner,
  *   destination: string,
  *   saved: import('./pictureInPictureBounds.js').Rect | null
  * }} options
  */
-export function createKwinPictureInPictureScript({ processId, destination, saved }) {
+export function createKwinPictureInPictureScript({ owner, destination, saved }) {
   const report = [destination, REPORT_PATH, REPORT_INTERFACE, 'ReportBounds'].map(value => JSON.stringify(value)).join(', ')
   return `
 const fit = ${fitPictureInPictureBounds}
+const isOwn = ${createKwinWindowOwnerCheck(owner)}
 let saved = ${JSON.stringify(saved)}
 const rect = geometry => ({ x: geometry.x, y: geometry.y, width: geometry.width, height: geometry.height })
 const workAreas = () => workspace.screens.map(output => rect(workspace.clientArea(KWin.MaximizeArea, output, workspace.currentDesktop)))
@@ -51,7 +50,7 @@ const restore = window => {
 // desktop file name. Its caption is translated, and on Wayland it is only
 // kept above others by a window rule.
 const track = window => {
-  if (window.pid === ${processId} && window.desktopFileName === '' && window.normalWindow) restore(window)
+  if (window.desktopFileName === '' && window.normalWindow && isOwn(window)) restore(window)
 }
 workspace.windowList().forEach(track)
 workspace.windowAdded.connect(track)
@@ -64,15 +63,16 @@ workspace.windowAdded.connect(track)
  *
  * @param {{
  *   store: ReturnType<typeof import('./pictureInPictureBounds.js').createPictureInPictureBoundsStore>,
- *   processId?: number
+ *   environment?: NodeJS.ProcessEnv
  * }} options
  * @returns {Promise<(() => Promise<void>) | null>} closes the backend
  */
-export async function startKwinPictureInPictureBounds({ store, processId = process.pid }) {
+export async function startKwinPictureInPictureBounds({ store, environment = process.env }) {
+  const owner = getKwinWindowOwner(environment)
   let bus
-  let directory
+  let scriptFile
   let scripting
-  const pluginName = `opentubex-picture-in-picture-${processId}`
+  const pluginName = getKwinScriptPluginName('opentubex-picture-in-picture', owner)
   try {
     bus = dbus.sessionBus({ timeout: 2_000 })
     bus.connection.on('error', () => {})
@@ -91,9 +91,8 @@ export async function startKwinPictureInPictureBounds({ store, processId = proce
       properties: {}
     })
 
-    directory = await mkdtemp(join(tmpdir(), 'opentubex-kwin-pip-'))
-    const file = join(directory, 'picture-in-picture.js')
-    await writeFile(file, createKwinPictureInPictureScript({ processId, destination: bus.name, saved: await store.load() }), 'utf8')
+    scriptFile = await createKwinScriptFile('picture-in-picture.js', environment)
+    await scriptFile.write(createKwinPictureInPictureScript({ owner, destination: bus.name, saved: await store.load() }))
     await scripting.unloadScript(pluginName).catch(() => {})
     const scriptId = await bus.invoke({
       destination: KWIN_SERVICE,
@@ -101,22 +100,22 @@ export async function startKwinPictureInPictureBounds({ store, processId = proce
       interface: KWIN_SCRIPTING_INTERFACE,
       member: 'loadScript',
       signature: 'ss',
-      body: [file, pluginName]
+      body: [scriptFile.path, pluginName]
     })
     if (!Number.isInteger(scriptId) || scriptId < 0) throw new Error('KWin rejected the Picture-in-Picture script')
     await scripting.start()
 
     const connectedBus = bus
-    const scriptDirectory = directory
+    const loadedScriptFile = scriptFile
     const loadedScripting = scripting
     return async () => {
       await loadedScripting.unloadScript(pluginName).catch(() => {})
-      await rm(scriptDirectory, { force: true, recursive: true }).catch(() => {})
+      await loadedScriptFile.remove()
       await connectedBus.close().catch(() => {})
     }
   } catch {
     await scripting?.unloadScript(pluginName).catch(() => {})
-    if (directory !== undefined) await rm(directory, { force: true, recursive: true }).catch(() => {})
+    await scriptFile?.remove()
     await bus?.close().catch(() => {})
     return null
   }
