@@ -44,6 +44,28 @@
   padding-block: 6px;
 }
 
+/* Classes set by useGridReorder: the other cards slide aside while one is dragged. */
+.playlistList.reorderActive,
+.playlistList.reorderActive :deep(*) {
+  cursor: grabbing;
+}
+
+.playlistList.reorderActive :deep([data-playlist-drag-item]) {
+  transition: translate var(--motion-fast-spatial);
+}
+
+.playlistList :deep(.reorderDragged) {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--shape-corner-large);
+  background-color: var(--card-bg-color);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 30%);
+}
+
+.playlistList.reorderActive :deep(.reorderDragged:not(.reorderDropping)) {
+  transition: none;
+}
+
 .newPlaylistButton {
   flex: 0 0 auto;
 }
