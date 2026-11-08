@@ -526,9 +526,9 @@ test.describe('search history dropdown shape', () => {
       const listStyle = list && getComputedStyle(list)
       return {
         fieldBottomCorners: [fieldStyle.borderEndStartRadius, fieldStyle.borderEndEndRadius],
-        fieldTopCorner: Math.min(parseFloat(fieldStyle.borderStartStartRadius), field.height / 2),
+        fieldTopCorner: fieldStyle.borderStartStartRadius,
         listTopCorners: listStyle && [listStyle.borderStartStartRadius, listStyle.borderStartEndRadius],
-        listBottomCorner: listStyle && parseFloat(listStyle.borderEndStartRadius),
+        listBottomCorner: listStyle?.borderEndStartRadius,
         sharedShadow: !!listStyle && fieldStyle.boxShadow.includes(listStyle.boxShadow),
         gap: listBounds && Math.abs(listBounds.top - field.bottom),
         inlineOffset: listBounds && Math.max(
@@ -546,7 +546,7 @@ test.describe('search history dropdown shape', () => {
         fieldBottomCorners,
         listTopCorners,
         sharedShadow,
-        cornersMatch: Math.abs(listBottomCorner - fieldTopCorner) < 0.1,
+        cornersMatch: listBottomCorner === fieldTopCorner,
         attached: gap < 0.1 && inlineOffset < 0.1
       }
     }).toEqual({
@@ -559,9 +559,10 @@ test.describe('search history dropdown shape', () => {
 
     await input.blur()
     await expect(list).toHaveCount(0)
+    // The closed field is a pill again.
     await expect.poll(async () => {
       const { fieldBottomCorners, fieldTopCorner } = await shape()
-      return fieldBottomCorners.map(parseFloat).every(corner => Math.min(corner, fieldTopCorner) === fieldTopCorner)
+      return fieldBottomCorners.every(corner => corner === fieldTopCorner)
     }).toBe(true)
   })
 })
