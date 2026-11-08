@@ -486,12 +486,17 @@ test('rebuilding the controls mid-drag ends the drag so play and pause keep work
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   await expect(playButton).toHaveAttribute('aria-label', /^Play/)
 
-  // Destroying the controls mid-drag has no drag to finish and must not fail.
+  // Destroying the controls mid-drag has no drag to finish and must not fail,
+  // also after Vue has removed the player from the page, as an unmount does.
   await expect(bar).toBeEnabled()
   await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [pointAt(0.6)] })
   await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [pointAt(0.65)] })
   await expect.poll(isSeeking).toBe(true)
-  expect(await video.evaluate(element => element.ui.destroy().then(() => 'destroyed', error => String(error)))).toBe('destroyed')
+  expect(await video.evaluate(element => {
+    const { ui } = element
+    element.closest('.ftVideoPlayer').remove()
+    return ui.destroy().then(() => 'destroyed', error => String(error))
+  })).toBe('destroyed')
   await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
 })
 
