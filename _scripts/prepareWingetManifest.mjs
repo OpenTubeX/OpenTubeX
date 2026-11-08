@@ -9,6 +9,10 @@ import { releaseNotesText } from './storeReleaseNotes.mjs'
 const PACKAGE_IDENTIFIER = 'OpenTubeX.OpenTubeX'
 const MAX_WINGET_TAGS = 16
 const MAX_WINGET_RELEASE_NOTES_LENGTH = 10_000
+const INSTALLER_SCOPES = [
+  ['user', '/CURRENTUSER'],
+  ['machine', '/ALLUSERS'],
+]
 
 export function cleanReleaseNotes(markdown) {
   const cleaned = releaseNotesText(markdown, ['windows'])
@@ -56,6 +60,38 @@ function replaceReleaseNotes(manifest, releaseNotes) {
   return `${manifest.slice(0, start)}${replacement}${manifest.slice(end)}`
 }
 
+// Komac writes one unscoped entry per architecture. The NSIS installer takes
+// /CURRENTUSER or /ALLUSERS, so winget can offer both installation scopes.
+function addInstallerScopes(manifest) {
+  const start = manifest.indexOf('\nInstallers:\n')
+  const end = manifest.indexOf('\nManifestType:', start)
+
+  assert(start !== -1 && end !== -1, 'Could not find the Installers block')
+
+  const entries = manifest
+    .slice(start + '\nInstallers:\n'.length, end)
+    .split(/^(?=- )/m)
+
+  assert(
+    entries.every((entry) => !/^\s*(?:Scope|InstallerSwitches):/m.test(entry)),
+    'Installer entries already have a scope or installer switches'
+  )
+
+  const scopedEntries = entries.flatMap((entry) => {
+    const [firstLine, ...otherLines] = entry.trimEnd().split('\n')
+
+    return INSTALLER_SCOPES.map(([scope, installerSwitch]) => [
+      firstLine,
+      `  Scope: ${scope}`,
+      ...otherLines,
+      '  InstallerSwitches:',
+      `    Custom: ${installerSwitch}`,
+    ].join('\n'))
+  })
+
+  return `${manifest.slice(0, start)}\nInstallers:\n${scopedEntries.join('\n')}${manifest.slice(end)}`
+}
+
 function scalar(block, key) {
   return block.match(new RegExp(`^\\s*${key}:\\s*(.+)$`, 'm'))?.[1].trim()
 }
@@ -90,14 +126,14 @@ function validateInstallerManifest(manifest, { release, version }) {
     assert(asset, `Missing release asset ${assetName}`)
     assert.match(asset.digest ?? '', /^sha256:[\da-f]{64}$/i, `Missing SHA-256 digest for ${assetName}`)
 
-    for (const scope of ['user', 'machine']) {
+    for (const [scope, installerSwitch] of INSTALLER_SCOPES) {
       const block = installerBlocks.find((entry) =>
         scalar(entry, 'Architecture') === architecture && scalar(entry, 'Scope') === scope)
 
       assert(block, `Missing ${architecture} ${scope} installer`)
       assert.equal(scalar(block, 'InstallerUrl'), asset.browser_download_url)
       assert.equal(scalar(block, 'InstallerSha256').toLowerCase(), asset.digest.slice('sha256:'.length).toLowerCase())
-      assert.equal(scalar(block, 'Custom'), scope === 'user' ? '/CURRENTUSER' : '/ALLUSERS')
+      assert.equal(scalar(block, 'Custom'), installerSwitch)
     }
   }
 }
@@ -171,6 +207,7 @@ export function prepareManifest({ manifestDirectory, release, topics }) {
 
   installerManifest = replaceScalar(installerManifest, 'ReleaseDate', releaseDate)
   installerManifest = replaceScalar(installerManifest, 'DisplayName', `OpenTubeX ${version}`, { all: true })
+  installerManifest = addInstallerScopes(installerManifest)
   localeManifest = replaceTags(localeManifest, tags)
   localeManifest = replaceReleaseNotes(localeManifest, releaseNotes)
   localeManifest = replaceScalar(localeManifest, 'ReleaseNotesUrl', releaseUrl)
