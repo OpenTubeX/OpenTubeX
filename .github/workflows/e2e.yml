@@ -207,12 +207,12 @@ jobs:
 
     - name: Get Electron version
       id: electron
-      if: ${{ matrix.project != 'browser' }}
       run: printf 'version=%s\n' "$(node -p "require('./node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
       shell: bash
 
+    # The global setup imports Electron in every project, which downloads the
+    # binary from GitHub when it is missing.
     - name: Restore Electron binary
-      if: ${{ matrix.project != 'browser' }}
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         key: ${{ format('electron-{0}-{1}-{2}', runner.os, runner.arch, steps.electron.outputs.version) }}
