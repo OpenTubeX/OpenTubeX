@@ -211,11 +211,11 @@ test.describe('search history suggestions', () => {
     await matchingSuggestions.locator('.optionWrapper[href*="time=today"]').click()
     await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('time')).toBe('today')
 
+    // Searching again moves the Today entry to the top once it is saved. The
+    // rows are reused in place then, so a click during the move lands on Today.
     await page.locator(sel.searchInput).click()
-    await suggestions(page)
-      .filter({ hasText: 'daily news' })
-      .locator('.optionWrapper[href*="time=week"]')
-      .click()
+    await expect(matchingSuggestions.nth(0)).toContainText('Today')
+    await matchingSuggestions.locator('.optionWrapper[href*="time=week"]').click()
     await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('time')).toBe('week')
   })
 
