@@ -296,7 +296,7 @@ test('a periodic check that finishes behind open release notes leaves them uncha
   await expect(page.locator('.changeLogTitle')).toHaveText(`Update to OpenTubeX ${olderUpdateVersion}`)
   const response = page.waitForResponse(RELEASES_URL)
   respond()
-  await (await response).finished()
+  expect(await (await response).finished()).toBeNull()
   // Let the check apply its result, which only needs cached modules and one IPC reply
   await page.evaluate(() => new Promise(resolve => requestIdleCallback(() => requestIdleCallback(resolve))))
 
