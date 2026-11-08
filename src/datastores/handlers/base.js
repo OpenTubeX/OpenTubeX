@@ -389,7 +389,10 @@ class History {
   }
 
   static migrateWatchedStatus() {
-    this.migrationPromise ??= this._migrateWatchedStatus()
+    this.migrationPromise ??= this._migrateWatchedStatus().catch(error => {
+      this.migrationPromise = null
+      throw error
+    })
     return this.migrationPromise
   }
 
@@ -471,21 +474,24 @@ class History {
     return db.history.removeAsync({ videoId })
   }
 
-  static async deleteOlderThan(cutoff, excludedVideoIds = []) {
-    const query = { timeWatched: { $lt: cutoff } }
-    if (excludedVideoIds.length > 0) {
-      query.videoId = { $nin: excludedVideoIds }
-    }
+  static deleteOlderThan(cutoff, excludedVideoIds = []) {
+    // Queue with the history writes, so a video watched again meanwhile isn't removed.
+    return Settings.runSeenStateUpdate(async () => {
+      const query = { timeWatched: { $lt: cutoff } }
+      if (excludedVideoIds.length > 0) {
+        query.videoId = { $nin: excludedVideoIds }
+      }
 
-    const records = await db.history.findAsync(query)
-    const videoIds = records.map(record => record.videoId)
+      const records = await db.history.findAsync(query)
+      const videoIds = records.map(record => record.videoId)
 
-    if (videoIds.length > 0) {
-      await recommendations.remove(videoIds)
-      await db.history.removeAsync(createIdQuery('videoId', videoIds), { multi: true })
-    }
+      if (videoIds.length > 0) {
+        await recommendations.remove(videoIds)
+        await db.history.removeAsync(createIdQuery('videoId', videoIds), { multi: true })
+      }
 
-    return videoIds
+      return videoIds
+    })
   }
 
   static async deleteAll() {
@@ -712,7 +718,10 @@ class WatchStats {
   }
 
   static migrateHistory() {
-    this.migrationPromise ??= this.runWrite(() => this._migrateHistory())
+    this.migrationPromise ??= this.runWrite(() => this._migrateHistory()).catch(error => {
+      this.migrationPromise = null
+      throw error
+    })
     return this.migrationPromise
   }
 

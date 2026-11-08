@@ -152,6 +152,11 @@ export function migrateLegacyHistoryRecord(record) {
 
 const timeWatched = record => typeof record.timeWatched === 'number' ? record.timeWatched : -Infinity
 
+/** Sorts history newest first, with progress-only records that have no watch time last. */
+export function compareHistoryRecordsNewestFirst(a, b) {
+  return (timeWatched(b) - timeWatched(a)) || 0
+}
+
 /**
  * Sorts stored history newest first and keeps one record per video: the
  * newest, or the first stored when several were watched at the same time.
@@ -160,7 +165,7 @@ const timeWatched = record => typeof record.timeWatched === 'number' ? record.ti
  * @returns {{ records: object[], duplicateIds: unknown[] }}
  */
 export function newestUniqueHistoryRecords(records) {
-  records.sort((a, b) => (timeWatched(b) - timeWatched(a)) || 0)
+  records.sort(compareHistoryRecordsNewestFirst)
   const seen = new Set()
   const duplicateIds = []
   const unique = records.filter(record => {

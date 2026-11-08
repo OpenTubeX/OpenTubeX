@@ -4,6 +4,7 @@ import { DBHistoryHandlers } from '../../../datastores/handlers/index'
 import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
 import {
   canMarkHistoryEntryAsWatched,
+  compareHistoryRecordsNewestFirst,
   getRetentionCutoff,
   migrateLegacyHistoryRecord,
 } from '../../helpers/history'
@@ -132,7 +133,7 @@ const actions = {
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      sortedRecords.sort((a, b) => b.timeWatched - a.timeWatched)
+      sortedRecords.sort(compareHistoryRecordsNewestFirst)
 
       await DBHistoryHandlers.overwrite(sortedRecords)
 
@@ -370,7 +371,7 @@ const mutations = {
     // Replace existing entries in place so stable sorting preserves timestamp ties.
     state.historyCacheSorted = retained
       .concat(upserts.filter(record => !retainedIds.has(record.videoId)))
-      .sort((a, b) => b.timeWatched - a.timeWatched)
+      .sort(compareHistoryRecordsNewestFirst)
 
     for (const videoId of deletions) {
       delete state.historyCacheById[videoId]
