@@ -402,6 +402,28 @@ test('GitLab issue requests authenticate with the sync token', async t => {
   for (const { options } of requests) assert.equal(options.headers['PRIVATE-TOKEN'], 'test-token')
 })
 
+test('GitLab requests retry transient failures except for note creation', async t => {
+  const requests = []
+  const failures = [new TypeError('fetch failed', { cause: { code: 'ECONNRESET' } }), { ok: false, status: 502 }]
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    requests.push(options.method)
+    const failure = failures.shift()
+    if (failure instanceof Error) throw failure
+    return failure ?? { ok: true, json: async () => [] }
+  })
+  const client = createClient('test-token', 'media-token', 1)
+  assert.deepEqual(await client.gl('user'), [])
+  assert.deepEqual(requests, ['GET', 'GET', 'GET'])
+  failures.push({ ok: false, status: 404 })
+  await assert.rejects(client.gl('user'), { message: 'GitLab GET user: HTTP 404' })
+  failures.push(new DOMException('The operation was aborted due to timeout', 'TimeoutError'))
+  requests.length = 0
+  await assert.rejects(client.gl('notes', 'POST', { body: 'Reply' }), { message: 'GitLab POST notes: TimeoutError' })
+  assert.deepEqual(requests, ['POST'])
+  failures.push(...Array(3).fill({ ok: false, status: 503 }))
+  await assert.rejects(client.gl('user'), { message: 'GitLab GET user: HTTP 503' })
+})
+
 test('generated title links display named and numeric entity syntax literally', async () => {
   const { state, client } = fixture()
   state.sources[0].title = 'Show &copy; &#91; &#x5b; &amp; literally'

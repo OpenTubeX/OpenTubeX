@@ -28,6 +28,30 @@ const githubBot = 'github-actions[bot]'
 const prefix = 'opentubex-sync'
 const marker = (kind, id) => `<!-- ${prefix}:${kind}:${id} -->`
 class SyncError extends Error {}
+class HttpError extends SyncError {
+  constructor(message, status) {
+    super(message)
+    this.status = status
+  }
+}
+const transient = status => status === 429 || status >= 500
+
+// GitLab.com intermittently drops connections or times out, so idempotent
+// requests are retried. Network errors only report their kind, never content.
+async function gitlab(retryDelay, label, request) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await request()
+    } catch (error) {
+      if (error instanceof HttpError ? !transient(error.status) : error instanceof SyncError) throw error
+      if (!retryDelay || attempt === 3) {
+        if (error instanceof SyncError) throw error
+        throw new SyncError(`${label}: ${error.name}${error.cause?.code ? ` ${error.cause.code}` : ''}`)
+      }
+      await setTimeout(retryDelay * attempt)
+    }
+  }
+}
 
 function markedId(body, kind) {
   return body?.match(new RegExp(`^<!-- ${prefix}:${kind}:(\\d+) -->`))?.[1]
@@ -262,7 +286,7 @@ function mediaMirror(client) {
   }
 }
 
-export function createClient(token, mediaToken) {
+export function createClient(token, mediaToken, retryDelay = 2000) {
   const gh = (args, input, env) => {
     try {
       return JSON.parse(execFileSync('gh', args, {
@@ -280,16 +304,19 @@ export function createClient(token, mediaToken) {
     }
   }
   return {
-    async gl(path, method = 'GET', body) {
-      const response = await fetch(`https://gitlab.com/api/v4/${path}`, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'PRIVATE-TOKEN': token },
-        body: body ? JSON.stringify(body) : undefined,
-        redirect: 'error',
-        signal: AbortSignal.timeout(30000),
+    gl(path, method = 'GET', body) {
+      // POST is not idempotent: a lost response may still have created a note.
+      return gitlab(method !== 'POST' && retryDelay, `GitLab ${method} ${path}`, async () => {
+        const response = await fetch(`https://gitlab.com/api/v4/${path}`, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'PRIVATE-TOKEN': token },
+          body: body ? JSON.stringify(body) : undefined,
+          redirect: 'error',
+          signal: AbortSignal.timeout(30000),
+        })
+        if (!response.ok) throw new HttpError(`GitLab ${method} ${path}: HTTP ${response.status}`, response.status)
+        return response.json()
       })
-      if (!response.ok) throw new SyncError(`GitLab ${method} ${path}: HTTP ${response.status}`)
-      return response.json()
     },
     async gh(path, method = 'GET', body) {
       // Space mutations to stay below GitHub's secondary content-creation limits.
@@ -310,13 +337,16 @@ export function createClient(token, mediaToken) {
         rmSync(directory, { recursive: true, force: true })
       }
     },
-    async download(path) {
-      const response = await fetch(uploadsUrl + path.slice('/uploads/'.length), { redirect: 'error', signal: AbortSignal.timeout(30000) })
-      return {
-        status: response.status,
-        type: response.headers.get('content-type'),
-        bytes: response.ok ? Buffer.from(await response.arrayBuffer()) : null,
-      }
+    download(path) {
+      return gitlab(retryDelay, 'GitLab upload download', async () => {
+        const response = await fetch(uploadsUrl + path.slice('/uploads/'.length), { redirect: 'error', signal: AbortSignal.timeout(30000) })
+        if (transient(response.status)) throw new HttpError(`GitLab upload download: HTTP ${response.status}`, response.status)
+        return {
+          status: response.status,
+          type: response.headers.get('content-type'),
+          bytes: response.ok ? Buffer.from(await response.arrayBuffer()) : null,
+        }
+      })
     },
   }
 }
