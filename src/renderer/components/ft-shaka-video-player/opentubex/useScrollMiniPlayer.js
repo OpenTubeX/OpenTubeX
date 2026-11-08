@@ -350,7 +350,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function moveScrollMiniPlayerDrag(_x, y) {
     if (!inlineDrag || inlineDrag.finishing) return
     inlineDrag.y = y
-    inlineDrag.velocity.add(Math.min(1, Math.abs(y) / getInlineDragDistance(inlineDrag)))
+    // Track pixels: a restore measures its distance only after the first move.
+    inlineDrag.velocity.add(Math.abs(y), performance.now())
     if (inlineDragFrame === null) inlineDragFrame = requestAnimationFrame(renderScrollMiniPlayerDrag)
   }
 
@@ -419,13 +420,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     let restored = false
     drag.finishing = true
     // Read the release speed before waiting, which would age the last sample.
-    const velocity = drag.velocity.velocity()
+    const pixelsPerMs = drag.velocity.velocity(performance.now())
     await drag.ready
     if (inlineDrag !== drag || !container.value) return
     if (inlineDragFrame !== null) cancelAnimationFrame(inlineDragFrame)
     renderScrollMiniPlayerDrag()
     try {
-      await settleScrollMiniPlayerDrag(commit, velocity)
+      await settleScrollMiniPlayerDrag(commit, pixelsPerMs / getInlineDragDistance(drag))
       if (inlineDrag !== drag || !container.value) return
       // Navigation and layout changes happen behind the completed preview, after
       // the video has reached the same endpoint as the normal mini-player motion.
