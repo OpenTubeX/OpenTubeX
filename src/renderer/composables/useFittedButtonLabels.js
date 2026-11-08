@@ -1,4 +1,7 @@
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toValue } from 'vue'
+
+// Fallback width of an icon-only button, used for actions in the More menu
+const ICON_BUTTON_SIZE = 48
 
 /**
  * @param {Element} element
@@ -14,11 +17,21 @@ function getOuterWidth(element) {
  * `.buttonLabel` children and stay in the accessible name. CSS cannot measure
  * the labeled width of a collapsed group, so both widths are measured within
  * the same frame.
+ *
+ * When even the icons do not fit, the buttons with a `data-overflow-key` move
+ * to the group's menu in the order of `overflowOrder`. Like the watch page's
+ * toolbar, the moved buttons are budgeted at an icon button's width each, so
+ * the freed space does not bring them back.
  * @param {import('vue').Ref<{ $el: HTMLElement } | null>} group
  * @param {import('vue').Ref<HTMLElement | null>} row
+ * @param {import('vue').MaybeRefOrGetter<string[]>} [overflowOrder] Keys of the shown
+ *   buttons that may move to the menu, the first one first
+ * @returns {{ overflowed: import('vue').ComputedRef<string[]> }} Keys of the moved buttons
  */
-export function useFittedButtonLabels(group, row) {
+export function useFittedButtonLabels(group, row, overflowOrder = []) {
   let frame
+  const overflowCount = ref(0)
+  const overflowed = computed(() => toValue(overflowOrder).slice(0, overflowCount.value))
 
   function update() {
     const groupElement = group.value?.$el
@@ -39,17 +52,38 @@ export function useFittedButtonLabels(group, row) {
     const rowStyle = getComputedStyle(rowElement)
     const availableWidth = rowElement.clientWidth - parseFloat(rowStyle.paddingInlineStart) -
       parseFloat(rowStyle.paddingInlineEnd) + 0.5
-    let width = labeledWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) + gap * Math.max(items.length - 1, 0)
+    const sumWidths = widths => widths.reduce((sum, itemWidth) => sum + itemWidth, 0) + gap * Math.max(widths.length - 1, 0)
 
+    const order = toValue(overflowOrder)
+    const hiddenCount = overflowed.value.length
+    const iconWidth = collapsedWidths.find((_, index) => collapsible[index]) ?? ICON_BUTTON_SIZE
+    // Moved buttons come back as icons, so they are budgeted in the collapsed width
+    const hiddenWidth = hiddenCount * (iconWidth + gap)
+    let collapsedWidth = sumWidths(collapsedWidths) + hiddenWidth
+    let count = 0
+    while (collapsedWidth > availableWidth && count < order.length) {
+      const item = groupElement.querySelector(`:scope > [data-overflow-key="${order[count]}"]`)
+      const index = items.indexOf(item)
+      collapsedWidth -= (index === -1 ? iconWidth : collapsedWidths[index]) + gap
+      count++
+    }
+
+    let width = sumWidths(labeledWidths) + hiddenWidth
     for (let index = items.length - 1; index >= 0; index--) {
       if (!collapsible[index]) { continue }
-      const collapsed = width > availableWidth
+      const collapsed = count > 0 || width > availableWidth
       if (collapsed) width -= labeledWidths[index] - collapsedWidths[index]
       collapse(items[index], collapsed)
     }
     // Apply the result before transitions return, so they do not animate from the measured state
     groupElement.getBoundingClientRect()
     groupElement.toggleAttribute('data-measuring-labels', false)
+
+    if (count !== overflowCount.value) {
+      overflowCount.value = count
+      // Fit the buttons that come back before the next paint
+      nextTick(update)
+    }
   }
 
   function schedule() {
@@ -72,4 +106,6 @@ export function useFittedButtonLabels(group, row) {
     mutationObserver.disconnect()
     cancelAnimationFrame(frame)
   })
+
+  return { overflowed }
 }
