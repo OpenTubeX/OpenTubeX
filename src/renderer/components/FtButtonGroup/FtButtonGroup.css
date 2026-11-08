@@ -1,7 +1,7 @@
 /* Material 3 Expressive standard button group: a pressed button widens while
    its neighbors narrow. Margins offset every padding change, so the buttons
    keep their layout boxes and a press never reflows or wraps the row. The
-   minimum widths follow FtButton's 64px minimum, so short buttons change too. */
+   minimum widths follow each button's own minimum, so short buttons change too. */
 .buttonGroup {
   align-items: center;
   display: flex;
@@ -23,15 +23,59 @@
     min-inline-size var(--motion-fast-spatial);
 }
 
+/* Buttons that show only their icon narrow to an icon button's width, so a
+   row of them fits on small phones */
+.buttonGroup > :deep([data-label-collapsed]) {
+  --group-button-min-size: 48px;
+  --button-padding-inline: 14px;
+
+  min-inline-size: var(--group-button-min-size);
+}
+
+/* Measuring must read final widths, not the start of a transition */
+.buttonGroup[data-measuring-labels] > :deep(.btn) {
+  transition: none;
+}
+
+/* Icon buttons with menus, such as Share, take FtButton's height and shape so
+   they match the icon-only buttons beside them */
+.buttonGroup > :deep(.ftIconButton > .iconButton) {
+  --button-height: 40px;
+
+  box-sizing: border-box;
+  min-inline-size: 48px;
+  min-block-size: var(--button-height);
+  border-radius: calc(var(--button-height) / 2 * var(--ui-roundness));
+}
+
+.buttonGroup > :deep(.ftIconButton > .iconButton:not(.disabled):active) {
+  border-radius: var(--shape-corner-small);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .buttonGroup > :deep(.ftIconButton > .iconButton) {
+    --button-height: 48px;
+  }
+}
+
+/* Labels collapsed by useFittedButtonLabels stay in the accessible name */
+.buttonGroup > :deep([data-label-collapsed] > .buttonLabel) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
 .buttonGroup > :deep(.btn:not(:disabled):active) {
-  min-inline-size: 72px;
+  min-inline-size: calc(var(--group-button-min-size, 64px) + 8px);
   margin-inline: -4px;
   padding-inline: calc(var(--button-padding-inline) + 4px);
 }
 
 .buttonGroup > :deep(.btn:has(+ .btn:not(:disabled):active)),
 .buttonGroup > :deep(.btn:not(:disabled):active + .btn) {
-  min-inline-size: 60px;
+  min-inline-size: calc(var(--group-button-min-size, 64px) - 4px);
   margin-inline: 2px;
   padding-inline: calc(var(--button-padding-inline) - 2px);
 }
