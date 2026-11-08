@@ -1578,7 +1578,7 @@ test.describe('UI roundness', () => {
   })
 })
 
-test.describe('font size', () => {
+test.describe('font size', { tag: '@scale' }, () => {
   test('scales text but not icons when changed, and saves it', async ({ app, page, attachScreenshot }) => {
     const navLabel = page.locator('.sideNav .navOption .navLabel').first()
     const navIcon = page.locator('.sideNav .navOption .navIcon').first()
@@ -1608,7 +1608,9 @@ test.describe('font size', () => {
       await expect(page.locator('body')).toHaveCSS('font-size', '24px')
       await expect(page.locator('.sideNav .navOption .navLabel').first()).toHaveCSS('font-size', '18px')
       await expect(page.locator('.sideNav .navOption .navIcon').first()).toHaveCSS('font-size', '24px')
-      await expect(page.locator('.sideNav').first()).toHaveCSS('width', '156px')
+      // UI Scale zoom can leave the computed width a fraction of a pixel off.
+      await expect.poll(() => page.locator('.sideNav').first().evaluate(element => parseFloat(getComputedStyle(element).width)))
+        .toBeCloseTo(156, 0)
     })
   })
 })
