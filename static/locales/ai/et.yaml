@@ -1523,6 +1523,7 @@ Profile:
   The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
   Theme Color: Kujunduse värv
 Channel:
+  Hide Watched: Peida vaadatud
   Fewer videos per day: "Vähem videoid päevas"
   More videos per day: "Rohkem videoid päevas"
   Verified: Kinnitatud

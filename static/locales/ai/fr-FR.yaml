@@ -1522,6 +1522,7 @@ Profile:
   The selected image could not be loaded: L’image sélectionnée n’a pas pu être chargée
   Theme Color: Couleur du thème
 Channel:
+  Hide Watched: Masquer les vidéos visionnées
   Fewer videos per day: "Moins de vidéos par jour"
   More videos per day: "Plus de vidéos par jour"
   Verified: Validé

@@ -1523,6 +1523,7 @@ Profile:
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
 Channel:
+  Hide Watched: 視聴済みを非表示
   Fewer videos per day: "1日あたりの動画数を減らす"
   More videos per day: "1日あたりの動画数を増やす"
   Verified: 確認済み

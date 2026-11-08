@@ -1529,6 +1529,7 @@ Profile:
   The selected image could not be loaded: Ekki tókst að hlaða völdu myndinni
   Theme Color: Þemalitur
 Channel:
+  Hide Watched: Fela áhorfð
   Fewer videos per day: "Færri myndskeið á dag"
   More videos per day: "Fleiri myndskeið á dag"
   Verified: Staðfest
