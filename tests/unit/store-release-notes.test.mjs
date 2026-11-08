@@ -115,7 +115,7 @@ test('RPM changelogs escape macros', () => {
 })
 
 test('store notes keep only items for their platforms and drop a label naming the only target', () => {
-  const labeled = `## More improvements
+  const labeled = `## Improvements
 
 - Works everywhere. (#1)
 - **Android:** Shared links open in the app. (#2)
@@ -125,17 +125,17 @@ test('store notes keep only items for their platforms and drop a label naming th
   <img src="https://github.com/user-attachments/assets/example" alt="MPRIS">
 `
 
-  assert.equal(fdroidChangelog(labeled), `More improvements
+  assert.equal(fdroidChangelog(labeled), `Improvements
 • Works everywhere.
 • Android: Shared links open in the app.
 • iOS: Adds SharePlay.`)
-  assert.equal(appStreamDescription(labeled), `<p>More improvements</p>
+  assert.equal(appStreamDescription(labeled), `<p>Improvements</p>
 <ul>
   <li>Works everywhere.</li>
   <li>Adds a tray icon.</li>
   <li>Adds MPRIS controls.</li>
 </ul>`)
-  assert.equal(releaseNotesText(labeled, ['windows']), `More improvements
+  assert.equal(releaseNotesText(labeled, ['windows']), `Improvements
 
 - Works everywhere. (#1)
 - Adds a tray icon. (#4)

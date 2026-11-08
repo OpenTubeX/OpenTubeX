@@ -13,7 +13,7 @@ const notes = `## Highlights
 - **Android:** Shared links open in the app. (#2)
   <img src="https://github.com/user-attachments/assets/android" alt="Share sheet">
 
-## More improvements
+## Improvements
 
 - Works everywhere. (#1)
 - **Desktop:** Adds a tray icon. (#4)
@@ -40,7 +40,7 @@ test('platform labels are parsed from rendered and plain-text items', () => {
 })
 
 test('filtering removes items for other platforms with their images and empty headings', () => {
-  assert.equal(filterReleaseNotesForPlatforms(notes, ['linux']), `## More improvements
+  assert.equal(filterReleaseNotesForPlatforms(notes, ['linux']), `## Improvements
 
 - Works everywhere. (#1)
 - **Desktop:** Adds a tray icon. (#4)
@@ -48,7 +48,7 @@ test('filtering removes items for other platforms with their images and empty he
     <img src="https://github.com/user-attachments/assets/tray" alt="Tray">
   </picture>
 `)
-  assert.equal(filterReleaseNotesForPlatforms(notes, ['ios']), `## More improvements
+  assert.equal(filterReleaseNotesForPlatforms(notes, ['ios']), `## Improvements
 
 - Works everywhere. (#1)
 - **Android, iOS:** Adds a mini player. (#5)
@@ -67,7 +67,7 @@ test('filtering keeps nightly wrappers and removes headings emptied inside them'
 
 - Works everywhere. (#1)
 
-## More improvements
+## Improvements
 
 - **Windows:** Adds jump lists. (#3)
 

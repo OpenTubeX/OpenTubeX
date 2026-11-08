@@ -114,7 +114,7 @@ test('wrapped release note lines are joined', () => {
 
 test('release note front matter accepts only known keys and values', () => {
   const invalid = [
-    ['category: feature', /Set category to highlight, improvement, fix/],
+    ['category: bug', /Set category to highlight, feature, improvement, fix/],
     ['platforms: [android]', /Set category/],
     ['category: fix\ntitle: Something', /Unknown front matter key: title/],
     ['category: fix\ncategory: fix', /Duplicate front matter key: category/],
@@ -429,6 +429,7 @@ test('release notes render under their categories in creation order with platfor
     }),
     note({ createdAt: 5, note: 'Adds keyboard shortcuts.', platforms: ['linux', 'macos', 'windows'], references: [43] }),
     note({ createdAt: 4, note: 'Shared links open in the app.', platforms: ['android', 'ios'] }),
+    note({ category: 'feature', createdAt: 6, note: 'Adds a sleep timer.', references: [45] }),
   ], {
     loadImage: async () => png(800, 600),
   })
@@ -439,7 +440,11 @@ test('release notes render under their categories in creation order with platfor
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="400">
   <img src="https://github.com/user-attachments/assets/second" alt="Adds a compact player." width="400">
 
-## More improvements
+## New features
+
+- Adds a sleep timer. (#45)
+
+## Improvements
 
 - **Android, iOS:** Shared links open in the app.
 - **Desktop:** Adds keyboard shortcuts. (#43)
@@ -450,7 +455,7 @@ test('release notes render under their categories in creation order with platfor
 `)
 })
 
-test('improvements are only called more improvements below highlights', async () => {
+test('sections without notes are left out', async () => {
   assert.equal(await renderReleaseNotes([note(), note({ category: 'fix', note: 'Fixed a crash.' })]), `## Improvements
 
 - Adds a compact player.

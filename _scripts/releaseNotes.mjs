@@ -9,7 +9,8 @@ import { formatPlatformLabel, RELEASE_NOTE_PLATFORMS } from '../src/renderer/hel
 export const RELEASE_NOTES_DIRECTORY = 'release-notes'
 const RELEASE_NOTE_CATEGORIES = new Map([
   ['highlight', '## Highlights'],
-  ['improvement', '## More improvements'],
+  ['feature', '## New features'],
+  ['improvement', '## Improvements'],
   ['fix', '## Fixed bugs'],
 ])
 const DESKTOP_PLATFORMS = ['linux', 'macos', 'windows']
@@ -636,13 +637,9 @@ export async function renderReleaseNotes(notes, {
     sections.get(note.category).push(releaseNote)
   }
 
-  // "More" only reads right below highlights.
-  const headingFor = (category, heading) => (
-    category === 'improvement' && sections.get('highlight').length === 0 ? '## Improvements' : heading
-  )
   const renderedSections = [...RELEASE_NOTE_CATEGORIES]
     .filter(([category]) => sections.get(category).length > 0)
-    .map(([category, heading]) => `${headingFor(category, heading)}\n\n${sections.get(category).join('\n')}`)
+    .map(([category, heading]) => `${heading}\n\n${sections.get(category).join('\n')}`)
 
   if (renderedSections.length === 0) {
     if (emptyMessage !== null) { return `${emptyMessage}\n` }
