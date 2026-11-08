@@ -3,6 +3,7 @@
     name="notificationList"
     mode="out-in"
     @enter="finishTransition"
+    @before-leave="makeInert"
     @leave="finishTransition"
   >
     <TransitionGroup
@@ -10,6 +11,7 @@
       tag="ul"
       name="notificationRow"
       class="notificationList"
+      @before-leave="makeInert"
       @leave="finishTransition"
     >
       <li
@@ -129,6 +131,14 @@ const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
 // The desktop app opens middle clicks on internal links in background tabs.
 const opensTabs = !!process.env.IS_ELECTRON
+
+/**
+ * Keeps dismissed notifications out of reach while they animate away.
+ * @param {HTMLElement} element
+ */
+function makeInert(element) {
+  element.inert = true
+}
 
 /**
  * Opens Ctrl or Cmd clicks in a new tab, like the app's link shortcuts, which

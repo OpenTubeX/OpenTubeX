@@ -297,6 +297,8 @@ test('dismissed notifications slide out before the rows below move up', { tag: '
   // Rows stay until their animations finish, however long the Animation Speed setting makes them.
   await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
   await expect(rows).toHaveCount(3)
+  // Leaving rows can no longer be focused or clicked.
+  await expect(rows.nth(0)).toHaveJSProperty('inert', true)
   // The row slides out first, keeping its place.
   await seek(0.5)
   let [dismissed, below] = await Promise.all([rect(rows.nth(0)), rect(rows.nth(1))])
@@ -316,6 +318,7 @@ test('dismissed notifications slide out before the rows below move up', { tag: '
   await dropdown.getByRole('button', { name: 'Clear all', exact: true }).click()
   await expect.poll(dismissalNames).toEqual(['notification-list-dismiss', 'notification-list-row-dismiss', 'notification-list-row-dismiss'])
   await expect(rows).toHaveCount(2)
+  await expect(dropdown.locator('.notificationList')).toHaveJSProperty('inert', true)
   await expect(dropdown.getByText('No notifications yet')).toHaveCount(0)
   await page.evaluate(() => window.dismissals.splice(0).forEach(animation => animation.finish()))
   await expect(rows).toHaveCount(0)

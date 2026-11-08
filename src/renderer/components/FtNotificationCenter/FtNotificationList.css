@@ -27,7 +27,6 @@
 .notificationRow-leave-active {
   min-block-size: 0;
   overflow: clip;
-  pointer-events: none;
   interpolate-size: allow-keywords;
   animation: notification-dismiss var(--motion-slow-effects) both;
 }
@@ -50,7 +49,6 @@
 
 /* Clearing every row slides them out together before the empty state fades in. */
 .notificationList-leave-active {
-  pointer-events: none;
   animation: notification-list-dismiss var(--motion-default-effects) both;
 }
 
