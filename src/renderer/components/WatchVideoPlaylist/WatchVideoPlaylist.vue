@@ -231,7 +231,7 @@
             :playlist-shuffle="shuffleEnabled"
             :playlist-loop="loopEnabled"
             :video-index="reversePlaylist ? playlistItems.length - index - 1 : index"
-            :is-current-video="currentVideoIndexZeroBased === index"
+            :is-current-video="playingVideoIndex === index"
             :can-move-video-up="index > 0 && canMoveVideos"
             :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
             :can-remove-from-playlist="isUserPlaylist"
@@ -477,6 +477,10 @@ const REMOVE_WATCHED_VIDEOS_PROMPT_VALUES = ['delete', 'cancel']
 const currentVideoIndexZeroBased = computed(() => {
   return findIndexOfCurrentVideoInPlaylist(playlistItems.value)
 })
+
+// Unlike the index above, this ignores the stand-in for a removed playing video,
+// so the queue does not highlight a video that is not playing.
+const playingVideoIndex = computed(() => findIndexOfCurrentVideoInPlaylist(playlistItems.value, null))
 
 const currentVideoIndexOneBased = computed(() => currentVideoIndexZeroBased.value + 1)
 
@@ -764,12 +768,13 @@ onMounted(() => {
 
 /**
  * @param {any[]} videoList
+ * @param {any} [removedVideoStandIn] entry to match in place of the playing video once it was removed
  */
-function findIndexOfCurrentVideoInPlaylist(videoList) {
+function findIndexOfCurrentVideoInPlaylist(videoList, removedVideoStandIn = prevVideoBeforeDeletion.value) {
   const playlistItemId = props.playlistItemId
   const videoId = props.videoId
-  const prevVideoBeforeDeletionPlaylistItemId = prevVideoBeforeDeletion.value?.playlistItemId
-  const prevVideoBeforeDeletionPlaylistVideoId = prevVideoBeforeDeletion.value?.videoId
+  const prevVideoBeforeDeletionPlaylistItemId = removedVideoStandIn?.playlistItemId
+  const prevVideoBeforeDeletionPlaylistVideoId = removedVideoStandIn?.videoId
 
   return videoList.findIndex((item) => {
     if (item.playlistItemId && (playlistItemId || prevVideoBeforeDeletionPlaylistItemId)) {
@@ -1809,9 +1814,9 @@ const shouldStopDueToPlaylistEnd = computed(() => {
  * Index that `playPreviousVideo` steps back from.
  *
  * When the current video being watched in the playlist is deleted,
- * the previous video is shown as the "current" one.
+ * the previous video stands in for the "current" one.
  * So if we want to play the previous video, in this case,
- * we actually want to actually play the "current" video.
+ * we actually want to play that stand-in video.
  * The only exception is when shuffle is enabled, as we don't actually
  * want to play the last sequential video with shuffle.
  */
