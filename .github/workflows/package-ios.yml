@@ -81,6 +81,17 @@ jobs:
           CODE_SIGNING_ALLOWED=NO archive
         mkdir -p ios/Payload
         ditto ios/OpenTubeX.xcarchive/Products/Applications/App.app ios/Payload/App.app
+        # SideStore re-signs with the entitlements embedded in each binary, so
+        # ad-hoc sign inside out to keep the App Group the widgets share.
+        app=ios/Payload/App.app
+        group="$(/usr/libexec/PlistBuddy -c 'Print :OpenTubeXAppGroup' "$app/Info.plist")"
+        sign() {
+          sed -E "s/group\.\\$\([A-Z_]+\)/$group/" "$2" > "$RUNNER_TEMP/entitlements.plist"
+          codesign --force --sign - --entitlements "$RUNNER_TEMP/entitlements.plist" "$1"
+        }
+        for framework in "$app"/Frameworks/*.framework; do codesign --force --sign - "$framework"; done
+        sign "$app/PlugIns/OpenTubeXWidgets.appex" ios/App/OpenTubeXWidgets/OpenTubeXWidgets.entitlements
+        sign "$app" ios/App/App/App.entitlements
         cd ios
         ditto -c -k --keepParent Payload "$IPA_NAME"
     - name: Upload unsigned IPA
