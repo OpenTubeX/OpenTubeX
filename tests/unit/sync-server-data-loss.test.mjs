@@ -622,3 +622,16 @@ test('a playlist deletion that could not be saved locally fails the sync', async
   }
   await assert.rejects(context.syncPlaylists(adapter, store, previous, { allowDataLoss: true }), /Could not remove synced playlist/)
 })
+
+test('a protected playlist deleted on another device is restored instead of failing every sync', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [{ ...structuredClone(playlist), protected: true }] } },
+    // `removePlaylist` keeps protected playlists.
+    dispatch: async action => action !== 'removePlaylist',
+  }
+  await context.syncPlaylists(adapter, store, previous, { allowDataLoss: true })
+  assert.deepEqual(Array.from(await adapter.getPlaylists(), item => item.title), [playlist.playlistName])
+})

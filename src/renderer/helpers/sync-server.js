@@ -850,16 +850,19 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
     }
   }
 
-  const mergedBookmarks = Array.from(mergedIds).map(id => {
-    return localById.get(id) ?? { ...remoteById.get(id), savedAt: Date.now() }
-  })
+  const addedIds = Array.from(mergedIds).filter(id => !localById.has(id))
+  const removedIds = new Set(Array.from(localById.keys()).filter(id => !mergedIds.has(id)))
 
-  if (!metadataEquals(localBookmarks, mergedBookmarks)) {
-    // Replacing the list would drop bookmarks saved or removed meanwhile.
-    if (!metadataEquals(readLocalBookmarks(), localBookmarks)) {
-      throw new Error('Playlist bookmarks changed during sync. Try again.')
-    }
-    const saved = await store.dispatch('replacePlaylistBookmarks', mergedBookmarks)
+  if (addedIds.length > 0 || removedIds.size > 0) {
+    // Apply the merge to the current list, so bookmarks saved or removed while
+    // the server was busy survive, and the next sync syncs them.
+    const currentBookmarks = readLocalBookmarks()
+    const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
+    const nextBookmarks = [
+      ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
+      ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
+    ]
+    const saved = await store.dispatch('replacePlaylistBookmarks', nextBookmarks)
     if (!saved) throw new Error('Could not save synced playlist bookmarks')
   }
 
@@ -890,6 +893,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     collection: 'playlists',
     getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
   })
+  // `removePlaylist` keeps protected playlists, so restore them remotely instead.
+  for (const [id, local] of localById) {
+    if (local.protected) mergedIds.add(id)
+  }
   const nextSnapshot = {}
   const assertCurrent = (local, id) => {
     const current = store.state.playlists.playlists.find(playlist => playlist._id === id)

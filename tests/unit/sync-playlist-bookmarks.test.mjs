@@ -81,12 +81,31 @@ test('keeps playlist bookmarks saved while the sync waits for the server', async
     return createPlaylistBookmark(bookmark)
   }
 
-  await assert.rejects(
-    context.syncPlaylistBookmarks(adapter, store, []),
-    /Playlist bookmarks changed during sync/
-  )
+  await context.syncPlaylistBookmarks(adapter, store, [])
   assert.deepEqual(
-    store.state.settings.playlistBookmarks.map(bookmark => bookmark.playlist.id),
-    ['synced-playlist', 'added-playlist']
+    Array.from(store.state.settings.playlistBookmarks, bookmark => bookmark.playlist.id),
+    ['synced-playlist', 'added-playlist', 'remote-playlist']
   )
+})
+
+test('a bookmark removed while the sync uploads it stays removed', async () => {
+  const removed = bookmarks.createPlaylistBookmark({ id: 'removed-playlist', title: 'Removed meanwhile', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 1 })
+  const remote = bookmarks.createPlaylistBookmark({ id: 'remote-playlist', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 2 })
+  const store = createStore([removed])
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylistBookmark(bookmarks.playlistBookmarkForSync(remote))
+  const createPlaylistBookmark = adapter.createPlaylistBookmark.bind(adapter)
+  adapter.createPlaylistBookmark = async bookmark => {
+    store.state.settings.playlistBookmarks = []
+    return createPlaylistBookmark(bookmark)
+  }
+
+  let previousIds = []
+  try {
+    previousIds = await context.syncPlaylistBookmarks(adapter, store, previousIds)
+  } catch {}
+  adapter.createPlaylistBookmark = createPlaylistBookmark
+  await context.syncPlaylistBookmarks(adapter, store, previousIds)
+  assert.deepEqual(Array.from(store.state.settings.playlistBookmarks, bookmark => bookmark.playlist.id), ['remote-playlist'])
+  assert.deepEqual((await adapter.getPlaylistBookmarks()).map(bookmark => bookmark.playlist.id), ['remote-playlist'])
 })
