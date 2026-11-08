@@ -460,7 +460,7 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 
 let settingSyncTimestampWrite = Promise.resolve()
 
-function recordSettingSyncTimestamp(commit, settings, settingId) {
+function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
   settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
@@ -471,7 +471,7 @@ function recordSettingSyncTimestamp(commit, settings, settingId) {
       : {}
     const updatedAt = {
       ...current,
-      [settingId]: Date.now(),
+      [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
@@ -1093,6 +1093,23 @@ const customActions = {
       // preference was split out. Preserve that choice for existing profiles.
       if (legacyHideLiveChatEntry && !hasHideLiveChatReplaySetting) {
         await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
+      }
+
+      // Auto Load Next Page used to control comments too, so they keep its value.
+      // Saving it settles the choice, so a later change to Auto Load Next Page is
+      // not copied. For sync, the copy keeps the edit time of Auto Load Next Page
+      // instead of counting as a new edit, so a newer choice from another device wins.
+      if (!userSettings.some(entry => entry._id === 'autoLoadComments')) {
+        const autoLoadComments = userSettings.find(
+          entry => entry._id === 'generalAutoLoadMorePaginatedItemsEnabled'
+        )?.value !== false
+        commit('setAutoLoadComments', autoLoadComments)
+        await DBSettingHandlers.upsert('autoLoadComments', autoLoadComments)
+        const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
+          ?.value?.generalAutoLoadMorePaginatedItemsEnabled
+        if (typeof editedAt === 'number') {
+          await recordSettingSyncTimestamp(commit, state, 'autoLoadComments', editedAt)
+        }
       }
 
       if (legacyHideAiVideoSummariesEntry) {

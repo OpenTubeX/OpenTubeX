@@ -500,6 +500,11 @@ Settings:
       System and In-App: Sistem dan di aplikasi
       System Only: Hanya sistem
       Off: Nonaktif
+    Auto Load Next Page:
+      Lists Tooltip: Muat halaman tambahan dari feed, hasil penelusuran, dan daftar lainnya secara otomatis.
+    Auto Load Comments:
+      Label: Otomatis Memuat Komentar
+      Tooltip: Muat komentar saat halaman dibuka dan muat lebih banyak komentar saat Anda menggulir.
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.

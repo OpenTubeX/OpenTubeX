@@ -540,7 +540,7 @@ Settings:
     Remember Tab Navigation History: Įsiminti naršymo skirtukuose istoriją
     Auto Load Next Page:
       Label: Automatiškai įkelti kitą puslapį
-      Tooltip: Automatiškai įkelti kitus puslapius ir komentarus.
+      Lists Tooltip: Automatiškai įkelti papildomus srautų, paieškos rezultatų ir kitų sąrašų puslapius.
     New Tab Position:
       New Tab Position: Naujo skirtuko vieta
       At the end: Pabaigoje
@@ -623,6 +623,9 @@ Settings:
       System and In-App: Sistemos ir programoje
       System Only: Tik sistemos
       Off: Išjungta
+    Auto Load Comments:
+      Label: Automatiškai įkelti komentarus
+      Tooltip: Įkelti komentarus atidarius puslapį ir slenkant įkelti daugiau.
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.

@@ -438,7 +438,7 @@ Settings:
     Remember Tab Navigation History: Hugs navigasjonshistorikken for faner
     Auto Load Next Page:
       Label: Last inn neste side automatisk
-      Tooltip: Last inn fleire sider og kommentarar automatisk.
+      Lists Tooltip: Last inn fleire sider av straumar, søkjeresultat og andre lister automatisk.
     New Tab Position:
       New Tab Position: Plassering av ny fane
       At the end: Til slutt
@@ -521,6 +521,9 @@ Settings:
       System and In-App: System og i appen
       System Only: Berre system
       Off: Av
+    Auto Load Comments:
+      Label: Last inn kommentarar automatisk
+      Tooltip: Last inn kommentarar når sida opnar seg, og last inn fleire medan du blar.
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.

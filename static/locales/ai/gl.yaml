@@ -504,6 +504,11 @@ Settings:
       System and In-App: Sistema e na aplicación
       System Only: Só sistema
       Off: Desactivadas
+    Auto Load Next Page:
+      Lists Tooltip: Cargar automaticamente máis páxinas de fontes, resultados de busca e outras listas.
+    Auto Load Comments:
+      Label: Cargar automaticamente os comentarios
+      Tooltip: Cargar os comentarios ao abrir a páxina e cargar máis mentres te desprazas.
   Context Menu Search Settings:
     Context Menu Search Settings: Busca no menú contextual
     Description: Escolle os motores de busca que aparecen ao premer co botón dereito sobre o texto seleccionado. As buscas ábrense no navegador predeterminado.

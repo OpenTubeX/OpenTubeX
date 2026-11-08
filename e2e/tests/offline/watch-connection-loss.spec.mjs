@@ -7,7 +7,7 @@ test.use({
     settings: {
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true,
-      generalAutoLoadMorePaginatedItemsEnabled: false,
+      autoLoadComments: false,
       animationSpeed: 0,
       useSponsorBlock: true,
     }

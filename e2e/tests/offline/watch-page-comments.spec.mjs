@@ -1,4 +1,4 @@
-import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { readDatastore, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { emptyCommentsResponse, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -173,7 +173,7 @@ test('loads initial comments with the video when automatic pagination is enabled
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
     const store = window.$store
-    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    store.commit('setAutoLoadComments', true)
   })
   // Initial comments must not depend on the later-page sentinel being visible.
   await page.addStyleTag({ content: '.commentAutoLoadSentinel { display: none !important; }' })
@@ -196,7 +196,7 @@ test('does not retry a failed automatic comment load until asked', async ({ app,
   })
   await page.evaluate(async () => {
     const store = window.$store
-    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    store.commit('setAutoLoadComments', true)
     await store.dispatch('updateBackendFallback', false)
   })
 
@@ -234,7 +234,7 @@ test('pauses automatic comment pagination while filtering', async ({ app, page }
 
   await page.evaluate(() => {
     const store = window.$store
-    store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    store.commit('setAutoLoadComments', true)
   })
   await openMockedVideo(page)
   await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
@@ -288,7 +288,7 @@ test.describe('manual comment loading', () => {
     seed: {
       settings: {
         ...WATCH_PAGE_SEED,
-        generalAutoLoadMorePaginatedItemsEnabled: false
+        autoLoadComments: false
       }
     }
   })
@@ -996,7 +996,7 @@ test.describe('manual comment loading', () => {
       seed: {
         settings: {
           ...WATCH_PAGE_SEED,
-          generalAutoLoadMorePaginatedItemsEnabled: false,
+          autoLoadComments: false,
           uiScale: 125
         },
         profiles: [{
@@ -1244,5 +1244,90 @@ test.describe('manual comment loading', () => {
     // rendered, so the position has to still be at the top a moment later.
     await page.waitForTimeout(1000)
     expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
+  })
+})
+
+test.describe('Auto Load Comments apart from Auto Load Next Page', () => {
+  /** Counts the comment page requests and opens the mocked video. */
+  async function openVideoCountingCommentRequests(app, page) {
+    await mockPlayableWatchPage(app, page)
+    const requests = { count: 0 }
+    await page.route(/\/youtubei\/v1\/next/, (route, request) => {
+      if (JSON.parse(request.postData() ?? '{}').continuation) requests.count++
+      return route.fallback()
+    })
+    await openMockedVideo(page)
+    return requests
+  }
+
+  test.describe('with only video lists loading automatically', () => {
+    test.use({
+      seed: {
+        settings: { ...WATCH_PAGE_SEED, generalAutoLoadMorePaginatedItemsEnabled: true, autoLoadComments: false }
+      }
+    })
+
+    test('waits for a click to load comments', async ({ app, page }) => {
+      const requests = await openVideoCountingCommentRequests(app, page)
+      const loadComments = page.locator('.getCommentsTitle')
+      await loadComments.scrollIntoViewIfNeeded()
+      await expect(loadComments).toBeVisible()
+      expect(requests.count).toBe(0)
+
+      await loadComments.click()
+      await expect(page.locator('.comment').first()).toBeVisible()
+      expect(requests.count).toBe(1)
+    })
+  })
+
+  test.describe('with only comments loading automatically', () => {
+    test.use({
+      seed: {
+        settings: { ...WATCH_PAGE_SEED, generalAutoLoadMorePaginatedItemsEnabled: false, autoLoadComments: true }
+      }
+    })
+
+    test('loads comments without a click', async ({ app, page }) => {
+      const requests = await openVideoCountingCommentRequests(app, page)
+      await expect(page.locator('.comment').first()).toBeVisible({ timeout: 30_000 })
+      await expect(page.locator('.getCommentsTitle')).toHaveCount(0)
+      expect(requests.count).toBeGreaterThan(0)
+    })
+  })
+
+  /** @returns {unknown} the saved Auto Load Comments value, if any */
+  function storedAutoLoadComments(app) {
+    const entry = readDatastore(app.userDataDir, 'settings').split('\n').filter(Boolean)
+      .map(line => JSON.parse(line))
+      .find(doc => doc._id === 'autoLoadComments')
+    return entry?.value
+  }
+
+  test.describe('after updating with Auto Load Next Page turned off', () => {
+    test.use({
+      seed: { settings: { ...WATCH_PAGE_SEED, generalAutoLoadMorePaginatedItemsEnabled: false } }
+    })
+
+    test('keeps comments loading manually and saves that choice', async ({ app, page }) => {
+      expect(await page.evaluate(() => window.$store.getters.getAutoLoadComments)).toBe(false)
+      await expect.poll(() => storedAutoLoadComments(app)).toBe(false)
+
+      const requests = await openVideoCountingCommentRequests(app, page)
+      const loadComments = page.locator('.getCommentsTitle')
+      await loadComments.scrollIntoViewIfNeeded()
+      await expect(loadComments).toBeVisible()
+      expect(requests.count).toBe(0)
+    })
+  })
+
+  test('does not copy a later Auto Load Next Page change to comments', async ({ app, page }) => {
+    await expect.poll(() => storedAutoLoadComments(app)).toBe(true)
+    await page.evaluate(() => window.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', false))
+
+    const relaunched = await app.relaunch()
+    expect(await relaunched.page.evaluate(() => [
+      window.$store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled,
+      window.$store.getters.getAutoLoadComments
+    ])).toEqual([false, true])
   })
 })

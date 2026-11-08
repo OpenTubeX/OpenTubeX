@@ -535,6 +535,11 @@ Settings:
       System and In-App: Sistemo kaj en la aplikaĵo
       System Only: Nur sistemo
       Off: Malŝaltitaj
+    Auto Load Next Page:
+      Lists Tooltip: Aŭtomate ŝargi pliajn paĝojn de fluoj, serĉrezultoj kaj aliaj listoj.
+    Auto Load Comments:
+      Label: Aŭtomate ŝargi komentojn
+      Tooltip: Ŝargi komentojn kiam la paĝo malfermiĝas kaj ŝargi pliajn dum vi rulumas.
   Context Menu Search Settings:
     Context Menu Search Settings: Serĉo per kunteksta menuo
     Description: Elektu, kiuj serĉiloj aperas kiam vi dekstre alklakas elektitan tekston. Serĉoj malfermiĝas en via defaŭlta retumilo.

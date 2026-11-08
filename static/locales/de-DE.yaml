@@ -568,7 +568,10 @@ Settings:
       External Link Handling: Handhabung externer Links
     Auto Load Next Page:
       Label: Nächste Seite automatisch laden
-      Tooltip: Zusätzliche Seiten und Kommentare automatisch laden.
+      Lists Tooltip: Zusätzliche Seiten von Feeds, Suchergebnissen und anderen Listen automatisch laden.
+    Auto Load Comments:
+      Label: Kommentare automatisch laden
+      Tooltip: Kommentare beim Öffnen der Seite laden und beim Scrollen weitere Kommentare nachladen.
     Open Deep Links In New Window: An OpenTubeX übergebene URLs in einem neuen Fenster öffnen
     Close Window With Last Tab: Fenster beim Schließen des letzten Tabs schließen
     Minimize to system tray: In die Systemleiste minimieren

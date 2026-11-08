@@ -549,6 +549,11 @@ Settings:
       System and In-App: سسٹم اور ایپ میں
       System Only: صرف سسٹم
       Off: بند
+    Auto Load Next Page:
+      Lists Tooltip: فیڈز، تلاش کے نتائج اور دیگر فہرستوں کے اضافی صفحات خود بخود لوڈ کریں۔
+    Auto Load Comments:
+      Label: تبصرے خود بخود لوڈ کریں
+      Tooltip: صفحہ کھلنے پر تبصرے لوڈ کریں اور اسکرول کرتے ہوئے مزید تبصرے لوڈ کریں۔
   Context Menu Search Settings:
     Context Menu Search Settings: کانٹیکسٹ مینو تلاش
     Description: منتخب کریں کہ منتخب متن پر رائٹ کلک کرنے پر کون سے سرچ انجن ظاہر ہوں۔ تلاشیں آپ کے ڈیفالٹ براؤزر میں کھلتی ہیں۔

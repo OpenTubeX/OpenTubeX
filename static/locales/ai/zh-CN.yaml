@@ -499,6 +499,11 @@ Settings:
       System and In-App: 系统和应用内
       System Only: 仅系统
       Off: 关闭
+    Auto Load Next Page:
+      Lists Tooltip: 自动加载订阅源、搜索结果和其他列表的更多页面。
+    Auto Load Comments:
+      Label: 自动加载评论
+      Tooltip: 打开页面时加载评论，并在滚动时加载更多评论。
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。

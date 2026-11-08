@@ -1376,8 +1376,8 @@ const hideCommentPhotos = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
-  return store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled
+const autoLoadComments = computed(() => {
+  return store.getters.getAutoLoadComments
 })
 
 const canPerformInitialCommentLoading = computed(() => {
@@ -1412,7 +1412,7 @@ watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   }
 }, { immediate: true })
 
-watch(generalAutoLoadMorePaginatedItemsEnabled, (autoLoadEnabled) => {
+watch(autoLoadComments, (autoLoadEnabled) => {
   automaticInitialLoadFailed = false
   if (autoLoadEnabled && canPerformInitialCommentLoading.value) {
     loadInitialCommentsAutomatically()
@@ -1424,14 +1424,14 @@ const canPerformMoreCommentLoading = computed(() => {
 })
 
 const canAutomaticallyLoadMoreComments = computed(() => {
-  return generalAutoLoadMorePaginatedItemsEnabled.value &&
+  return autoLoadComments.value &&
     !hasActiveCommentFilters.value &&
     canPerformMoreCommentLoading.value
 })
 
 const shouldShowManualLoadMoreComments = computed(() => {
   return canPerformMoreCommentLoading.value &&
-    (!generalAutoLoadMorePaginatedItemsEnabled.value || hasActiveCommentFilters.value)
+    (!autoLoadComments.value || hasActiveCommentFilters.value)
 })
 
 const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
@@ -1442,7 +1442,7 @@ const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
 })
 
 const observeVisibilityOptions = computed(() => {
-  if (!generalAutoLoadMorePaginatedItemsEnabled.value || hasActiveCommentFilters.value) {
+  if (!autoLoadComments.value || hasActiveCommentFilters.value) {
     return false
   }
 

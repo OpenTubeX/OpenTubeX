@@ -85,6 +85,13 @@ export function migrateLegacySettings(settings) {
     migratedSettings.hideLiveChatReplay = migratedSettings.hideLiveChat === true
   }
 
+  if (
+    Object.hasOwn(migratedSettings, 'generalAutoLoadMorePaginatedItemsEnabled') &&
+    !Object.hasOwn(migratedSettings, 'autoLoadComments')
+  ) {
+    migratedSettings.autoLoadComments = migratedSettings.generalAutoLoadMorePaginatedItemsEnabled !== false
+  }
+
   if (Object.hasOwn(migratedSettings, 'useVerticalTabBar')) {
     if (!Object.hasOwn(migratedSettings, 'tabBarPosition')) {
       migratedSettings.tabBarPosition = migratedSettings.useVerticalTabBar === true ? 'left' : 'top'

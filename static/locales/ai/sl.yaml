@@ -550,7 +550,7 @@ Settings:
     Remember Tab Navigation History: Zapomni si zgodovino krmarjenja po zavihkih
     Auto Load Next Page:
       Label: Samodejno naloži naslednjo stran
-      Tooltip: Samodejno naloži dodatne strani in komentarje.
+      Lists Tooltip: Samodejno naloži dodatne strani virov, rezultatov iskanja in drugih seznamov.
     New Tab Position:
       New Tab Position: Položaj novega zavihka
       At the end: Na koncu
@@ -633,6 +633,9 @@ Settings:
       System and In-App: Sistem in v aplikaciji
       System Only: Samo sistem
       Off: Izklopljeno
+    Auto Load Comments:
+      Label: Samodejno naloži komentarje
+      Tooltip: Naloži komentarje ob odprtju strani in med pomikanjem naloži več komentarjev.
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.

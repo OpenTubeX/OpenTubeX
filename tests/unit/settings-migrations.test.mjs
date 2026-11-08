@@ -51,6 +51,27 @@ test('prefers an explicit live chat replay visibility choice', () => {
   })
 })
 
+test('copies the former Auto Load Next Page choice to comments', () => {
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: false }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: false,
+  })
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: true }), {
+    generalAutoLoadMorePaginatedItemsEnabled: true,
+    autoLoadComments: true,
+  })
+})
+
+test('prefers an explicit Auto Load Comments choice', () => {
+  assert.deepEqual(migrateLegacySettings({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  })
+})
+
 test('migrates the legacy vertical tab bar preference to the left layout', () => {
   assert.deepEqual(migrateLegacySettings({ useVerticalTabBar: true }), {
     tabBarPosition: 'left',
@@ -489,4 +510,67 @@ test('a failed control bar migration retries on the next launch', async () => {
   await migrateControlBar(stored)
   assert.deepEqual([...stored.controlBarButtons], ['chapters', 'screenshot', 'menu'])
   assert.equal(stored.controlBarButtonsMigration, true)
+})
+
+const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
+const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
+
+const syncTimestampWriterStart = settingsSource.indexOf('let settingSyncTimestampWrite')
+const syncTimestampWriterEnd = settingsSource.indexOf('const customState', syncTimestampWriterStart)
+
+/**
+ * @param {Record<string, unknown>} stored
+ * @param {Record<string, number>} [startupEditTimes] edit times saved earlier in startup
+ */
+async function migrateAutoLoadComments(stored, startupEditTimes) {
+  const state = { syncServerSettingUpdatedAt: startupEditTimes ?? stored.syncServerSettingUpdatedAt ?? {} }
+  const commits = {}
+  await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(syncTimestampWriterStart, syncTimestampWriterEnd)}
+    ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
+  })()`, {
+    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+    state,
+    commit: (mutation, value) => {
+      commits[mutation] = value
+      if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
+    },
+    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    isSettingSyncable: () => true,
+    CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+    console,
+  })
+  // Objects from the script's context have another realm's prototype.
+  return JSON.parse(JSON.stringify({ stored, commits }))
+}
+
+test('startup copies Auto Load Next Page to comments with its sync edit time', async () => {
+  const editTimes = { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20 },
+  }, { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }), {
+    stored: {
+      generalAutoLoadMorePaginatedItemsEnabled: false,
+      autoLoadComments: false,
+      // Keeps the edit time an earlier startup migration saved.
+      syncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 },
+    },
+    commits: { setAutoLoadComments: false, setSyncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 } },
+  })
+
+  // Without a recorded edit, the copy is not an edit either.
+  assert.deepEqual(await migrateAutoLoadComments({}), {
+    stored: { autoLoadComments: true },
+    commits: { setAutoLoadComments: true },
+  })
+
+  // A saved choice is never replaced.
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    stored: { generalAutoLoadMorePaginatedItemsEnabled: false, autoLoadComments: true },
+    commits: {},
+  })
 })

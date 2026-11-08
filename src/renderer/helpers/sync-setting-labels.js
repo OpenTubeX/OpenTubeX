@@ -12,6 +12,7 @@ export const SYNC_SETTING_LABELS = {
   mobileAutoPictureInPicture: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
   animationSpeed: 'Settings.Theme Settings.Animation Speed',
   appFont: 'Settings.Theme Settings.Font.App Font',
+  autoLoadComments: 'Settings.General Settings.Auto Load Comments.Label',
   autoOpenChapters: 'Settings.Player Settings.Automatically Open Chapters',
   autoPictureInPictureTriggers: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
   autoUpdateChannelPlaybackSpeeds: 'Settings.Channel Settings.Auto Save Playback Speed',
