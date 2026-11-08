@@ -57,7 +57,7 @@
   --ft-option-gap: 6px;
 
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  grid-auto-rows: 68px;
+  grid-auto-rows: minmax(68px, auto);
   gap: 6px;
   align-content: safe center;
 }
@@ -207,7 +207,7 @@
 
   inline-size: min(100%, 880px) !important;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  grid-auto-rows: 92px;
+  grid-auto-rows: minmax(92px, auto);
   gap: 8px;
 }
 
