@@ -359,7 +359,9 @@ public class AndroidMediaSessionService extends Service {
         // Keep the CPU awake until the renderer reports playback.
         mainHandler.removeCallbacks(releasePlaybackWakeLock);
         if (!playbackWakeLock.isHeld()) playbackWakeLock.acquire();
-        mainHandler.postDelayed(releasePlaybackWakeLock, PAUSED_WAKE_LOCK_GRACE_MS);
+        if (!"playing".equals(currentState.optString("playbackState"))) {
+            mainHandler.postDelayed(releasePlaybackWakeLock, PAUSED_WAKE_LOCK_GRACE_MS);
+        }
     }
 
     private List<String> notificationActions(Set<String> actions, String playbackState) {
