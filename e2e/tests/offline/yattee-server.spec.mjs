@@ -391,7 +391,7 @@ test('opens channels by handle with only the tabs the server provides', async ({
 
   await page.locator(sel.searchInput).fill('https://www.youtube.com/@TestChannel')
   await page.locator(sel.searchInput).press('Enter')
-  const tabs = page.locator(`${activeTab} .channelDetails [role="tab"]`)
+  const tabs = page.locator(`${activeTab} .channelDetails [role="tab"]:not(.moreTab)`)
   await expect(tabs).toHaveText(['Videos', 'Shorts', 'Live', 'Playlists', 'About'])
   await expect(page.locator(`${activeTab} .ft-list-video`).first()).toContainText('Latest upload')
   // The server ignores the sort order

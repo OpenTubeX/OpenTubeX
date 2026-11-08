@@ -11,19 +11,25 @@
       :style="{ anchorName: isProfileDropdownOpen ? profileDropdownAnchor : null }"
     >
       <FtButton
-        :label="subscribedText"
         :no-border="true"
         :icon="['fas', isSubscribed ? 'check' : 'user-plus']"
         class="subscribeButton"
         :class="{
           hasProfileDropdownToggle: isSubscriptionOptionsEnabled,
           dropdownOpened: isProfileDropdownOpen,
-          justToggled: justToggled
+          justToggled: justToggled,
+          compact
         }"
+        :aria-label="compact ? subscribedText : undefined"
+        :title="compact ? subscribedText : undefined"
         theme="primary"
         :variant="isSubscribed ? 'tonal' : 'filled'"
         @click="handleSubscription(activeProfile)"
-      />
+      >
+        <template #label>
+          <span class="subscribeLabel">{{ subscribedText }}</span>
+        </template>
+      </FtButton>
       <FtPrompt
         v-if="showUnsubscribePopupForProfile !== null"
         :label="$t('Channels.Unsubscribe Prompt', { channelName: channelName })"
@@ -257,6 +263,11 @@ const props = defineProps({
   subscriptionCountText: {
     type: String,
     default: ''
+  },
+  // Shows only the icon; the label still names the button.
+  compact: {
+    type: Boolean,
+    default: false
   }
 })
 

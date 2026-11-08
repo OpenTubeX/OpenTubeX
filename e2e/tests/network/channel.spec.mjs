@@ -245,7 +245,7 @@ test.describe('channel page', () => {
     await aboutPanel.dispatchEvent('keydown', { key: 'ArrowRight', bubbles: true })
     await expect(selectedChannelTab).toHaveAttribute('id', initialChannelTabId)
 
-    const channelTabIds = await page.locator('.channelDetails [role="tab"]').evaluateAll((tabs) => (
+    const channelTabIds = await page.locator('.channelDetails [role="tab"]:not(.moreTab)').evaluateAll((tabs) => (
       tabs.map((tab) => tab.id)
     ))
     const initialChannelTabIndex = channelTabIds.indexOf(initialChannelTabId)

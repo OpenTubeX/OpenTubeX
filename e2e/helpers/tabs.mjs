@@ -60,3 +60,25 @@ export async function selectTabWithHighlightAnimation(tab, key = null) {
     else element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
   }), key)
 }
+
+/**
+ * Selects a channel tab, through the More menu when it does not fit in the row.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} id The tab id without the `Tab` suffix, such as `about`.
+ */
+export async function selectChannelTab(page, id) {
+  const tab = page.locator(`.channelDetails:visible #${id}Tab`)
+  if (!await tab.evaluate(element => element.classList.contains('overflowedTab'))) {
+    await tab.click()
+    await expect(tab).toHaveAttribute('aria-selected', 'true')
+    return
+  }
+  const label = await tab.locator('.tabLabel > span').textContent()
+  const more = page.locator('.channelDetails:visible #moreTab')
+  await more.click()
+  // Phones list the tabs in a bottom sheet with checkbox items; elsewhere they are radio items.
+  await page.locator('[role="menuitemradio"], [role="menuitemcheckbox"]')
+    .filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) }).click()
+  await expect(more).toHaveAttribute('aria-selected', 'true')
+  await expect(more).toContainText(label)
+}

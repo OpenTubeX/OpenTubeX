@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises'
-import { expectTabHighlightAligned, expectTabHighlightStyle, selectTabWithHighlightAnimation, tabHighlightAnimations } from '../../helpers/tabs.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle, selectChannelTab, selectTabWithHighlightAnimation, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
 
@@ -55,7 +55,7 @@ for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
     }, width)
     await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const tab of ['videos', 'shorts', 'live', 'podcasts', 'releases', 'courses', 'playlists', 'community']) {
-      await page.locator(`#${tab}Tab`).click()
+      await selectChannelTab(page, tab)
       await expect(card.locator('.message')).toBeVisible()
       const layout = await card.evaluate(element => {
         const box = element.getBoundingClientRect()
@@ -72,35 +72,21 @@ for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
   })
 }
 
-async function expectTabScrollRange(tabs) {
+/** Shown tabs sit in one row inside the container, which never scrolls. */
+async function expectTabsFitRow(tabs) {
   await expect.poll(() => tabs.evaluate(container => {
     const viewport = container.getBoundingClientRect()
-    const content = container.querySelector('.tabsContent').getBoundingClientRect()
-    const range = Math.max(0, content.width - viewport.width)
-    const scrollbar = container.querySelector('.os-scrollbar-horizontal')
-    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-    const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+    const rects = [...container.querySelectorAll('[role="tab"]:not(.overflowedTab)')].map(tab => tab.getBoundingClientRect())
     const tolerance = 2 / devicePixelRatio
-    const progress = range > 0 ? Math.min(1, Math.abs(container.scrollLeft) / range) : 0
-    const rtl = getComputedStyle(container).direction === 'rtl'
-    const thumbOffset = (rtl ? 1 - progress : progress) * (track.width - thumb.width)
+    const overflowed = container.querySelectorAll('.overflowedTab:not(.moreTab)').length
     return {
-      validOffset: Math.abs(container.scrollLeft) <= range + tolerance,
-      noEmptySpace: content.left <= viewport.left + tolerance && content.right >= viewport.right - tolerance,
-      // Native overflow rounds fractional content and viewport widths separately.
-      scrollbarMatchesRange: scrollbar.classList.contains('os-scrollbar-unusable') === (container.scrollWidth <= container.clientWidth),
-      thumbSizeMatchesRange: range < 1 || Math.abs(thumb.width - track.width * viewport.width / content.width) <= tolerance,
-      thumbPositionMatchesOffset: range < 1 || Math.abs(thumb.left - track.left - thumbOffset) <= tolerance,
+      noScrolling: container.scrollWidth <= container.clientWidth,
+      oneRow: Math.max(...rects.map(rect => rect.top)) - Math.min(...rects.map(rect => rect.top)) < 1,
+      inside: rects.every(rect => rect.left >= viewport.left - tolerance && rect.right <= viewport.right + tolerance),
+      moreOnlyWithOverflow: !container.querySelector('#moreTab').classList.contains('overflowedTab') === (overflowed > 0),
       fullLabels: [...container.querySelectorAll('.tabLabel > span')].every(label => label.scrollWidth <= label.clientWidth + 1)
     }
-  })).toEqual({
-    validOffset: true,
-    noEmptySpace: true,
-    scrollbarMatchesRange: true,
-    thumbSizeMatchesRange: true,
-    thumbPositionMatchesOffset: true,
-    fullLabels: true
-  })
+  })).toEqual({ noScrolling: true, oneRow: true, inside: true, moreOnlyWithOverflow: true, fullLabels: true })
 }
 
 test('hides channel tab icons and preserves full labels when space is limited', async ({ app, page }, testInfo) => {
@@ -123,11 +109,8 @@ test('hides channel tab icons and preserves full labels when space is limited', 
   })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(450, 900))
   await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
-  // Pill spacing can require scrolling even with fewer tabs; labels stay complete.
-  await expect.poll(() => page.locator('.channelDetails:visible .tabLabel > span').evaluateAll(labels =>
-    labels.every(label => label.scrollWidth <= label.clientWidth + 1)
-  )).toBe(true)
-  await expectTabScrollRange(page.locator('.channelDetails:visible .tabs'))
+  // Pill spacing can move tabs to the More menu even with fewer tabs; labels stay complete.
+  await expectTabsFitRow(page.locator('.channelDetails:visible .tabs'))
   await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
 })
 
@@ -158,7 +141,8 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
       const gaps = {
         bannerToAvatar: avatar.top - banner.bottom,
         infoToControls: controls.top - info.bottom,
-        actionsToSearch: search.top - subscribe.bottom,
+        // Beside the avatar, the actions are centered on it and the avatar ends the row.
+        actionsToSearch: search.top - Math.max(subscribe.bottom, avatar.bottom),
         belowTabs: container.bottom - tabs.bottom
       }
       if (actions.top >= avatar.bottom) {
@@ -191,8 +175,9 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
     await store.dispatch('updateHideUnsubscribeButton', true)
   })
   const actions = page.locator('.channelDetails:visible .infoActionsContainer')
-  await expect(actions.locator(':scope > *')).toHaveCount(1)
+  await expect(actions.locator(':scope > *')).toHaveCount(2)
   await expect(actions.getByRole('button', { name: 'Pin to Navigation', exact: true })).toBeVisible()
+  await expect(actions.getByRole('button', { name: 'Search Channel', exact: true })).toBeVisible()
   await expect.poll(() => page.locator('.channelDetails:visible').evaluate(header => {
     const info = header.querySelector('.thumbnailContainer').getBoundingClientRect()
     const search = header.querySelector('.channelSearch input').getBoundingClientRect()
@@ -240,10 +225,10 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
       BrowserWindow.getAllWindows()[0].setSize(width, height)
     }, { width, height })
     await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-    await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => {
+    await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]:not(.overflowedTab)').evaluateAll(tabs => {
       return Math.max(...tabs.map(tab => {
         const bounds = tab.getBoundingClientRect()
-        const label = tab.querySelector('.tabLabel').getBoundingClientRect()
+        const label = tab.querySelector('.tabLabel, .moreTabLabel').getBoundingClientRect()
         const border = Number.parseFloat(getComputedStyle(tab).borderBottomWidth)
         return Math.abs((label.top + label.bottom) / 2 - (bounds.top + bounds.bottom - border) / 2)
       }))
@@ -292,7 +277,7 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
       ['coursesTab', '.elementList .message:visible'],
       ['aboutTab', '#aboutPanel h2:first-child']
     ]) {
-      await page.locator(`#${tabId}`).click()
+      await selectChannelTab(page, tabId.replace(/Tab$/, ''))
       await expect(page.locator(contentSelector)).toBeVisible()
       if (tabId === 'videosTab') {
         expect(await page.locator('.select-container').evaluate(row => {
@@ -341,10 +326,10 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
         await page.evaluate(() => document.activeElement?.blur())
         if (interaction === 'hover') await searchToggle.hover()
         if (interaction === 'keyboard') {
-          await expect.poll(async () => {
-            await page.keyboard.press('Tab')
-            return searchToggle.evaluate(button => button === document.activeElement)
-          }, { message: 'Keyboard Tab reaches the channel search toggle', intervals: [0] }).toBe(true)
+          // Search follows Share in the action row, so Tab moves from one to the other.
+          await page.locator('.channelDetails:visible .shareIcon button').focus()
+          await page.keyboard.press('Shift+Tab')
+          await expect(searchToggle).toBeFocused()
           await expect.poll(() => searchToggle.evaluate(button => button.matches(':focus-visible'))).toBe(true)
         }
         colors.push(await searchToggle.evaluate(async button => {
@@ -375,7 +360,7 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
   }
   description = ''
   await page.reload()
-  await page.locator('#aboutTab').click()
+  await selectChannelTab(page, 'about')
   const firstHeading = page.locator('#aboutPanel h2:first-child')
   await expect(firstHeading).toHaveText('Details')
   await expect.poll(() => firstHeading.evaluate(heading => {
@@ -455,6 +440,7 @@ test('places the channel line immediately after layout changes without animating
 })
 
 test('keeps every channel tab in one row across zoom, RTL, and changing labels', async ({ app, page }, testInfo) => {
+  const tabs = page.locator('.channelDetails:visible .tabs')
   for (const [width, height, scale] of [[1600, 900, 95], [375, 812, 95], [812, 375, 125]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
       BrowserWindow.getAllWindows()[0].setSize(width, height)
@@ -463,24 +449,16 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
       return window.$store.dispatch('updateUiScale', value)
     }, scale)
     await expectAligned(page)
-    await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => {
-      const tops = tabs.map(tab => tab.getBoundingClientRect().top)
-      return Math.max(...tops) - Math.min(...tops)
-    })).toBeLessThan(1)
+    await expectTabsFitRow(tabs)
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThan(2)
-    for (const tab of await page.locator('.channelDetails:visible [role="tab"]').all()) {
-      await tab.click()
-      await expect(tab).toHaveAttribute('aria-selected', 'true')
+    for (const id of await tabs.locator('.tab:not(.moreTab)').evaluateAll(elements => elements.map(element => element.dataset.tab))) {
+      await selectChannelTab(page, id)
       await expectAligned(page)
-      await expect.poll(() => tab.evaluate(element => {
-        const tab = element.getBoundingClientRect()
-        const viewport = element.closest('.tabs').getBoundingClientRect()
-        return Math.max(viewport.left - tab.left, tab.right - viewport.right)
-      })).toBeLessThan(2)
+      await expectTabsFitRow(tabs)
     }
   }
   await app.electronApp.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0].setSize(812, 1100)
+    BrowserWindow.getAllWindows()[0].setSize(1050, 1100)
   })
   await expectAligned(page)
   await page.evaluate(() => window.scrollTo(0, 0))
@@ -489,10 +467,10 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
     contentType: 'image/png'
   })
 
-  await page.locator('.channelDetails:visible .tabs').evaluate(element => { element.dir = 'rtl' })
-  await page.locator('#videosTab').click()
+  await tabs.evaluate(element => { element.dir = 'rtl' })
+  await selectChannelTab(page, 'videos')
   await expectAligned(page)
-  await page.locator('#aboutTab').click()
+  await selectChannelTab(page, 'about')
   await expectAligned(page)
 
   await page.locator('#videosTab .tabLabel').evaluate(label => {
@@ -500,6 +478,7 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
     label.firstElementChild.textContent = label.dataset.label
   })
   await expectAligned(page)
+  await expectTabsFitRow(tabs)
 
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => {
@@ -511,74 +490,93 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
   }
 })
 
-test('scrolls full channel labels and clamps the range after labels or available tabs change', async ({ app, page }) => {
+test('moves channel tabs that do not fit into a More menu', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  const tabs = page.locator('.channelDetails:visible .tabs')
+  const more = page.locator('.channelDetails:visible #moreTab')
+  await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
+  for (const [width, locale] of [[375, 'en-US'], [412, 'de-DE'], [760, 'en-US'], [412, 'ar']]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setSize(size, 900), Math.round(width * uiScale / 100))
+    await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = locale }, locale)
+    await expectAligned(page)
+    await expectTabsFitRow(tabs)
+    await expect(more, `More tab at ${width}px in ${locale}`).toBeVisible()
+    expect(await tabs.locator('[role="tab"]:not(.overflowedTab)').evaluateAll(elements =>
+      elements.every(element => element.getBoundingClientRect().height > 47.5)
+    ), 'Touch-sized tabs').toBe(true)
+    // Every tab stays reachable: the shown ones directly, the rest from the menu,
+    // where the More tab takes over the selected tab's label and highlight.
+    for (const id of await tabs.locator('.tab:not(.moreTab)').evaluateAll(elements => elements.map(element => element.dataset.tab))) {
+      await selectChannelTab(page, id)
+      await expectAligned(page)
+      await expectTabsFitRow(tabs)
+    }
+    await selectChannelTab(page, 'videos')
+    await expect(more).toHaveAttribute('aria-selected', 'false')
+  }
+
+  await page.evaluate(() => { document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = 'en-US' })
+  await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setSize(size, 900), Math.round(412 * uiScale / 100))
+  await expectTabsFitRow(tabs)
+  // Arrow keys still cycle through every tab; hidden ones focus the More tab.
+  await page.locator('#videosTab').focus()
+  const tabCount = await tabs.locator('.tab:not(.moreTab)').count()
+  for (const key of ['ArrowLeft', ...Array(tabCount + 1).fill('ArrowRight')]) {
+    await page.keyboard.press(key)
+    await expect.poll(() => page.evaluate(() => {
+      const focused = document.activeElement
+      return focused?.getAttribute('aria-selected') === 'true' && focused.getClientRects().length > 0 &&
+        getComputedStyle(focused).visibility === 'visible'
+    }), `${key} focuses the selected, visible tab`).toBe(true)
+    await expectAligned(page)
+  }
+  await expect(page.locator('#videosTab')).toHaveAttribute('aria-selected', 'true')
+  await testInfo.attach('channel tabs with More menu', {
+    body: await page.locator('.channelDetails:visible').screenshot(),
+    contentType: 'image/png'
+  })
+})
+
+test('keeps full channel labels and updates the More menu when labels or available tabs change', async ({ app, page }) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(375, 812)
   })
   const tabs = page.locator('.channelDetails:visible .tabs')
-  async function expectFullLabels() {
-    await expect.poll(() => tabs.evaluate(container => {
-      const tabs = [...container.querySelectorAll('[role="tab"]')].map(tab => tab.getBoundingClientRect())
-      const labels = [...container.querySelectorAll('.tabLabel > span')]
-      return {
-        oneRow: Math.max(...tabs.map(tab => tab.top)) - Math.min(...tabs.map(tab => tab.top)) < 1,
-        fullLabels: labels.every(label => label.scrollWidth <= label.clientWidth + 1),
-        validOffset: Math.abs(container.scrollLeft) <= container.scrollWidth - container.clientWidth + 2 / devicePixelRatio
-      }
-    })).toEqual({ oneRow: true, fullLabels: true, validOffset: true })
-    await expectAligned(page)
-    await expectTabScrollRange(tabs)
-  }
-  await expectFullLabels()
-  const scrollbar = tabs.locator(':scope > .os-scrollbar-horizontal')
-  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-  await expect.poll(() => tabs.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0)
-  await expect.poll(() => tabs.locator('[role="tab"]').evaluateAll(elements =>
-    Math.min(...elements.map(element => element.getBoundingClientRect().height))
-  )).toBeGreaterThan(47.5)
-  await page.locator('#aboutTab').evaluate(tab => tab.click())
-  await expectFullLabels()
-  await expect.poll(() => page.locator('#aboutTab').evaluate(tab => {
-    const bounds = tab.getBoundingClientRect()
-    const viewport = tab.closest('.tabs').getBoundingClientRect()
-    return Math.max(viewport.left - bounds.left, bounds.right - viewport.right)
-  })).toBeLessThan(2)
-  await expect.poll(() => tabs.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+  const more = page.locator('.channelDetails:visible #moreTab')
+  await expectTabsFitRow(tabs)
+  await expect(more).toBeVisible()
+  await selectChannelTab(page, 'about')
+  await expectAligned(page)
   await page.locator('#videosTab .tabLabel').evaluate(label => {
     label.dataset.label = 'A very long translated video tab label'
     label.firstElementChild.textContent = label.dataset.label
   })
-  await expectFullLabels()
+  await expectTabsFitRow(tabs)
   await expect(page.locator('#videosTab .tabLabel > span')).toHaveCSS('text-overflow', 'clip')
-  await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
+  await expect(more).toHaveAttribute('aria-selected', 'true')
   await page.evaluate(async () => {
     const store = window.$store
     await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
       .map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
   })
-  await expectFullLabels()
-  await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
+  await expectTabsFitRow(tabs)
   await page.locator('#videosTab .tabLabel').evaluate(label => {
     label.dataset.label = 'Videos'
     label.firstElementChild.textContent = 'Videos'
   })
-  await expectFullLabels()
-  await expect.poll(() => tabs.evaluate(element => ({
-    range: element.scrollWidth - element.clientWidth,
-    offset: element.scrollLeft
-  }))).toEqual({ range: 0, offset: 0 })
-  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  await expectTabsFitRow(tabs)
+  await expect(more).toBeHidden()
+  await expect(page.locator('#aboutTab')).toHaveAttribute('aria-selected', 'true')
+  await expectAligned(page)
   await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
 })
 
-test('clamps channel tab scrolling after resize and locale changes', async ({ app, page }) => {
+test('keeps channel tabs in one row after resize and locale changes', async ({ app, page }) => {
   const tabs = page.locator('.channelDetails:visible .tabs')
   for (const [width, locale] of [[375, 'de-DE'], [375, 'en-US'], [1600, 'en-US'], [375, 'ar'], [1600, 'ar']]) {
-    await tabs.evaluate(element => { element.scrollLeft = getComputedStyle(element).direction === 'rtl' ? -element.scrollWidth : element.scrollWidth })
     await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 900), width)
     await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = locale }, locale)
     await expectAligned(page)
-    await expectTabScrollRange(tabs)
+    await expectTabsFitRow(tabs)
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThan(2)
   }
 })
@@ -623,7 +621,7 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
 test('desktop channel tabs size to their content and show icons in both packs', async ({ app, page }, testInfo) => {
   for (const pack of ['material', 'remix']) {
     await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), pack)
-    const tabs = page.locator('.channelDetails:visible [role="tab"]')
+    const tabs = page.locator('.channelDetails:visible [role="tab"]:not(.moreTab)')
     for (const tab of await tabs.all()) {
       await expect(tab.locator('.ft-icon__glyph')).toBeVisible()
       const spacing = await tab.evaluate(element => {
@@ -648,7 +646,7 @@ test.describe(() => {
     await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
     const widthWithIcons = await tabs.evaluate(container => {
       const content = container.querySelector('.tabsContent')
-      const buttons = [...content.querySelectorAll('.tab')]
+      const buttons = [...content.querySelectorAll('.tab:not(.moreTab)')]
       const width = buttons.reduce((sum, tab) => sum + tab.getBoundingClientRect().width, 0)
       const gaps = (buttons.length - 1) * parseFloat(getComputedStyle(content).columnGap)
       container.style.flex = 'none'
@@ -670,7 +668,14 @@ test.describe(() => {
     await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
   })
 
-  test('channel panel and document keyboard navigation crossfade the selected highlight', { tag: '@scale' }, async ({ page }) => {
+  // Wide enough to show every tab, so the highlight belongs to the tab itself.
+  async function showAllTabs(app, page, uiScale) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 900), Math.round(1600 * uiScale / 100))
+    await expect(page.locator('.channelDetails:visible #moreTab')).toBeHidden()
+  }
+
+  test('channel panel and document keyboard navigation crossfade the selected highlight', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await showAllTabs(app, page, uiScale)
     await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
     for (const source of ['body', 'panel', 'appTab']) {
       await page.locator('#videosTab').click()
@@ -702,7 +707,8 @@ test.describe(() => {
     }
   })
 
-  test('channel search restores highlights immediately unless a tab is deliberately selected', { tag: '@scale' }, async ({ page }) => {
+  test('channel search restores highlights immediately unless a tab is deliberately selected', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await showAllTabs(app, page, uiScale)
     await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
     const search = page.locator('.channelSearch input')
     for (const key of [null, 'Enter', ' ']) {

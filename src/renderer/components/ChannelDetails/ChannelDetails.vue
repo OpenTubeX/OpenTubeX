@@ -19,6 +19,7 @@
       class="infoContainer"
     >
       <div
+        ref="info"
         class="info"
       >
         <div
@@ -60,7 +61,21 @@
           </div>
         </div>
 
-        <div class="infoActionsContainer">
+        <div
+          ref="actions"
+          class="infoActionsContainer"
+        >
+          <FtIconButton
+            v-if="showSearchBar && !hasErrorMessage"
+            class="channelSearchToggle"
+            :title="$t('Channel.Search Channel')"
+            :icon="['fas', 'search']"
+            :aria-expanded="searchExpanded"
+            :aria-pressed="searchExpanded"
+            :theme="searchExpanded ? 'secondary' : 'base-no-default'"
+            @click="toggleSearch"
+          />
+
           <FtShareButton
             v-if="!hideSharingActions && showShareMenu"
             :id="id"
@@ -70,6 +85,7 @@
 
           <FtIconButton
             v-if="canPin || isPinnedToNavigation"
+            class="pinButton"
             :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
             :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
             :aria-pressed="isPinnedToNavigation"
@@ -82,6 +98,7 @@
             :channel-id="id"
             :channel-name="name"
             :channel-thumbnail="thumbnailUrl"
+            :compact="compactSubscribe"
             @subscribed="subscribed"
           />
         </div>
@@ -93,276 +110,72 @@
       >
         <div
           ref="tabsContainer"
-          v-overlay-scrollbars
           class="tabs"
         >
           <FtTabs
             ref="tabsContent"
             class="tabsContent"
+            :class="{ hideTabIcons }"
             :aria-label="$t('Channel.Channel Tabs')"
           >
             <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
             <div
-              v-if="visibleTabs.includes('home')"
-              id="homeTab"
+              v-for="tab in shownTabs"
+              :id="`${tab.id}Tab`"
+              :key="tab.id"
+              :data-tab="tab.id"
               class="tab"
-              :class="{ selectedTab: currentTab === 'home' }"
+              :class="{ selectedTab: currentTab === tab.id, overflowedTab: overflowTabs.includes(tab.id) }"
               role="tab"
-              :aria-selected="currentTab === 'home'"
-              aria-controls="homePanel"
-              :tabindex="(currentTab === 'home' || currentTab === 'search') ? 0 : -1"
-              @click="changeTabFromPointer($event, 'home')"
-              @keydown.left.right="focusTab('home', $event)"
-              @keydown.enter.space.prevent="changeTab('home')"
+              :aria-selected="currentTab === tab.id && !selectedOverflowTab"
+              :aria-controls="tab.panel"
+              :tabindex="tabIndex(tab.id)"
+              @click="changeTabFromPointer($event, tab.id)"
+              @keydown.left.right="focusTab(tab.id, $event)"
+              @keydown.enter.space.prevent="changeTab(tab.id)"
             >
               <FtIcon
-                :icon="['fas', 'house']"
+                :icon="['fas', tab.icon]"
                 class="channelTabIcon"
                 aria-hidden="true"
               />
               <span
                 class="tabLabel"
-                :data-label="$t('Channel.Home.Home')"
-              ><span>{{ $t("Channel.Home.Home") }}</span></span>
+                :data-label="tab.label"
+              ><span>{{ tab.label }}</span></span>
             </div>
+            <!-- Tabs that do not fit open from here. It stands in for a selected one. -->
             <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
             <div
-              v-if="visibleTabs.includes('videos')"
-              id="videosTab"
-              class="tab"
-              :class="{ selectedTab: currentTab === 'videos' }"
+              id="moreTab"
+              ref="moreTab"
+              class="tab moreTab"
+              :class="{ selectedTab: selectedOverflowTab, overflowedTab: overflowTabs.length === 0 }"
               role="tab"
-              :aria-selected="currentTab === 'videos'"
-              aria-controls="videoPanel"
-              :tabindex="(currentTab === 'videos' || currentTab === 'search') ? 0 : -1"
-              @click="changeTabFromPointer($event, 'videos')"
-              @keydown.left.right="focusTab('videos', $event)"
-              @keydown.enter.space.prevent="changeTab('videos')"
+              aria-haspopup="menu"
+              :aria-selected="!!selectedOverflowTab"
+              :aria-controls="selectedOverflowTab?.panel"
+              :tabindex="selectedOverflowTab ? 0 : -1"
+              @click="openMoreTabs"
+              @keydown.left.right="focusTab(currentTab, $event)"
+              @keydown.enter.space.prevent="openMoreTabs"
             >
+              <span class="moreTabLabel">
+                <span
+                  ref="moreTabText"
+                  :class="{ moreTabTextHidden: selectedOverflowTab }"
+                >{{ $t('More') }}</span>
+                <span
+                  v-if="selectedOverflowTab"
+                  class="moreTabSelected"
+                  :data-label="selectedOverflowTab.label"
+                ><span>{{ selectedOverflowTab.label }}</span></span>
+              </span>
               <FtIcon
-                :icon="['fas', 'video']"
-                class="channelTabIcon"
+                :icon="['fas', 'angle-down']"
+                class="moreTabIcon"
                 aria-hidden="true"
               />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Videos.Videos')"
-              ><span>{{ $t("Channel.Videos.Videos") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('shorts')"
-              id="shortsTab"
-              class="tab"
-              :class="{ selectedTab: currentTab === 'shorts' }"
-              role="tab"
-              :aria-selected="currentTab === 'shorts'"
-              aria-controls="shortPanel"
-              :tabindex="currentTab === 'shorts' ? 0 : -1"
-              @click="changeTabFromPointer($event, 'shorts')"
-              @keydown.left.right="focusTab('shorts', $event)"
-              @keydown.enter.space.prevent="changeTab('shorts')"
-            >
-              <FtIcon
-                :icon="['fas', 'play']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Global.Shorts')"
-              ><span>{{ $t("Global.Shorts") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('live')"
-              id="liveTab"
-              class="tab"
-              :class="{ selectedTab: currentTab === 'live' }"
-              role="tab"
-              :aria-selected="currentTab === 'live'"
-              aria-controls="livePanel"
-              :tabindex="currentTab === 'live' ? 0 : -1"
-              @click="changeTabFromPointer($event, 'live')"
-              @keydown.left.right="focusTab('live', $event)"
-              @keydown.enter.space.prevent="changeTab('live')"
-            >
-              <FtIcon
-                :icon="['fas', 'tower-broadcast']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Live.Live')"
-              ><span>{{ $t("Channel.Live.Live") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('releases')"
-              id="releasesTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'releases'"
-              aria-controls="releasePanel"
-              :tabindex="currentTab === 'releases' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'releases' }"
-              @click="changeTabFromPointer($event, 'releases')"
-              @keydown.left.right="focusTab('releases', $event)"
-              @keydown.enter.space.prevent="changeTab('releases')"
-            >
-              <FtIcon
-                :icon="['fas', 'headphones']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Releases.Releases')"
-              ><span>{{ $t("Channel.Releases.Releases") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('shows')"
-              id="showsTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'shows'"
-              aria-controls="showsPanel"
-              :tabindex="currentTab === 'shows' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'shows' }"
-              @click="changeTabFromPointer($event, 'shows')"
-              @keydown.left.right="focusTab('shows', $event)"
-              @keydown.enter.space.prevent="changeTab('shows')"
-            >
-              <FtIcon
-                :icon="['fas', 'tv']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Shows.Shows')"
-              ><span>{{ $t("Channel.Shows.Shows") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('podcasts')"
-              id="podcastsTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'podcasts'"
-              aria-controls="podcastPanel"
-              :tabindex="currentTab === 'podcasts' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'podcasts' }"
-              @click="changeTabFromPointer($event, 'podcasts')"
-              @keydown.left.right="focusTab('podcasts', $event)"
-              @keydown.enter.space.prevent="changeTab('podcasts')"
-            >
-              <FtIcon
-                :icon="['fas', 'podcast']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Podcasts.Podcasts')"
-              ><span>{{ $t("Channel.Podcasts.Podcasts") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('courses')"
-              id="coursesTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'courses'"
-              aria-controls="coursesPanel"
-              :tabindex="currentTab === 'courses' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'courses' }"
-              @click="changeTabFromPointer($event, 'courses')"
-              @keydown.left.right="focusTab('courses', $event)"
-              @keydown.enter.space.prevent="changeTab('courses')"
-            >
-              <FtIcon
-                :icon="['fas', 'book-open']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Courses.Courses')"
-              ><span>{{ $t("Channel.Courses.Courses") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('playlists')"
-              id="playlistsTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'playlists'"
-              aria-controls="playlistPanel"
-              :tabindex="currentTab === 'playlists' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'playlists' }"
-              @click="changeTabFromPointer($event, 'playlists')"
-              @keydown.left.right="focusTab('playlists', $event)"
-              @keydown.enter.space.prevent="changeTab('playlists')"
-            >
-              <FtIcon
-                :icon="['fas', 'list']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.Playlists.Playlists')"
-              ><span>{{ $t("Channel.Playlists.Playlists") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              v-if="visibleTabs.includes('community')"
-              id="communityTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'community'"
-              aria-controls="communityPanel"
-              :tabindex="currentTab === 'community' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'community' }"
-              @click="changeTabFromPointer($event, 'community')"
-              @keydown.left.right="focusTab('community', $event)"
-              @keydown.enter.space.prevent="changeTab('community')"
-            >
-              <FtIcon
-                :icon="['fas', 'rss']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Global.Posts')"
-              ><span>{{ $t("Global.Posts") }}</span></span>
-            </div>
-            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-            <div
-              id="aboutTab"
-              class="tab"
-              role="tab"
-              :aria-selected="currentTab === 'about'"
-              aria-controls="aboutPanel"
-              :tabindex="currentTab === 'about' ? 0 : -1"
-              :class="{ selectedTab: currentTab === 'about' }"
-              @click="changeTabFromPointer($event, 'about')"
-              @keydown.left.right="focusTab('about', $event)"
-              @keydown.enter.space.prevent="changeTab('about')"
-            >
-              <FtIcon
-                :icon="['fas', 'circle-info']"
-                class="channelTabIcon"
-                aria-hidden="true"
-              />
-              <span
-                class="tabLabel"
-                :data-label="$t('Channel.About.About')"
-              ><span>{{ $t("Channel.About.About") }}</span></span>
             </div>
           </FtTabs>
         </div>
@@ -381,16 +194,6 @@
           :maxlength="255"
           @input="handleSearchInput"
           @click="search"
-        />
-        <FtIconButton
-          v-if="showSearchBar"
-          class="channelSearchToggle"
-          :title="$t('Channel.Search Channel')"
-          :icon="['fas', 'search']"
-          :aria-expanded="searchExpanded"
-          :aria-pressed="searchExpanded"
-          :theme="searchExpanded ? 'secondary' : 'base-no-default'"
-          @click="toggleSearch"
         />
       </FtFlexBox>
       <FtFixedBackground />
@@ -417,7 +220,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, formatSubscriberCount } from '../../helpers/utils'
-import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
@@ -500,64 +303,173 @@ async function togglePinnedToNavigation() {
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const { isTabPresented } = useTabContext()
 const tabsContainer = useTemplateRef('tabsContainer')
 const tabsContent = useTemplateRef('tabsContent')
 let tabsResizeObserver = null
+let actionsResizeObserver = null
 
-function revealSelectedTab() {
-  const container = tabsContainer.value
-  const selected = container?.querySelector('.selectedTab')
-  if (!(selected instanceof HTMLElement)) return
-  const viewport = container.getBoundingClientRect()
-  const tab = selected.getBoundingClientRect()
-  // Scroll only this row, without moving the page or changing keyboard focus.
-  if (tab.left < viewport.left) container.scrollBy({ left: tab.left - viewport.left })
-  else if (tab.right > viewport.right) container.scrollBy({ left: tab.right - viewport.right })
+const tabDefinitions = computed(() => [
+  { id: 'home', panel: 'homePanel', icon: 'house', label: t('Channel.Home.Home') },
+  { id: 'videos', panel: 'videoPanel', icon: 'video', label: t('Channel.Videos.Videos') },
+  { id: 'shorts', panel: 'shortPanel', icon: 'play', label: t('Global.Shorts') },
+  { id: 'live', panel: 'livePanel', icon: 'tower-broadcast', label: t('Channel.Live.Live') },
+  { id: 'releases', panel: 'releasePanel', icon: 'headphones', label: t('Channel.Releases.Releases') },
+  { id: 'shows', panel: 'showsPanel', icon: 'tv', label: t('Channel.Shows.Shows') },
+  { id: 'podcasts', panel: 'podcastPanel', icon: 'podcast', label: t('Channel.Podcasts.Podcasts') },
+  { id: 'courses', panel: 'coursesPanel', icon: 'book-open', label: t('Channel.Courses.Courses') },
+  { id: 'playlists', panel: 'playlistPanel', icon: 'list', label: t('Channel.Playlists.Playlists') },
+  { id: 'community', panel: 'communityPanel', icon: 'rss', label: t('Global.Posts') },
+  { id: 'about', panel: 'aboutPanel', icon: 'circle-info', label: t('Channel.About.About') },
+])
+
+const shownTabs = computed(() => tabDefinitions.value.filter(tab => tab.id === 'about' || props.visibleTabs.includes(tab.id)))
+
+/** Tabs that do not fit in the row and open from the More tab instead. */
+const overflowTabs = ref([])
+const hideTabIcons = ref(false)
+const selectedOverflowTab = computed(() => overflowTabs.value.includes(props.currentTab)
+  ? shownTabs.value.find(tab => tab.id === props.currentTab)
+  : null)
+
+/** @param {string} tab */
+function tabIndex(tab) {
+  if (selectedOverflowTab.value) return -1
+  // Search results belong to the Home or Videos tab.
+  if (props.currentTab === 'search' && (tab === 'home' || tab === 'videos')) return 0
+  return props.currentTab === tab ? 0 : -1
 }
 
+const moreTab = useTemplateRef('moreTab')
+const moreTabText = useTemplateRef('moreTabText')
+
+/** @param {string} value */
+function px(value) {
+  return Number.parseFloat(value) || 0
+}
+
+/**
+ * Shows every tab in one row: with icons if they fit, otherwise without, and
+ * otherwise as many as fit before a More tab that lists the rest. The row
+ * never wraps or scrolls.
+ */
 function updateTabsLayout() {
   const container = tabsContainer.value
-  if (!container || container.getBoundingClientRect().width === 0) return
-  // Measure the full, bold-reserved labels independently of icon visibility.
-  // This also lets icons return after resizing, changing locale or hiding tabs.
-  const tabs = [...container.querySelectorAll('.tab')]
-  const rowGap = Number.parseFloat(getComputedStyle(tabsContent.value.$el).columnGap)
-  const fullWidth = tabs.reduce((width, tab) => {
+  const content = tabsContent.value?.$el
+  const more = moreTab.value
+  if (!container || !content || !more) return
+  const available = container.getBoundingClientRect().width + 0.5
+  if (available <= 0.5) return
+  const gap = px(getComputedStyle(content).columnGap)
+  // Hidden tabs stay in the layout, and labels reserve their bold width, so
+  // every width is known whichever tabs are shown or selected.
+  const tabs = [...content.querySelectorAll('.tab:not(.moreTab)')].map(tab => {
     const style = getComputedStyle(tab)
-    const icon = getComputedStyle(tab.querySelector('.channelTabIcon'))
-    return width + tab.querySelector('.tabLabel').getBoundingClientRect().width +
-      Number.parseFloat(style.paddingInlineStart) + Number.parseFloat(style.paddingInlineEnd) +
-      Number.parseFloat(icon.inlineSize) + Number.parseFloat(style.columnGap)
-  }, Math.max(0, tabs.length - 1) * rowGap)
-  container.classList.toggle('hideTabIcons', fullWidth > container.getBoundingClientRect().width + 0.5)
-  // Let the indicator's previous transform disappear before measuring overflow.
-  nextTick(() => {
-    if (tabsContainer.value !== container || !tabsContent.value) return
-    clampOverlayScrollLeft(container, tabsContent.value.$el)
-    revealSelectedTab()
+    const label = tab.querySelector('.tabLabel').getBoundingClientRect().width
+    const width = label + px(style.paddingInlineStart) + px(style.paddingInlineEnd)
+    const icon = px(getComputedStyle(tab.querySelector('.channelTabIcon')).inlineSize) + px(style.columnGap)
+    return { id: tab.dataset.tab, label, width, withIcon: width + icon }
   })
+  const rowWidth = (items, key = 'width') => items.reduce((sum, tab) => sum + tab[key], 0) + Math.max(0, items.length - 1) * gap
+
+  let overflow = []
+  const hideIcons = rowWidth(tabs, 'withIcon') > available
+  if (hideIcons && rowWidth(tabs) > available) {
+    const moreChrome = more.getBoundingClientRect().width - more.querySelector('.moreTabLabel').getBoundingClientRect().width
+    const moreText = moreTabText.value.getBoundingClientRect().width
+    const fitting = (label) => {
+      const moreWidth = moreChrome + Math.max(moreText, label)
+      let count = 0
+      while (count < tabs.length && rowWidth(tabs.slice(0, count + 1)) + gap + moreWidth <= available) count++
+      return count
+    }
+    let count = fitting(0)
+    const selected = tabs.findIndex(tab => tab.id === props.currentTab)
+    // The More tab shows the selected tab's label in place of its own.
+    if (selected >= count) count = fitting(tabs[selected].label)
+    overflow = tabs.slice(count).map(tab => tab.id)
+  }
+  if (hideTabIcons.value !== hideIcons) hideTabIcons.value = hideIcons
+  if (overflow.join() !== overflowTabs.value.join()) overflowTabs.value = overflow
+}
+
+const moreTabItems = computed(() => overflowTabs.value.map(id => {
+  const tab = shownTabs.value.find(tab => tab.id === id)
+  return {
+    type: 'radio',
+    label: tab.label,
+    icon: ['fas', tab.icon],
+    checked: props.currentTab === id,
+    enabled: true,
+    run: () => changeTab(id, false)
+  }
+}))
+
+function openMoreTabs() {
+  if (overflowTabs.value.length > 0) openButtonMenu(moreTab.value, moreTabItems, t('More'))
 }
 
 function observeTabs() {
   tabsResizeObserver?.disconnect()
-  if (tabsContainer.value) {
+  if (tabsContainer.value && tabsContent.value) {
     tabsResizeObserver?.observe(tabsContainer.value)
-    tabsResizeObserver?.observe(tabsContent.value.$el)
-    // Labels can change width without resizing the wrapping container.
-    tabsContainer.value.querySelectorAll('.tab, .tabLabel').forEach(tab => tabsResizeObserver?.observe(tab))
+    // Labels can change width without resizing the row.
+    tabsContainer.value.querySelectorAll('.tabLabel, .moreTabLabel > span').forEach(label => tabsResizeObserver?.observe(label))
   }
   updateTabsLayout()
 }
 
-watch(() => props.currentTab, revealSelectedTab, { flush: 'post' })
+const info = useTemplateRef('info')
+const actions = useTemplateRef('actions')
+const compactSubscribe = ref(false)
+
+/** Drops the subscribe label when the actions would not fit in one row. */
+function updateActionsLayout() {
+  const row = actions.value
+  if (!row || !info.value) return
+  const available = info.value.getBoundingClientRect().width + 0.5
+  if (available <= 0.5) return
+  const children = [...row.children].filter(child => child.getBoundingClientRect().width > 0)
+  let width = children.reduce((sum, child) => sum + child.getBoundingClientRect().width, 0) +
+    Math.max(0, children.length - 1) * px(getComputedStyle(row).columnGap)
+  const button = row.querySelector('.subscribeButton')
+  const label = button?.querySelector('.subscribeLabel')
+  if (compactSubscribe.value && label) {
+    // The compact button has its own minimum, so rebuild the labeled width from its parts.
+    const style = getComputedStyle(button)
+    const icon = button.querySelector('.ft-icon')?.getBoundingClientRect().width ?? 0
+    const fullWidth = Math.max(px(style.getPropertyValue('--subscribe-button-min-size')),
+      px(style.paddingInlineStart) + px(style.paddingInlineEnd) + px(style.borderInlineStartWidth) +
+      px(style.borderInlineEndWidth) + icon + px(style.columnGap) + label.getBoundingClientRect().width)
+    width += fullWidth - button.getBoundingClientRect().width
+  }
+  const compact = width > available
+  if (compact !== compactSubscribe.value) compactSubscribe.value = compact
+}
+
+function observeActions() {
+  actionsResizeObserver?.disconnect()
+  if (info.value && actions.value) {
+    actionsResizeObserver?.observe(info.value)
+    for (const child of actions.value.children) actionsResizeObserver?.observe(child)
+    const label = actions.value.querySelector('.subscribeLabel')
+    if (label) actionsResizeObserver?.observe(label)
+  }
+  updateActionsLayout()
+}
+
+watch(() => props.currentTab, updateTabsLayout, { flush: 'post' })
 watch([() => props.visibleTabs, tabsContainer, locale,
   () => isTabPresented?.value], observeTabs, { flush: 'post' })
 
-onActivated(() => nextTick(observeTabs))
+onActivated(() => nextTick(() => {
+  observeTabs()
+  observeActions()
+}))
 onDeactivated(() => {
   tabsResizeObserver?.disconnect()
+  actionsResizeObserver?.disconnect()
 })
 
 const thumbnailLoadFailed = ref(false)
@@ -641,8 +553,9 @@ function focusTab(currentTab, event) {
     ? visibleTabs[(index > 0 ? index : visibleTabs.length) - 1]
     : visibleTabs[(index + 1) % visibleTabs.length]
 
-  document.getElementById(`${tab}Tab`).focus()
   changeTab(tab)
+  // Tabs in the More menu are represented by the More tab.
+  nextTick(() => (overflowTabs.value.includes(tab) ? moreTab.value : document.getElementById(`${tab}Tab`))?.focus())
   store.dispatch('showOutlines')
 }
 
@@ -688,14 +601,22 @@ function keyboardShortcutHandler(event) {
   }
 }
 
+// Actions appear and disappear with these, without resizing the row.
+watch([hideSharingActions, hideUnsubscribeButton, isPinnedToNavigation, locale, () => props.canPin,
+  () => props.showSearchBar, () => props.hasErrorMessage], observeActions, { flush: 'post' })
+
 onMounted(() => {
   tabsResizeObserver = new ResizeObserver(updateTabsLayout)
+  actionsResizeObserver = new ResizeObserver(updateActionsLayout)
   observeTabs()
+  observeActions()
   document.addEventListener('keydown', keyboardShortcutHandler)
 })
 
 onBeforeUnmount(() => {
   tabsResizeObserver?.disconnect()
+  actionsResizeObserver?.disconnect()
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreTabItems }))
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 </script>

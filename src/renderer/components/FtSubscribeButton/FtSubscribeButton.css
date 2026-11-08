@@ -37,8 +37,25 @@
 }
 
 .subscribeButton {
-  min-inline-size: 150px;
+  /* Read by layouts that decide when to show the compact button. */
+  --subscribe-button-min-size: 150px;
+
+  min-inline-size: var(--subscribe-button-min-size);
   white-space: initial;
+}
+
+.subscribeButton.compact,
+.subscribeButton.hasProfileDropdownToggle.compact {
+  position: relative;
+  min-inline-size: 48px;
+}
+
+/* Stays measurable so the layout knows when the label fits again. */
+.subscribeButton.compact .subscribeLabel {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .subscribeButton.justToggled {
@@ -167,7 +184,9 @@
 }
 
 .subscribeButton.hasProfileDropdownToggle {
-  min-inline-size: 100px;
+  --subscribe-button-min-size: 100px;
+
+  min-inline-size: var(--subscribe-button-min-size);
   padding-inline: 5px;
   border-inline-end: 1px solid var(--subscribe-divider) !important;
   border-start-end-radius: 0;
