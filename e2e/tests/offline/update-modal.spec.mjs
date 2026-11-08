@@ -40,7 +40,7 @@ async function showUpdateNotification(page, releases) {
     body: JSON.stringify(releases)
   }))
 
-  // The update check only runs at startup, so enable it and reload. The route
+  // The first update check runs at startup, so enable it and reload. The route
   // above stays installed across the reload, so no request ever leaves.
   await goTo(page, 'settings')
   const updateToggle = page.locator('.switch-ctn', { hasText: 'Check for Updates' })
@@ -52,6 +52,15 @@ async function showUpdateNotification(page, releases) {
   const notification = page.locator('.toast', { hasText: 'is now available' })
   await expect(notification).toBeVisible()
   return notification
+}
+
+/** Moves the clock past the six-hour interval; becoming visible runs a due check. */
+function runPeriodicUpdateCheck(page) {
+  return page.evaluate(() => {
+    const now = Date.now()
+    Date.now = () => now + 7 * 60 * 60 * 1000
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
 }
 
 async function showUpdatePrompt(page, releases) {
@@ -237,6 +246,63 @@ test('closing the release notes restores the update notification', async ({ page
   await page.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(page.locator('.changeLogTitle')).toHaveCount(0)
   await expect(notification).toBeVisible()
+})
+
+test('periodic update checks keep one notification for the newest release', async ({ page }) => {
+  const releases = [
+    release(`OpenTubeX ${olderUpdateVersion}`, `v${olderUpdateVersion}-beta`, '- Older change')
+  ]
+  const notification = await showUpdateNotification(page, releases)
+  await expect(notification).toContainText(olderUpdateVersion)
+
+  let requests = 0
+  await page.route(RELEASES_URL, (route) => {
+    requests++
+    return route.fallback()
+  })
+  const recheck = () => runPeriodicUpdateCheck(page)
+
+  await recheck()
+  await expect.poll(() => requests).toBe(1)
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+
+  releases.unshift(release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES))
+  await recheck()
+  await expect(page.locator('.toast', { hasText: `Version ${newestUpdateVersion} is now available` })).toBeVisible()
+  // A duplicate from the first recheck or the older toast would remain here
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+})
+
+test('a periodic check that finishes behind open release notes leaves them unchanged', async ({ page }) => {
+  const releases = [
+    release(`OpenTubeX ${olderUpdateVersion}`, `v${olderUpdateVersion}-beta`, '- Older change')
+  ]
+  const notification = await showUpdateNotification(page, releases)
+
+  let respond
+  const responded = new Promise(resolve => { respond = resolve })
+  let requested
+  const request = new Promise(resolve => { requested = resolve })
+  await page.route(RELEASES_URL, async (route) => {
+    requested()
+    await responded
+    return route.fallback()
+  })
+  releases.unshift(release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES))
+  await runPeriodicUpdateCheck(page)
+  await request
+
+  await notification.getByRole('button', { name: 'See changes and update' }).click()
+  await expect(page.locator('.changeLogTitle')).toHaveText(`Update to OpenTubeX ${olderUpdateVersion}`)
+  const response = page.waitForResponse(RELEASES_URL)
+  respond()
+  expect(await (await response).finished()).toBeNull()
+  // Let the check apply its result, which only needs cached modules and one IPC reply
+  await page.evaluate(() => new Promise(resolve => requestIdleCallback(() => requestIdleCallback(resolve))))
+
+  await expect(page.locator('.changeLogTitle')).toHaveText(`Update to OpenTubeX ${olderUpdateVersion}`)
+  await expect(page.locator('.changeLogText')).toContainText('Older change')
+  await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(0)
 })
 
 test('a single update shows its version once and renders the release notes', { tag: '@scale' }, async ({ page, attachScreenshot }) => {

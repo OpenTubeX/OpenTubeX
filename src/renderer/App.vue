@@ -708,7 +708,7 @@ import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
-import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
@@ -1968,6 +1968,7 @@ onMounted(async () => {
     setTimeout(() => {
       checkForNewUpdates()
     }, 500)
+    stopUpdateChecks = scheduleUpdateChecks(checkForNewUpdates, UPDATE_CHECK_INTERVAL, document)
   })
 
   await router.isReady()
@@ -2037,6 +2038,7 @@ onBeforeUnmount(() => {
   subscriptionAutoRefresh.stop()
   rssFeedAutoRefresh.stop()
   clearInterval(historyCleanupTimer)
+  stopUpdateChecks?.()
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   window.removeEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
@@ -2388,6 +2390,11 @@ useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogCon
 const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
 /** @type {{ tagName: string, versionNumber: string } | null} */
 let availableUpdate = null
+/** @type {AbortController | null} */
+let availableUpdateToast = null
+const UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000
+/** @type {(() => void) | null} */
+let stopUpdateChecks = null
 /** @type {() => string} */
 let renderUpdateChangelog = () => ''
 // Release notes can be labeled for some platforms, so the prompt hides notes for others.
@@ -2413,7 +2420,11 @@ function showAvailableUpdateToast() {
     return
   }
 
+  // A later check can find a newer release while the older one's toast is open
+  availableUpdateToast?.abort()
+  availableUpdateToast = new AbortController()
   showToast({
+    abortSignal: availableUpdateToast.signal,
     message: t('Version {versionNumber} is now available.', {
       versionNumber: update.versionNumber
     }),
@@ -2458,7 +2469,11 @@ async function checkForNewUpdates() {
     const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
-    if (sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === tagName) {
+    // The toast for this release is open, was dismissed, or was answered already
+    if (
+      availableUpdate?.tagName === tagName ||
+      sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === tagName
+    ) {
       return
     }
 
@@ -2472,6 +2487,10 @@ async function checkForNewUpdates() {
       import('./helpers/releaseNotesMarkdown'),
       window.ftElectron?.getPackageManagerUpdate() ?? null
     ])
+    // The setting can change during the request, and an open prompt keeps its changelog
+    if (!checkForUpdates.value || showReleaseNotes.value) {
+      return
+    }
     packageManagerUpdate.value = packageManager
     const changelogHtml = createReleaseNotesMarkdown().parse(changelog)
     // Pick screenshots for the app theme when the prompt opens, because the

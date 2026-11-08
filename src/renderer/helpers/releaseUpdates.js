@@ -128,6 +128,36 @@ export function findUpdateRelease(releases, installedVersion) {
   return findUpdateReleases(releases, installedVersion)[0] ?? null
 }
 
+const UPDATE_CHECK_POLL_INTERVAL = 15 * 60 * 1000
+
+/**
+ * Calls `check` again whenever `interval` milliseconds of wall-clock time have
+ * passed since the last call. Timers stall while the device sleeps or the app
+ * is suspended, so a short poll and the document becoming visible compare the
+ * clock instead of waiting out one long timer. Hidden documents wait, as the app
+ * can be suspended before the check finishes.
+ *
+ * @param {() => void} check
+ * @param {number} interval
+ * @param {EventTarget & { hidden: boolean }} visibilityTarget
+ * @returns {() => void} stops the checks
+ */
+export function scheduleUpdateChecks(check, interval, visibilityTarget) {
+  let lastCheck = Date.now()
+  const checkIfDue = () => {
+    if (visibilityTarget.hidden || Date.now() - lastCheck < interval) return
+    lastCheck = Date.now()
+    check()
+  }
+
+  const timer = setInterval(checkIfDue, Math.min(interval, UPDATE_CHECK_POLL_INTERVAL))
+  visibilityTarget.addEventListener('visibilitychange', checkIfDue)
+  return () => {
+    clearInterval(timer)
+    visibilityTarget.removeEventListener('visibilitychange', checkIfDue)
+  }
+}
+
 /**
  * Combines release notes into a changelog with a heading for each release.
  * A single release gets no heading, as the prompt title already names it.
