@@ -256,6 +256,28 @@ test('reports rejected credentials when loading a video', async ({ page }) => {
   await expect(page.locator(`${activeTab} .errorContainer`)).toContainText('The Yattee server rejected the username or password.')
 })
 
+test('shows a local image for unavailable videos without contacting YouTube', async ({ page }) => {
+  const youtubeRequests = []
+  page.on('request', request => {
+    if (/(^|\.)youtube\.com$/.test(new URL(request.url()).hostname)) youtubeRequests.push(request.url())
+  })
+  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
+    status: 404,
+    json: { detail: `Video not found: yt-dlp failed: ERROR: [youtube] ${VIDEO_ID}: This video is unavailable` }
+  }))
+
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .errorContainer`)).toContainText('This video is unavailable')
+
+  const image = page.locator(`${activeTab} .videoPlayerError .videoThumbnail`)
+  await expect(image).toHaveAttribute('src', /^data:image\/svg\+xml/)
+  expect(await image.evaluate(img => img.naturalWidth)).toBeGreaterThan(0)
+  // The selected pack's glyph is drawn in the frame
+  expect(decodeURIComponent(await image.getAttribute('src'))).toContain('<path')
+  expect(youtubeRequests).toEqual([])
+})
+
 /**
  * A live stream for which the server returned no streams
  * @param {import('@playwright/test').Page} page

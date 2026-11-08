@@ -153,6 +153,9 @@ import { areCommentsAvailable } from './watchComments'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { getVideoPopularity } from '../../helpers/player/videoPopularity'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
+import { createUnavailableVideoThumbnail } from '../../helpers/unavailableVideoThumbnail'
+import { getLoadedIconData } from '../../icons/registerMappedIcons'
+import { resolveIconifyId } from '../../icons/resolveIconifyId'
 
 /**
  * @typedef {{
@@ -194,10 +197,6 @@ const ANDROID_HTTP_ERROR_RETRY_DELAY_MS = 750
 // internet check succeeds, so a completed download stops waiting for it.
 const DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS = 3000
 let nextSabrSchemeId = 0
-const UNAVAILABLE_VIDEO_THUMBNAILS = {
-  light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
-  dark: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video_dark_theme.png'
-}
 
 export default defineComponent({
   name: 'Watch',
@@ -4427,9 +4426,7 @@ export default defineComponent({
       const backgroundColor = window.getComputedStyle(document.body).backgroundColor
       const isLightTheme = calculateColorLuminance(backgroundColor) === '#000000'
 
-      return isLightTheme
-        ? UNAVAILABLE_VIDEO_THUMBNAILS.light
-        : UNAVAILABLE_VIDEO_THUMBNAILS.dark
+      return createUnavailableVideoThumbnail(getLoadedIconData(resolveIconifyId('video-slash')), isLightTheme)
     },
 
     /**

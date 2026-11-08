@@ -765,6 +765,10 @@
     "ri": "video-line",
     "material": "videocam-outline"
   },
+  "video-slash": {
+    "ri": "video-off-line",
+    "material": "videocam-off-outline"
+  },
   "volume-high": {
     "ri": "volume-up-line",
     "material": "volume-up-rounded"
