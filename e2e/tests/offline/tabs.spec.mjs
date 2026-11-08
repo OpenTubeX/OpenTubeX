@@ -4228,6 +4228,21 @@ for (const tabBarPosition of ['top', 'left']) {
         return document.querySelectorAll('.tabBar .tabStripItem[data-leaving]').length
       })).toBe(0)
 
+      // A tab closed while it pops in does not move the tab after it on removal.
+      const popping = (await pauseTransition({ type: 'create' }, 'start')).id
+      await page.evaluate(async id => {
+        const ids = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id).filter(tabId => tabId !== id)
+        ids.splice(1, 0, id)
+        await window.$store.dispatch('reorderTabs', ids)
+      }, popping)
+      await expect(page.locator(sel.tabs).nth(1)).toHaveAttribute('data-tab-id', popping)
+      const follower = await page.locator(sel.tabs).nth(2).getAttribute('data-tab-id')
+      await pauseTransition({ type: 'close', id: popping }, 'end')
+      const followerAtCloseEnd = await start(follower)
+      await finish(popping)
+      await expect(page.locator(`.tabBar .tab[data-tab-id="${popping}"]`)).toHaveCount(0)
+      expect(Math.abs(await start(follower) - followerAtCloseEnd)).toBeLessThan(0.5)
+
       // Closing the last tab of a strip scrolled to its end keeps the scroll
       // range and position until the tab is removed, and after it.
       await page.evaluate(async () => {

@@ -155,14 +155,17 @@ export function useTabStripTransition({ isVertical, shouldAnimateEnter, onEntere
       [`padding${axis}End`]: style[`padding${axis}End`],
       [`border${axis}StartWidth`]: style[`border${axis}StartWidth`],
       [`border${axis}EndWidth`]: style[`border${axis}EndWidth`],
-      [`margin${axis}Start`]: style[`margin${axis}Start`]
+      [`margin${axis}Start`]: style[`margin${axis}Start`],
+      // A tab closed while it pops in keeps the margin it opened with.
+      [`margin${axis}End`]: style[`margin${axis}End`]
     }
     const collapsed = {
       [`padding${axis}Start`]: '0px',
       [`padding${axis}End`]: '0px',
       [`border${axis}StartWidth`]: '0px',
       [`border${axis}EndWidth`]: '0px',
-      [`margin${axis}Start`]: `${-getGap(wrapper)}px`
+      [`margin${axis}Start`]: `${-getGap(wrapper)}px`,
+      [`margin${axis}End`]: '0px'
     }
     if (vertical) {
       // Collapsed group chips size themselves with flex-basis.
