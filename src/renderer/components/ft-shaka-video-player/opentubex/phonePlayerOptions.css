@@ -57,7 +57,10 @@
   --ft-option-gap: 6px;
 
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  grid-auto-rows: minmax(68px, auto);
+
+  /* Rows fit their tiles, which have a minimum height, so larger text can grow them
+     even when the menu has no free space. */
+  grid-auto-rows: min-content;
   gap: 6px;
   align-content: safe center;
 }
@@ -204,10 +207,10 @@
   --ft-option-font-size: 13px;
   --ft-option-gap: 8px;
   --ft-caption-action-font-size: 15px;
+  --phone-tile-min-block-size: 92px;
 
   inline-size: min(100%, 880px) !important;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  grid-auto-rows: minmax(92px, auto);
   gap: 8px;
 }
 
@@ -221,6 +224,7 @@
 }
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid > button) {
+  min-block-size: var(--phone-tile-min-block-size, 68px);
   padding: var(--phone-tile-padding, 2px);
   gap: var(--phone-tile-gap, 1px);
 }
