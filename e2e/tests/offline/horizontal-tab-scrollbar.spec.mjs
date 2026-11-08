@@ -1,5 +1,6 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
+import { expectTabStripSettled } from '../../helpers/tabs.mjs'
 
 test.use({ seed: { settings: { alwaysShowScrollbars: true } } })
 
@@ -265,6 +266,7 @@ for (const position of ['top', 'bottom']) {
     const scrollbar = container.locator(':scope > .os-scrollbar-horizontal')
     const scrollToEnd = async () => {
       await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+      await expectTabStripSettled(page)
       await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
       // Native scroll events reach Electron asynchronously. Ensure the
       // position is shared before title updates publish another tab snapshot.

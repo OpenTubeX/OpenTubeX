@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { test, expect } from '../../helpers/app.mjs'
+import { expectTabStripSettled } from '../../helpers/tabs.mjs'
 
 for (const iconPack of ['material', 'remix']) {
   test.describe(iconPack, () => {
@@ -35,6 +36,7 @@ for (const iconPack of ['material', 'remix']) {
       const tabs = ids.map(id => page.locator(`.tabBar .tab[data-tab-id="${id}"]`))
       const identities = [tabs[0].locator('img.tabAvatar'), tabs[1].locator('.tabPageIcon')]
       for (const identity of identities) await expect(identity).toBeVisible()
+      await expectTabStripSettled(page)
       const initialTitleBounds = await Promise.all(tabs.map(tab => tab.locator('.tabTitleText').boundingBox()))
 
       await page.evaluate(ids => ids.forEach(id => window.ftElectron.tabs.setPlaybackState('playing', id)), ids)

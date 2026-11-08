@@ -325,9 +325,15 @@ test('a collapsed tab group opens a group menu', async ({ page }) => {
   const state = () => page.evaluate(() => window.ftElectron.tabs.getState())
   const menu = page.locator('.contextMenu')
   const group = page.locator('.collapsedTabGroup')
+  // A chip collapsed again at once can appear before the expanded one has
+  // finished closing.
+  const openGroupMenu = async () => {
+    await expect(group).toHaveCount(1)
+    await group.click({ button: 'right' })
+  }
 
   const research = await createCollapsedGroup('Research')
-  await group.click({ button: 'right' })
+  await openGroupMenu()
   await expect(menu.getByRole('menuitem')).toHaveText([
     'Expand Group', 'Close 2 Tabs', 'Ungroup', 'Manage Tab Groups…'
   ])
@@ -336,7 +342,7 @@ test('a collapsed tab group opens a group menu', async ({ page }) => {
   await expect.poll(async () => (await state()).groups.find(group => group.id === research.groupId)?.isCollapsed).toBe(false)
 
   await page.evaluate(id => window.ftElectron.tabs.updateGroup(id, { isCollapsed: true }), research.groupId)
-  await group.click({ button: 'right' })
+  await openGroupMenu()
   await menu.getByRole('menuitem', { name: 'Ungroup', exact: true }).click()
   await expect.poll(async () => {
     const { tabs, groups } = await state()
@@ -347,7 +353,7 @@ test('a collapsed tab group opens a group menu', async ({ page }) => {
   }).toEqual({ groupExists: false, groupIds: [null, null] })
 
   const music = await createCollapsedGroup('Music')
-  await group.click({ button: 'right' })
+  await openGroupMenu()
   await menu.getByRole('menuitem', { name: 'Close 2 Tabs', exact: true }).click()
   await expect.poll(async () => (await state()).tabs.filter(tab => music.tabIds.includes(tab.id))).toHaveLength(0)
   await expect(page.locator(sel.tabs)).toHaveCount(3)

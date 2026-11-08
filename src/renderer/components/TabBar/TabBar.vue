@@ -20,13 +20,20 @@
         @mousedown.middle="handleTabListMiddleMouseDown"
         @auxclick="handleTabListAuxClick"
       >
-        <div
-          ref="tabsContentRef"
+        <TransitionGroup
+          ref="tabsContentGroup"
+          tag="div"
           class="tabsContent"
+          :css="false"
+          data-skip-move
+          @enter="stripTransition.onEnter"
+          @enter-cancelled="stripTransition.onEnterCancelled"
+          @leave="stripTransition.onLeave"
         >
-          <template
+          <div
             v-for="(item, index) in stripItems"
             :key="item.id"
+            class="tabStripItem"
           >
             <SortableTab
               v-if="item.type === 'tab'"
@@ -87,8 +94,8 @@
                 </button>
               </template>
             </TabTooltip>
-          </template>
-        </div>
+          </div>
+        </TransitionGroup>
       </div>
     </div>
     <div class="tabBarActions">
@@ -156,6 +163,7 @@ import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
 import TabTooltipOverlay from './TabTooltipOverlay.vue'
 import { provideTabTooltip } from './useTabTooltip'
+import { useTabStripTransition } from './tabStripTransition'
 import {
   buildCurrentShiftedTabIds,
   buildShiftedTabIds,
@@ -348,7 +356,9 @@ const tabOrganizerTooltip = computed(() => {
 })
 
 const tabBarRef = useTemplateRef('tabBarRef')
-const tabsContentRef = useTemplateRef('tabsContentRef')
+const tabsContentGroup = useTemplateRef('tabsContentGroup')
+/** @type {import('vue').ComputedRef<HTMLElement | null>} */
+const tabsContentRef = computed(() => tabsContentGroup.value?.$el ?? null)
 const dropZoneRef = useTemplateRef('dropZoneRef')
 // The app makes room for a visible horizontal scrollbar, which the overlay
 // scrollbar helper toggles through the class of the bar it adds to the container. Only
@@ -382,6 +392,25 @@ watch(dropZoneRef, (container, _previous, onCleanup) => {
 }, { immediate: true, flush: 'sync' })
 useRootClass('appTabBarScrollbar', horizontalScrollbarVisible)
 const closeTooltipsSignal = ref(0)
+
+// Tabs that arrive with the first state update, such as a restored session,
+// appear without animating.
+let animateStripEnter = false
+watch(stripItems, (_items, previousItems) => {
+  animateStripEnter = previousItems.length > 0
+})
+
+const stripTransition = useTabStripTransition({
+  isVertical: () => vertical.value,
+  shouldAnimateEnter: () => animateStripEnter,
+  // The tab was revealed while it was still a dot.
+  onEntered: (item) => {
+    if (!item.classList.contains('active')) return
+    revealActiveTabPending = true
+    revealActiveTab()
+  },
+  onLeft: () => clampTabsScroll()
+})
 const selectedTabIds = computed(() => new Set(store.getters.getSelectedTabIds))
 /** @type {string | null} */
 let selectionAnchorId = null
@@ -494,6 +523,9 @@ function handleTabContainerPointerDown(event) {
     clearTabSelection()
     return
   }
+
+  // Measure the strip without tabs that are still opening or closing.
+  stripTransition.finishAll()
 
   const interruptedSettle = isSettling.value
   const pendingTabOrder = finishSettle(true)
@@ -1458,7 +1490,8 @@ function clampTabsScroll() {
   if (!container || !content) return
 
   if (vertical.value) {
-    clampOverlayScrollTop(container, content.lastElementChild)
+    // Strip items are `display: contents` wrappers without a box of their own.
+    clampOverlayScrollTop(container, content.lastElementChild?.firstElementChild)
   } else {
     clampOverlayScrollLeft(container, content)
     if (scrollTarget != null) {
@@ -1486,7 +1519,7 @@ function revealActiveTab() {
   if (!revealActiveTabPending) return
 
   const container = dropZoneRef.value
-  const activeItem = tabsContentRef.value?.querySelector('.tabBarReorderItem.active')
+  const activeItem = tabsContentRef.value?.querySelector('.tabStripItem:not([data-leaving]) > .tabBarReorderItem.active')
   if (!container?.clientWidth || !container.clientHeight || !activeItem) return
 
   revealActiveTabPending = false
