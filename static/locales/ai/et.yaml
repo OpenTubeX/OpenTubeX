@@ -380,6 +380,11 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Link Underlines:
+      Link Underlines: "Linkide allajoonimine"
+      On Hover: "Jooni lingid alla, kui kursor on nende kohal"
+      Never: "Ära kunagi jooni linke alla"
+      Always: "Jooni lingid alati alla"
     Limit Titles to Two Lines: "Piira pealkirjad kahe reaga"
     Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
     Preferred Video Codec: Eelistatud videokoodek

@@ -381,6 +381,11 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Link Underlines:
+      Link Underlines: "Υπογράμμιση συνδέσμων"
+      On Hover: "Υπογράμμιση συνδέσμων κατά την τοποθέτηση του δείκτη"
+      Never: "Ποτέ υπογράμμιση συνδέσμων"
+      Always: "Πάντα υπογράμμιση συνδέσμων"
     Limit Titles to Two Lines: "Περιορισμός τίτλων σε δύο γραμμές"
     Close Window With Last Tab: 'Κλείσιμο παραθύρου κατά το κλείσιμο της τελευταίας καρτέλας'
     Preferred Video Codec: Προτιμώμενος κωδικοποιητής βίντεο

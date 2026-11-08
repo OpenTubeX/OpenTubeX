@@ -385,6 +385,11 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Link Underlines:
+      Link Underlines: "Linkkien alleviivaus"
+      On Hover: "Alleviivaa linkit, kun osoitin on niiden päällä"
+      Never: "Älä koskaan alleviivaa linkkejä"
+      Always: "Alleviivaa linkit aina"
     Limit Titles to Two Lines: "Rajoita otsikot kahteen riviin"
     Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
     Preferred Video Codec: Ensisijainen videokoodekki

@@ -197,6 +197,11 @@ Settings:
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Link Underlines:
+      Link Underlines: "Podkreślanie linków"
+      On Hover: "Podkreślaj linki po najechaniu kursorem"
+      Never: "Nigdy nie podkreślaj linków"
+      Always: "Zawsze podkreślaj linki"
     Limit Titles to Two Lines: "Ogranicz tytuły do dwóch wierszy"
     Close Window With Last Tab: 'Zamykaj okno po zamknięciu ostatniej karty'
     Preferred Video Codec: Preferowany kodek wideo

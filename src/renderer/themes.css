@@ -265,17 +265,12 @@ body:not(.hotPink, .pastelPink) {
 
 /* Given that the Hot Pink theme does not need link underlining due to meeting
 WCAG 2 Level AA (https://webaim.org/resources/linkcontrastchecker/?fcolor=FFFFFF&bcolor=DE1C85&lcolor=000000),
-it can be safely elided. This looks quite pleasant on this theme. */
-.hotPink a:not(:hover, :focus),
+it can be safely elided. This looks quite pleasant on this theme. Links follow
+the link underline setting instead, which underlines them on hover by default. */
 .hotPink .navOption:hover,
 .hotPink .navOption:focus,
-.hotPink *:not(:hover, :focus) {
+.hotPink :not(a, :hover, :focus) {
   text-decoration: none;
-}
-
-.hotPink a:hover,
-.hotPink a:focus {
-  text-decoration: underline;
 }
 
 .hotPink .shaka-range-container {
@@ -2494,6 +2489,15 @@ a:link {
 
 a:visited {
   color: var(--link-visited-color);
+}
+
+/* The link underline setting replaces only the browser's default underline;
+   zero specificity keeps decorations that components set themselves. */
+:where(
+  :root[data-link-underline='hover'] a:not(:hover, :focus-visible),
+  :root[data-link-underline='never'] a
+) {
+  text-decoration: none;
 }
 
 /* stylelint-enable no-descending-specificity */

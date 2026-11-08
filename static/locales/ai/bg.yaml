@@ -383,6 +383,11 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Link Underlines:
+      Link Underlines: "Подчертаване на връзките"
+      On Hover: "Подчертаване на връзките при посочване"
+      Never: "Без подчертаване на връзките"
+      Always: "Винаги подчертаване на връзките"
     Limit Titles to Two Lines: "Ограничаване на заглавията до два реда"
     Close Window With Last Tab: 'Затваряне на прозореца при затваряне на последния раздел'
     Preferred Video Codec: Предпочитан видео кодек

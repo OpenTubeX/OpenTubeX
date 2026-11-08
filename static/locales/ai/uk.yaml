@@ -385,6 +385,11 @@ Settings:
       Network: мережа
       Disk: диск
   General Settings:
+    Link Underlines:
+      Link Underlines: "Підкреслення посилань"
+      On Hover: "Підкреслювати посилання при наведенні"
+      Never: "Ніколи не підкреслювати посилання"
+      Always: "Завжди підкреслювати посилання"
     Limit Titles to Two Lines: "Обмежити назви двома рядками"
     Close Window With Last Tab: 'Закривати вікно під час закриття останньої вкладки'
     Preferred Video Codec: Бажаний відеокодек

@@ -381,6 +381,11 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Link Underlines:
+      Link Underlines: "Tanlinellu dolenni"
+      On Hover: "Tanlinellu dolenni wrth hofran"
+      Never: "Peidio byth â thanlinellu dolenni"
+      Always: "Tanlinellu dolenni bob amser"
     Limit Titles to Two Lines: "Cyfyngu teitlau i ddwy linell"
     Close Window With Last Tab: 'Cau’r ffenestr wrth gau’r tab olaf'
     Preferred Video Codec: Codec fideo dewisol

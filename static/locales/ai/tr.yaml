@@ -380,6 +380,11 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Bağlantı alt çizgisi"
+      On Hover: "Üzerine gelindiğinde bağlantıların altını çiz"
+      Never: "Bağlantıların altını asla çizme"
+      Always: "Bağlantıların altını her zaman çiz"
     Limit Titles to Two Lines: "Başlıkları iki satırla sınırla"
     Close Window With Last Tab: 'Son sekme kapatılınca pencereyi kapat'
     Preferred Video Codec: Tercih edilen video codec'i

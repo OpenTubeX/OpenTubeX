@@ -380,6 +380,11 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Link Underlines:
+      Link Underlines: "Understrykning av länkar"
+      On Hover: "Stryk under länkar vid hovring"
+      Never: "Stryk aldrig under länkar"
+      Always: "Stryk alltid under länkar"
     Limit Titles to Two Lines: "Begränsa titlar till två rader"
     Close Window With Last Tab: 'Stäng fönstret när den sista fliken stängs'
     Preferred Video Codec: Föredragen videokodek

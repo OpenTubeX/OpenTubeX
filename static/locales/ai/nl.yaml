@@ -385,6 +385,11 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Link Underlines:
+      Link Underlines: "Onderstreping van links"
+      On Hover: "Links onderstrepen bij aanwijzen"
+      Never: "Links nooit onderstrepen"
+      Always: "Links altijd onderstrepen"
     Limit Titles to Two Lines: "Titels beperken tot twee regels"
     Close Window With Last Tab: 'Venster sluiten bij het sluiten van het laatste tabblad'
     Preferred Video Codec: Voorkeursvideocodec

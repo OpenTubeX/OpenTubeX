@@ -380,6 +380,11 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Link Underlines:
+      Link Underlines: "Islinennañ al liammoù"
+      On Hover: "Islinennañ al liammoù pa vez tremenet warno"
+      Never: "Na islinennañ biken al liammoù"
+      Always: "Islinennañ al liammoù bepred"
     Limit Titles to Two Lines: "Bevenniñ an titloù da zaou linenn"
     Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
     Preferred Video Codec: Kodek video gwellañ karet

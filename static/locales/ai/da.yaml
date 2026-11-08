@@ -391,6 +391,11 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Link Underlines:
+      Link Underlines: "Understregning af links"
+      On Hover: "Understreg links, når markøren holdes over dem"
+      Never: "Understreg aldrig links"
+      Always: "Understreg altid links"
     Limit Titles to Two Lines: "Begræns titler til to linjer"
     Close Window With Last Tab: 'Luk vinduet, når den sidste fane lukkes'
     Preferred Video Codec: Foretrukket videocodec

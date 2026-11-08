@@ -394,6 +394,11 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Link Underlines:
+      Link Underlines: "Understreking av lenkjer"
+      On Hover: "Understrek lenkjer når peikaren er over dei"
+      Never: "Aldri understrek lenkjer"
+      Always: "Alltid understrek lenkjer"
     Limit Titles to Two Lines: "Avgrens titlar til to linjer"
     Close Window With Last Tab: 'Lukk vindauget når den siste fana vert lukka'
     Preferred Video Codec: Føretrekt videokodek

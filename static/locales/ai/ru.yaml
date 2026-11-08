@@ -353,6 +353,11 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Link Underlines:
+      Link Underlines: "Подчёркивание ссылок"
+      On Hover: "Подчёркивать ссылки при наведении"
+      Never: "Никогда не подчёркивать ссылки"
+      Always: "Всегда подчёркивать ссылки"
     Limit Titles to Two Lines: "Ограничить названия двумя строками"
     Close Window With Last Tab: 'Закрывать окно при закрытии последней вкладки'
     Preferred Video Codec: Предпочтительный видеокодек

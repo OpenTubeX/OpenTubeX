@@ -393,6 +393,11 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Link Underlines:
+      Link Underlines: "இணைப்பு அடிக்கோடு"
+      On Hover: "சுட்டியை மேலே கொண்டுசெல்லும்போது இணைப்புகளுக்கு அடிக்கோடிடு"
+      Never: "இணைப்புகளுக்கு ஒருபோதும் அடிக்கோடிடாதே"
+      Always: "இணைப்புகளுக்கு எப்போதும் அடிக்கோடிடு"
     Limit Titles to Two Lines: "தலைப்புகளை இரண்டு வரிகளுக்குள் கட்டுப்படுத்து"
     Close Window With Last Tab: 'கடைசி தாவலை மூடும்போது சாளரத்தை மூடு'
     Preferred Video Codec: விருப்பமான வீடியோ கோடெக்

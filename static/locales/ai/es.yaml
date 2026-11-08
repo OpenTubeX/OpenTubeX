@@ -340,6 +340,11 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Link Underlines:
+      Link Underlines: "Subrayado de enlaces"
+      On Hover: "Subrayar los enlaces al pasar el cursor"
+      Never: "No subrayar nunca los enlaces"
+      Always: "Subrayar siempre los enlaces"
     Limit Titles to Two Lines: "Limitar los títulos a dos líneas"
     Close Window With Last Tab: 'Cerrar la ventana al cerrar la última pestaña'
     Preferred Video Codec: Códec de vídeo preferido

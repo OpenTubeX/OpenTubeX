@@ -380,6 +380,11 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Link Underlines:
+      Link Underlines: "リンクの下線"
+      On Hover: "ホバー時にリンクに下線を表示"
+      Never: "リンクに下線を表示しない"
+      Always: "常にリンクに下線を表示"
     Limit Titles to Two Lines: "タイトルを2行までにする"
     Close Window With Last Tab: '最後のタブを閉じたときにウィンドウを閉じる'
     Preferred Video Codec: 優先する動画コーデック

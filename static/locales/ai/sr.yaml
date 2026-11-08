@@ -390,6 +390,11 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Link Underlines:
+      Link Underlines: "Подвлачење линкова"
+      On Hover: "Подвуци линкове при преласку показивачем"
+      Never: "Никад не подвлачи линкове"
+      Always: "Увек подвуци линкове"
     Limit Titles to Two Lines: "Ограничи наслове на два реда"
     Close Window With Last Tab: 'Затвори прозор при затварању последње картице'
     Preferred Video Codec: Жељени видео кодек

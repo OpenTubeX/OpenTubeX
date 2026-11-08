@@ -403,6 +403,11 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Link Underlines:
+      Link Underlines: "Падкрэсліванне спасылак"
+      On Hover: "Падкрэсліваць спасылкі пры навядзенні"
+      Never: "Ніколі не падкрэсліваць спасылкі"
+      Always: "Заўсёды падкрэсліваць спасылкі"
     Limit Titles to Two Lines: "Абмежаваць назвы двума радкамі"
     Close Window With Last Tab: 'Закрываць акно пры закрыцці апошняй укладкі'
     Preferred Video Codec: Пераважны відэакодэк

@@ -380,6 +380,11 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Link Underlines:
+      Link Underlines: "Soulignement des liens"
+      On Hover: "Souligner les liens au survol"
+      Never: "Ne jamais souligner les liens"
+      Always: "Toujours souligner les liens"
     Limit Titles to Two Lines: "Limiter les titres à deux lignes"
     Close Window With Last Tab: 'Fermer la fenêtre à la fermeture du dernier onglet'
     Preferred Video Codec: Codec vidéo préféré

@@ -404,6 +404,11 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Link Underlines:
+      Link Underlines: "زیرخط پیوندها"
+      On Hover: "زیرخط‌دار کردن پیوندها هنگام نگه‌داشتن نشانگر روی آن‌ها"
+      Never: "هرگز پیوندها را زیرخط‌دار نکن"
+      Always: "همیشه پیوندها را زیرخط‌دار کن"
     Limit Titles to Two Lines: "محدود کردن عنوان‌ها به دو خط"
     Close Window With Last Tab: 'بستن پنجره هنگام بستن آخرین زبانه'
     Preferred Video Codec: کدک ویدیویی ترجیحی

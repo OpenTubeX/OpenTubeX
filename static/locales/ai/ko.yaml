@@ -475,6 +475,11 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Link Underlines:
+      Link Underlines: "링크 밑줄"
+      On Hover: "마우스를 올리면 링크에 밑줄 표시"
+      Never: "링크에 밑줄 표시 안 함"
+      Always: "항상 링크에 밑줄 표시"
     Limit Titles to Two Lines: "제목을 두 줄로 제한"
     Close Window With Last Tab: '마지막 탭을 닫으면 창 닫기'
     Preferred Video Codec: 선호하는 동영상 코덱

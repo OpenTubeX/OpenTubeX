@@ -380,6 +380,11 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Link Underlines:
+      Link Underlines: "Link Underlines"
+      On Hover: "Underline links on hover"
+      Never: "Never underline links"
+      Always: "Always underline links"
     Limit Titles to Two Lines: "Limit titles to two lines"
     Close Window With Last Tab: 'Close window when closing the last tab'
     Preferred Video Codec: Preferred video codec

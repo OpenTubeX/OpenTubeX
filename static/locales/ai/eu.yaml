@@ -380,6 +380,11 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Link Underlines:
+      Link Underlines: "Esteken azpimarra"
+      On Hover: "Azpimarratu estekak kurtsorea gainetik pasatzean"
+      Never: "Ez azpimarratu inoiz estekak"
+      Always: "Azpimarratu beti estekak"
     Limit Titles to Two Lines: "Mugatu izenburuak bi lerrora"
     Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
     Preferred Video Codec: Hobetsitako bideo-kodeka

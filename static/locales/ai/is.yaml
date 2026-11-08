@@ -380,6 +380,11 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Link Underlines:
+      Link Underlines: "Undirstrikun tengla"
+      On Hover: "Undirstrika tengla þegar bendill er yfir þeim"
+      Never: "Aldrei undirstrika tengla"
+      Always: "Alltaf undirstrika tengla"
     Limit Titles to Two Lines: "Takmarka titla við tvær línur"
     Close Window With Last Tab: 'Loka glugga þegar síðasta flipanum er lokað'
     Preferred Video Codec: Valinn myndmerkjakóði

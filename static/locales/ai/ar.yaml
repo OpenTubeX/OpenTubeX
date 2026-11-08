@@ -385,6 +385,11 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Link Underlines:
+      Link Underlines: "تسطير الروابط"
+      On Hover: "تسطير الروابط عند تمرير المؤشر فوقها"
+      Never: "عدم تسطير الروابط أبدًا"
+      Always: "تسطير الروابط دائمًا"
     Limit Titles to Two Lines: "تقييد العناوين بسطرين"
     Close Window With Last Tab: 'إغلاق النافذة عند إغلاق آخر علامة تبويب'
     Preferred Video Codec: ترميز الفيديو المفضل
