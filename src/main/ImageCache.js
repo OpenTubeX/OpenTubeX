@@ -88,6 +88,12 @@ export function extractExpiryTimestamp(headers) {
   const maxAgeRegex = /max-age=(\d+)/
 
   const cacheControl = headers['cache-control']
+  // The cache cannot revalidate, so a no-cache image is as unreusable as a
+  // no-store one; an expiry in the past keeps both out of it.
+  if (cacheControl && /(?:^|,)\s*no-(?:store|cache)\s*(?:[,=]|$)/i.test(cacheControl)) {
+    return 0
+  }
+
   if (cacheControl && maxAgeRegex.test(cacheControl)) {
     let maxAge = parseInt(cacheControl.match(maxAgeRegex)[1])
 
@@ -111,4 +117,87 @@ export function extractExpiryTimestamp(headers) {
   }
 
   return Math.trunc(Date.now() / 1000) + FALLBACK_MAX_AGE
+}
+
+/**
+ * Creates the `imagecache://` protocol handler, which serves images from the
+ * in-memory cache and otherwise fetches them with `request`.
+ * @param {ImageCache} imageCache
+ * @param {(url: string, webContentsId: number) => Record<string, string> | undefined} getAuthorizationHeaders
+ * @param {typeof import('electron').net.request} request
+ * @returns {(request: Request) => Promise<Response>}
+ */
+export function createImageCacheHandler(imageCache, getAuthorizationHeaders, request) {
+  return (protocolRequest) => {
+    const [requestUrl, rawWebContentsId] = protocolRequest.url.split('#')
+
+    return new Promise((resolve, reject) => {
+      const url = decodeURIComponent(requestUrl.substring(13))
+      const headers = rawWebContentsId
+        ? getAuthorizationHeaders(url, parseInt(rawWebContentsId))
+        : undefined
+      // The cache is keyed by URL alone, so images fetched with an account's
+      // credentials must neither come from it nor go into it.
+      const cacheable = headers === undefined
+
+      if (cacheable && imageCache.has(url)) {
+        const cached = imageCache.get(url)
+
+        resolve(new Response(cached.data, {
+          headers: { 'content-type': cached.mimeType }
+        }))
+        return
+      }
+
+      const newRequest = request({
+        method: protocolRequest.method,
+        url,
+        headers
+      })
+
+      newRequest.on('response', (response) => {
+        const chunks = []
+        response.on('data', (chunk) => {
+          chunks.push(chunk)
+        })
+
+        response.on('end', () => {
+          const data = Buffer.concat(chunks)
+          const mimeType = response.headers['content-type']
+
+          // Only a complete 200 response is an image worth keeping; an error
+          // page or a partial 206 answer would be served to every later
+          // request for the URL as if it were the whole image.
+          if (cacheable && response.statusCode === 200) {
+            imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
+          }
+
+          // Response() only accepts 200-599 and throws when a body accompanies
+          // a status that forbids one.
+          const status = response.statusCode >= 200 && response.statusCode <= 599
+            ? response.statusCode
+            : 502
+          const bodyAllowed = ![204, 205, 304].includes(status)
+          resolve(new Response(bodyAllowed ? data : null, {
+            status,
+            headers: { 'content-type': mimeType }
+          }))
+        })
+
+        response.on('error', (error) => {
+          console.error('image cache error', error)
+          reject(error)
+        })
+      })
+
+      newRequest.on('error', (err) => {
+        // Settle the request so the <img> fires its error event and the
+        // renderer can show a placeholder instead of waiting forever.
+        console.error(err)
+        reject(err)
+      })
+
+      newRequest.end()
+    })
+  }
 }

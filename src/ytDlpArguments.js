@@ -43,10 +43,16 @@ export function jsRuntimeArguments(version, nodePath) {
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
 // Keeps local-playlist URLs comfortably below Windows' process command-line limit.
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500
+// Options that run programs, load configs or inputs, replace yt-dlp, or write
+// files outside the download folder (a written config can carry `--exec`).
 const DENIED_CUSTOM_ARGS = [
   '--alias',
+  '--batch-file',
+  '--cache-dir',
   '--config-location',
   '--config-locations',
+  '--cookies',
+  '--download-archive',
   '--downloader',
   '--downloader-args',
   '--exec',
@@ -55,15 +61,43 @@ const DENIED_CUSTOM_ARGS = [
   '--external-downloader-args',
   '--ffmpeg-location',
   '--js-runtimes',
+  '--load-info-json',
+  '--load-pages',
   '--netrc-cmd',
+  '--output',
+  '--output-na-placeholder',
+  '--paths',
   '--plugin-dirs',
+  '--postprocessor-args',
+  '--ppa',
+  '--print-to-file',
   '--remote-components',
-  '--use-postprocessor'
+  '--update',
+  '--update-to',
+  '--use-postprocessor',
+  '--write-pages'
 ]
-/** yt-dlp accepts unambiguous prefixes of long options, so `--exec-befor` runs `--exec-before-download`. */
+// Exact options win over abbreviations, so these prefixes of denied options are safe.
+const ALLOWED_PREFIXES = ['--netrc', '--print']
+// -U/--update, -a/--batch-file, -P/--paths and -o/--output
+const DENIED_SHORT_ARGS = 'UaPo'
+// Short options that take a value consume the rest of a combined argument such as `-fbest`.
+const SHORT_ARGS_WITH_VALUES = '2INOPRSafoprtu'
+/**
+ * yt-dlp accepts unambiguous prefixes of long options, so `--exec-befor` runs `--exec-before-download`,
+ * and combined short options, so `-xo` is `-x -o`.
+ */
 export function isDeniedCustomArgument(argument) {
+  if (/^-[^-]/.test(argument)) {
+    for (const option of argument.slice(1)) {
+      if (DENIED_SHORT_ARGS.includes(option)) return true
+      if (SHORT_ARGS_WITH_VALUES.includes(option)) return false
+    }
+    return false
+  }
   const option = argument.split('=')[0]
-  return option.startsWith('--') && option.length > 2 && DENIED_CUSTOM_ARGS.some(denied => denied.startsWith(option))
+  return option.startsWith('--') && option.length > 2 && !ALLOWED_PREFIXES.includes(option) &&
+    DENIED_CUSTOM_ARGS.some(denied => denied.startsWith(option))
 }
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 export const AUTOMATIC_NUMBER_LIMITS = Object.freeze({

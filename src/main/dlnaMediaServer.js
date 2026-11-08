@@ -6,8 +6,10 @@ import { fetchCastMedia } from './castMediaServer.js'
 /**
  * `resolveAddresses` validates every hop, like the Cast relay, so redirects cannot reach private hosts.
  * `getHeaders` resolves credentials for each hop, so redirects only receive those scoped to their URL.
+ * `resolveProxy` routes each hop, so a configured proxy refuses the relay instead of being bypassed.
  */
-export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = () => ({}), resolveAddresses = async () => null) {
+export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = () => ({}), resolveAddresses = async () => null,
+  resolveProxy = async () => 'DIRECT') {
   return createServer(async (request, response) => {
     if (
       request.url !== `/${token}/video.mp4` ||
@@ -33,7 +35,8 @@ export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = (
             method: request.method,
             headers,
             signal: controller.signal,
-            addresses
+            addresses,
+            proxy: await resolveProxy(url.href)
           })
           const location = upstream.headers.get('location')
           if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break

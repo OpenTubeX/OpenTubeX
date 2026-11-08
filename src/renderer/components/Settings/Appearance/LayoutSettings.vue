@@ -378,6 +378,7 @@
       :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
       :option-names="restartPromptNames"
       :option-values="RESTART_PROMPT_VALUES"
+      :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
       @click="handleRestartPrompt"
     />
   </FtSettingsSection>

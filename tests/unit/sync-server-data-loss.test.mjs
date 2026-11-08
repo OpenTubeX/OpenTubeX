@@ -162,6 +162,7 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
     dispatch: async (action, value) => {
       assert.equal(action, 'addPlaylist')
       fresh.state.playlists.playlists.push(value)
+      return true
     },
   }
   await context.syncPlaylists(adapter, fresh)
@@ -556,4 +557,81 @@ test('a video removed while a playlist restoration is pending stays removed', as
     deletions: { playlists: { kept: [playlist._id] }, [`playlistVideos:${playlist._id}`]: { confirmed: [video.videoId] } },
   })
   assert.deepEqual(Array.from((await adapter.getPlaylist(playlist._id)).videos), [])
+})
+
+test('a remote playlist that could not be saved locally is not deleted from the server by the retry', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const created = await adapter.createPlaylist({ id: playlist._id, title: playlist.playlistName, description: '' })
+  const remoteId = created?.id ?? playlist._id
+  await adapter.addPlaylistVideos(remoteId, [syncVideoToRemote(video)])
+  let saveFails = true
+  const store = {
+    ...playlistBaseline(),
+    state: { playlists: { playlists: [] } },
+    dispatch: async (action, value) => {
+      assert.equal(action, 'addPlaylist')
+      if (saveFails) return false
+      store.state.playlists.playlists.push(value)
+      return true
+    },
+  }
+  await assert.rejects(context.syncPlaylists(adapter, store), /Could not save synced playlist/)
+  const previous = store.readBaseline() ?? {}
+  assert.equal(previous[playlist._id], undefined)
+
+  saveFails = false
+  await context.syncPlaylists(adapter, store, previous)
+  assert.deepEqual(Array.from(await adapter.getPlaylists(), item => item.id), [remoteId])
+  assert.deepEqual(store.state.playlists.playlists.map(item => item._id), [playlist._id])
+})
+
+test('a remote profile that could not be saved locally is not deleted from the server by the retry', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createSubscriptionGroup({ id: profile._id, local_id: profile._id, title: profile.name, bg_color: '#000000', text_color: '#FFFFFF' })
+  const store = {
+    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }] } },
+    dispatch: async action => {
+      assert.equal(action, 'updateProfile')
+      return false
+    },
+  }
+  await assert.rejects(context.syncProfiles(adapter, store), /Could not save synced profile/)
+})
+
+test('a profile deletion that could not be saved locally fails the sync', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const previous = { [profile._id]: { metadata: { title: profile.name, bgColor: '#000000', textColor: '#FFFFFF' }, channels: [channel.id] } }
+  const store = {
+    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }, structuredClone(profile)] } },
+    dispatch: async action => {
+      assert.equal(action, 'removeProfile')
+      return false
+    },
+  }
+  await assert.rejects(context.syncProfiles(adapter, store, previous, { allowDataLoss: true }), /Could not remove synced profile/)
+})
+
+test('a playlist deletion that could not be saved locally fails the sync', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [structuredClone(playlist)] } },
+    // `removePlaylist` logs failures instead of reporting them, leaving the playlist in place.
+    dispatch: async action => assert.equal(action, 'removePlaylist'),
+  }
+  await assert.rejects(context.syncPlaylists(adapter, store, previous, { allowDataLoss: true }), /Could not remove synced playlist/)
+})
+
+test('a protected playlist deleted on another device is restored instead of failing every sync', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const previous = { [playlist._id]: { remoteId: playlist._id, metadata: { title: playlist.playlistName, description: '' }, videos: [video.videoId] } }
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [{ ...structuredClone(playlist), protected: true }] } },
+    // `removePlaylist` keeps protected playlists.
+    dispatch: async action => action !== 'removePlaylist',
+  }
+  await context.syncPlaylists(adapter, store, previous, { allowDataLoss: true })
+  assert.deepEqual(Array.from(await adapter.getPlaylists(), item => item.title), [playlist.playlistName])
 })

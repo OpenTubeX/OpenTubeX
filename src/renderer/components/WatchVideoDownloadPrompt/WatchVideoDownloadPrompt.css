@@ -178,6 +178,11 @@
   padding-inline: 20px;
 }
 
+/* Keeps the last message's margin inside the rendered end the scroll clamp measures. */
+.downloadProgressContent {
+  display: flow-root;
+}
+
 .downloadFooter {
   flex: none;
   padding-block: 8px 10px;

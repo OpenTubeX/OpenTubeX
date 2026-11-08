@@ -1,5 +1,6 @@
 export {
   canMarkHistoryEntryAsWatched,
+  compareHistoryRecordsNewestFirst,
   getRetentionCutoff,
   hasReachedWatchedThreshold,
   isHistoryEntryWatched,

@@ -257,6 +257,7 @@
           :label="removeWatchedVideosPromptLabel"
           :option-names="removeWatchedVideosPromptOptionNames"
           :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"
+          :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
           is-first-option-destructive
           @click="handleRemoveWatchedVideosPromptAnswer"
         />

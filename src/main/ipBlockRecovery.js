@@ -82,7 +82,9 @@ async function executeIpBlockRecoveryScript(scriptPath) {
       windowsVerbatimArguments = true
     } else if (extension === '.ps1') {
       command = path.join(systemDirectory, 'WindowsPowerShell', 'v1.0', 'powershell.exe')
-      args = ['-NoProfile', '-NonInteractive', '-File', normalizedPath]
+      // Windows' default Restricted policy refuses every script. Bypass it for this
+      // process only, as the user chose to run this script.
+      args = ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', normalizedPath]
     } else if (extension === '.vbs') {
       command = path.join(systemDirectory, 'cscript.exe')
       args = ['//Nologo', normalizedPath]

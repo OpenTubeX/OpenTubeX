@@ -245,40 +245,47 @@
 
       <div
         v-else
+        ref="progressScroller"
+        v-overlay-scrollbars
         class="downloadProgress"
       >
-        <div class="downloadProgressState">
-          <div
-            v-if="downloadInProgress"
-            class="downloadProgressBarTrack"
-          >
+        <div
+          ref="progressContent"
+          class="downloadProgressContent"
+        >
+          <div class="downloadProgressState">
             <div
-              class="downloadProgressBarFill"
-              :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
-              :style="{ transform: `scaleX(${Math.min(100, Math.max(0, activeDownload.percent)) / 100})` }"
-            />
+              v-if="downloadInProgress"
+              class="downloadProgressBarTrack"
+            >
+              <div
+                class="downloadProgressBarFill"
+                :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
+                :style="{ transform: `scaleX(${Math.min(100, Math.max(0, activeDownload.percent)) / 100})` }"
+              />
+            </div>
+            <p class="downloadStatusLine">
+              {{ statusLine }}
+            </p>
           </div>
-          <p class="downloadStatusLine">
-            {{ statusLine }}
+          <p
+            v-if="activeDownload.status === 'failed' && activeDownload.errorMessage !== 'ENOENT' && activeDownload.errorMessage"
+            class="downloadErrorDetails"
+          >
+            {{ downloadErrorMessage(activeDownload.errorMessage, t) }}
           </p>
+          <p
+            v-if="activeDownload.titleTruncated"
+            class="downloadWarning"
+          >
+            <FtIcon
+              :icon="['fas', 'triangle-exclamation']"
+              aria-hidden="true"
+            />
+            {{ t('Downloads.File Name Shortened') }}
+          </p>
+          <DownloadFailureHint v-if="activeDownload.status === 'failed'" />
         </div>
-        <p
-          v-if="activeDownload.status === 'failed' && activeDownload.errorMessage !== 'ENOENT' && activeDownload.errorMessage"
-          class="downloadErrorDetails"
-        >
-          {{ downloadErrorMessage(activeDownload.errorMessage, t) }}
-        </p>
-        <p
-          v-if="activeDownload.titleTruncated"
-          class="downloadWarning"
-        >
-          <FtIcon
-            :icon="['fas', 'triangle-exclamation']"
-            aria-hidden="true"
-          />
-          {{ t('Downloads.File Name Shortened') }}
-        </p>
-        <DownloadFailureHint v-if="activeDownload.status === 'failed'" />
       </div>
     </div>
     <template #footer>
@@ -412,6 +419,7 @@ const phoneLayout = usePhoneLayout()
 const optionsScroller = useTemplateRef('optionsScroller')
 const optionsContent = useTemplateRef('optionsContent')
 useScrollClamp(optionsScroller, optionsContent)
+useScrollClamp(useTemplateRef('progressScroller'), useTemplateRef('progressContent'))
 const downloadLabel = computed(() => props.isPlaylist
   ? t('Downloads.Download Playlist')
   : t('Downloads.Download Video'))

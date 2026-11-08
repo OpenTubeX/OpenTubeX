@@ -6,7 +6,7 @@ import { Worker } from 'node:worker_threads'
 import { gunzipSync } from 'node:zlib'
 import { reactive, toRaw } from 'vue'
 import { createStore } from 'vuex'
-import { migrateLegacyHistoryRecord } from '../../src/history.js'
+import { compareHistoryRecordsNewestFirst, migrateLegacyHistoryRecord } from '../../src/history.js'
 import { Utils, YT } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 import { executeBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
@@ -41,7 +41,7 @@ function syncContext(runBackgroundJob) {
 function historyStore(DBHistoryHandlers) {
   const history = vm.compileFunction(historySource
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
-    .replace('export default ', 'return '), ['DBHistoryHandlers', 'migrateLegacyHistoryRecord', 'toRaw'])(DBHistoryHandlers, migrateLegacyHistoryRecord, toRaw)
+    .replace('export default ', 'return '), ['DBHistoryHandlers', 'compareHistoryRecordsNewestFirst', 'migrateLegacyHistoryRecord', 'toRaw'])(DBHistoryHandlers, compareHistoryRecordsNewestFirst, migrateLegacyHistoryRecord, toRaw)
   return createStore({ modules: { history } })
 }
 

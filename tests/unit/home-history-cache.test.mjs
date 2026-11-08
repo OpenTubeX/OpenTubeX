@@ -5,7 +5,7 @@ import { compileFunction } from 'node:vm'
 import { isProxy, toRaw } from 'vue'
 import { createStore } from 'vuex'
 import { getContinueWatchingCandidates } from '../../src/renderer/helpers/homeSections.js'
-import { canMarkHistoryEntryAsWatched, getRetentionCutoff } from '../../src/history.js'
+import { canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord } from '../../src/history.js'
 
 const source = (await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -13,7 +13,7 @@ const source = (await readFile(new URL('../../src/renderer/store/modules/history
 
 function fixture(DBHistoryHandlers = {}, rootGetters = {}) {
   const dependencies = {
-    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, getRetentionCutoff, toRaw, DBHistoryHandlers, removeExternalMediaPositionsBefore: () => {},
+    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord, toRaw, DBHistoryHandlers, removeExternalMediaPositionsBefore: () => {},
   }
   const history = compileFunction(source, Object.keys(dependencies))(...Object.values(dependencies))
   return createStore({ modules: { history }, getters: rootGetters })
@@ -203,4 +203,21 @@ test('loading history keeps an entry another window added during the retention c
 
   await store.dispatch('grabHistory')
   assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['added'])
+})
+
+test('history sorting puts progress-only records without a watch time last', async () => {
+  const progressOnly = { videoId: 'progress-only', watchProgress: 5 }
+  const older = { ...video('older'), timeWatched: 1 }
+  const newer = { ...video('newer'), timeWatched: 3 }
+  let saved = null
+  const store = fixture({ overwrite: async records => { saved = records.map(record => record.videoId) } })
+  const order = () => store.state.history.historyCacheSorted.map(record => record.videoId)
+
+  assert.equal(await store.dispatch('overwriteHistory', new Map([progressOnly, older, newer].map(record => [record.videoId, record]))), true)
+  assert.deepEqual(saved, ['newer', 'older', 'progress-only'])
+  assert.deepEqual(order(), ['newer', 'older', 'progress-only'])
+
+  store.commit('setHistoryCacheSorted', [progressOnly, older])
+  store.commit('applyHistorySyncChanges', { insertions: [newer], updates: [], deletions: [] })
+  assert.deepEqual(order(), ['newer', 'older', 'progress-only'])
 })

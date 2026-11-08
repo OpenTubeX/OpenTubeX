@@ -210,11 +210,9 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
   let keepView = false
 
   try {
-    if (proxyUrl) {
-      await theSession.setProxy({
-        proxyRules: proxyUrl
-      })
-    }
+    // The session outlives proxy changes, so a disabled proxy must restore the
+    // system route this session starts with.
+    await theSession.setProxy(proxyUrl ? { proxyRules: proxyUrl } : { mode: 'system' })
 
     webContentsView = new WebContentsView({
       webPreferences: {

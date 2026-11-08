@@ -239,8 +239,12 @@
         </div>
       </div>
       <div class="liveChatBody">
+        <!-- Each Super Chat starts at its top -->
         <div
           v-if="showSuperChat"
+          :key="superChat.id"
+          ref="openedSuperChatRef"
+          v-overlay-scrollbars
           class="openedSuperChat"
           :class="superChat.superChat.colorClass"
           role="button"
@@ -248,7 +252,10 @@
           @click.self="hideSuperChat"
           @keydown.enter.space.self.prevent="hideSuperChat"
         >
-          <div class="superChatMessage">
+          <div
+            ref="openedSuperChatContentRef"
+            class="superChatMessage"
+          >
             <div
               class="upperSuperChatMessage"
             >
@@ -456,6 +463,7 @@ import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
 import { isRecoverableNetworkError } from '../../helpers/networkRecovery'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useScrollClamp } from '../../composables/useScrollClamp'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
 import {
   createCoalescingPoller,
@@ -592,6 +600,7 @@ function closeSettingsMenu(event) {
   settingsMenuOpen.value = false
 }
 const liveChatActionsRef = useTemplateRef('liveChatActionsRef')
+useScrollClamp(useTemplateRef('openedSuperChatRef'), useTemplateRef('openedSuperChatContentRef'))
 const comments = shallowReactive([])
 const superChatComments = shallowReactive([])
 const superChat = ref({

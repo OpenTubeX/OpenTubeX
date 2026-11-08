@@ -98,9 +98,24 @@ test('invalid IDs and custom executable overrides cannot reach either runtime', 
   }
 })
 
-test('custom arguments keep unrelated long options', () => {
-  const { args } = buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs: '--no-exec --cookies-from-browser firefox' })
-  assert.ok(args.includes('--cookies-from-browser'))
+test('custom arguments cannot write files, load inputs or replace yt-dlp', () => {
+  // `--print-to-file` can write a yt-dlp config whose `--exec` runs on the next download.
+  for (const customArgs of ["--print-to-file '--exec id' ~/.config/yt-dlp/config", '--print-to-f=x y', '-o /tmp/x', '-o/tmp/x',
+    '--output=/tmp/x', '--out /tmp/x', '-P /tmp', '-xP/tmp', '--paths=temp:/tmp', '-a urls.txt', '--batch-file urls.txt',
+    '-ka urls.txt', '--load-info-json info.json', '--cookies ~/.config/yt-dlp/config', '--cache-dir /tmp',
+    '--download-archive ~/.bashrc', '--output-na-placeholder ../..', '--ppa ffmpeg:-y', '--postprocessor-args=ffmpeg:-y',
+    '-U', '-xU', '--update', '--update-to evil/yt-dlp@latest', '--write-pages', '--write-pa', '--load-pages', '--load-p']) {
+    assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs }), /unsupported-custom-argument/, customArgs)
+    assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video' }, customArgs), /unsupported-custom-argument/, customArgs)
+  }
+})
+
+test('custom arguments keep unrelated long and short options', () => {
+  const customArgs = '--no-exec --cookies-from-browser firefox --print title --netrc -f bestaudio -fbestaudio -xk -S res:720 -t mp3 --no-update'
+  const { args } = buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs })
+  for (const argument of ['--cookies-from-browser', '--print', '--netrc', '-fbestaudio', '-xk', '-t', '--no-update']) {
+    assert.ok(args.includes(argument), argument)
+  }
 })
 
 test('playback mapping retains alternate audio and live stream timing', () => {

@@ -296,6 +296,7 @@
         :label="$t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
+        :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
         is-first-option-destructive
         @click="handleDeletePlaylistPromptAnswer"
       />
@@ -305,6 +306,7 @@
         :label="removeVideosOnWatchPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
+        :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
         is-first-option-destructive
         @click="handleRemoveVideosOnWatchPromptAnswer"
       />
@@ -314,6 +316,7 @@
         :label="removeDuplicateVideosPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
+        :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
         is-first-option-destructive
         @click="handleRemoveDuplicateVideosPromptAnswer"
       />
@@ -334,6 +337,7 @@
         :label="t('Settings.Data Settings.Select Export Type')"
         :option-names="exportNames"
         :option-values="EXPORT_VALUES"
+        :option-icons="[['fas', 'database'], ['fab', 'youtube'], ['fas', 'link'], ['fas', 'xmark']]"
         @click="handleExport"
       />
       <WatchVideoDownloadPrompt

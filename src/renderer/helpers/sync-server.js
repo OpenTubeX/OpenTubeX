@@ -825,9 +825,10 @@ async function mergeSubscriptions(client, store, previousIds, options) {
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
-  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
+  const readLocalBookmarks = () => (Array.isArray(store.state.settings.playlistBookmarks)
     ? store.state.settings.playlistBookmarks
     : []).filter(isValidPlaylistBookmark)
+  const localBookmarks = readLocalBookmarks()
   const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
   const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
@@ -849,12 +850,19 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
     }
   }
 
-  const mergedBookmarks = Array.from(mergedIds).map(id => {
-    return localById.get(id) ?? { ...remoteById.get(id), savedAt: Date.now() }
-  })
+  const addedIds = Array.from(mergedIds).filter(id => !localById.has(id))
+  const removedIds = new Set(Array.from(localById.keys()).filter(id => !mergedIds.has(id)))
 
-  if (!metadataEquals(localBookmarks, mergedBookmarks)) {
-    const saved = await store.dispatch('replacePlaylistBookmarks', mergedBookmarks)
+  if (addedIds.length > 0 || removedIds.size > 0) {
+    // Apply the merge to the current list, so bookmarks saved or removed while
+    // the server was busy survive, and the next sync syncs them.
+    const currentBookmarks = readLocalBookmarks()
+    const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
+    const nextBookmarks = [
+      ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
+      ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
+    ]
+    const saved = await store.dispatch('replacePlaylistBookmarks', nextBookmarks)
     if (!saved) throw new Error('Could not save synced playlist bookmarks')
   }
 
@@ -885,6 +893,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     collection: 'playlists',
     getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
   })
+  // `removePlaylist` keeps protected playlists, so restore them remotely instead.
+  for (const [id, local] of localById) {
+    if (local.protected) mergedIds.add(id)
+  }
   const nextSnapshot = {}
   const assertCurrent = (local, id) => {
     const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
@@ -899,7 +911,11 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
   for (const id of localById.keys()) {
     if (!mergedIds.has(id)) {
+      // `removePlaylist` logs failures instead of returning them.
       await store.dispatch('removePlaylist', id)
+      if (store.state.playlists.playlists.some(playlist => playlist._id === id)) {
+        throw new Error('Could not remove synced playlist')
+      }
     }
   }
 
@@ -1038,7 +1054,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         protected: false,
         videos: mergedVideos,
       }
-      await store.dispatch('addPlaylist', local)
+      if (!await store.dispatch('addPlaylist', local)) throw new Error('Could not save synced playlist')
     } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
       const saved = await store.dispatch('updatePlaylistFromSync', {
         previous: local,
@@ -1216,7 +1232,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     if (!mergedIds.has(id)) await client.deleteSubscriptionGroup(remote.remoteId)
   }
   for (const id of localById.keys()) {
-    if (!mergedIds.has(id)) await store.dispatch('removeProfile', id)
+    if (!mergedIds.has(id) && !await store.dispatch('removeProfile', id)) {
+      throw new Error('Could not remove synced profile')
+    }
   }
 
   for (const id of mergedIds) {
@@ -1290,7 +1308,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
       subscriptions: mergedSubscriptions,
     }
     if (!local || !metadataEquals(local, mergedProfile)) {
-      await store.dispatch('updateProfile', mergedProfile)
+      if (!await store.dispatch('updateProfile', mergedProfile)) throw new Error('Could not save synced profile')
     }
 
     next[id] = {

@@ -4,6 +4,7 @@ import path from 'node:path'
 import {
   test,
   expect,
+  expectOverlayScrollRange,
   expectScrollAtRenderedEnd,
   goTo,
   goToSettingsSection,
@@ -131,6 +132,76 @@ test.describe('download editor spacing', () => {
         if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}.png`) })
       }
     }
+  })
+})
+
+test.describe('download progress', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US' },
+      history: [{
+        _id: 'jNQXAC9IVRw',
+        videoId: 'jNQXAC9IVRw',
+        title: 'Download progress fixture',
+        author: 'Test channel',
+        lengthSeconds: 60,
+        timeWatched: 1000,
+        watchProgress: 0,
+        type: 'video'
+      }]
+    }
+  })
+
+  test('scrolls long download errors with overlay scrollbars', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    const setDownload = download => page.evaluate(download => {
+      window.$store.commit('upsertYtDlpDownload', {
+        id: 42,
+        videoId: 'jNQXAC9IVRw',
+        title: 'Download progress fixture',
+        mode: 'video',
+        percent: 40,
+        speed: null,
+        eta: null,
+        errorMessage: null,
+        ...download
+      })
+    }, download)
+    await setWindowSize(app, page, { width: 1000, height: 600 })
+    await setDownload({ status: 'downloading' })
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Download Video', exact: true }).click()
+    const prompt = page.locator('.activeDownloadCard')
+    await expect(prompt.locator('.downloadStatusLine')).toHaveText(/40\.0%/)
+
+    const errorLines = Array.from({ length: 60 }, (_, index) => `ERROR: [youtube] jNQXAC9IVRw: fragment ${index + 1} failed`)
+    await setDownload({ status: 'failed', errorMessage: errorLines.join('\n') })
+    const progress = prompt.locator('.downloadProgress')
+    await expect(prompt.locator('.downloadErrorDetails')).toBeVisible()
+    await expect(progress).toHaveAttribute('data-overlayscrollbars-viewport', '')
+    // The bar measures the new range on a later frame.
+    await expect.poll(() => progress.evaluate(element => ({
+      overflows: element.scrollHeight - element.clientHeight > 1,
+      nativeScrollbar: getComputedStyle(element).scrollbarWidth,
+      overlayScrollbar: element.querySelector(':scope > .os-scrollbar-vertical:not(.os-scrollbar-unusable)') !== null
+    }))).toEqual({ overflows: true, nativeScrollbar: 'none', overlayScrollbar: true })
+
+    await scrollToBottom(progress)
+    await expectScrollAtRenderedEnd(progress)
+    await expectOverlayScrollRange(progress)
+    if (uiScale === 100) await prompt.screenshot({ path: testInfo.outputPath('download-progress-scrollbar.png') })
+
+    // A taller window shows more of the error at once.
+    await setWindowSize(app, page, { width: 1001, height: 800 })
+    await expectOverlayScrollRange(progress)
+
+    // Retrying the download from the downloads list removes the error.
+    await scrollToBottom(progress)
+    await setDownload({ status: 'downloading' })
+    await expect(prompt.locator('.downloadErrorDetails')).toHaveCount(0)
+    await expectOverlayScrollRange(progress)
   })
 })
 

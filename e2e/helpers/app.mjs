@@ -234,6 +234,38 @@ export async function expectPageScrollWithinRenderedRange(page) {
 }
 
 /**
+ * Checks, after the scroll range of an overlay scrollbar container changed,
+ * that its offset stays within the rendered content, that it leaves no empty
+ * space past the content, and that its scrollbar matches the new range.
+ *
+ * @param {import('@playwright/test').Locator} scroller
+ */
+export async function expectOverlayScrollRange(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const content = Array.from(element.children).findLast(child => !child.classList.contains('os-scrollbar'))
+    const contentEnd = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+      element.scrollTop + Number.parseFloat(getComputedStyle(content).marginBottom) +
+      Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const realMaximum = Math.max(0, contentEnd - element.clientHeight)
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const thumb = scrollbar?.querySelector('.os-scrollbar-handle')?.getBoundingClientRect()
+    const track = scrollbar?.querySelector('.os-scrollbar-track')?.getBoundingClientRect()
+    let scrollbarMatches
+    if (realMaximum <= 1) scrollbarMatches = scrollbar?.classList.contains('os-scrollbar-unusable')
+    else if (element.scrollTop >= realMaximum - 2) scrollbarMatches = thumb && track && Math.abs(thumb.bottom - track.bottom) <= 2
+    else if (thumb && track) {
+      const expectedOffset = element.scrollTop / realMaximum * (track.height - thumb.height)
+      scrollbarMatches = Math.abs(thumb.top - track.top - expectedOffset) <= 2
+    }
+    return {
+      validOffset: element.scrollTop <= realMaximum + 2,
+      noEmptySpace: element.scrollHeight - element.clientHeight <= realMaximum + 2,
+      scrollbarMatches: Boolean(scrollbarMatches)
+    }
+  })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
+}
+
+/**
  * Creates an isolated userData directory, optionally seeded with
  * settings and datastore documents.
  *

@@ -24,7 +24,11 @@ async function fixture() {
     getYtDlpExternalStreamCookieHeader: () => null,
     getDlnaFfmpegExecutable: () => new Promise((_, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
     createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => [{ address: '93.184.215.14', family: 4 }] }),
-    startDlnaCast: async (_owner, payload) => { attempts.push(payload); return { castId: 'cast-1' } },
+    session: { defaultSession: { resolveProxy: async () => 'DIRECT' } },
+    startDlnaCast: async (_owner, payload, _headers, _mux, _addresses, resolveProxy) => {
+      attempts.push({ ...payload, resolveProxy })
+      return { castId: 'cast-1' }
+    },
     stopDlnaCast: async () => {},
     console,
     URL,
@@ -78,4 +82,17 @@ test('a source the relay would refuse does not start a cast', async () => {
   const { audioUrl, fallbackMediaUrl, ...single } = payload
   assert.match((await f.dlna.start(single)).error, /not allowed/)
   assert.equal(f.attempts.length, 0)
+})
+
+test('a proxied source does not start a cast, and the relay resolves the proxy for every hop', async () => {
+  const f = await fixture()
+  const { audioUrl, fallbackMediaUrl, ...single } = payload
+  f.context.session.defaultSession.resolveProxy = async url => url === single.mediaUrl ? 'PROXY 127.0.0.1:8080' : 'DIRECT'
+  assert.match((await f.dlna.start(single)).error, /direct route/)
+  assert.equal(f.attempts.length, 0)
+
+  f.context.session.defaultSession.resolveProxy = async () => 'DIRECT'
+  assert.equal((await f.dlna.start(single)).castId, 'cast-1')
+  f.context.session.defaultSession.resolveProxy = async url => `PROXY ${new URL(url).hostname}:1080`
+  assert.equal(await f.attempts[0].resolveProxy('https://redirect.example/video'), 'PROXY redirect.example:1080')
 })

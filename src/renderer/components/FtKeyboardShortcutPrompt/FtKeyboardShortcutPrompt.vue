@@ -145,6 +145,7 @@
     :extra-labels="[shortcutConflictMessage]"
     :option-names="shortcutConflictOptionNames"
     :option-values="shortcutConflictOptionValues"
+    :option-icons="shortcutConflictOptionIcons"
     :is-first-option-destructive="shortcutConflictCanBeReassigned"
     @click="resolveShortcutConflict"
   />
@@ -239,6 +240,11 @@ const shortcutConflictCanBeReassigned = computed(() =>
 const shortcutConflictOptionNames = computed(() => shortcutConflictCanBeReassigned.value
   ? [t('KeyboardShortcutPrompt.Reassign'), t('Undo')]
   : [t('Undo')]
+)
+
+const shortcutConflictOptionIcons = computed(() => shortcutConflictCanBeReassigned.value
+  ? [['fas', 'keyboard'], ['fas', 'undo']]
+  : [['fas', 'undo']]
 )
 
 const shortcutConflictOptionValues = computed(() => shortcutConflictCanBeReassigned.value

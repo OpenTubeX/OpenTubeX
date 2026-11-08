@@ -347,6 +347,7 @@
       :extra-labels="cleanupPrompt.extraLabels"
       :option-names="[cleanupPrompt.confirm, t('Cancel')]"
       :option-values="['confirm', 'cancel']"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       is-first-option-destructive
       @click="handleCleanupPrompt"
     />

@@ -232,6 +232,7 @@
       :extra-labels="[IS_CAPACITOR ? t('Downloads.Remove File Permanently Warning', { title: pendingRemoval.title }) : t('Downloads.Remove File Warning', { title: pendingRemoval.title })]"
       :option-names="[t('Downloads.Remove File'), t('Cancel')]"
       :option-values="['remove', 'cancel']"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       is-first-option-destructive
       @click="handleRemovePrompt"
     />

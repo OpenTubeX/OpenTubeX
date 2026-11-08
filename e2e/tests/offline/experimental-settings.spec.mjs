@@ -1,6 +1,6 @@
 import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
-test('canceling experimental restart prompts restores both running settings', async ({ page }) => {
+test('canceling experimental restart prompts restores both running settings', async ({ page }, testInfo) => {
   const settings = await goToSettingsSection(page, 'advanced')
   const labels = ['Disable Hardware Acceleration', 'Replace HTTP Cache']
 
@@ -12,6 +12,10 @@ test('canceling experimental restart prompts restores both running settings', as
 
     const prompt = page.getByRole('dialog', { name: /The app needs to restart/ })
     await expect(prompt).toBeVisible()
+    for (const name of ['Yes, restart', 'Cancel']) {
+      await expect(prompt.getByRole('button', { name, exact: true }).locator('.ft-icon')).toHaveCount(1)
+    }
+    if (label === labels[0]) await prompt.screenshot({ path: testInfo.outputPath('restart-prompt-icons.png') })
     await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
     await expect(prompt).toBeHidden()
     await expect(checkbox).not.toBeChecked()
