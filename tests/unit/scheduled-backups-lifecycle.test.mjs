@@ -31,6 +31,7 @@ function lifecycle(platform) {
     shutdownYtDlpDownloads: async () => {},
     uploadNotifier: { settle: async () => {} },
     closeKwinPictureInPictureBounds: Promise.resolve(null),
+    pictureInPictureBoundsStore: { settled: async () => {} },
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
   vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${events}\n${handleQuit}\n${cleanup}`, context)

@@ -88,7 +88,8 @@ export function createPictureInPictureBoundsStore(file) {
         await rename(file + '.tmp', file)
       }).catch(error => console.error('Failed to save the Picture-in-Picture bounds', error))
       return pending
-    }
+    },
+    settled: () => pending
   }
 }
 
@@ -101,11 +102,10 @@ export function createPictureInPictureBoundsStore(file) {
  */
 
 /**
- * Electron has no API for Chromium's Picture-in-Picture window. Chromium keeps
- * its bounds while the window exists, which is as long as the page that opened
- * it, so restore the saved ones once per window. Moves raise no event, and
- * closing the window from the system destroys it before the page hears about
- * it, so poll the bounds while it shows.
+ * Electron has no API for Chromium's Picture-in-Picture window, so restore the
+ * saved bounds each time it shows. Moves raise no event, and closing the window
+ * from the system destroys it before the page hears about it, so poll the
+ * bounds while it shows.
  *
  * @param {{
  *   native: NativePictureInPictureWindows,
@@ -126,8 +126,6 @@ export function createNativePictureInPictureBounds({
   fromNative = bounds => bounds,
   pollInterval = 1000
 }) {
-  /** @type {Set<number>} */
-  const restored = new Set()
   /** @type {Set<number>} */
   const restoring = new Set()
   /** @type {Map<object, number>} */
@@ -166,8 +164,6 @@ export function createNativePictureInPictureBounds({
       if (handle === null) return
       visible.set(owner, handle)
       timer ??= setInterval(poll, pollInterval)
-      if (restored.has(handle)) return
-      restored.add(handle)
       restoring.add(handle)
       try {
         const saved = await store.load()

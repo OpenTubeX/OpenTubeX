@@ -67,6 +67,11 @@ test('stores the bounds for the next session', async t => {
   assert.deepEqual(await store.load(), { x: 1, y: 2, width: 3, height: 4 })
   assert.deepEqual(await createPictureInPictureBoundsStore(file).load(), { x: 1, y: 2, width: 3, height: 4 })
 
+  // Quitting waits for the last save
+  store.save({ x: 5, y: 6, width: 7, height: 8 })
+  await store.settled()
+  assert.deepEqual(JSON.parse(await readFile(file, 'utf8')), { x: 5, y: 6, width: 7, height: 8 })
+
   await writeFile(file, '{')
   t.mock.method(console, 'error', () => {})
   assert.equal(await createPictureInPictureBoundsStore(file).load(), null)
@@ -88,7 +93,7 @@ function nativeFixture(saved) {
     }
   }
   const stored = []
-  const store = { load: async () => saved, save: value => stored.push(value) }
+  const store = { load: async () => stored.at(-1) ?? saved, save: value => stored.push(value) }
   const tracker = createNativePictureInPictureBounds({
     native,
     store,
@@ -102,7 +107,7 @@ function nativeFixture(saved) {
   return { tracker, calls, bounds, stored }
 }
 
-test('restores saved bounds once per native window', async t => {
+test('restores the saved bounds each time the window shows', async t => {
   t.mock.timers.enable({ apis: ['setInterval'] })
   const { tracker, calls, bounds, stored } = nativeFixture({ x: 40, y: 50, width: 640, height: 360 })
   const page = {}
@@ -110,18 +115,14 @@ test('restores saved bounds once per native window', async t => {
   await tracker.shown(page)
   assert.deepEqual(calls, [['find', ['main window']], ['set', 7, { x: 80, y: 100, width: 1280, height: 720 }]])
 
-  // Chromium remembers where the window was moved while it exists
   bounds.set(7, { x: 200, y: 300, width: 800, height: 450 })
   tracker.hidden(page)
   assert.deepEqual(stored, [{ x: 100, y: 150, width: 400, height: 225 }])
-  await tracker.shown(page)
-  assert.equal(calls.filter(([name]) => name === 'set').length, 1)
-  tracker.hidden(page)
 
-  // A window for another page gets the saved bounds again
-  bounds.set(8, { x: 0, y: 0, width: 768, height: 432 })
+  // Windows can reuse a destroyed window's handle for a new window
+  bounds.set(7, { x: 3000, y: 1600, width: 768, height: 432 })
   await tracker.shown({})
-  assert.deepEqual(calls.at(-1), ['set', 8, { x: 80, y: 100, width: 1280, height: 720 }])
+  assert.deepEqual(calls.at(-1), ['set', 7, { x: 200, y: 300, width: 800, height: 450 }])
 })
 
 test('saves moves while the window shows, for a window closed from the system', async t => {

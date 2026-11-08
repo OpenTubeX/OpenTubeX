@@ -3906,7 +3906,8 @@ function runApp() {
       await Promise.allSettled([
         trayIconWrite,
         // A script left in KWin would act on a later process with the same ID
-        closeKwinPictureInPictureBounds.then(close => close?.()),
+        closeKwinPictureInPictureBounds.then(close => close?.())
+          .finally(() => pictureInPictureBoundsStore.settled()),
         // Queue requests run in order, so a read waits for pending queue writes
         updateWatchQueue({}),
         baseHandlers.compactAllDatastores(),
