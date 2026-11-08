@@ -12,7 +12,7 @@ const packageChangelogs = process.env.PACKAGE_CHANGELOG_DIR
 export default {
   appId: `io.opentubex.${packageDetails.name}`,
   copyright: 'Copyleft © 2020-2026',
-  asarUnpack: ['dist/windows_share.node', 'dist/opentubex-cast', 'dist/opentubex-cast.exe'],
+  asarUnpack: ['dist/windows_share.node', 'dist/macos_native.node', 'dist/opentubex-cast', 'dist/opentubex-cast.exe'],
   // compression: 'store',
   productName: packageDetails.productName,
   directories: {

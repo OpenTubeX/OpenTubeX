@@ -125,6 +125,8 @@ const IpcChannels = {
   WINDOW_MINIMIZED_STATE: 'window-minimized-state',
   WINDOW_FOCUSED_STATE: 'window-focused-state',
   SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE: 'supports-auto-picture-in-picture-minimize',
+  PICTURE_IN_PICTURE_SHOWN: 'picture-in-picture-shown',
+  PICTURE_IN_PICTURE_HIDDEN: 'picture-in-picture-hidden',
   TABS_REQUEST_FULLSCREEN: 'tabs-request-fullscreen',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',
   TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',

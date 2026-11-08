@@ -30,9 +30,12 @@ const config = {
         }
       },
       {
-        // The Windows addon path is resolved at runtime. Dependencies such as
+        // Native addon paths are resolved at runtime. Dependencies such as
         // font-list still need webpack to follow their static createRequire calls.
-        include: path.join(__dirname, '../src/main/desktopShare.js'),
+        include: [
+          path.join(__dirname, '../src/main/desktopShare.js'),
+          path.join(__dirname, '../src/main/pictureInPictureBounds.js')
+        ],
         parser: { createRequire: false },
       },
     ],

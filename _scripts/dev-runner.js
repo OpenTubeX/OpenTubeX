@@ -346,6 +346,9 @@ async function start() {
     if (process.platform === 'win32') {
       const { prepareWindowsShare } = await import('./windowsShare.mjs')
       await prepareWindowsShare()
+    } else if (process.platform === 'darwin') {
+      const { prepareMacosNative } = await import('./macosNative.mjs')
+      await prepareMacosNative()
     }
     startRenderer(devServerPort => {
       if (worktree) {
