@@ -553,6 +553,7 @@ Settings:
     Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
     Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.
   Theme Settings:
+    Font Size: Tipara grandeco
     Sections:
       Interface: "Fasado"
       Side Bar and Header: "Flanka breto kaj kapo"

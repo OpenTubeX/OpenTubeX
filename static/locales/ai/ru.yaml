@@ -490,6 +490,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Font Size: Размер шрифта
     Sections:
       Interface: "Интерфейс"
       Side Bar and Header: "Боковая панель и заголовок"

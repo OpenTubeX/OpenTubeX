@@ -522,6 +522,7 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Font Size: حجم الخط
     Sections:
       Interface: "الواجهة"
       Side Bar and Header: "الشريط الجانبي والترويسة"

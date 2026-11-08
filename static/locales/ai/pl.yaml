@@ -282,6 +282,7 @@ Settings:
       Label: Automatyczne wczytywanie komentarzy
       Tooltip: Wczytuj komentarze po otwarciu strony i kolejne podczas przewijania.
   Theme Settings:
+    Font Size: Rozmiar czcionki
     Sections:
       Interface: "Interfejs"
       Side Bar and Header: "Pasek boczny i nagłówek"

@@ -522,6 +522,7 @@ Settings:
     Invalid Engine: Введіть назву й дійсну URL-адресу пошуку HTTP або HTTPS, яка містить %s.
     Engine Limit: Можна додати до {count} власних пошукових систем.
   Theme Settings:
+    Font Size: Розмір шрифту
     Sections:
       Interface: "Інтерфейс"
       Side Bar and Header: "Бічна панель і заголовок"

@@ -367,6 +367,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
     playlistThumbnailSize: DEFAULT_THUMBNAIL_SIZE,
     uiRoundness: 100,
+    fontSize: 100,
     animationSpeed: 100,
     showToastTimeoutIndicator: true,
     onlyShowImportantToasts: false,

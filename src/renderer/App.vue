@@ -2257,6 +2257,11 @@ const uiRoundness = computed(() => store.getters.getUiRoundness)
 watch(uiRoundness, updateUiRoundness)
 
 /** @type {import('vue').ComputedRef<number>} */
+const fontSize = computed(() => store.getters.getFontSize)
+
+watch(fontSize, updateFontSize)
+
+/** @type {import('vue').ComputedRef<number>} */
 const scrollbarThumbWidth = computed(() => store.getters.getScrollbarThumbWidth)
 
 watch(scrollbarThumbWidth, updateScrollbarThumbWidth)
@@ -2360,6 +2365,10 @@ function updateUiRoundness() {
   document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
 }
 
+function updateFontSize() {
+  document.body.style.setProperty('--font-scale', String(fontSize.value / 100))
+}
+
 function updateScrollbarThumbWidth() {
   document.body.style.setProperty(
     '--scrollbar-thumb-width',
@@ -2378,6 +2387,7 @@ function updateThumbnailListSize() {
 updateTheme()
 updateAppFont()
 updateUiRoundness()
+updateFontSize()
 updateScrollbarThumbWidth()
 updateThumbnailListSize()
 

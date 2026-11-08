@@ -518,6 +518,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Font Size: Ukuran Font
     Sections:
       Interface: "Antarmuka"
       Side Bar and Header: "Bilah Samping & Header"

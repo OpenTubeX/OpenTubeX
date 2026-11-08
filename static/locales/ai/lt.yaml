@@ -639,6 +639,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Font Size: Šrifto dydis
     Sections:
       Interface: "Sąsaja"
       Side Bar and Header: "Šoninė juosta ir antraštė"

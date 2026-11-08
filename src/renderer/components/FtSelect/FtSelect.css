@@ -75,7 +75,7 @@
 }
 
 .select.outlined > .selectSearchHighlightFrame {
-  inset-block-start: -7px;
+  inset-block-start: calc(-7px * var(--font-scale, 1));
 }
 
 .select-text {
@@ -422,7 +422,7 @@
 .select.outlined .selectOutline {
   display: block;
   position: absolute;
-  inset-block: -7px 0;
+  inset-block: calc(-7px * var(--font-scale, 1)) 0;
   inset-inline: var(--select-outline-inline-start, 0) var(--select-indicator-space);
   min-inline-size: 0;
   margin: 0;
@@ -443,12 +443,12 @@
 .select.contentSized.outlined .selectOutline {
   position: relative;
   inset-block: auto;
-  margin-block-start: -7px;
+  margin-block-start: calc(-7px * var(--font-scale, 1));
 }
 
 .select.outlined .selectLegend {
   display: block;
-  min-block-size: 14px;
+  min-block-size: calc(14px * var(--font-scale, 1));
   max-inline-size: calc(100% - 56px);
   margin-inline-start: 12px;
   padding: 0;
@@ -469,16 +469,16 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .select.outlined .selectOutline {
-    inset-block-start: -9px;
+    inset-block-start: calc(-9px * var(--font-scale, 1));
   }
 
   .select.contentSized.outlined .selectOutline {
-    margin-block-start: -9px;
+    margin-block-start: calc(-9px * var(--font-scale, 1));
   }
 
   .select.outlined .selectLegend,
   .select.outlined .select-label {
-    min-block-size: 18px;
+    min-block-size: calc(18px * var(--font-scale, 1));
   }
 }
 
