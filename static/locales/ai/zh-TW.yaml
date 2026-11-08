@@ -1586,6 +1586,8 @@ Video:
     Previous Version: 先前版本 {number}
     Empty: （空白）
   Fetching Streams: 正在使用 yt-dlp 擷取串流…
+  Waiting For Connection: "無法連線到伺服器。正在自動重試…"
+  Retry Now: "立即重試"
   Transcript:
     Title: 逐字稿
     Search: 搜尋逐字稿

@@ -1588,6 +1588,8 @@ Video:
     Previous Version: Predchádzajúca verzia {number}
     Empty: (prázdne)
   Fetching Streams: Streamy sa získavajú cez yt-dlp…
+  Waiting For Connection: "Server sa nepodarilo kontaktovať. Automaticky sa skúša znova…"
+  Retry Now: "Skúsiť znova teraz"
   Transcript:
     Title: Prepis
     Search: Hľadať v prepise

@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Előző verzió ({number})
     Empty: (üres)
   Fetching Streams: Adatfolyamok lekérése az yt-dlp-vel…
+  Waiting For Connection: "Nem sikerült elérni a kiszolgálót. Automatikus újrapróbálkozás…"
+  Retry Now: "Újrapróbálás most"
   Transcript:
     Title: Átirat
     Search: Keresés az átiratban

@@ -1606,6 +1606,8 @@ Video:
     Previous Version: Προηγούμενο {number}
     Empty: (κενό)
   Fetching Streams: Ανάκτηση ροών με το yt-dlp…
+  Waiting For Connection: "Δεν ήταν δυνατή η σύνδεση με τον διακομιστή. Αυτόματη επανάληψη…"
+  Retry Now: "Επανάληψη τώρα"
   Transcript:
     Title: Απομαγνητοφώνηση
     Search: Αναζήτηση στην απομαγνητοφώνηση

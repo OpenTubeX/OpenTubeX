@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Föregående {number}
     Empty: (tom)
   Fetching Streams: Hämtar strömmar med yt-dlp…
+  Waiting For Connection: "Det gick inte att nå servern. Försöker igen automatiskt…"
+  Retry Now: "Försök igen nu"
   Transcript:
     Title: Transkription
     Search: Sök i transkriptionen

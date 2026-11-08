@@ -25,7 +25,7 @@ export function isRecoverableNetworkError(error) {
  * One connectivity listener for the app. Each origin gets one recovery probe,
  * so an unavailable optional service cannot block YouTube or another backend.
  */
-export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget, isVisible, checkInternet, internetChecksEnabled = true, onChange = () => {} }) {
+export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget, isVisible, checkInternet, internetChecksEnabled = true, onChange = () => {}, onWaitingChange = () => {} }) {
   const deviceEvents = eventTarget
   const isDeviceOnline = isOnline
   const connectivity = checkInternet ? createInternetConnectivity({ eventTarget, isOnline, probe: checkInternet, enabled: internetChecksEnabled, visibilityTarget, isVisible }) : null
@@ -64,7 +64,11 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
   eventTarget.addEventListener('offline', connectivityChanged)
   update()
 
-  function wait(delay, signal, canAttempt) {
+  function waitingOrigins() {
+    return [...origins].filter(([, origin]) => origin.probe).map(([key]) => key)
+  }
+
+  function wait(delay, signal, canAttempt, origin) {
     return new Promise((resolve, reject) => {
       let timer
       const targets = deviceEvents === eventTarget ? [eventTarget] : [eventTarget, deviceEvents]
@@ -75,6 +79,7 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
           target.removeEventListener('offline', disconnected)
         }
         signal.removeEventListener('abort', aborted)
+        origin.wake = null
         if (error) reject(error)
         else resolve()
       }
@@ -86,6 +91,7 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
         target.addEventListener('offline', disconnected)
       }
       signal.addEventListener('abort', aborted, { once: true })
+      origin.wake = connected
       if (canAttempt()) timer = setTimeout(() => finish(), delay)
       if (signal.aborted) aborted()
     })
@@ -112,7 +118,7 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
     if (signal.aborted) throw createAbortError()
     let origin = origins.get(originKey)
     if (!origin) {
-      origin = { failed: false, probe: null, users: 0 }
+      origin = { failed: false, probe: null, users: 0, wake: null, retryNow: false }
       origins.set(originKey, origin)
     }
     origin.users++
@@ -128,10 +134,13 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
           origin.failed = true
           let release
           origin.probe = new Promise(resolve => { release = resolve })
+          onWaitingChange(waitingOrigins())
           try {
             let delay = 5000
             for (;;) {
-              await wait(delay, signal, canAttempt)
+              // Retry now during an attempt skips the next backoff.
+              if (origin.retryNow) origin.retryNow = false
+              else await wait(delay, signal, canAttempt, origin)
               if (!canAttempt()) continue
               try {
                 const result = await task(signal)
@@ -152,7 +161,9 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
             }
           } finally {
             origin.probe = null
+            origin.retryNow = false
             release()
+            onWaitingChange(waitingOrigins())
           }
         }
         try {
@@ -194,6 +205,16 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
     },
     ownsRequests(signal) { return delegatedSignals.has(signal) },
     ownsDeadline(signal) { return delegatedSignals.get(signal) === true },
+    /** Origins whose requests wait for a recovery probe. */
+    get waitingOrigins() { return waitingOrigins() },
+    /** Ends the backoff of every waiting origin, for a user who wants to retry now. */
+    retryNow() {
+      for (const origin of origins.values()) {
+        if (!origin.probe) continue
+        if (origin.wake) origin.wake()
+        else origin.retryNow = true
+      }
+    },
     get state() { return state },
     dispose() {
       shutdown.abort()
@@ -208,6 +229,8 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
 let appRecovery
 export const connectionEvents = new EventTarget()
 export function getConnectionState() { return appRecovery?.state ?? 'online' }
+export function getWaitingOrigins() { return appRecovery?.waitingOrigins ?? [] }
+export function retryWaitingRequests() { appRecovery?.retryNow() }
 
 /** Lets a caller with its own retries handle a request's failures outside the recovery queue. */
 export function delegateRequests(signal, options) {
@@ -223,7 +246,8 @@ export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled
       visibilityTarget: typeof document === 'undefined' ? undefined : document,
       isVisible: () => !isAppHidden(),
       isOnline: () => navigator.onLine !== false,
-      onChange: state => connectionEvents.dispatchEvent(new CustomEvent('change', { detail: state }))
+      onChange: state => connectionEvents.dispatchEvent(new CustomEvent('change', { detail: state })),
+      onWaitingChange: origins => connectionEvents.dispatchEvent(new CustomEvent('waiting', { detail: origins }))
     })
   }
   return appRecovery

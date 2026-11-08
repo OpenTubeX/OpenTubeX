@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Versão anterior {number}
     Empty: (vazio)
   Fetching Streams: A obter transmissões com o yt-dlp…
+  Waiting For Connection: "Não foi possível contactar o servidor. A tentar novamente automaticamente…"
+  Retry Now: "Tentar agora"
   Transcript:
     Title: Transcrição
     Search: Pesquisar na transcrição

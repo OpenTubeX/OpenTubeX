@@ -1591,6 +1591,8 @@ Video:
     Previous Version: Bản trước {number}
     Empty: (trống)
   Fetching Streams: Đang lấy luồng bằng yt-dlp…
+  Waiting For Connection: "Không thể kết nối tới máy chủ. Đang tự động thử lại…"
+  Retry Now: "Thử lại ngay"
   Transcript:
     Title: Bản chép lời
     Search: Tìm trong bản chép lời

@@ -1621,6 +1621,8 @@ Video:
     Previous Version: Попередня версія {number}
     Empty: (порожньо)
   Fetching Streams: Отримання потоків за допомогою yt-dlp…
+  Waiting For Connection: "Не вдалося зв'язатися із сервером. Автоматична повторна спроба…"
+  Retry Now: "Повторити зараз"
   Transcript:
     Title: Текст відео
     Search: Шукати в тексті відео

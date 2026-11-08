@@ -1623,6 +1623,8 @@ Video:
     Previous Version: السابق {number}
     Empty: (فارغ)
   Fetching Streams: جارٍ جلب مجموعات البث باستخدام yt-dlp…
+  Waiting For Connection: "تعذّر الوصول إلى الخادم. تجري إعادة المحاولة تلقائيًا…"
+  Retry Now: "أعد المحاولة الآن"
   Transcript:
     Title: نص
     Search: نص البحث

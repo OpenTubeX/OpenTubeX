@@ -1596,6 +1596,8 @@ Video:
     Previous Version: Sebelumnya {number}
     Empty: (kosong)
   Fetching Streams: Mengambil stream dengan yt-dlp…
+  Waiting For Connection: "Tidak dapat menjangkau server. Mencoba lagi secara otomatis…"
+  Retry Now: "Coba lagi sekarang"
   Transcript:
     Title: Transkrip
     Search: Cari transkrip

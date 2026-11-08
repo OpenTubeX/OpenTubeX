@@ -1582,6 +1582,8 @@ Video:
     Previous Version: '{number}個前'
     Empty: （空）
   Fetching Streams: yt-dlpでストリームを取得中…
+  Waiting For Connection: "サーバーに接続できませんでした。自動的に再試行しています…"
+  Retry Now: "今すぐ再試行"
   Transcript:
     Title: 文字起こし
     Search: 文字起こしを検索

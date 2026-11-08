@@ -1625,6 +1625,8 @@ Video:
     Previous Version: הגרסה הקודמת {number}
     Empty: (ריק)
   Fetching Streams: הזרמים מתקבלים באמצעות yt-dlp…
+  Waiting For Connection: "לא ניתן להגיע לשרת. מתבצע ניסיון חוזר אוטומטי…"
+  Retry Now: "לנסות שוב עכשיו"
   Transcript:
     Title: תמלול
     Search: חיפוש בתמלול

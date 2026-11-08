@@ -1600,6 +1600,8 @@ Video:
     Previous Version: Blaenorol {number}
     Empty: (gwag)
   Fetching Streams: Wrthi'n cyrchu ffrydiau gydag yt-dlp…
+  Waiting For Connection: "Methu cyrraedd y gweinydd. Yn ceisio eto'n awtomatig…"
+  Retry Now: "Ceisio eto nawr"
   Transcript:
     Title: Trawsgrifiad
     Search: Chwilio'r trawsgrifiad

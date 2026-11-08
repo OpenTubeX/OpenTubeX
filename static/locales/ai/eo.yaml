@@ -1617,6 +1617,8 @@ Video:
     Previous Version: Antaŭa {number}
     Empty: (malplena)
   Fetching Streams: Venigado de fluoj per yt-dlp…
+  Waiting For Connection: "Ne eblis atingi la servilon. Aŭtomate reprovante…"
+  Retry Now: "Reprovi nun"
   Transcript:
     Title: Transskribo
     Search: Serĉi en transskribo

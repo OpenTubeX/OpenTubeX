@@ -1656,6 +1656,8 @@ Video:
     Previous Version: نسخهٔ قبلی {number}
     Empty: (خالی)
   Fetching Streams: در حال دریافت جریان‌ها با yt-dlp…
+  Waiting For Connection: "دسترسی به سرور ممکن نشد. تلاش دوباره به‌صورت خودکار…"
+  Retry Now: "اکنون دوباره تلاش کنید"
   Transcript:
     Title: رونوشت
     Search: جست‌وجوی رونوشت

@@ -1621,6 +1621,8 @@ Video:
     Previous Version: Anterior {number}
     Empty: (baleiro)
   Fetching Streams: Obtendo as emisións con yt-dlp…
+  Waiting For Connection: "Non se puido conectar co servidor. Volvendo tentalo automaticamente…"
+  Retry Now: "Tentar de novo agora"
   Transcript:
     Title: Transcrición
     Search: Buscar na transcrición

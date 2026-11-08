@@ -1811,6 +1811,8 @@ Video:
     Previous Version: Vorige {number}
     Empty: (leeg)
   Fetching Streams: Haal strome met yt-dlp op…
+  Waiting For Connection: "Kon nie die bediener bereik nie. Probeer outomaties weer…"
+  Retry Now: "Probeer nou weer"
   Transcript:
     Title: Transkripsie
     Search: Soek in transkripsie

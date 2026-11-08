@@ -1593,6 +1593,8 @@ Video:
     Previous Version: Fyrri útgáfa {number}
     Empty: (autt)
   Fetching Streams: Sæki streymi með yt-dlp…
+  Waiting For Connection: "Ekki tókst að ná sambandi við netþjóninn. Reyni sjálfkrafa aftur…"
+  Retry Now: "Reyna aftur núna"
   Transcript:
     Title: Textauppskrift
     Search: Leita í textauppskrift

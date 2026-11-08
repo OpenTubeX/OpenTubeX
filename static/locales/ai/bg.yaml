@@ -1605,6 +1605,8 @@ Video:
     Previous Version: Предишна версия {number}
     Empty: (празно)
   Fetching Streams: Извличане на потоци с yt-dlp…
+  Waiting For Connection: "Сървърът не е достъпен. Автоматичен повторен опит…"
+  Retry Now: "Опитай отново сега"
   Transcript:
     Title: Транскрипция
     Search: Търсене в транскрипцията

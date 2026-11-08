@@ -1582,6 +1582,8 @@ Video:
     Previous Version: Aurreko {number}
     Empty: (hutsik)
   Fetching Streams: Korronteak yt-dlp bidez eskuratzen…
+  Waiting For Connection: "Ezin izan da zerbitzarira iritsi. Automatikoki berriro saiatzen…"
+  Retry Now: "Saiatu berriro orain"
   Transcript:
     Title: Transkripzioa
     Search: Bilatu transkripzioan

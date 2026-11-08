@@ -1809,6 +1809,8 @@ Video:
     Previous Version: Tidlegare {number}
     Empty: (tom)
   Fetching Streams: Hentar straumar med yt-dlp…
+  Waiting For Connection: "Fekk ikkje kontakt med tenaren. Prøver automatisk på nytt…"
+  Retry Now: "Prøv på nytt no"
   Transcript:
     Title: Transkripsjon
     Search: Søk i transkripsjonen
