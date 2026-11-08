@@ -1256,14 +1256,20 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniScrollToTop()
   }
 
-  /** @param {MouseEvent} event */
+  /**
+   * Remembers whether a click gesture started on the video rather than a control.
+   * @param {MouseEvent} event
+   */
   function trackScrollMiniClick(event) {
     if (event.detail !== 1) return
     scrollMiniClickStartedOnVideo = event.target instanceof Element &&
       event.target.classList.contains('scrollMiniPointerLayer')
   }
 
-  /** @param {MouseEvent} event */
+  /**
+   * Returns to the full player when a double-click started on the video.
+   * @param {MouseEvent} event
+   */
   function handleScrollMiniDoubleClick(event) {
     if (scrollMiniClickStartedOnVideo) scrollMiniScrollToTop(event)
   }
@@ -1281,6 +1287,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  /**
+   * Toggles playback, except for the second click of a double-click on the video.
+   * @param {MouseEvent} [event]
+   */
   async function scrollMiniTogglePlayPause(event) {
     event?.preventDefault()
     event?.stopPropagation()
