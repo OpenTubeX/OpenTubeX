@@ -37,9 +37,27 @@ enum HomeWidgetStore {
     static let maxVideos = 4
 
     static var directory: URL? {
-        guard let group = Bundle.main.object(forInfoDictionaryKey: "OpenTubeXAppGroup") as? String,
-              let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else { return nil }
+        guard let configured = Bundle.main.object(forInfoDictionaryKey: "OpenTubeXAppGroup") as? String else { return nil }
+        let profile = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision").flatMap { try? Data(contentsOf: $0) }
+        let group = appGroup(configured, provisioned: provisionedAppGroups(profile))
+        guard let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else { return nil }
         return container.appendingPathComponent("HomeWidgets", isDirectory: true)
+    }
+
+    /// SideStore re-signs with the App Group renamed to `<group>.<team ID>`,
+    /// so the app and its widgets look up the name their profile grants.
+    static func appGroup(_ configured: String, provisioned: [String]) -> String {
+        provisioned.contains(configured) ? configured : provisioned.first { $0.hasPrefix(configured + ".") } ?? configured
+    }
+
+    /// Reads the App Groups from the XML plist inside a signed provisioning profile.
+    static func provisionedAppGroups(_ profile: Data?) -> [String] {
+        guard let profile,
+              let start = profile.range(of: Data("<?xml".utf8)),
+              let end = profile.range(of: Data("</plist>".utf8), in: start.lowerBound..<profile.endIndex),
+              let plist = try? PropertyListSerialization.propertyList(from: profile[start.lowerBound..<end.upperBound], format: nil) as? [String: Any],
+              let entitlements = plist["Entitlements"] as? [String: Any] else { return [] }
+        return entitlements["com.apple.security.application-groups"] as? [String] ?? []
     }
 
     static func videos() -> [HomeWidgetVideo] {

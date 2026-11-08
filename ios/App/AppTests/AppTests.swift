@@ -2425,6 +2425,25 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["result"] as? Int, 42)
     }
 
+    func testHomeWidgetsUseTheAppGroupTheirProfileGrants() throws {
+        let profile = Data("""
+        \u{30}\u{82}<?xml version="1.0" encoding="UTF-8"?>
+        <plist version="1.0"><dict><key>Entitlements</key><dict>
+        <key>com.apple.security.application-groups</key>
+        <array><string>group.org.opentubex.app.ABCDE12345</string></array>
+        </dict></dict></plist>\u{a0}\u{82}
+        """.utf8)
+        let groups = HomeWidgetStore.provisionedAppGroups(profile)
+        XCTAssertEqual(groups, ["group.org.opentubex.app.ABCDE12345"])
+        XCTAssertEqual(HomeWidgetStore.appGroup("group.org.opentubex.app", provisioned: groups), "group.org.opentubex.app.ABCDE12345")
+        XCTAssertEqual(HomeWidgetStore.appGroup("group.org.opentubex.app.nightly", provisioned: groups), "group.org.opentubex.app.nightly")
+        XCTAssertEqual(HomeWidgetStore.appGroup("group.org.opentubex.app",
+                                                provisioned: ["group.org.opentubex.app.nightly", "group.org.opentubex.app"]),
+                       "group.org.opentubex.app")
+        XCTAssertEqual(HomeWidgetStore.appGroup("group.org.opentubex.app", provisioned: HomeWidgetStore.provisionedAppGroups(nil)),
+                       "group.org.opentubex.app")
+    }
+
     func testHomeWidgetsCacheContinueWatchingAndOpenTheirLinks() async throws {
         try await openApplication()
         XCTAssertNotNil(HomeWidgetStore.directory, "The app and its widgets must share an App Group")
