@@ -1,6 +1,7 @@
 import path from 'node:path'
 
 import packageDetails from '../package.json' with { type: 'json' }
+import { removeLinuxGroupOtherWrite } from './linuxFileModes.mjs'
 import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
 import { prepareWindowsInstallerTranslations } from './windowsInstallerTranslations.mjs'
 
@@ -38,6 +39,7 @@ export default {
   // returning `false` from the `beforeBuild` hook skips that.
   beforeBuild: () => Promise.resolve(false),
   afterPack: async context => {
+    await removeLinuxGroupOtherWrite(context)
     await patchLinuxMprisName(context)
     await prepareWindowsInstallerTranslations(context)
   },
@@ -62,6 +64,7 @@ export default {
   },
   linux: {
     category: 'AudioVideo;Video;Player;Feed;Network',
+    synopsis: packageDetails.description,
     icon: '_icons/icon.svg',
     target: ['deb', 'zip', '7z', 'rpm', 'AppImage', 'pacman'], // 'flatpak'],
   },
@@ -86,6 +89,7 @@ export default {
     ]
   },
   deb: {
+    packageCategory: 'video',
     depends: [
       'libgtk-3-0',
       'libnotify4',
