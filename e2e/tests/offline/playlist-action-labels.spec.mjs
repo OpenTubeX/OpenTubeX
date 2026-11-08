@@ -119,7 +119,7 @@ test.describe('playlist actions', { tag: '@scale' }, () => {
     }))
     const tab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/playlist/action-labels-remote', makeActive: false }))
     await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
-    const actions = page.locator('.playlistOptions:visible')
+    const actions = page.locator('.playlistOptions').filter({ visible: true })
     for (const name of ['Save', 'Add to Queue', 'Download', 'Share Playlist', 'More']) {
       await expect(actions.getByRole('button', { name, exact: true })).toBeVisible()
     }
