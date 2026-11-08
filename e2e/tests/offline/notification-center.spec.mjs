@@ -262,6 +262,68 @@ for (const baseTheme of ['system', 'hotPink']) {
   })
 }
 
+test('dismissed notifications slide out before the rows below move up', { tag: '@scale' }, async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await mockSystemNotifications(app)
+  await announceUploads(page, ['c', 'b', 'a'])
+
+  await page.getByRole('button', { name: 'Notifications (3 unread)', exact: true }).click()
+  const dropdown = page.locator('.notificationCenterDropdown')
+  await dropdown.getByRole('button', { name: 'Mark all as read', exact: true }).click()
+  await dropdown.evaluate(element => Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished)))
+  const rows = dropdown.locator('.notificationRow')
+  // Zero-height rows count as hidden for Playwright's bounding boxes.
+  const rect = locator => locator.evaluate(element => element.getBoundingClientRect().toJSON())
+  const [first, second] = await Promise.all([rect(rows.nth(0)), rect(rows.nth(1))])
+
+  // Pause each dismissal as it starts to inspect it.
+  await dropdown.evaluate(element => {
+    window.dismissals = []
+    element.addEventListener('animationstart', (event) => {
+      const animation = event.target.getAnimations().find(animation => animation.animationName === event.animationName)
+      animation.pause()
+      window.dismissals.push(animation)
+    })
+  })
+  // Scoped styles suffix keyframe names with a hash.
+  const dismissalNames = () => page.evaluate(() => window.dismissals.map(animation => animation.animationName.replace(/-[\da-f]+$/, '')).toSorted())
+  /** @param {number} progress */
+  const seek = progress => page.evaluate(progress => window.dismissals.forEach(animation => {
+    animation.currentTime = animation.effect.getComputedTiming().duration * progress
+  }), progress)
+
+  await dropdown.getByRole('button', { name: 'Clear', exact: true }).first().click()
+  await expect.poll(dismissalNames).toEqual(['notification-dismiss'])
+  // Rows stay until their animations finish, however long the Animation Speed setting makes them.
+  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+  await expect(rows).toHaveCount(3)
+  // The row slides out first, keeping its place.
+  await seek(0.5)
+  let [dismissed, below] = await Promise.all([rect(rows.nth(0)), rect(rows.nth(1))])
+  expect(Math.abs(dismissed.x - (first.x + first.width))).toBeLessThan(1)
+  expect(Math.abs(dismissed.height - first.height)).toBeLessThan(1)
+  expect(Math.abs(below.y - second.y)).toBeLessThan(1)
+  // Then its space closes, gap included, moving the rows below into its place.
+  // Seeking to the very end would end the animation and remove the row.
+  await seek(0.999)
+  ;[dismissed, below] = await Promise.all([rect(rows.nth(0)), rect(rows.nth(1))])
+  expect(dismissed.height).toBeLessThan(1)
+  expect(Math.abs(below.y - first.y)).toBeLessThan(1)
+  await page.evaluate(() => window.dismissals.splice(0).forEach(animation => animation.finish()))
+  await expect(rows).toHaveCount(2)
+
+  // Clearing every row slides them out together before the empty state appears.
+  await dropdown.getByRole('button', { name: 'Clear all', exact: true }).click()
+  await expect.poll(dismissalNames).toEqual(['notification-list-dismiss', 'notification-list-row-dismiss', 'notification-list-row-dismiss'])
+  await expect(rows).toHaveCount(2)
+  await expect(dropdown.getByText('No notifications yet')).toHaveCount(0)
+  await page.evaluate(() => window.dismissals.splice(0).forEach(animation => animation.finish()))
+  await expect(rows).toHaveCount(0)
+  await expect.poll(dismissalNames).toEqual(['notification-empty-enter'])
+  await page.evaluate(() => window.dismissals.forEach(animation => animation.finish()))
+  await expect(dropdown.getByText('No notifications yet')).toBeVisible()
+})
+
 test('the bell icon follows the notifications and wiggles for new ones', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await mockSystemNotifications(app)
@@ -448,7 +510,8 @@ async function clearLastOfScrolledList(container, scroller) {
 const UPLOADS = Array.from({ length: 12 }, (_, index) => `upload${index}`)
 
 test('clearing a scrolled list leaves a valid scroll range', { tag: '@scale' }, async ({ app, page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Dismissals shrink the range gradually.
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await mockSystemNotifications(app)
   await setWindowSize(app, page, { width: 1000, height: 760 })
   await announceUploads(page, UPLOADS)
@@ -459,7 +522,8 @@ test('clearing a scrolled list leaves a valid scroll range', { tag: '@scale' }, 
 })
 
 test('clearing one entry of a scrolled list leaves a valid scroll range', { tag: '@scale' }, async ({ app, page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Dismissals shrink the range gradually.
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await mockSystemNotifications(app)
   await setWindowSize(app, page, { width: 1000, height: 760 })
   await announceUploads(page, UPLOADS)
