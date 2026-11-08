@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scrollMiniPlayer.js'
+import { COLLAPSE_SPRING, createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/ft-shaka-video-player/opentubex/spring.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
 const morphSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/scrollMiniPlayerMorph.js', import.meta.url), 'utf8')
@@ -188,6 +189,10 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     usesMobileMiniBar: () => mobile,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
+    COLLAPSE_SPRING,
+    EXPAND_SPRING,
+    createSpring,
+    createVelocityTracker,
     getAnimationSpeedMultiplier: () => 1,
     store: { getters: { getAnimationSpeed: 1 } },
     watchNavigation: {
@@ -414,7 +419,7 @@ test('return keeps the preview in place until the player reaches the inline endp
   assert.equal(f.deactivated(), false)
   frame = f.frames.get(1)
   f.frames.delete(1)
-  frame(300)
+  frame(1000)
   await finished
   assert.equal(f.deactivated(), true)
   assert.equal(f.style.transform, undefined)

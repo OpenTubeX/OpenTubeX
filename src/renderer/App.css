@@ -511,15 +511,20 @@
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)),
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
   translate: 0 var(--mobile-fullscreen-swipe-offset, 0);
-  will-change: translate;
+  scale: var(--mobile-fullscreen-swipe-scale, 1);
+  will-change: translate, scale;
 }
 
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)) {
   transition: none;
 }
 
+/* A cancelled swipe returns on a critically damped spring (stiffness 400), without
+   overshoot. MOBILE_FULLSCREEN_SWIPE_SETTLE_MS matches its duration. */
 .app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
-  transition: translate 140ms cubic-bezier(0.2, 0, 0, 1);
+  --mobile-fullscreen-swipe-settle: 400ms linear(0, 0.062, 0.191, 0.337, 0.475, 0.594, 0.692, 0.769, 0.829, 0.874, 0.908, 0.934, 0.952, 0.966, 0.976, 0.983, 0.988, 0.991, 0.994, 0.996, 1);
+
+  transition: translate var(--mobile-fullscreen-swipe-settle), scale var(--mobile-fullscreen-swipe-settle);
 }
 
 .crossTabMiniPlayerLayer {

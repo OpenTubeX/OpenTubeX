@@ -50,6 +50,7 @@ import {
   SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT,
 } from '../../../helpers/scrollMiniPlayer'
 import { createMobileMiniMorph } from './scrollMiniPlayerMorph'
+import { COLLAPSE_SPRING, createSpring, createVelocityTracker, EXPAND_SPRING } from './spring'
 import { useScrollMiniPlayerControls } from './useScrollMiniPlayerControls'
 
 const SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS = 400
@@ -220,7 +221,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
-  function beginScrollMiniPlayerDrag(restoring = false) {
+  /**
+   * @param {boolean} [restoring]
+   * @param {number} [startTime] when the finger went down, where the drag's progress starts
+   */
+  function beginScrollMiniPlayerDrag(restoring = false, startTime = performance.now()) {
     const element = container.value
     if (inlineDrag || scrollRestoreDrag || !element || !watchNavigation?.beginMinimizePreview ||
       scrollMiniPlayerActive.value !== restoring || !canUseScrollMiniPlayerBase(true)) return false
@@ -247,6 +252,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       y: 0,
       progress: 0,
       restoring,
+      // Start from where the finger went down, so a flick that is recognized
+      // and released within one move still has a velocity.
+      velocity: createVelocityTracker(0, startTime),
       videoTo: mobileBar?.video,
       videoFrom: {
         left: videoRect.left - from.left,
@@ -342,6 +350,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function moveScrollMiniPlayerDrag(_x, y) {
     if (!inlineDrag || inlineDrag.finishing) return
     inlineDrag.y = y
+    inlineDrag.velocity.add(Math.min(1, Math.abs(y) / getInlineDragDistance(inlineDrag)))
     if (inlineDragFrame === null) inlineDragFrame = requestAnimationFrame(renderScrollMiniPlayerDrag)
   }
 
@@ -350,7 +359,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     moveScrollMiniPlayerDrag(0, progress * getInlineDragDistance(inlineDrag))
   }
 
-  function settleScrollMiniPlayerDrag(commit) {
+  function settleScrollMiniPlayerDrag(commit, velocity) {
     const drag = inlineDrag
     const target = commit ? 1 : 0
     if (isReducedMotionEnabled() || drag.progress === target) {
@@ -358,18 +367,21 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       return Promise.resolve()
     }
     drag.settling = true
-    const from = drag.progress
+    const speed = getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+    // Continue at the finger's speed, so a fling carries into the settle. Docking
+    // glides slower than the return to Watch.
+    const docking = commit !== drag.restoring
+    const spring = createSpring(drag.progress, target, velocity / speed, docking ? COLLAPSE_SPRING : EXPAND_SPRING)
     const started = performance.now()
-    const duration = SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
     return new Promise(resolve => {
       drag.resolveSettle = resolve
       const frame = now => {
         inlineDragFrame = null
         if (inlineDrag !== drag) return resolve()
-        const time = Math.max(0, Math.min(1, (now - started) / duration))
-        const progress = 1 - (1 - time) ** 3
-        renderInlineDragProgress(from + (target - from) * progress)
-        if (time === 1) resolve()
+        const elapsed = (now - started) * speed
+        const done = spring.done(elapsed)
+        renderInlineDragProgress(done ? target : Math.min(1, Math.max(0, spring.at(elapsed))))
+        if (done) resolve()
         else inlineDragFrame = requestAnimationFrame(frame)
       }
       inlineDragFrame = requestAnimationFrame(frame)
@@ -406,12 +418,14 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const drag = inlineDrag
     let restored = false
     drag.finishing = true
+    // Read the release speed before waiting, which would age the last sample.
+    const velocity = drag.velocity.velocity()
     await drag.ready
     if (inlineDrag !== drag || !container.value) return
     if (inlineDragFrame !== null) cancelAnimationFrame(inlineDragFrame)
     renderScrollMiniPlayerDrag()
     try {
-      await settleScrollMiniPlayerDrag(commit)
+      await settleScrollMiniPlayerDrag(commit, velocity)
       if (inlineDrag !== drag || !container.value) return
       // Navigation and layout changes happen behind the completed preview, after
       // the video has reached the same endpoint as the normal mini-player motion.
@@ -474,7 +488,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       return
     }
 
-    const layoutHeight = getScrollMiniInlineLayoutHeight(container.value, lastKnownInlinePlayerHeight)
+    // Follow the current size rather than the largest one. A wider layout, such
+    // as the landscape viewport while leaving fullscreen, would otherwise delay
+    // docking until the page scrolled that much further.
+    const layoutHeight = getScrollMiniInlineLayoutHeight(container.value)
     if (layoutHeight >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) {
       lastKnownInlinePlayerHeight = layoutHeight
     }
@@ -484,6 +501,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // Navigation hides the retained Watch view before it teleports the player.
     // The drag's original measurement remains valid during that handoff.
     if (inlineDrag) return Math.max(inlineDrag.from.height, inlineDrag.from.width * 9 / 16)
+    if (!scrollMiniPlayerActive.value) {
+      const layoutHeight = getScrollMiniInlineLayoutHeight(container.value)
+      if (layoutHeight >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) return layoutHeight
+    }
     return getScrollMiniInlineLayoutHeight(container.value, lastKnownInlinePlayerHeight)
   }
 
@@ -720,8 +741,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         width: nextVideoRect.width,
         height: nextVideoRect.height
       }
-      const duration = SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS /
-        getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+      const speed = getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+      // Share the drag release's springs, so tapping and scrolling move alike.
+      const spring = createSpring(0, 1, 0, expectedActive ? COLLAPSE_SPRING : EXPAND_SPRING)
       const started = performance.now()
       let frameId = null
       let holdScrollY = null
@@ -749,8 +771,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
             if (scrollMiniLayoutAnimation !== animation) return
           }
         }
-        const time = Math.min(1, Math.max(0, (now - started) / duration))
-        const progress = time * time * (3 - 2 * time)
+        const elapsed = (now - started) * speed
+        const settled = spring.done(elapsed)
+        const progress = settled ? 1 : Math.min(1, spring.at(elapsed))
         // Read the stable inline slot before writing the transform. Its bounds
         // follow touch/smooth scrolling and browser scroll anchoring while the
         // video remains in the viewport layer.
@@ -780,7 +803,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
               height: nextRect.height
             }
         renderMobileMiniMorph(previousRect, target, videoFrom, videoTo, progress, !expectedActive)
-        if (time < 1 || scrollToSlot > 0) {
+        if (!settled || scrollToSlot > 0) {
           frameId = requestAnimationFrame(frame)
         } else {
           scrollMiniLayoutAnimation = null

@@ -938,8 +938,9 @@ test('mobile bar details fade at the destination during both swipe directions', 
 test('scroll docking fades the details at the bottom bar position', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   // Under parallel load, real frames can skip the morph's midpoint. Step a
-  // paused clock instead, so the slowest animation speed renders every frame.
-  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
+  // paused clock instead. At half speed, several frames land in the midpoint
+  // range, while the whole spring still fits in the poll timeout.
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 50))
   await page.clock.install()
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
   const settle = async (docked) => {
@@ -1000,6 +1001,36 @@ test('scroll docking fades the details at the bottom bar position', async ({ app
   expect(restoreMiddle.opacity).toBeLessThan(0.5)
   const restoreVisible = restoring.filter(sample => sample.opacity > 0)
   expect(Math.max(...restoreVisible.map(sample => sample.barTop)) - Math.min(...restoreVisible.map(sample => sample.barTop))).toBeLessThan(2)
+})
+
+test('scroll docking follows the current player height after a wider layout', { tag: '@scale' }, async ({ app, page }) => {
+  // Watch opens in the wider default window before narrowing, like leaving
+  // fullscreen passes through the landscape viewport.
+  const player = await openMobilePlayer(app, page)
+  const docking = await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '3000px'
+    document.body.append(spacer)
+    const element = document.querySelector('.ftVideoPlayer')
+    return new Promise(resolve => {
+      let previous = null
+      const step = () => {
+        if (element.classList.contains('scrollMiniPlayer')) return resolve(previous)
+        const { top, height } = element.getBoundingClientRect()
+        previous = { top, height }
+        if (top < -2 * height) return resolve(null)
+        window.scrollBy(0, 10)
+        requestAnimationFrame(step)
+      }
+      requestAnimationFrame(step)
+    })
+  })
+  expect(docking, 'the player docks while scrolling past it').not.toBeNull()
+  // It docks once less than 15% remains visible, before scrolling fully out of
+  // view. The scroll handler can trail the last sample by two 10px steps.
+  expect(docking.top + docking.height).toBeGreaterThan(0)
+  expect(docking.top + docking.height).toBeLessThan(docking.height * 0.15 + 20)
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
 })
 
 test('Shorts overflow is clipped while dragging into the mini player', async ({ app, page }) => {
