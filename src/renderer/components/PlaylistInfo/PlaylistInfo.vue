@@ -142,6 +142,7 @@
     <hr class="playlistInfoSeparator">
 
     <div
+      ref="actionRow"
       class="channelShareWrapper"
     >
       <component
@@ -166,7 +167,10 @@
       </component>
 
       <div class="playlistOptionsWrapper">
-        <FtButtonGroup class="playlistOptions">
+        <FtButtonGroup
+          ref="playlistOptions"
+          class="playlistOptions"
+        >
           <template v-if="editMode">
             <FtButton
               class="actionButton"
@@ -190,22 +194,28 @@
               v-if="isUserPlaylist"
               class="actionButton"
               :title="t('User Playlists.Edit Playlist Info')"
-              :label="t('User Playlists.Edit')"
               :icon="['fas', 'edit']"
               theme="secondary"
               @click="enterEditMode"
-            />
+            >
+              <template #label>
+                <span class="buttonLabel">{{ t('User Playlists.Edit') }}</span>
+              </template>
+            </FtButton>
             <FtButton
               v-else-if="showPlaylists"
               class="actionButton"
               :title="isPlaylistBookmarked ? t('User Playlists.Remove Saved Playlist') : t('User Playlists.Save Playlist')"
-              :label="t('User Playlists.Save')"
               :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
               :selected="isPlaylistBookmarked"
               :disabled="playlistBookmarkPending"
               theme="secondary"
               @click="emit('toggle-playlist-bookmark')"
-            />
+            >
+              <template #label>
+                <span class="buttonLabel">{{ t('User Playlists.Save') }}</span>
+              </template>
+            </FtButton>
             <FtButton
               v-if="videoCount > 0"
               class="actionButton"
@@ -220,17 +230,20 @@
                 :spin="queueSnapshotPending"
                 aria-hidden="true"
               />
-              {{ t('Video.Add to Queue') }}
+              <span class="buttonLabel">{{ t('Video.Add to Queue') }}</span>
             </FtButton>
             <FtButton
               v-if="supportsYtDlp && enableDownloads && videoCount > 0"
               class="actionButton"
               :title="t('Downloads.Download Playlist')"
-              :label="t('Downloads.Download')"
               :icon="['fas', 'download']"
               theme="secondary"
               @click="showDownloadPrompt = true"
-            />
+            >
+              <template #label>
+                <span class="buttonLabel">{{ t('Downloads.Download') }}</span>
+              </template>
+            </FtButton>
             <FtButton
               v-if="deadVideoScanRunning"
               class="actionButton"
@@ -249,6 +262,7 @@
               v-if="sharePlaylistButtonVisible"
               :id="id"
               class="sharePlaylistIcon"
+              :size="14"
               :dropdown-position-y="description ? 'top' : 'bottom'"
               share-target-type="Playlist"
             />
@@ -267,7 +281,7 @@
                 :spin="menuSnapshotPending"
                 aria-hidden="true"
               />
-              {{ t('More') }}
+              <span class="buttonLabel">{{ t('More') }}</span>
             </FtButton>
           </template>
         </FtButtonGroup>
@@ -387,6 +401,7 @@ import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePla
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { useFittedButtonLabels } from '../../composables/useFittedButtonLabels'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -755,6 +770,9 @@ const moreMenuItems = computed(() => {
 })
 
 const moreOptionsButton = useTemplateRef('moreOptionsButton')
+
+// Labels collapse to icons from the end instead of wrapping the actions onto a second row
+useFittedButtonLabels(useTemplateRef('playlistOptions'), useTemplateRef('actionRow'))
 
 function openMoreOptionsMenu() {
   openButtonMenu(moreOptionsButton.value.$el, moreMenuItems, props.title)

@@ -114,6 +114,25 @@ for (const playlistViewType of ['grid', 'list']) {
           // Stacked panels square the bottom corners where they meet the items card.
           const stacked = layout === 'list' && width <= 850 && roundness > 0
           await expect(panel).toHaveCSS('border-radius', stacked ? `${radius} ${radius} 0px 0px` : radius, { timeout: 2000 })
+          // Share matches the shape and size of the action buttons beside it, once
+          // the corner transitions from the roundness change have finished
+          await expect(async () => {
+            const share = await panel.evaluate(element => {
+              const share = element.querySelector('.sharePlaylistIcon .iconButton')
+              const more = element.querySelector('.playlistOptions > .btn:last-child')
+              return {
+                height: share.getBoundingClientRect().height - more.getBoundingClientRect().height,
+                width: share.getBoundingClientRect().width,
+                icon: share.querySelector('.icon').getBoundingClientRect().height - more.querySelector('.ft-icon').getBoundingClientRect().height,
+                radius: [getComputedStyle(share).borderRadius, getComputedStyle(more).borderRadius],
+              }
+            })
+            expect(Math.abs(share.height), 'share should be as tall as the action buttons').toBeLessThanOrEqual(0.5)
+            expect(share.width).toBeGreaterThanOrEqual(47.5)
+            expect(Math.abs(share.icon), 'share icon should match the action icons').toBeLessThanOrEqual(0.5)
+            // Fractional UI scales round the two radii differently
+            expect(Math.abs(parseFloat(share.radius[0]) - parseFloat(share.radius[1])), 'share should have the same corners').toBeLessThanOrEqual(0.05)
+          }).toPass({ timeout: 2000 })
           if (layout === 'grid') {
             await expect(panel).toHaveCSS('box-shadow', 'none')
             await expect(async () => {
