@@ -40,6 +40,30 @@ async function getVideoFillGeometry(video) {
   })
 }
 
+/** @param {import('@playwright/test').Page} page */
+function expectNotFullscreen(page) {
+  return expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+}
+
+/**
+ * Double-clicks the mini player's video surface beside its controls.
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} player
+ */
+async function doubleClickMiniPlayerVideo(page, player) {
+  const point = await player.evaluate(element => {
+    const { left, top, width, height } = element.getBoundingClientRect()
+    for (let y = top + height * 0.3; y < top + height * 0.8; y += 4) {
+      for (let x = left + width * 0.2; x < left + width * 0.8; x += 4) {
+        if (document.elementFromPoint(x, y)?.classList.contains('scrollMiniPointerLayer')) return { x, y }
+      }
+    }
+    return null
+  })
+  expect(point).not.toBeNull()
+  await page.mouse.dblclick(point.x, point.y)
+}
+
 /** Scrolls the player out of view, which docks it as the scroll mini player. */
 function scrollBelowPlayer(player) {
   return player.evaluate(element => {
@@ -2396,6 +2420,56 @@ test.describe('scroll mini player', () => {
     expect(animations[1].zIndex).toBe('150')
   })
 
+  test('expands the mini player on double-click', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    await scrollBelowPlayer(player)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+
+    // A double-click on a control keeps the mini player, even right after a
+    // click on the video.
+    for (const control of ['.scrollMiniPlayPause', '.scrollMiniDragHandle']) {
+      await player.locator('.scrollMiniPointerLayer').click({ position: { x: 20, y: 60 } })
+      await player.locator(control).dblclick()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+    }
+    await expectNotFullscreen(page)
+
+    await doubleClickMiniPlayerVideo(page, player)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+    await expectNotFullscreen(page)
+
+    // During playback, controls hide under a resting pointer. The first click
+    // reveals them, so the second click lands on one of them.
+    for (const control of ['.scrollMiniPlayPause', '.scrollMiniDragHandle']) {
+      // Ending playback would reveal the controls again.
+      await video.evaluate(element => {
+        element.currentTime = 0
+        return element.play()
+      })
+      await scrollBelowPlayer(player)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+      const hiddenControl = player.locator(control)
+      const bounds = await hiddenControl.boundingBox()
+      const x = bounds.x + bounds.width / 2
+      const y = bounds.y + bounds.height / 2
+      await page.mouse.move(x, y)
+      await expect(hiddenControl).toHaveClass(/isHidden/, { timeout: 10_000 })
+      // Double-click without moving, as mouse.dblclick() would reveal the controls first.
+      for (const clickCount of [1, 2]) {
+        await page.mouse.down({ clickCount })
+        await page.mouse.up({ clickCount })
+      }
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+      expect(await video.evaluate(element => element.paused)).toBe(false)
+    }
+  })
+
   for (const side of ['left', 'right']) {
     test.describe(`tucked ${side}`, () => {
       test.use({ seed: { settings: { ...PLAYER_SEED, uiScale: side === 'left' ? 100 : 125 } } })
@@ -2744,6 +2818,20 @@ test.describe('scroll mini player', () => {
       await expect.poll(readPosition).toEqual(scrollPosition)
       await page.locator('.tabBar .newTabButton').click()
       await expect.poll(readPosition).toEqual(tabPosition)
+    })
+
+    test('returns to the video tab on double-click', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const player = page.locator('.ftVideoPlayer')
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+
+      await doubleClickMiniPlayerVideo(page, player)
+      await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expectNotFullscreen(page)
     })
 
     test('keeps the most recently left video visible across tabs', async ({ app, page, attachScreenshot }) => {

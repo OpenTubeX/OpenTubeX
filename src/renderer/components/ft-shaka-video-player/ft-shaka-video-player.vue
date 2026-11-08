@@ -1757,9 +1757,13 @@
           </div>
         </div>
       </Teleport>
+      <!-- Tracks where mouse double-clicks start; the controls inside handle the keyboard. -->
+      <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
       <div
         v-if="scrollMiniPlayerActive"
         class="scrollMiniPlayerControls"
+        @click.capture="trackScrollMiniClick"
+        @dblclick="handleScrollMiniDoubleClick"
       >
         <button
           type="button"
