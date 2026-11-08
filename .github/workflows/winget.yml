@@ -114,7 +114,7 @@ jobs:
 
         echo 'needed=true' >> "$GITHUB_OUTPUT"
 
-    - name: Install Komac 2.16.0
+    - name: Install Komac 2.17.2
       if: steps.duplicate.outputs.needed == 'true'
       env:
         GH_TOKEN: ${{ github.token }}
@@ -122,16 +122,16 @@ jobs:
       run: |
         set -euo pipefail
 
-        archive='komac-2.16.0-x86_64-unknown-linux-gnu.tar.gz'
-        install_dir="${RUNNER_TEMP}/komac-2.16.0"
+        archive='komac-2.17.2-x86_64-unknown-linux-gnu.tar.gz'
+        install_dir="${RUNNER_TEMP}/komac-2.17.2"
         mkdir -p "$install_dir"
 
-        gh release download v2.16.0 \
+        gh release download v2.17.2 \
           --repo russellbanks/Komac \
           --pattern "$archive" \
           --dir "$install_dir"
 
-        echo '7d2707fa6210f2789a3702de49fbd150b736dbf426ee0b9bc8e098736f9fd82d  '"$install_dir/$archive" \
+        echo 'b03b020eec98acfb0b53e284a6e21815b884be33de6785b97e7a120f0e748966  '"$install_dir/$archive" \
           | sha256sum --check --status
         tar --extract --gzip --file "$install_dir/$archive" --directory "$install_dir"
         chmod 755 "$install_dir/komac"
@@ -159,16 +159,16 @@ jobs:
         bash _scripts/wait-for-release-asset.sh "$x64_url"
         bash _scripts/wait-for-release-asset.sh "$arm64_url"
 
-        # --submit --dry-run avoids Komac's interactive prompt. Submission is
-        # handled below because Komac only supports personal forks.
+        # --exit skips Komac's interactive prompt and only writes the
+        # manifests. Submission is handled below because Komac only supports
+        # personal forks.
         komac update OpenTubeX.OpenTubeX \
           --version "$VERSION" \
           --urls "$x64_url" "$arm64_url" \
           --release-notes-url "$release_url" \
           --output "$output_dir" \
           --skip-pr-check \
-          --submit \
-          --dry-run
+          --exit
 
         node _scripts/prepareWingetManifest.mjs \
           --manifest-dir "$manifest_dir" \
@@ -176,7 +176,14 @@ jobs:
           --topics-json "$TOPICS_JSON"
 
         # Komac reparses and validates the final, post-processed manifests.
-        komac submit --dry-run --yes "$manifest_dir"
+        # It skips manifests that fail to parse and still exits successfully.
+        validation_log="${RUNNER_TEMP}/komac-validation.log"
+        komac submit --dry-run --yes "$manifest_dir" 2>&1 | tee "$validation_log"
+
+        if grep --quiet 'No valid packages' "$validation_log"; then
+          echo '::error::Komac rejected the post-processed manifests.'
+          exit 1
+        fi
 
         echo "directory=$manifest_dir" >> "$GITHUB_OUTPUT"
 
@@ -317,7 +324,7 @@ jobs:
 
         cat >> "$body" <<EOF
 
-        Komac 2.16.0 generated and validated the manifests before this branch was pushed.
+        Komac 2.17.2 generated and validated the manifests before this branch was pushed.
         EOF
 
         pr_url="$(gh pr create \

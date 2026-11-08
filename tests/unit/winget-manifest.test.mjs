@@ -23,18 +23,6 @@ function asset (architecture, digestCharacter) {
 }
 
 function installerManifest () {
-  const installers = [
-    ['x64', 'user', '/CURRENTUSER', 'a'],
-    ['x64', 'machine', '/ALLUSERS', 'a'],
-    ['arm64', 'user', '/CURRENTUSER', 'b'],
-    ['arm64', 'machine', '/ALLUSERS', 'b'],
-  ].map(([architecture, scope, installerSwitch, digestCharacter]) => `- Architecture: ${architecture}
-  Scope: ${scope}
-  InstallerUrl: ${asset(architecture, digestCharacter).browser_download_url}
-  InstallerSha256: ${digestCharacter.repeat(64)}
-  InstallerSwitches:
-    Custom: ${installerSwitch}`).join('\n')
-
   return `PackageIdentifier: OpenTubeX.OpenTubeX
 PackageVersion: ${VERSION}
 InstallerType: nullsoft
@@ -46,10 +34,29 @@ AppsAndFeaturesEntries:
 - DisplayName: Old name
   ProductCode: ${PRODUCT_CODE}
 Installers:
-${installers}
+- Architecture: x64
+  InstallerUrl: ${asset('x64', 'a').browser_download_url}
+  InstallerSha256: ${'a'.repeat(64)}
+- Architecture: arm64
+  InstallerUrl: ${asset('arm64', 'b').browser_download_url}
+  InstallerSha256: ${'b'.repeat(64)}
 ManifestType: installer
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
 `
+}
+
+function scopedInstallers () {
+  return [
+    ['x64', 'user', '/CURRENTUSER', 'a'],
+    ['x64', 'machine', '/ALLUSERS', 'a'],
+    ['arm64', 'user', '/CURRENTUSER', 'b'],
+    ['arm64', 'machine', '/ALLUSERS', 'b'],
+  ].map(([architecture, scope, installerSwitch, digestCharacter]) => `- Architecture: ${architecture}
+  Scope: ${scope}
+  InstallerUrl: ${asset(architecture, digestCharacter).browser_download_url}
+  InstallerSha256: ${digestCharacter.repeat(64)}
+  InstallerSwitches:
+    Custom: ${installerSwitch}`).join('\n')
 }
 
 function localeManifest () {
@@ -63,7 +70,7 @@ ReleaseNotes: |-
   Old notes
 ReleaseNotesUrl: https://example.com/old
 ManifestType: defaultLocale
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
 `
 }
 
@@ -157,7 +164,7 @@ test('manifest preparation applies release metadata and validates installers', (
   fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
 PackageVersion: ${VERSION}
 ManifestType: version
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
 `)
 
   const result = prepareManifest({
@@ -186,6 +193,7 @@ ManifestVersion: 1.12.0
 
   assert.match(installer, /^ReleaseDate: 2026-08-27$/m)
   assert.match(installer, /^- DisplayName: OpenTubeX 1\.2\.3$/m)
+  assert(installer.includes(`\nInstallers:\n${scopedInstallers()}\nManifestType: installer\n`))
   assert.match(locale, /Tags:\n- electron\n- privacy\n- youtube/)
   assert.match(locale, /ReleaseNotes: \|-\n {2}Fixed bugs\n\n {2}- Fixed a bug\./)
   assert.match(locale, new RegExp(`ReleaseNotesUrl: https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`))
@@ -227,28 +235,42 @@ PackageVersion: ${VERSION}
   assert.equal(tagBlock.split('\n').length, 16)
 })
 
-test('manifest preparation rejects missing installer scopes', (context) => {
+function prepareInstallerManifest (installer) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
-  context.after(() => fs.rmSync(directory, { recursive: true }))
 
-  fs.writeFileSync(
-    path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'),
-    installerManifest().replace(/- Architecture: arm64\n {2}Scope: machine[^]*?(?=\nManifestType:)/, '')
-  )
-  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
-  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
+  try {
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), installer)
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
 PackageVersion: ${VERSION}
 `)
 
-  assert.throws(() => prepareManifest({
-    manifestDirectory: directory,
-    release: {
-      assets: [asset('x64', 'a'), asset('arm64', 'b')],
-      body: '## Fixed bugs\n\n- Fixed a bug.',
-      html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
-      published_at: '2026-08-27T10:00:00Z',
-      tag_name: `v${VERSION}-beta`,
-    },
-    topics: { names: ['privacy'] },
-  }), /Expected four installer entries/)
+    return prepareManifest({
+      manifestDirectory: directory,
+      release: {
+        assets: [asset('x64', 'a'), asset('arm64', 'b')],
+        body: '## Fixed bugs\n\n- Fixed a bug.',
+        html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
+        published_at: '2026-08-27T10:00:00Z',
+        tag_name: `v${VERSION}-beta`,
+      },
+      topics: { names: ['privacy'] },
+    })
+  } finally {
+    fs.rmSync(directory, { recursive: true })
+  }
+}
+
+test('manifest preparation rejects a missing installer architecture', () => {
+  assert.throws(
+    () => prepareInstallerManifest(installerManifest().replace(/- Architecture: arm64\n[^]*?(?=\nManifestType:)/, '')),
+    /Expected four installer entries/
+  )
+})
+
+test('manifest preparation rejects installers that already have scopes', () => {
+  assert.throws(
+    () => prepareInstallerManifest(installerManifest().replace(/(?<=\nInstallers:\n)[^]*?(?=\nManifestType:)/, scopedInstallers())),
+    /already have a scope or installer switches/
+  )
 })
