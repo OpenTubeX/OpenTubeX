@@ -222,7 +222,13 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   }
 
   release() {
-    // Rebuilding the controls mid-drag skips onChangeEnd, and the new config copies the old one.
+    // Rebuilding the controls mid-drag removes the listeners that would end the
+    // drag. End it as a release would: the controls' seeking state outlives this
+    // bar, and while it is set, play and pause no longer apply to the video.
+    // A rebuild removes the bar before releasing it. Destroying the controls
+    // releases it in place, after stopping the timers that ending a drag uses.
+    if (this.dragStartValue !== null && !this.bar.isConnected) this.onChangeEnd()
+    // The new config copies the old one.
     this.restoreShowUIAlways()
     super.release()
   }
