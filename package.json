@@ -112,7 +112,7 @@
     "bgutils-js": "^4.0.3",
     "dbus-native": "^0.16.3",
     "dompurify": "^3.4.17",
-    "eld": "^2.1.0",
+    "eld": "^2.1.1",
     "fflate": "^0.8.3",
     "font-list": "^2.1.0",
     "googlevideo": "^4.1.1",
