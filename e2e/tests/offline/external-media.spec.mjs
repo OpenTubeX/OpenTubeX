@@ -2158,10 +2158,19 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     video.dispatchEvent(new Event('timeupdate'))
   })
   const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
+  const chaptersPanel = externalMedia.locator('.watchVideoChaptersPanel')
+  // While the panel opens, it clips its content and Playwright scrolls it to
+  // reach a button. The button moves once the panel grows past it, which can
+  // happen between mousedown and mouseup, so wait for the panel to open.
+  const openChapters = async () => {
+    await chaptersButton.click({ force: true })
+    await expect(chaptersPanel).toHaveCount(1)
+    await expect(chaptersPanel).not.toHaveClass(/chapters-panel-enter-active/)
+  }
   await expect(externalMedia.locator('.watchVideoChaptersPanel')).toHaveCount(0)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
   await expect(chaptersButton.locator('.ft-chapters-current-title')).toHaveText('Chapters')
-  await chaptersButton.click({ force: true })
+  await openChapters()
   await expect(externalMedia.locator('.watchVideoChaptersPanel')).toContainText('Main segment')
   await expect(externalMedia.locator('.watchVideoChaptersPanel [aria-current="true"]')).toHaveCount(0)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Close Chapters')
@@ -2170,7 +2179,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await expect(player.locator('.ftVideoPlayer')).not.toHaveClass(/scrollMiniPlayer/)
   await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
-  await chaptersButton.click({ force: true })
+  await openChapters()
   await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: /^Main segment/ }).click()
   await expect.poll(() => player.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(10)
   const seekBar = player.locator('.shaka-seek-bar-container')
