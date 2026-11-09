@@ -1222,6 +1222,41 @@ test.describe('OIDC sync login', () => {
       expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe('')
     })
 
+    test('cancels a deletion that waits for the browser', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/v1/account/oidc/delete') {
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize' } })
+        } else if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: {} } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      const waiting = dialog.getByText('Continue in your browser. OpenTubeX resumes when you are done.')
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect(waiting).toBeVisible()
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toHaveCount(0)
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect(waiting).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(dialog).toHaveCount(0)
+      expect(await externalLinks()).toHaveLength(2)
+
+      await openLink(app, 'opentubex://oidc')
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+      await expect(page.locator('.toast', { hasText: 'Sync account deleted' })).toHaveCount(0)
+    })
+
     test('keeps the account when the provider did not confirm the deletion', async ({ app, page }) => {
       const externalLinks = await recordExternalLinks(app)
       await page.route('https://sync.example/**', async (route) => {

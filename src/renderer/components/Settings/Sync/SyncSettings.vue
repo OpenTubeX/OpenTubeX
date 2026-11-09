@@ -481,7 +481,7 @@
         v-if="showDeleteAccountPrompt"
         :label="t('Settings.Sync Settings.Delete Account Confirmation')"
         theme="readable-width"
-        :busy="busy || accountActionBusy"
+        :busy="(busy || accountActionBusy) && oidcPending !== 'delete'"
         @click="closeDeleteAccountPrompt"
       >
         <div class="deleteAccountContent">
@@ -528,7 +528,7 @@
               :label="t('Cancel')"
               :icon="['fas', 'xmark']"
               :disabled="accountActionBusy && oidcPending !== 'delete'"
-              @click="cancelDeleteAccount"
+              @click="closeDeleteAccountPrompt()"
             />
           </FtFlexBox>
         </div>
@@ -942,19 +942,16 @@ function setSyncEnabled(enabled) {
 }
 
 function closeDeleteAccountPrompt(value) {
-  if ((busy.value || accountActionBusy.value) && value !== null) return
+  // The user may give up on the provider, so a deletion waiting for the
+  // browser can always be cancelled.
+  if (oidcPending.value === 'delete') {
+    store.dispatch('cancelSyncServerOidc')
+  } else if ((busy.value || accountActionBusy.value) && value !== null) {
+    return
+  }
   showDeleteAccountPrompt.value = false
   deleteAccountPassword.value = ''
   deleteAccountError.value = ''
-}
-
-function cancelDeleteAccount() {
-  if (oidcPending.value === 'delete') {
-    store.dispatch('cancelSyncServerOidc')
-    closeDeleteAccountPrompt(null)
-    return
-  }
-  closeDeleteAccountPrompt()
 }
 
 async function deleteAccount() {

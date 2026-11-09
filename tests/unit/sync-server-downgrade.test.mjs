@@ -53,7 +53,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {} } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -102,7 +102,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     ...subscriptionSettingsSync,
     ...errors,
     ...oidc,
-    openExternalLink: async () => {},
+    openExternalLink: url => openExternalLink(url),
     showToast: options => notifications.push(options),
     showToastOnAllTabs: (message, time, icon, buttonAction) => notifications.push({
       message, time, icon, buttonAction, broadcast: true,
@@ -2405,3 +2405,39 @@ for (const rememberHistory of [false, true]) for (const position of [0, 125.75])
     assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
   })
 }
+
+test('OIDC sign-in reports a browser that fails to open', async () => {
+  const unhandled = []
+  const onUnhandled = error => unhandled.push(error)
+  process.on('unhandledRejection', onUnhandled)
+  try {
+    const { actions, context } = fixture({ syncServerToken: '' }, {
+      respond: () => ({ capabilities: {} }),
+      openExternalLink: async () => { throw new Error('no browser') },
+    })
+    const login = { serverUrl: 'https://sync.example', privacyPassphrase: '', deviceId: 'device-1' }
+    await assert.rejects(actions.loginSyncServerWithOidc(context, login), /no browser/)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(unhandled, [])
+  } finally {
+    process.off('unhandledRejection', onUnhandled)
+  }
+})
+
+test('a replaced OIDC sign-in leaves the newer one waiting', async () => {
+  const { actions, context, dispatched } = fixture({ syncServerToken: '' }, {
+    respond: () => ({ capabilities: {} }),
+  })
+  const login = { serverUrl: 'https://sync.example', privacyPassphrase: '', deviceId: 'device-1' }
+  const first = actions.loginSyncServerWithOidc(context, login)
+  const firstRejected = assert.rejects(first, error => error.name === 'SyncServerCancelledError')
+  await new Promise(resolve => setTimeout(resolve, 10))
+  const second = actions.loginSyncServerWithOidc(context, login)
+  await firstRejected
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  assert.equal(actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc?token=a.b.c'), true)
+  await second
+  assert.equal(dispatched.at(-1)[0], 'authenticateSyncServer')
+  assert.equal(dispatched.at(-1)[1].token, 'a.b.c')
+})

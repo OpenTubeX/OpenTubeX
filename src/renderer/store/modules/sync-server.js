@@ -335,12 +335,16 @@ async function runOidcFlow(commit, kind, url) {
   oidcCallbacks.cancel(new SyncServerCancelledError())
   const flow = ++oidcFlow
   const callback = oidcCallbacks.wait()
+  // Not awaited yet while the browser opens; cancelling it then must not
+  // become an unhandled rejection.
+  callback.catch(() => {})
   commit('setSyncServerOidcPending', kind)
   try {
     await openExternalLink(url)
     return await callback
   } catch (error) {
-    oidcCallbacks.cancel(error)
+    // A newer flow that replaced this one now owns the pending callback.
+    if (flow === oidcFlow) oidcCallbacks.cancel(error)
     throw error
   } finally {
     if (flow === oidcFlow) commit('setSyncServerOidcPending', null)
