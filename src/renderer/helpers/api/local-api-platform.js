@@ -21,6 +21,8 @@ export function prewarmPlayerScriptEvaluator() {
   playerScriptEvaluator.prewarm()
 }
 
+const STUCK_BOTGUARD = /PO token (?:generation|minting) timed out|VM operation timed out/
+
 /**
  * Generates a video-bound PO token through the isolated host implementation.
  * BotGuard loads in its own view, outside `window.fetch`, so its runs wait in
@@ -37,11 +39,13 @@ export function generateContentPoToken(videoId, context, initialAttestationData,
     if (!isNeeded()) return undefined
     return await generateHostPoToken(videoId, context, initialAttestationData, ytConfig)
   }, {
-    // A timeout can also mean a stuck BotGuard program, which retrying cannot
-    // fix. Wait for those only while the internet check reports an outage.
+    // A job or VM deadline can also mean a stuck BotGuard program, which
+    // retrying cannot fix. Wait for those only while the internet check
+    // reports an outage. Their messages are ours or bgutils', so they are
+    // English on every platform, unlike iOS's localized request timeouts.
     async isNetworkError(error) {
       if (classifyRequestFailure(error) !== 'network') return false
-      if (!/timed out/i.test(String(error?.message ?? error))) return true
+      if (!STUCK_BOTGUARD.test(String(error?.message ?? error))) return true
       return !await initializeNetworkRecovery().checkConnection()
     }
   })
