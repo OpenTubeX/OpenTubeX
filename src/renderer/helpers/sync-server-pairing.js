@@ -1,9 +1,8 @@
-import {
-  Aes256Gcm,
-  CipherSuite,
-  DhkemX25519HkdfSha256,
-  HkdfSha256,
-} from '@hpke/core'
+import { Aes256Gcm, CipherSuite, HkdfSha256 } from '@hpke/core'
+// Web Crypto X25519 is missing from WebViews before Chromium 133, including
+// the Android 8 baseline. This KEM does the curve math in JavaScript and
+// produces the same RFC 9180 keys and payloads.
+import { DhkemX25519HkdfSha256 } from '@hpke/dhkem-x25519'
 import {
   base64UrlToBytes,
   base64UrlToStandardBase64,
