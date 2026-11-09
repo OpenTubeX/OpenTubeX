@@ -1496,14 +1496,15 @@ Tutorial:
     Action: Adatok importálása
     Not Now: Most nem
 About:
+  Get OpenTubeX: OpenTubeX beszerzése
+  Community: Közösség
+  Contribute: Közreműködés
   Documentation: Dokumentáció
   Downloads: Letöltések
   Changelog: Változáslista
   Commit: Commit
-  Fluxer: Csatlakozás a Fluxer-közösségünkhöz
   Matrix: Matrix
   Email: E-mail
-  Support the development of OpenTubeX: "Támogasd az OpenTubeX fejlesztését"
 Profile:
   Customization: Testreszabás
   Manage Profile Subscriptions: Profil feliratkozásainak kezelése

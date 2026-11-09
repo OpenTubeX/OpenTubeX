@@ -956,13 +956,14 @@ Tutorial:
     Action: Importuj dane
     Not Now: Nie teraz
 About:
+  Get OpenTubeX: Pobierz OpenTubeX
+  Community: Społeczność
+  Contribute: Wesprzyj projekt
   Documentation: Dokumentacja
   Downloads: Pobieranie
   Changelog: Lista zmian
   Commit: Commit
-  Fluxer: Dołącz do naszej społeczności na Fluxerze
   Matrix: Matrix
-  Support the development of OpenTubeX: "Wesprzyj rozwój OpenTubeX"
 Profile:
   Customization: Dostosowanie
   Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu

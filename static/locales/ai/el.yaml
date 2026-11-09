@@ -1509,14 +1509,15 @@ Tutorial:
     Action: Εισαγωγή δεδομένων
     Not Now: Όχι τώρα
 About:
+  Get OpenTubeX: Λήψη του OpenTubeX
+  Community: Κοινότητα
+  Contribute: Συνεισφορά
   Documentation: Τεκμηρίωση
   Downloads: Λήψεις
   Changelog: Αρχείο αλλαγών
   Commit: Commit
-  Fluxer: Συμμετοχή στην κοινότητά μας στο Fluxer
   Matrix: Matrix
   Email: Ηλεκτρονικό ταχυδρομείο
-  Support the development of OpenTubeX: "Υποστηρίξτε την ανάπτυξη του OpenTubeX"
 Profile:
   Customization: Προσαρμογή
   Manage Profile Subscriptions: Διαχείριση συνδρομών προφίλ

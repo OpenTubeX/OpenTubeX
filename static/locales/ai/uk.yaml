@@ -1526,14 +1526,15 @@ Tutorial:
     Action: Імпортувати дані
     Not Now: Не зараз
 About:
+  Get OpenTubeX: Отримати OpenTubeX
+  Community: Спільнота
+  Contribute: Зробити внесок
   Documentation: Документація
   Downloads: Завантаження
   Changelog: Журнал змін
   Commit: Коміт
-  Fluxer: Приєднатися до нашої спільноти Fluxer
   Matrix: Matrix
   Email: Електронна пошта
-  Support the development of OpenTubeX: "Підтримати розробку OpenTubeX"
 Profile:
   Customization: Налаштування
   Manage Profile Subscriptions: Керування підписками профілю

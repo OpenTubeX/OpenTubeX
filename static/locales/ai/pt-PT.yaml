@@ -1524,13 +1524,14 @@ Tutorial:
     Action: Importar dados
     Not Now: Agora não
 About:
+  Get OpenTubeX: Obter o OpenTubeX
+  Community: Comunidade
+  Contribute: Contribuir
   Documentation: Documentação
   Downloads: Transferências
   Changelog: Registo de alterações
   Commit: Commit
-  Fluxer: Junte-se à nossa comunidade no Fluxer
   Matrix: Matrix
-  Support the development of OpenTubeX: "Apoie o desenvolvimento do OpenTubeX"
 Profile:
   Customization: Personalização
   Manage Profile Subscriptions: Gerir subscrições do perfil

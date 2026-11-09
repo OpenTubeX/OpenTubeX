@@ -1629,6 +1629,9 @@ Tutorial:
     Action: Importar datos
     Not Now: Ahora no
 About:
+  Get OpenTubeX: Obtener OpenTubeX
+  Community: Comunidad
+  Contribute: Contribuir
   Documentation: Documentación
   Downloads: Descargas
   Changelog: Registro de cambios
@@ -1643,7 +1646,6 @@ About:
   OpenTubeX Wiki: Wiki de OpenTubeX
   FAQ: Preguntas frecuentes
   Discussions: Debates
-  Fluxer: Únete a nuestra comunidad de Fluxer
   Matrix: Matrix
   Report a problem: Informar de un problema
   GitHub issues: Sugerencias en GitHub
@@ -1658,7 +1660,6 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX es posible gracias a {creditsPageLink}
   these people and projects: estas personas y proyectos
   Donate: Donar
-  Support the development of OpenTubeX: "Apoyá el desarrollo de OpenTubeX"
 Profile:
   Customization: Personalización
   Manage Profile Subscriptions: Gestionar suscripciones del perfil

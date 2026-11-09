@@ -1496,14 +1496,15 @@ Tutorial:
     Action: Importera data
     Not Now: Inte nu
 About:
+  Get OpenTubeX: Skaffa OpenTubeX
+  Community: Gemenskap
+  Contribute: Bidra
   Documentation: Dokumentation
   Downloads: Nedladdningar
   Changelog: Ändringslogg
   Commit: Incheckning
-  Fluxer: Gå med i vår Fluxer-gemenskap
   Matrix: Matrix
   Email: E-post
-  Support the development of OpenTubeX: "Stöd utvecklingen av OpenTubeX"
 Profile:
   Customization: Anpassning
   Manage Profile Subscriptions: Hantera profilens prenumerationer

@@ -1496,14 +1496,15 @@ Tutorial:
     Action: Verileri içe aktar
     Not Now: Şimdi değil
 About:
+  Get OpenTubeX: 'OpenTubeX''i edinin'
+  Community: Topluluk
+  Contribute: Katkıda bulunun
   Documentation: Belgeler
   Downloads: İndirmeler
   Changelog: Değişiklik günlüğü
   Commit: Commit
-  Fluxer: Fluxer Topluluğumuza Katılın
   Matrix: Matrix
   Email: E-posta
-  Support the development of OpenTubeX: "OpenTubeX'in geliştirilmesini destekleyin"
 Profile:
   Customization: Özelleştirme
   Manage Profile Subscriptions: Profil aboneliklerini yönet
