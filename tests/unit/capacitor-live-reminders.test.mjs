@@ -4,11 +4,11 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
-const systemNotifications = { calls: [], pending: [] }
-const [{ getLiveReminderNotificationId, closeCapacitorSystemNotifications }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+const systemNotifications = { calls: [], all: [] }
+const [{ closeCapacitorSystemNotifications }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
   '@capacitor/local-notifications': {
     LocalNotifications: {
-      getPending: async () => ({ notifications: systemNotifications.pending }),
+      getAll: async () => ({ notifications: systemNotifications.all }),
       cancel: async ({ notifications }) => { systemNotifications.calls.push(['cancel', notifications.map(({ id }) => id)]) },
       removeDeliveredNotificationsById: async ({ ids }) => { systemNotifications.calls.push(['removeDelivered', ids]) },
     }
@@ -18,12 +18,13 @@ const [{ getLiveReminderNotificationId, closeCapacitorSystemNotifications }] = a
 
 const START = Date.UTC(2026, 0, 1)
 
-test('closing a reminder entry cancels its overdue alarm but keeps one for a later premiere', async () => {
+test('closing reminder entries removes their notifications and overdue alarms by their own IDs', async () => {
   process.env.IS_CAPACITOR = 'true'
   const at = offset => ({ at: new Date(Date.now() + offset).toISOString() })
-  // Android has not delivered the inexact alarm the app already moved to the history.
-  systemNotifications.pending = [
+  systemNotifications.all = [
+    // Android has not delivered the inexact alarm the app already moved to the history.
     { id: 7, schedule: at(-60_000), extra: { videoId: 'premiere00a' } },
+    // The same video premieres again later.
     { id: 8, schedule: at(3_600_000), extra: { videoId: 'premiere00b' } },
     { id: 9, schedule: at(-60_000), extra: { videoId: 'premiere00c' } },
   ]
@@ -36,8 +37,7 @@ test('closing a reminder entry cancels its overdue alarm but keeps one for a lat
     delete process.env.IS_CAPACITOR
   }
   assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7]])
-  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'),
-    ['removeDelivered', ['premiere00a', 'premiere00b'].map(getLiveReminderNotificationId)])
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8]])
 })
 
 async function loadCapacitorReminder(notifications, context = {}) {
@@ -52,7 +52,6 @@ async function loadCapacitorReminder(notifications, context = {}) {
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     Date: class extends Date { static now() { return clock.now } },
     getLiveReminderTarget: videoId => ({ kind: 'live-reminder', path: `/watch/${videoId}` }),
-    getLiveReminderNotificationId,
     setTimeout,
     clearTimeout,
     ...context,

@@ -1,34 +1,24 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { cancelAndroidUploadNotifications } from './androidSubscriptionRefresh.js'
 
-/**
- * The system notification ID of a video's reminder. Scheduling moves to the
- * next free ID in the rare case that another reminder has it.
- * @param {string} videoId
- */
-export function getLiveReminderNotificationId(videoId) {
-  let id = 0x811c9dc5
-  for (const character of videoId) {
-    id ^= character.codePointAt(0)
-    id = Math.imul(id, 0x01000193)
-  }
-  return id >>> 1
-}
-
 const UPLOAD_FEED_TYPES = { video: 'videos', live: 'live', short: 'shorts', post: 'posts' }
 
 /**
- * Android may deliver inexact reminder alarms well after their time, so
- * reminders already in the history can still be waiting for theirs. Alarms
- * for a later premiere of the same video stay.
+ * Removes the shown notifications of these videos' reminders. Android may
+ * deliver inexact alarms well after their time, so reminders already in the
+ * history can still be waiting for theirs. Alarms for a later premiere of the
+ * same video stay.
  * @param {Set<string>} videoIds
  */
-async function cancelOverdueReminders(videoIds) {
+async function closeReminders(videoIds) {
   const now = Date.now()
-  const { notifications } = await LocalNotifications.getPending()
-  const overdue = notifications.filter(({ extra, schedule }) =>
-    videoIds.has(extra?.videoId) && new Date(schedule?.at ?? Number.NaN).getTime() <= now)
-  if (overdue.length > 0) await LocalNotifications.cancel({ notifications: overdue.map(({ id }) => ({ id })) })
+  const { notifications } = await LocalNotifications.getAll()
+  const reminders = notifications.filter(({ extra }) => videoIds.has(extra?.videoId))
+  const overdue = reminders.filter(({ schedule }) => new Date(schedule?.at ?? Number.NaN).getTime() <= now)
+  await Promise.all([
+    reminders.length > 0 && LocalNotifications.removeDeliveredNotificationsById({ ids: reminders.map(({ id }) => id) }),
+    overdue.length > 0 && LocalNotifications.cancel({ notifications: overdue.map(({ id }) => ({ id })) })
+  ])
 }
 
 /**
@@ -46,8 +36,7 @@ export async function closeCapacitorSystemNotifications(targets) {
   }
   try {
     await Promise.all([
-      reminders.size > 0 && LocalNotifications.removeDeliveredNotificationsById({ ids: [...reminders].map(getLiveReminderNotificationId) }),
-      reminders.size > 0 && cancelOverdueReminders(reminders),
+      reminders.size > 0 && closeReminders(reminders),
       uploads.length > 0 && cancelAndroidUploadNotifications(uploads)
     ])
   } catch (error) {

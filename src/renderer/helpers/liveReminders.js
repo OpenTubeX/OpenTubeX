@@ -1,7 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { getLiveReminderTarget } from '../../notificationHistory.js'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory.js'
-import { getLiveReminderNotificationId } from './capacitorSystemNotifications.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-live-reminders'
 // Whether the system schedule is paused because notifications are off.
@@ -83,7 +82,12 @@ function notificationIdForVideo(videoId, records) {
   const existing = records.find(record => record.videoId === videoId)
   if (existing) return existing.notificationId
 
-  let id = getLiveReminderNotificationId(videoId)
+  let id = 0x811c9dc5
+  for (const character of videoId) {
+    id ^= character.codePointAt(0)
+    id = Math.imul(id, 0x01000193)
+  }
+  id = id >>> 1
   const usedIds = new Set(records.map(record => record.notificationId))
   while (usedIds.has(id)) id = (id + 1) & 0x7fffffff
   return id
