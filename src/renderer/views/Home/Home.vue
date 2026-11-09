@@ -250,7 +250,7 @@
                     :icon="recommendationFeedbackFor(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
                     :aria-pressed="action.selectedIcon ? recommendationFeedbackFor(video.videoId) === action.type : null"
                     theme="base-no-default"
-                    @click="recommendationFeedback(video, action.type)"
+                    @click="toggleRecommendationFeedback(video, action.type)"
                   />
                 </div>
               </div>
@@ -566,6 +566,7 @@ import {
 } from '../../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { useHomeRecommendations } from '../../composables/useHomeRecommendations'
@@ -624,6 +625,28 @@ const recommendationActions = computed(() => [
   { type: 'dismiss', label: t('Home Page.Not interested'), icon: ['fas', 'thumbs-down'], selectedIcon: ['fas', 'thumbs-down-filled'] },
   { type: 'blockChannel', label: t('Home Page.Hide this channel'), icon: ['fas', 'eye-slash'] },
 ])
+
+// Clicking the selected feedback again clears it. Hiding a channel removes
+// its cards, so it offers Undo instead, restoring the earlier feedback.
+async function toggleRecommendationFeedback(video, type) {
+  const previous = recommendationFeedbackFor(video.videoId)
+  if (previous === type) {
+    recommendationFeedback(video, 'clearFeedback')
+    return
+  }
+  if (!await recommendationFeedback(video, type) || type !== 'blockChannel') return
+  showToast({
+    message: t('Home Page.Channel hidden', { channel: video.author }),
+    time: 5000,
+    icon: ['fas', 'eye-slash'],
+    buttons: [{
+      label: t('Undo'),
+      icon: ['fas', 'undo'],
+      primary: true,
+      action: () => recommendationFeedback(video, previous ?? 'clearFeedback'),
+    }],
+  })
+}
 
 // Share the card's resolved text, including original and DeArrow titles.
 const recommendationDisplayTitles = ref(new Map())

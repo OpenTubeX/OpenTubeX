@@ -735,7 +735,7 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   await expect.poll(() => page.evaluate(() => window.$store.getters.getRecommendationRecords.length)).toBe(0)
 })
 
-test('records real grid impressions once per feed and supports positive and channel feedback', async ({ page }) => {
+test('records real grid impressions once per feed and supports clearing positive feedback and undoing a hidden channel', async ({ page }) => {
   await mockCandidates(page)
   await goTo(page, 'home')
   await setEnabled(page, true)
@@ -751,6 +751,9 @@ test('records real grid impressions once per feed and supports positive and chan
   await expect.poll(async () => (await getRecord('recchan0001'))?.feedback).toBe('positive')
   await expect(positive).toHaveAttribute('aria-pressed', 'true')
   await expect(positive.locator('[data-icon="thumbs-up-filled"] svg')).toBeVisible()
+  await positive.click()
+  await expect(positive).toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(async () => (await getRecord('recchan0001'))?.feedback ?? null).toBeNull()
   const hideChannel = section.locator('.recommendationEntry').filter({ hasText: 'Linux desktop themes' })
     .getByRole('button', { name: /^Hide this channel:/ })
   await expect(hideChannel).toHaveAttribute('title', 'Hide this channel: Discovery Channel')
@@ -758,6 +761,10 @@ test('records real grid impressions once per feed and supports positive and chan
   await hideChannel.click()
   await expect(section.locator('a.title').filter({ hasText: /Linux desktop themes/ })).toHaveCount(0)
   await expect.poll(async () => (await getRecord('recsrch0001'))?.feedback).toBe('blockChannel')
+  await page.locator('.toast', { hasText: 'Discovery Channel hidden from recommendations' })
+    .getByRole('button', { name: 'Undo' }).click()
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop themes/ })).toHaveCount(1)
+  await expect.poll(async () => (await getRecord('recsrch0001'))?.feedback ?? null).toBeNull()
 })
 
 test.describe('saved-video cold start', () => {
