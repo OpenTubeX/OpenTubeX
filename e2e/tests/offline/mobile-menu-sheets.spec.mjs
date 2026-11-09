@@ -109,11 +109,16 @@ test('mobile menu sheets drag from rows and animate dismissal', { tag: '@scale' 
         backdrop.click()
         return new Promise(resolve => requestAnimationFrame(() => resolve({
           connected: element.isConnected,
-          animations: element.getAnimations().map(animation => animation.effect.getKeyframes())
+          animations: element.getAnimations().map(animation => animation.effect.getKeyframes()),
+          backdropFrames: backdrop.getAnimations().flatMap(animation => animation.effect.getKeyframes())
         })))
       })
       expect(leaving.connected).toBe(true)
       expect(leaving.animations.some(frames => frames.at(-1).transform === 'translateY(100%)')).toBe(true)
+      // Fading the backdrop's opacity would crossfade a sharp and a blurred
+      // copy of the page, which flickers on Android, so the blur recedes instead.
+      expect(leaving.backdropFrames.some(frame => 'opacity' in frame)).toBe(false)
+      expect(leaving.backdropFrames.at(-1)?.backdropFilter).toMatch(/^blur\(0(px)?\)$/)
       await expect(menu).toHaveCount(0)
 
       for (const colorScheme of ['dark', 'light']) {

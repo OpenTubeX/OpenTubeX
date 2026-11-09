@@ -950,9 +950,11 @@
   animation: tab-organizer-leave var(--motion-default-effects) forwards;
 }
 
+/* Animates the dim and blur rather than opacity, like FtPrompt. */
 @keyframes tab-organizer-backdrop-enter {
   from {
-    opacity: 0;
+    background-color: transparent;
+    backdrop-filter: blur(0);
   }
 }
 
@@ -965,13 +967,14 @@
 
 @keyframes tab-organizer-backdrop-leave {
   to {
-    opacity: 0;
+    background-color: transparent;
+    backdrop-filter: blur(0);
   }
 }
 
-/* The backdrop fades the dialog with it; fading both would compound. */
 @keyframes tab-organizer-leave {
   to {
+    opacity: 0;
     transform: scale(0.95) translateY(8px);
   }
 }

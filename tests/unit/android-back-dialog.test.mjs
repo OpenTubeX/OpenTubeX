@@ -8,7 +8,7 @@ import { settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBa
 const source = readFileSync(new URL('../../src/renderer/helpers/androidBackDialog.js', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function fixture({ reducedMotion = false, busy = false, closes = true, rejects = false, deferredFrames = false } = {}) {
+function fixture({ reducedMotion = false, busy = false, closes = true, rejects = false, deferredFrames = false, prompt = false } = {}) {
   let available = true
   let backs = 0
   const properties = new Map([
@@ -17,28 +17,31 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
   ])
   const animations = []
   const frames = []
+  function animate(frames, options) {
+    const animation = {
+      target: this, frames, effect: { getTiming: () => options }, currentTime: 0,
+      playState: 'running', finished: Promise.resolve(),
+      pause() { this.playState = 'paused' },
+      play() { this.playState = 'running' },
+      reverseCalls: 0,
+      reverse() { this.reverseCalls++; this.playState = 'running' },
+      cancel() { this.playState = 'idle' },
+    }
+    animations.push(animation)
+    return animation
+  }
+  const card = { animate }
   const element = {
     isConnected: true, scrollTop: 150.5,
-    querySelector: () => busy ? {} : null,
+    matches: selector => prompt && selector === '.prompt',
+    querySelector: selector => selector === ':scope > .promptCard' ? (prompt ? card : null) : (busy ? {} : null),
     style: {
       getPropertyValue: name => properties.get(name)?.[0] ?? '',
       getPropertyPriority: name => properties.get(name)?.[1] ?? '',
       setProperty: (name, value, priority) => properties.set(name, [value, priority]),
       removeProperty: name => properties.delete(name),
     },
-    animate(frames, options) {
-      const animation = {
-        frames, effect: { getTiming: () => options }, currentTime: 0,
-        playState: 'running', finished: Promise.resolve(),
-        pause() { this.playState = 'paused' },
-        play() { this.playState = 'running' },
-        reverseCalls: 0,
-        reverse() { this.reverseCalls++; this.playState = 'running' },
-        cancel() { this.playState = 'idle' },
-      }
-      animations.push(animation)
-      return animation
-    },
+    animate,
   }
   const create = vm.runInNewContext(`${source}; createAndroidBackDialogPreview`, {
     nextTick, settleAndroidBackAnimation, applyAnimationSpeed: animation => animation,
@@ -52,8 +55,24 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     if (rejects) throw new Error('Back failed')
     if (closes) element.isConnected = false
   }, () => element.isConnected && available)
-  return { preview, element, animations, properties, frames, backs: () => backs, replaceLayer: () => { available = false } }
+  return { preview, element, card, animations, properties, frames, backs: () => backs, replaceLayer: () => { available = false } }
 }
+
+test('a prompt clears its backdrop blur and fades its card instead of fading the whole backdrop', async () => {
+  const f = fixture({ prompt: true })
+  assert.equal(f.preview.begin(), true)
+  const [backdrop, card] = f.animations
+  // Fading the backdrop's opacity would crossfade a sharp and a blurred page.
+  assert.equal(backdrop.target, f.element)
+  assert.deepEqual(JSON.parse(JSON.stringify(backdrop.frames)), [{ backgroundColor: 'transparent', backdropFilter: 'blur(0)' }])
+  assert.equal(card.target, f.card)
+  assert.equal(card.frames.at(-1).opacity, 0)
+  f.preview.update(0.5)
+  assert.deepEqual(f.animations.map(animation => animation.currentTime), [90, 90])
+  await f.preview.finish(true)
+  assert.equal(f.backs(), 1)
+  assert.deepEqual(f.animations.map(animation => animation.playState), ['idle', 'idle'])
+})
 
 test('commit keeps the finished effect until Vue applies its leave state across two frames', async () => {
   const f = fixture({ closes: false, deferredFrames: true })
