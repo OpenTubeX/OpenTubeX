@@ -65,7 +65,8 @@ export function watchTrayColorScheme(onChange) {
         signalled = true
         publish(value)
       })
-      const value = await settings.ReadOne(NAMESPACE, KEY)
+      // Version 1 portals lack ReadOne, and dbus-native unwraps the nested variant Read returns.
+      const value = await settings.Read(NAMESPACE, KEY)
       // The portal can signal a change before it answers the read, so the signal is newer
       if (!signalled && !stopped) publish(value)
     } catch {
