@@ -1,4 +1,4 @@
-import { test, expect, sel, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, clickInFullscreen, sel, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -65,7 +65,7 @@ for (const input of ['touch', 'mouse']) {
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     if (input === 'touch') {
       await longPressCard(card, menu)
-      await menu.getByRole('menuitem', { name: 'Add to Queue', exact: true }).click()
+      await clickInFullscreen(menu.getByRole('menuitem', { name: 'Add to Queue', exact: true }))
       await expect(menu).toHaveCount(0)
       await expect.poll(() => watch.evaluate(component => component.proxy.$store.getters.getWatchQueue.some(video => video.videoId === 'related0001'))).toBe(true)
       await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)

@@ -2,7 +2,7 @@ import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
-import { test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
@@ -872,7 +872,7 @@ test.describe('playlist view type', () => {
     })
     const playlistViewSelect = playlistViewSetting.locator('select')
     await expect(playlistViewSelect).toHaveValue('grid')
-    await playlistViewSelect.selectOption('list')
+    await chooseSelectOption(playlistViewSelect, 'list')
     await page.locator('.settingsCloseButton').click()
 
     await expect(page.locator('.playlistPage')).toHaveClass(/list/)

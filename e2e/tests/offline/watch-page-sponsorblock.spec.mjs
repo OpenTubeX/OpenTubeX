@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -500,7 +500,7 @@ test.describe('watch page', () => {
 
     const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
     await expect(submissionMenu).toBeVisible()
-    await submissionMenu.locator('select').first().selectOption('exclusive_access')
+    await chooseSelectOption(submissionMenu.locator('select').first(), 'exclusive_access')
     await expect(submissionMenu.locator('select').nth(1)).toHaveValue('full')
     await expect(submissionMenu.locator('.sponsorBlockDraftTimeText')).toHaveText('Full Video')
 

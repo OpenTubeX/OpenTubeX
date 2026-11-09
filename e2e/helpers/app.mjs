@@ -139,6 +139,44 @@ export function latestSettings(contents) {
     .map(record => [record._id, record.value]))
 }
 
+/**
+ * Picks an FtSelect option by value through its combobox, as a user would.
+ * FtSelect keeps its native <select> inert, so Playwright cannot act on it.
+ * @param {import('@playwright/test').Locator} select the FtSelect's native <select>
+ * @param {string} value
+ */
+export async function chooseSelectOption(select, value) {
+  const { id, index } = await select.evaluate((element, wanted) => ({
+    id: element.name,
+    index: [...element.options].findIndex(option => option.value === wanted)
+  }), value)
+  if (index === -1) throw new Error(`Select ${id} has no option with the value ${value}`)
+  const page = select.page()
+  await page.locator(`[id="${id}"]`).click()
+  await page.locator(`[id="${id}-option-${index}"]`).click()
+}
+
+/**
+ * Clicks a control in a prompt or menu open inside the player's fullscreen
+ * element. The prompt makes the main view around the player inert, and
+ * Chromium exempts the fullscreen element from that, but Playwright only looks
+ * for an inert ancestor. Check instead that the control has stopped moving and
+ * receives the pointer.
+ * @param {import('@playwright/test').Locator} control
+ */
+export async function clickInFullscreen(control) {
+  await expect.poll(() => control.evaluate(async element => {
+    element.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    const before = element.getBoundingClientRect()
+    await new Promise(resolve => requestAnimationFrame(resolve))
+    const rect = element.getBoundingClientRect()
+    return ['x', 'y', 'width', 'height'].every(key => rect[key] === before[key]) &&
+      !!document.fullscreenElement?.contains(element) &&
+      element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
+  })).toBe(true)
+  await control.click({ force: true })
+}
+
 export async function updateInputWithoutScrolling(input, value) {
   await input.evaluate((element, nextValue) => {
     element.value = nextValue

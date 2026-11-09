@@ -1,4 +1,4 @@
-import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { clickInFullscreen, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -49,7 +49,7 @@ test('keeps the prompt behind a nested prompt open when Escape exits player full
 
   await showAddToPlaylistPrompt(page)
   const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-  await addPrompt.getByRole('button', { name: 'Create new Playlist', exact: true }).click()
+  await clickInFullscreen(addPrompt.getByRole('button', { name: 'Create new Playlist', exact: true }))
   await expect(page.locator(':fullscreen .prompt')).toHaveCount(2)
 
   await pressBrowserEscape(app, page)
@@ -68,15 +68,16 @@ test('moves a busy prompt out of player fullscreen when Escape exits it', async 
   await setPlayerFullscreen(page, true)
 
   await page.evaluate(() => window.dispatchEvent(new Event('opentubex:open-tab-organizer')))
-  await page.locator(':fullscreen .tabOrganizerBackdrop').getByRole('button', { name: 'Create Group', exact: true }).click()
+  await clickInFullscreen(page.locator(':fullscreen .tabOrganizerBackdrop').getByRole('button', { name: 'Create Group', exact: true }))
   const groupPrompt = page.getByRole('dialog', { name: 'Create Group', exact: true })
-  await groupPrompt.getByRole('textbox').fill('Research')
+  // The textbox is in player fullscreen, see clickInFullscreen.
+  await groupPrompt.getByRole('textbox').fill('Research', { force: true })
   // Hold group creation open so the prompt stays busy.
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('tabs-create-group')
     ipcMain.handle('tabs-create-group', () => new Promise(resolve => { globalThis.__e2eFinishCreateGroup = resolve }))
   })
-  await groupPrompt.getByRole('button', { name: 'Create Group', exact: true }).click()
+  await clickInFullscreen(groupPrompt.getByRole('button', { name: 'Create Group', exact: true }))
   await expect(page.locator(':fullscreen .prompt .promptCard[inert]')).toHaveCount(1)
 
   await pressBrowserEscape(app, page)
@@ -113,7 +114,7 @@ test('keeps a prompt open behind a modal sheet when Escape exits player fullscre
 
   await showAddToPlaylistPrompt(page)
   const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-  await addPrompt.locator('.sortSelect').getByRole('combobox').click()
+  await clickInFullscreen(addPrompt.locator('.sortSelect').getByRole('combobox'))
   await expect(page.locator(':fullscreen dialog:modal')).toHaveCount(1)
 
   await pressBrowserEscape(app, page)

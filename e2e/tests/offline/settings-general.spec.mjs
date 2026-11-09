@@ -1,4 +1,5 @@
 import {
+  chooseSelectOption,
   test,
   expect,
   goTo,
@@ -162,7 +163,7 @@ test.describe('settings', () => {
       .locator('select')
 
     await expect(rememberHistory).toBeChecked()
-    await watchedProgressMode.selectOption('semi-auto')
+    await chooseSelectOption(watchedProgressMode, 'semi-auto')
     await rememberHistoryLabel.click()
     await expect(rememberHistory).not.toBeChecked()
     await expect(watchedProgressMode).toHaveValue('semi-auto')
@@ -186,7 +187,7 @@ test.describe('settings', () => {
       '.settingsMenu [data-section="data"] [data-icon="box-archive"][data-icon-pack="material"]'
     )).toBeVisible()
     await attachScreenshot('material icon pack')
-    await select.selectOption('remix')
+    await chooseSelectOption(select, 'remix')
     await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
     await expect(page.locator(
       '.settingsMenu [data-section="add-ons"] [data-icon="puzzle-piece"][data-icon-pack="remix"]'
@@ -224,7 +225,7 @@ test.describe('settings', () => {
     const loadFailure = page.waitForEvent('console', message => (
       message.type() === 'error' && message.text().includes('[icon-pack] failed to load remix')
     ))
-    await select.selectOption('remix')
+    await chooseSelectOption(select, 'remix')
     await loadFailure
     expect(errors).toEqual([])
     await expect(select).toHaveValue('material')

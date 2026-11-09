@@ -1,4 +1,4 @@
-import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel, readDatastore, scrollPageToEnd, expectPageScrollWithinRenderedRange } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel, readDatastore, scrollPageToEnd, expectPageScrollWithinRenderedRange } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
@@ -483,7 +483,7 @@ test.describe('history cleanup', () => {
     await expect(page.getByText('Old video')).toBeVisible()
 
     await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
-    await page.locator('.cleanupPromptContent select').selectOption('30')
+    await chooseSelectOption(page.locator('.cleanupPromptContent select'), '30')
     await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Old video')).toBeHidden()
@@ -501,7 +501,7 @@ test.describe('history cleanup', () => {
     await expect(page.getByText('Recent video')).toBeVisible()
 
     await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
-    await page.locator('.cleanupPromptContent select').selectOption('all')
+    await chooseSelectOption(page.locator('.cleanupPromptContent select'), 'all')
     await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Watch history has been cleared')).toBeVisible()
@@ -523,7 +523,7 @@ test.describe('history cleanup', () => {
     })
 
     await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
-    await page.locator('.cleanupPromptContent select').selectOption('all')
+    await chooseSelectOption(page.locator('.cleanupPromptContent select'), 'all')
     await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
 
     await expect(page.getByText('Storage cleanup failed')).toBeVisible()

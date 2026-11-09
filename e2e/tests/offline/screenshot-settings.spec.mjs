@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goToSettingsSection, setWindowSize, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 
 async function expectValidScrollRange(content) {
   await expect.poll(() => content.evaluate(element => {
@@ -71,7 +71,7 @@ test.describe('screenshot settings', { tag: '@scale' }, () => {
     const content = page.locator('.settingsContent')
     const mode = content.locator('.select').filter({ hasText: 'Screenshot Mode' }).locator('select')
     for (const value of ['prompt_folder', 'default_folder', 'clipboard', 'prompt_folder']) {
-      await mode.selectOption(value)
+      await chooseSelectOption(mode, value)
       await expect.poll(() => content.evaluate(element => {
         const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
         return viewport.scrollWidth - viewport.clientWidth

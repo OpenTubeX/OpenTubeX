@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 
-import { test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { test, expect, clickInFullscreen, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -397,7 +397,7 @@ for (const { uiScale, iconPack, colorScheme } of [
         const download = player.locator('.downloadPromptCard')
         await expect(download).toBeVisible()
         await expect(download.locator('.downloadVideoTitle')).toHaveText('Me at the zoo')
-        await download.getByRole('button', { name: 'Cancel', exact: true }).click()
+        await clickInFullscreen(download.getByRole('button', { name: 'Cancel', exact: true }))
         await setPlayerFullscreen(page, false)
         await page.locator('.watchVideoInfo').getByRole('button', { name: 'Download Video', exact: true }).click()
         await expect(page.locator('.downloadPromptCard')).toBeVisible()

@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 
-import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, clickInFullscreen, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -113,7 +113,7 @@ for (const { uiScale, colorScheme } of [{ uiScale: 200, colorScheme: 'dark' }]) 
           })).toBe(true)
         }
         await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 3', exact: true }) }).getByRole('button', { name: 'More options', exact: true }).click()
-        await page.getByRole('menuitem', { name: 'Remove from Queue', exact: true }).click()
+        await clickInFullscreen(page.getByRole('menuitem', { name: 'Remove from Queue', exact: true }))
         await expect(queue.locator('.queueItem')).toHaveCount(2)
         await expectValidScroll(queue.locator('.queueItems'), '.queueItemsContent')
         await queue.locator('.queueItem h3').first().scrollIntoViewIfNeeded()
