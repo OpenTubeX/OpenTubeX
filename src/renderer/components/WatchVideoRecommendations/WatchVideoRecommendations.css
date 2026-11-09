@@ -71,7 +71,7 @@
 
 .offlineDownloadThumbnail.blur {
   clip-path: inset(0 round var(--shape-corner-small));
-  filter: blur(20px);
+  filter: blur(20px) var(--content-filter,);
 }
 
 .offlineDownloadText {

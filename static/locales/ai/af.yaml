@@ -1328,10 +1328,13 @@ Settings:
       Count Watch Time From: Tel kyktyd vanaf
       Break Reminder Action: Wanneer dit tyd vir ’n pouse is
       Grayscale: Grysskaal
+      Apply Grayscale To: "Pas grysskaal toe op"
       'Off': 'Af'
       Always: Altyd
       During Bedtime: Tydens slaaptyd
       After the Daily Limit: Na die daaglikse limiet
+      Whole App: "Hele toep"
+      Videos and Images: "Video’s en prente"
       Daily Watch Time Limit: Daaglikse kyktydlimiet
       Daily Shorts Limit: Daaglikse limiet vir kortvideo’s
       When a Limit Is Reached: Wanneer ’n limiet bereik word
@@ -2452,7 +2455,8 @@ Tooltips:
     Hide Playlist Stats: Versteek die aantal video’s, die aantal kyke, die datum van die laaste opdatering en die totale duur op snitlysbladsye.
     Count Watch Time From: Alle toestelle tel elke toestel wat kykstatistieke sinkroniseer. Hierdie toestel tel slegs wat u hier kyk.
     When a Limit Is Reached: Pouseer afspeel laat u toe om 15 minute by te voeg of die limiet vir vandag te ignoreer. Met ’n instellingswagwoord kan u ’n limiet slegs in Instellings verhoog.
-    Grayscale: Wys die hele toep, insluitend video’s, in grystinte sodat dit minder aandag trek. Tydens slaaptyd volg die skedule van die slaaptydherinnering.
+    Grayscale: "Wys die toep in grystinte sodat dit minder aandag trek. Tydens slaaptyd volg die skedule van die slaaptydherinnering."
+    Apply Grayscale To: "Video’s en prente hou die koppelvlak in kleur en maak net video’s, duimnaels en avatars grys."
     Daily Watch Time Limit: Tel wat u vandag gekyk het op alle toestelle wat kykstatistieke sinkroniseer, insluitend kortvideo’s.
     Daily Shorts Limit: Tel die kortvideo’s wat u vandag op hierdie toestel gekyk het.
     Take a Break Reminder: Pouseer die video na soveel kyk. ’n Pouse van 10 minute of meer begin die telling weer.

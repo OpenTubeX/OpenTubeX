@@ -65,7 +65,7 @@
 }
 
 .endedRecommendation .blur {
-  filter: blur(20px);
+  filter: blur(20px) var(--content-filter,);
 }
 
 .endedRecommendationTitle {

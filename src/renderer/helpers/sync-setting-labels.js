@@ -139,6 +139,7 @@ export const SYNC_SETTING_LABELS = {
   hideHeaderLogo: 'Settings.Theme Settings.Hide OpenTubeX Header Logo',
   hideHeaderSyncIndicator: 'Settings.Distraction Free Settings.Hide Header Sync Indicator',
   grayscaleMode: 'Settings.Distraction Free Settings.Digital Wellbeing.Grayscale',
+  grayscaleScope: 'Settings.Distraction Free Settings.Digital Wellbeing.Apply Grayscale To',
   dailyWatchTimeLimit: 'Settings.Distraction Free Settings.Digital Wellbeing.Daily Watch Time Limit',
   dailyWatchTimeLimitDevices: 'Settings.Distraction Free Settings.Digital Wellbeing.Count Watch Time From',
   dailyShortsLimit: 'Settings.Distraction Free Settings.Digital Wellbeing.Daily Shorts Limit',
