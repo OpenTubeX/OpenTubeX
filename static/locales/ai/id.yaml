@@ -2497,6 +2497,7 @@ Tray:
 Tray Icon:
   Title: "Ikon baki sistem"
   Follow App Theme: "Ikuti tema aplikasi"
+  Monochrome: "Monokrom"
 
 Form Inputs:
   Browse: "Telusuri"

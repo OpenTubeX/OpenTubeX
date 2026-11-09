@@ -2472,6 +2472,7 @@ Tray:
 Tray Icon:
   Title: "托盘图标"
   Follow App Theme: "跟随应用主题"
+  Monochrome: "单色"
 
 Form Inputs:
   Browse: "浏览"

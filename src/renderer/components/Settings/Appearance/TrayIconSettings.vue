@@ -32,16 +32,13 @@
           <span
             v-else
             class="trayIconPreview"
+            :class="{ monochrome: preset.id === MONOCHROME_TRAY_ICON_PRESET }"
             :style="{ color: preset.foreground, backgroundColor: preset.background }"
             aria-hidden="true"
           >
             <span :style="{ maskImage: `url(${maskUrl})` }" />
           </span>
-          <span>{{ preset.id === 'theme'
-            ? t('Tray Icon.Follow App Theme')
-            : preset.translationKey
-              ? (themeNames[preset.translationKey] ?? preset.translationKey)
-              : t('Settings.General Settings.Thumbnail Preference.Default') }}</span>
+          <span>{{ presetLabel(preset) }}</span>
           <input
             :checked="selected === preset.id"
             type="radio"
@@ -65,11 +62,22 @@ import maskUrl from '../../../assets/img/tray-icon-mask.svg'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../helpers/overlayScrollbars'
+import { MONOCHROME_TRAY_ICON_PRESET } from '../../../helpers/trayIcon'
 
 const store = useStore()
 const { t, tm } = useI18n()
 const themeNames = computed(() => tm('Settings.Theme Settings.Base Theme'))
-const presets = [{ id: 'theme' }, ...APP_ICON_PRESETS]
+const [defaultPreset, ...themePresets] = APP_ICON_PRESETS
+const presets = [{ id: 'theme' }, defaultPreset, { id: MONOCHROME_TRAY_ICON_PRESET }, ...themePresets]
+
+function presetLabel(preset) {
+  switch (preset.id) {
+    case 'theme': return t('Tray Icon.Follow App Theme')
+    case 'default': return t('Settings.General Settings.Thumbnail Preference.Default')
+    case MONOCHROME_TRAY_ICON_PRESET: return t('Tray Icon.Monochrome')
+    default: return themeNames.value[preset.translationKey] ?? preset.translationKey
+  }
+}
 const selected = computed(() => store.getters.getTrayIconPreset)
 const open = ref(false)
 const contentRef = useTemplateRef('contentRef')

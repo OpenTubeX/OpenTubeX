@@ -2475,6 +2475,7 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemfältet"
   Follow App Theme: "Följ appens tema"
+  Monochrome: "Monokrom"
 
 Form Inputs:
   Browse: "Bläddra"

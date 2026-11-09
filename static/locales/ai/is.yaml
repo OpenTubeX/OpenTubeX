@@ -2495,6 +2495,7 @@ Tray:
 Tray Icon:
   Title: "Tákn í kerfisbakka"
   Follow App Theme: "Fylgja þema forritsins"
+  Monochrome: "Einlitt"
 
 Form Inputs:
   Browse: "Fletta"

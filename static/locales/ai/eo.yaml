@@ -2524,6 +2524,7 @@ Tray:
 Tray Icon:
   Title: Taskopleta piktogramo
   Follow App Theme: Sekvi la etoson de la aplikaĵo
+  Monochrome: "Unukolora"
 Form Inputs:
   Browse: "Foliumi"
   Use Default Path: "Uzi la defaŭlton"

@@ -3132,6 +3132,7 @@ Tray:
 Tray Icon:
   Title: "Icona de la safata"
   Follow App Theme: "Segueix el tema de l’aplicació"
+  Monochrome: "Monocrom"
 
 Form Inputs:
   Browse: "Navega"

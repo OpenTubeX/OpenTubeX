@@ -2472,6 +2472,7 @@ Tray:
 Tray Icon:
   Title: "Ikona v oznamovací oblasti"
   Follow App Theme: "Použít motiv aplikace"
+  Monochrome: "Jednobarevná"
 
 Form Inputs:
   Browse: "Procházet"

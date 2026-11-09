@@ -2580,6 +2580,7 @@ Tray:
 Tray Icon:
   Title: "نماد سینی سیستم"
   Follow App Theme: "پیروی از زمینهٔ برنامه"
+  Monochrome: "تک‌رنگ"
 
 Form Inputs:
   Browse: "مرور"

@@ -2529,6 +2529,7 @@ Tray:
 Tray Icon:
   Title: "Значок у системному треї"
   Follow App Theme: "Використовувати тему застосунку"
+  Monochrome: "Монохромний"
 
 Form Inputs:
   Browse: "Огляд"

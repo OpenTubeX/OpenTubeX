@@ -2538,6 +2538,7 @@ Tray:
 Tray Icon:
   Title: "Icona da bandexa"
   Follow App Theme: "Seguir o tema da aplicación"
+  Monochrome: "Monocromo"
 
 Form Inputs:
   Browse: "Examinar"

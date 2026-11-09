@@ -2737,6 +2737,7 @@ Tray:
 Tray Icon:
   Title: Stelselbakikoon
   Follow App Theme: Volg toeptema
+  Monochrome: "Monochroom"
 Form Inputs:
   Browse: "Blaai"
   Use Default Path: "Gebruik verstek"

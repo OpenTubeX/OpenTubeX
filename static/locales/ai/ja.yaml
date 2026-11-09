@@ -2472,6 +2472,7 @@ Tray:
 Tray Icon:
   Title: "トレイアイコン"
   Follow App Theme: "アプリのテーマに合わせる"
+  Monochrome: "モノクロ"
 
 Form Inputs:
   Browse: "参照"

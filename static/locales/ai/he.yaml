@@ -2537,6 +2537,7 @@ Tray:
 Tray Icon:
   Title: "סמל במגש המערכת"
   Follow App Theme: "התאמה לערכת הנושא של היישום"
+  Monochrome: "חד־צבעי"
 
 Form Inputs:
   Browse: "עיון"

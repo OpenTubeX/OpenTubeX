@@ -2479,6 +2479,7 @@ Tray:
 Tray Icon:
   Title: "系統匣圖示"
   Follow App Theme: "跟隨應用程式主題"
+  Monochrome: "單色"
 
 Form Inputs:
   Browse: "瀏覽"

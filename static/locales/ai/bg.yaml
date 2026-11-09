@@ -2510,6 +2510,7 @@ Tray:
 Tray Icon:
   Title: "Икона в системната област"
   Follow App Theme: "Следване на темата на приложението"
+  Monochrome: "Монохромна"
 
 Form Inputs:
   Browse: "Преглед"

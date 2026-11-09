@@ -3746,6 +3746,7 @@ Tray:
 Tray Icon:
   Title: "Tray icon"
   Follow App Theme: "Follow app theme"
+  Monochrome: "Monochrome"
 
 Form Inputs:
   Browse: "Browse"

@@ -2473,6 +2473,7 @@ Tray:
 Tray Icon:
   Title: "Sistem tepsisi simgesi"
   Follow App Theme: "Uygulama temasını izle"
+  Monochrome: "Tek renkli"
 
 Form Inputs:
   Browse: "Göz at"

@@ -2481,6 +2481,7 @@ Tray:
 Tray Icon:
   Title: "Arlun ar maez reizhiad"
   Follow App Theme: "Heuliañ neuz an arload"
+  Monochrome: "Unliv"
 
 Form Inputs:
   Browse: "Furchal"

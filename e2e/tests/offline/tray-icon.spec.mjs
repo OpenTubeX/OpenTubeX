@@ -10,9 +10,9 @@ async function setSetting(page, name, value) {
   }, { name, value })
 }
 
-async function cachedIcon(app) {
+async function cachedIcon(app, fileName = 'tray-icon.png') {
   // writeFile empties the file before writing it, so an empty read is still in progress.
-  return readFile(path.join(app.userDataDir, 'tray-icon.png')).then(bytes => bytes.length ? bytes.toString('base64') : null).catch(() => null)
+  return readFile(path.join(app.userDataDir, fileName)).then(bytes => bytes.length ? bytes.toString('base64') : null).catch(() => null)
 }
 
 async function backgroundPixel(app) {
@@ -67,7 +67,12 @@ test('tray icon choices persist and follow the active app palette', async ({ app
   await page.evaluate(theme => window.ftElectron.saveCustomTheme(theme), custom)
   await setSetting(page, 'BaseTheme', 'custom:tray-test')
   await expect.poll(() => backgroundPixel(app)).toEqual([0x56, 0x34, 0x12, 255])
+  // The monochrome icon gets its own cache file, which tells the next start to adapt it to the panel.
+  await choices.locator('input[value="monochrome"]').check()
+  await expect.poll(() => cachedIcon(app, 'tray-iconTemplate.png')).not.toBeNull()
+  await expect.poll(() => cachedIcon(app)).toBeNull()
   await choices.locator('input[value="default"]').check()
+  await expect.poll(() => cachedIcon(app, 'tray-iconTemplate.png')).toBeNull()
   await expect.poll(() => cachedIcon(app)).toBeNull()
 })
 

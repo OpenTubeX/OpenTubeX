@@ -2472,6 +2472,7 @@ Tray:
 Tray Icon:
   Title: "Icona nell’area di notifica"
   Follow App Theme: "Segui il tema dell’app"
+  Monochrome: "Monocromatica"
 
 Form Inputs:
   Browse: "Sfoglia"

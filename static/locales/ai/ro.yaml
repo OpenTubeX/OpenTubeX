@@ -2534,6 +2534,7 @@ Tray:
 Tray Icon:
   Title: "Pictogramă în zona de notificare"
   Follow App Theme: "Urmează tema aplicației"
+  Monochrome: "Monocrom"
 
 Form Inputs:
   Browse: "Răsfoiește"
