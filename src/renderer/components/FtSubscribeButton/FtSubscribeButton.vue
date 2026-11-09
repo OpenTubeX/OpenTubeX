@@ -717,7 +717,9 @@ function handleSubscription(profile) {
     if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
       channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
     }
-    const handle = normalizeChannelHandle(props.channelHandle)
+    // A saved handle can be newer than the one from a cached result.
+    const savedHandle = store.getters.getSubscribedChannelsById.get(props.channelId)?.handle
+    const handle = savedHandle ?? normalizeChannelHandle(props.channelHandle)
     if (handle !== null) {
       channel.handle = handle
     }
@@ -726,6 +728,10 @@ function handleSubscription(profile) {
       channel,
       profileIds
     })
+    // Profiles that already had the channel saved it without a handle.
+    if (handle !== null && savedHandle === undefined && !profileIds.includes(MAIN_PROFILE_ID)) {
+      store.dispatch('updateSubscriptionDetails', { channelId: props.channelId, channelHandle: handle })
+    }
 
     showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
     emit('subscribed')
