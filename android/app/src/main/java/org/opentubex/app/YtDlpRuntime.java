@@ -263,7 +263,7 @@ final class YtDlpRuntime {
         File download = File.createTempFile("yt-dlp", null, context.getCacheDir());
         try {
             // Release downloads, unlike the REST API, have no rate limit for unauthenticated clients.
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://github.com/" + repository + "/releases/download/" + tag + "/yt-dlp").openConnection();
+            HttpURLConnection connection = (HttpURLConnection) AndroidProxy.openConnection(new URL("https://github.com/" + repository + "/releases/download/" + tag + "/yt-dlp"));
             connection.setConnectTimeout(15_000);
             connection.setReadTimeout(15_000);
             try (InputStream input = connection.getInputStream(); OutputStream output = new FileOutputStream(download)) {

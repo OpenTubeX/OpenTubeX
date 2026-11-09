@@ -55,10 +55,45 @@ index 8b9de88493bd3269247cffbe9d290fc381fc088f..878cb509bd4046e920d6db1b8c1721ea
          // Convert pixels to density-independent pixels
          float density = getActivity().getResources().getDisplayMetrics().density;
 diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
-index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce1207a1d3e9a 100644
+index d92eb9bb44dc0b064312ca43f97a78206a67be21..90ae7a9c3b6160e9c800ef3c29645ddb0c193c68 100644
 --- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 +++ b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
-@@ -219,7 +219,9 @@ public class HttpRequestHandler {
+@@ -16,6 +16,8 @@ import java.io.UnsupportedEncodingException;
+ import java.lang.reflect.Method;
+ import java.net.HttpURLConnection;
+ import java.net.MalformedURLException;
++import java.net.Proxy;
++import java.net.ProxySelector;
+ import java.net.URI;
+ import java.net.URISyntaxException;
+ import java.net.URL;
+@@ -103,8 +105,24 @@ public class HttpRequestHandler {
+             return this;
+         }
+ 
++        /**
++         * HttpURLConnection tries a direct connection once every proxy from
++         * ProxySelector has failed, which would bypass the app's proxy. An
++         * explicit proxy has no such fallback.
++         */
++        private static Proxy selectedProxy(URL url) throws IOException {
++            ProxySelector selector = ProxySelector.getDefault();
++            if (selector == null) return Proxy.NO_PROXY;
++            try {
++                List<Proxy> proxies = selector.select(url.toURI());
++                return proxies == null || proxies.isEmpty() ? Proxy.NO_PROXY : proxies.get(0);
++            } catch (URISyntaxException error) {
++                throw new MalformedURLException(error.getMessage());
++            }
++        }
++
+         public HttpURLConnectionBuilder openConnection() throws IOException {
+-            connection = new CapacitorHttpUrlConnection((HttpURLConnection) url.openConnection());
++            connection = new CapacitorHttpUrlConnection((HttpURLConnection) url.openConnection(selectedProxy(url)));
+ 
+             connection.setAllowUserInteraction(false);
+             connection.setRequestMethod(method);
+@@ -219,7 +237,9 @@ public class HttpRequestHandler {
          output.put("status", statusCode);
          output.put("headers", buildResponseHeaders(connection));
          output.put("url", connection.getURL());
@@ -69,7 +104,7 @@ index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce120
  
          InputStream errorStream = connection.getErrorStream();
          if (errorStream != null) {
-@@ -241,6 +243,12 @@ public class HttpRequestHandler {
+@@ -241,6 +261,12 @@ public class HttpRequestHandler {
          InputStream errorStream = connection.getErrorStream();
          String contentType = connection.getHeaderField("Content-Type");
  
@@ -82,7 +117,7 @@ index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce120
          if (errorStream != null) {
              if (isOneOf(contentType, MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON)) {
                  return parseJSON(readStreamAsString(errorStream));
-@@ -423,6 +431,9 @@ public class HttpRequestHandler {
+@@ -423,6 +449,9 @@ public class HttpRequestHandler {
              .openConnection();
  
          CapacitorHttpUrlConnection connection = connectionBuilder.build();
@@ -92,7 +127,7 @@ index d92eb9bb44dc0b064312ca43f97a78206a67be21..2fa4a3b4c90614910d10cd8abe7ce120
  
          if (null != bridge && !isDomainExcludedFromSSL(bridge, url)) {
              connection.setSSLSocketFactory(bridge);
-@@ -437,7 +448,6 @@ public class HttpRequestHandler {
+@@ -437,7 +466,6 @@ public class HttpRequestHandler {
              }
          }
  

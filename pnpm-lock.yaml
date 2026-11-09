@@ -171,7 +171,7 @@ overrides:
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': 92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8
-  '@capacitor/android': 83d0554b78029c8c12fda5b09f95fea3a22073b1806126698529b5f36c0769af
+  '@capacitor/android': 9e380073c1a6908cca4ea69ac37843e61731d38a29c40a61d0359ee5705a2ed2
   '@capacitor/local-notifications@8.3.1': 59d1a3665fb92225eb3e377f2653c476dd7220aa95d2eeb6ec171bc6ce9d3d85
   '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
@@ -195,7 +195,7 @@ importers:
         version: 8.0.0(patch_hash=92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8)(@capacitor/core@8.6.0)
       '@capacitor/android':
         specifier: ^8.6.0
-        version: 8.6.0(patch_hash=83d0554b78029c8c12fda5b09f95fea3a22073b1806126698529b5f36c0769af)(@capacitor/core@8.6.0)
+        version: 8.6.0(patch_hash=9e380073c1a6908cca4ea69ac37843e61731d38a29c40a61d0359ee5705a2ed2)(@capacitor/core@8.6.0)
       '@capacitor/app':
         specifier: ^8.1.2
         version: 8.1.2(@capacitor/core@8.6.0)
@@ -5612,7 +5612,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.6.0
 
-  '@capacitor/android@8.6.0(patch_hash=83d0554b78029c8c12fda5b09f95fea3a22073b1806126698529b5f36c0769af)(@capacitor/core@8.6.0)':
+  '@capacitor/android@8.6.0(patch_hash=9e380073c1a6908cca4ea69ac37843e61731d38a29c40a61d0359ee5705a2ed2)(@capacitor/core@8.6.0)':
     dependencies:
       '@capacitor/core': 8.6.0
 
