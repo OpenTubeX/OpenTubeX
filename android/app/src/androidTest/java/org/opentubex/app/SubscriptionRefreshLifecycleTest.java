@@ -14,6 +14,7 @@ import android.hardware.display.DisplayManager;
 import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.os.Build;
 import android.os.SystemClock;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -46,6 +47,10 @@ public class SubscriptionRefreshLifecycleTest {
 
     @Before
     public void resetCoordinator() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission(context.getPackageName(),
+                android.Manifest.permission.POST_NOTIFICATIONS);
+        }
         SubscriptionRefreshCoordinator.resetForTest();
     }
 

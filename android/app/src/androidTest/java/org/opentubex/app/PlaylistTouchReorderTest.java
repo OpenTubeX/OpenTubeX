@@ -29,8 +29,7 @@ public class PlaylistTouchReorderTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('#app')?.__vue_app__ && !!document.querySelector('.profileTrigger')");
-            evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (async () => {
                     const app = document.querySelector('#app').__vue_app__.config.globalProperties;
@@ -77,12 +76,12 @@ public class PlaylistTouchReorderTest {
                             Thread.sleep(30);
                         }
                         assertEquals("Dragged row remains visible at " + scale + "%", "true",
-                            evaluate(view, "!!document.querySelector('.playlistItemsCard .draggedVideo') && " +
-                                "Number(getComputedStyle(document.querySelector('.playlistItemsCard .draggedVideo')).opacity) > 0"));
+                            evaluate(view, "!!document.querySelector('.playlistItemsCard .reorderDragged') && " +
+                                "Number(getComputedStyle(document.querySelector('.playlistItemsCard .reorderDragged')).opacity) > 0"));
                     } finally {
                         touch(downTime, MotionEvent.ACTION_UP, end[0], end[1]);
                     }
-                    await(view, "!document.querySelector('.playlistItemsCard .draggedVideo') && " +
+                    await(view, "!document.querySelector('.playlistItemsCard .reorderDragged') && " +
                         "document.querySelector('" + row + " .h3Title').textContent.trim() === window.touchSecond");
                     await(view, APP + ".$store.getters.getPlaylist('" + ID + "').videos[0].title === window.touchSecond");
                     evaluate(view, APP + ".$router.push('/userplaylists')");

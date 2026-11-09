@@ -156,6 +156,10 @@ android {
         testInstrumentationRunner(optimizedTestBuild
             ? "org.opentubex.app.OptimizedApkInstrumentation"
             : "androidx.test.runner.AndroidJUnitRunner")
+        if (!optimizedTestBuild) {
+            // Instrumentation tests expect a fresh app profile.
+            testInstrumentationRunnerArguments clearPackageData: 'true'
+        }
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -173,6 +177,9 @@ android {
         }
     }
     testBuildType project.findProperty('testBuildType') ?: 'debug'
+    if (!optimizedTestBuild) {
+        testOptions.execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
     // F-Droid rejects this block because only Google can read it.
     dependenciesInfo {
         includeInApk = false
@@ -297,6 +304,8 @@ dependencies {
         // PairingCameraTest serves a sync server over HTTPS and shows the scanner a QR code.
         androidTestImplementation "com.squareup.okhttp3:okhttp-tls:5.5.1"
         androidTestImplementation "com.google.zxing:core:3.5.4"
+        androidTestUtil "androidx.test:orchestrator:1.6.1"
+        androidTestUtil "androidx.test.services:test-services:1.6.0"
     }
     implementation project(':capacitor-cordova-android-plugins')
 }

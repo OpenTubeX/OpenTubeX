@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 public class MobileStorageTest {
     @Test
-    public void rendererHistoryUpdatesUseIndividualNativeRecords() throws Exception {
+    public void rendererHistorySurvivesWebViewStorageEviction() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> view = new AtomicReference<>();
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
@@ -28,22 +28,22 @@ public class MobileStorageTest {
                     try {
                         await store.dispatch('updateWatchProgress', {videoId,watchProgress:12});
                         await store.dispatch('updateWatchProgress', {videoId,watchProgress:42});
-                        const result = await window.Capacitor.nativePromise('AndroidStorage', 'readRecords', {filename:'history.db'});
-                        const records = result.contents.split('\\n').filter(Boolean).map(JSON.parse);
-                        window.__storageTest = records.filter(record => record.videoId === videoId).map(record => record.watchProgress);
+                        // Libraries live in native SQLite, so losing WebView storage must not lose them.
+                        await Promise.all((await indexedDB.databases()).map(({name}) => new Promise((resolve, reject) => {
+                            const request = indexedDB.deleteDatabase(name);
+                            request.onsuccess = resolve;
+                            request.onerror = () => reject(request.error);
+                        })));
+                        window.__storageTest = 'evicted';
                     } catch(error) { window.__storageTest = String(error); }
                 })();
                 """);
             awaitCondition(webView, "window.__storageTest !== null");
-            assertEquals("[42]", evaluate(webView, "window.__storageTest"));
-            evaluate(webView, """
-                window.__evicted = false;
-                const request = indexedDB.deleteDatabase('opentubex-records-history.db');
-                request.onsuccess = () => { window.__evicted = true; };
-                """);
-            awaitCondition(webView, "window.__evicted === true");
+            assertEquals("\"evicted\"", evaluate(webView, "window.__storageTest"));
+            evaluate(webView, "window.__beforeReload = true");
             scenario.onActivity(activity -> webView.reload());
-            awaitCondition(webView, "document.querySelector('#app').__vue_app__?.config.globalProperties.$store.getters" +
+            awaitCondition(webView, "!window.__beforeReload && " +
+                "document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store.getters" +
                 ".getHistoryCacheById['storage-test-video']?.watchProgress === 42");
             evaluate(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store" +
                 ".dispatch('removeFromHistory', 'storage-test-video')");

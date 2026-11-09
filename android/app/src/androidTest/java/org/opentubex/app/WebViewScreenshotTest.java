@@ -36,8 +36,7 @@ public class WebViewScreenshotTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('.app.capacitorTabs')");
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
             evaluate(webView, """
                 (async () => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -128,8 +127,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
 
             evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
             awaitCondition(webView, "!window.__firstCard.isConnected && document.querySelectorAll('.ft-list-video').length > 0 && document.querySelectorAll('.ft-list-video').length < 20");
@@ -426,8 +424,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
             evaluate(webView, """
                 (() => {
                     const marker = document.createElement('span');

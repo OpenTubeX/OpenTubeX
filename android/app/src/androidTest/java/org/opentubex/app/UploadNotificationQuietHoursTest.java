@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -65,14 +66,19 @@ public class UploadNotificationQuietHoursTest {
         UploadNotifications.observe(context, "UC1", "videos", new JSONArray().put(entry("a", now)));
         UploadNotifications.observe(context, "UC1", "videos", new JSONArray().put(entry("b", now)).put(entry("a", now)));
 
-        Notification found = null;
-        for (StatusBarNotification active : manager().getActiveNotifications()) {
-            if (!"new-upload".equals(active.getTag())) continue;
-            assertNull("only one upload is new", found);
-            found = active.getNotification();
+        // NotificationManager posts asynchronously.
+        long deadline = SystemClock.uptimeMillis() + 5000;
+        while (true) {
+            Notification found = null;
+            for (StatusBarNotification active : manager().getActiveNotifications()) {
+                if (!"new-upload".equals(active.getTag())) continue;
+                assertNull("only one upload is new", found);
+                found = active.getNotification();
+            }
+            if (found != null) return found;
+            assertTrue("the new upload is notified", SystemClock.uptimeMillis() < deadline);
+            Thread.sleep(50);
         }
-        assertNotNull(found);
-        return found;
     }
 
     private static JSONObject entry(String id, long published) throws Exception {

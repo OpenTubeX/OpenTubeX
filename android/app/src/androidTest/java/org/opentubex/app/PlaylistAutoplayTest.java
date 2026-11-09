@@ -70,8 +70,7 @@ public class PlaylistAutoplayTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('#app')?.__vue_app__ && !!document.querySelector('.profileTrigger')");
-            evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (async () => {
                     const app = document.querySelector('#app').__vue_app__;

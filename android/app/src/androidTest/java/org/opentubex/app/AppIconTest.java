@@ -57,7 +57,7 @@ public class AppIconTest {
         try {
             AppIconPlugin.select(context, "dracula");
             try (LauncherSession scenario = LauncherSession.launch(context)) {
-                await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+                awaitApp(scenario);
                 assertRecentsIcon(scenario, "dracula");
                 evaluate(scenario, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')");
                 await(scenario, "!!document.querySelector('.settingsMenu [data-section=appearance]')");
@@ -71,7 +71,7 @@ public class AppIconTest {
                 tap(scenario, ".appIconAppliedPrompt button:last-child");
             }
             try (LauncherSession scenario = LauncherSession.launch(context)) {
-                await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+                awaitApp(scenario);
                 assertRecentsIcon(scenario, "light");
             }
         } finally {
@@ -79,7 +79,21 @@ public class AppIconTest {
         }
     }
 
-    private static void assertRecentsIcon(LauncherSession scenario, String preset) {
+    private static void assertRecentsIcon(LauncherSession scenario, String preset) throws Exception {
+        // The system updates the recent task's description asynchronously.
+        long deadline = SystemClock.uptimeMillis() + 5000;
+        while (true) {
+            try {
+                checkRecentsIcon(scenario, preset);
+                return;
+            } catch (AssertionError error) {
+                if (SystemClock.uptimeMillis() > deadline) throw error;
+                Thread.sleep(100);
+            }
+        }
+    }
+
+    private static void checkRecentsIcon(LauncherSession scenario, String preset) {
         scenario.onActivity(activity -> {
             try {
                 int icon = activity.getPackageManager().getActivityInfo(
@@ -109,7 +123,7 @@ public class AppIconTest {
         String original = AppIconPlugin.current(context);
         String chosen = original.equals("dracula") ? "light" : "dracula";
         try (LauncherSession scenario = LauncherSession.launch(context)) {
-            await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+            awaitApp(scenario);
             evaluate(scenario, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')");
             await(scenario, "!!document.querySelector('.settingsMenu [data-section=appearance]')");
             evaluate(scenario, "document.querySelector('.settingsMenu [data-section=appearance]').click()");
@@ -151,7 +165,7 @@ public class AppIconTest {
         ShortcutManager shortcuts = context.getSystemService(ShortcutManager.class);
         AppIconPlugin.select(context, "default");
         try (LauncherSession scenario = LauncherSession.launch(context)) {
-            await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+            awaitApp(scenario);
             evaluate(scenario, """
                 window.iconTestApp = document.querySelector('#app').__vue_app__.config.globalProperties;
                 window.iconTestOriginalScale = iconTestApp.$store.getters.getUiScale;
@@ -349,6 +363,12 @@ public class AppIconTest {
             InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
             event.recycle();
         }
+    }
+
+    /** Waits for the renderer and dismisses the first-run tutorial, which intercepts taps. */
+    private static void awaitApp(LauncherSession scenario) throws Exception {
+        await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+        TutorialTestHelper.dismissIfPending(scenario.activity.getBridge().getWebView());
     }
 
     private static void await(LauncherSession scenario, String script) throws Exception {

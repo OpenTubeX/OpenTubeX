@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -136,9 +137,9 @@ public class HomeWidgetsTest {
     }
 
     private static void skipTutorial(ActivityScenario<MainActivity> scenario) throws Exception {
-        await(scenario, "document.querySelector('.tutorialSkip button') || !document.querySelector('.tutorialOverlay')");
-        evaluate(scenario, "document.querySelector('.tutorialSkip button')?.click()");
-        await(scenario, "!document.querySelector('.tutorialOverlay')");
+        AtomicReference<WebView> view = new AtomicReference<>();
+        scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+        TutorialTestHelper.dismissIfPending(view.get());
     }
 
     private static Bundle height(int dp) {

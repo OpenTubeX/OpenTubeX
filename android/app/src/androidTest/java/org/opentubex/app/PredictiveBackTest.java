@@ -531,10 +531,14 @@ public class PredictiveBackTest {
                 int height = screen[1];
                 assertTrue("Landscape physical display", screen[0] > screen[1]);
                 long downTime = SystemClock.uptimeMillis();
-                touch(downTime, MotionEvent.ACTION_DOWN, screen[0] - 2, height / 2f);
+                touch(downTime, downTime, MotionEvent.ACTION_DOWN, screen[0] - 2, height / 2f);
+                // Timestamp the swipe 40ms apart even when injection stalls, since
+                // the system cancels an edge swipe held too long before it moves.
+                long eventTime = downTime;
                 for (int x : new int[] { 30, 60, 120, 200, 320 }) {
                     Thread.sleep(40);
-                    touch(downTime, MotionEvent.ACTION_MOVE, screen[0] - x, height / 2f);
+                    eventTime += 40;
+                    touch(downTime, eventTime, MotionEvent.ACTION_MOVE, screen[0] - x, height / 2f);
                 }
                 await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
                 touch(downTime, MotionEvent.ACTION_UP, screen[0] - 320, height / 2f);
@@ -562,7 +566,11 @@ public class PredictiveBackTest {
     }
 
     private static void touch(long downTime, int action, float x, float y) {
-        MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action, x, y, 0);
+        touch(downTime, SystemClock.uptimeMillis(), action, x, y);
+    }
+
+    private static void touch(long downTime, long eventTime, int action, float x, float y) {
+        MotionEvent event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0);
         event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         try {
             boolean injected = InstrumentationRegistry.getInstrumentation().getUiAutomation().injectInputEvent(event, true);
