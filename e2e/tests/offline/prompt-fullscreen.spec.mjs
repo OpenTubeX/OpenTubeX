@@ -114,6 +114,7 @@ test('keeps a prompt open behind a modal sheet when Escape exits player fullscre
 
   await showAddToPlaylistPrompt(page)
   const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  await clickInFullscreen(addPrompt.getByRole('button', { name: 'Search filters', exact: true }))
   await clickInFullscreen(addPrompt.locator('.sortSelect').getByRole('combobox'))
   await expect(page.locator(':fullscreen dialog:modal')).toHaveCount(1)
 

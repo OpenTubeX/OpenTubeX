@@ -60,6 +60,14 @@
           :maxlength="255"
           @input="updateQueryDebounce"
         />
+        <FtIconButton
+          v-if="phoneLayout"
+          :title="t('Search Filters.Search Filters')"
+          :icon="['fas', 'filter']"
+          :aria-expanded="showFilters"
+          theme="secondary"
+          @click="showFilters = !showFilters"
+        />
         <div
           :id="optionsTargetId"
           class="optionsTarget"
@@ -72,7 +80,12 @@
       :to="`#${optionsTargetId}`"
       :disabled="phoneLayout"
     >
-      <div class="optionsRow">
+      <!-- Phones hide the filters behind a button, but keep the duplicate switch in view while it applies -->
+      <div
+        v-show="!filtersHidden || anyPlaylistContainsVideosToBeAdded"
+        class="optionsRow"
+        :class="{ filtersHidden }"
+      >
         <div class="optionToggles">
           <FtToggleSwitch
             class="matchingVideoToggle"
@@ -103,6 +116,7 @@
     </Teleport>
     <div
       class="playlists-container"
+      :class="playlistAppearance"
     >
       <FtFlexBox>
         <div
@@ -117,6 +131,7 @@
           <FtPlaylistSelector
             :tabindex="playlistDisabled(playlist._id) ? -1 : 0"
             :playlist="playlist"
+            :appearance="playlistAppearance"
             :selected="selectedPlaylistIdList.includes(playlist._id)"
             :disabled="playlistDisabled(playlist._id)"
             :adding-duplicate-videos-enabled="addingDuplicateVideosEnabled"
@@ -161,6 +176,7 @@ import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtPlaylistSelector from '../FtPlaylistSelector/FtPlaylistSelector.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -182,6 +198,13 @@ const { locale, t } = useI18n()
 // Phones keep the playlist options in the scrolling content and preview fewer videos, so the fixed header leaves room for the playlists
 const phoneLayout = usePhoneLayout()
 const optionsTargetId = useId()
+const showFilters = ref(false)
+const filtersHidden = computed(() => phoneLayout.value && !showFilters.value)
+
+// Grid tiles take a whole phone screen each, so phones always list the playlists as rows
+const playlistAppearance = computed(() => {
+  return phoneLayout.value || store.getters.getListType === 'list' ? 'list' : 'grid'
+})
 
 const SORT_BY_VALUES = {
   NameAscending: 'name_ascending',

@@ -155,3 +155,19 @@
 .playlist-selector-container.disabled {
   opacity: 0.5;
 }
+
+.filtersHidden .matchingVideoToggle,
+.filtersHidden .sortSelect {
+  display: none;
+}
+
+/* Rows fill the width, in columns when the prompt is wide enough */
+.playlists-container.list {
+  padding: 6px;
+}
+
+.playlists-container.list .ft-flex-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 2px 8px;
+}

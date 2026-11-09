@@ -12,6 +12,30 @@ async function showPrompt(page, videos) {
   await page.evaluate(videos => window.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos }), videos)
 }
 
+// The content must end at the bottom of the scroll range, with the scrollbar thumb matching it.
+// Fractional UI scales round clientHeight, so measure the viewport's bounding box instead.
+async function expectValidScrollRange(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    return element.scrollTop - Math.max(0, end - viewport.height)
+  })).toBeLessThanOrEqual(1)
+  await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    const scrollbar = element.querySelector('.os-scrollbar-vertical')
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const handle = scrollbar.querySelector('.os-scrollbar-handle')
+    const thumb = handle.getBoundingClientRect()
+    const expectedHeight = Math.max(Number.parseFloat(getComputedStyle(handle).minHeight) || 0,
+      track.height * viewport.height / end)
+    return Math.abs(element.scrollTop - Math.max(0, end - viewport.height)) <= 1 &&
+      !scrollbar.classList.contains('os-scrollbar-unusable') &&
+      Math.abs(track.bottom - thumb.bottom) <= 1 && Math.abs(thumb.height - expectedHeight) <= 1
+  })).toBe(true)
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
 })
@@ -59,7 +83,7 @@ test.describe('with several playlists', () => {
     },
   })
 
-  test('puts the playlist options beside the search outside the phone layout @scale', async ({ app, page }) => {
+  test('puts the playlist options beside the search outside the phone layout, and behind a button with rows in it @scale', async ({ app, page }) => {
     await showPrompt(page, [video(1)])
     const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
     const toggle = prompt.getByRole('checkbox', { name: 'Playlists with matching videos', exact: true })
@@ -81,6 +105,12 @@ test.describe('with several playlists', () => {
 
     await setWindowSize(app, page, { width: 480, height: 800 })
     await expect(searchRow.locator('.matchingVideoToggle')).toHaveCount(0)
+    // Grid tiles left room for only one playlist on a phone screen
+    await expect(prompt.locator('.ft-playlist-selector.list')).toHaveCount(2)
+    await expect(prompt.locator('.ft-playlist-selector', { hasText: 'Second' })).toBeInViewport({ ratio: 1 })
+    await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeHidden()
+
+    await prompt.getByRole('button', { name: 'Search filters', exact: true }).click()
     await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeVisible()
     await expect(toggle).toBeChecked()
   })
@@ -119,10 +149,39 @@ test.describe('with long option labels', () => {
     await showPrompt(page, [video(1), video(2)])
     const toggles = page.locator('.prompt .promptContent .optionToggles')
 
+    // The duplicate switch stays visible while the filters are collapsed
     await expect(toggles.locator('.allowDuplicateToggle')).toBeVisible()
+    await page.locator('.prompt').getByRole('button', { name: 'Suchfilter', exact: true }).click()
+    await expect(toggles.locator('.matchingVideoToggle')).toBeVisible()
     await expect.poll(() => toggles.evaluate((element) => {
       const [first, second] = [...element.querySelectorAll('.switch-label')].map(label => label.getBoundingClientRect())
       return first.bottom - second.top
-    })).toBeLessThanOrEqual(0)
+    // Fractional UI Scale can leave a rounding overlap far below a pixel
+    })).toBeLessThanOrEqual(0.01)
+  })
+})
+
+test.describe('with many playlists', () => {
+  test.use({
+    seed: {
+      playlists: Array.from({ length: 12 }, (_, index) => ({ _id: `playlist${index}`, playlistName: `Playlist ${index}`, protected: false, videos: [] })),
+    },
+  })
+
+  test('keeps a valid scroll range when the filters collapse in the phone layout @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1)])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    const scroller = prompt.locator('.promptContentScroller')
+    const filters = prompt.getByRole('button', { name: 'Search filters', exact: true })
+
+    await filters.click()
+    await expect(prompt.locator('.sortSelect')).toBeVisible()
+    await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await filters.click()
+    await expect(prompt.locator('.sortSelect')).toBeHidden()
+    await expectValidScrollRange(scroller)
   })
 })
