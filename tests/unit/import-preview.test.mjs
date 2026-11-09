@@ -172,7 +172,7 @@ test('watch history with empty subtitles imports the record counted in the previ
     parseTakeoutWatchHistory,
     historyCacheById: { value: {} },
     deepCopy: structuredClone,
-    store: { dispatch: async (_action, records) => { imported = records } },
+    store: { dispatch: async (_action, records) => { imported = records; return true } },
     showToast() {},
     t: key => key,
   })

@@ -643,15 +643,7 @@ async function importSelectedTakeoutData() {
   try {
     await forEachTakeoutImportEntry(takeoutFile.value, selected, takeoutEntries.value, async entry => {
       if (entry.type === 'subscriptions') {
-        const subscriptions = parseTakeoutSubscriptions(entry)
-        const known = new Set(primaryProfile.value.subscriptions.map(channel => channel.id))
-        const additions = subscriptions.filter(channel => {
-          if (known.has(channel.id)) return false
-          known.add(channel.id)
-          return true
-        })
-        await store.dispatch('updateProfile', { ...deepCopy(primaryProfile.value), subscriptions: [...deepCopy(primaryProfile.value.subscriptions), ...additions] })
-        showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'subscriptions'] })
+        await addSubscriptionsToPrimaryProfile(parseTakeoutSubscriptions(entry))
       } else if (entry.type === 'history') {
         await importYouTubeWatchHistory(JSON.parse(entry.content))
       } else if (entry.type === 'searchHistory') {
@@ -812,61 +804,47 @@ async function importSubscriptions() {
 
   const { filename, content } = response
 
-  if (filename.endsWith('.csv')) {
-    await importCsvYouTubeSubscriptions(content)
-  } else if (filename.endsWith('.db')) {
-    const records = parseImportedLineDelimitedJson(content)
-    if (records !== null) {
-      importFreeTubeSubscriptions(records)
-    }
-  } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
-    await importOpmlYouTubeSubscriptions(content)
-  } else if (filename.endsWith('.json')) {
-    const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid subscriptions file'))
-    if (jsonContent === null) {
-      return
-    }
+  try {
+    if (filename.endsWith('.csv')) {
+      await importCsvYouTubeSubscriptions(content)
+    } else if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeSubscriptions(records)
+      }
+    } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
+      await importOpmlYouTubeSubscriptions(content)
+    } else if (filename.endsWith('.json')) {
+      const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid subscriptions file'))
+      if (jsonContent === null) {
+        return
+      }
 
-    const subscriptionFormat = detectSubscriptionJsonFormat(jsonContent)
+      const subscriptionFormat = detectSubscriptionJsonFormat(jsonContent)
 
-    switch (subscriptionFormat) {
-      case 'libretube-backup':
-        importLibreTubeSubscriptions(getLibreTubeSubscriptions(jsonContent))
-        break
-      case 'libretube-freetube':
-        importLibreTubeSubscriptions(jsonContent.subscriptions)
-        break
-      case 'newpipe':
-        importNewPipeSubscriptions(jsonContent)
-        break
-      case 'youtube':
-        await importYouTubeSubscriptions(jsonContent)
-        break
-      default:
-        showToast({
-          message: t('Settings.Data Settings.Invalid subscriptions file'),
-          icon: ['fas', 'circle-exclamation'],
-        })
+      switch (subscriptionFormat) {
+        case 'libretube-backup':
+          await importLibreTubeSubscriptions(getLibreTubeSubscriptions(jsonContent))
+          break
+        case 'libretube-freetube':
+          await importLibreTubeSubscriptions(jsonContent.subscriptions)
+          break
+        case 'newpipe':
+          await importNewPipeSubscriptions(jsonContent)
+          break
+        case 'youtube':
+          await importYouTubeSubscriptions(jsonContent)
+          break
+        default:
+          showToast({
+            message: t('Settings.Data Settings.Invalid subscriptions file'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+      }
     }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
-}
-
-/**
- * @param {string | null} channelId
- * @param {{ id: string, name: string, thumbnail: string | null }[]} subscriptions
- */
-function isChannelSubscribed(channelId, subscriptions) {
-  if (channelId === null) { return true }
-
-  const subExists = primaryProfile.value.subscriptions.some((sub) => {
-    return sub.id === channelId
-  })
-
-  const subDuplicateExists = subscriptions.some((sub) => {
-    return sub.id === channelId
-  })
-
-  return subExists || subDuplicateExists
 }
 
 /**
@@ -925,9 +903,20 @@ function convertOldFreeTubeFormatToNew(oldData) {
 }
 
 /**
+ * Keeps the first entry for each channel ID.
+ * @template {{ id: string }} T
+ * @param {T[]} subscriptions
+ * @returns {T[]}
+ */
+function uniqueSubscriptions(subscriptions) {
+  const seen = new Set()
+  return subscriptions.filter(channel => !seen.has(channel.id) && seen.add(channel.id))
+}
+
+/**
  * @param {unknown[]} profileRecords
  */
-function importFreeTubeSubscriptions(profileRecords) {
+async function importFreeTubeSubscriptions(profileRecords) {
   const firstEntry = profileRecords[0]
   if (
     isJsonObject(firstEntry) &&
@@ -952,8 +941,9 @@ function importFreeTubeSubscriptions(profileRecords) {
     'icon'
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
-  const updatedPrimaryProfile = primaryProfile.value
+  const updatedPrimaryProfile = deepCopy(profileList.value[0])
   let shouldUpdatePrimaryProfile = false
+  const profileWrites = []
 
   profileRecords.forEach((profileData) => {
     // We would technically already be done by the time the data is parsed,
@@ -995,15 +985,8 @@ function importFreeTubeSubscriptions(profileRecords) {
           if (Object.hasOwn(profileObject, 'icon')) {
             existingProfile.icon = profileObject.icon
           }
-          existingProfile.subscriptions = existingProfile.subscriptions.concat(profileObject.subscriptions)
-          existingProfile.subscriptions = existingProfile.subscriptions.filter((sub, index) => {
-            const profileIndex = existingProfile.subscriptions.findIndex((x) => {
-              return x.id === sub.id
-            })
-
-            return profileIndex === index
-          })
-          store.dispatch('updateProfile', existingProfile)
+          existingProfile.subscriptions = uniqueSubscriptions(existingProfile.subscriptions.concat(profileObject.subscriptions))
+          profileWrites.push(store.dispatch('updateProfile', existingProfile))
         } else {
           const hasProfileIdCollision = profileList.value.some((profile) => {
             return profile._id === profileObject._id
@@ -1012,21 +995,14 @@ function importFreeTubeSubscriptions(profileRecords) {
           if (hasProfileIdCollision) {
             const newProfile = { ...profileObject }
             delete newProfile._id
-            store.dispatch('createProfile', newProfile)
+            profileWrites.push(store.dispatch('createProfile', newProfile))
           } else {
-            store.dispatch('updateProfile', profileObject)
+            profileWrites.push(store.dispatch('updateProfile', profileObject))
           }
         }
       }
 
-      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions)
-      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.filter((sub, index) => {
-        const profileIndex = updatedPrimaryProfile.subscriptions.findIndex((x) => {
-          return x.id === sub.id
-        })
-
-        return profileIndex === index
-      })
+      updatedPrimaryProfile.subscriptions = uniqueSubscriptions(updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions))
       shouldUpdatePrimaryProfile = true
     }
   })
@@ -1035,7 +1011,11 @@ function importFreeTubeSubscriptions(profileRecords) {
     return
   }
 
-  store.dispatch('updateProfile', updatedPrimaryProfile)
+  profileWrites.push(store.dispatch('updateProfile', updatedPrimaryProfile))
+  const results = await Promise.all(profileWrites)
+  if (results.some(result => result !== true)) {
+    throw new Error('Could not import profiles')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
@@ -1068,24 +1048,14 @@ function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last
     })
 
     ytsubs.forEach((yt) => {
-      const channelId = yt[0]
-      if (!isChannelSubscribed(channelId, subscriptions)) {
-        const subscription = {
-          id: channelId,
-          name: yt[2],
-          thumbnail: null
-        }
-
-        subscriptions.push(subscription)
-      }
+      subscriptions.push({
+        id: yt[0],
+        name: yt[2],
+        thumbnail: null
+      })
     })
 
-    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    await store.dispatch('updateProfile', primaryProfile.value)
-    showToast({
-      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'subscriptions'],
-    })
+    await addSubscriptionsToPrimaryProfile(subscriptions)
   })
 }
 
@@ -1105,14 +1075,11 @@ function importYouTubeSubscriptions(textDecode) {
         throw new Error('Unable to find channel data')
       }
 
-      const channelId = snippet.resourceId.channelId
-      if (!isChannelSubscribed(channelId, subscriptions)) {
-        subscriptions.push({
-          id: channelId,
-          name: snippet.title,
-          thumbnail: snippet.thumbnails.default.url
-        })
-      }
+      subscriptions.push({
+        id: snippet.resourceId.channelId,
+        name: snippet.title,
+        thumbnail: snippet.thumbnails.default.url
+      })
 
       count++
 
@@ -1120,12 +1087,7 @@ function importYouTubeSubscriptions(textDecode) {
       progressOperation.update({ percentage: progressPercentage })
     })
 
-    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    await store.dispatch('updateProfile', primaryProfile.value)
-    showToast({
-      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'subscriptions'],
-    })
+    await addSubscriptionsToPrimaryProfile(subscriptions)
   })
 }
 
@@ -1156,14 +1118,11 @@ function importOpmlYouTubeSubscriptions(data) {
         console.error(`Unknown xmlUrl format: ${xmlUrl}`)
       }
 
-      if (!isChannelSubscribed(channelId, subscriptions)) {
-        const subscription = {
-          id: channelId,
-          name: channelName,
-          thumbnail: null
-        }
-        subscriptions.push(subscription)
-      }
+      subscriptions.push({
+        id: channelId,
+        name: channelName,
+        thumbnail: null
+      })
 
       count++
 
@@ -1171,12 +1130,7 @@ function importOpmlYouTubeSubscriptions(data) {
       progressOperation.update({ percentage: progressPercentage })
     })
 
-    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    await store.dispatch('updateProfile', primaryProfile.value)
-    showToast({
-      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'subscriptions'],
-    })
+    await addSubscriptionsToPrimaryProfile(subscriptions)
   })
 }
 
@@ -1191,31 +1145,28 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
     return
   }
 
-  mergeSubscriptionsIntoPrimaryProfile(subscriptions)
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
 }
 
 /**
- * @param {{ id: string, name: string, thumbnail: string | null }[]} subscriptions
+ * Adds the channels that are not subscribed yet to the primary profile.
+ * @param {{ id: string | null | undefined, name: string, thumbnail: string | null }[]} subscriptions
  */
-function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
-  runWithDataImportProgress(progressOperation => {
-    const newSubscriptions = []
+async function addSubscriptionsToPrimaryProfile(subscriptions) {
+  const profile = deepCopy(profileList.value[0])
+  const subscribedIds = new Set(profile.subscriptions.map(channel => channel.id))
+  for (const channel of subscriptions) {
+    if (channel.id == null || subscribedIds.has(channel.id)) continue
+    subscribedIds.add(channel.id)
+    profile.subscriptions.push(channel)
+  }
 
-    subscriptions.forEach((channel, index) => {
-      if (!isChannelSubscribed(channel.id, newSubscriptions)) {
-        newSubscriptions.push(channel)
-      }
-
-      const progressPercentage = ((index + 1) / subscriptions.length) * 100
-      progressOperation.update({ percentage: progressPercentage })
-    })
-
-    primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(newSubscriptions)
-    store.dispatch('updateProfile', primaryProfile.value)
-    showToast({
-      message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'subscriptions'],
-    })
+  if (await store.dispatch('updateProfile', profile) !== true) {
+    throw new Error('Could not import subscriptions')
+  }
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'subscriptions'],
   })
 }
 
@@ -1245,7 +1196,7 @@ function importNewPipeSubscriptions(newPipeData) {
     })
     .filter(subscription => subscription !== null)
 
-  mergeSubscriptionsIntoPrimaryProfile(subscriptions)
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
 }
 
 // #endregion subscriptions import
@@ -1477,24 +1428,28 @@ async function importWatchHistory() {
 
   const { filename, content } = response
 
-  if (filename.endsWith('.db')) {
-    const records = parseImportedLineDelimitedJson(content)
-    if (records !== null) {
-      importFreeTubeWatchHistory(records)
-    }
-  } else if (filename.endsWith('.json')) {
-    const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
-    if (jsonContent === null) {
-      return
-    }
+  try {
+    if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeWatchHistory(records)
+      }
+    } else if (filename.endsWith('.json')) {
+      const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
+      if (jsonContent === null) {
+        return
+      }
 
-    if (isLibreTubeWatchHistoryBackup(jsonContent)) {
-      importLibreTubeWatchHistory(jsonContent)
-    } else if (Array.isArray(jsonContent)) {
-      importYouTubeWatchHistory(jsonContent)
-    } else {
-      showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+      if (isLibreTubeWatchHistoryBackup(jsonContent)) {
+        await importLibreTubeWatchHistory(jsonContent)
+      } else if (Array.isArray(jsonContent)) {
+        await importYouTubeWatchHistory(jsonContent)
+      } else {
+        showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+      }
     }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -1581,7 +1536,9 @@ async function importFreeTubeWatchHistory(historyRecords) {
     return
   }
 
-  await store.dispatch('overwriteHistory', historyItems)
+  if (await store.dispatch('overwriteHistory', historyItems) !== true) {
+    throw new Error('Could not import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -1620,7 +1577,9 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  await store.dispatch('overwriteHistory', convertedHistoryItems)
+  if (await store.dispatch('overwriteHistory', convertedHistoryItems) !== true) {
+    throw new Error('Could not import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -1642,7 +1601,9 @@ async function importYouTubeWatchHistory(historyData) {
   const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
   for (const entry of entries) historyItems.set(entry.videoId, entry)
 
-  await store.dispatch('overwriteHistory', historyItems)
+  if (await store.dispatch('overwriteHistory', historyItems) !== true) {
+    throw new Error('Could not import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -2107,13 +2068,17 @@ async function importSearchHistory() {
 
   const { filename, content } = response
 
-  if (filename.endsWith('.db')) {
-    const records = parseImportedLineDelimitedJson(content)
-    if (records !== null) {
-      importFreeTubeSearchHistory(records)
+  try {
+    if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeSearchHistory(records)
+      }
+    } else if (filename.endsWith('.json')) {
+      await importYouTubeSearchHistory(JSON.parse(content))
     }
-  } else if (filename.endsWith('.json')) {
-    importYouTubeSearchHistory(JSON.parse(content))
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -2148,7 +2113,9 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
 
   const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
-  await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
+  if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),
@@ -2169,7 +2136,9 @@ async function importYouTubeSearchHistory(historyData) {
 
   const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
-  await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
+  if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),
