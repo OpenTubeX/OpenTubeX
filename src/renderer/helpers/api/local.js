@@ -802,7 +802,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
           id,
           htmlExtracts.session.context,
           htmlExtracts.initialAttestationData,
-          htmlExtracts.ytConfig
+          htmlExtracts.ytConfig,
+          shouldGeneratePoToken
         )
         player.po_token = contentPoToken
       } catch (error) {
