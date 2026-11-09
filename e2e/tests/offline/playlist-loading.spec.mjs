@@ -191,6 +191,9 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
   ;({ page } = await app.relaunch())
   await goTo(page, 'userplaylists')
   await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toBeVisible()
+  await page.getByRole('link', { name: 'Saved YouTube playlist' }).click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Pin to Top', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsPinnedIds)).toEqual([playlistId])
 
   await mockPlaylist(page)
   await page.getByRole('link', { name: 'Saved YouTube playlist' }).click()
@@ -200,6 +203,8 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
   await page.getByTitle('Remove Saved Playlist').click()
   await goTo(page, 'userplaylists')
   await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toHaveCount(0)
+  // Saving it again should not restore the pin.
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsPinnedIds)).toEqual([])
 })
 
 test('keeps the search result thumbnail when saving a playlist', async ({ page }) => {

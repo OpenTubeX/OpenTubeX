@@ -813,11 +813,16 @@ const customActions = {
     return persistPlaylistBookmarks(commit, bookmarks)
   },
 
-  removePlaylistBookmark: async ({ commit, getters }, playlistId) => {
+  removePlaylistBookmark: async ({ commit, getters, state }, playlistId) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(bookmark => bookmark?.playlist?.id !== playlistId)
 
-    return persistPlaylistBookmarks(commit, bookmarks)
+    if (!await persistPlaylistBookmarks(commit, bookmarks)) return false
+    // Saving the playlist again should not bring back an old pin.
+    if (state.userPlaylistsPinnedIds.includes(playlistId)) {
+      await updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', state.userPlaylistsPinnedIds.filter(id => id !== playlistId))
+    }
+    return true
   },
 
   replacePlaylistBookmarks: async ({ commit }, bookmarks) => {
