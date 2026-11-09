@@ -112,7 +112,7 @@ test('notifications appear in the app while it is visible and in the system othe
       .match(/Hist[^\n]*org\.opentubex\.app\.dev\/org\.opentubex\.app\.MainActivity[\s\S]*?state=(\w+)/)?.[1], { timeout: 15_000 }).toBe('STOPPED')
     await observe([hidden, visible, seed])
     await expect.poll(systemNotifications).toMatch(new RegExp(`Upload ${hidden}`))
-    // The thumbnail is added once it loads, which takes up to two attempts of 10 seconds each.
+    // The thumbnail is added once it loads, which takes up to three attempts of 10 seconds each.
     await expect.poll(() => /android\.picture=/.test(systemNotifications()), { timeout: 60_000 }).toBe(true)
     // The system also shows reminders without the app.
     await page.evaluate(stream => localStorage.setItem('opentubex-capacitor-live-reminders', JSON.stringify([{
