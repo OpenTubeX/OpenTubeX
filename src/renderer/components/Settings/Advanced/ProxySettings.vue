@@ -239,12 +239,13 @@ function handleUpdateProxy(enabled) {
 /**
  * @param {string} value
  */
-function handleUpdateProxyProtocol(value) {
+async function handleUpdateProxyProtocol(value) {
+  // apply the new protocol, not the one that is still saved
+  await store.dispatch('updateProxyProtocol', value)
+
   if (useProxy.value) {
     enableProxy()
   }
-
-  store.dispatch('updateProxyProtocol', value)
 }
 
 /**
@@ -323,7 +324,12 @@ function enableProxy() {
   }
 }
 
-const debouncedEnableProxy = debounce(enableProxy, 200)
+// An edit followed quickly by disabling the proxy must not turn it back on
+const debouncedEnableProxy = debounce(() => {
+  if (useProxy.value) {
+    enableProxy()
+  }
+}, 200)
 
 function disableProxy() {
   if (process.env.IS_ELECTRON) {
