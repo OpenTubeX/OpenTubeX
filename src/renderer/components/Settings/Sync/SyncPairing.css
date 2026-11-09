@@ -66,17 +66,29 @@
 }
 
 .scannerFrame {
+  align-items: center;
   aspect-ratio: 1;
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  border-radius: calc(28px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  display: flex;
   inline-size: min(100%, 24rem);
+  justify-content: center;
   margin-inline: auto;
   overflow: hidden;
   position: relative;
 }
 
+.scannerPlaceholderIcon {
+  font-size: 3rem;
+}
+
 .scannerVideo {
   block-size: 100%;
   inline-size: 100%;
+  inset: 0;
   object-fit: cover;
+  position: absolute;
 }
 
 .pairingDetails {
