@@ -97,7 +97,7 @@
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
           :aria-label="channel.name"
-          role="button"
+          :role="enableChannelLinks ? 'button' : undefined"
         >
           <div
             class="thumbnailContainer"
@@ -140,7 +140,7 @@
           :class="enableChannelLinks ? '' : 'disabledIcon'"
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
-          role="button"
+          :role="enableChannelLinks ? 'button' : undefined"
         >
           <div
             class="thumbnailContainer"
