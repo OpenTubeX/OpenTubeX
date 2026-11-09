@@ -1222,6 +1222,8 @@ Settings:
     Automatic History Retention: Automatisches Löschen des Wiedergabeverlaufs (Tage)
     Automatic History Retention Placeholder: Leer lassen, um nie automatisch zu löschen
     Automatic History Retention Tooltip: Leer lassen, um den Verlauf unbegrenzt aufzubewahren. Beim Speichern einer Zahl werden ältere Einträge sofort und automatisch gelöscht, solange die Anwendung geöffnet ist.
+    Automatic Search History Retention: Automatisches Löschen des Suchverlaufs (Tage)
+    Automatic Search History Retention Tooltip: Leer lassen, um den Suchverlauf unbegrenzt aufzubewahren. Beim Speichern einer Zahl werden ältere Suchanfragen sofort und automatisch gelöscht, solange die Anwendung geöffnet ist.
     History Retention Saved: Aufbewahrungsdauer des Verlaufs wurde gespeichert
     Invalid History Retention Days: Gib eine ganze Anzahl von Tagen größer als null ein
     Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: Bist du sicher, dass du alle Abos und Profile löschen möchtest?  Diese Aktion kann nicht rückgängig gemacht werden.
@@ -2063,7 +2065,7 @@ About:
   Please read the {roomRulesLink}: Bitte lies die {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wird ermöglicht durch {creditsPageLink}
   Commit: Commit
-  Get OpenTubeX: OpenTubeX herunterladen
+  Project: Projekt
   Community: Community
   Contribute: Mitwirken
   Matrix: Matrix

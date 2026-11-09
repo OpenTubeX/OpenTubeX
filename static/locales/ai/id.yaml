@@ -1035,6 +1035,8 @@ Settings:
     Automatic History Retention: Penyimpanan Riwayat Otomatis (Hari)
     Automatic History Retention Placeholder: Biarkan kosong untuk menyimpan selamanya
     Automatic History Retention Tooltip: Biarkan kosong untuk menyimpan riwayat selamanya. Menyimpan angka akan segera menghapus entri yang lebih lama dan menghapusnya secara otomatis selama aplikasi terbuka.
+    Automatic Search History Retention: Penyimpanan Riwayat Pencarian Otomatis (Hari)
+    Automatic Search History Retention Tooltip: Biarkan kosong untuk menyimpan riwayat pencarian selamanya. Menyimpan angka akan segera menghapus pencarian yang lebih lama dan menghapusnya secara otomatis selama aplikasi terbuka.
     History Retention Saved: Pengaturan penyimpanan riwayat telah disimpan
     Invalid History Retention Days: Masukkan bilangan bulat hari yang lebih besar dari nol
     Enable Watch Statistics: Aktifkan Statistik Tontonan
@@ -1506,7 +1508,7 @@ Tutorial:
     Action: Impor data
     Not Now: Jangan sekarang
 About:
-  Get OpenTubeX: Dapatkan OpenTubeX
+  Project: Proyek
   Community: Komunitas
   Contribute: Berkontribusi
   Documentation: Dokumentasi

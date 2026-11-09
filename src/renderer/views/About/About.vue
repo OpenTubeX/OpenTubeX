@@ -59,6 +59,7 @@
               <span
                 v-for="item in line"
                 :key="item.href"
+                class="linkItem"
               >
                 <a
                   :href="item.href"
@@ -119,8 +120,8 @@ const runtimeVersions = process.env.IS_ELECTRON
 
 const chunks = computed(() => [
   {
-    icon: ['fas', 'download'],
-    title: t('About.Get OpenTubeX'),
+    icon: ['fas', 'cube'],
+    title: t('About.Project'),
     lines: [
       [
         { icon: ['fas', 'globe'], label: t('About.Website'), href: 'https://opentubex.org/' },

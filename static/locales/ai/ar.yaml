@@ -1043,6 +1043,8 @@ Settings:
     Automatic History Retention: الاحتفاظ التلقائي بالسجل (أيام)
     Automatic History Retention Placeholder: اتركه فارغًا للاحتفاظ به إلى الأبد
     Automatic History Retention Tooltip: اتركه فارغا للحفاظ على التاريخ إلى الأبد. يؤدي حفظ الرقم إلى إزالة الإدخالات القديمة الآن وبشكل تلقائي أثناء فتح التطبيق.
+    Automatic Search History Retention: الاحتفاظ التلقائي بسجل البحث (أيام)
+    Automatic Search History Retention Tooltip: اتركه فارغا للاحتفاظ بسجل البحث إلى الأبد. يؤدي حفظ رقم إلى إزالة عمليات البحث الأقدم الآن وبشكل تلقائي أثناء فتح التطبيق.
     History Retention Saved: تم حفظ الاحتفاظ بالتاريخ
     Invalid History Retention Days: أدخل عددًا صحيحًا من الأيام أكبر من الصفر
     Enable Watch Statistics: تمكين إحصائيات المشاهدة
@@ -1529,7 +1531,7 @@ Tutorial:
     Action: استيراد البيانات
     Not Now: ليس الآن
 About:
-  Get OpenTubeX: احصل على OpenTubeX
+  Project: المشروع
   Community: المجتمع
   Contribute: ساهم
   Documentation: التوثيق

@@ -343,6 +343,10 @@ class SearchHistory {
     return dbSearchHistory(DBActions.GENERAL.DELETE, _id)
   }
 
+  static deleteOlderThan(cutoff) {
+    return dbSearchHistory(DBActions.SEARCH_HISTORY.DELETE_OLDER_THAN, cutoff)
+  }
+
   static deleteAll() {
     return dbSearchHistory(DBActions.GENERAL.DELETE_ALL)
   }

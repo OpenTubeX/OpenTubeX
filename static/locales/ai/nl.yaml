@@ -1047,6 +1047,8 @@ Settings:
     Automatic History Retention: Geschiedenis automatisch bewaren (dagen)
     Automatic History Retention Placeholder: Leeg laten om onbeperkt te bewaren
     Automatic History Retention Tooltip: Laat dit leeg om de geschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere items nu en automatisch verwijderd zolang de app geopend is.
+    Automatic Search History Retention: Zoekgeschiedenis automatisch bewaren (dagen)
+    Automatic Search History Retention Tooltip: Laat dit leeg om de zoekgeschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere zoekopdrachten nu en automatisch verwijderd zolang de app geopend is.
     History Retention Saved: Bewaartermijn voor geschiedenis is opgeslagen
     Invalid History Retention Days: Voer een geheel aantal dagen groter dan nul in
     Enable Watch Statistics: Kijkstatistieken inschakelen
@@ -1533,7 +1535,7 @@ Tutorial:
     Action: Gegevens importeren
     Not Now: Niet nu
 About:
-  Get OpenTubeX: OpenTubeX downloaden
+  Project: Project
   Community: Gemeenschap
   Contribute: Bijdragen
   Documentation: Documentatie

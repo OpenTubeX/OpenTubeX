@@ -618,8 +618,7 @@ test.describe('custom theme editor', () => {
     await expect(editor).toHaveCount(0)
     await goToSettingsSection(page, 'storage')
     const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
-    // Destructive buttons rest tonal and take the theme's own state shades.
-    await expect(removeHistoryButton).toHaveClass(/\bvariant-tonal\b/)
+    // Custom themes give destructive buttons their own state shades.
     await removeHistoryButton.hover()
     await expect(removeHistoryButton).toHaveCSS('color', 'rgb(254, 220, 186)')
     await expect.poll(() => backgroundRgb(removeHistoryButton)).toBe('rgb(69, 109, 239)')

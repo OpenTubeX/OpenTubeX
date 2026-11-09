@@ -1165,7 +1165,9 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible({ timeout: 10_000 })
+  // Loading the page under load must not use up the 5s retry delay's budget.
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBeGreaterThan(0)
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible()
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
 
   await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => {
@@ -2763,6 +2765,21 @@ test('plays both streams when an external clip has separate audio and codec-free
   await page.locator(sel.searchInput).press('Enter')
   const video = page.locator(`${activeTab} .videoPlayer video`)
   const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+  // Under load a poll round trip can take longer than the looping soundtrack
+  // spends inside a short window, so watch its playback in the page.
+  const playsAudioBetween = (min, max, timeout = 10000) => audio.evaluate((element, { min, max, timeout }) => new Promise(resolve => {
+    const finish = result => {
+      element.removeEventListener('timeupdate', check)
+      clearTimeout(timer)
+      resolve(result)
+    }
+    const check = () => {
+      if (element.currentTime > min && element.currentTime < max && !element.paused) finish(true)
+    }
+    const timer = setTimeout(() => finish(false), timeout)
+    element.addEventListener('timeupdate', check)
+    check()
+  }), { min, max, timeout })
   await expect.poll(() => video.evaluate(element => element.videoWidth).catch(() => 0), { timeout: 20000 }).toBeGreaterThan(0)
   await expect.poll(() => audio.evaluate(element => element.currentTime > 0 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
   await video.evaluate(element => {
@@ -2783,20 +2800,29 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect(video).toHaveJSProperty('loop', true)
   await video.evaluate(element => { delete element.duration })
   await audio.evaluate(element => { delete element.duration })
-  await audio.evaluate(async element => { element.currentTime = 0; await element.play() })
-  await video.evaluate(element => element.dispatchEvent(new Event('waiting')))
-  await expect.poll(() => audio.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
-  await video.evaluate(element => element.dispatchEvent(new Event('playing')))
-  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
-  await expect.poll(() => audio.evaluate(element => element.currentTime > 2.5 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
+  // The looping video fires real waiting and playing events of its own, so check
+  // each simulated buffering event in one evaluation before one of them can run.
+  expect(await video.evaluate((element, companion) => {
+    companion.currentTime = 0
+    // A real buffering pause may interrupt this play request.
+    companion.play().catch(() => {})
+    const playing = !companion.paused
+    element.dispatchEvent(new Event('waiting'))
+    const pausedWhileBuffering = companion.paused
+    element.dispatchEvent(new Event('playing'))
+    return { playing, pausedWhileBuffering, resumed: !companion.paused }
+  }, await audio.elementHandle())).toEqual({ playing: true, pausedWhileBuffering: true, resumed: true })
+  expect(await playsAudioBetween(2.5, Infinity, 20000)).toBe(true)
   await expect(video).toHaveJSProperty('loop', true)
   await expect.poll(() => video.evaluate(element => !element.paused)).toBe(true)
-  await expect.poll(() => audio.evaluate(element => element.currentTime > 1 && element.currentTime < 3), { timeout: 10000 }).toBe(true)
-  const audioBeforeSeek = await audio.evaluate(element => element.currentTime)
-  await video.evaluate(element => { element.currentTime = 0.5 })
+  expect(await playsAudioBetween(1, 3)).toBe(true)
+  const audioBeforeSeek = await video.evaluate((element, companion) => {
+    element.currentTime = 0.5
+    return companion.currentTime
+  }, await audio.elementHandle())
   await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 5000 }).toBeGreaterThan(0.4)
   expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThan(audioBeforeSeek - 0.25)
-  await expect.poll(() => audio.evaluate(element => element.currentTime < 1 && !element.paused), { timeout: 10000 }).toBe(true)
+  expect(await playsAudioBetween(0, 1)).toBe(true)
   await expect(video).toHaveJSProperty('paused', false)
   await video.evaluate(element => element.pause())
   await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)

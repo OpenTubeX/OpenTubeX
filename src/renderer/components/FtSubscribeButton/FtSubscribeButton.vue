@@ -224,6 +224,7 @@ import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
+import { normalizeChannelHandle } from '../../helpers/feed-metadata'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
@@ -250,6 +251,10 @@ const props = defineProps({
     required: true
   },
   channelThumbnail: {
+    type: String,
+    default: null
+  },
+  channelHandle: {
     type: String,
     default: null
   },
@@ -287,6 +292,7 @@ const profileDropdownAnchor = `--subscription-${id}`
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
  * @property {string|undefined} subscriptions[].thumbnail
+ * @property {string|undefined} subscriptions[].handle
  * @property {string[]|undefined} subscriptions[].feedTypes
  * @property {number|null|undefined} subscriptions[].dailyVideoLimit
  * @property {boolean|undefined} subscriptions[].showMembersOnly
@@ -711,11 +717,21 @@ function handleSubscription(profile) {
     if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
       channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
     }
+    // A saved handle can be newer than the one from a cached result.
+    const savedHandle = store.getters.getSubscribedChannelsById.get(props.channelId)?.handle
+    const handle = savedHandle ?? normalizeChannelHandle(props.channelHandle)
+    if (handle !== null) {
+      channel.handle = handle
+    }
 
     store.dispatch('addChannelToProfiles', {
       channel,
       profileIds
     })
+    // Profiles that already had the channel saved it without a handle.
+    if (handle !== null && savedHandle === undefined && !profileIds.includes(MAIN_PROFILE_ID)) {
+      store.dispatch('updateSubscriptionDetails', { channelId: props.channelId, channelHandle: handle })
+    }
 
     showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
     emit('subscribed')

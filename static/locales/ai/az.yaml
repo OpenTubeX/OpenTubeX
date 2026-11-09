@@ -1034,6 +1034,8 @@ Settings:
     Automatic History Retention: Tarixçənin avtomatik saxlanma müddəti (gün)
     Automatic History Retention Placeholder: Həmişəlik saxlamaq üçün boş buraxın
     Automatic History Retention Tooltip: Tarixçəni həmişəlik saxlamaq üçün boş buraxın. Rəqəm yadda saxlandıqda köhnə qeydlər dərhal və tətbiq açıq olduğu müddətdə avtomatik silinir.
+    Automatic Search History Retention: Axtarış tarixçəsinin avtomatik saxlanma müddəti (gün)
+    Automatic Search History Retention Tooltip: Axtarış tarixçəsini həmişəlik saxlamaq üçün boş buraxın. Rəqəm yadda saxlandıqda köhnə axtarışlar dərhal və tətbiq açıq olduğu müddətdə avtomatik silinir.
     History Retention Saved: Tarixçənin saxlanma müddəti yadda saxlandı
     Invalid History Retention Days: Sıfırdan böyük tam gün sayı daxil edin
     Enable Watch Statistics: Baxış statistikasını aktivləşdir
@@ -1502,7 +1504,7 @@ Tutorial:
     Action: Məlumatları idxal et
     Not Now: İndi yox
 About:
-  Get OpenTubeX: OpenTubeX-i əldə edin
+  Project: Layihə
   Community: İcma
   Contribute: Töhfə verin
   Documentation: Sənədləşmə

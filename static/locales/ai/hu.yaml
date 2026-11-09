@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Előzmények automatikus megőrzése (nap)
     Automatic History Retention Placeholder: Hagyja üresen a korlátlan megőrzéshez
     Automatic History Retention Tooltip: Hagyja üresen az előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi bejegyzéseket, és ezt az alkalmazás futása közben automatikusan megismétli.
+    Automatic Search History Retention: Keresési előzmények automatikus megőrzése (nap)
+    Automatic Search History Retention Tooltip: Hagyja üresen a keresési előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi kereséseket, és ezt az alkalmazás futása közben automatikusan megismétli.
     History Retention Saved: Előzménymegőrzés mentve
     Invalid History Retention Days: Adjon meg nullánál nagyobb egész számú napot
     Enable Watch Statistics: Megtekintési statisztikák engedélyezése
@@ -1499,7 +1501,7 @@ Tutorial:
     Action: Adatok importálása
     Not Now: Most nem
 About:
-  Get OpenTubeX: OpenTubeX beszerzése
+  Project: Projekt
   Community: Közösség
   Contribute: Közreműködés
   Documentation: Dokumentáció

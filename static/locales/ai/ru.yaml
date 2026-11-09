@@ -1005,6 +1005,8 @@ Settings:
     Automatic History Retention: Автоматическое хранение истории (дней)
     Automatic History Retention Placeholder: Оставьте пустым для бессрочного хранения
     Automatic History Retention Tooltip: Оставьте поле пустым, чтобы хранить историю бессрочно. Если сохранить число, старые записи будут удалены сразу, а затем будут удаляться автоматически, пока приложение открыто.
+    Automatic Search History Retention: Автоматическое хранение истории поиска (дней)
+    Automatic Search History Retention Tooltip: Оставьте поле пустым, чтобы хранить историю поиска бессрочно. Если сохранить число, старые запросы будут удалены сразу, а затем будут удаляться автоматически, пока приложение открыто.
     History Retention Saved: Срок хранения истории сохранён
     Invalid History Retention Days: Введите целое число дней больше нуля
     Enable Watch Statistics: Включить статистику просмотров
@@ -1473,7 +1475,7 @@ Tutorial:
     Action: Импортировать данные
     Not Now: Не сейчас
 About:
-  Get OpenTubeX: Получить OpenTubeX
+  Project: Проект
   Community: Сообщество
   Contribute: Внести вклад
   Documentation: Документация

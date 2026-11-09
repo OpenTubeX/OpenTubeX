@@ -1047,6 +1047,8 @@ Settings:
     Automatic History Retention: Historian automaattinen säilytysaika (päivää)
     Automatic History Retention Placeholder: Jätä tyhjäksi säilyttääksesi historian pysyvästi
     Automatic History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää historian pysyvästi. Kun tallennat luvun, sitä vanhemmat merkinnät poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
+    Automatic Search History Retention: Hakuhistorian automaattinen säilytysaika (päivää)
+    Automatic Search History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää hakuhistorian pysyvästi. Kun tallennat luvun, sitä vanhemmat haut poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
     History Retention Saved: Historian säilytysaika tallennettiin
     Invalid History Retention Days: Anna päivien määräksi nollaa suurempi kokonaisluku
     Enable Watch Statistics: Ota katselutilastot käyttöön
@@ -1533,7 +1535,7 @@ Tutorial:
     Action: Tuo tiedot
     Not Now: Ei nyt
 About:
-  Get OpenTubeX: Hanki OpenTubeX
+  Project: Projekti
   Community: Yhteisö
   Contribute: Osallistu
   Documentation: Dokumentaatio

@@ -1214,7 +1214,9 @@ Settings:
     Automatic History Retention: 시청 기록 자동 보관 기간 (일)
     Automatic History Retention Placeholder: 영구 보관하려면 비워 두세요
     Automatic History Retention Tooltip: 시청 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 기록을 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
-    History Retention Saved: 시청 기록 보관 기간을 저장했습니다
+    Automatic Search History Retention: 검색 기록 자동 보관 기간 (일)
+    Automatic Search History Retention Tooltip: 검색 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 검색어를 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
+    History Retention Saved: 기록 보관 기간을 저장했습니다
     Invalid History Retention Days: 0보다 큰 정수 일수를 입력하세요
     Enable Watch Statistics: 시청 통계 활성화
     Week Starts On: 한 주의 시작 요일
@@ -1755,7 +1757,7 @@ Tutorial:
     Action: 데이터 가져오기
     Not Now: 나중에
 About:
-  Get OpenTubeX: OpenTubeX 받기
+  Project: 프로젝트
   Community: 커뮤니티
   Contribute: 기여하기
   Documentation: 문서

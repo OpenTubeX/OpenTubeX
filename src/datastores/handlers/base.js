@@ -1219,6 +1219,15 @@ class SearchHistory {
     return db.searchHistory.removeAsync({ _id: _id })
   }
 
+  /**
+   * @param {number} cutoff Searches last used before this timestamp are removed
+   * @returns {Promise<object[] | null>} The remaining searches, or null when none were removed
+   */
+  static async deleteOlderThan(cutoff) {
+    const removed = await db.searchHistory.removeAsync({ lastUpdatedAt: { $lt: cutoff } }, { multi: true })
+    return removed > 0 ? SearchHistory.find() : null
+  }
+
   static deleteAll() {
     return db.searchHistory.removeAsync({}, { multi: true })
   }

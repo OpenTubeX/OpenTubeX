@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: "Mirout an istor ent emgefreek (devezhioù)"
     Automatic History Retention Placeholder: "Leuskel goullo evit mirout da viken"
     Automatic History Retention Tooltip: "Leuskit goullo evit mirout an istor da viken. Enrollañ un niver a zilam an elfennoù koshoc'h bremañ, hag ent emgefreek pa vez digor an arload."
+    Automatic Search History Retention: Mirout istor an enklaskoù ent emgefreek (devezhioù)
+    Automatic Search History Retention Tooltip: Leuskit goullo evit mirout istor an enklaskoù da viken. Enrollañ un niver a zilam an enklaskoù koshoc'h bremañ, hag ent emgefreek pa vez digor an arload.
     History Retention Saved: "Enrollet eo bet padelezh mirout an istor"
     Invalid History Retention Days: "Lakait un niver anterin a zevezhioù brasoc'h eget mann"
     Enable Watch Statistics: "Gweredekaat ar stadegoù sellout"
@@ -1499,7 +1501,7 @@ Tutorial:
     Action: "Enporzhiañ roadennoù"
     Not Now: "Diwezhatoc'h"
 About:
-  Get OpenTubeX: Kaout OpenTubeX
+  Project: Raktres
   Community: Kumuniezh
   Contribute: Kenlabourat
   Documentation: Teuliadur

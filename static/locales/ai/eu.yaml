@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Historiaren atxikipen automatikoa (egunak)
     Automatic History Retention Placeholder: Utzi hutsik betiko gordetzeko
     Automatic History Retention Tooltip: Utzi hutsik historia betiko gordetzeko. Zenbaki bat gordetzean, sarrera zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
+    Automatic Search History Retention: Bilaketa-historiaren atxikipen automatikoa (egunak)
+    Automatic Search History Retention Tooltip: Utzi hutsik bilaketa-historia betiko gordetzeko. Zenbaki bat gordetzean, bilaketa zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
     History Retention Saved: Historiaren atxikipena gorde da
     Invalid History Retention Days: Idatzi zero baino handiagoa den egun kopuru oso bat
     Enable Watch Statistics: Gaitu ikustaldien estatistikak
@@ -1499,7 +1501,7 @@ Tutorial:
     Action: Inportatu datuak
     Not Now: Orain ez
 About:
-  Get OpenTubeX: Lortu OpenTubeX
+  Project: Proiektua
   Community: Komunitatea
   Contribute: Lagundu
   Documentation: Dokumentazioa

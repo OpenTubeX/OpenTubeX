@@ -72,10 +72,20 @@
   letter-spacing: -0.01em;
 }
 
-.subCount {
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.5em;
   color: var(--tertiary-text-color);
-  inset-block-start: 50px;
-  inset-inline-start: 120px;
+}
+
+.handle {
+  overflow-wrap: anywhere;
+}
+
+.handle + .subCount::before {
+  content: '•' / '';
+  margin-inline-end: 0.5em;
 }
 
 .infoActionsContainer {
@@ -240,7 +250,7 @@
 }
 
 .name,
-.subCount {
+.metadata {
   margin: 0;
 }
 
@@ -316,6 +326,10 @@
 
   .lineContainer {
     padding-inline-start: 0;
+  }
+
+  .metadata {
+    justify-content: center;
   }
 
   .thumbnailContainer {

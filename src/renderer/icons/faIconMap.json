@@ -195,6 +195,10 @@
     "ri": "cookie-line",
     "material": "cookie-outline"
   },
+  "cube": {
+    "ri": "box-3-line",
+    "material": "deployed-code-outline"
+  },
   "database": {
     "ri": "database-2-line",
     "material": "database-outline"

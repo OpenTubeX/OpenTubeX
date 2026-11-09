@@ -1,5 +1,31 @@
 export const CHANNEL_HANDLE_REGEX = /^@[\w.-]{3,30}$/
 
+/**
+ * Handles can use letters from any script, unlike {@link CHANNEL_HANDLE_REGEX}.
+ * Servers can send any text in their handle fields, so only handles are kept.
+ * @param {unknown} value
+ * @returns {string | null} the handle including its leading `@`
+ */
+export function normalizeChannelHandle(value) {
+  if (typeof value !== 'string') return null
+  const handle = value.trim()
+  return /^@[^\s/?#@]+$/u.test(handle) ? handle : null
+}
+
+/**
+ * @param {unknown} url a channel URL such as `http://www.youtube.com/@name`
+ * @returns {string | null} the handle including its leading `@`
+ */
+export function getChannelHandleFromUrl(url) {
+  if (typeof url !== 'string' || url === '') return null
+  try {
+    const segment = new URL(url, 'https://www.youtube.com').pathname.split('/')[1]
+    return normalizeChannelHandle(decodeURIComponent(segment))
+  } catch {
+    return null
+  }
+}
+
 const PUBLISHED_TEXT_REGEX = /(\d+)\s?([a-z]+)/i
 
 /**

@@ -267,6 +267,7 @@ export const SYNC_SETTING_LABELS = {
   scrollMiniPlayerOnAllTabs: 'Settings.Player Settings.Scroll Mini Player.On All Tabs',
   scrollSpeed: 'Settings.Theme Settings.Scroll Speed',
   scrollbarThumbWidth: 'Settings.Theme Settings.Scrollbar Width',
+  searchHistoryRetentionDays: 'Settings.Privacy Settings.Automatic Search History Retention',
   secColor: 'Settings.Theme Settings.Secondary Color Theme',
   seekIntervalMultiplyByPlaybackRate: 'Settings.Player Settings.Multiply Seek Interval by Playback Rate',
   segmentPrefetchLimit: 'Settings.Player Settings.Parallel Segment Loading',

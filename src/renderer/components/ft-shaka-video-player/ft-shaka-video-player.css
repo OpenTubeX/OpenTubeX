@@ -74,6 +74,11 @@
   background-color: transparent;
 }
 
+/* The center icons explain themselves, and a tooltip over the video looks out of place. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container > :is(.shaka-tooltip, .shaka-tooltip-status)::after) {
+  display: none;
+}
+
 /* Keeps the icons legible over bright video. */
 .ftVideoPlayer :deep(.shaka-big-buttons-container .shaka-ui-icon) {
   filter: drop-shadow(0 0 6px rgb(0 0 0 / 60%));

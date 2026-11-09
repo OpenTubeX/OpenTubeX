@@ -26,3 +26,24 @@ test('a failed search history import keeps the saved history', async (t) => {
   await SearchHistory.overwrite([{ _id: 'imported', query: 'a', lastUpdatedAt: 2 }])
   assert.deepEqual(await SearchHistory.find(), [{ _id: 'imported', query: 'a', lastUpdatedAt: 2 }])
 })
+
+test('search history retention removes only searches last used before the cutoff', async (t) => {
+  const db = { searchHistory: createDesktopDatastore(':memory:') }
+  t.after(() => db.searchHistory.driver.close())
+  const SearchHistory = vm.runInNewContext(
+    source.slice(source.indexOf('class SearchHistory {'), source.indexOf('\nclass SubscriptionCache {')) + '\nSearchHistory',
+    { db }
+  )
+  const legacy = { _id: 'legacy', query: 'legacy' }
+  await db.searchHistory.insertAsync([
+    { _id: 'old', query: 'old', lastUpdatedAt: 1 },
+    { _id: 'cutoff', query: 'cutoff', lastUpdatedAt: 10 },
+    { _id: 'recent', query: 'recent', lastUpdatedAt: 20 },
+    legacy,
+  ])
+
+  const remaining = await SearchHistory.deleteOlderThan(10)
+  assert.deepEqual(remaining.map(entry => entry._id), ['recent', 'cutoff', 'legacy'])
+  assert.deepEqual(await SearchHistory.find(), remaining)
+  assert.equal(await SearchHistory.deleteOlderThan(10), null)
+})

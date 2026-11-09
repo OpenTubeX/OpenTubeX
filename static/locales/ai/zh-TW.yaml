@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: 自動保留觀看記錄（天）
     Automatic History Retention Placeholder: 留空則永久保留
     Automatic History Retention Tooltip: 留空會永久保留記錄。儲存天數後，系統會立即移除較舊的項目，並在應用程式開啟期間自動清除。
+    Automatic Search History Retention: 自動保留搜尋記錄（天）
+    Automatic Search History Retention Tooltip: 留空會永久保留搜尋記錄。儲存天數後，系統會立即移除較舊的搜尋，並在應用程式開啟期間自動清除。
     History Retention Saved: 已儲存記錄保留設定
     Invalid History Retention Days: 請輸入大於零的整數天數
     Enable Watch Statistics: 啟用觀看統計
@@ -1500,7 +1502,7 @@ Tutorial:
     Action: 匯入資料
     Not Now: 暫時不要
 About:
-  Get OpenTubeX: 取得 OpenTubeX
+  Project: 專案
   Community: 社群
   Contribute: 參與貢獻
   Documentation: 文件

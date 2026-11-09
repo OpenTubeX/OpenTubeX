@@ -34,6 +34,7 @@
     role="checkbox"
     tabindex="0"
     :aria-labelledby="id"
+    :title="channelHandle ? `${channelName}\n${channelHandle}` : null"
     @click="handleClick"
     @keydown.space.enter.prevent="handleClick"
   >
@@ -84,6 +85,11 @@ const props = defineProps({
     required: true
   },
   channelThumbnail: {
+    type: String,
+    default: null
+  },
+  // Shown on hover, as the bubble has no room for it
+  channelHandle: {
     type: String,
     default: null
   },
