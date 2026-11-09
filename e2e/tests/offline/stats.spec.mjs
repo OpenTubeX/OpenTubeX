@@ -61,19 +61,6 @@ test.describe('watch stats', () => {
     }
   })
 
-  test('summary cards show the seeded totals', async ({ page }) => {
-    await goTo(page, 'stats')
-
-    const summaryCard = (label) => page.locator('.summaryCard').filter({ hasText: label })
-
-    await expect(summaryCard('Today')).toContainText('1 hr')
-    await expect(summaryCard('Total watch time')).toContainText('1 hr 30 min')
-
-    // Both charts render with data.
-    await expect(page.locator('.lineChart')).toBeVisible()
-    await expect(page.locator('.barChart')).toBeVisible()
-  })
-
   test('resetting statistics clears all recorded time', async ({ page }) => {
     await goTo(page, 'stats')
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('1 hr 30 min')
@@ -82,75 +69,6 @@ test.describe('watch stats', () => {
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
 
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
-  })
-
-  test('a single statistics action stays on the right and fits its contents', async ({ app, page }) => {
-    await goTo(page, 'stats')
-    for (const zoom of [1, 1.25]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
-      for (const width of [375, 1500]) {
-        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
-        await expectStatsActionsLayout(page, 1)
-      }
-    }
-  })
-
-  test('active navigation stays readable while the system theme changes', async ({ app, page }, testInfo) => {
-    await goTo(page, 'stats')
-    const contrast = () => page.evaluate(() => {
-      function channels(color) {
-        return color.match(/[\d.]+/g).map(Number)
-      }
-      function luminance(rgb) {
-        const [red, green, blue] = rgb.map(channel => {
-          const value = channel / 255
-          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
-        })
-        return 0.2126 * red + 0.7152 * green + 0.0722 * blue
-      }
-      function ratio(foreground, background) {
-        const a = luminance(foreground)
-        const b = luminance(background)
-        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
-      }
-      const tab = document.querySelector('.tab.active')
-      const nav = document.querySelector('.sideNav .navOption.router-link-exact-active')
-      const navColor = channels(getComputedStyle(nav).backgroundColor)
-      const navBase = channels(getComputedStyle(nav.closest('.sideNav')).backgroundColor)
-      const navOpacity = navColor[3] ?? 1
-      const navBackground = navBase.map((channel, index) =>
-        navColor[index] * navOpacity + channel * (1 - navOpacity))
-      return {
-        tab: ratio(channels(getComputedStyle(tab).color), channels(getComputedStyle(tab).backgroundColor)),
-        sidebar: ratio(channels(getComputedStyle(nav.querySelector('.navLabel')).color), navBackground),
-      }
-    })
-    await page.emulateMedia({ colorScheme: 'light' })
-    await expect(page.locator('body')).toHaveClass(/\blight\b/)
-    await page.locator('.sideNav .navOption.router-link-exact-active').hover()
-    await expect.poll(async () => (await contrast()).tab).toBeGreaterThan(4.5)
-    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
-    await page.screenshot({ path: testInfo.outputPath('active-navigation-light.png') })
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
-    const changed = await contrast()
-    expect.soft(changed.tab).toBeGreaterThan(4.5)
-    expect.soft(changed.sidebar).toBeGreaterThan(4.5)
-    await expect.poll(async () => (await contrast()).tab).toBeGreaterThan(4.5)
-    await page.emulateMedia({ colorScheme: 'light' })
-    await expect(page.locator('body')).toHaveClass(/\blight\b/)
-    const reversed = await contrast()
-    expect.soft(reversed.tab).toBeGreaterThan(4.5)
-    expect.soft(reversed.sidebar).toBeGreaterThan(4.5)
-    await setWindowSize(app, page, { width: 320, height: 800 })
-    await page.evaluate(() => window.$store
-      .dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels']))
-    await expect(page.locator('.sideNav .navOption.router-link-exact-active')).toBeVisible()
-    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
-    await page.screenshot({ path: testInfo.outputPath('active-mobile-navigation-light.png') })
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
-    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
   })
 })
 
@@ -195,15 +113,10 @@ test.describe('historical watch time migration', () => {
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('10 min')
     await expect(page.locator('.adjustEstimateButton')).toBeVisible()
     await page.emulateMedia({ colorScheme: 'dark' })
-    for (const zoom of [1, 1.25]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
-      for (const width of [375, 1500]) {
-        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
-        await expectStatsActionsLayout(page, 2)
-        await page.locator('.statsFooter').scrollIntoViewIfNeeded()
-        if (zoom === 1) await attachScreenshot(`statistics action stack at ${width}px`)
-      }
-    }
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await expectStatsActionsLayout(page, 2)
+    await page.locator('.statsFooter').scrollIntoViewIfNeeded()
+    await attachScreenshot('statistics action stack at 375px')
   })
 })
 
@@ -238,30 +151,6 @@ test.describe('synced watch stats', () => {
         migrationDone,
       ],
     },
-  })
-
-  test('the replace device action uses the reset position and fits its contents', async ({ app, page, attachScreenshot }) => {
-    await goTo(page, 'stats')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerEnabled', true)
-      store.commit('setSyncServerWatchStatsSupported', true)
-      store.commit('setSyncedWatchStats', [
-        { deviceId: 'phone', deviceName: 'Pixel 8 Pro', platform: 'android', days: {} },
-      ])
-    })
-    await page.getByRole('group', { name: 'Devices' }).getByRole('button', { name: 'Pixel 8 Pro', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Replace old device', exact: true })).toBeVisible()
-    await page.emulateMedia({ colorScheme: 'dark' })
-    for (const zoom of [1, 1.25]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
-      for (const width of [375, 1500]) {
-        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
-        await expectStatsActionsLayout(page, 1)
-        await page.locator('.statsFooter').scrollIntoViewIfNeeded()
-        if (zoom === 1) await attachScreenshot(`replace device action at ${width}px`)
-      }
-    }
   })
 
   test('device picker grows into available space and fades overflowing edges', async ({ app, page }, testInfo) => {

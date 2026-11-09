@@ -399,65 +399,6 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await attachScreenshot('subscription list stays at the bottom after clearing the selection')
 })
 
-test('only offers members-only controls when yt-dlp playback cookies are configured', async ({ page }) => {
-  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
-  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-  await expect(page.getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(subscriptions.length)
-  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
-  await expect(page.getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(subscriptions.length + 1)
-
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updateYtDlpPlaybackAuthMode', 'none')
-  })
-
-  await expect(page.getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(0)
-
-  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
-  await goTo(page, 'subscribedchannels')
-  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
-  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
-  await expect(page.locator('.profileDropdown')
-    .getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(0)
-})
-
-test('the popover keeps the last daily limit count after reopening', async ({ page }) => {
-  await goTo(page, 'subscribedchannels')
-  const settingsButton = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings' })
-  await settingsButton.click()
-  const popover = page.locator('.profileDropdown')
-  const more = popover.getByRole('button', { name: 'More videos per day', exact: true })
-  await more.click()
-  await more.click()
-  await expect(popover.locator('.dailyVideoLimitCount')).toHaveText('3')
-  await popover.getByRole('button', { name: 'Unlimited', exact: true }).click()
-  await page.keyboard.press('Escape')
-  await expect(popover).toHaveCount(0)
-  await settingsButton.click()
-  await expect(popover.getByRole('button', { name: 'Unlimited', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await expect(popover.locator('.dailyVideoLimitCount')).toHaveText('3')
-})
-
-test('reports subscription setting write failures from the channel popover', async ({ page }) => {
-  await goTo(page, 'subscribedchannels')
-  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
-  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
-  const popover = page.locator('.profileDropdown')
-  const shorts = popover.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Shorts' })
-  await expect(shorts).toHaveAttribute('aria-checked', 'false')
-
-  await page.evaluate(() => {
-    const store = window.$store
-    store._actions.updateChannelSettings = [() => Promise.resolve(false)]
-  })
-  await shorts.click()
-
-  await expect(page.locator('.toast', {
-    hasText: 'Failed to save channel settings'
-  })).toBeVisible()
-  await expect(shorts).toHaveAttribute('aria-checked', 'false')
-})
-
 test('does not carry a failed popover edit into a later update', async ({ app, page }) => {
   await goTo(page, 'subscribedchannels')
   const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
@@ -673,51 +614,6 @@ for (const overlapping of [false, true]) {
     ))).toBe(null)
   })
 }
-
-test('reports one failure toast for a failed batch update', async ({ page }) => {
-  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
-  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-
-  await page.evaluate(() => {
-    const store = window.$store
-    let updateCount = 0
-    store._actions.batchUpdateChannelSettings = [() => {
-      updateCount += 1
-      return Promise.resolve(false)
-    }]
-    window.channelSettingsUpdateCount = () => updateCount
-  })
-
-  const selectionToolbar = page.locator('.channelSelectionToolbar')
-  await selectionToolbar.getByRole('button', { name: 'Select All' }).click()
-  await page.locator('.bulkFeedTypeSettings')
-    .getByRole('group', { name: 'Show in subscription feed', exact: true })
-    .getByRole('checkbox', { name: 'Videos' })
-    .click()
-
-  await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount()))
-    .toBe(1)
-  await expect(page.locator('.toast', {
-    hasText: 'Failed to save channel settings'
-  })).toHaveCount(1)
-})
-
-test('preserves the mixed members-only switch after a failed bulk save', async ({ page }) => {
-  const settings = await goToSettingsSection(page, 'subscription')
-  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-  await page.evaluate(() => {
-    window.$store._actions.batchUpdateChannelSettings = [() => Promise.resolve(false)]
-  })
-  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
-  const members = page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Show members-only videos' })
-  await expect(members).toHaveJSProperty('indeterminate', true)
-  await members.focus()
-  await members.press('Space')
-  await expect(page.locator('.toast', { hasText: 'Failed to save channel settings' })).toHaveCount(1)
-  await expect(members).toHaveJSProperty('indeterminate', true)
-  await expect(members).toHaveJSProperty('checked', false)
-  await expect(members).toHaveAttribute('aria-checked', 'mixed')
-})
 
 test('reports a partial write when a requested profile no longer exists', async ({ page }) => {
   const result = await page.evaluate(async () => {

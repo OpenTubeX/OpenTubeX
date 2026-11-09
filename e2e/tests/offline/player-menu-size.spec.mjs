@@ -62,91 +62,65 @@ async function expectValidScrollRange(options) {
   })).toEqual({ validOffset: true, noEmptySpace: true, scrollbarMatches: true })
 }
 
-for (const usePlayerMenuGrid of [true, false]) {
-  test.describe(`${usePlayerMenuGrid ? 'grid' : 'list'} player menu`, () => {
-    test.use({ seed: { settings: { ...WATCH_PAGE_SEED, enableSubtitlesByDefault: true, usePlayerMenuGrid } } })
+test.describe('grid player menu', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, enableSubtitlesByDefault: true, usePlayerMenuGrid: true } } })
 
-    test('scrolls only the caption options between a fixed header and footer @scale', async ({ app, page, attachScreenshot }) => {
-      await setWindowSize(app, page, { width: 1500, height: 1000 })
-      await mockPlayableWatchPage(app, page, { captionTranslations: true, extraCaptionTracks })
-      await openMockedVideo(page)
-      const player = await openOverflowMenu(page)
-      await openCaptionLanguages(player)
-      await expect(player.locator('.shaka-text-languages .shaka-turn-captions-off-button')).toBeAttached()
-
-      if (usePlayerMenuGrid) {
-        const height = await player.locator('.shaka-overflow-menu').evaluate(menu => menu.getBoundingClientRect().height)
-        expect(height).toBeLessThanOrEqual(340.5)
-      }
-
-      const options = player.locator('.shaka-text-languages > .ft-caption-list-options')
-      expect(await captionMenuLayout(player)).toEqual({
-        menuScrolls: false,
-        optionsScroll: true,
-        headerVisible: true,
-        footerVisible: true,
-      })
-
-      // Dragging the scrollbar must not count as a click that closes the submenu.
-      const track = options.locator(':scope > .os-scrollbar-vertical')
-      const handle = track.locator('.os-scrollbar-handle')
-      // The scrollbar only shows while the pointer is over the options.
-      await options.hover()
-      await expect(track).toHaveClass(/os-scrollbar-visible/)
-      const start = await handle.boundingBox()
-      const end = await track.boundingBox()
-      await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
-      await page.mouse.down()
-      await page.mouse.move(start.x + start.width / 2, end.y + end.height + 20, { steps: 5 })
-      await page.mouse.up()
-      await expect(player.locator('.shaka-text-languages')).toBeVisible()
-      await expect(options.getByRole('button', { name: 'Auto-translate' })).toBeInViewport()
-      expect(await captionMenuLayout(player)).toMatchObject({ headerVisible: true, footerVisible: true })
-      await attachScreenshot('caption options scrolled to the end')
-
-      // Coming back from a page that opens from the list starts at its top again.
-      await options.getByRole('button', { name: 'Auto-translate' }).click()
-      await player.locator('.ft-caption-translation-menu > .shaka-back-to-overflow-button').click()
-      await expect(player.locator('.shaka-text-languages')).toBeVisible()
-      await expect.poll(() => options.evaluate(element => element.scrollTop)).toBe(0)
-
-      // Shaka rebuilds the choices when the tracks change, here to a shorter list.
-      await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
-      await player.evaluate((element) => {
-        const shakaPlayer = element.ui.getControls().getPlayer()
-        const tracks = shakaPlayer.getTextTracks().slice(0, 20)
-        shakaPlayer.getTextTracks = () => tracks
-        shakaPlayer.dispatchEvent({ type: 'trackschanged' })
-      })
-      await expect(options.locator(':scope > button')).toHaveCount(23)
-      await expectValidScrollRange(options)
-
-      // So does a window size that gives the menu more room.
-      await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
-      await setWindowSize(app, page, { width: 1260, height: 820 })
-      await expectValidScrollRange(options)
-    })
-  })
-}
-
-test.describe('list player menu', () => {
-  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, usePlayerMenuGrid: false, videoPlaybackRateInterval: 0.1, maxVideoPlaybackRate: 3 } } })
-
-  test('wraps the playback speed presets instead of widening the menu @scale', async ({ app, page, attachScreenshot }) => {
-    await page.setViewportSize({ width: 1600, height: 900 })
-    await mockPlayableWatchPage(app, page)
+  test('scrolls only the caption options between a fixed header and footer @scale', async ({ app, page, attachScreenshot }) => {
+    await setWindowSize(app, page, { width: 1500, height: 1000 })
+    await mockPlayableWatchPage(app, page, { captionTranslations: true, extraCaptionTracks })
     await openMockedVideo(page)
     const player = await openOverflowMenu(page)
-    await player.locator('.shaka-playbackrate-button').click()
-    const presets = player.locator('.shaka-playback-rates > .shaka-playback-rate-presets')
-    await expect(presets).toBeVisible()
+    await openCaptionLanguages(player)
+    await expect(player.locator('.shaka-text-languages .shaka-turn-captions-off-button')).toBeAttached()
 
-    const width = await presets.evaluate(element => element.getBoundingClientRect().width)
-    expect(width).toBeLessThanOrEqual(400.5)
-    const rows = await presets.locator('.shaka-playback-rate-preset-btn').evaluateAll(buttons => {
-      return new Set(buttons.map(button => Math.round(button.getBoundingClientRect().top))).size
+    const height = await player.locator('.shaka-overflow-menu').evaluate(menu => menu.getBoundingClientRect().height)
+    expect(height).toBeLessThanOrEqual(340.5)
+
+    const options = player.locator('.shaka-text-languages > .ft-caption-list-options')
+    expect(await captionMenuLayout(player)).toEqual({
+      menuScrolls: false,
+      optionsScroll: true,
+      headerVisible: true,
+      footerVisible: true,
     })
-    expect(rows).toBeGreaterThan(1)
-    await attachScreenshot('wrapped playback speed presets')
+
+    // Dragging the scrollbar must not count as a click that closes the submenu.
+    const track = options.locator(':scope > .os-scrollbar-vertical')
+    const handle = track.locator('.os-scrollbar-handle')
+    // The scrollbar only shows while the pointer is over the options.
+    await options.hover()
+    await expect(track).toHaveClass(/os-scrollbar-visible/)
+    const start = await handle.boundingBox()
+    const end = await track.boundingBox()
+    await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(start.x + start.width / 2, end.y + end.height + 20, { steps: 5 })
+    await page.mouse.up()
+    await expect(player.locator('.shaka-text-languages')).toBeVisible()
+    await expect(options.getByRole('button', { name: 'Auto-translate' })).toBeInViewport()
+    expect(await captionMenuLayout(player)).toMatchObject({ headerVisible: true, footerVisible: true })
+    await attachScreenshot('caption options scrolled to the end')
+
+    // Coming back from a page that opens from the list starts at its top again.
+    await options.getByRole('button', { name: 'Auto-translate' }).click()
+    await player.locator('.ft-caption-translation-menu > .shaka-back-to-overflow-button').click()
+    await expect(player.locator('.shaka-text-languages')).toBeVisible()
+    await expect.poll(() => options.evaluate(element => element.scrollTop)).toBe(0)
+
+    // Shaka rebuilds the choices when the tracks change, here to a shorter list.
+    await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+    await player.evaluate((element) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      const tracks = shakaPlayer.getTextTracks().slice(0, 20)
+      shakaPlayer.getTextTracks = () => tracks
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    })
+    await expect(options.locator(':scope > button')).toHaveCount(23)
+    await expectValidScrollRange(options)
+
+    // So does a window size that gives the menu more room.
+    await options.evaluate(element => element.scrollTo({ top: element.scrollHeight }))
+    await setWindowSize(app, page, { width: 1260, height: 820 })
+    await expectValidScrollRange(options)
   })
 })

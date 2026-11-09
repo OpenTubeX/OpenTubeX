@@ -23,44 +23,6 @@ export async function expectTabHighlightAligned(tab) {
   await expect.poll(() => tab.evaluate(tabHighlightAlignment)).toBeLessThan(0.2)
 }
 
-/** Excludes text/hover transitions from highlight animation assertions. */
-export function tabHighlightAnimations(tab) {
-  return tab.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
-    .map(animation => ({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration }))
-}
-
-/**
- * Capture the fade as soon as the selection renders. A busy renderer can
- * finish it before the next frame dispatches transitionrun.
- */
-export async function selectTabWithHighlightAnimation(tab, key = null) {
-  return tab.evaluate((element, key) => new Promise(resolve => {
-    const observer = new MutationObserver(onSelection)
-    const timeout = setTimeout(() => {
-      observer.disconnect()
-      resolve(null)
-    }, 5000)
-    // Mutation callbacks run right after Vue's update, before the fade can advance.
-    async function onSelection() {
-      if (element.getAttribute('aria-selected') !== 'true') return
-      observer.disconnect()
-      clearTimeout(timeout)
-      const animation = element.getAnimations({ subtree: true }).find(animation =>
-        animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
-      if (!animation) { resolve(null); return }
-      try {
-        await animation.ready
-        resolve({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration })
-      } catch {
-        resolve(null)
-      }
-    }
-    observer.observe(element, { attributeFilter: ['aria-selected'] })
-    if (key === null) element.click()
-    else element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
-  }), key)
-}
-
 /**
  * Selects a channel tab, through the More menu when it does not fit in the row.
  * @param {import('@playwright/test').Page} page

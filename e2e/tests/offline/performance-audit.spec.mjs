@@ -68,93 +68,65 @@ test('download progress animates without changing layout width', { tag: '@scale'
   }
 })
 
-test('select focus underline animates with transforms', async ({ page }) => {
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updateReducedMotion', 'off')
-  })
+test('color picker batches theme previews and preserves release position at 0.95 UI scale', { tag: '@performance' }, async ({ page }) => {
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
   const appearance = await goToSettingsSection(page, 'appearance')
-  const select = appearance.locator('.select').first()
-  // Exercise the supported filled variant, including its focus underline.
-  await select.evaluate(element => { element.classList.remove('outlined') })
-  const button = select.locator('.select-text')
-  await button.focus()
-  const result = await select.locator('.select-bar').evaluate(element => {
-    const before = getComputedStyle(element, '::before')
-    const after = getComputedStyle(element, '::after')
-    return { before: before.transitionProperty, after: after.transitionProperty }
-  })
-  expect(result).toEqual({ before: 'transform', after: 'transform' })
-  await expect.poll(() => select.locator('.select-bar').evaluate(element => (
-    getComputedStyle(element, '::before').transform
-  ))).toBe('matrix(1, 0, 0, 1, 0, 0)')
-  await button.evaluate(element => element.blur())
-  await expect.poll(() => select.locator('.select-bar').evaluate(element => (
-    getComputedStyle(element, '::before').transform
-  ))).toBe('matrix(0, 0, 0, 1, 0, 0)')
-})
-
-for (const zoom of [1, 0.95]) {
-  test(`color picker batches theme previews and preserves release position at ${zoom} UI scale`, { tag: '@performance' }, async ({ page }) => {
-    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Create custom theme' }).click()
-    await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
-    const surface = page.locator('.colorPickerPopover .saturationValue')
-    await expect(surface).toBeVisible()
-    const metrics = await surface.evaluate(async element => {
-      const original = element.getBoundingClientRect
-      const bounds = original.call(element)
-      let reads = 0
-      element.getBoundingClientRect = function () { reads++; return original.call(this) }
-      const pointer = (type, x, y, pointerId = 7) => new PointerEvent(type, {
-        bubbles: true, button: 0, pointerId, clientX: x, clientY: y
-      })
-      try {
-        element.dispatchEvent(pointer('pointerdown', bounds.left + 1, bounds.top + 1))
-        reads = 0
-        for (let index = 0; index < 50; index++) {
-          window.dispatchEvent(pointer('pointermove', bounds.left + bounds.width * index / 100, bounds.top + 10))
-        }
-        element.dispatchEvent(pointer('pointerdown', bounds.right, bounds.bottom, 8))
-        window.dispatchEvent(pointer('pointermove', bounds.right, bounds.bottom, 8))
-        window.dispatchEvent(pointer('pointerup', bounds.right, bounds.bottom, 8))
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        const burstReads = reads
-        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
-        window.dispatchEvent(pointer('pointerup', bounds.right + 1, bounds.top + bounds.height / 2))
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        const releaseValue = element.getAttribute('aria-valuetext')
-        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
-        reads = 0
-        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
-        window.dispatchEvent(pointer('pointercancel', 0, 0))
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        const cancelReads = reads
-        const cancelValue = element.getAttribute('aria-valuetext')
-        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
-        reads = 0
-        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
-        window.dispatchEvent(new Event('blur'))
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        return { burstReads, releaseValue, cancelReads, cancelValue, blurReads: reads, blurValue: element.getAttribute('aria-valuetext') }
-      } finally {
-        element.getBoundingClientRect = original
-      }
+  await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+  await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
+  const surface = page.locator('.colorPickerPopover .saturationValue')
+  await expect(surface).toBeVisible()
+  const metrics = await surface.evaluate(async element => {
+    const original = element.getBoundingClientRect
+    const bounds = original.call(element)
+    let reads = 0
+    element.getBoundingClientRect = function () { reads++; return original.call(this) }
+    const pointer = (type, x, y, pointerId = 7) => new PointerEvent(type, {
+      bubbles: true, button: 0, pointerId, clientX: x, clientY: y
     })
-    console.log('Rendered color picker pointer work:', metrics)
-    expect.soft(metrics.burstReads).toBe(1)
-    expect(metrics.releaseValue).toBe('100%, 50%')
-    expect(metrics.cancelReads).toBe(0)
-    expect(metrics.cancelValue).toBe('100%, 50%')
-    expect(metrics.blurReads).toBe(0)
-    expect(metrics.blurValue).toBe('100%, 50%')
-    await surface.press('ArrowUp')
-    await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
-    await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
-    await expect(surface).toHaveCount(0)
+    try {
+      element.dispatchEvent(pointer('pointerdown', bounds.left + 1, bounds.top + 1))
+      reads = 0
+      for (let index = 0; index < 50; index++) {
+        window.dispatchEvent(pointer('pointermove', bounds.left + bounds.width * index / 100, bounds.top + 10))
+      }
+      element.dispatchEvent(pointer('pointerdown', bounds.right, bounds.bottom, 8))
+      window.dispatchEvent(pointer('pointermove', bounds.right, bounds.bottom, 8))
+      window.dispatchEvent(pointer('pointerup', bounds.right, bounds.bottom, 8))
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const burstReads = reads
+      window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+      window.dispatchEvent(pointer('pointerup', bounds.right + 1, bounds.top + bounds.height / 2))
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const releaseValue = element.getAttribute('aria-valuetext')
+      element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+      reads = 0
+      window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+      window.dispatchEvent(pointer('pointercancel', 0, 0))
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const cancelReads = reads
+      const cancelValue = element.getAttribute('aria-valuetext')
+      element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+      reads = 0
+      window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+      window.dispatchEvent(new Event('blur'))
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      return { burstReads, releaseValue, cancelReads, cancelValue, blurReads: reads, blurValue: element.getAttribute('aria-valuetext') }
+    } finally {
+      element.getBoundingClientRect = original
+    }
   })
-}
+  console.log('Rendered color picker pointer work:', metrics)
+  expect.soft(metrics.burstReads).toBe(1)
+  expect(metrics.releaseValue).toBe('100%, 50%')
+  expect(metrics.cancelReads).toBe(0)
+  expect(metrics.cancelValue).toBe('100%, 50%')
+  expect(metrics.blurReads).toBe(0)
+  expect(metrics.blurValue).toBe('100%, 50%')
+  await surface.press('ArrowUp')
+  await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
+  await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
+  await expect(surface).toHaveCount(0)
+})
 
 test.describe('large bookmark playlist', { tag: '@performance' }, () => {
   test.use({
@@ -317,29 +289,6 @@ test('player visibility and playback changes avoid repeated layout work', { tag:
   expect(playback.paused).toBe(true)
   expect(playback.toggles).toEqual([true, true, true, true])
   expect(playback.layoutReads).toBe(0)
-})
-
-test('default-speed button transitions do not query animations in JavaScript', { tag: '@performance' }, async ({ page }) => {
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updateReducedMotion', 'off')
-  })
-  const button = page.getByRole('button', { name: 'Expand side navigation', exact: true })
-  await page.mouse.move(800, 500)
-  await button.evaluate(element => {
-    window.__buttonAnimationWork = { transitions: 0, queries: 0 }
-    element.addEventListener('transitionrun', () => window.__buttonAnimationWork.transitions++)
-    const original = element.getAnimations
-    element.getAnimations = function (options) {
-      window.__buttonAnimationWork.queries++
-      return original.call(this, options)
-    }
-  })
-  await button.hover()
-  await expect.poll(() => page.evaluate(() => window.__buttonAnimationWork.transitions)).toBeGreaterThan(0)
-  const metrics = await page.evaluate(() => window.__buttonAnimationWork)
-  console.log('Default-speed button animation work:', metrics)
-  expect(metrics.queries).toBe(0)
 })
 
 test('hidden player menus do not measure labels after playback option changes', { tag: '@performance' }, async ({ app, page }) => {

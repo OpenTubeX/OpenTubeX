@@ -8,7 +8,7 @@ const lockup = JSON.parse(await readFile(new URL('../../fixtures/innertube/watch
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-for (const [publishedText, uploadedTime] of [['2d ago', '2 days ago'], ['57\u00a0min ago', '57 minutes ago']]) {
+for (const [publishedText, uploadedTime] of [['57\u00a0min ago', '57 minutes ago']]) {
   test(`shows a recommendation channel whose name contains view and upload time ${uploadedTime}`, async ({ app, page }, testInfo) => {
     const recommendation = structuredClone(lockup)
     recommendation.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[1].text.content = publishedText

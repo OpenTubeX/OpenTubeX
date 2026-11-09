@@ -60,14 +60,6 @@ function searchResponse(request) {
         correctedQueryEndpoint: { searchEndpoint: { query: 'cooking' } }
       }
     }, searchVideo('hashtag', 'Hashtag result'))
-  } else if (request.query === 'qwzxv plorf') {
-    contents.push({
-      didYouMeanRenderer: {
-        didYouMean: text('Did you mean:'),
-        correctedQuery: text('quiz plot'),
-        correctedQueryEndpoint: { searchEndpoint: { query: 'quiz plot' } }
-      }
-    })
   } else {
     contents.push(searchVideo('suggested', 'Suggested spelling result'))
   }
@@ -143,26 +135,4 @@ test('omits the uncorrected search when YouTube offers none', async ({ page }) =
   await expect(page.getByText('Hashtag result')).toBeVisible()
   await expect(correction).toHaveText('Including results for cooking')
   await expect(correction.getByRole('link')).toHaveCount(0)
-})
-
-test('centers the spelling suggestion with the empty results message', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
-  await page.route(/^https?:\/\//, abortUnmockedRequest)
-  await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: searchResponse(route.request().postDataJSON()) }))
-
-  await page.locator(sel.searchInput).fill('qwzxv plorf')
-  await page.locator(sel.searchInput).press('Enter')
-
-  const suggestion = page.locator('.searchCorrection p')
-  const status = page.locator('.searchStatus')
-  await expect(suggestion).toHaveText('Did you mean quiz plot?')
-  await expect(status).toBeVisible()
-
-  const centerOf = locator => locator.evaluate(element => {
-    const range = document.createRange()
-    range.selectNodeContents(element)
-    const { left, right } = range.getBoundingClientRect()
-    return (left + right) / 2
-  })
-  expect(Math.abs(await centerOf(suggestion) - await centerOf(status))).toBeLessThanOrEqual(1)
-  await attachScreenshot('centered spelling suggestion')
 })

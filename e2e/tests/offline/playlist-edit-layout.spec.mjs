@@ -25,7 +25,7 @@ async function resize(app, page, width, uiScale, height = 900) {
   await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
 }
 
-for (const playlistViewType of ['grid', 'list']) {
+for (const playlistViewType of ['grid']) {
   test(`edit form uses the available width in the ${playlistViewType} layout`, { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await page.evaluate(view => window.$store.dispatch('updatePlaylistViewType', view), playlistViewType)

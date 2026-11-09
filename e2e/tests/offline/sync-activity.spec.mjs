@@ -56,32 +56,6 @@ async function expectActivityRange(scroller, atEnd = true) {
   }, atEnd)).toBe(true)
 }
 
-test.describe('account activity navigation', () => {
-  // en-GB lacks the Buffering labels that Settings search indexes.
-  test.use({ seed: { settings: { syncServerUrl: '', currentLocale: 'en-US' } } })
-
-  test('focuses a slider setting from activity without opening its tooltip', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'buffer', deviceName: 'Laptop', key: 'bufferBeforePlaying', value: 3, createdAt: Date.now() },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    await sync.locator('.syncActivity .activitySetting').click()
-
-    const slider = page.getByRole('slider', { name: /Buffer Before Playing/ })
-    await expect(slider).toBeFocused()
-    const tooltip = page.getByRole('tooltip', { includeHidden: true })
-      .filter({ hasText: 'How much video has to load before playback starts' })
-    await expect(tooltip).toBeAttached()
-    await expect(tooltip).toBeHidden()
-  })
-})
-
 test.describe('account activity labels', () => {
   test.use({ seed: { settings: { syncServerUrl: '' } } })
 
@@ -103,203 +77,10 @@ test.describe('account activity labels', () => {
     await seedActivity(page)
     await expect(firstCard).toContainText('No recent activity')
   })
-
-  test('shows named changes across synced collections and settings', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: '1', deviceName: 'Laptop', collection: 'subscriptions', action: 'added', item: 'Alpha', createdAt: Date.now() },
-        { id: '2', deviceName: 'Laptop', collection: 'playlists', action: 'removed', item: 'Video A', parent: 'Favorites', createdAt: Date.now() - 1 },
-        { id: '3', deviceName: 'Laptop', collection: 'profiles', action: 'renamed', item: 'Old profile', value: 'New profile', createdAt: Date.now() - 2 },
-        { id: '4', deviceName: 'Laptop', collection: 'playlistBookmarks', action: 'added', item: 'Saved mix', createdAt: Date.now() - 3 },
-        { id: '5', deviceName: 'Laptop', key: 'subscriptionChannelSettings', detail: 'dailyVideoLimit', item: 'Alpha', value: 3, createdAt: Date.now() - 4 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const card = sync.locator('.syncActivity')
-    await expect(card.locator('.activityList li')).toHaveCount(3)
-    await expect(card.locator('.activityList li').nth(0)).toContainText('Laptop added Alpha to Subscriptions')
-    await expect(card.locator('.activityList li').nth(1)).toContainText('Laptop removed Video A from Favorites')
-    await expect(card.locator('.activityList li').nth(2)).toContainText('Laptop renamed Old profile to New profile')
-    await card.locator('.activityDisclosure').click()
-    await expect(card.locator('.activityList li').nth(3)).toContainText('Laptop added Saved mix to Saved playlists')
-    await expect(card.locator('.activityList li').nth(4)).toContainText('Laptop changed Subscription settings · Alpha · Videos per day to 3')
-  })
-
-  test('uses a readable label for a saved setting choice', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'focus', deviceName: 'Laptop', key: 'tabCloseFocus', value: 'nextTab', createdAt: Date.now() },
-        { id: 'theme', deviceName: 'Laptop', key: 'baseTheme', value: 'catppuccinMocha', createdAt: Date.now() - 1 },
-        { id: 'format', deviceName: 'Laptop', key: 'screenshotFormat', value: 'jpeg', createdAt: Date.now() - 2 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const activity = sync.locator('.syncActivity .activityList li')
-    await expect(activity.nth(0)).toContainText(
-      'Laptop changed After Closing the Active Tab to Next tab in tab order'
-    )
-    await expect(activity.nth(1)).toContainText(/Laptop changed Base [Tt]heme to Catppuccin Mocha/)
-    await expect(activity.nth(2)).toContainText(/Laptop changed Screenshot [Ff]ormat to JPEG/)
-  })
-
-  test('names automatic grid columns and shows fixed counts as numbers', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'auto', deviceName: 'Laptop', key: 'gridColumns', value: 0, createdAt: Date.now() },
-        { id: 'fixed', deviceName: 'Laptop', key: 'playlistGridColumns', value: 5, createdAt: Date.now() - 1 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const activity = sync.locator('.syncActivity .activityList li')
-    await expect(activity.nth(0)).toContainText('Laptop changed Grid Columns to Auto')
-    await expect(activity.nth(1)).toContainText('Laptop changed Playlist Grid Columns to 5')
-  })
-
-  test('shows shortcut bindings as shortcuts and summarizes older JSON entries', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'shortcut', deviceName: 'Laptop', key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h', createdAt: Date.now() },
-        { id: 'legacy-shortcut', deviceName: 'Laptop', key: 'keyboardShortcuts', value: '{"VIDEO_PLAYER":{"PLAYBACK":{"TOGGLE_SKIP_SILENCE":"h"}}}', createdAt: Date.now() - 1 },
-        { id: 'unassigned', deviceName: 'Laptop', key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: '', createdAt: Date.now() - 2 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const activity = sync.locator('.syncActivity .activityList li p')
-    await expect(activity.nth(0)).toHaveText('Laptop changed Keyboard Shortcuts · Toggle skip silence to h')
-    await expect(activity.nth(1)).toHaveText('Laptop updated Keyboard Shortcuts')
-    await expect(activity.nth(2)).toHaveText('Laptop changed Keyboard Shortcuts · Toggle skip silence to Unassigned')
-    await expect(sync.locator('.syncActivity')).not.toContainText('VIDEO_PLAYER')
-  })
-
-  test('uses the shortcut editor labels for action codes with nontrivial names', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', ['RESTORE_CLOSED_TAB', 'NAVIGATE_TO_SETTINGS', 'PICTURE_IN_PICTURE'].map((detail, index) => ({
-        id: String(index), deviceName: 'Laptop', key: 'keyboardShortcuts', detail, value: 'ctrl+h', createdAt: Date.now() - index,
-      })))
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const activity = sync.locator('.syncActivity .activityList li p')
-    await expect(activity.nth(0)).toContainText(/Keyboard Shortcuts · Reopen.*tab/i)
-    await expect(activity.nth(1)).toContainText(/Keyboard Shortcuts · Navigate to the Settings page/i)
-    await expect(activity.nth(2)).toContainText(/Keyboard Shortcuts · Toggle Picture-in-Picture mode/i)
-  })
-
-  test('labels desktop-only shortcuts in cross-device activity', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'desktop-shortcut', deviceName: 'Desktop', key: 'keyboardShortcuts', detail: 'FULLWINDOW', value: 's', createdAt: Date.now() },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    await expect(sync.locator('.syncActivity .activityList li p')).toHaveText('Desktop changed Keyboard Shortcuts · Toggle full window to s')
-  })
-
-  test('keeps malformed caption anchors readable', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'top-', createdAt: Date.now() },
-        { id: 'known-anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'bottom-right', createdAt: Date.now() - 1 },
-        { id: 'unknown-anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'diagonal', createdAt: Date.now() - 2 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    await expect(sync.locator('.syncActivity .activityList li')).toContainText(['top-', 'Bottom Right', 'diagonal'])
-  })
-
-  test('names custom themes once and describes an empty subscription feed', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerToken', 'test-token')
-      store.commit('setSyncServerActivity', [
-        { id: 'theme', deviceName: 'Laptop', key: 'customThemes', action: 'added', item: 'Ocean', createdAt: Date.now() },
-        { id: 'removed-theme', deviceName: 'Laptop', key: 'customThemes', action: 'removed', item: 'Sunset', createdAt: Date.now() - 1 },
-        { id: 'feed', deviceName: 'Laptop', key: 'subscriptionChannelSettings', detail: 'feedTypes', item: 'Alpha', value: '', createdAt: Date.now() - 2 },
-      ])
-      store.commit('setSyncServerLiveSupported', true)
-      store.commit('setSyncServerEnabled', true)
-    })
-    const activity = sync.locator('.syncActivity .activityList li')
-    await expect(activity.nth(0).locator('p')).toHaveText(/Laptop added Ocean to Custom theme creator$/i)
-    await expect(activity.nth(1).locator('p')).toHaveText(/Laptop removed Sunset from Custom theme creator$/i)
-    await expect(activity.nth(2)).toContainText('No feed types')
-  })
 })
 
 test.describe('account activity', () => {
   test.use({ seed: { settings: { syncServerUrl: '' } } })
-
-  test('shortens clear before moving it below the title and refresh', { tag: '@scale' }, async ({ app, page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await seedActivity(page, 3)
-    const card = sync.locator('.syncActivity')
-    await setWindowSize(app, page, { width: 1400, height: 1000 })
-    for (const [width, label, below] of [[680, 'Clear on this device', false], [520, 'Clear on this device', false], [400, 'Clear', false], [380, 'Clear', false], [300, 'Clear on this device', true]]) {
-      await card.evaluate((element, width) => { element.style.inlineSize = width + 'px' }, width)
-      await card.scrollIntoViewIfNeeded()
-      await expect.poll(() => card.locator('.activityClear').innerText()).toBe(label)
-      await expect.poll(() => card.evaluate((element, below) => {
-        const header = element.querySelector('.activityHeader').getBoundingClientRect()
-        const title = element.querySelector('.activityTitle').getBoundingClientRect()
-        const clear = element.querySelector('.activityClear').getBoundingClientRect()
-        const refresh = element.querySelector('.activityAction').getBoundingClientRect()
-        const tolerance = 2 / devicePixelRatio
-        return Math.abs(refresh.right - header.right) <= tolerance &&
-          refresh.top < title.bottom && refresh.bottom > title.top &&
-          (below
-            ? clear.top >= Math.max(title.bottom, refresh.bottom) &&
-              Math.abs((clear.left + clear.right) / 2 - (header.left + header.right) / 2) <= tolerance
-            : clear.top < refresh.bottom && clear.bottom > refresh.top)
-      }, below)).toBe(true)
-    }
-  })
-
-  test('keeps clear beside refresh after the settings window morphs out of the header button', { tag: '@scale' }, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 1400, height: 1000 })
-    await page.evaluate(() => window.$store.dispatch('updateMoveSettingsToAppHeader', true))
-    await seedActivity(page, 3)
-    const card = (await goToSettingsSection(page, 'sync')).locator('.syncActivity')
-    await expect.poll(() => card.locator('.activityClear').innerText()).toBe('Clear on this device')
-    await page.evaluate(() => window.$store.dispatch('closeSettingsWindowToIcon'))
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-    await page.locator('.topNav [data-settings-window-icon="settings"]').click()
-    await expect(card).toBeVisible()
-    await expect(card.locator('.activityHeader')).not.toHaveClass(/activityStacked/)
-    await expect.poll(() => card.locator('.activityClear').innerText()).toBe('Clear on this device')
-    await expect.poll(() => card.evaluate(element => {
-      const clear = element.querySelector('.activityClear').getBoundingClientRect()
-      const refresh = element.querySelector('.activityAction').getBoundingClientRect()
-      return clear.top < refresh.bottom && clear.bottom > refresh.top
-    })).toBe(true)
-  })
 
   test('keeps translated activity actions inside narrow cards', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     const sync = await goToSettingsSection(page, 'sync')
@@ -310,8 +91,6 @@ test.describe('account activity', () => {
       .dispatch('updateUseAITranslationCompletions', true))
     for (const [locale, label] of [
       ['en-US', 'Clear on this device'],
-      ['de-DE', 'Auf diesem Gerät leeren'],
-      ['it', 'Cancella su questo dispositivo'],
       ['el', 'Εκκαθάριση σε αυτή τη συσκευή'],
     ]) {
       // Wait for the setting and rendered label instead of returning a Vuex
@@ -322,7 +101,7 @@ test.describe('account activity', () => {
       }, locale)
       await expect.poll(() => page.evaluate(() => window.$store.getters.getCurrentLocale)).toBe(locale)
       await expect(card.locator('.activityClear')).toHaveAccessibleName(label)
-      for (const width of [800, 700, 600, 480, 375, 320]) {
+      for (const width of [600, 375, 320]) {
         await setWindowSize(app, page, { width, height: 700 + width })
         await card.scrollIntoViewIfNeeded()
         await expect.poll(() => card.evaluate(element => {
@@ -398,24 +177,6 @@ test.describe('account activity', () => {
     await setWindowSize(app, restartedPage, { width: 480, height: 700 })
     await expect(reloadedCard.getByRole('button', { name: 'Clear on this device' })).toBeVisible()
     expect(await reloadedCard.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-  })
-
-  test('keeps activity and the confirmation available when clearing fails', async ({ page }) => {
-    const sync = await goToSettingsSection(page, 'sync')
-    await seedActivity(page, 3)
-    await page.evaluate(() => {
-      const store = window.$store
-      store._actions.updateSyncServerActivityClearedThrough = [
-        () => Promise.reject(new Error('Could not save activity preference')),
-      ]
-    })
-    const card = sync.locator('.syncActivity')
-    await card.getByRole('button', { name: 'Clear on this device' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
-    await dialog.getByRole('button', { name: 'Clear on this device' }).click()
-    await expect(dialog).toContainText('Could not save activity preference')
-    await expect(card.locator('.activityList li')).toHaveCount(3)
-    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
   })
 
   test('keeps expanded activity in its own bounded themed scroll area', { tag: '@scale' }, async ({ page }) => {

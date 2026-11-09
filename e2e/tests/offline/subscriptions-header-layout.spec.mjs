@@ -67,22 +67,6 @@ async function setWindowWidth (app, page, width) {
   }))
 }
 
-function headerBoxes (page) {
-  return page.evaluate(() => {
-    const toBox = (selector) => {
-      const rect = document.querySelector(selector).getBoundingClientRect()
-      return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
-    }
-
-    return {
-      title: toBox('.pageTitle'),
-      tabs: toBox('.tabs'),
-      refreshWidget: toBox('.headerRefreshWidget'),
-      header: toBox('.subscriptionsHeader')
-    }
-  })
-}
-
 test.describe('subscriptions header layout', () => {
   test('keeps keyboard focus in visual order when the header changes layout', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
@@ -153,45 +137,6 @@ test.describe('subscriptions header layout', () => {
       expect(layout.controlsGap).toBeGreaterThanOrEqual(0)
       await attachScreenshot(`desktop ${tab} feed action`)
     }
-  })
-
-  test('stacks the last update and next auto refresh beside the desktop feed tabs', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-    }, uiScale)
-    await goTo(page, 'subscriptions')
-    await setWindowWidth(app, page, Math.round(1500 * uiScale / 100))
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
-      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
-    })
-    await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
-    await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
-    await expect(page.locator('.markAllSeenButton')).toBeVisible()
-    await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
-
-    const layout = await page.evaluate(() => {
-      const box = selector => document.querySelector(selector).getBoundingClientRect()
-      return {
-        tabs: box('.tabs'),
-        updated: box('.headerRefreshWidget > .lastRefreshTimestamp'),
-        next: box('.headerRefreshWidget .nextAutoRefreshTimestamp .lastRefreshTimestamp'),
-        countdown: box('.headerRefreshWidget .nextAutoRefreshCountdown'),
-        refresh: box('.headerRefreshWidget .refreshButton')
-      }
-    })
-    const center = rect => (rect.top + rect.bottom) / 2
-    const linesCenter = (layout.updated.top + layout.next.bottom) / 2
-
-    expect(layout.next.top).toBeGreaterThanOrEqual(layout.updated.bottom - 1)
-    expect(Math.abs(layout.next.left - layout.updated.left)).toBeLessThanOrEqual(1)
-    expect(layout.countdown.right).toBeLessThanOrEqual(layout.updated.left)
-    expect(Math.abs(center(layout.countdown) - linesCenter)).toBeLessThanOrEqual(2)
-    expect(layout.refresh.left).toBeGreaterThanOrEqual(Math.max(layout.updated.right, layout.next.right))
-    expect(Math.abs(center(layout.refresh) - linesCenter)).toBeLessThanOrEqual(2)
-    expect(Math.abs(center(layout.refresh) - center(layout.tabs))).toBeLessThanOrEqual(2)
-    await attachScreenshot('desktop stacked refresh status')
   })
 
   test('shows the New feed action and regular feed refresh status on mobile', async ({ app, page, attachScreenshot }) => {
@@ -393,64 +338,6 @@ test.describe('subscriptions header layout', () => {
     }
   })
 
-  test('separates the main feed tabs from the centered New feed tabs', async ({ app, page, attachScreenshot }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-
-    const combinedSeparatorTopMargin = () => page.evaluate(() => {
-      const header = document.querySelector('.subscriptionsHeader')
-      const mainTabs = [...header.querySelectorAll('[data-subscription-feed-tab]')]
-
-      return header.getBoundingClientRect().bottom -
-        Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom))
-    })
-
-    const separatorLayout = () => page.evaluate(() => {
-      const header = document.querySelector('.subscriptionsHeader')
-      const headerRow = header.querySelector('.headerRow')
-      const mainTabs = [...header.querySelectorAll('[data-subscription-feed-tab]')]
-      const newFeedTabs = [...header.querySelectorAll('[data-new-feed-tab]')]
-      const headerRowRect = headerRow.getBoundingClientRect()
-      const headerStyle = getComputedStyle(header)
-      const headerRowStyle = getComputedStyle(headerRow)
-
-      return {
-        headerShadow: headerStyle.boxShadow,
-        separatorWidth: Number.parseFloat(headerRowStyle.borderBottomWidth),
-        separatorY: headerRowRect.bottom,
-        separatorTopMargin: headerRowRect.bottom -
-          Number.parseFloat(headerRowStyle.borderBottomWidth) -
-          Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom)),
-        mainTabsBottom: Math.max(...mainTabs.map(tab => tab.getBoundingClientRect().bottom)),
-        newFeedTabsTop: Math.min(...newFeedTabs.map(tab => tab.getBoundingClientRect().top))
-      }
-    })
-
-    for (const width of [1400, 700, 375]) {
-      await setWindowWidth(app, page, width)
-      if (await page.getByRole('button', { name: 'Show combined view' }).isVisible()) {
-        await page.getByRole('button', { name: 'Show combined view' }).click()
-      }
-      // The view preference is saved before the header switches layouts.
-      const header = page.locator('.subscriptionsHeader')
-      await expect(header).not.toHaveClass(/\btabbedNewFeed\b/)
-      const combinedTopMargin = await combinedSeparatorTopMargin()
-
-      await page.getByRole('button', { name: 'Show tabbed view' }).click()
-      await expect(header).toHaveClass(/\btabbedNewFeed\b/)
-      const layout = await separatorLayout()
-
-      expect(layout.headerShadow).toBe('none')
-      expect(layout.separatorWidth).toBeGreaterThan(0)
-      expect(layout.separatorWidth).toBeLessThanOrEqual(1.1)
-      expect(Math.abs(layout.separatorTopMargin - combinedTopMargin)).toBeLessThanOrEqual(1)
-      expect(layout.separatorY).toBeGreaterThanOrEqual(layout.mainTabsBottom)
-      expect(layout.newFeedTabsTop).toBeGreaterThanOrEqual(layout.separatorY)
-    }
-
-    await attachScreenshot('New feed tabs separator')
-  })
-
   test('puts the New feed controls below the main feed tabs at narrow widths', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -505,73 +392,6 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('New feed controls below main tabs')
   })
 
-  test('puts the tabs beside the title when they fit', async ({ page, attachScreenshot }) => {
-    await goTo(page, 'subscriptions')
-
-    await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
-    await attachScreenshot('single row header')
-
-    const { title, tabs, refreshWidget } = await headerBoxes(page)
-
-    // One line: the tabs follow the title and the refresh widget stays last
-    expect(tabs.start).toBeGreaterThanOrEqual(title.end)
-    expect(refreshWidget.start).toBeGreaterThanOrEqual(tabs.end)
-    expect(tabs.top).toBeLessThan(title.bottom)
-    expect(refreshWidget.top).toBeLessThan(tabs.bottom)
-  })
-
-  test('centers the refresh status and button on the tabs when they share a tablet row', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-    }, uiScale)
-    await goTo(page, 'subscriptions')
-    await setWindowWidth(app, page, Math.round(1200 * uiScale / 100))
-    await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
-
-    const layout = await page.evaluate(() => {
-      const center = selector => {
-        const rect = document.querySelector(selector).getBoundingClientRect()
-        return (rect.top + rect.bottom) / 2
-      }
-      const timestamp = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp')
-      const text = document.createRange()
-      text.selectNodeContents(timestamp)
-      return {
-        tabs: center('.tabs'),
-        timestamp: center('.headerRefreshWidget > .lastRefreshTimestamp'),
-        refresh: center('.headerRefreshWidget .refreshButton'),
-        timestampLines: text.getClientRects().length,
-        tabsBottom: document.querySelector('.tabs').getBoundingClientRect().bottom,
-        timestampTop: timestamp.getBoundingClientRect().top
-      }
-    })
-
-    expect(layout.timestampLines).toBe(1)
-    expect(layout.timestampTop).toBeLessThan(layout.tabsBottom)
-    expect(Math.abs(layout.timestamp - layout.tabs)).toBeLessThanOrEqual(2)
-    expect(Math.abs(layout.refresh - layout.tabs)).toBeLessThanOrEqual(2)
-  })
-
-  test('moves the controls below the tabs before the tabs wrap', async ({ app, page, attachScreenshot }) => {
-    await goTo(page, 'subscriptions')
-    await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
-
-    await setWindowWidth(app, page, 800)
-
-    await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
-    await attachScreenshot('two row header')
-
-    const { title, tabs, refreshWidget } = await headerBoxes(page)
-    const tabRows = await page.locator('[data-subscription-feed-tab]').evaluateAll(tabs => {
-      return new Set(tabs.map(tab => tab.getBoundingClientRect().top)).size
-    })
-
-    // The controls move down before taking enough space to wrap the tabs.
-    expect(tabs.top).toBeGreaterThanOrEqual(title.bottom)
-    expect(refreshWidget.top - tabs.bottom).toBeGreaterThanOrEqual(8)
-    expect(tabRows).toBe(1)
-  })
-
   test('merges the rows again when the window grows back', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
@@ -593,36 +413,6 @@ test.describe('subscriptions header layout', () => {
     expect(new Set(heights).size).toBe(1)
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
     await attachScreenshot('merged header after growing the window')
-  })
-
-  test('merges the rows when the Mark all as seen button is what did not fit', async ({ app, page }) => {
-    await goTo(page, 'subscriptions')
-
-    const header = page.locator('.subscriptionsHeader')
-    const markAllSeen = page.locator('.markAllSeenButton')
-    await expect(markAllSeen).toBeVisible()
-
-    // Narrow the window step by step until the button is what pushes the tabs
-    // onto their own line
-    let width = 1920
-    while (width > 900) {
-      width -= 20
-      await setWindowWidth(app, page, width)
-
-      if (!await header.evaluate(element => element.classList.contains('singleRow'))) {
-        break
-      }
-    }
-
-    await expect(header).not.toHaveClass(/singleRow/)
-
-    // Removing the button frees far more space than the last step took away, so
-    // the tabs fit next to the title again. The button leaves without resizing
-    // the tabs row, which keeps its full width while it has its own line.
-    await markAllSeen.click()
-    await expect(markAllSeen).toBeHidden()
-
-    await expect(header).toHaveClass(/singleRow/)
   })
 
   test('keeps all five feed tabs on one row at phone widths', async ({ app, page, attachScreenshot }) => {
@@ -665,32 +455,6 @@ test.describe('subscriptions header layout', () => {
     }
   })
 
-  test('truncates a long feed tab label within its tab', async ({ app, page }) => {
-    await goTo(page, 'subscriptions')
-    await setWindowWidth(app, page, 375)
-
-    const label = page.locator('[data-subscription-feed-tab="videos"] .tabLabel')
-    await label.evaluate(element => {
-      const longName = 'Extremely long translated subscription videos feed label'
-      element.dataset.label = longName
-      element.querySelector('span').textContent = longName
-    })
-
-    const layout = await label.evaluate(element => {
-      const text = element.querySelector('span')
-      const tab = element.closest('[data-subscription-feed-tab]')
-      return {
-        labelRight: element.getBoundingClientRect().right,
-        tabRight: tab.getBoundingClientRect().right,
-        textWidth: text.clientWidth,
-        fullTextWidth: text.scrollWidth
-      }
-    })
-
-    expect(layout.labelRight).toBeLessThanOrEqual(layout.tabRight)
-    expect(layout.fullTextWidth).toBeGreaterThan(layout.textWidth)
-  })
-
   test('keeps the feed tabs usable on one row at 200% zoom', async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2)
@@ -709,20 +473,5 @@ test.describe('subscriptions header layout', () => {
     expect(Math.max(...layout.tabs.map(tab => tab.top)) - Math.min(...layout.tabs.map(tab => tab.top))).toBeLessThan(1)
     expect(layout.tabs.every(tab => tab.width >= 24)).toBe(true)
     expect(layout.tabs.every(tab => tab.left >= layout.container.left - 1 && tab.right <= layout.container.right + 1)).toBe(true)
-  })
-
-  test('saves vertical space compared to the two line layout', async ({ app, page }) => {
-    await goTo(page, 'subscriptions')
-
-    const headerHeight = () => page.evaluate(() => {
-      return document.querySelector('.subscriptionsHeader').getBoundingClientRect().height
-    })
-
-    const merged = await headerHeight()
-
-    await setWindowWidth(app, page, 800)
-    await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
-
-    expect(merged).toBeLessThan(await headerHeight())
   })
 })

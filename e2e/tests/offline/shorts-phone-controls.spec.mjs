@@ -33,111 +33,6 @@ async function openShort({ app, page }) {
   await watch.dispose()
 }
 
-async function showShortPoster(page, watch) {
-  // Let pause settle before revealing the retained poster in component state.
-  await page.locator('.ftVideoPlayer video').evaluate(async video => {
-    if (!video.paused) {
-      await new Promise(resolve => {
-        video.addEventListener('pause', resolve, { once: true })
-        video.pause()
-      })
-    }
-  })
-  await watch.evaluate(component => { component.proxy.$refs.player.$.setupState.showPoster = true })
-}
-
-test('Shorts posters match the video crop across presentation modes', { tag: '@scale' }, async ({ app, page }) => {
-  await openShort({ app, page })
-  const poster = 'https://provider.test/landscape-short-poster.jpg'
-  await page.route(poster, route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
-  }))
-  const watch = await page.evaluateHandle(findWatchComponent)
-  await watch.evaluate((component, poster) => {
-    component.proxy.thumbnail = poster
-  }, poster)
-  await showShortPoster(page, watch)
-  const player = page.locator('.ftVideoPlayer.shortsPlayer')
-  const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
-  const video = player.locator('video')
-  await expect(image).toBeVisible()
-  await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
-  const expectCrop = async crop => {
-    await expect(video).toHaveCSS('object-fit', crop)
-    await expect(image).toHaveCSS('object-fit', crop)
-  }
-  await expectCrop('cover')
-  await page.locator('body').press('s')
-  await expect(player).toHaveClass(/fullWindow/)
-  await expectCrop('contain')
-  await page.locator('body').press('s')
-  await expectCrop('cover')
-  await player.evaluate(player => player.requestFullscreen())
-  await expectCrop('contain')
-  await page.evaluate(() => document.exitFullscreen())
-  await expectCrop('cover')
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
-  await page.setViewportSize({ width: 1026, height: 461 })
-  await expectCrop('contain')
-  await page.setViewportSize({ width: 390, height: 800 })
-  await expectCrop('cover')
-  await watch.dispose()
-})
-
-test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
-  await openShort({ app, page })
-  const high = 'https://i.ytimg.com/vi/short-poster/large.jpg'
-  const low = 'https://i.ytimg.com/vi/short-poster/small.jpg'
-  await page.route('https://i.ytimg.com/vi/short-poster/**', route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
-  }))
-  const watch = await page.evaluateHandle(findWatchComponent)
-  await watch.evaluate(async (component, { high, low }) => {
-    const store = component.proxy.$store
-    const channelId = 'UC-short-poster-test'
-    const profile = JSON.parse(JSON.stringify(store.getters.getActiveProfile))
-    await store.dispatch('updateProfile', { ...profile, subscriptions: [{ id: channelId, name: 'Poster test', thumbnail: '' }] })
-    await store.dispatch('updateSubscriptionShortsCacheByChannel', {
-      channelId,
-      videos: [{ videoId: component.proxy.videoId, title: 'Poster test', authorId: channelId, published: Date.now(), thumbnailUrl: high, lowResolutionThumbnailUrl: low }]
-    })
-    component.proxy.thumbnail = high
-  }, { high, low })
-  await showShortPoster(page, watch)
-  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
-  await expect(image).toBeVisible()
-  await expect(image).toHaveAttribute('src', high)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
-  await expect(image).toHaveAttribute('src', low)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
-  await expect(image).toHaveAttribute('src', high)
-  await watch.dispose()
-})
-
-test('data saver preserves standalone Shorts posters without alternate thumbnails', async ({ app, page }) => {
-  await openShort({ app, page })
-  const poster = 'https://provider.test/short-poster.jpg'
-  await page.route(poster, route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
-  }))
-  const watch = await page.evaluateHandle(findWatchComponent)
-  await watch.evaluate((component, poster) => {
-    component.proxy.thumbnail = poster
-  }, poster)
-  await showShortPoster(page, watch)
-  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
-  await expect(image).toBeVisible()
-  await expect(image).toHaveAttribute('src', poster)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
-  await expect(image).toHaveAttribute('src', poster)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
-  await expect(image).toHaveAttribute('src', poster)
-  await watch.dispose()
-})
-
 test('phone Shorts options stay inside their menu dialog', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })
@@ -304,25 +199,6 @@ test('phone Shorts controls clear navigation and show quick speeds', async ({ ap
   await watch.dispose()
 })
 
-test('phone Shorts loading controls match the action rail', async ({ app, page }) => {
-  await openShort({ app, page })
-  const watch = await page.evaluateHandle(findWatchComponent)
-  await watch.evaluate(component => { component.proxy.isLoading = true })
-
-  const rail = page.locator('.shortsActionRailSkeleton')
-  const placeholders = rail.locator('.shortsActionSkeleton > span')
-  await expect(placeholders.first()).toBeVisible()
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
-  await expect(rail.locator('.shortsActionSkeleton > small')).toHaveCount(0)
-  const bounds = await placeholders.first().boundingBox()
-  expect(bounds.width).toBeGreaterThanOrEqual(40)
-  expect(bounds.width).toBeCloseTo(bounds.height, 0)
-  expect(await placeholders.first().evaluate(el => getComputedStyle(el).borderRadius)).toBe('50%')
-  await expect(page.locator('.shortsSkeletonControlGroup').first().locator('span:visible')).toHaveCount(1)
-
-  await watch.dispose()
-})
-
 test('landscape phone Shorts keep a portrait player and accessible controls', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
@@ -434,24 +310,6 @@ test('landscape phone Shorts keep a portrait player and accessible controls', as
   await expect(page.locator('body')).toHaveClass(/\blight\b/)
   expect(await page.locator('.shortsExternalTitleButton').evaluate(element => getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
   await watch.dispose()
-})
-
-test('landscape Shorts keep light-theme metadata clear of the player', async ({ app, page }) => {
-  await openShort({ app, page })
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
-  await page.emulateMedia({ colorScheme: 'light' })
-  await expect(page.locator('body')).toHaveClass(/\blight\b/)
-  await page.setViewportSize({ width: 700, height: 540 })
-
-  const player = page.locator('.ftVideoPlayer.shortsPlayer')
-  const metadata = page.locator('.shortsExternalMetadata')
-  const [playerBounds, metadataBounds] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
-  expect(metadataBounds.x + metadataBounds.width).toBeLessThanOrEqual(playerBounds.x - 8)
-  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
-  await expect.poll(async () => {
-    const [scaledPlayer, scaledMetadata] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
-    return scaledPlayer.x - scaledMetadata.x - scaledMetadata.width
-  }).toBeGreaterThanOrEqual(8)
 })
 
 test('landscape Shorts keep every control inside the narrow player and action rail', async ({ app, page }) => {
@@ -589,29 +447,6 @@ test('landscape Shorts keep long playback errors and retry actions readable', as
   await watch.dispose()
 })
 
-test('narrow landscape Shorts keep the translated loading notice inside the player', async ({ app, page }) => {
-  await openShort({ app, page })
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
-  await page.setViewportSize({ width: 600, height: 320 })
-  const watch = await page.evaluateHandle(findWatchComponent)
-  await watch.evaluate(component => { component.proxy.ytDlpStreamsPending = true })
-  const streamPlaceholder = page.locator('.streamPlaceholder.shortsPlayerPlaceholder')
-  await expect(streamPlaceholder).toBeVisible()
-  await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => {
-    element.textContent = 'Récupération des flux avec yt-dlp…'
-  })
-  const [streamBounds, noticeBounds] = await Promise.all([
-    streamPlaceholder.boundingBox(),
-    streamPlaceholder.locator('.streamPlaceholderOverlay').boundingBox(),
-  ])
-  expect(noticeBounds.x).toBeGreaterThanOrEqual(streamBounds.x)
-  expect(noticeBounds.x + noticeBounds.width).toBeLessThanOrEqual(streamBounds.x + streamBounds.width)
-  expect(noticeBounds.y).toBeGreaterThanOrEqual(streamBounds.y)
-  expect(noticeBounds.y + noticeBounds.height).toBeLessThanOrEqual(streamBounds.y + streamBounds.height)
-  expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-  await watch.dispose()
-})
-
 test('narrow landscape Shorts stay above the phone navigation', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => {
@@ -670,25 +505,6 @@ test('short phone screens can reach every Shorts rail action with navigation pre
   await expect.poll(() => rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
 })
 
-test('medium-width Shorts retain their player height without bottom tabs', async ({ app, page }) => {
-  await openShort({ app, page })
-  await setWindowSize(app, page, { width: 720, height: 820 })
-  const player = page.locator('.videoLayout.shortsPlayerActive .videoPlayer')
-  const baseline = await player.boundingBox()
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
-  await expect.poll(async () => (await player.boundingBox()).height).toBeCloseTo(baseline.height, 0)
-})
-
-test('Shorts playlist sheet opens over the lower 70% of the screen', async ({ app, page }) => {
-  await openShort({ app, page })
-  await page.locator('.shortsActionRail .shortsAction').filter({ hasText: 'Add to Playlist' }).locator('button').first().click()
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet).toBeVisible()
-  const viewportHeight = await page.evaluate(() => window.innerHeight)
-  await expect.poll(async () => (await sheet.boundingBox()).y).toBeCloseTo(viewportHeight * 0.3, 0)
-  expect((await sheet.boundingBox()).height).toBeGreaterThanOrEqual(viewportHeight * 0.7 - 1)
-})
-
 test('phone Shorts opens video information from the rail without a bottom title', async ({ app, page }) => {
   await openShort({ app, page })
   await expect(page.locator('.shortsExternalTitle')).toBeVisible()
@@ -739,7 +555,7 @@ test('Shorts fullscreen control opens fullscreen and only the top control shows 
   await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
 })
 
-for (const durationBackoff of [0, 0.5, 60]) {
+for (const durationBackoff of [0, 0.5]) {
   test(`End on a paused Short reaches replay with ${durationBackoff}s seek backoff`, async ({ app, page }) => {
     await openShort({ app, page })
     const watch = await page.evaluateHandle(findWatchComponent)

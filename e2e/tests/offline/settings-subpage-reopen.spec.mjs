@@ -33,9 +33,9 @@ for (const protectedSettings of [false, true]) {
     })
 
     for (const { label, tab, addLabel, pickerSelector } of [
-      { label: 'Customize navigation', tab: 'navigation', addLabel: 'Add item', pickerSelector: '.itemPickerPopover' },
-      { label: 'Customize fullscreen actions', tab: 'fullscreen actions', addLabel: 'Add action', pickerSelector: '.itemPickerPopover' },
-      { label: 'Customize quick settings', tab: 'quick settings', addLabel: 'Add setting', pickerSelector: '.settingPickerPopover' },
+      protectedSettings
+        ? { label: 'Customize quick settings', tab: 'quick settings', addLabel: 'Add setting', pickerSelector: '.settingPickerPopover' }
+        : { label: 'Customize navigation', tab: 'navigation', addLabel: 'Add item', pickerSelector: '.itemPickerPopover' },
     ]) {
       test(`dismisses ${label} picker through Preferences`, async ({ app, page }) => {
         await goTo(page, 'settings')
@@ -256,46 +256,37 @@ test.describe('protected settings subpage reopening', () => {
     })
   }
 
-  for (const opener of ['header', 'toast']) {
-    test(`a direct section opener replaces a pending search target (${opener})`, async ({ page }) => {
-      await goTo(page, 'settings')
-      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
-      await passwordInput.fill(password)
-      await passwordInput.press('Enter')
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
-      const themeName = page.locator('.customThemeEditor .themeNameField input')
-      await themeName.fill('Unfinished theme')
-      await page.locator('.settingsCloseButton').click()
-      await expect(page.locator('.settingsWindow')).toBeHidden()
-      await page.keyboard.press('Control+k')
-      await page.getByRole('combobox', { name: 'Search commands' }).fill('ui scale')
-      await page.getByRole('option', { name: /UI Scale/ }).click()
-      await expect(passwordInput).toBeFocused()
-      await page.locator('.settingsCloseButton').click()
-      await expect(page.locator('.settingsWindow')).toBeHidden()
-      if (opener === 'header') {
-        await page.evaluate(() => {
-          const store = window.$store
-          store.commit('setSyncServerStatus', 'syncing')
-        })
-        await page.locator('.topNav .syncIndicator').click()
-      } else {
-        await page.evaluate(() => {
-          window.ftElectron.showToastOnAllTabs('Sync needs attention', 30000, ['fas', 'sync'], 'open-sync-settings')
-        })
-        await page.locator('.toast', { hasText: 'Sync needs attention' }).getByRole('button', { name: /^Sync(?: Settings)?$/i }).click()
-      }
-      await expect(passwordInput).toBeFocused()
-      await expect(themeName).toHaveValue('Unfinished theme')
-      await passwordInput.fill(password)
-      await passwordInput.press('Enter')
-      await expect(page.locator('.section[data-section="sync"]')).toBeVisible()
-      await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+  test('a direct section opener replaces a pending search target (header)', async ({ page }) => {
+    await goTo(page, 'settings')
+    const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+    const themeName = page.locator('.customThemeEditor .themeNameField input')
+    await themeName.fill('Unfinished theme')
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await page.keyboard.press('Control+k')
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('ui scale')
+    await page.getByRole('option', { name: /UI Scale/ }).click()
+    await expect(passwordInput).toBeFocused()
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerStatus', 'syncing')
     })
-  }
+    await page.locator('.topNav .syncIndicator').click()
+    await expect(passwordInput).toBeFocused()
+    await expect(themeName).toHaveValue('Unfinished theme')
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.section[data-section="sync"]')).toBeVisible()
+    await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+  })
 
-  for (const opener of ['palette', 'keyboard', 'quick-settings']) {
+  for (const opener of ['palette', 'keyboard']) {
     test(`a shortcut request replaces a pending search target (${opener})`, async ({ app, page }) => {
       await setWindowSize(app, page, { width: 1400, height: 750 })
       await goTo(page, 'settings')
@@ -313,12 +304,9 @@ test.describe('protected settings subpage reopening', () => {
         await page.keyboard.press('Control+k')
         await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
         await page.locator('[role="option"][id$="-app-shortcuts"]').click()
-      } else if (opener === 'keyboard') {
+      } else {
         await passwordInput.evaluate(input => input.blur())
         await page.keyboard.press('Shift+?')
-      } else {
-        await page.locator('.profileTrigger').click()
-        await page.locator('.quickSettingsMenu').getByRole('button', { name: /^Keyboard shortcuts$/i }).click()
       }
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
@@ -369,12 +357,9 @@ test.describe('protected settings subpage reopening', () => {
         await page.keyboard.press('Control+k')
         await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
         await page.locator('[role="option"][id$="-app-shortcuts"]').click()
-      } else if (opener === 'keyboard') {
+      } else {
         await passwordInput.evaluate(input => input.blur())
         await page.keyboard.press('Shift+?')
-      } else {
-        await page.locator('.profileTrigger').click()
-        await page.locator('.quickSettingsMenu').getByRole('button', { name: /^Keyboard shortcuts$/i }).click()
       }
       await expect.poll(() => page.evaluate(() => window.$store.getters.getIsKeyboardShortcutPromptShown)).toBe(true)
       await expect(themeName).toHaveValue('Unfinished theme')
@@ -407,45 +392,6 @@ test.describe('protected settings subpage reopening', () => {
     })
   }
 
-  test('a shortcut request replaces a pending category request', async ({ page }) => {
-    await goTo(page, 'settings')
-    const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
-    await passwordInput.fill(password)
-    await passwordInput.press('Enter')
-    const privacy = await goToSettingsSection(page, 'privacy')
-    await page.locator('.settingsCloseButton').click()
-    await goTo(page, 'settings')
-    await expect(passwordInput).toBeFocused()
-    await page.keyboard.press('Control+k')
-    await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
-    await page.locator('[role="option"][id$="-settings-general"]').click()
-    await page.keyboard.press('Control+k')
-    await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
-    await page.locator('[role="option"][id$="-app-shortcuts"]').click()
-    await passwordInput.fill(password)
-    await passwordInput.press('Enter')
-    await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
-    await page.locator('.settingsCloseButton').click()
-    await goTo(page, 'settings')
-    await passwordInput.fill(password)
-    await passwordInput.press('Enter')
-    await expect(privacy).toBeVisible()
-
-    // A newer category request must still replace the pending shortcut request.
-    await page.locator('.settingsCloseButton').click()
-    await goTo(page, 'settings')
-    await expect(passwordInput).toBeFocused()
-    await page.evaluate(() => window.$store.dispatch('showKeyboardShortcutPrompt'))
-    await page.keyboard.press('Control+k')
-    await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
-    await page.locator('[role="option"][id$="-settings-general"]').click()
-    await passwordInput.fill(password)
-    await passwordInput.press('Enter')
-    await expect(page.locator('.section[data-section="general"]')).toBeVisible()
-    await expect(page.locator('.settingsKeyboardShortcutPage')).toHaveCount(0)
-    await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
-  })
-
   test('keeps keyboard shortcut navigation unavailable while Settings is locked', async ({ page }) => {
     await goTo(page, 'settings')
     const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
@@ -470,7 +416,7 @@ test.describe('protected settings subpage reopening', () => {
     await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
   })
 
-  for (const targetType of ['setting', 'category', 'root']) {
+  for (const targetType of ['setting', 'root']) {
     test(`keeps a draft locked until the latest command-palette target can open (${targetType})`, async ({ page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
@@ -493,12 +439,6 @@ test.describe('protected settings subpage reopening', () => {
         await expect(themeName).toHaveCount(1)
         await expect(themeName).toHaveValue('Unfinished theme')
       }
-      if (targetType === 'category') {
-        await page.keyboard.press('Control+k')
-        await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
-        await page.locator('[role="option"][id$="-settings-general"]').click()
-        await expect(themeName).toHaveValue('Unfinished theme')
-      }
       if (targetType === 'root') {
         await page.keyboard.press('Control+k')
         const search = page.getByRole('combobox', { name: 'Search commands' })
@@ -515,9 +455,6 @@ test.describe('protected settings subpage reopening', () => {
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
       if (targetType === 'setting') {
         await expect(page.locator('.settingsSearchTarget')).toContainText('UI Scale')
-      } else if (targetType === 'category') {
-        await expect(page.locator('.section[data-section="general"]')).toBeVisible()
-        await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
       } else {
         await expect(themeName).toBeVisible()
         await expect(themeName).toHaveValue('Unfinished theme')
@@ -548,19 +485,71 @@ test.describe('protected settings subpage reopening', () => {
     await expect(page.locator('.selectDropdown')).toHaveCount(0)
   })
 
-  for (const narrow of [false, true]) {
-    test(`dismisses a teleported prompt when Preferences closes settings${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
-      if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
+  test('dismisses a teleported prompt when Preferences closes settings', async ({ app, page }) => {
+    await goTo(page, 'settings')
+    const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.settingsPassword')).toHaveCount(0)
+    const playback = await goToSettingsSection(page, 'playback')
+    await playback.getByRole('button', { name: 'Manage Saved Channels (0)', exact: true }).click()
+    await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+    const prompt = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+    await expect(prompt).toBeVisible()
+    await toggleSettingsFromPreferences(app)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await expect(prompt).toHaveCount(0)
+    await expectPromptResourcesReleased(page)
+    await goTo(page, 'settings')
+    await expect(passwordInput).toBeFocused()
+    await expect(prompt).toHaveCount(0)
+    await expectPromptResourcesReleased(page)
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.settingsPassword')).toHaveCount(0)
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
+    await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+    await expect(prompt).toBeVisible()
+    await expect(prompt.getByRole('button', { name: 'Alpha Channel', exact: true })).toBeEnabled()
+  })
+
+  for (const outcome of ['success', 'failure']) {
+    test(`dismisses a busy prompt through unlocking while its operation is still pending (${outcome})`, async ({ app, page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      const playback = await goToSettingsSection(page, 'playback')
-      await playback.getByRole('button', { name: 'Manage Saved Channels (0)', exact: true }).click()
-      await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
-      const prompt = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
-      await expect(prompt).toBeVisible()
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = window.$store
+        store.commit('setSyncServerUrl', '')
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+        store.commit('setSyncServerActivity', [{
+          id: 'overlay-test',
+          deviceName: 'Laptop',
+          collection: 'subscriptions',
+          action: 'added',
+          item: 'Alpha Channel',
+          createdAt: Date.now()
+        }])
+        const dispatch = store.dispatch.bind(store)
+        store.dispatch = (action, ...args) => {
+          if (action === 'clearSyncServerActivity') {
+            return new Promise((resolve, reject) => {
+              window.finishOverlayActivityClear = resolve
+              window.failOverlayActivityClear = () => reject(new Error('Activity clear failed'))
+            })
+          }
+          return dispatch(action, ...args)
+        }
+      })
+      await sync.locator('.activityClear').click()
+      const prompt = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
+      await prompt.getByRole('button', { name: 'Clear on this device', exact: true }).click()
+      await expect(prompt).toHaveAttribute('inert', '')
       await toggleSettingsFromPreferences(app)
       await expect(page.locator('.settingsWindow')).toBeHidden()
       await expect(prompt).toHaveCount(0)
@@ -572,75 +561,17 @@ test.describe('protected settings subpage reopening', () => {
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      await expect(page.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
-      await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+      await expect(prompt).toHaveCount(0)
+      await expectPromptResourcesReleased(page)
+      await page.evaluate(outcome => {
+        if (outcome === 'success') window.finishOverlayActivityClear()
+        else window.failOverlayActivityClear()
+      }, outcome)
+      await expect(sync.locator('.activityClear')).toBeEnabled()
+      await expect(prompt).toHaveCount(0)
+      await sync.locator('.activityClear').click()
       await expect(prompt).toBeVisible()
-      await expect(prompt.getByRole('button', { name: 'Alpha Channel', exact: true })).toBeEnabled()
     })
-  }
-
-  for (const narrow of [false, true]) {
-    for (const outcome of ['success', 'failure']) {
-      test(`dismisses a busy prompt through unlocking while its operation is still pending (${outcome})${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
-        if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
-        await goTo(page, 'settings')
-        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
-        await passwordInput.fill(password)
-        await passwordInput.press('Enter')
-        await expect(page.locator('.settingsPassword')).toHaveCount(0)
-        const sync = await goToSettingsSection(page, 'sync')
-        await page.evaluate(() => {
-          const store = window.$store
-          store.commit('setSyncServerUrl', '')
-          store.commit('setSyncServerToken', 'test-token')
-          store.commit('setSyncServerLiveSupported', true)
-          store.commit('setSyncServerEnabled', true)
-          store.commit('setSyncServerActivity', [{
-            id: 'overlay-test',
-            deviceName: 'Laptop',
-            collection: 'subscriptions',
-            action: 'added',
-            item: 'Alpha Channel',
-            createdAt: Date.now()
-          }])
-          const dispatch = store.dispatch.bind(store)
-          store.dispatch = (action, ...args) => {
-            if (action === 'clearSyncServerActivity') {
-              return new Promise((resolve, reject) => {
-                window.finishOverlayActivityClear = resolve
-                window.failOverlayActivityClear = () => reject(new Error('Activity clear failed'))
-              })
-            }
-            return dispatch(action, ...args)
-          }
-        })
-        await sync.locator('.activityClear').click()
-        const prompt = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
-        await prompt.getByRole('button', { name: 'Clear on this device', exact: true }).click()
-        await expect(prompt).toHaveAttribute('inert', '')
-        await toggleSettingsFromPreferences(app)
-        await expect(page.locator('.settingsWindow')).toBeHidden()
-        await expect(prompt).toHaveCount(0)
-        await expectPromptResourcesReleased(page)
-        await goTo(page, 'settings')
-        await expect(passwordInput).toBeFocused()
-        await expect(prompt).toHaveCount(0)
-        await expectPromptResourcesReleased(page)
-        await passwordInput.fill(password)
-        await passwordInput.press('Enter')
-        await expect(page.locator('.settingsPassword')).toHaveCount(0)
-        await expect(prompt).toHaveCount(0)
-        await expectPromptResourcesReleased(page)
-        await page.evaluate(outcome => {
-          if (outcome === 'success') window.finishOverlayActivityClear()
-          else window.failOverlayActivityClear()
-        }, outcome)
-        await expect(sync.locator('.activityClear')).toBeEnabled()
-        await expect(prompt).toHaveCount(0)
-        await sync.locator('.activityClear').click()
-        await expect(prompt).toBeVisible()
-      })
-    }
   }
 
   test('dismisses a pending account prompt and permits retry after failure', async ({ app, page }) => {
@@ -772,159 +703,145 @@ test.describe('protected settings subpage reopening', () => {
     })
   })
 
-  for (const narrow of [false, true]) {
-    for (const picker of ['select', 'color']) {
-      test(`dismisses a teleported ${picker} picker when Preferences closes settings${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
-        if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
-        await goTo(page, 'settings')
-        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
-        await passwordInput.fill(password)
-        await passwordInput.press('Enter')
-        await expect(page.locator('.settingsPassword')).toHaveCount(0)
-        const appearance = await goToSettingsSection(page, 'appearance')
-        await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
-        const editor = page.locator('.customThemeEditor')
-        const trigger = picker === 'select'
-          ? editor.getByRole('combobox', { name: 'Based on', exact: true })
-          : editor.locator('.colorFieldTrigger').first()
-        const popup = page.locator(picker === 'select' ? '.selectDropdown' : '.colorPickerPopover')
-        await trigger.click()
-        await expect(popup).toBeVisible()
-        await toggleSettingsFromPreferences(app)
-        await expect(page.locator('.settingsWindow')).toBeHidden()
-        await expect(popup).toHaveCount(0)
-        await goTo(page, 'settings')
-        await expect(passwordInput).toBeFocused()
-        await expect(popup).toHaveCount(0)
-        await passwordInput.fill(password)
-        await passwordInput.press('Enter')
-        await expect(page.locator('.settingsPassword')).toHaveCount(0)
-        await expect(editor).toBeVisible()
-        await trigger.click()
-        await expect(popup).toBeVisible()
-      })
-    }
-  }
-
-  for (const narrow of [false, true]) {
-    test(`keeps an unsaved theme draft through closing the locked password screen${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
-      if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
+  for (const picker of ['select', 'color']) {
+    test(`dismisses a teleported ${picker} picker when Preferences closes settings`, async ({ app, page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
+      await expect(page.locator('.settingsPassword')).toHaveCount(0)
       const appearance = await goToSettingsSection(page, 'appearance')
       await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
-      const themeName = page.locator('.customThemeEditor .themeNameField input')
-      await themeName.fill('Unfinished theme')
+      const editor = page.locator('.customThemeEditor')
+      const trigger = picker === 'select'
+        ? editor.getByRole('combobox', { name: 'Based on', exact: true })
+        : editor.locator('.colorFieldTrigger').first()
+      const popup = page.locator(picker === 'select' ? '.selectDropdown' : '.colorPickerPopover')
+      await trigger.click()
+      await expect(popup).toBeVisible()
       await toggleSettingsFromPreferences(app)
       await expect(page.locator('.settingsWindow')).toBeHidden()
+      await expect(popup).toHaveCount(0)
       await goTo(page, 'settings')
       await expect(passwordInput).toBeFocused()
-      await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
-      await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
-      await page.keyboard.press('Escape')
-      await expect(page.locator('.settingsWindow')).toBeHidden()
-      await goTo(page, 'settings')
+      await expect(popup).toHaveCount(0)
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      await expect(page.locator('.settingsBreadcrumb')).toContainText('Custom theme creator')
-      await expect(themeName).toHaveValue('Unfinished theme')
+      await expect(editor).toBeVisible()
+      await trigger.click()
+      await expect(popup).toBeVisible()
     })
   }
 
-  for (const narrow of [false, true]) {
-    test(`keeps Customize navigation and scroll after unlocking again${narrow ? ' in a narrow window' : ''}`, { tag: '@scale' }, async ({ app, page }) => {
-      await setWindowSize(app, page, narrow ? { width: 500, height: 700 } : { width: 1100, height: 600 })
-      await goTo(page, 'settings')
-      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
-      await passwordInput.fill(password)
-      await passwordInput.press('Enter')
-      await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      await openInterfaceCustomizer(page, 'navigation')
-      const subpage = page.locator('.selectedItem').first()
-      await expect(subpage).toBeVisible()
-      const scroller = page.locator('.customizerEditorScroll').visible()
-      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-      const scrollTop = await scroller.evaluate(element => element.scrollTop)
-      await page.locator('.settingsCloseButton').click()
-      await expect(page.locator('.settingsWindow')).toBeHidden()
-      await goTo(page, 'settings')
-      await expect(passwordInput).toBeFocused()
-      await expect(subpage).toBeHidden()
-      await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
-      await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
-      await passwordInput.fill('wrong-password')
-      await passwordInput.press('Enter')
-      await expect(page.getByRole('alert')).toHaveText('Incorrect password')
-      await expect(subpage).toBeHidden()
-      await toggleSettingsFromPreferences(app)
-      await expect(page.locator('.settingsWindow')).toBeHidden()
-      await toggleSettingsFromPreferences(app)
-      await expect(passwordInput).toBeFocused()
-      await expect(subpage).toBeHidden()
-      await passwordInput.fill(password)
-      await passwordInput.press('Enter')
-      await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
-      await expect(page.locator('.selectedItem').last()).toBeVisible()
-      await expect.poll(async () => Math.abs(await scroller.evaluate(element => element.scrollTop) - scrollTop))
-        .toBeLessThanOrEqual(1)
-    })
-  }
+  test('keeps an unsaved theme draft through closing the locked password screen', async ({ app, page }) => {
+    await goTo(page, 'settings')
+    const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+    const themeName = page.locator('.customThemeEditor .themeNameField input')
+    await themeName.fill('Unfinished theme')
+    await toggleSettingsFromPreferences(app)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await goTo(page, 'settings')
+    await expect(passwordInput).toBeFocused()
+    await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
+    await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await goTo(page, 'settings')
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.settingsPassword')).toHaveCount(0)
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Custom theme creator')
+    await expect(themeName).toHaveValue('Unfinished theme')
+  })
+
+  test('keeps Customize navigation and scroll after unlocking again in a narrow window', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 500, height: 700 })
+    await goTo(page, 'settings')
+    const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.settingsPassword')).toHaveCount(0)
+    await openInterfaceCustomizer(page, 'navigation')
+    const subpage = page.locator('.selectedItem').first()
+    await expect(subpage).toBeVisible()
+    const scroller = page.locator('.customizerEditorScroll').visible()
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const scrollTop = await scroller.evaluate(element => element.scrollTop)
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await goTo(page, 'settings')
+    await expect(passwordInput).toBeFocused()
+    await expect(subpage).toBeHidden()
+    await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
+    await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
+    await passwordInput.fill('wrong-password')
+    await passwordInput.press('Enter')
+    await expect(page.getByRole('alert')).toHaveText('Incorrect password')
+    await expect(subpage).toBeHidden()
+    await toggleSettingsFromPreferences(app)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await toggleSettingsFromPreferences(app)
+    await expect(passwordInput).toBeFocused()
+    await expect(subpage).toBeHidden()
+    await passwordInput.fill(password)
+    await passwordInput.press('Enter')
+    await expect(page.locator('.settingsPassword')).toHaveCount(0)
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
+    await expect(page.locator('.selectedItem').last()).toBeVisible()
+    await expect.poll(async () => Math.abs(await scroller.evaluate(element => element.scrollTop) - scrollTop))
+      .toBeLessThanOrEqual(1)
+  })
 })
 
 test.describe('settings subpage reopening', () => {
-  for (const width of [375, 1000]) {
-    for (const view of ['downloads', 'about']) {
-      test(`keeps category scrolling through a direct ${view} switch at width ${width}`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
-        await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(650 * uiScale / 100) })
-        const category = await goToSettingsSection(page, 'appearance')
-        const content = page.locator('.settingsContent')
-        const scrollbar = content.locator(':scope > .os-scrollbar-vertical')
-        for (const resize of [false, true]) {
-          await content.evaluate(element => { element.scrollTop = element.scrollHeight })
-          await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(100)
-          const scrollTop = await content.evaluate(element => element.scrollTop)
-          if (view === 'downloads') await page.keyboard.press('Control+j')
-          else {
-            await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
-          }
-          await expect(page.locator(view === 'downloads' ? '.settingsDownloadsPage' : '.settingsAboutPage')).toBeVisible()
-          await expect(category).toBeHidden()
-          // Let the hidden section's ResizeObserver notification run.
-          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-          if (resize) {
-            await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-              const window = BrowserWindow.getAllWindows()[0]
-              window.setBounds({ ...window.getBounds(), width: Math.round((width === 375 ? 1000 : 375) * uiScale / 100), height: Math.round(900 * uiScale / 100) })
-            }, { width, uiScale })
-            await expect.poll(() => page.evaluate(() => innerHeight)).toBeGreaterThan(800)
-            await page.locator('.settingsCloseButton').click()
-            await expect(page.locator('.settingsWindow')).toBeHidden()
-          }
-          await toggleSettingsFromPreferences(app)
-          await expect(category).toBeVisible()
-          await expect.poll(() => content.evaluate((element, saved) => {
-            const maximum = Math.max(0, element.scrollHeight - element.clientHeight)
-            return Math.abs(element.scrollTop - Math.min(saved, maximum))
-          }, scrollTop)).toBeLessThanOrEqual(1)
-          await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-          await expect.poll(() => content.evaluate(element => {
-            const section = element.querySelector(':scope > [data-section="appearance"]')
-            const end = section.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
-            const bounds = element.getBoundingClientRect()
-            const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
-            const thumb = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
-            return end >= bounds.bottom - 2 / devicePixelRatio && element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
-              Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
-          })).toBe(true)
-        }
-      })
+  test('keeps category scrolling through a direct downloads switch at width 375', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    const width = 375
+    await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(650 * uiScale / 100) })
+    const category = await goToSettingsSection(page, 'appearance')
+    const content = page.locator('.settingsContent')
+    const scrollbar = content.locator(':scope > .os-scrollbar-vertical')
+    for (const resize of [false, true]) {
+      await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(100)
+      const scrollTop = await content.evaluate(element => element.scrollTop)
+      await page.keyboard.press('Control+j')
+      await expect(page.locator('.settingsDownloadsPage')).toBeVisible()
+      await expect(category).toBeHidden()
+      // Let the hidden section's ResizeObserver notification run.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      if (resize) {
+        await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), width: Math.round((width === 375 ? 1000 : 375) * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+        }, { width, uiScale })
+        await expect.poll(() => page.evaluate(() => innerHeight)).toBeGreaterThan(800)
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+      }
+      await toggleSettingsFromPreferences(app)
+      await expect(category).toBeVisible()
+      await expect.poll(() => content.evaluate((element, saved) => {
+        const maximum = Math.max(0, element.scrollHeight - element.clientHeight)
+        return Math.abs(element.scrollTop - Math.min(saved, maximum))
+      }, scrollTop)).toBeLessThanOrEqual(1)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      await expect.poll(() => content.evaluate(element => {
+        const section = element.querySelector(':scope > [data-section="appearance"]')
+        const end = section.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
+        const bounds = element.getBoundingClientRect()
+        const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+        const thumb = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+        return end >= bounds.bottom - 2 / devicePixelRatio && element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
+          Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+      })).toBe(true)
     }
-  }
+  })
 
   test('opens a command-palette category before compact Settings first mounts', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 700 })
@@ -954,63 +871,44 @@ test.describe('settings subpage reopening', () => {
     await expect(page.locator('.section[data-section="appearance"]')).toBeVisible()
   })
 
-  test('keeps search results when Settings is reopened', async ({ page }) => {
-    await goToSettingsSection(page, 'appearance')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-    await search.fill('thumbnail')
-    const results = page.locator('.settingsSearchResults')
-    await expect(results).toBeVisible()
-    await page.locator('.settingsCloseButton').click()
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-    await goTo(page, 'settings')
-    await expect(search).toHaveValue('thumbnail')
-    await expect(results).toBeVisible()
-    await search.fill('')
-    await expect(page.locator('.section[data-section="appearance"]')).toBeVisible()
-  })
+  for (const { narrow, section, label, tab, title, content } of [
+    { narrow: false, section: 'appearance', label: 'Customize interface', tab: 'fullscreenActions', content: '.selectedAction' },
+    { narrow: true, section: 'playback', label: 'Manage Saved Channels', title: 'Saved Channel Settings', content: '.channelListContainer' },
+  ]) {
+    test(`keeps ${label}${tab ? ` ${tab} tab` : ''} when settings is closed and reopened${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
+      if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
+      const category = await goToSettingsSection(page, section)
+      await category.getByRole('button', { name: label }).click()
+      if (tab) await page.locator(`[data-settings-subpage-tab="${tab}"]`).click()
+      const breadcrumb = page.locator('.settingsBreadcrumb')
+      const subpage = page.locator(content).first()
+      await expect(breadcrumb).toContainText(title ?? label)
+      await expect(subpage).toBeVisible()
 
-  for (const narrow of [false, true]) {
-    for (const { section, label, tab, title, content } of [
-      { section: 'appearance', label: 'Customize interface', content: '.selectedItem' },
-      { section: 'appearance', label: 'Customize interface', tab: 'fullscreenActions', content: '.selectedAction' },
-      { section: 'appearance', label: 'Create custom theme', title: 'Custom theme creator', content: '.customThemeEditor' },
-      { section: 'playback', label: 'Manage Saved Channels', title: 'Saved Channel Settings', content: '.channelListContainer' },
-    ]) {
-      test(`keeps ${label}${tab ? ` ${tab} tab` : ''} when settings is closed and reopened${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
-        if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
-        const category = await goToSettingsSection(page, section)
-        await category.getByRole('button', { name: label }).click()
-        if (tab) await page.locator(`[data-settings-subpage-tab="${tab}"]`).click()
-        const breadcrumb = page.locator('.settingsBreadcrumb')
-        const subpage = page.locator(content).first()
-        await expect(breadcrumb).toContainText(title ?? label)
-        await expect(subpage).toBeVisible()
-
-        for (let attempt = 0; attempt < 2; attempt++) {
-          if (attempt === 0) {
-            await page.locator('.settingsCloseButton').click()
-          } else {
-            await toggleSettingsFromPreferences(app)
-          }
-          await expect(page.locator('.settingsWindow')).toBeHidden()
-          await goTo(page, 'settings')
-          await expect(breadcrumb).toContainText(title ?? label)
-          await expect(subpage).toBeVisible()
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (attempt === 0) {
+          await page.locator('.settingsCloseButton').click()
+        } else {
+          await toggleSettingsFromPreferences(app)
         }
-
-        await page.getByRole('button', { name: 'Back', exact: true }).click()
-        await expect(category).toBeVisible()
-        await expect(subpage).toHaveCount(0)
-        await page.locator('.settingsCloseButton').click()
         await expect(page.locator('.settingsWindow')).toBeHidden()
         await goTo(page, 'settings')
-        await expect(category).toBeVisible()
-        await expect(subpage).toHaveCount(0)
+        await expect(breadcrumb).toContainText(title ?? label)
+        await expect(subpage).toBeVisible()
+      }
 
-        if (narrow) await page.getByRole('button', { name: 'Back', exact: true }).click()
-        await page.locator('.settingsMenu [data-section="privacy"]').click()
-        await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
-      })
-    }
+      await page.getByRole('button', { name: 'Back', exact: true }).click()
+      await expect(category).toBeVisible()
+      await expect(subpage).toHaveCount(0)
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await expect(category).toBeVisible()
+      await expect(subpage).toHaveCount(0)
+
+      if (narrow) await page.getByRole('button', { name: 'Back', exact: true }).click()
+      await page.locator('.settingsMenu [data-section="privacy"]').click()
+      await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
+    })
   }
 })

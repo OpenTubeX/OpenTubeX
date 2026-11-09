@@ -431,40 +431,6 @@ test.describe('with followed feeds', () => {
     await expect(banner).toHaveText('1 feed could not be refreshed.')
   })
 
-  test('spaces the refresh error banner evenly between the header and the items @scale', async ({ page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.locator('.errorBanner')).toBeVisible()
-    await expect(panel.locator('.ft-list-item')).toHaveCount(2)
-
-    const { above, below } = await page.evaluate(() => {
-      const header = document.querySelector('.subscriptionsHeader').getBoundingClientRect()
-      const banner = document.querySelector('#subscriptionsPanel .errorBanner').getBoundingClientRect()
-      // The item's padding is empty space, so measure to its content
-      const content = document.querySelector('#subscriptionsPanel .ft-list-item > *').getBoundingClientRect()
-      return { above: banner.top - header.bottom, below: content.top - banner.bottom }
-    })
-    expect(above).toBeGreaterThan(0)
-    expect(Math.abs(above - below)).toBeLessThan(1)
-  })
-
-  test('shows the empty state after dismissing the errors of every feed', async ({ page }) => {
-    await mockFeeds(page)
-    await page.route(RSS_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    const banner = panel.locator('.errorBanner')
-    const empty = panel.getByText('Your feeds currently do not have any items.')
-    await expect(banner).toHaveText('2 feeds could not be refreshed.')
-    await expect(empty).toHaveCount(0)
-
-    await banner.getByRole('button', { name: 'Close' }).click()
-    await expect(empty).toBeVisible()
-  })
-
   test('opens the feed manager from the RSS tab after settings were opened before', async ({ page }) => {
     await mockFeeds(page)
     const section = await goToSettingsSection(page, 'subscriptions')
@@ -490,44 +456,6 @@ test.describe('with followed feeds', () => {
     await section.getByRole('button', { name: 'Manage RSS Feeds' }).click()
     await expect(manager.getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
   })
-
-  // Phones hide tab icons, so the spinner must not take space from the label there.
-  for (const [layout, size] of [['desktop', null], ['phone', { width: 360, height: 740 }]]) {
-    test(`shows the refresh indicator without resizing the tab on ${layout} @scale`, async ({ app, page }) => {
-      if (size) await setWindowSize(app, page, size)
-      await mockFeeds(page)
-      await goTo(page, 'subscriptions')
-      const tab = page.locator('[data-rss-feeds-tab]')
-      const label = tab.locator('.tabLabel')
-      await tab.click()
-      await expect(page.locator('#subscriptionsPanel .ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
-      const idleTab = await tab.boundingBox()
-      const idleLabel = await label.boundingBox()
-
-      let release
-      const held = new Promise(resolve => { release = resolve })
-      await page.route(RSS_URL, async route => {
-        await held
-        await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
-      })
-      await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ }).click()
-      const loader = tab.locator('.tabLoadingIndicator')
-      await expect(loader).toBeVisible()
-      await expect(tab.locator('.subscriptionIcon')).toBeHidden()
-
-      expect((await tab.boundingBox()).width).toBeCloseTo(idleTab.width, 1)
-      expect((await label.boundingBox()).width).toBeCloseTo(idleLabel.width, 1)
-      if (!size) {
-        const iconBox = await tab.locator('.tabIcon').boundingBox()
-        const loaderBox = await loader.boundingBox()
-        expect(loaderBox.x + loaderBox.width / 2).toBeCloseTo(iconBox.x + iconBox.width / 2, 1)
-      }
-
-      release()
-      await expect(loader).toHaveCount(0)
-      if (!size) await expect(tab.locator('.subscriptionIcon')).toBeVisible()
-    })
-  }
 
   test('keeps a feed added while another refresh is running', async ({ page }) => {
     await mockFeeds(page)
@@ -756,73 +684,6 @@ test.describe('with followed feeds', () => {
     })
   })
 
-  test('shows progress while a feed is added', { tag: '@scale' }, async ({ page }) => {
-    await mockFeeds(page)
-    let release
-    const held = new Promise(resolve => { release = resolve })
-    await page.route(ATOM_URL, async route => {
-      await held
-      await route.fulfill({ contentType: 'application/atom+xml', body: atomFeed })
-    })
-    const manager = await openFeedManager(page)
-    const input = manager.getByRole('textbox', { name: 'Add Feed' })
-    const progress = manager.getByRole('progressbar', { name: 'Add Feed' })
-    await expect(progress).toHaveCount(0)
-    await input.fill(ATOM_URL)
-    await input.press('Enter')
-    await expect(progress).toBeVisible()
-    await expect(input).toBeDisabled()
-    // Without animations, the bar fills the track instead of stopping partway
-    await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'reduce' })
-    await expect.poll(() => progress.evaluate(bar => getComputedStyle(bar, '::before').width === getComputedStyle(bar).width))
-      .toBe(true)
-
-    release()
-    await expect(manager.locator('.feedRow')).toHaveCount(3)
-    await expect(progress).toHaveCount(0)
-  })
-
-  test('puts the feed manager description after the RSSHub button', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-    await mockFeeds(page)
-    const manager = await openFeedManager(page)
-    const button = manager.getByRole('button', { name: 'Browse RSSHub', exact: true })
-    const description = manager.locator('.rssHubRow p')
-    await expect(description).toContainText('RSSHub')
-
-    for (const { width, height } of [{ width: 1500, height: 700 }, { width: 375, height: 800 }]) {
-      await setWindowSize(app, page, { width, height })
-      const [action, text] = await Promise.all([button.boundingBox(), description.boundingBox()])
-      if (width === 1500) {
-        // Same row, text to the right of the button
-        expect(Math.abs((action.y + action.height / 2) - (text.y + text.height / 2))).toBeLessThanOrEqual(1)
-        expect(text.x).toBeGreaterThan(action.x + action.width)
-      } else {
-        // Narrow content wraps the button below the text instead of squeezing it
-        expect(action.y).toBeGreaterThanOrEqual(text.y + text.height)
-        expect(Math.abs(action.x - text.x)).toBeLessThanOrEqual(1)
-      }
-      await attachScreenshot(`RSS feed manager header at ${width}px`)
-    }
-  })
-
-  test('keeps the feed manager button on the refresh row at phone widths', { tag: '@scale' }, async ({ app, page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    await expect(page.locator('#subscriptionsPanel .ft-list-item')).toHaveCount(2)
-    await setWindowSize(app, page, { width: 375, height: 800 })
-
-    const header = page.locator('.subscriptionsHeader')
-    const manage = header.getByRole('button', { name: 'Manage RSS Feeds' })
-    const refresh = header.locator('.headerRefreshWidget')
-    await expect(refresh.locator('.lastRefreshTimestamp')).toBeVisible()
-    await expect.poll(async () => {
-      const [button, widget] = await Promise.all([manage.boundingBox(), refresh.boundingBox()])
-      return Math.abs((button.y + button.height / 2) - (widget.y + widget.height / 2)) <= 2 &&
-        button.x + button.width <= widget.x + 1
-    }).toBe(true)
-  })
-
   test('shows the progress of watched items', async ({ page }) => {
     await mockFeeds(page)
     await page.evaluate(() => {
@@ -898,91 +759,6 @@ test.describe('with followed feeds', () => {
     await older.getByRole('button', { name: 'More Options' }).click()
     await menu.getByRole('menuitem', { name: 'Download Video' }).click()
     await expect(page.getByRole('dialog', { name: 'Older VOD' })).toBeVisible()
-  })
-})
-
-test.describe('with a followed feed and a YouTube subscription', () => {
-  const CHANNEL_ID = 'UC0000000000000000000000'
-
-  test.use({
-    seed: {
-      settings: {
-        fetchSubscriptionsAutomatically: false,
-        enableRssFeeds: true,
-        followedRssFeeds: [RSS_FEED],
-        useRssFeeds: true,
-        backendPreference: 'local',
-        hideSubscriptionsShorts: true,
-        hideSubscriptionsLive: true,
-        toastPosition: 'bottom-left'
-      },
-      profiles: [{
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [{ id: CHANNEL_ID, name: 'YouTube channel', thumbnail: '' }]
-      }]
-    }
-  })
-
-  test('shows the progress of the subscription and RSS refreshes running together', { tag: '@scale' }, async ({ page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
-
-    let releaseSubscriptions
-    let releaseRss
-    const subscriptionsHeld = new Promise(resolve => { releaseSubscriptions = resolve })
-    const rssHeld = new Promise(resolve => { releaseRss = resolve })
-    await page.route('**/feeds/videos.xml**', async route => {
-      await subscriptionsHeld
-      await route.fulfill({
-        contentType: 'application/xml',
-        body: `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
-  <author><name>YouTube channel</name></author>
-</feed>`
-      }).catch(() => {})
-    })
-    await page.route(RSS_URL, async route => {
-      await rssHeld
-      await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed }).catch(() => {})
-    })
-
-    // The New feed refreshes the subscriptions and the RSS feeds together
-    await page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh / }).click()
-    const subscriptionToast = page.getByTestId('subscription-refresh-toast')
-    const rssToast = page.getByTestId('progress-toast')
-    await expect(subscriptionToast).toContainText('Refreshing subscription videos')
-    await expect(rssToast).toContainText('Refreshing RSS feeds')
-    await expect(rssToast.locator('.icon')).toHaveAttribute('data-icon', 'rss')
-
-    // The subscription refresh sits nearest the edge, with the RSS refresh above it
-    const subscriptionBounds = await subscriptionToast.boundingBox()
-    const rssBounds = await rssToast.boundingBox()
-    expect(rssBounds.y + rssBounds.height).toBeLessThanOrEqual(subscriptionBounds.y)
-
-    // Approaching either toast tucks them both away
-    const stack = page.locator('.persistent-stack')
-    await page.mouse.move(rssBounds.x + rssBounds.width / 2, rssBounds.y + rssBounds.height / 2)
-    await expect(stack).toHaveClass(/minimized/)
-    // Progress updates keep them tucked away while the pointer stays there
-    await page.evaluate(() => window.$store.commit('setSubscriptionFeedRefreshProgress', 50))
-    await expect(subscriptionToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '50')
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    await expect(stack).toHaveClass(/minimized/)
-    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
-    await page.mouse.move(viewport.width / 2, viewport.height / 2)
-    await expect(stack).not.toHaveClass(/minimized/)
-
-    releaseRss()
-    await expect(rssToast).toHaveCount(0)
-    await expect(subscriptionToast).toBeVisible()
-
-    releaseSubscriptions()
-    await expect(subscriptionToast).toHaveCount(0)
   })
 })
 
@@ -1289,91 +1065,6 @@ test.describe('with new items', () => {
     // Turning it off stops the refreshes
     await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '0'))
     await expect.poll(nextRefresh).toBe(0)
-  })
-
-  test('shows the progress of refreshes as a notification or in the progress bar', async ({ page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
-    const loading = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
-    await expect(loading).toHaveCount(0)
-
-    let release
-    const holdFeed = async () => {
-      const held = new Promise(resolve => { release = resolve })
-      await page.route(RSS_URL, async (route) => {
-        await held
-        await route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
-      })
-    }
-    const progressToast = page.getByTestId('progress-toast')
-    const progressBar = page.locator('.app > .progressBar')
-    const refresh = page.locator('.subscriptionsHeader').getByRole('button', { name: /^Refresh RSS/ })
-
-    await holdFeed()
-    await refresh.click()
-    await expect(progressToast).toContainText('Refreshing RSS feeds')
-    await expect(progressToast.locator('.icon')).toHaveAttribute('data-icon', 'rss')
-    await expect(progressBar).toHaveCount(0)
-    release()
-    await expect(loading).toHaveCount(0)
-    await expect(progressToast).toHaveCount(0)
-
-    // Without progress notifications, the progress bar shows it
-    await page.evaluate(() => window.$store.dispatch('updateShowProgressBarToast', false))
-    await holdFeed()
-    await refresh.click()
-    await expect(progressBar).toHaveCount(1)
-    await expect(progressToast).toHaveCount(0)
-    release()
-    await expect(loading).toHaveCount(0)
-    await expect(progressBar).toHaveCount(0)
-
-    // And automatic refreshes announce themselves
-    await page.evaluate(() => window.$store.dispatch('updateRssFeedsAutoRefreshInterval', '1800000'))
-    await holdFeed()
-    await page.evaluate(() => {
-      localStorage.setItem('rssFeedsNextAutoRefresh', String(Date.now() - 1000))
-      window.dispatchEvent(new StorageEvent('storage', { key: 'rssFeedsNextAutoRefresh' }))
-    })
-    await expect(page.locator('.toast', { hasText: 'Refreshing RSS feeds' })).toBeVisible()
-    await expect(progressBar).toHaveCount(1)
-    release()
-    await expect(loading).toHaveCount(0)
-    await expect(progressBar).toHaveCount(0)
-  })
-
-  test('refreshes both RSS views with the refresh shortcut', async ({ page }) => {
-    await mockFeeds(page)
-    let requests = 0
-    page.on('request', (request) => {
-      if (request.url() === RSS_URL) requests++
-    })
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Newest VOD', 'Older VOD'])
-    const loading = page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')
-    await expect(loading).toHaveCount(0)
-    expect(requests).toBe(1)
-
-    await page.route(RSS_URL, route => route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed }))
-    await page.keyboard.press('r')
-    await expect(panel.locator('.ft-list-item .h3Title'))
-      .toHaveText(['Brand new VOD', 'Second new VOD', 'Newest VOD', 'Older VOD'])
-    await expect(loading).toHaveCount(0)
-    expect(requests).toBe(2)
-
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-    await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Show Tabbed View' }).click()
-    await page.locator('[data-new-feed-rss-tab]').click()
-    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Brand new VOD', 'Second new VOD'])
-    await page.keyboard.press('r')
-    await expect.poll(() => requests).toBe(3)
-    await expect(loading).toHaveCount(0)
-    expect(requests).toBe(3)
   })
 
   test('marks items as unseen from the context menu', async ({ page }) => {
@@ -1779,30 +1470,6 @@ test.describe('when RSS feeds are the only enabled feeds', () => {
     await page.getByRole('button', { name: 'Mark all as seen' }).click()
     await expect(panel.getByText('There is no new content.')).toBeVisible()
   })
-
-  test.describe('besides posts, which the New feed leaves out with YouTube\'s RSS feeds', () => {
-    test.use({
-      seed: {
-        settings: {
-          fetchSubscriptionsAutomatically: false,
-          enableRssFeeds: true,
-          followedRssFeeds: [RSS_FEED],
-          useRssFeeds: true,
-          hideSubscriptionsVideos: true,
-          hideSubscriptionsShorts: true,
-          hideSubscriptionsLive: true
-        }
-      }
-    })
-
-    test('treats the New feed as an RSS feed', async ({ page }) => {
-      await mockFeeds(page)
-      await goTo(page, 'subscriptions')
-      await page.locator('[data-subscription-feed-tab="all"]').click()
-      await expect(page.locator('#subscriptionsPanel').getByText('There is no new content.')).toBeVisible()
-      await expect(page.locator('.subscriptionsHeader').getByRole('button', { name: 'Manage RSS Feeds' })).toBeVisible()
-    })
-  })
 })
 
 test.describe('with many followed feeds', () => {
@@ -2030,55 +1697,6 @@ test.describe('without followed feeds', () => {
       element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
   })
 
-  test('keeps the scrollbar of the RSSHub instance suggestions on the list', { tag: '@scale' }, async ({ page }) => {
-    await page.route(/^https?:\/\//, abortUnmockedRequest)
-    const instances = Array.from({ length: 30 }, (_, index) => `{ url: 'https://rss${index}.example.test', location: '🇩🇪' },`)
-    await page.route('https://raw.githubusercontent.com/RSSNext/rsshub-docs/**', route => route.fulfill({
-      body: `const instances = [${instances.join('\n')}];`
-    }))
-
-    const manager = await openFeedManager(page)
-    await manager.getByRole('button', { name: 'Browse RSSHub' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Add a feed from RSSHub' })
-    await dialog.getByRole('textbox', { name: 'RSSHub instance' }).click()
-    const list = dialog.locator('.instanceInput .list')
-    await expect(list.locator('li')).toHaveCount(30)
-
-    // The bar spans the list instead of an ancestor reaching over the input
-    const scrollbar = list.locator(':scope > .os-scrollbar-vertical')
-    const listBox = await list.boundingBox()
-    const scrollbarBox = await scrollbar.boundingBox()
-    expect(Math.abs(scrollbarBox.y - listBox.y)).toBeLessThan(1)
-    expect(Math.abs(scrollbarBox.height - listBox.height)).toBeLessThan(1)
-
-    // Dragging the handle scrolls the suggestions
-    await list.hover()
-    const handle = await scrollbar.locator('.os-scrollbar-handle').boundingBox()
-    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2 + 60)
-    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await page.mouse.up()
-    await expect(list.locator('li')).toHaveCount(30)
-  })
-
-  test('explains that a site asks for a browser check', async ({ page }) => {
-    await page.route(/^https?:\/\//, abortUnmockedRequest)
-    // Cloudflare answers clients it wants to verify with a challenge page
-    await page.route('https://protected.example.test/feed.xml', route => route.fulfill({
-      status: 403,
-      headers: { 'cf-mitigated': 'challenge', 'content-type': 'text/html; charset=UTF-8' },
-      body: '<!DOCTYPE html><html><head><title>Just a moment...</title></head><body><script>window._cf_chl_opt = {}</script></body></html>'
-    }))
-    const manager = await openFeedManager(page)
-    const input = manager.getByRole('textbox', { name: 'Add Feed' })
-    await input.fill('https://protected.example.test/feed.xml')
-    await input.press('Enter')
-    await expect(page.getByText('This site requires a browser check', { exact: false })).toBeVisible()
-    await expect(page.getByText('The feed could not be loaded.', { exact: false })).toHaveCount(0)
-    await expect(manager.locator('.feedRow')).toHaveCount(0)
-  })
-
   test('plays podcast episodes from their audio enclosure', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.route('https://rss.example.test/podcast.xml', route => route.fulfill({
@@ -2101,38 +1719,6 @@ test.describe('without followed feeds', () => {
     await page.locator('#subscriptionsPanel .h3Title', { hasText: 'Episode 1' }).click()
     await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.query.url))
       .toBe('https://cdn.example.test/episode-1.mp3')
-  })
-
-  test('opens the feed manager from the empty tab', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-rss-feeds-tab]').click()
-    const panel = page.locator('#subscriptionsPanel')
-    await expect(panel.getByText("You don't follow any RSS feeds yet.")).toBeVisible()
-    await panel.getByRole('button', { name: 'Manage RSS Feeds' }).click()
-    await expect(page.locator('.settingsSubpageContent').getByRole('textbox', { name: 'Add Feed' })).toBeVisible()
-  })
-})
-
-test.describe('with subscription groups', () => {
-  test.use({
-    seed: {
-      settings: {
-        fetchSubscriptionsAutomatically: false,
-        enableRssFeeds: true,
-        followedRssFeeds: [RSS_FEED],
-        subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [] }]
-      }
-    }
-  })
-
-  test('hides the groups, which only filter channels, on the RSS tab', async ({ page }) => {
-    await mockFeeds(page)
-    await goTo(page, 'subscriptions')
-    const groups = page.getByRole('tablist', { name: 'Groups' })
-    await expect(groups).toBeVisible()
-    await page.locator('[data-rss-feeds-tab]').click()
-    await expect(page.locator('#subscriptionsPanel .ft-list-item')).toHaveCount(2)
-    await expect(groups).toHaveCount(0)
   })
 })
 

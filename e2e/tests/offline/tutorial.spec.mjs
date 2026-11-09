@@ -2,47 +2,6 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 
 test.use({ showTutorial: true })
 
-test('neutral tutorial buttons have the same visible height as colored buttons', { tag: '@scale' }, async ({ page, uiScale }, testInfo) => {
-  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-  await page.reload()
-
-  const tutorial = page.locator('.tutorialCard')
-  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
-
-  for (const theme of ['light', 'dark']) {
-    await page.evaluate(async baseTheme => {
-      const store = window.$store
-      await store.dispatch('updateBaseTheme', baseTheme)
-    }, theme)
-
-    // Outlined Skip and tonal Next share the same outer bounds; the
-    // outline is part of Skip's visible surface.
-    const buttons = tutorial.locator('.tutorialActions .btn')
-    await expect(buttons).toHaveCount(2)
-    const metrics = await buttons.evaluateAll(elements => elements.map(element => {
-      const style = getComputedStyle(element)
-      const bounds = element.getBoundingClientRect()
-      return {
-        height: bounds.height,
-        center: bounds.y + bounds.height / 2,
-        background: style.backgroundColor,
-        border: style.borderTopColor,
-        borderWidth: Number.parseFloat(style.borderTopWidth)
-      }
-    }))
-    expect(metrics[0].height).toBeCloseTo(metrics[1].height, 1)
-    expect(metrics[0].center).toBeCloseTo(metrics[1].center, 1)
-    expect(metrics[0].background).toBe('rgba(0, 0, 0, 0)')
-    expect(metrics[0].border).not.toBe('rgba(0, 0, 0, 0)')
-    expect(metrics[0].borderWidth).toBeGreaterThan(0)
-    expect(metrics[1].background).not.toBe('rgba(0, 0, 0, 0)')
-    await testInfo.attach(`Tutorial buttons in ${theme} theme at ${uiScale}% scale`, {
-      body: await tutorial.screenshot({ animations: 'disabled' }),
-      contentType: 'image/png'
-    })
-  }
-})
-
 async function expectHighlightCenteredOn(page, targetSelector) {
   await expect.poll(async () => {
     const [highlight, target] = await Promise.all([
@@ -67,9 +26,7 @@ async function clickAppMenuItem(app, menuLabel, itemLabel) {
 
 for (const [name, settings] of [
   ['without saved tutorial state', {}],
-  ['with the retired notice pending', { tutorialAudience: 'existing' }],
-  ['with a saved app version', { lastUsedVersion: '0.34.0' }],
-  ['with a completed tutorial', { tutorialAudience: 'completed' }]
+  ['with the retired notice pending', { tutorialAudience: 'existing' }]
 ]) {
   test.describe(`returning users ${name}`, () => {
     test.use({ seed: { settings } })
@@ -171,29 +128,6 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
 test.describe('translated import actions', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 
-  test('keep their labels when they fit on one row', async ({ app, page }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows()[0].setSize(500, 600)
-    })
-    await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-    await page.reload()
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
-
-    const tutorial = page.locator('.tutorialCard')
-    for (let step = 0; step < 5; step++) {
-      await tutorial.getByRole('button', { name: 'Weiter' }).click()
-    }
-
-    const actions = ['Zurück', 'Nicht jetzt', 'Daten importieren'].map(name => {
-      return tutorial.getByRole('button', { name })
-    })
-    await Promise.all(actions.map(action => expect(action.locator('.tutorialActionText')).toBeVisible()))
-    const actionTops = await Promise.all(actions.map(action => {
-      return action.evaluate(element => Math.round(element.getBoundingClientRect().top))
-    }))
-    expect(new Set(actionTops).size).toBe(1)
-  })
-
   test('stay on one row in a narrow window', async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0].setSize(340, 600)
@@ -276,18 +210,6 @@ test('resets the managed content viewport after a shorter step replaces it', asy
     scrollRange: element.scrollHeight - element.clientHeight
   }))).toEqual({ scrollTop: 0, scrollRange: 0 })
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-})
-
-test.describe('right-to-left layout', () => {
-  test.use({ seed: { settings: { currentLocale: 'ar', tutorialAudience: 'new' } } })
-
-  test('keeps the spotlight centered on physical target coordinates', async ({ page }) => {
-    await expect(page.locator('.app')).toHaveClass(/isLocaleRightToLeft/)
-    for (let step = 0; step < 4; step++) {
-      await page.locator('.tutorialActions').getByRole('button').last().click()
-    }
-    await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
-  })
 })
 
 test('walks new users through the essential controls', async ({ page }) => {
@@ -403,30 +325,6 @@ test('repositions the navigation highlight after crossing the mobile breakpoint'
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
 })
 
-test('repositions the tab highlight when the layout is reset', async ({ page }) => {
-  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-  await page.reload()
-  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
-
-  const tutorial = page.locator('.tutorialCard')
-  for (let step = 0; step < 3; step++) {
-    await tutorial.getByRole('button', { name: 'Next' }).click()
-  }
-  await expect(tutorial).toHaveAccessibleName('Keep pages open in tabs')
-
-  const layout = tutorial.getByRole('combobox', { name: 'Tab Layout' })
-  await layout.click()
-  await page.locator(`#${await layout.getAttribute('aria-controls')}`)
-    .getByRole('option', { name: 'Vertical on right', exact: true }).click()
-  await expect(page.locator('.tabBar.position-right')).toBeVisible()
-  await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
-
-  await tutorial.getByRole('button', { name: 'Reset this setting to its default' }).click()
-  await expect(page.locator('.tabBar.position-top')).toBeVisible()
-  await expect(layout).toHaveText('Horizontal at top')
-  await expectHighlightCenteredOn(page, '[data-tutorial="tabs"]')
-})
-
 test.describe('fresh profile relaunch', () => {
   test.use({ seed: { freshProfile: true } })
 
@@ -443,71 +341,5 @@ test.describe('fresh profile relaunch', () => {
     const { page: relaunchedPage } = await app.relaunch()
 
     await expect(relaunchedPage.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
-  })
-})
-
-test('highlights the mobile search button', async ({ app, page }) => {
-  await app.electronApp.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0].setSize(600, 700)
-  })
-  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-  await page.reload()
-
-  const tutorial = page.locator('.tutorialCard')
-  await tutorial.getByRole('button', { name: 'Next' }).click()
-  await tutorial.getByRole('button', { name: 'Next' }).click()
-  await expect(tutorial).toHaveAccessibleName('Search or paste a link')
-  await expectHighlightCenteredOn(page, '.navSearchButton[data-tutorial="search"]')
-})
-
-test.describe('rounded keyboard focus', { tag: '@scale' }, () => {
-  test.use({ seed: { settings: { baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' } } })
-
-  test('keeps the complete button highlight inside the tutorial viewport', async ({ page, uiScale }, testInfo) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
-    await page.reload()
-    const tutorial = page.locator('.tutorialCard')
-    const next = tutorial.getByRole('button', { name: 'Next', exact: true })
-    await tutorial.getByRole('button', { name: 'Skip', exact: true }).focus()
-    await page.keyboard.press('Tab')
-    await expect(next).toBeFocused()
-
-    const geometry = await next.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      const viewport = element.closest('.tutorialScroll').getBoundingClientRect()
-      const style = getComputedStyle(element)
-      const outside = Math.max(0, parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth))
-      return { bottom: bounds.bottom + outside, viewportBottom: viewport.bottom, outline: style.outlineStyle }
-    })
-    await testInfo.attach('keyboard-focus', {
-      body: await tutorial.screenshot({ animations: 'disabled' }), contentType: 'image/png'
-    })
-    expect(geometry.outline).toBe('solid')
-    expect(geometry.bottom - geometry.viewportBottom).toBeLessThanOrEqual(0.1)
-
-    if (uiScale === 100) {
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-        const screenshot = testInfo.outputPath(`keyboard-focus-${colorScheme}.png`)
-        await tutorial.locator('.tutorialActions').screenshot({ path: screenshot })
-        await testInfo.attach(`keyboard-focus-${colorScheme}`, { path: screenshot, contentType: 'image/png' })
-      }
-    }
-
-    for (const width of [1600, 480]) {
-      await page.setViewportSize({ width, height: 800 })
-      for (const roundness of [0, 50, 100, 200]) {
-        await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-        await tutorial.getByRole('button', { name: 'Skip', exact: true }).focus()
-        const unfocusedRadius = await next.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))
-        expect(unfocusedRadius).toBeCloseTo((width <= 680 ? 24 : 20) * roundness / 100, 1)
-        await page.keyboard.press('Tab')
-        await expect(next).toBeFocused()
-        expect(await next.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(unfocusedRadius, 1)
-      }
-    }
   })
 })

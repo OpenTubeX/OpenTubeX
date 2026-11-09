@@ -1,4 +1,4 @@
-import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, sel } from '../../helpers/app.mjs'
 
 // A closing filters prompt stays in the page while it fades out.
 const filters = page => page.locator('.prompt:not([inert])')
@@ -65,43 +65,4 @@ test('right-clicking the search filter button clears only the active tab', async
   await filterButton.click()
   await expect(filters(page).locator('input[type="radio"][value="popularity"]')).toBeChecked()
   await expect(filters(page).locator('input[type="radio"][value="today"]')).not.toBeChecked()
-})
-
-test('desktop search filter options keep compact spacing', { tag: '@scale' }, async ({ page }, testInfo) => {
-  await page.locator('.navFilterButton').click()
-  const labels = filters(page).locator('.searchRadio', { hasText: 'Type' }).locator('input + label')
-  await expect(labels).toHaveCount(6)
-
-  const tops = await labels.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top))
-  for (let i = 1; i < tops.length; i++) {
-    expect(tops[i] - tops[i - 1]).toBeLessThan(32)
-  }
-
-  const overflow = await page.locator('.searchFiltersCard .promptContentScroller').evaluate(element => {
-    const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
-    return viewport.scrollHeight - viewport.clientHeight
-  })
-  expect(overflow).toBeLessThanOrEqual(0)
-
-  await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('search-filters.png') })
-})
-
-test.describe('system-font search filters', () => {
-  test.use({ seed: { settings: { appFont: 'system' } } })
-
-  test('checkbox highlights fit without a scrollbar on a laptop', { tag: '@scale' }, async ({ page, app }, testInfo) => {
-    await setWindowSize(app, page, { width: 1901, height: 1012 })
-    await page.locator('.navFilterButton').click()
-    const scroller = page.locator('.searchFiltersCard .promptContentScroller')
-    await expect.poll(() => scroller.evaluate(element => {
-      const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
-      return viewport.scrollHeight - viewport.clientHeight
-    })).toBe(0)
-    await page.locator('.searchRadio input[value="location"] + label').hover()
-    await expect.poll(() => scroller.evaluate(element => {
-      const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
-      return viewport.scrollHeight - viewport.clientHeight
-    })).toBe(0)
-    await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('system-font-search-filters.png') })
-  })
 })

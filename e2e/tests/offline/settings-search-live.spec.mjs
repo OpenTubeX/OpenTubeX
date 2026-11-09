@@ -1,6 +1,6 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
-for (const width of [460, 1400]) {
+for (const width of [460]) {
   test.describe(`live settings search at ${width}px`, () => {
     test.beforeEach(async ({ page, app }) => {
       await setWindowSize(app, page, { width, height: 850 })

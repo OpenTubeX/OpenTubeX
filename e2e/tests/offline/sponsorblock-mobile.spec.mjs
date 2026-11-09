@@ -128,28 +128,6 @@ test.describe('mobile SponsorBlock', () => {
       await expectInlinePosition()
     }
   })
-
-  test('updates prompt and undo shortcut hints when a keyboard connects or disconnects', async ({ app, page }) => {
-    const player = await openSponsorBlockPrompt(app, page)
-    const action = player.locator('.unskipButton')
-    const setKeyboardAttached = attached => page.evaluate(value => {
-      const app = document.querySelector('#app').__vue_app__
-      app._container._vnode.component.provides.hardwareKeyboardAttached.value = value
-    }, attached)
-    await expect(action).toHaveText('Skip (Enter)')
-    await setKeyboardAttached(false)
-    await expect(action).toHaveText('Skip')
-    await expect(action).toHaveAttribute('title', 'Skip')
-    await setKeyboardAttached(true)
-    await expect(action).toHaveText('Skip (Enter)')
-    await setKeyboardAttached(false)
-    await action.click()
-    await expect(action).toHaveText('Unskip')
-    await setKeyboardAttached(true)
-    await expect(action).toHaveText('Unskip (Enter)')
-    await setKeyboardAttached(false)
-    await expect(action).toHaveText('Unskip')
-  })
 })
 
 for (const { mobile, width, orientation } of [

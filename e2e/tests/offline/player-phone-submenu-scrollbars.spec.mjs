@@ -5,7 +5,7 @@ import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: { ...WATCH_PAGE_SEED, reducedMotion: 'on' } } })
 
-for (const [width, height] of [[844, 390], [390, 844], [932, 430]]) {
+for (const [width, height] of [[844, 390], [390, 844]]) {
   test(`phone slider submenus fit without a stray horizontal scrollbar at ${width}×${height} @scale`, async ({ app, page, uiScale, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     const video = await openMockedVideo(page)

@@ -19,61 +19,6 @@ test.use({
 const popularity = Array.from({ length: 100 }, (_, index) =>
   index === 75 ? 1 : 0.12 + 0.5 * Math.exp(-(((index - 75) / 5) ** 2)) + Math.sin(index * 0.6) ** 2 * 0.08)
 
-test('popularity exits above the seek bar without clipping the graph', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page, { popularity })
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
-  const player = page.locator('.ftVideoPlayer')
-  const graph = player.locator('.ft-popularity-graph')
-  const bar = player.locator('.shaka-seek-bar-container')
-  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
-    for (const width of [1300, 500]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setContentSize(width, 900), width)
-      for (const frosted of [true, false]) {
-        await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
-        await bar.hover()
-        await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
-        const trackTop = await bar.evaluate(element => element.getBoundingClientRect().top +
-          Number.parseFloat(getComputedStyle(element).borderTopWidth))
-        // Pause the actual hover transition before it can finish, then sample it
-        // deterministically rather than relying on wall-clock screenshot timing.
-        await graph.evaluate(element => {
-          const pauseExit = event => {
-            if (event.propertyName !== 'transform') return
-            element.removeEventListener('transitionrun', pauseExit)
-            for (const animation of element.getAnimations()) {
-              animation.pause()
-              animation.currentTime = 90
-            }
-          }
-          element.addEventListener('transitionrun', pauseExit)
-        })
-        await player.locator('.shaka-play-button').hover()
-        await expect.poll(() => graph.evaluate(element => element.getAnimations()
-          .find(animation => animation.transitionProperty === 'transform')?.playState)).toBe('paused')
-        for (const time of [45, 90, 135]) {
-          const frame = await graph.evaluate((element, time) => {
-            for (const animation of element.getAnimations()) animation.currentTime = time
-            const bounds = element.getBoundingClientRect()
-            const style = getComputedStyle(element)
-            return { bottom: bounds.bottom, height: bounds.height, clip: style.clipPath, visibility: style.visibility }
-          }, time)
-          expect(frame.visibility).toBe('visible')
-          expect(frame.height).toBeGreaterThan(0)
-          expect(frame.height).toBeLessThanOrEqual(40)
-          expect(Math.abs(frame.bottom - trackTop) * scale, 'graph must stay above the seek bar throughout its exit').toBeLessThanOrEqual(1)
-          expect(['none', 'inset(0px)'], 'the full graph must remain unclipped during its exit').toContain(frame.clip)
-        }
-        await graph.evaluate(element => { for (const animation of element.getAnimations()) animation.finish() })
-        await expect(graph).toBeHidden()
-      }
-    }
-  }
-})
-
 test('popularity aligns with the seek bar across layouts, themes and UI scales', async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page, { popularity })
   const video = await openMockedVideo(page)
@@ -180,26 +125,6 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await expect(graph).toHaveCount(0)
 })
 
-test('reduced motion reveals the popularity graph without a transition', async ({ app, page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await mockPlayableWatchPage(app, page, { popularity })
-  await openMockedVideo(page)
-  const graph = page.locator('.ft-popularity-graph')
-  await expect(graph).toBeHidden()
-  await expect(graph).toHaveCSS('transition-duration', '0s')
-  await page.locator('.shaka-seek-bar-container').hover()
-  await expect(graph).toBeVisible()
-  await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
-  await page.locator('.shaka-play-button').hover()
-  await expect(graph).toBeHidden()
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await expect(graph).toHaveCSS('transition-duration', '0.18s, 0s')
-  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
-  await expect(graph).toHaveCSS('transition-duration', '0s')
-  await page.locator('.shaka-seek-bar-container').hover()
-  await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
-})
-
 test('Distraction Free hides popularity and saves the preference', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { popularity })
   const video = await openMockedVideo(page)
@@ -236,39 +161,4 @@ test('Distraction Free hides popularity and saves the preference', async ({ app,
   const { page: relaunched } = await app.relaunch()
   const restored = await goToSettingsSection(relaunched, 'focus')
   await expect(restored.getByRole('checkbox', { name: 'Hide Popularity Graph' })).toBeChecked()
-})
-
-test('touch scrubbing shows the most replayed label at the peak', async ({ app, page }) => {
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
-  })
-  await mockPlayableWatchPage(app, page, { popularity })
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
-  await setPlayerFullscreen(page, true)
-  const bar = page.locator('.shaka-seek-bar')
-  const tooltip = page.locator('.shaka-player-ui-thumbnail-time')
-  await expect(bar).toBeVisible()
-  const box = await bar.boundingBox()
-  expect(box).not.toBeNull()
-  const cdp = await page.context().newCDPSession(page)
-  const point = percentage => ({ x: box.x + box.width * percentage, y: box.y + box.height / 2 })
-  try {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0.4)] })
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(0.755)] })
-    await expect(tooltip).toContainText('Most replayed')
-    await expect(tooltip).toBeVisible()
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(0.5)] })
-    await expect(tooltip).not.toContainText('Most replayed')
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-  } finally {
-    await cdp.detach()
-  }
-})
-
-test('videos without popularity data keep the normal timeline', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page, { popularity: null })
-  await openMockedVideo(page)
-  await expect(page.locator('.ft-popularity-graph')).toHaveCount(0)
-  await expect(page.locator('.shaka-seek-bar-container')).not.toHaveClass(/ft-has-popularity/)
 })

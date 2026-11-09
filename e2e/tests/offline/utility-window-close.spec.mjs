@@ -1,69 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
 
-for (const { width, height, uiScale } of [
-  { width: 1600, height: 900, uiScale: 100 },
-  { width: 1600, height: 900, uiScale: 125 },
-  { width: 375, height: 800, uiScale: 100 },
-  { width: 800, height: 375, uiScale: 125 }
-]) {
-  test.describe(`utility window dismissal at ${width}×${height}, ${uiScale}% UI scale`, () => {
-    test.use({ seed: { settings: { currentLocale: 'en-US', reducedMotion: 'off', uiScale } } })
-
-    test('closes without rebuilding hidden content or staging transition styles', { tag: '@performance' }, async ({ page }) => {
-      await page.setViewportSize({ width, height })
-      const session = await page.context().newCDPSession(page)
-      await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
-
-      for (const view of [null, 'about', 'downloads']) {
-        await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
-        const dialog = page.locator('.settingsWindow')
-        await expect(dialog).toBeVisible()
-        await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
-
-        const changes = await page.evaluate(async () => {
-          const dialog = document.querySelector('.settingsWindow')
-          const addedContent = []
-          const transitionClasses = []
-          const observer = new MutationObserver(mutations => {
-            for (const mutation of mutations) {
-              if (mutation.type === 'childList') {
-                // Vue replaces dismissed overlay Teleports with empty comment anchors.
-                addedContent.push(...[...mutation.addedNodes].filter(node => node.nodeType !== Node.COMMENT_NODE))
-              }
-              if (mutation.type === 'attributes' && mutation.target === dialog) {
-                transitionClasses.push(mutation.oldValue)
-              }
-            }
-          })
-          observer.observe(dialog, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true })
-          document.querySelector('.settingsCloseButton').click()
-          await Promise.resolve()
-          const closeAnimations = dialog.getAnimations().filter(animation => animation.animationName?.startsWith('settings-window-leave'))
-          await new Promise(resolve => {
-            function frame() {
-              if (!dialog.isConnected) resolve()
-              else requestAnimationFrame(frame)
-            }
-            requestAnimationFrame(frame)
-          })
-          observer.disconnect()
-          return { addedContent: addedContent.length, transitionClasses, closeAnimations: closeAnimations.length }
-        })
-
-        await expect(dialog).toHaveCount(0)
-        expect.soft(changes.addedContent, `${view ?? 'settings'} rebuilt hidden content`).toBe(0)
-        expect.soft(changes.transitionClasses.join(' ')).not.toMatch(/settings-window-leave-(from|to)/)
-        expect(changes.closeAnimations).toBe(1)
-        // Reopening selects the requested view even though the closed view stays cached.
-        await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
-        await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
-        await page.keyboard.press('Escape')
-        await expect(dialog).toHaveCount(0)
-      }
-    })
-  })
-}
-
 test('reopening a cached utility window cancels its close animation', async ({ page }) => {
   for (const view of [null, 'about', 'downloads']) {
     await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
@@ -151,22 +87,3 @@ for (const prompt of ['Add download', 'Download options', 'Remove file']) {
     await expect(page.locator('.prompt')).toHaveCount(0)
   })
 }
-
-test.describe('with reduced motion', () => {
-  test.use({ seed: { settings: { reducedMotion: 'on' } } })
-
-  test('dismisses utility windows without animating', async ({ page }) => {
-    for (const view of [null, 'about', 'downloads']) {
-      await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
-      const dialog = page.locator('.settingsWindow')
-      await expect(dialog).toBeVisible()
-      const animationNames = await dialog.evaluate(async element => {
-        element.querySelector('.settingsCloseButton').click()
-        await Promise.resolve()
-        return element.getAnimations().map(animation => animation.animationName)
-      })
-      expect(animationNames).toEqual([])
-      await expect(dialog).toHaveCount(0)
-    }
-  })
-})

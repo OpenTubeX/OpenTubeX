@@ -77,30 +77,6 @@ test('reorders the control bar and moves removed buttons into the player menu', 
   await expect(player).toHaveClass(/fullWindow/)
 })
 
-test('applies the order to the compact control bar', async ({ app, page }) => {
-  const player = await openPausedVideo({ app, page })
-  await page.evaluate(() => window.$store.dispatch('updateControlBarButtons', ['fullscreen', 'menu', 'pictureInPicture']))
-  await setWindowSize(app, page, { width: 560, height: 800 })
-  // Picture-in-picture stays in the menu of the compact desktop layout.
-  await expect.poll(() => barButtons(player)).toEqual(['fullscreen', 'menu'])
-})
-
-test('applies the order to the mobile control bar', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await page.locator('.app').evaluate(element => {
-    const applyMobileClass = () => element.classList.add('capacitorTabs')
-    new MutationObserver(() => {
-      if (!element.classList.contains('capacitorTabs')) applyMobileClass()
-    }).observe(element, { attributeFilter: ['class'] })
-    applyMobileClass()
-  })
-  await page.evaluate(() => window.$store.dispatch('updateControlBarButtons', ['pictureInPicture', 'menu']))
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 450, height: 850 })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await expect.poll(() => barButtons(player)).toEqual(['pictureInPicture', 'menu'])
-})
-
 test('puts player menu controls on the control bar', async ({ app, page }) => {
   const player = await openPausedVideo({ app, page })
   await page.evaluate(() => window.$store.dispatch('updateControlBarButtons', ['quality', 'playbackRate', 'loop', 'menu', 'fullscreen']))

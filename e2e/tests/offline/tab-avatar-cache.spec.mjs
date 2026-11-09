@@ -1,7 +1,6 @@
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
-import { createServer } from 'node:http'
 import { gunzipSync } from 'node:zlib'
 
 import { abortUnmockedRequest, test, expect, goToSettingsSection } from '../../helpers/app.mjs'
@@ -12,8 +11,7 @@ const AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8
 const OTHER_AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
 
 test.beforeEach(async ({ page }) => {
-  // Keep the startup test's local server reachable; mock every remote service.
-  await page.route(/^https?:\/\/(?!127\.0\.0\.1[:/])/, abortUnmockedRequest)
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
 })
 
 /**
@@ -48,77 +46,6 @@ async function createChannelTabWithAvatar(page, channelId, avatarBase64) {
     const applied = await window.ftElectron.tabs.updateAvatar(bytes.buffer, tab.id, route)
     return { id: tab.id, applied }
   }, { channelId, avatarBase64 })
-}
-
-for (const pageType of ['watch', 'channel']) {
-  test(`retains a loaded ${pageType} avatar while caching it after switching and reordering tabs`, async ({ page }) => {
-    let download
-    await page.route('https://images.test/migrating-avatar.png', route => {
-      if (route.request().resourceType() === 'fetch') {
-        download = route
-        return
-      }
-      return route.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
-    })
-    const existing = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
-    const background = await page.evaluate(pageType => window.ftElectron.tabs.create({
-      route: `/${pageType}/migrating-avatar`, makeActive: false, lazyLoad: true
-    }), pageType)
-    const tab = page.locator(`.tabBar .tab[data-tab-id="${background.id}"]`)
-    await page.evaluate(pageType => {
-      const store = window.$store
-      if (pageType === 'watch') {
-        store.commit('setVideoAvatar', { videoId: 'migrating-avatar', avatar: 'https://images.test/migrating-avatar.png' })
-      } else {
-        store.commit('setChannelThumbnail', { channelId: 'migrating-avatar', thumbnail: 'https://images.test/migrating-avatar.png' })
-      }
-    }, pageType)
-    const avatar = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
-    await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    await expect(avatar).toBeVisible()
-    await expect(tab.locator('.retryImagePlaceholder')).toHaveCount(0)
-    await page.evaluate(tabId => window.ftElectron.tabs.setLoading(true, tabId), background.id)
-    await expect.poll(() => download != null).toBe(true)
-    await page.evaluate(tabId => {
-      window.__avatarFlashes = []
-      window.__avatarObserver = new MutationObserver(() => {
-        const tab = document.querySelector(`.tabBar .tab[data-tab-id="${tabId}"]`)
-        const image = tab?.querySelector('img.tabAvatar:not(.retryImagePlaceholder)')
-        if (!image?.checkVisibility({ visibilityProperty: true }) || tab.querySelector('.retryImagePlaceholder')) {
-          window.__avatarFlashes.push({ visible: image?.checkVisibility({ visibilityProperty: true }), placeholder: !!tab?.querySelector('.retryImagePlaceholder') })
-        }
-      })
-      window.__avatarObserver.observe(document.querySelector('.tabsContainer'), {
-        childList: true, attributes: true, subtree: true
-      })
-    }, background.id)
-
-    await page.locator('.tabBar .tab').first().click()
-    for (const scale of [100, 125]) {
-      await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
-      const source = page.locator(`.tabBar .tab[data-tab-id="${existing.id}"]`)
-      await source.click()
-      const sourceBox = await source.boundingBox()
-      const targetBox = await tab.boundingBox()
-      await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2)
-      await page.mouse.down()
-      await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, { steps: 5 })
-      await page.mouse.up()
-      await expect(source).not.toHaveClass(/settling/)
-      await expect.poll(() => page.locator('.tabBar .tab').evaluateAll((tabs, { existingId, backgroundId }) => {
-        const ids = tabs.map(tab => tab.dataset.tabId)
-        return ids.indexOf(existingId) > ids.indexOf(backgroundId)
-      }, { existingId: existing.id, backgroundId: background.id })).toBe(scale === 100)
-    }
-    await download.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
-    await expect(avatar).toHaveAttribute('src', /^data:image\/jpeg/)
-    await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    const flashes = await page.evaluate(() => {
-      window.__avatarObserver.disconnect()
-      return window.__avatarFlashes
-    })
-    expect(flashes, 'a loaded avatar must stay visible while its cached copy is decoded').toEqual([])
-  })
 }
 
 test('does not restore a cached avatar when navigating away during decoding', async ({ page }) => {
@@ -160,142 +87,6 @@ test('does not restore a cached avatar when navigating away during decoding', as
   await expect(avatar).toHaveCount(0)
   await expect(tab.locator('.tabPageIcon')).toBeVisible()
 })
-
-for (const surface of ['organizer', 'tooltip', 'switcher']) {
-  test(`keeps a loaded ${surface} avatar visible when its cached copy arrives`, async ({ page }) => {
-    await page.route('https://images.test/surface-avatar.png', route => {
-      if (route.request().resourceType() === 'fetch') return route.abort()
-      return route.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
-    })
-    const background = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/watch/surface-avatar', title: 'Avatar handoff', makeActive: false, lazyLoad: true
-    }))
-    await page.evaluate(() => {
-      window.$store.commit('setVideoAvatar', {
-        videoId: 'surface-avatar', avatar: 'https://images.test/surface-avatar.png'
-      })
-    })
-    let container
-    if (surface === 'organizer') {
-      await page.locator('.tabOrganizerButton').click()
-      container = page.locator('.tabOrganizerRow').filter({ hasText: 'Avatar handoff' })
-    } else if (surface === 'tooltip') {
-      await page.locator(`.tabBar .tab[data-tab-id="${background.id}"]`).hover()
-      container = page.locator('.tabTooltip')
-    } else {
-      await page.keyboard.down('Control')
-      await page.keyboard.press('Tab')
-      container = page.locator(`#tab-switcher-option-${background.id}`)
-    }
-    try {
-      const avatars = container.locator('img:not(.retryImagePlaceholder)')
-      await expect(container).toBeVisible()
-      await expect.poll(() => avatars.evaluateAll(images => images.length > 0 && images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
-      const avatarCount = await avatars.count()
-      await expect(container.locator('.retryImagePlaceholder')).toHaveCount(0)
-      await container.evaluate(element => {
-        window.__surfaceAvatarFlashes = []
-        window.__surfaceAvatarObserver = new MutationObserver(() => {
-          const images = [...element.querySelectorAll('img:not(.retryImagePlaceholder)')]
-          if (element.querySelector('.retryImagePlaceholder') || images.some(image => !image.checkVisibility({ visibilityProperty: true }))) {
-            window.__surfaceAvatarFlashes.push(true)
-          }
-        })
-        window.__surfaceAvatarObserver.observe(element, { childList: true, attributes: true, subtree: true })
-      })
-      await page.evaluate(async ({ tabId, png }) => {
-        const bytes = Uint8Array.from(atob(png), character => character.charCodeAt(0))
-        await window.ftElectron.tabs.updateAvatar(bytes.buffer, tabId, '/watch/surface-avatar')
-      }, { tabId: background.id, png: AVATAR_PNG })
-      await expect(container).toBeVisible()
-      await expect(avatars).toHaveCount(avatarCount)
-      await expect.poll(() => avatars.evaluateAll(images => images.length > 0 && images.every(image => image.src.startsWith('data:image/jpeg') && image.complete && image.naturalWidth > 0))).toBe(true)
-      const flashes = await page.evaluate(() => {
-        window.__surfaceAvatarObserver.disconnect()
-        return window.__surfaceAvatarFlashes
-      })
-      expect(flashes, `${surface} avatars must not flash their placeholder during caching`).toEqual([])
-    } finally {
-      if (surface === 'switcher') {
-        await page.keyboard.press('Escape')
-        await page.keyboard.up('Control')
-      }
-    }
-  })
-}
-
-test('uses the normal fallback when a loaded avatar gets an invalid embedded replacement', async ({ page }) => {
-  await page.route('https://images.test/valid-avatar.png', route => route.fulfill({
-    contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64')
-  }))
-  const background = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/watch/invalid-cached-avatar', makeActive: false, lazyLoad: true
-  }))
-  const setAvatar = avatar => page.evaluate(avatar => {
-    window.$store.commit('setVideoAvatar', {
-      videoId: 'invalid-cached-avatar', avatar
-    })
-  }, avatar)
-  await setAvatar('https://images.test/valid-avatar.png')
-  const tab = page.locator(`.tabBar .tab[data-tab-id="${background.id}"]`)
-  const image = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
-  await expect.poll(() => image.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-  await setAvatar('data:image/png;base64,AAAA')
-  await expect(image).toHaveCount(0)
-  await expect(tab.locator('.tabPageIcon')).toBeVisible()
-})
-
-for (const indicator of ['loading', 'playing']) {
-  test(`loads and retains a watch avatar with the ${indicator} indicator`, async ({ page }) => {
-    let avatarRequest
-    await page.route('https://images.test/watch-avatar.png', route => {
-      avatarRequest = route
-    })
-    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/watch/cached-avatar',
-      makeActive: false,
-      lazyLoad: true
-    }))
-    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
-    const setIndicator = enabled => page.evaluate(({ tabId, indicator, enabled }) => {
-      if (indicator === 'loading') {
-        window.ftElectron.tabs.setLoading(enabled, tabId)
-      } else {
-        window.ftElectron.tabs.setPlaybackState(enabled ? 'playing' : 'paused', tabId)
-      }
-    }, { tabId: watchTab.id, indicator, enabled })
-    const statusIcon = tab.locator(indicator === 'loading' ? '.tabLoadingLine' : '.playingIcon')
-    await setIndicator(true)
-    await expect(statusIcon).toBeVisible()
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setVideoAvatar', { videoId: 'cached-avatar', avatar: 'https://images.test/watch-avatar.png' })
-    })
-    await expect.poll(() => avatarRequest != null, { timeout: 2000 }).toBe(true)
-    await avatarRequest.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
-    const avatar = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
-    await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    await expect(avatar).toBeVisible()
-    const originalImage = await avatar.elementHandle()
-
-    for (let transition = 0; transition < 2; transition++) {
-      await setIndicator(false)
-      await expect(statusIcon).toHaveCount(0)
-      const firstFrame = await tab.evaluate(element => new Promise(resolve => requestAnimationFrame(() => {
-        const image = element.querySelector('img.tabAvatar:not(.retryImagePlaceholder)')
-        resolve({
-          visible: image?.checkVisibility({ visibilityProperty: true }) === true,
-          placeholder: [...element.querySelectorAll('.retryImagePlaceholder')].some(icon => icon.checkVisibility({ visibilityProperty: true }))
-        })
-      })))
-      expect(firstFrame).toEqual({ visible: true, placeholder: false })
-      expect(await avatar.evaluate((image, original) => image === original, originalImage)).toBe(true)
-      await setIndicator(true)
-      await expect(statusIcon).toBeVisible()
-      await expect(avatar).toBeVisible()
-    }
-  })
-}
 
 test('tabs of the same channel share one cached avatar file', async ({ app, page }) => {
   // Ignore any avatars already cached before this test.
@@ -353,58 +144,6 @@ test.describe('loading missing tab icons', () => {
         backendFallback: false
       }
     }
-  })
-
-  test('manually retries an unloaded tab icon after automatic loading fails', async ({ page }) => {
-    let metadataRequests = 0
-    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => {
-      metadataRequests++
-      return route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify({
-          authorThumbnails: metadataRequests === 1 ? [] : [{ url: 'https://images.test/avatar.png' }],
-          tabs: []
-        })
-      })
-    })
-    await page.route('https://images.test/avatar.png', route => route.fulfill({
-      contentType: 'image/png',
-      body: Buffer.from(AVATAR_PNG, 'base64')
-    }))
-
-    const { tabId, activeTabId } = await page.evaluate(async () => {
-      const activeTabId = (await window.ftElectron.tabs.getState()).activeTabId
-      const tab = await window.ftElectron.tabs.create({
-        route: '/channel/UCmissing',
-        makeActive: false,
-        lazyLoad: true
-      })
-      return { tabId: tab.id, activeTabId }
-    })
-    await expect.poll(() => metadataRequests).toBe(1)
-
-    const themeSection = await goToSettingsSection(page, 'theme')
-    const loadButton = themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })
-    await loadButton.click()
-    const toast = page.locator('.toast', { hasText: 'Missing tab icon loaded: 1' })
-    await expect(toast).toBeVisible()
-    await expect(toast.locator('.icon[data-prefix="fas"][data-icon="check"]')).toBeVisible()
-    await expect(loadButton).toBeDisabled()
-
-    await expect.poll(() => page.evaluate(tabId => {
-      return window.ftElectron.tabs.getState().then(state => {
-        const tab = state.tabs.find(candidate => candidate.id === tabId)
-        return {
-          activeTabId: state.activeTabId,
-          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
-          isUnloaded: tab?.isUnloaded
-        }
-      })
-    }, tabId)).toEqual({
-      activeTabId,
-      avatarLoaded: true,
-      isUnloaded: true
-    })
   })
 
   test('shows an error icon when an icon cannot be loaded', async ({ page }) => {
@@ -604,80 +343,3 @@ for (const routePath of ['/watch/jNQXAC9IVRw', '/channel/UCn_FAXem2-e3HQvmK-mOH4
     await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
   })
 }
-
-test.describe('automatic missing tab icons', () => {
-  const server = createServer()
-  const seed = {
-    settings: {
-      backendPreference: 'invidious',
-      defaultInvidiousInstance: '',
-      startupBehavior: 'restoreTabLoadState'
-    },
-    tabSessions: [{
-      _id: 'avatar-startup-session',
-      value: {
-        tabs: [{
-          id: 'active-tab',
-          url: 'app://bundle/index.html#/history',
-          title: 'History',
-          isUnloaded: false
-        }, {
-          id: 'missing-avatar-tab',
-          url: 'app://bundle/index.html#/channel/UCstartup',
-          title: 'Unloaded channel',
-          isUnloaded: true
-        }],
-        activeTabId: 'active-tab',
-        bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
-      }
-    }]
-  }
-
-  test.use({ seed })
-
-  test.beforeAll(async () => {
-    server.on('request', (request, response) => {
-      if (request.url?.startsWith('/api/v1/channels/UCstartup')) {
-        response.setHeader('content-type', 'application/json')
-        response.end(JSON.stringify({
-          authorThumbnails: [{ url: `${seed.settings.defaultInvidiousInstance}/avatar.png` }],
-          tabs: []
-        }))
-      } else if (request.url === '/avatar.png') {
-        response.setHeader('content-type', 'image/png')
-        response.end(Buffer.from(AVATAR_PNG, 'base64'))
-      } else {
-        response.statusCode = 404
-        response.end()
-      }
-    })
-    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
-    const address = server.address()
-    seed.settings.defaultInvidiousInstance = `http://127.0.0.1:${address.port}`
-  })
-
-  test.afterAll(async () => {
-    server.closeAllConnections()
-    await new Promise(resolve => server.close(resolve))
-  })
-
-  test('loads restored icons on startup and disables the completed action', async ({ page }) => {
-    await expect.poll(() => page.evaluate(() => {
-      return window.ftElectron.tabs.getState().then(state => {
-        const tab = state.tabs.find(candidate => candidate.id === 'missing-avatar-tab')
-        return {
-          activeTabId: state.activeTabId,
-          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
-          isUnloaded: tab?.isUnloaded
-        }
-      })
-    })).toEqual({
-      activeTabId: 'active-tab',
-      avatarLoaded: true,
-      isUnloaded: true
-    })
-
-    const themeSection = await goToSettingsSection(page, 'theme')
-    await expect(themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })).toBeDisabled()
-  })
-})

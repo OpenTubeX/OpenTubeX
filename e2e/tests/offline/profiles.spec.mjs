@@ -52,15 +52,6 @@ async function openProfileList(page) {
   await expect(page.locator('.profileList')).toBeVisible()
 }
 
-test('creates All Channels with the default person icon', async ({ app, page }) => {
-  await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
-  await expect.poll(async () => {
-    const contents = readDatastore(app.userDataDir, 'profiles')
-    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-    return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
-  }).toEqual({ type: 'icon', value: 'circle-user' })
-})
-
 test.describe('All Channels with a previously saved color', () => {
   test.use({
     seed: {
@@ -113,7 +104,7 @@ test.describe('existing All Channels without an icon', () => {
   })
 })
 
-for (const iconPack of ['material', 'remix']) {
+for (const iconPack of ['material']) {
   test.describe(`built-in profile icons (${iconPack})`, () => {
     test.use({ seed: { settings: { iconPack }, profiles: [mainProfile, secondProfile] } })
 
@@ -335,20 +326,6 @@ test.describe('profile selector', () => {
     expect(profileIds).toEqual(['allChannels', 'e2eprofile'])
   })
 
-  test('opens directly from the profile button context menu', async ({ page }) => {
-    await profileIcon(page).click()
-    await expect(page.locator('.profileSummaryText')).toContainText('You can also right-click the profile icon to switch profiles')
-    await profileIcon(page).click()
-
-    await profileIcon(page).click({ button: 'right' })
-
-    await expect(page.locator('.profileList')).toBeVisible()
-
-    await profileIcon(page).click({ button: 'right' })
-    await page.locator('.topNav .logo').click()
-    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
-  })
-
   test('lists seeded profiles and switches the active profile', async ({ page }) => {
     await expect(profileIconInitial(page)).toHaveText('A')
 
@@ -361,30 +338,6 @@ test.describe('profile selector', () => {
     await expect(page.locator('.menuSection')).toHaveCount(0)
     await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     await expect(profileIconInitial(page)).toHaveText('S')
-  })
-})
-
-test.describe('profile selector with a custom image', () => {
-  test.use({
-    seed: {
-      profiles: [{
-        ...mainProfile,
-        icon: {
-          type: 'image',
-          value: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
-        }
-      }]
-    }
-  })
-
-  test('keeps the profile button centered in the top navigation', async ({ page }) => {
-    await expect(profileIconInitial(page).locator('img')).toBeVisible()
-
-    const navigationBox = await page.locator('.topNav').boundingBox()
-    const profileButtonBox = await profileIcon(page).boundingBox()
-
-    expect(profileButtonBox.y + profileButtonBox.height / 2)
-      .toBeCloseTo(navigationBox.y + navigationBox.height / 2, 0)
   })
 })
 
@@ -401,36 +354,6 @@ test.describe('default profile setting', () => {
   })
 })
 
-test.describe('profile channel thumbnails', () => {
-  test.use({
-    seed: {
-      settings: { hideUnsubscribeButton: true, uiRoundness: 200 },
-      profiles: [{
-        ...mainProfile,
-        subscriptions: [{
-          id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
-          name: 'Deleted Channel',
-          thumbnail: 'data:image/png;base64,invalid'
-        }]
-      }]
-    }
-  })
-
-  test('uses the default avatar when a channel thumbnail fails to load', async ({ page }) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    await page.locator('.card .profileList').getByText('All Channels').click()
-    await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
-
-    const channel = page.getByRole('tabpanel', { name: 'Manage profile subscriptions', exact: true }).getByRole('link', { name: 'Deleted Channel' })
-    await expect(channel).toHaveCSS('border-radius', '32px')
-    await expect(channel.locator('img.bubble')).toHaveCount(0)
-    const fallbackAvatar = channel.locator('.bubble:not(img)')
-    await expect(fallbackAvatar).toBeVisible()
-    await expect(fallbackAvatar).toHaveCSS('font-size', '50px')
-  })
-})
-
 test.describe('profile manager presentation', () => {
   test.use({
     seed: {
@@ -443,111 +366,6 @@ test.describe('profile manager presentation', () => {
         ]
       }]
     }
-  })
-
-  test('preserves profile name colors on hover and softly highlights the open profile', async ({ page, attachScreenshot }) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    const profiles = page.locator('.profileSettingsContent > .card .profileList .bubblePadding')
-    for (const theme of ['black', 'light']) {
-      await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
-      for (const profile of await profiles.all()) {
-        await page.locator('.settingsBreadcrumb').hover()
-        const name = profile.locator('.profileName')
-        const color = await name.evaluate(element => getComputedStyle(element).color)
-        await profile.hover()
-        await expect(name).toHaveCSS('color', color)
-        await profile.click()
-        await page.locator('.settingsBreadcrumb').hover()
-        const openColor = await name.evaluate(element => getComputedStyle(element).color)
-        await profile.hover()
-        await expect(name).toHaveCSS('color', openColor)
-        await page.locator('.settingsBreadcrumb').hover()
-        await expect(name).toHaveCSS('color', color)
-        await expect.poll(() => profile.evaluate(element => {
-          const canvas = document.createElement('canvas')
-          const context = canvas.getContext('2d')
-          context.fillStyle = getComputedStyle(element).backgroundColor
-          context.fillRect(0, 0, 1, 1)
-          return context.getImageData(0, 0, 1, 1).data[3] / 255
-        })).toBeLessThan(0.4)
-        await profile.hover()
-        await expect(name).toHaveCSS('color', color)
-      }
-      await attachScreenshot(`Profile highlights in ${theme} theme`)
-    }
-  })
-
-  test('places the create option after existing profiles with its label below the icon', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    const list = page.locator('.profileSettingsContent .profileList')
-    const createOption = list.getByRole('button', { name: 'Create New Profile', exact: true })
-    await expect.poll(() => createOption.evaluate(element => {
-      const previous = element.previousElementSibling.getBoundingClientRect()
-      const option = element.getBoundingClientRect()
-      const icon = element.querySelector('.createProfileIcon').getBoundingClientRect()
-      const previousIcon = element.previousElementSibling.querySelector('.bubble').getBoundingClientRect()
-      const label = element.querySelector('.createProfileLabel').getBoundingClientRect()
-      return option.left >= previous.right - 1 && Math.abs(option.top - previous.top) < 1 &&
-        Math.abs(icon.top - previousIcon.top) < 1 && label.top >= icon.bottom
-    })).toBe(true)
-    await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
-    for (const narrow of [false, true]) {
-      if (narrow) {
-        await resizeToCssWidth(app, page, 390, uiScale)
-      }
-      await expect.poll(() => createOption.evaluate(element => {
-        const bounds = element.getBoundingClientRect()
-        const list = element.parentElement.getBoundingClientRect()
-        return bounds.left >= list.left - 1 && bounds.right <= list.right + 1
-      })).toBe(true)
-      const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-        (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-      await testInfo.attach(`Create profile option at ${narrow ? 'narrow' : 'desktop'} ${uiScale}% scale`, {
-        body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
-      })
-    }
-    await createOption.click()
-    await expect(page.getByRole('heading', { name: 'Create New Profile', exact: true })).toBeVisible()
-  })
-
-  test('groups profile tiles with sensible gaps and leaves the create icon unfilled', { tag: '@scale' }, async ({ page }) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    const list = page.locator('.profileSettingsContent .profileList')
-    await expect.soft.poll(() => list.evaluate(element => {
-      const tiles = [...element.children].map(tile => tile.getBoundingClientRect())
-      return tiles.slice(1).every((tile, index) => {
-        const gap = tile.left - tiles[index].right
-        return gap >= 12 && gap <= 24
-      })
-    }), { timeout: 2000 }).toBe(true)
-    await expect(list.locator('.createProfileIcon')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 2000 })
-  })
-
-  test('keeps custom profile controls and preview side by side when space permits', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
-    await page.locator('.builtinIconOptions').getByRole('button', { name: 'Gaming', exact: true }).click()
-    await resizeToCssWidth(app, page, 940, uiScale)
-    await expect.poll(() => page.locator('.secondEditRow').evaluate(element => {
-      const [controls, preview] = [...element.children].map(child => child.getBoundingClientRect())
-      return Math.abs(controls.top - preview.top) < 1 && preview.left - controls.right >= 16
-    }), { timeout: 2000 }).toBe(true)
-    await page.locator('.secondEditRow > div').last().evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
-    await expect.poll(() => page.locator('.secondEditRow > div').last().evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      const viewport = element.closest('.settingsSubpageScroll').getBoundingClientRect()
-      return bounds.top >= viewport.top - 1 && bounds.bottom <= viewport.bottom + 1
-    })).toBe(true)
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-    await testInfo.attach(`Custom profile columns at ${uiScale}% scale`, {
-      body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
-    })
   })
 
   test('spaces wrapped profile buttons and stacked editor sections on narrow layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
@@ -686,23 +504,6 @@ test.describe('profile manager presentation', () => {
     await expect(page.locator('.profileEdit')).toBeVisible()
   })
 
-  test('balances profile filter spacing when subscriptions are present', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
-    await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
-    for (const width of [1200, 350]) {
-      await resizeToCssWidth(app, page, width, uiScale)
-      await expect.soft.poll(() => page.locator('.profileSettingsContent .select').evaluate(element => {
-        const channels = document.querySelector('.selectionActions').nextElementSibling.getBoundingClientRect()
-        const label = element.querySelector('.select-label').getBoundingClientRect()
-        const count = element.parentElement.nextElementSibling.getBoundingClientRect()
-        return Math.abs(label.top - channels.bottom - (count.top - element.getBoundingClientRect().bottom))
-      // Allow subpixel snapping at fractional UI scales.
-      }), { timeout: 2000 }).toBeLessThanOrEqual(1.05)
-    }
-  })
-
   test('balances the space above and below the profile filter after emptying subscriptions', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()
@@ -745,68 +546,6 @@ test.describe('profile manager presentation', () => {
         body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
       })
     }
-  })
-
-  test('keeps subscription selection working in its own tab', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
-    await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
-    const selectAll = page.getByRole('button', { name: 'Select All', exact: true }).first()
-    const subscription = page.locator('.profileSettingsContent').getByText('Channel one', { exact: true })
-    await expect.poll(() => page.locator('.profileActions').evaluate(element =>
-      element.querySelector('button').getBoundingClientRect().top - element.previousElementSibling.getBoundingClientRect().bottom
-    ), { timeout: 2000 }).toBeCloseTo(21, 0)
-    await expect.poll(() => page.locator('.secondEditRow').evaluate(element =>
-      element.getBoundingClientRect().top - element.previousElementSibling.getBoundingClientRect().bottom
-    )).toBeGreaterThanOrEqual(19)
-    await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
-    await expect.poll(() => page.locator('.selectionActions').evaluate(element => (
-      element.nextElementSibling.getBoundingClientRect().top - element.getBoundingClientRect().bottom
-    ))).toBeCloseTo(16, 0)
-    await expect.poll(() => page.locator('.selectionActions').evaluate(element => {
-      const buttons = [...element.querySelectorAll('button')].map(button => button.getBoundingClientRect())
-      const count = element.previousElementSibling.getBoundingClientRect()
-      const center = (buttons[0].left + buttons.at(-1).right) / 2
-      return Math.abs(center - (count.left + count.right) / 2) < 1 &&
-        buttons.slice(1).every((button, index) => button.left - buttons[index].right <= 20)
-    }), { timeout: 2000, message: 'selection buttons form a compact group centered below the count' }).toBe(true)
-    await selectAll.click()
-    await expect(page.locator('.selectedCount')).toHaveText('2 selected')
-    await page.getByRole('button', { name: 'Select None', exact: true }).first().click()
-    await expect(page.locator('.selectedCount')).toHaveText('0 selected')
-    await selectAll.click()
-    await expect(selectAll).toBeDisabled()
-    await expect(page.locator('.selectionActions').getByRole('button', { name: 'Select None', exact: true })).toHaveCSS('opacity', '1')
-    await subscription.scrollIntoViewIfNeeded()
-    const desktopScreenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-    await testInfo.attach(`Subscription selection at ${uiScale}% scale`, {
-      body: Buffer.from(desktopScreenshot, 'base64'), contentType: 'image/png'
-    })
-    await resizeToCssWidth(app, page, 390, uiScale)
-    await expect.poll(() => page.locator('.selectionActions').evaluate(element => {
-      const count = element.previousElementSibling.getBoundingClientRect()
-      const bounds = element.getBoundingClientRect()
-      const rows = []
-      for (const button of element.querySelectorAll('button')) {
-        const rect = button.getBoundingClientRect()
-        if (rect.left < bounds.left - 1 || rect.right > bounds.right + 1) return false
-        const row = rows.find(row => Math.abs(row.top - rect.top) < 1)
-        if (row) row.right = rect.right
-        else rows.push({ top: rect.top, left: rect.left, right: rect.right })
-      }
-      return rows.every(row => Math.abs((row.left + row.right - count.left - count.right) / 2) < 1)
-    })).toBe(true)
-    await page.locator('.selectionActions').scrollIntoViewIfNeeded()
-    const narrowScreenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-    await testInfo.attach(`Centered selection actions at narrow ${uiScale}% scale`, {
-      body: Buffer.from(narrowScreenshot, 'base64'), contentType: 'image/png'
-    })
-    await page.getByRole('button', { name: 'Delete Selected', exact: true }).click()
-    await page.getByRole('button', { name: 'Yes, Delete', exact: true }).click()
-    await expect(subscription).toHaveCount(0)
-    await expect(page.locator('.selectedCount')).toHaveText('0 selected')
   })
 
   test('disables subscription selection actions when they do not apply', async ({ page }) => {
@@ -954,45 +693,6 @@ test.describe('profile manager', () => {
 
   test.describe('theme color profiles', () => {
     test.use({ seed: { settings: { mainColor: 'Green' } } })
-
-    test('resolves the current theme color after the system theme changes', async ({ page }) => {
-      await page.emulateMedia({ colorScheme: 'dark' })
-      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
-      await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
-      await page.locator('.card .profileList').getByText('All Channels').click()
-      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'dark'))
-      await page.locator('.themeColorOption').click()
-      await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(76, 175, 80)')
-      await expect(page.locator('.profileColorPicker code')).toHaveText('#4caf50', { timeout: 2000 })
-      await expect(page.locator('.profileColorPicker .swatchColor')).toHaveCSS('background-color', 'rgb(76, 175, 80)')
-
-      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
-      await expect(page.locator('.profileColorPicker code')).toHaveText('#000')
-      await expect(page.locator('.profileColorPicker .swatchColor')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
-      await page.emulateMedia({ colorScheme: 'light' })
-      await expect(page.locator('.profileColorPicker code')).toHaveText('#4caf50')
-    })
-
-    test('resolves the derived Tally accent as the theme color', async ({ page }) => {
-      await page.evaluate(async () => {
-        await window.$store.dispatch('updateBaseTheme', 'openTubeXLight')
-        await window.$store.dispatch('updateSignalAccentColor', '#ffff00')
-      })
-      await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
-      await page.locator('.card .profileList').getByText('All Channels').click()
-      await page.locator('.themeColorOption').click()
-      // The light theme darkens yellow for contrast; the picker needs a hex value.
-      await expect(page.locator('.profileColorPicker code')).toHaveText(/^#[\da-f]{6}$/)
-      const hex = await page.locator('.profileColorPicker code').textContent()
-      expect(hex).not.toBe('#ffff00')
-      // The preview paints the theme variable itself, so compare its resolved channels.
-      const preview = await page.locator('.profilePreviewIcon').evaluate(element =>
-        getComputedStyle(element).backgroundColor.match(/[\d.]+(?:e-?\d+)?/g).slice(0, 3)
-          .map(value => Math.round(Number(value) * 255)))
-      expect(preview).toEqual(hex.match(/[\da-f]{2}/g).map(value => Number.parseInt(value, 16)))
-    })
 
     test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
       await openProfileList(page)

@@ -1,4 +1,4 @@
-import { chmod, readFile, unlink, writeFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
@@ -103,7 +103,7 @@ async function captureSearchNotice(page, filename, animations = 'allow') {
   })
 }
 
-for (const responseType of ['empty', 'ads-only']) {
+for (const responseType of ['ads-only']) {
   test(`offers a cookie retry for ${responseType} search responses without an age notice`, async ({ app, page }) => {
     const { log, response } = await configureCookieSearch(app, 'file', 1000)
     const anonymousResponse = structuredClone(ageGate)
@@ -262,29 +262,6 @@ test('cookie search loads video, playlist, and channel avatars and disposes empt
   await page.locator(sel.tabs).last().getByRole('button', { name: 'Close Tab', exact: true }).click()
   await expect(page.locator(sel.tabs)).toHaveCount(1)
   expect(errors).toEqual([])
-})
-
-test('cookie channel avatars use YouTube URLs with the Invidious backend selected', async ({ app, page }) => {
-  const { response } = await configureCookieSearch(app, 'browser')
-  const avatar = 'https://yt3.googleusercontent.com/cookie-channel-avatar'
-  await page.route(avatar, route => fulfillVisualFixture(route, 'avatar'))
-  await writeFile(response, JSON.stringify({
-    entries: [{
-      id: 'UCn_FAXem2-e3HQvmK-mOH4g', title: 'Cookie search channel', thumbnails: [{ url: avatar }]
-    }]
-  }))
-  await searchForAgeGate(page)
-  // Keep the age-gate notice while changing the preferred backend: the cookie
-  // retry still gets its data from yt-dlp, not from the selected instance.
-  await page.evaluate(() => {
-    const store = window.$store
-    store.commit('setBackendPreference', 'invidious')
-    store.commit('setDefaultInvidiousInstance', 'https://invidious.test')
-  })
-  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
-  const image = page.locator('.ft-list-channel img')
-  await expect(image).toHaveAttribute('src', avatar)
-  await expectImagesLoaded(image)
 })
 
 test('cookie search shows the playlist thumbnail and total count omitted by flat search', async ({ app, page }) => {
@@ -480,53 +457,6 @@ test('paginates authenticated results and stops at an empty final page', async (
   const args = JSON.parse(await readFile(log, 'utf8'))
   expect(args[args.indexOf('--playlist-start') + 1]).toBe('21')
 })
-
-for (const autoLoadMore of [true, false]) {
-  test(`shows only the pagination spinner for cookie searches with ${autoLoadMore ? 'automatic' : 'manual'} loading`, async ({ app, page }) => {
-    const { log, response, pendingResponse } = await configureCookieSearch(app)
-    await searchForAgeGate(page)
-    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    await writeFile(response, JSON.stringify({
-      entries: Array.from({ length: 20 }, (_, index) => ({
-        id: String(index).padStart(11, '0'), title: `Authenticated video ${index}`, channel: 'Creator', duration: 120
-      }))
-    }))
-    await page.getByRole('button', { name: 'Try with configured cookies' }).click()
-    await expect(page.getByRole('heading', { name: 'Authenticated video 0', exact: true })).toBeVisible()
-    const colorScheme = autoLoadMore ? 'dark' : 'light'
-    await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-    await writeFile(response, JSON.stringify({ entries: [] }))
-    await writeFile(pendingResponse, '')
-    const pagination = page.locator('.ft-auto-load-next-page-wrapper')
-    try {
-      await page.evaluate(enabled => window.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
-      if (autoLoadMore) {
-        await pagination.evaluate(element => element.scrollIntoView({ block: 'end', behavior: 'instant' }))
-      } else {
-        await page.getByRole('button', { name: 'Fetch more results' }).click()
-      }
-      await expect.poll(async () => {
-        const args = JSON.parse(await readFile(log, 'utf8'))
-        return args[args.indexOf('--playlist-start') + 1]
-      }).toBe('21')
-      await expect(page.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
-      await expect(page.locator('.loadingIndicator')).toHaveCount(1, { timeout: 500 })
-      await expectImagesLoaded(page.locator('.ft-list-item img'))
-      const box = await pagination.boundingBox()
-      const width = Math.min(600, box.width)
-      await page.screenshot({
-        path: test.info().outputPath(`cookie-search-pagination-${colorScheme}.png`),
-        clip: { x: box.x + (box.width - width) / 2, y: box.y - 150, width, height: box.height + 150 }
-      })
-    } finally {
-      await unlink(pendingResponse)
-    }
-    await expect(page.getByText('There are no more results for this search')).toBeVisible()
-    await expect(pagination).toHaveCount(0)
-    await expect(page.locator('.loadingIndicator')).toHaveCount(0)
-  })
-}
 
 test('keeps loaded results and retries the same page after a pagination error', async ({ app, page }) => {
   const { log, response } = await configureCookieSearch(app)

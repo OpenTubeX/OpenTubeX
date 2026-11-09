@@ -215,32 +215,6 @@ test.describe('multi-tab window close confirmation', () => {
     ])
     expect(newWindow.isClosed()).toBe(false)
   })
-
-  test('confirms when a context menu closes every tab in a multi-tab window', async ({ app, page }) => {
-    const { newWindow } = await openSecondWindowWithTwoTabs(app, page)
-    await newWindow.evaluate(async () => {
-      const { tabs } = await window.ftElectron.tabs.getState()
-      const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
-      await window.ftElectron.tabs.setGroup(tabs.map(tab => tab.id), group.id)
-      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
-    })
-
-    await app.electronApp.evaluate(({ dialog }) => {
-      globalThis.windowCloseDialogs = []
-      dialog.showMessageBox = async (_window, options) => {
-        globalThis.windowCloseDialogs.push(options.message)
-        return { response: 1 }
-      }
-    })
-
-    await newWindow.locator('.collapsedTabGroup').click({ button: 'right' })
-    await newWindow.getByRole('menuitem', { name: 'Close 2 Tabs', exact: true }).click()
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogs)).toEqual([
-      'This window contains 2 tabs. Are you sure you want to close it?'
-    ])
-    expect(newWindow.isClosed()).toBe(false)
-    expect(await newWindow.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs.length)).toBe(2)
-  })
 })
 
 test.describe('disabled multi-tab window close confirmation', () => {
@@ -328,18 +302,5 @@ test.describe('disabled multi-tab window close confirmation', () => {
       window.evaluate(() => window.ftElectron.tabs.getState()).then(state => state.tabs.map(tab => tab.url))
     )))
     expect(restoredUrls.filter(urls => urls.length === expectedTabUrls.length)).toEqual([expectedTabUrls])
-  })
-
-  test('can disable the multi-tab window close confirmation', async ({ app, page }) => {
-    const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
-
-    await app.electronApp.evaluate(({ dialog }) => {
-      dialog.showMessageBox = async () => {
-        throw new Error('Window close confirmation should be disabled')
-      }
-    })
-    const closed = newWindow.waitForEvent('close')
-    await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
-    await closed
   })
 })

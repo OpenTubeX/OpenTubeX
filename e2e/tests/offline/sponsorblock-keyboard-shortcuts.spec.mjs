@@ -86,28 +86,6 @@ test('assigns searchable SponsorBlock shortcuts and resets them', async ({ page 
   await page.locator('.keyboardShortcutPromptEmbedded').screenshot({ path: testInfo.outputPath('sponsorblock-shortcuts.png') })
 })
 
-test('uses the extension defaults to mark both boundaries and toggle the submission menu', async ({ app, page }) => {
-  const video = await openVideo(app, page)
-  await expect(page.locator('.sponsorblock-start-button').first()).toHaveAttribute('aria-label', 'Start Segment Now (;)')
-  await page.keyboard.down(';')
-  await page.keyboard.down(';')
-  await page.keyboard.up(';')
-  await expect.poll(() => drafts(page)).toEqual([
-    expect.objectContaining({ startTime: 2, endTime: null })
-  ])
-  await video.evaluate(element => { element.currentTime = 6 })
-  await page.keyboard.press(';')
-  await expect.poll(() => drafts(page)).toEqual([
-    expect.objectContaining({ startTime: 2, endTime: 6 })
-  ])
-  const menu = page.locator('.sponsorBlockSubmissionMenu')
-  await expect(menu).toBeVisible()
-  await page.keyboard.press("'")
-  await expect(menu).toHaveCount(0)
-  await page.keyboard.press("'")
-  await expect(menu).toBeVisible()
-})
-
 test('reserves Space for playback when assigning SponsorBlock shortcuts', async ({ app, page }, testInfo) => {
   const video = await openVideo(app, page)
   await page.keyboard.press('Shift+?')

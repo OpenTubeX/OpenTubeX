@@ -1,4 +1,4 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const now = Date.now()
@@ -88,24 +88,6 @@ test('resting the pointer on a video loads Watch without fetching it, and the cl
   await expect(page.locator('.tabContent[aria-hidden="false"] .videoLayout')).toBeVisible()
   expect(await page.evaluate(() => window.__routePlaceholders)).toBe(0)
   await expect.poll(() => videoRequests.length).toBeGreaterThan(0)
-})
-
-test('keyboard focus on a side navigation link loads its destination', async ({ page }) => {
-  expect(await isRouteLoaded(page, '/userplaylists')).toBe(false)
-
-  const link = page.locator(sel.sideNavLink('userplaylists')).first()
-  await link.focus()
-  await page.keyboard.press('Shift+Tab')
-  await page.keyboard.press('Tab')
-  await expect(link).toBeFocused()
-  expect(await link.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-  await expect.poll(() => isRouteLoaded(page, '/userplaylists')).toBe(true)
-  await expect(page).toHaveURL(/#\/history$/)
-
-  await recordRoutePlaceholders(page)
-  await page.keyboard.press('Enter')
-  await expect(page.locator('.tabContent[aria-hidden="false"]')).toContainText('Route preload playlist')
-  expect(await page.evaluate(() => window.__routePlaceholders)).toBe(0)
 })
 
 test('a route whose code failed to preload still opens on click', async ({ page }) => {

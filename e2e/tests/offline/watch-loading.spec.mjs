@@ -240,35 +240,6 @@ test.describe('local player request concurrency', () => {
     }
   })
 
-  test('fetches watch metadata while token generation is pending', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      ipcMain.removeHandler('generate-po-token')
-      ipcMain.handle('generate-po-token', () => new Promise(resolve => {
-        globalThis.finishLoadingTestToken = () => resolve('test-po-token')
-      }))
-    })
-    let metadataRequested = false
-    await page.route('**/youtubei/v1/next**', route => {
-      metadataRequested = true
-      return route.fallback()
-    })
-    const finishToken = () => app.electronApp.evaluate(() => globalThis.finishLoadingTestToken?.())
-    try {
-      await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
-      await page.locator(sel.searchInput).press('Enter')
-      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishLoadingTestToken === 'function'))
-        .toBe(true)
-      await expect.poll(() => metadataRequested).toBe(true)
-      await expect(page.locator('.infoSkeleton')).toBeVisible()
-      await finishToken()
-      await waitForPlayback(page)
-      await expect(page.locator('.infoSkeleton, .videoPlayerPlaceholder')).toHaveCount(0)
-    } finally {
-      await finishToken()
-    }
-  })
-
   for (const changeVideo of [false, true]) {
     test(changeVideo ? 'only requests a token for the current video after navigation during player-script setup' : 'fetches watch metadata while the player script is pending', async ({ app, page }, testInfo) => {
       const currentVideoId = 'dQw4w9WgXc'

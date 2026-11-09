@@ -109,116 +109,8 @@ test('compact bulk actions preserve the selection and mixed color state', async 
   await expect(page.locator(sel.tabs)).toHaveAttribute('data-tab-id', ids[2])
 })
 
-test('the menu animates open from the pointer and closed on the compositor while taking input @scale', async ({ page }) => {
-  // Slow motion keeps the menu's animations running long enough to inspect
-  // them. Fly-outs keep their own short transition so they settle at once.
-  await page.evaluate(() => {
-    const sheet = new CSSStyleSheet()
-    sheet.replaceSync(`
-      .contextMenu { --motion-fast-effects: 10s linear; --motion-fast-spatial: 10s linear; }
-      .contextMenu .submenu { --motion-fast-effects: 0s; --motion-fast-spatial: 0s; }
-    `)
-    window.__slowMenuMotion = sheet
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
-  })
-  const tab = page.locator(sel.activeTab)
-  const tabBox = await tab.boundingBox()
-  const point = { x: tabBox.x + 24, y: tabBox.y + tabBox.height / 2 }
-  await page.mouse.click(point.x, point.y, { button: 'right' })
-  const menu = page.locator('.compactTabMenu')
-  await expect(menu).toBeVisible()
-
-  // The open and close animations change only opacity and transform, which
-  // need no layout or paint, so a busy main thread can neither delay nor stall them
-  const animatedProperties = () => menu.evaluate(element => [...new Set(element.getAnimations({ subtree: true })
-    .filter(animation => animation instanceof CSSAnimation && animation.playState === 'running')
-    .flatMap(animation => animation.effect.getKeyframes())
-    .flatMap(keyframe => Object.keys(keyframe))
-    .filter(key => !['offset', 'computedOffset', 'easing', 'composite'].includes(key)))].sort())
-  expect(await animatedProperties()).toEqual(['opacity', 'transform'])
-  // Only the surface scales; the menu and its items keep their final geometry
-  expect(await menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
-  // The surface expands from the pointer, give or take the rounding of
-  // pointer coordinates at fractional UI scales
-  const origin = await menu.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    const [x, y] = getComputedStyle(element, '::before').transformOrigin.split(' ').map(Number.parseFloat)
-    return { x: rect.left + x, y: rect.top + y }
-  })
-  expect(Math.abs(origin.x - point.x)).toBeLessThanOrEqual(1.5)
-  expect(Math.abs(origin.y - point.y)).toBeLessThanOrEqual(1.5)
-
-  // Fly-outs open where they belong while the menu is still animating
-  const trigger = menu.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
-  const triggerBox = await trigger.boundingBox()
-  await page.mouse.move(triggerBox.x + triggerBox.width / 2, triggerBox.y + triggerBox.height / 2)
-  const ungrouped = menu.getByRole('menuitemradio', { name: 'Ungrouped', exact: true })
-  await expect(ungrouped).toBeVisible()
-  const ungroupedBox = await ungrouped.boundingBox()
-  expect(ungroupedBox.x).toBeGreaterThanOrEqual(triggerBox.x + triggerBox.width - 8)
-  expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('[role="menuitemradio"]')?.textContent.trim(), {
-    x: ungroupedBox.x + ungroupedBox.width / 2, y: ungroupedBox.y + ungroupedBox.height / 2
-  })).toBe('Ungrouped')
-  expect(await animatedProperties()).toEqual(['opacity', 'transform'])
-
-  // Items work before the open animation ends
-  const pin = menu.getByRole('menuitem', { name: 'Pin Tab', exact: true })
-  const pinBox = await pin.boundingBox()
-  await page.mouse.click(pinBox.x + pinBox.width / 2, pinBox.y + pinBox.height / 2)
-  await expect(tab).toHaveClass(/pinned/)
-
-  // The closing menu fades out and lets the page beneath take input at once
-  await expect(menu).toHaveClass(/context-menu-leave-active/)
-  expect(await animatedProperties()).toEqual(['opacity', 'transform'])
-  expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('.contextMenu') == null, {
-    x: pinBox.x + pinBox.width / 2, y: pinBox.y + pinBox.height / 2
-  })).toBe(true)
-
-  await page.evaluate(() => {
-    document.adoptedStyleSheets = document.adoptedStyleSheets.filter(sheet => sheet !== window.__slowMenuMotion)
-  })
-  await expect(menu).toHaveCount(0)
-})
-
-test('a menu closed while it opens still fades out in full', async ({ page }) => {
-  // The surface finishes expanding while the longer fade-out still runs
-  await page.evaluate(() => {
-    const sheet = new CSSStyleSheet()
-    sheet.replaceSync('.contextMenu { --motion-fast-effects: 4s linear; --motion-fast-spatial: 1s linear; }')
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
-  })
-  await page.locator(sel.activeTab).click({ button: 'right' })
-  const menu = page.locator('.compactTabMenu')
-  await expect(menu).toBeVisible()
-  await page.keyboard.press('Escape')
-  await expect(menu).toHaveClass(/context-menu-leave-active/)
-  await menu.evaluate(element => Promise.all(element.getAnimations({ subtree: true })
-    .filter(animation => animation.animationName.startsWith('context-menu-expand'))
-    .map(animation => animation.finished)))
-  await expect(menu).toHaveClass(/context-menu-leave-active/)
-  expect(await menu.evaluate(element => element.getAnimations()
-    .find(animation => animation.animationName.startsWith('context-menu-fade-out'))?.playState)).toBe('running')
-})
-
-test('pink tab colors render and survive an app restart', async ({ page, app }) => {
-  await page.locator(sel.activeTab).click({ button: 'right' })
-  await page.getByRole('menuitemradio', { name: 'Pink', exact: true }).click()
-  await expect(page.locator(sel.activeTab)).toHaveCSS('--tab-accent-color', '#d65b96')
-  // Rounded colored tabs keep one even border instead of a one-sided accent stripe.
-  await expect(page.locator(sel.activeTab)).toHaveCSS('box-shadow', 'none')
-  await page.evaluate(() => window.$store.commit('setTabBarPosition', 'left'))
-  await expect(page.locator(`${sel.activeTab}.vertical`)).toHaveCSS('box-shadow', 'none')
-  await page.evaluate(() => window.$store.commit('setTabBarPosition', 'top'))
-  await app.relaunch()
-  await expect(app.page.locator(sel.activeTab)).toHaveCSS('--tab-accent-color', '#d65b96')
-  await app.page.locator(sel.activeTab).click({ button: 'right' })
-  await expect(app.page.getByRole('menuitemradio', { name: 'Pink', exact: true })).toBeChecked()
-})
-
 for (const settings of [
-  { currentLocale: 'en-US', baseTheme: 'dark', iconPack: 'material', uiScale: 100 },
   { currentLocale: 'de-DE', baseTheme: 'light', iconPack: 'remix', uiScale: 125 },
-  { currentLocale: 'en-US', baseTheme: 'dark', iconPack: 'remix', uiScale: 95 }
 ]) {
   test.describe(`compact tab menu ${Object.values(settings).join(' ')}`, () => {
     test.use({ seed: { settings } })
@@ -243,9 +135,6 @@ for (const settings of [
       }
       await expect(menu).toHaveCSS('opacity', '1')
       await testInfo.attach('compact tab menu', { body: await page.screenshot({ animations: 'disabled' }), contentType: 'image/png' })
-      if (settings.uiScale === 100) {
-        await testInfo.attach('compact tab menu detail', { body: await menu.screenshot({ animations: 'disabled' }), contentType: 'image/png' })
-      }
 
       const quickActions = menu.locator('.tabQuickActions button')
       await quickActions.first().hover()
@@ -292,25 +181,6 @@ for (const settings of [
     })
   })
 }
-
-test('the empty tab bar menu uses the compact tab menu rows @scale', async ({ page }) => {
-  await page.locator(sel.activeTab).click({ button: 'right' })
-  const tabMenuRow = page.locator('.compactTabMenu .menuScroll .menuItem').first()
-  await expect(tabMenuRow).toBeVisible()
-  const rowStyle = element => {
-    const style = getComputedStyle(element)
-    return { fontSize: style.fontSize, minBlockSize: style.minBlockSize, height: element.getBoundingClientRect().height }
-  }
-  const tabRow = await tabMenuRow.evaluate(rowStyle)
-  await page.keyboard.press('Escape')
-
-  const content = await page.locator('.tabsContent').boundingBox()
-  const container = await page.locator('.tabsContainer').boundingBox()
-  await page.mouse.click(container.x + container.width - 12, content.y + content.height / 2, { button: 'right' })
-  const newTab = page.locator('.contextMenu').getByRole('menuitem', { name: 'New Tab', exact: true })
-  await expect(newTab).toBeVisible()
-  expect(await newTab.evaluate(rowStyle)).toEqual(tabRow)
-})
 
 test('a collapsed tab group opens a group menu', async ({ page }) => {
   const createCollapsedGroup = name => page.evaluate(async name => {

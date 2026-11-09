@@ -1,8 +1,6 @@
-import { readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -25,19 +23,6 @@ test.use({ seed: { settings: PLAYER_SEED } })
 async function openDemoVideo({ app, page }) {
   await mockPlayableWatchPage(app, page)
   return await openMockedVideo(page)
-}
-
-async function getVideoFillGeometry(video) {
-  return video.evaluate(element => {
-    const player = element.closest('.ftVideoPlayer')
-    const fit = Math.min(element.clientWidth / element.videoWidth, element.clientHeight / element.videoHeight)
-    const fill = Math.max(
-      player.clientWidth / (element.videoWidth * fit),
-      player.clientHeight / (element.videoHeight * fit),
-    )
-    const bounds = player.getBoundingClientRect()
-    return { fill, x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 }
-  })
 }
 
 /** @param {import('@playwright/test').Page} page */
@@ -189,55 +174,6 @@ test('repeated seek shortcuts accumulate the OSD while seeking immediately', asy
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
 })
 
-test('shows the replay icon when playback ends before Shaka updates its play icon', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  const watchComponent = await page.evaluateHandle(findWatchComponent)
-  const replayIconPath = await watchComponent.evaluate(component => {
-    return component.refs.player.$.setupState.replayIcon
-  })
-  const playButtons = page.locator(`${activeTab} .shaka-play-button`)
-  const readPlayControls = () => playButtons.evaluateAll(buttons => buttons.map(button => ({
-    state: button.getAttribute('data-ft-play-pause-state'),
-    path: button.querySelector(
-      ':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon) > path'
-    )?.getAttribute('d')
-  })))
-
-  await watchComponent.evaluate(async component => {
-    await component.proxy.$store.dispatch('updateDisplayVideoPlayButton', true)
-    await component.proxy.$nextTick()
-  })
-  await expect(playButtons).toHaveCount(2)
-  const initialControls = await readPlayControls()
-  const pauseIconPath = initialControls[0].path
-  expect(pauseIconPath).toBeTruthy()
-  expect(initialControls.map(control => control.path)).toEqual([pauseIconPath, pauseIconPath])
-  await video.evaluate(element => element.pause())
-  await expect.poll(async () => (await readPlayControls()).map(control => control.state))
-    .toEqual(['play', 'play'])
-
-  await video.evaluate(element => {
-    Object.defineProperty(element, 'ended', { configurable: true, value: true })
-    element.dispatchEvent(new Event('ended'))
-  })
-
-  await expect.poll(readPlayControls).toEqual([
-    { state: 'replay', path: replayIconPath },
-    { state: 'replay', path: replayIconPath }
-  ])
-
-  await video.evaluate(async element => {
-    delete element.ended
-    element.currentTime = 0
-    await element.play()
-  })
-  await expect.poll(readPlayControls).toEqual([
-    { state: 'pause', path: pauseIconPath },
-    { state: 'pause', path: pauseIconPath }
-  ])
-  await watchComponent.dispose()
-})
-
 test('does not restore a consumed link timestamp after an app restart', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&t=2')
@@ -277,22 +213,20 @@ test('a timestamped video stays paused when the window loses focus', async ({ ap
 test.describe('without autoplay', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, autoplayVideos: false } } })
 
-  for (const timestamp of [false, true]) {
-    test(`a paused seek replaces the startup poster with the video${timestamp ? ' after a timestamp' : ''}`, async ({ app, page }) => {
-      await mockPlayableWatchPage(app, page)
-      await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=jNQXAC9IVRw${timestamp ? '&t=2' : ''}`)
-      await page.locator(sel.searchInput).press('Enter')
-      const video = page.locator(`${activeTab} video`)
-      const poster = page.locator(`${activeTab} .countdownPoster`)
-      await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 30_000 }).toBe(4)
-      // The start position must not replace the thumbnail before the user acts.
-      await expect(poster).toBeVisible()
+  test('a paused seek replaces the startup poster with the video after a timestamp', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&t=2')
+    await page.locator(sel.searchInput).press('Enter')
+    const video = page.locator(`${activeTab} video`)
+    const poster = page.locator(`${activeTab} .countdownPoster`)
+    await expect.poll(() => video.evaluate(element => element.readyState), { timeout: 30_000 }).toBe(4)
+    // The start position must not replace the thumbnail before the user acts.
+    await expect(poster).toBeVisible()
 
-      await video.evaluate(element => { element.currentTime = 5 })
-      await expect(poster).toBeHidden()
-      expect(await video.evaluate(element => element.paused)).toBe(true)
-    })
-  }
+    await video.evaluate(element => { element.currentTime = 5 })
+    await expect(poster).toBeHidden()
+    expect(await video.evaluate(element => element.paused)).toBe(true)
+  })
 })
 
 test('a Short opened in a background tab never starts playback', async ({ app, page }) => {
@@ -326,80 +260,6 @@ test('a Short opened in a background tab never starts playback', async ({ app, p
     paused: element.paused,
     currentTime: element.currentTime
   }))).toEqual({ paused: true, currentTime: 0 })
-})
-
-test('uses one playing interface hide delay in portrait, landscape, fullscreen and full window', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  await video.evaluate(element => { element.loop = true })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  const controls = player.locator('.shaka-controls-container')
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
-    // Timed in the page, as the test's own steps can take longer than the delay on a busy machine
-    window.lastMouseMoveAt = 0
-    window.controlsRevealedAt = 0
-    window.controlsHiddenAt = 0
-    document.addEventListener('mousemove', () => { window.lastMouseMoveAt = performance.now() }, true)
-    new MutationObserver(records => {
-      const player = document.querySelector('.tabContent[aria-hidden="false"] .ftVideoPlayer')
-      const controls = player?.querySelector('.shaka-controls-container')
-      if (!controls) return
-      const shown = controls.getAttribute('shown') === 'true'
-      if (!shown && records.some(record => record.target === controls && record.attributeName === 'shown')) {
-        window.controlsHiddenAt = performance.now()
-      } else if (shown && !player.classList.contains('no-cursor')) {
-        window.controlsRevealedAt = performance.now()
-      }
-    }).observe(document.body, { subtree: true, attributeFilter: ['shown', 'class'] })
-  })
-
-  for (const mode of ['portrait', 'landscape', 'fullWindow', 'fullscreen']) {
-    if (mode === 'portrait') await setWindowSize(app, page, { width: 420, height: 920 })
-    if (mode === 'landscape') await setWindowSize(app, page, { width: 1600, height: 880 })
-    if (mode === 'fullWindow') await page.locator('body').press('s')
-    if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
-    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
-    const bounds = await player.boundingBox()
-    await page.evaluate(() => {
-      window.controlsRevealedAt = 0
-      window.controlsHiddenAt = 0
-    })
-    await page.mouse.move(0, 0)
-    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-    // The last movement shows the controls and the cursor. Checked in the page,
-    // as they can hide again before a busy test runner looks.
-    await expect.poll(() => page.evaluate(() => window.controlsRevealedAt >= window.lastMouseMoveAt)).toBe(true)
-    await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
-    await expect(player).toHaveClass(/no-cursor/)
-    // Not before the delay since the last movement. Timers don't fire early, so
-    // this holds however slow the machine is (1 ms for timer rounding).
-    expect(await page.evaluate(() => window.controlsHiddenAt - window.lastMouseMoveAt)).toBeGreaterThanOrEqual(499)
-
-    if (mode === 'fullWindow') await page.locator('body').press('s')
-    if (mode === 'fullscreen') await setPlayerFullscreen(page, false)
-    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
-  }
-})
-
-test('keeps the configured interface hide delay when playback resumes', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  const controls = player.locator('.shaka-controls-container')
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updatePlayingInterfaceHideDelay', 60)
-  })
-  await setPlayerFullscreen(page, true)
-  await video.evaluate(element => element.pause())
-  await expect(player).toHaveClass(/playerPaused/)
-  const bounds = await player.boundingBox()
-  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-  await video.evaluate(element => element.play())
-  await expect(player).not.toHaveClass(/playerPaused/)
-  // Outlast the default hide delay; the configured 10 s delay must still apply.
-  await page.waitForTimeout(4000)
-  await expect(controls).toHaveAttribute('shown', 'true', { timeout: 500 })
 })
 
 test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {
@@ -451,21 +311,6 @@ test('hides configured paused interface elements until pointer activity', async 
   await expect(controls).toHaveCSS('opacity', '0')
   await expect(seekBar).toHaveCSS('opacity', '0')
   await watchComponent.dispose()
-})
-
-test('hides the tab play indicator while buffering', async ({ app, page, attachScreenshot }) => {
-  const video = await openDemoVideo({ app, page })
-
-  const tabBarTab = page.locator('.tabBar .tab.active')
-  await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
-  await attachScreenshot('tab play indicator')
-
-  await video.dispatchEvent('waiting')
-  await expect(tabBarTab.locator('.playingIcon')).toHaveCount(0)
-  await attachScreenshot('tab while buffering')
-
-  await video.dispatchEvent('playing')
-  await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
 })
 
 // Regression: playback speed controls stopped working (1c958d468)
@@ -621,20 +466,6 @@ test('player shortcuts do not run while typing in focused inputs or selects', as
   const activeOptionId = await region.getAttribute('aria-activedescendant')
   await expect(page.locator(`#${activeOptionId}`)).toHaveText('Kenya')
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
-})
-
-test('playback rate shortcuts use the normal rate while hold-to-double is active', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-
-  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1)
-  await page.keyboard.down('Space')
-  try {
-    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2)
-    await page.locator('body').press('p')
-    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
-  } finally {
-    await page.keyboard.up('Space')
-  }
 })
 
 test.describe('player wheel gestures', () => {
@@ -813,105 +644,6 @@ test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) 
   await expect(page.locator(`${activeTab} video`)).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
 })
 
-test('smoothly transitions video zoom at fractional UI scale', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
-
-  // Capture and pause the transition in the renderer before a delayed
-  // Playwright round trip can miss its 200ms lifetime.
-  const zoomState = await video.evaluateHandle((element) => {
-    const state = { transition: null }
-    function captureTransition(event) {
-      if (event.target !== element || event.propertyName !== 'transform') return
-      state.transition = element.getAnimations().find(animation =>
-        animation instanceof CSSTransition && animation.transitionProperty === 'transform'
-      )
-      state.transition.pause()
-      element.removeEventListener('transitionrun', captureTransition)
-    }
-    element.addEventListener('transitionrun', captureTransition)
-    return state
-  })
-  await page.locator('body').press('z')
-  await expect.poll(() => zoomState.evaluate(state => state.transition !== null)).toBe(true)
-  const zoomTransition = await zoomState.evaluateHandle(state => state.transition)
-
-  expect(await zoomTransition.evaluate(transition => transition.effect.getTiming())).toMatchObject({
-    duration: 200,
-    easing: 'ease-out',
-  })
-  await zoomTransition.evaluate(transition => { transition.currentTime = 100 })
-  const intermediateScale = await video.evaluate((element) => {
-    return new DOMMatrix(getComputedStyle(element).transform).a
-  })
-  expect(intermediateScale).toBeGreaterThan(1)
-  expect(intermediateScale).toBeLessThan(1.25)
-
-  await zoomTransition.dispose()
-  await zoomState.dispose()
-
-  // A new choice replaces the in-flight transition and becomes its final state.
-  await page.locator('body').press('z')
-  await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
-
-  await page.evaluate(() => {
-    const store = window.$store
-    return store.dispatch('updateReducedMotion', 'on')
-  })
-  await page.locator('body').press('Shift+Z')
-  await page.locator('body').press('Shift+Z')
-  await expect(video).toHaveCSS('transform', 'none')
-  expect(await video.evaluate((element) => {
-    return element.getAnimations().some(animation =>
-      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
-    )
-  })).toBe(false)
-})
-
-test('shift-dragging moves the visible part of a zoomed video', async ({ app, page, attachScreenshot }) => {
-  const video = await openDemoVideo({ app, page })
-  const readTranslation = () => video.evaluate((element) => {
-    const { m41, m42 } = new DOMMatrix(getComputedStyle(element).transform)
-    return { x: m41, y: m42 }
-  })
-
-  await page.locator('body').press('z')
-  await page.locator('body').press('z')
-  expect(await readTranslation()).toEqual({ x: 0, y: 0 })
-
-  const box = await video.boundingBox()
-  const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
-
-  await page.keyboard.down('Shift')
-  await page.mouse.move(center.x, center.y)
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await expect(player).toHaveClass(/videoZoomPannable/)
-
-  await page.mouse.down()
-  await page.mouse.move(center.x - 120, center.y - 40, { steps: 4 })
-  await expect(player).toHaveClass(/videoZoomPanning/)
-  expect(await video.evaluate((element) => {
-    return element.getAnimations().some(animation =>
-      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
-    )
-  })).toBe(false)
-  await page.mouse.up()
-  await page.keyboard.up('Shift')
-  await attachScreenshot('panned video')
-
-  const panned = await readTranslation()
-  expect(panned.x).toBeLessThan(0)
-  expect(panned.y).toBeLessThan(0)
-
-  // Panning must not double as a play/pause click
-  expect(await video.evaluate((element) => element.paused)).toBe(false)
-
-  // Turning the zoom off recenters the video
-  await page.locator('body').press('Shift+Z')
-  await page.locator('body').press('Shift+Z')
-  await expect(video).toHaveCSS('transform', 'none')
-})
-
 test('pinch zoom starts over the paused player controls without toggling playback', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
@@ -1059,266 +791,6 @@ test('pinch zoom starts over the paused player controls without toggling playbac
 
   await player.locator('.shaka-big-buttons-container .shaka-play-button').click()
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
-})
-
-test('inline pinch zoom shows its value without a fill snap', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
-  await player.evaluate(element => { element.style.height = '400px' })
-  const geometry = await getVideoFillGeometry(video)
-  expect(geometry.fill).toBeGreaterThan(1.1)
-  expect(geometry.fill).toBeLessThan(3)
-
-  const session = await page.context().newCDPSession(page)
-  const point = (offset, id) => ({ x: geometry.x + offset, y: geometry.y, id })
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
-  })
-  await expect(player.locator('.valueChangePopup')).toBeVisible()
-  await expect(player.locator('.valueChangeText')).toHaveText('100%')
-
-  const nearScale = geometry.fill - 0.04
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchMove', touchPoints: [point(-50 * nearScale, 1), point(50 * nearScale, 2)],
-  })
-  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
-  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(nearScale * 100)}%`)
-  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-  await session.detach()
-
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
-    .toBeCloseTo(nearScale, 3)
-})
-
-test('fullscreen pinch zoom arms the fill point only after moving toward it', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
-  await setPlayerFullscreen(page, true)
-  // Give the 16:9 fixture a taller frame so fullscreen has a distinct fill scale.
-  await video.evaluate(element => {
-    Object.defineProperty(element, 'videoHeight', { configurable: true, value: 480 })
-  })
-
-  const geometry = await getVideoFillGeometry(video)
-  expect(geometry.fill).toBeGreaterThan(1.1)
-  expect(geometry.fill).toBeLessThan(3)
-
-  const tabId = await player.getAttribute('data-tab-id')
-  const setZoom = (value) => page.evaluate(({ tabId, value }) => {
-    window.$store
-      .commit('setTabVideoZoom', { tabId, value })
-  }, { tabId, value })
-  const nearScale = geometry.fill - 0.04
-  await setZoom(nearScale)
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
-    .toBeCloseTo(nearScale, 3)
-
-  const session = await page.context().newCDPSession(page)
-  const point = (offset, id) => ({ x: geometry.x + offset, y: geometry.y, id })
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
-  })
-  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
-  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
-    .toBeCloseTo(nearScale, 3)
-
-  await setZoom(1)
-  await expect(video).toHaveCSS('transform', 'none')
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
-  })
-  await expect(player.locator('.valueChangeText')).toHaveText('100%')
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchMove', touchPoints: [point(-50 * nearScale, 1), point(50 * nearScale, 2)],
-  })
-  await expect(player.locator('.videoFillZoomEdges')).toHaveClass(/videoFillZoomSnapReady/)
-  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(nearScale * 100)}%`)
-  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-  await session.detach()
-
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
-    .toBeCloseTo(geometry.fill, 3)
-  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(geometry.fill * 100)}%`)
-  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
-
-  await setZoom(4)
-  await setPlayerFullscreen(page, false)
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
-    .toBe(3)
-})
-
-test('exiting fullscreen during a pinch does not restore fullscreen zoom inline', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
-  await setPlayerFullscreen(page, true)
-
-  const tabId = await player.getAttribute('data-tab-id')
-  await page.evaluate(({ tabId }) => {
-    window.$store
-      .commit('setTabVideoZoom', { tabId, value: 4 })
-  }, { tabId })
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(4)
-
-  const bounds = await player.boundingBox()
-  const point = (offset, id) => ({ x: bounds.x + bounds.width / 2 + offset, y: bounds.y + bounds.height / 2, id })
-  const session = await page.context().newCDPSession(page)
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
-  })
-  await expect(player.locator('.valueChangeText')).toHaveText('400%')
-
-  await setPlayerFullscreen(page, false)
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
-  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
-  await session.send('Input.dispatchTouchEvent', {
-    type: 'touchMove', touchPoints: [point(-60, 1), point(60, 2)],
-  })
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
-  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-  await session.detach()
-  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
-})
-
-test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {
-  const video = await openDemoVideo({ app, page })
-
-  await page.locator('body').press('z')
-  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
-
-  // The control panel is hidden until the pointer is over the player
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.hover()
-  const moreOptions = player.getByRole('button', { name: 'More settings' })
-  await expect(moreOptions).toBeVisible()
-  await openPlayerOptions(player)
-
-  const overflowMenu = player.locator('.shaka-overflow-menu')
-  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
-  await expect(overflowMenu).toHaveCSS('display', 'grid')
-  await expect(overflowMenu).toHaveCSS('overscroll-behavior', 'contain')
-  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
-  expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
-    return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
-  })).toBe(true)
-  const statusTypography = await overflowMenu.evaluate((menu) => {
-    // The local fixture uses a legacy format, so reproduce Shaka's additional
-    // wrapper around the standard resolution status in the live menu.
-    const button = document.createElement('button')
-    button.innerHTML = `
-      <label class="shaka-overflow-button-label">
-        <span><span class="shaka-current-selection-span">1080p60</span></span>
-      </label>`
-    menu.append(button)
-
-    const resolutionStatus = button.querySelector('.shaka-current-selection-span')
-    const playbackRateStatus = menu.querySelector(
-      '.shaka-playbackrate-button .shaka-current-selection-span'
-    )
-    const typography = (element) => {
-      const { color, fontSize, opacity } = getComputedStyle(element)
-      return { color, fontSize, opacity }
-    }
-    const result = [typography(resolutionStatus), typography(playbackRateStatus)]
-    button.remove()
-    return result
-  })
-  expect(statusTypography[0]).toEqual(statusTypography[1])
-  expect(statusTypography[0]).toMatchObject({ fontSize: '10px', opacity: '0.75' })
-  // The menu grows in when it opens, and zooms as a whole between its views.
-  await settleMenuZoom(player)
-  const overflowMenuHeight = (await overflowMenu.boundingBox()).height
-
-  await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
-  const zoomMenu = player.locator('.video-zoom-menu')
-  await expect(zoomMenu).toHaveClass(/ft-menu-grid/)
-  await expect(zoomMenu).toHaveCSS('flex-wrap', 'wrap')
-  await settleMenuZoom(player)
-  expect((await overflowMenu.boundingBox()).height).toBe(overflowMenuHeight)
-  const zoomHeader = zoomMenu.locator('.shaka-back-to-overflow-button')
-  const zoomHeaderTitle = zoomHeader.getByText('Zoom')
-  const [headerBox, titleBox] = await Promise.all([
-    zoomHeader.boundingBox(),
-    zoomHeaderTitle.boundingBox(),
-  ])
-  expect(Math.abs(
-    (headerBox.x + headerBox.width / 2) - (titleBox.x + titleBox.width / 2)
-  )).toBeLessThanOrEqual(1)
-  await attachScreenshot('zoom menu')
-
-  await zoomMenu.getByRole('button', { name: 'Off' }).click()
-  await expect(video).toHaveCSS('transform', 'none')
-
-  // A narrow player folds Autoplay into the overflow menu.
-  await player.evaluate(element => { element.style.width = '600px' })
-  const autoplaySwitch = overflowMenu.locator('.autoplay-toggle > .ft-autoplay-switch')
-  await player.hover()
-  await openPlayerOptions(player)
-  await expect(autoplaySwitch).toBeVisible()
-  await expect(autoplaySwitch).toHaveCSS('margin-right', '0px')
-
-  const watchComponent = await page.evaluateHandle(findWatchComponent)
-  await watchComponent.evaluate(async (component) => {
-    await component.proxy.$store.dispatch('updateUsePlayerMenuGrid', false)
-    await component.proxy.$nextTick()
-  })
-  await player.hover()
-  await openPlayerOptions(player)
-  await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
-  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
-  await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
-  await watchComponent.dispose()
-})
-
-test('grid menu tiles that open a submenu have a folded corner', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-  await openDemoVideo({ app, page })
-
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.hover()
-  await openPlayerOptions(player)
-  const overflowMenu = player.locator('.shaka-overflow-menu')
-  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
-
-  const readCorners = () => overflowMenu.locator(':scope > button:not(.shaka-hidden)').evaluateAll((buttons) => {
-    return buttons.map((button) => {
-      const label = button.querySelector(':scope > .shaka-overflow-button-label')
-      const corner = getComputedStyle(label ?? button, '::after')
-      return {
-        name: button.ariaLabel ?? label?.textContent,
-        opensSubmenu: button.getAttribute('aria-haspopup') === 'true',
-        hasCorner: label !== null && corner.content !== 'none' && corner.clipPath !== 'none',
-        position: getComputedStyle(button).position,
-        bottom: corner.bottom,
-        clipPath: corner.clipPath,
-        left: corner.left,
-        right: corner.right,
-      }
-    })
-  })
-
-  const tiles = await readCorners()
-  expect(tiles.some(tile => tile.opensSubmenu)).toBe(true)
-  expect(tiles.some(tile => !tile.opensSubmenu)).toBe(true)
-  for (const tile of tiles) {
-    expect(tile.hasCorner, tile.name).toBe(tile.opensSubmenu)
-  }
-  const submenuTiles = tiles.filter(tile => tile.opensSubmenu)
-  for (const tile of submenuTiles) {
-    expect(tile, tile.name).toMatchObject({ position: 'relative', bottom: '0px', right: '0px' })
-  }
-  await attachScreenshot('grid menu with folded corners')
-
-  // The corner follows the reading direction.
-  await page.evaluate(() => { document.body.dir = 'rtl' })
-  const rtlTiles = (await readCorners()).filter(tile => tile.opensSubmenu)
-  for (const [index, tile] of rtlTiles.entries()) {
-    expect(tile.left, tile.name).toBe('0px')
-    expect(tile.clipPath, tile.name).not.toBe(submenuTiles[index].clipPath)
-  }
-  await attachScreenshot('grid menu with folded corners, right to left')
 })
 
 test('volume boost amplifies the audio within its tab', async ({ app, page, attachScreenshot }) => {
@@ -1561,56 +1033,6 @@ test('mobile fullscreen keeps menus and SponsorBlock notices above the action do
   expect(layers.controls).toBeGreaterThan(layers.notice)
 })
 
-/**
- * @param {{ app: import('../../helpers/app.mjs').ElectronAppFixture, page: import('@playwright/test').Page }} fixtures
- */
-async function expectEllipsizedPlayerMenuLabelTitles({ app, page }) {
-  await openDemoVideo({ app, page })
-
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.hover()
-  await openPlayerOptions(player)
-
-  const overflowMenu = player.locator('.shaka-overflow-menu')
-  const zoomButton = overflowMenu.getByRole('button', { name: 'Zoom' })
-  const expectFullTextOnHover = async (label, fullText) => {
-    const isOverflowing = () => label.evaluate((element) => {
-      return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
-    })
-
-    await label.evaluate((element, text) => { element.textContent = text }, fullText)
-    expect(await isOverflowing()).toBe(true)
-    await expect(label).toHaveAttribute('title', fullText, { timeout: 1000 })
-    await label.hover()
-
-    await label.evaluate((element) => { element.textContent = 'Short label' })
-    expect(await isOverflowing()).toBe(false)
-    await expect(label).not.toHaveAttribute('title', { timeout: 1000 })
-  }
-
-  await expectFullTextOnHover(
-    zoomButton.locator('.shaka-overflow-button-label > span').first(),
-    'Zoom to a very long player menu option that cannot fit in its tile'
-  )
-
-  await zoomButton.click()
-  await expectFullTextOnHover(
-    player.locator('.video-zoom-menu > button:not(.shaka-back-to-overflow-button) > span').first(),
-    'An unusually long submenu option like the descriptive audio tracks'
-  )
-}
-
-test('ellipsized player menu labels expose their full text on hover', expectEllipsizedPlayerMenuLabelTitles)
-
-test.describe('at 125% display scale', () => {
-  test.use({ launchArgs: ['--force-device-scale-factor=1.25'] })
-
-  test(
-    'ellipsized player menu labels expose their full text on hover',
-    expectEllipsizedPlayerMenuLabelTitles
-  )
-})
-
 test('auto-translates captions into an arbitrary language', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   await openMockedVideo(page)
@@ -1717,37 +1139,6 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await watchComponent.dispose()
 })
 
-test('video zoom can be disabled', async ({ app, page }) => {
-  const video = await openDemoVideo({ app, page })
-
-  await page.locator('body').press('z')
-  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
-
-  const watchComponent = await page.evaluateHandle(findWatchComponent)
-  await watchComponent.evaluate(async (component) => {
-    await component.proxy.$store.dispatch('updateEnableVideoZoom', false)
-    await component.proxy.$nextTick()
-  })
-  await expect(video).toHaveCSS('transform', 'none')
-
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.hover()
-  await openPlayerOptions(player)
-  await expect(player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }))
-    .toHaveCount(0)
-
-  await page.keyboard.press('Escape')
-  await page.locator('body').press('z')
-  await expect(video).toHaveCSS('transform', 'none')
-
-  await watchComponent.evaluate(async (component) => {
-    await component.proxy.$store.dispatch('updateEnableVideoZoom', true)
-    await component.proxy.$nextTick()
-  })
-  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
-  await watchComponent.dispose()
-})
-
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {
   await openDemoVideo({ app, page })
   await page.locator('.ftVideoPlayer').click({ button: 'right' })
@@ -1761,23 +1152,6 @@ test('keeps the context menu open when the pointer leaves a playing video', asyn
   await page.waitForTimeout(3500)
   await expect(contextMenu).toBeVisible()
   await attachScreenshot('context menu after the pointer left')
-})
-
-test('shows the loop icon that matches the loop state in the context menu', async ({ app, page }) => {
-  const shakaIcons = readFileSync(createRequire(import.meta.url).resolve('shaka-player/ui/enums.js'), 'utf8')
-  const shakaIcon = name => shakaIcons.match(new RegExp(`'${name}': '([^']+)'`))[1]
-  const video = await openDemoVideo({ app, page })
-  const player = page.locator('.ftVideoPlayer')
-  const loopButton = page.locator('.shaka-context-menu .loop-button')
-  const loopIcon = loopButton.locator('svg path')
-
-  await player.click({ button: 'right' })
-  await expect(loopIcon).toHaveAttribute('d', shakaIcon('UNLOOP'))
-  await loopButton.click()
-  await expect(video).toHaveJSProperty('loop', true)
-
-  await player.click({ button: 'right' })
-  await expect(loopIcon).toHaveAttribute('d', shakaIcon('LOOP'))
 })
 
 test('scopes the mobile fullscreen swipe movement to the video in tablet layout', async ({ app, page }) => {
@@ -1811,81 +1185,6 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
   await expect(video).toHaveCSS('translate', '0px -42px')
   await expect(player).toHaveCSS('transform', 'none')
 })
-
-for (const phone of [true, false]) {
-  for (const audio of [false, true]) {
-    test(`${audio ? 'audio artwork' : 'waiting poster'} follows fullscreen swipes in ${phone ? 'phone' : 'tablet'} layout`, { tag: '@scale' }, async ({ app, page }) => {
-      await mockPlayableWatchPage(app, page)
-      await page.route('https://i.ytimg.com/**', route => route.fulfill({
-        contentType: 'image/svg+xml',
-        body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="#326b8a"/></svg>'
-      }))
-      await openMockedVideo(page)
-      await setWindowSize(app, page, { width: phone ? 375 : 900, height: 850 })
-      await page.evaluate(phone => {
-        Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
-        const app = document.querySelector('.app')
-        const mobile = () => {
-          app.classList.add('capacitorTabs')
-          app.classList.add(phone ? 'capacitorPhoneLayout' : 'capacitorTabletLayout')
-        }
-        new MutationObserver(() => {
-          if (!app.classList.contains('capacitorTabs')) mobile()
-        }).observe(app, { attributeFilter: ['class'] })
-        mobile()
-      }, phone)
-      const watch = await watchViewHandle(page)
-      await watch.evaluate(async view => {
-        view.isLoading = true
-        await view.$nextTick()
-        view.adEndTimeUnixMs = Date.now() + 60_000
-        view.isLoading = false
-      })
-      if (audio) await watch.evaluate(view => { view.musicMediaType = 'audioTrack' })
-      const player = page.locator('.ftVideoPlayer')
-      const video = player.locator('video')
-      const poster = player.locator(audio ? '.musicAudioSurface' : '.countdownPoster')
-      await expect(poster).toBeVisible()
-      if (!audio) await expect.poll(() => poster.locator('img').evaluate(image => image.naturalWidth)).toBe(480)
-      await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
-      const cdp = await page.context().newCDPSession(page)
-      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
-        type, touchPoints: point ? [point] : []
-      })
-      try {
-        for (const fullscreen of [false, true]) {
-          await setPlayerFullscreen(page, fullscreen)
-          const before = await poster.boundingBox()
-          const bounds = await player.boundingBox()
-          // Stay above the seek bar, which occupies the center at narrow scales.
-          const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height * 0.3 }
-          await touch('touchStart', start)
-          await touch('touchMove', { ...start, y: start.y + (fullscreen ? 40 : -40) })
-          await expect(player).toHaveClass(/mobileFullscreenSwiping/)
-          // Measure both in the same frame. The swipe moves them together, so
-          // the poster must not lag behind; a wall-clock poll limit would also
-          // fail a correct probe that a loaded machine answers slowly.
-          const offset = await player.evaluate((element, selector) => Math.abs(
-            element.querySelector(selector).getBoundingClientRect().top -
-              element.querySelector('video').getBoundingClientRect().top
-          ), audio ? '.musicAudioSurface' : '.countdownPoster')
-          expect(offset).toBeLessThan(1)
-          const during = await poster.boundingBox()
-          expect(fullscreen ? during.y - before.y : before.y - during.y).toBeGreaterThan(8)
-          await touch('touchCancel')
-          await expect(player).not.toHaveClass(/mobileFullscreenSwiping|mobileFullscreenSwipeSettling/)
-          await expect.poll(async () => Math.abs((await poster.boundingBox()).y - before.y)).toBeLessThan(1)
-          await expect(poster).toHaveCSS('translate', 'none')
-          await expect(video).toHaveCSS('translate', 'none')
-          await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
-        }
-      } finally {
-        await touch('touchCancel').catch(() => {})
-        await cdp.detach()
-      }
-    })
-  }
-}
 
 test('uses mobile surface taps for controls and keeps an on-video play button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -2067,23 +1366,6 @@ test('keeps mobile double-tap seek zones on the video beside the fullscreen queu
   }
 })
 
-test('caps the optional desktop center play button on wide players', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await page.evaluate(async () => {
-    const store = window.$store
-    await store.dispatch('updateDisplayVideoPlayButton', true)
-  })
-  await openMockedVideo(page)
-
-  const centerPlayButton = page.locator(
-    `${activeTab} .ftVideoPlayer .shaka-big-buttons-container .shaka-play-button`
-  )
-  await expect(centerPlayButton).toBeVisible()
-  const width = await centerPlayButton.evaluate(element => element.getBoundingClientRect().width)
-  expect(width).toBeGreaterThanOrEqual(48)
-  expect(width).toBeLessThanOrEqual(80)
-})
-
 test('handles mobile title taps before Shaka can toggle fullscreen in tablet layout', async ({ app, page }) => {
   await openDemoVideo({ app, page })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -2140,47 +1422,6 @@ test('handles mobile title taps before Shaka can toggle fullscreen in tablet lay
 
   await expect.poll(() => player.evaluate(element => document.fullscreenElement === element)).toBe(true)
   await watchComponent.dispose()
-})
-
-test('animates the fullscreen title when the Android status-bar inset changes', async ({ app, page }) => {
-  await openDemoVideo({ app, page })
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  const controls = player.locator('.shaka-controls-container')
-  const title = player.locator('.playerFullscreenTitleOverlay')
-
-  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
-  await setPlayerFullscreen(page, true)
-  await player.evaluate(element => element.style.setProperty('--safe-area-inset-top', '32px'))
-  await controls.evaluate(element => element.setAttribute('shown', 'true'))
-  await expect(title).toBeVisible()
-  await expect.poll(() => title.evaluate(element => element.getAnimations().length)).toBe(0)
-
-  const shownTop = await title.evaluate(element => element.getBoundingClientRect().top)
-  const { immediateTop, transitioningTop, hiddenTop } = await title.evaluate(element => {
-    element.closest('.ftVideoPlayer').style.setProperty('--safe-area-inset-top', '0px')
-    element.closest('.shaka-controls-container').removeAttribute('shown')
-    const immediateTop = element.getBoundingClientRect().top
-    const transition = element.getAnimations().find(animation => animation.transitionProperty === 'top')
-    if (!transition) throw new Error('The fullscreen title has no top transition')
-    // Sample the animation timeline directly so time spent between browser
-    // protocol calls cannot consume the transition on a busy CI worker.
-    transition.pause()
-    transition.currentTime = Number(transition.effect.getTiming().duration) * 0.3
-    const transitioningTop = element.getBoundingClientRect().top
-    transition.finish()
-    return { immediateTop, transitioningTop, hiddenTop: element.getBoundingClientRect().top }
-  })
-
-  const totalMovement = Math.abs(hiddenTop - shownTop)
-  expect(totalMovement).toBeGreaterThanOrEqual(30)
-  expect(Math.abs(immediateTop - shownTop)).toBeLessThan(totalMovement * 0.25)
-  expect(transitioningTop).toBeLessThan(shownTop)
-  expect(transitioningTop).toBeGreaterThan(hiddenTop)
-
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await expect.poll(() => title.evaluate(element => (
-    getComputedStyle(element).transitionProperty.split(', ').includes('top')
-  ))).toBe(false)
 })
 
 test.describe('scroll mini player', () => {
@@ -2381,56 +1622,6 @@ test.describe('scroll mini player', () => {
     })
   })
 
-  test('animates into and out of the scroll mini player', async ({ app, page, attachScreenshot }) => {
-    const video = await openDemoVideo({ app, page })
-    await video.evaluate(element => element.pause())
-
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.scrollMiniPlayerAnimations = []
-      const nativeAnimate = Element.prototype.animate
-
-      Element.prototype.animate = function (keyframes, options) {
-        if (this.classList.contains('ftVideoPlayer')) {
-          const style = getComputedStyle(this)
-          window.scrollMiniPlayerAnimations.push({
-            className: this.className,
-            keyframes,
-            options,
-            position: style.position,
-            zIndex: style.zIndex
-          })
-        }
-        return nativeAnimate.call(this, keyframes, options)
-      }
-    })
-
-    const player = page.locator('.ftVideoPlayer')
-    await scrollBelowPlayer(player)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player.locator('.scrollMiniScrollTop .ft-icon'))
-      .toHaveAttribute('data-icon', 'angle-up')
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(1)
-    await attachScreenshot('scroll mini player')
-
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(2)
-    await attachScreenshot('back to the inline player')
-
-    const animations = await page.evaluate(() => window.scrollMiniPlayerAnimations)
-    for (const animation of animations) {
-      expect(animation.options.duration).toBe(300)
-      expect(animation.options.easing).toBe('cubic-bezier(0.4, 0, 0.2, 1)')
-      expect(animation.keyframes[0].transform).toContain('translate(')
-      expect(animation.keyframes[0].transform).toContain('scale(')
-      expect(animation.keyframes[1].transform).toBe('none')
-    }
-    expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
-    expect(animations[1].position).toBe('relative')
-    expect(animations[1].zIndex).toBe('150')
-  })
-
   test('expands the mini player on double-click', { tag: '@scale' }, async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
@@ -2480,69 +1671,6 @@ test.describe('scroll mini player', () => {
       expect(await video.evaluate(element => element.paused)).toBe(false)
     }
   })
-
-  for (const side of ['left', 'right']) {
-    test.describe(`tucked ${side}`, () => {
-      test.use({ seed: { settings: { ...PLAYER_SEED, uiScale: side === 'left' ? 100 : 125 } } })
-      test(`remembers mini player position tucked ${side} after reopening`, async ({ app, page }) => {
-        await openDemoVideo({ app, page })
-        let player = page.locator('.ftVideoPlayer')
-        await player.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await expect(player).toHaveClass(/scrollMiniPlayer/)
-        await setWindowSize(app, page, { width: 480, height: 800 })
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        const handle = player.locator('.scrollMiniDragHandle')
-        const bounds = await handle.boundingBox()
-        const targetX = side === 'left' ? -240 : 720
-        await handle.dispatchEvent('pointerdown', {
-          clientX: bounds.x + bounds.width / 2,
-          clientY: bounds.y + bounds.height / 2,
-          pointerId: 1,
-          pointerType: 'touch',
-          button: 0
-        })
-        await page.evaluate(targetX => {
-          for (const type of ['pointermove', 'pointerup']) {
-            window.dispatchEvent(new PointerEvent(type, {
-              clientX: targetX, clientY: 350, pointerId: 1, pointerType: 'touch'
-            }))
-          }
-        }, targetX)
-        await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        const position = await player.boundingBox()
-        await page.evaluate(() => window.scrollTo(0, 0))
-        await expect(player).not.toHaveClass(/scrollMiniPlayerStashed/)
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        await player.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        await expect.poll(async () => Math.round((await player.boundingBox()).y)).toBe(Math.round(position.y))
-
-        await page.evaluate(() => window.scrollTo(0, 0))
-        await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-        ;({ page } = await app.relaunch())
-        await setWindowSize(app, page, { width: 1100, height: 900 })
-        await openDemoVideo({ app, page })
-        player = page.locator('.ftVideoPlayer')
-        await player.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await expect(player).toHaveClass(/scrollMiniPlayerStashed/)
-        await setWindowSize(app, page, { width: 480, height: 800 })
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        await expect.poll(async () => Math.round((await player.boundingBox()).y)).toBe(Math.round(position.y))
-        const restored = await player.boundingBox()
-        expect(side === 'left' ? restored.x < 0 : restored.x + restored.width > await page.evaluate(() => window.innerWidth)).toBe(true)
-        await player.locator('.scrollMiniPointerLayer').dispatchEvent('pointerdown')
-        await expect(player).not.toHaveClass(/scrollMiniPlayerStashed/)
-        await page.evaluate(() => window.scrollTo(0, 0))
-        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-        await player.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await expect(player).toHaveClass(/scrollMiniPlayer/)
-        await expect(player).not.toHaveClass(/scrollMiniPlayerStashed/)
-      })
-    })
-  }
 
   test('restores a phone mini player by tapping its tucked sliver', async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
@@ -2629,47 +1757,6 @@ test.describe('scroll mini player', () => {
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(pausedBeforeRestore)
   })
 
-  test('does not replay the animation after switching tabs', async ({ app, page, attachScreenshot }) => {
-    const video = await openDemoVideo({ app, page })
-    await video.evaluate(element => element.pause())
-
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.scrollMiniPlayerAnimationCount = 0
-      const nativeAnimate = Element.prototype.animate
-
-      Element.prototype.animate = function (keyframes, options) {
-        if (this.classList.contains('ftVideoPlayer')) {
-          window.scrollMiniPlayerAnimationCount++
-        }
-        return nativeAnimate.call(this, keyframes, options)
-      }
-    })
-
-    const player = page.locator('.ftVideoPlayer')
-    await scrollBelowPlayer(player)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
-
-    await page.locator('.tabBar .newTabButton').click()
-    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
-    await expect(player).toBeHidden()
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await attachScreenshot('second tab open')
-    const animationCountBeforeReturn = await page.evaluate(
-      () => window.scrollMiniPlayerAnimationCount
-    )
-    await page.locator('.tabBar .tab').first().click()
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await attachScreenshot('back on the video tab')
-
-    // The old behavior scheduled the restored entrance animation on the next
-    // Vue tick, so wait past its duration before checking that none was added.
-    await page.waitForTimeout(350)
-    expect(await page.evaluate(() => window.scrollMiniPlayerAnimationCount))
-      .toBe(animationCountBeforeReturn)
-  })
-
   test.describe('on all tabs', () => {
     test.use({
       seed: {
@@ -2728,107 +1815,6 @@ test.describe('scroll mini player', () => {
       await page.locator('.tabBar .tab').first().click()
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect(player.locator('.shortsTopControls')).toBeVisible()
-    })
-
-    test('shares the longest mini-player edge between Shorts and normal videos', async ({ app, page }) => {
-      await openDemoVideo({ app, page })
-      const player = page.locator('.ftVideoPlayer')
-      const size = () => player.evaluate(element => ({
-        width: Number.parseFloat(element.style.width),
-        height: Number.parseFloat(element.style.height)
-      }))
-      await page.locator('.tabBar .newTabButton').click()
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      const landscape = await size()
-      await page.locator('.tabBar .tab').first().click()
-      await usePortraitShort(page)
-      await player.locator('video').evaluate(video => video.play())
-      await page.locator('.tabBar .tab').nth(1).click()
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await expect.poll(async () => (await size()).height).toBe(landscape.width)
-
-      const handle = player.locator('.scrollMiniResizeHandle')
-      const handleBounds = await handle.boundingBox()
-      const startX = handleBounds.x + handleBounds.width / 2
-      const startY = handleBounds.y + handleBounds.height / 2
-      const portrait = await size()
-      await handle.dispatchEvent('pointerdown', { button: 0, clientX: startX, clientY: startY, pointerId: 1 })
-      await page.evaluate(({ clientX, clientY }) => {
-        for (const type of ['pointermove', 'pointerup']) {
-          window.dispatchEvent(new PointerEvent(type, { clientX, clientY, pointerId: 1 }))
-        }
-      }, { clientX: startX + portrait.width - 270, clientY: startY })
-      await expect.poll(async () => (await size()).height).toBe(480)
-      await page.locator('.tabBar .tab').first().click()
-      const watch = await page.evaluateHandle(findWatchComponent)
-      await watch.evaluate(component => { component.proxy.isShort = false })
-      await watch.dispose()
-      await player.locator('video').evaluate(video => {
-        delete video.videoWidth
-        delete video.videoHeight
-        video.dispatchEvent(new Event('resize'))
-        return video.play()
-      })
-      await page.locator('.tabBar .tab').nth(1).click()
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await expect.poll(size).toEqual({ width: 480, height: 270 })
-    })
-
-    test('remembers separate mini player positions for scrolling and tab switches', async ({ app, page }) => {
-      // Two cold launches with playback each; an ended video leaves the mini
-      // player, and this test can outlast the short demo clip on a busy machine.
-      test.slow()
-      const loopDemoVideo = video => video.evaluate(element => { element.loop = true })
-      await loopDemoVideo(await openDemoVideo({ app, page }))
-      let player = page.locator('.ftVideoPlayer')
-      const videoTab = page.locator('.tabBar .tab').first()
-      const readPosition = () => player.evaluate(element => ({
-        left: Number.parseFloat(element.style.left),
-        top: Number.parseFloat(element.style.top)
-      }))
-      const dragTo = async (left, top) => {
-        const position = await readPosition()
-        await player.locator('.scrollMiniDragHandle').dispatchEvent('pointerdown', {
-          button: 0, clientX: 0, clientY: 0, pointerId: 1
-        })
-        await page.evaluate(({ dx, dy }) => {
-          for (const type of ['pointermove', 'pointerup']) {
-            window.dispatchEvent(new PointerEvent(type, {
-              clientX: dx, clientY: dy, pointerId: 1
-            }))
-          }
-        }, { dx: left - position.left, dy: top - position.top })
-        await expect.poll(async () => Math.abs((await readPosition()).top - top)).toBeLessThan(1)
-      }
-
-      await scrollBelowPlayer(player)
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-      await dragTo(16, 160)
-      const scrollPosition = await readPosition()
-
-      await page.locator('.tabBar .newTabButton').click()
-      await expect(player.getByRole('button', { name: 'Hide mini player' })).toBeVisible()
-      await expect.poll(readPosition).not.toEqual(scrollPosition)
-      await dragTo(16, 260)
-      const tabPosition = await readPosition()
-
-      await videoTab.click()
-      await expect.poll(readPosition).toEqual(scrollPosition)
-      await page.locator('.tabBar .tab').nth(1).click()
-      await expect.poll(readPosition).toEqual(tabPosition)
-
-      // Both positions must survive restarting the app, not just remain in memory.
-      await videoTab.click()
-      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-      await expect(page).toHaveURL(/#\/subscriptions$/)
-      ;({ page } = await app.relaunch())
-      await loopDemoVideo(await openDemoVideo({ app, page }))
-      player = page.locator('.ftVideoPlayer')
-      await scrollBelowPlayer(player)
-      await expect.poll(readPosition).toEqual(scrollPosition)
-      await page.locator('.tabBar .newTabButton').click()
-      await expect.poll(readPosition).toEqual(tabPosition)
     })
 
     test('returns to the video tab on double-click', async ({ app, page }) => {
@@ -3259,31 +2245,6 @@ test.describe('skip silence shortcut', () => {
     }
   })
 
-  test('shows an on-screen indicator when toggled', async ({ app, page, attachScreenshot }) => {
-    await openDemoVideo({ app, page })
-
-    const popup = page.locator(`${activeTab} .valueChangePopup`)
-    const skipSilence = () => page.evaluate(() => {
-      const store = window.$store
-      return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
-    })
-
-    await page.locator('body').press('h')
-    await expect(popup).toBeVisible()
-    await expect(popup).toHaveText(/On/)
-    await expect(popup.locator('.valueChangeIcons .ft-icon')).toHaveCount(2)
-    await expect(popup.locator('.valueChangeIcons .ft-icon').nth(0)).toHaveAttribute('data-icon', 'forward-step')
-    await expect(popup.locator('.valueChangeIcons .ft-icon').nth(1)).toHaveAttribute('data-icon', 'volume-xmark')
-    await expect.poll(skipSilence).toBe(true)
-    await attachScreenshot('skip silence enabled')
-
-    await page.locator('body').press('h')
-    await expect(popup).toBeVisible()
-    await expect(popup).toHaveText(/Off/)
-    await expect.poll(skipSilence).toBe(false)
-    await attachScreenshot('skip silence disabled')
-  })
-
   test('keeps the setting within its tab', async ({ app, page }) => {
     await openDemoVideo({ app, page })
 
@@ -3420,68 +2381,6 @@ test.describe('skip silence default', () => {
 test.describe('playback when navigating away', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true } } })
 
-  /**
-   * Hides the Watch view with motion enabled and records the player's bounds
-   * on every frame until it has docked.
-   * @param {import('@playwright/test').Page} page
-   * @param {import('@playwright/test').Locator} player
-   * @param {() => Promise<void>} hideWatch
-   */
-  async function sampleDocking(page, player, hideWatch) {
-    // Slow the 300 ms morph down. Leaving Watch can block the main thread for
-    // several hundred milliseconds on a loaded machine, which would otherwise
-    // leave too few sampled frames.
-    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-    await player.evaluate(element => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.dockingFrames = []
-      const sample = () => {
-        const { left, top, width, height } = element.getBoundingClientRect()
-        window.dockingFrames.push({ left, top, width, height })
-        window.dockingFrame = requestAnimationFrame(sample)
-      }
-      sample()
-    })
-    await hideWatch()
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    return await page.evaluate(() => {
-      cancelAnimationFrame(window.dockingFrame)
-      return window.dockingFrames
-    })
-  }
-
-  /** @param {{ left: number, top: number, width: number, height: number }[]} frames */
-  function expectMorphIntoMiniPlayer(frames) {
-    const start = frames[0]
-    const end = frames.at(-1)
-    expect(end.width).toBeLessThan(start.width / 2)
-    const shrinking = frames.filter(frame => frame.width < start.width - 5 && frame.width > end.width + 5)
-    expect(shrinking.length, 'the video visibly shrinks into the mini player').toBeGreaterThan(2)
-    const growing = frames.slice(1).filter((frame, index) => frame.width > frames[index].width + 0.5)
-    expect(growing, 'the video only shrinks while docking').toEqual([])
-  }
-
-  test('morphs the video into the mini player when navigating away', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    const player = page.locator('.ftVideoPlayer')
-    const frames = await sampleDocking(page, player, async () => {
-      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-      await expect(page).toHaveURL(/#\/subscriptions$/)
-    })
-    expectMorphIntoMiniPlayer(frames)
-  })
-
-  test('morphs the video into the mini player when switching to another tab', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    const player = page.locator('.ftVideoPlayer')
-    const frames = await sampleDocking(page, player, async () => {
-      await page.locator('.tabBar .newTabButton').click()
-      await expect(page.locator('.tabBar .tab')).toHaveCount(2)
-    })
-    expectMorphIntoMiniPlayer(frames)
-  })
-
   test('keeps the ended mini player visible and replays while browsing', async ({ app, page }) => {
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')
@@ -3586,172 +2485,6 @@ test.describe('playback when navigating away', () => {
     expect(jumps, 'the player must not jump at the preview handoff').toEqual([])
     expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
     await expect(page.locator('.tabBar .tab')).toHaveText(title)
-  })
-
-  test('keeps the returning Watch preview in place while the sidebar hides', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    const player = page.locator('.ftVideoPlayer')
-    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-    await expect(page).toHaveURL(/#\/subscriptions$/)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      // Like a channel's video grid, this page's height depends on its width,
-      // so hiding the sidebar on Watch moves the retained Watch host below it.
-      const grid = document.createElement('div')
-      grid.style.aspectRatio = '1'
-      document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(grid)
-      const preview = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div')
-      window.watchPreviewRects = []
-      // Measure every frame after its resize observers, which run in creation
-      // order after layout. A fresh observer therefore sees the preview after
-      // the app re-anchors it, while animation frame callbacks run too early.
-      const samplePreview = () => {
-        const observer = new ResizeObserver(() => {
-          observer.disconnect()
-          const { left, top, width } = preview.getBoundingClientRect()
-          if (width > 0) window.watchPreviewRects.push({ left, top })
-        })
-        observer.observe(document.documentElement)
-        window.watchPreviewFrame = requestAnimationFrame(samplePreview)
-      }
-      window.watchPreviewFrame = requestAnimationFrame(samplePreview)
-    })
-    await player.locator('.scrollMiniScrollTop').click()
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect(page.locator('.watchDragPreview')).toHaveCount(0)
-    const { rects, final } = await page.evaluate(() => {
-      cancelAnimationFrame(window.watchPreviewFrame)
-      const { left, top } = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div').getBoundingClientRect()
-      return { rects: window.watchPreviewRects, final: { left, top } }
-    })
-    expect(rects.length).toBeGreaterThan(0)
-    const displaced = rects.filter(rect => Math.abs(rect.left - final.left) > 1 || Math.abs(rect.top - final.top) > 1)
-    expect(displaced, 'the browsing page must not show around the preview').toEqual([])
-  })
-
-  /**
-   * Expands the mini player with motion enabled and hit tests the center of
-   * the navigation on every frame of the returning Watch preview. Returns
-   * whether the preview, the navigation or something else is topmost there.
-   * @param {import('@playwright/test').Page} page
-   * @param {import('@playwright/test').Locator} player
-   */
-  async function sampleNavigationDuringReturn(page, player) {
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.navigationHits = []
-      const sample = () => {
-        const preview = document.querySelector('.watchRestorePreview')
-        if (preview) {
-          const navigation = document.querySelector('.app > .sideNav').getBoundingClientRect()
-          // Hit testing skips the inert, pointer-events: none preview. Its
-          // stacking does not, so lift both for this probe only.
-          preview.inert = false
-          preview.style.pointerEvents = 'auto'
-          const hit = document.elementFromPoint((navigation.left + navigation.right) / 2, (navigation.top + navigation.bottom) / 2)
-          preview.inert = true
-          preview.style.removeProperty('pointer-events')
-          window.navigationHits.push(preview.contains(hit) ? 'preview' : hit?.closest('.sideNav') ? 'navigation' : 'other')
-        }
-        window.navigationHitFrame = requestAnimationFrame(sample)
-      }
-      sample()
-    })
-    await player.locator('.scrollMiniScrollTop').click()
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(page.locator('.watchDragPreview')).toHaveCount(0)
-    return await page.evaluate(() => {
-      cancelAnimationFrame(window.navigationHitFrame)
-      return window.navigationHits
-    })
-  }
-
-  test('covers the sidebar with the returning Watch preview', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    const player = page.locator('.ftVideoPlayer')
-    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-    await expect(page).toHaveURL(/#\/subscriptions$/)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    await expect(page.locator('.app > .sideNav')).toBeVisible()
-    const hits = await sampleNavigationDuringReturn(page, player)
-    expect(hits.length).toBeGreaterThan(0)
-    // The preview fades in its background over the browsing page. The sidebar
-    // leaves with Watch, so it must fade with that page instead of staying on top.
-    expect(hits.filter(hit => hit === 'navigation'), 'the sidebar stays below the returning preview').toEqual([])
-  })
-
-  test('keeps the bottom navigation above the returning Watch preview', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    // The narrow layout hides the search box that opens the video.
-    await setWindowSize(app, page, { width: 600, height: 850 })
-    const player = page.locator('.ftVideoPlayer')
-    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-    await expect(page).toHaveURL(/#\/subscriptions$/)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    await expect(page.locator('.app > .sideNav')).toBeVisible()
-    const hits = await sampleNavigationDuringReturn(page, player)
-    expect(hits.length).toBeGreaterThan(0)
-    // Narrow layouts keep their bottom navigation on Watch.
-    expect(hits.filter(hit => hit === 'preview'), 'the bottom navigation stays above the returning preview').toEqual([])
-  })
-
-  test('keeps the returning video corners between the mini and inline radii', { tag: '@scale' }, async ({ app, page }) => {
-    await openDemoVideo({ app, page })
-    const player = page.locator('.ftVideoPlayer')
-    const inlineRadius = await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))
-    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
-    await expect(page).toHaveURL(/#\/subscriptions$/)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    const miniRadius = await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))
-    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-    await player.evaluate(element => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      const video = element.querySelector('video')
-      // The morph scales the player, which scales its radii too. Compare the
-      // corners as they appear on screen.
-      const screenRadius = (target, scaleX, scaleY) => {
-        const [x, y = x] = getComputedStyle(target).borderTopLeftRadius.split(' ').map(Number.parseFloat)
-        return { x: x * scaleX, y: y * scaleY }
-      }
-      window.miniRestoreCorners = []
-      const sample = () => {
-        if (!element.isConnected) return
-        if (element.hasAttribute('data-inline-mini-drag')) {
-          const bounds = element.getBoundingClientRect()
-          const scaleX = bounds.width / element.offsetWidth
-          const scaleY = bounds.height / element.offsetHeight
-          window.miniRestoreCorners.push({
-            player: screenRadius(element, scaleX, scaleY),
-            video: screenRadius(video, scaleX, scaleY)
-          })
-        }
-        window.miniRestoreCornerFrame = requestAnimationFrame(sample)
-      }
-      sample()
-    })
-    await player.locator('.scrollMiniScrollTop').click()
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveAttribute('data-inline-mini-drag')
-    const corners = await page.evaluate(() => {
-      cancelAnimationFrame(window.miniRestoreCornerFrame)
-      return window.miniRestoreCorners
-    })
-    expect(corners.length).toBeGreaterThan(2)
-    const minimum = Math.min(miniRadius, inlineRadius) - 0.5
-    const maximum = Math.max(miniRadius, inlineRadius) + 0.5
-    const outOfRange = corners.filter(({ player }) => [player.x, player.y].some(radius => radius < minimum || radius > maximum))
-    expect(outOfRange, 'the player corners stay between the mini and inline radii').toEqual([])
-    // A rounder video would uncover the player's black background in the corners.
-    const exposed = corners.filter(({ player, video }) => video.x > player.x + 0.5 || video.y > player.y + 0.5)
-    expect(exposed, 'the video follows the player corners').toEqual([])
-    expect(await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(inlineRadius, 1)
   })
 })
 

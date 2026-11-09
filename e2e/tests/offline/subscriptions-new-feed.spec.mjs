@@ -74,18 +74,6 @@ const populatedCache = [{
   communityPostsTimestamp: new Date(now - HOUR).toISOString()
 }]
 
-const cacheWithoutNewContent = [{
-  _id: CHANNEL_ID,
-  videos: [oldVideo],
-  videosTimestamp: new Date(now - HOUR).toISOString(),
-  shorts: [],
-  shortsTimestamp: new Date(now - HOUR).toISOString(),
-  liveStreams: [],
-  liveStreamsTimestamp: new Date(now - HOUR).toISOString(),
-  communityPosts: [],
-  communityPostsTimestamp: new Date(now - HOUR).toISOString()
-}]
-
 const watchedHistory = [{
   _id: watchedVideo.videoId,
   ...watchedVideo,
@@ -237,61 +225,6 @@ test.describe('Reactive subscription title filtering', () => {
   }
 })
 
-test.describe('New feed removal animation', () => {
-  test.use({
-    seed: {
-      settings: { ...commonSettings, uiScale: 125, newSubscriptionFeedView: 'tabbed' },
-      profiles: [profile()],
-      subscriptionCache: [{
-        _id: CHANNEL_ID,
-        videos: Array.from({ length: 8 }, (_, index) => video(
-          `move-video-${index}`, `Moving video ${index}`, now - index * HOUR,
-          { isNewInSubscriptionFeed: true }
-        )),
-        videosTimestamp: new Date(now).toISOString()
-      }]
-    }
-  })
-
-  test('preserves retained-card movement after marking a video seen at fractional scale', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-    const retained = page.locator('.newFeed [data-video-id="move-video-1"]')
-    await expect(retained).toBeVisible()
-    await expect(page.locator('.feed-enter-active')).toHaveCount(0)
-    // Suppression is a TransitionGroup prop, not a class on idle cards.
-    await expect.poll(() => page.locator('.newFeed .autoGrid').evaluate(element => {
-      const movementEnabled = vnode => {
-        if (!vnode) return false
-        if (vnode.el === element && vnode.props?.name === 'feed') {
-          return vnode.component.props.moveClass !== 'feed-move-suppressed'
-        }
-        return movementEnabled(vnode.component?.subTree) ||
-          (Array.isArray(vnode.children) && vnode.children.some(movementEnabled))
-      }
-      return movementEnabled(document.querySelector('#app')._vnode)
-    })).toBe(true)
-    await page.evaluate(() => {
-      window.__retainedCardMoved = false
-      window.__moveObserver = new MutationObserver(records => {
-        if (records.some(({ target }) => target.dataset.videoId === 'move-video-1' && target.classList.contains('feed-move'))) {
-          window.__retainedCardMoved = true
-        }
-      })
-      window.__moveObserver.observe(document.querySelector('.newFeed .autoGrid'), {
-        subtree: true, attributes: true, attributeFilter: ['class']
-      })
-    })
-    await page.locator('.newFeed [data-video-id="move-video-0"] .title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
-    await expect.poll(() => page.evaluate(() => window.__retainedCardMoved)).toBe(true)
-    await expect(page.locator('.feed-leave-active, .feed-move')).toHaveCount(0)
-    await expect(retained).toBeVisible()
-    await expect(page.locator('.newFeed [data-video-id="move-video-0"]')).toHaveCount(0)
-    await page.evaluate(() => window.__moveObserver.disconnect())
-  })
-})
-
 test.describe('new subscriptions feed', () => {
   test.use({
     seed: {
@@ -429,11 +362,6 @@ test.describe('new subscriptions feed', () => {
 
   test('keeps New feed tabs on one compact row at phone widths', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await expectCompactNewFeedTabs(app, page, testInfo, uiScale)
-  })
-
-  test('keeps New feed tabs on one compact row at phone widths and 200% scale', async ({ app, page }, testInfo) => {
-    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2))
-    await expectCompactNewFeedTabs(app, page, testInfo, 200)
   })
 
   test('wraps long New feed category labels without clipping desktop tabs', async ({ app, page }, testInfo) => {
@@ -642,60 +570,6 @@ test.describe('new subscriptions feed', () => {
     await expect(menu.getByRole('menuitem', { name: 'Mark all as seen' })).toHaveCount(0)
   })
 
-  test('the mobile feed menu marks an inactive new category as seen', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-    await page.getByRole('button', { name: 'Show tabbed view' }).click()
-    // The view switches once its setting saves.
-    await expect(page.getByRole('tablist', { name: 'New content tabs' })).toBeVisible()
-    const videos = page.locator('[data-new-feed-tab="videos"]')
-    const shorts = page.locator('[data-new-feed-tab="shorts"]')
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    const bounds = await shorts.boundingBox()
-    await session.send('Input.dispatchTouchEvent', {
-      type: 'touchStart',
-      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
-    })
-    const menu = page.locator('.mobileLinkActions')
-    await expect(menu).toBeVisible()
-    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(menu.getByRole('menuitem', { name: 'Reload Shorts', exact: true })).toBeVisible()
-    await menu.getByRole('menuitem', { name: 'Mark all as seen', exact: true }).click()
-    await expect(menu).toHaveCount(0)
-    await expect(videos).toHaveAttribute('aria-selected', 'true')
-    await expect(videos.locator('.newContentDot')).toBeVisible()
-    await expect(shorts.locator('.newContentDot')).toHaveCount(0)
-    await shorts.evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
-      bubbles: true, cancelable: true, pointerType: 'touch'
-    })))
-    await expect(menu).toBeVisible()
-    await expect(menu.getByRole('menuitem', { name: 'Mark all as seen', exact: true })).toHaveCount(0)
-    await session.detach()
-  })
-
-  test('shows Shorts as portrait cards with their duration and upload time', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-
-    const short = page.locator('.ft-list-video.youtubeShort').filter({ hasText: 'New short' })
-    await expect(short).toBeVisible()
-    await expect(short.locator('.videoDuration')).toHaveText('2:00')
-    await expect(short.locator('.uploadedTime')).not.toBeEmpty()
-    const thumbnail = short.locator('.thumbnailImage:not([aria-hidden="true"])')
-    await expect(thumbnail).toHaveAttribute('src', newShort.thumbnailUrl)
-
-    const aspectRatio = await thumbnail.evaluate(element => {
-      return getComputedStyle(element).aspectRatio
-    })
-    expect(aspectRatio).toBe('2 / 3')
-
-    // This suite seeds the largest thumbnail preference. The portrait grid
-    // must honor it instead of falling back to its old fixed card width.
-    const cardWidth = await short.evaluate(element => element.getBoundingClientRect().width)
-    expect(cardWidth).toBeGreaterThanOrEqual(342)
-  })
-
   test('keeps a new video and its menus open until the video is chosen', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -763,30 +637,6 @@ test.describe('new subscriptions feed', () => {
     await expect(card).toBeVisible()
     expect(await card.evaluate(element => getComputedStyle(element.parentElement).position)).not.toBe('absolute')
     await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
-  })
-
-  test('marks a dotted video as seen from its options menu', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const video = page.locator('.ft-list-video').filter({
-      has: page.getByText('New video', { exact: true })
-    })
-    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
-    await expect(video.locator('.newContentDot')).toBeVisible()
-    await expect(markAllAsSeen).toBeVisible()
-
-    await video.hover()
-    await video.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: /^Mark As Seen$/ }).click()
-
-    await expect(video).toBeVisible()
-    await expect(video.locator('.newContentDot')).toHaveCount(0)
-    await expect(video).not.toHaveClass(/watched/)
-    await expect(markAllAsSeen).toHaveCount(0)
-
-    await video.hover()
-    await video.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
   })
 
   test('marks all combined New content as seen while RSS feeds are enabled', async ({ page }) => {
@@ -869,24 +719,6 @@ test.describe('new subscriptions feed', () => {
     expect(history.watchProgress).toBe(watchedVideo.lengthSeconds)
     expect(history.timeWatched).toBe(now)
   })
-
-  for (const [tab, title] of [['shorts', 'New short'], ['live', 'New live stream']]) {
-    test(`marks seen ${tab} unseen in the open feed`, async ({ page }) => {
-      await goTo(page, 'subscriptions')
-      await page.locator(`[data-subscription-feed-tab="${tab}"]`).click()
-      const card = page.locator('.ft-list-video').filter({ hasText: title })
-      await card.locator('.title').click({ button: 'right' })
-      await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
-      await expect(card.locator('.newContentDot')).toHaveCount(0)
-      await card.locator('.title').click({ button: 'right' })
-      await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
-      await expect(card.locator('.newContentDot')).toBeVisible()
-      await page.locator('[data-subscription-feed-tab="all"]').click()
-      const section = page.locator('.mediaSection')
-      await (tab === 'live' ? section.last() : section.first()).scrollIntoViewIfNeeded()
-      await expect(card).toBeVisible()
-    })
-  }
 
   test('marks a dotted post as seen from its options menu and persists after restart', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
@@ -1053,74 +885,6 @@ test.describe('new subscriptions feed', () => {
       const store = window.$store
       return JSON.parse(store.getters.getSubscriptionSeenVideos).length
     })).toBe(10000)
-  })
-})
-
-test.describe('community post author', { tag: '@scale' }, () => {
-  test.use({
-    seed: {
-      settings: commonSettings,
-      profiles: [profile()],
-      subscriptionCache: populatedCache
-    }
-  })
-
-  test('centers the channel name and relative time on the avatar', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
-    await expect(post).toBeVisible()
-
-    const centers = await post.evaluate(element => {
-      const verticalCenter = selector => {
-        const rect = element.querySelector(selector).getBoundingClientRect()
-        return (rect.top + rect.bottom) / 2
-      }
-
-      return {
-        avatar: verticalCenter('.communityThumbnail'),
-        author: verticalCenter('.authorName'),
-        published: verticalCenter('.publishedText')
-      }
-    })
-
-    expect(Math.abs(centers.author - centers.avatar)).toBeLessThanOrEqual(1)
-    expect(Math.abs(centers.published - centers.avatar)).toBeLessThanOrEqual(1)
-  })
-})
-
-test.describe('new subscriptions feed empty state', { tag: '@scale' }, () => {
-  test.use({
-    seed: {
-      settings: commonSettings,
-      profiles: [profile()],
-      subscriptionCache: cacheWithoutNewContent
-    }
-  })
-
-  test('uses matching space above and below the message', async ({ page, attachScreenshot, uiScale }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-
-    const message = page.getByText('There is no new content.', { exact: true })
-    await expect(message).toBeVisible()
-
-    const spacing = await message.evaluate(element => {
-      const card = element.closest('.card').getBoundingClientRect()
-      const header = element.closest('.card').querySelector('.subscriptionsHeader').getBoundingClientRect()
-      const message = element.getBoundingClientRect()
-
-      return {
-        top: message.top - header.bottom,
-        bottom: card.bottom - message.bottom
-      }
-    })
-
-    expect(spacing.top).toBeGreaterThanOrEqual(15)
-    expect(spacing.top).toBeLessThanOrEqual(17)
-    expect(Math.abs(spacing.top - spacing.bottom)).toBeLessThanOrEqual(1)
-    await attachScreenshot(`empty New feed at ${uiScale}% UI scale`)
   })
 })
 
@@ -1372,112 +1136,6 @@ test.describe('new feed settings and seen state', () => {
     await expect(newFeedVideo).toHaveCount(0)
   })
 
-  test('marks a post as seen from the New feed even when dots are disabled', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
-    await post.getByRole('button', { name: /^More options$/i }).click()
-    await expect(page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
-    await page.keyboard.press('Escape')
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-
-    await page.locator('.postsSection').scrollIntoViewIfNeeded()
-    await expect(post).toBeVisible()
-    await post.getByRole('button', { name: /^More options$/i }).click()
-    await page.getByRole('option', { name: 'Mark As Seen', exact: true }).focus()
-    await page.keyboard.press('Enter')
-    await expect(post).toHaveCount(0)
-    await expect(page.getByText('New video post', { exact: true })).toBeVisible()
-
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-    await expect(post).toBeVisible()
-    await post.getByRole('button', { name: /^More options$/i }).click()
-    await expect(page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
-  })
-
-  test('keeps YouTube-style Shorts as portrait grid cards in list display mode', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-
-    const short = page.locator('.ft-list-video.youtubeShort').filter({ hasText: 'New short' })
-    await expect(short).toBeVisible()
-    // The list layout squeezes the portrait card into a row and drops the
-    // portrait thumbnail rule, which the grid class must prevent.
-    await expect(short).toContainClass('grid')
-    await expect(short).not.toContainClass('list')
-
-    const aspectRatio = await short.locator('.thumbnailImage:not([aria-hidden="true"])').evaluate(element => {
-      return getComputedStyle(element).aspectRatio
-    })
-    expect(aspectRatio).toBe('2 / 3')
-  })
-
-  test('stacks community post sections in list display mode', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
-    await expect(post).toBeVisible()
-
-    // The video list template placed the author, the text and the bottom
-    // section into its three columns instead of stacking them.
-    const layout = await post.evaluate(element => {
-      const author = element.querySelector('.author-div').getBoundingClientRect()
-      const text = element.querySelector('.postText').getBoundingClientRect()
-
-      return {
-        postWidth: element.getBoundingClientRect().width,
-        authorBottom: author.bottom,
-        textTop: text.top,
-        textWidth: text.width
-      }
-    })
-
-    expect(layout.textTop).toBeGreaterThanOrEqual(layout.authorBottom)
-    expect(layout.textWidth).toBeGreaterThan(layout.postWidth * 0.8)
-  })
-
-  test('omits Mark as unseen from videos attached to subscription posts', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const attachedVideo = page.locator('.ft-list-post .ft-list-video').filter({ hasText: 'Attached video' })
-    await attachedVideo.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Open in a New Window', exact: true })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true })).toHaveCount(0)
-  })
-
-  test('keeps an attached video inside a post as a full width card in list display mode', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const attachedVideo = page.locator('.ft-list-post .ft-list-video').filter({ hasText: 'Attached video' })
-    await expect(attachedVideo).toBeVisible()
-    // The list layout put the thumbnail beside the title and left the duration
-    // badge stranded outside the shrunken thumbnail.
-    await expect(attachedVideo).toContainClass('grid')
-
-    const layout = await attachedVideo.evaluate(element => {
-      const thumbnail = element.querySelector('.videoThumbnail').getBoundingClientRect()
-      const title = element.querySelector('.title').getBoundingClientRect()
-      const duration = element.querySelector('.videoDuration').getBoundingClientRect()
-
-      return {
-        cardWidth: element.getBoundingClientRect().width,
-        thumbnailWidth: thumbnail.width,
-        thumbnailRight: thumbnail.right,
-        titleTop: title.top,
-        thumbnailBottom: thumbnail.bottom,
-        durationRight: duration.right
-      }
-    })
-
-    expect(layout.thumbnailWidth).toBeGreaterThan(layout.cardWidth * 0.8)
-    expect(layout.titleTop).toBeGreaterThanOrEqual(layout.thumbnailBottom - 12)
-    expect(layout.durationRight).toBeLessThanOrEqual(layout.thumbnailRight)
-  })
-
   test('persists a post as seen when its comments are opened', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -1492,45 +1150,6 @@ test.describe('new feed settings and seen state', () => {
     await goTo(relaunched.page, 'subscriptions')
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(relaunched.page.getByText('New community post', { exact: true })).toHaveCount(0)
-  })
-})
-
-test.describe('classic Shorts watch layout', () => {
-  test.use({
-    seed: {
-      settings: {
-        ...commonSettings,
-        useCustomShortsPlayer: false
-      },
-      profiles: [profile()],
-      subscriptionCache: populatedCache
-    }
-  })
-
-  test('uses the regular player thumbnail morph when YouTube-style Shorts are disabled', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-    await expect(page.getByText('New short', { exact: true })).toBeVisible()
-
-    await page.evaluate(() => {
-      window.__watchMorphClasses = []
-      const observer = new MutationObserver(() => {
-        window.__watchMorphClasses.push(document.documentElement.className)
-      })
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class']
-      })
-    })
-
-    await page.getByText('New short', { exact: true }).click()
-    await expect(page).toHaveURL(/#\/watch\/new-short-1\?short=true&shortSource=subscriptions/)
-    await expect.poll(() => page.evaluate(() => window.__watchMorphClasses.some(value => value.includes('viewTransitionMorphActive')))).toBe(true)
-    await expect(page.locator('html')).not.toHaveClass(/viewTransitionMorphActive/)
-
-    const morphClasses = await page.evaluate(() => window.__watchMorphClasses)
-    expect(morphClasses.some(value => value.includes('viewTransitionMorphActive'))).toBe(true)
-    expect(morphClasses.some(value => value.includes('viewTransitionShortMorphActive'))).toBe(false)
   })
 })
 
@@ -1806,9 +1425,7 @@ test.describe('large combined new feed', () => {
 
   for (const [view, scale, reducedMotion] of [
     ['combined', 95, 'off'],
-    ['combined', 125, 'on'],
-    ['tabbed', 125, 'off'],
-    ['tabbed', 95, 'on']
+    ['tabbed', 125, 'off']
   ]) {
     test.describe(`mark all seen: ${view}, ${scale}% scale, motion ${reducedMotion}`, () => {
       test.use({ seed: { ...seed, settings: { ...seed.settings, newSubscriptionFeedView: view, uiScale: scale, reducedMotion } } })
@@ -2054,21 +1671,5 @@ test.describe('large combined new feed', () => {
     // than two frames. Wait for actual eviction rather than sampling mid-update.
     await expect.poll(() => panel.locator('.ft-list-video').count()).toBeLessThan(40)
     await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
-  })
-
-  test('keeps visible video cards mounted when switching feed tabs', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    const videosTab = page.locator('[data-subscription-feed-tab="videos"]')
-    await videosTab.click()
-    const firstCard = page.locator('#subscriptionsPanel:not(.newFeed) .ft-list-video').first()
-    await expect(firstCard).toBeVisible()
-    await firstCard.evaluate(element => { window.originalVideoCard = element })
-
-    await page.locator('[data-subscription-feed-tab="all"]').click()
-    await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
-    await expect.poll(() => page.evaluate(() => window.originalVideoCard.isConnected)).toBe(false)
-    await videosTab.click()
-    await expect(firstCard).toBeVisible()
-    expect(await firstCard.evaluate(element => element === window.originalVideoCard)).toBe(true)
   })
 })

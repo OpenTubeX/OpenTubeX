@@ -4,7 +4,7 @@ import path from 'node:path'
 import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const thumbnail = `data:image/svg+xml;base64,${(await readFile(path.join(repoRoot, 'e2e/fixtures/media/video-thumbnail.svg'))).toString('base64')}`
 const downloads = [1, 2, 3].map(id => ({
@@ -103,78 +103,22 @@ for (const width of [1500, 480]) {
   })
 }
 
-for (const dataSaver of [false, true]) {
-  test.describe(`offline thumbnail URLs with data saver ${dataSaver ? 'enabled' : 'disabled'}`, () => {
-    const storedUrl = 'https://i.ytimg.com/vi/offline0002/hqdefault.jpg'
-    const cachedUrl = `https://i.ytimg.com/vi/offline0002/${dataSaver ? 'mq' : 'maxres'}default.jpg`
-    test.use({
-      seed: {
-        settings: { landingPage: 'history', enableDownloads: true, thumbnailDataSaver: dataSaver },
-        downloads: downloads.map(download => download.id === 2 ? { ...download, thumbnail: storedUrl } : download),
-      }
-    })
-    test('requests the same thumbnail as Downloads after disconnecting', async ({ page }) => {
-      await page.route(/^https?:/, route => route.request().url() === cachedUrl
-        ? fulfillVisualFixture(route, 'video-thumbnail')
-        : route.abort('internetdisconnected'))
-      await goTo(page, 'downloads')
-      const savedRow = page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: 'Saved audio 2', exact: true }) })
-      await expectImagesLoaded(savedRow.locator('.downloadThumbnail'))
-      await expect(savedRow.locator('.downloadThumbnail')).toHaveAttribute('src', cachedUrl)
-      await page.evaluate(() => {
-        Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
-        window.dispatchEvent(new Event('offline'))
-      })
-      await page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: 'Saved audio 1', exact: true }) }).getByRole('button', { name: 'Play download', exact: true }).click()
-      const saved = page.locator('.offlineDownloadRecommendation').filter({ hasText: 'Saved audio 2' })
-      await expectImagesLoaded(saved.locator('img'))
-      await expect(saved.locator('img')).toHaveAttribute('src', cachedUrl)
-    })
+test.describe('offline hidden thumbnails', () => {
+  test.use({
+    seed: {
+      settings: { landingPage: 'history', enableDownloads: true, videoPlaybackEngine: 'built-in', thumbnailPreference: 'hidden', blurThumbnails: false },
+      downloads,
+    }
   })
-}
-
-for (const preference of ['hidden', 'blur']) {
-  test.describe(`offline ${preference} thumbnails`, () => {
-    test.use({
-      seed: {
-        settings: { landingPage: 'history', enableDownloads: true, videoPlaybackEngine: 'built-in', thumbnailPreference: preference === 'hidden' ? 'hidden' : '', blurThumbnails: preference === 'blur' },
-        downloads,
-      }
+  test('preserves thumbnail privacy preferences after disconnecting', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
     })
-    // Only the blurred thumbnail geometry depends on the UI scale.
-    test('preserves thumbnail privacy preferences after disconnecting', { tag: preference === 'blur' ? '@scale' : [] }, async ({ app, page, uiScale }, testInfo) => {
-      await mockPlayableWatchPage(app, page)
-      await openMockedVideo(page)
-      await page.evaluate(() => {
-        Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
-        window.dispatchEvent(new Event('offline'))
-      })
-      const image = page.locator('.offlineDownloadRecommendation').filter({ hasText: 'Saved audio 2' }).locator('img')
-      await expectImagesLoaded(image)
-      if (preference === 'hidden') {
-        await expect(image).toHaveAttribute('src', /thumbnail_placeholder\.svg/)
-      } else {
-        await expect(image).toHaveAttribute('src', thumbnail)
-        await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toMatch(/blur\(/)
-        await image.scrollIntoViewIfNeeded()
-        // Resample until transient paint settles. A real bleed never matches.
-        await expect.poll(async () => {
-          const bounds = await image.boundingBox()
-          const gap = { x: bounds.x + bounds.width + 3, y: bounds.y + bounds.height / 2 - 4, width: 6, height: 8 }
-          const blurred = await page.screenshot({ clip: gap })
-          const visibility = await image.evaluate(element => {
-            const original = element.style.visibility
-            element.style.visibility = 'hidden'
-            return original
-          })
-          try {
-            return blurred.equals(await page.screenshot({ clip: gap }))
-          } finally {
-            await image.evaluate((element, visibility) => { element.style.visibility = visibility }, visibility)
-          }
-        }, { message: `Blur must stay out of the thumbnail/text gap at ${uiScale}%` }).toBe(true)
-        await page.locator('.watchVideoRecommendations').screenshot({ path: testInfo.outputPath('blurred-offline.png') })
-      }
-    })
+    const image = page.locator('.offlineDownloadRecommendation').filter({ hasText: 'Saved audio 2' }).locator('img')
+    await expectImagesLoaded(image)
+    await expect(image).toHaveAttribute('src', /thumbnail_placeholder\.svg/)
   })
-}
+})

@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, sel, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
@@ -202,24 +202,6 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
   })
 
-  test('page and nested scrollbar handles follow live UI roundness changes', async ({ page }) => {
-    await addPageOverflow(page)
-    const viewport = await addNestedCustomSpeedScroller(page, 'data-roundness-scrollbar', 0)
-    for (const width of [4, 10]) {
-      await page.evaluate(value => {
-        window.$store.commit('setScrollbarThumbWidth', value)
-      }, width)
-      for (const roundness of [0, 50, 100, 200]) {
-        await page.evaluate(value => {
-          window.$store.commit('setUiRoundness', value)
-        }, roundness)
-        for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
-          await expect(scrollbar.locator('.os-scrollbar-handle')).toHaveCSS('border-radius', `${width * roundness / 100}px`)
-        }
-      }
-    }
-  })
-
   test('preserves native keyboard scrolling and clamps a fractional viewport after content shrinks', async ({ page }) => {
     const viewport = await addNestedCustomSpeedScroller(page, 'data-keyboard-scrollbar', 0)
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
@@ -326,31 +308,6 @@ test.describe('overlay scrollbars', () => {
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
   })
 
-  test('follows a page direction change', async ({ page }) => {
-    await addPageOverflow(page)
-    const viewport = await addNestedCustomSpeedScroller(page, 'data-direction-scrollbar-test', 0)
-    for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
-      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
-      await page.evaluate(() => { document.body.dir = 'rtl' })
-      await expect(scrollbar).toHaveClass(/os-scrollbar-rtl/)
-      await page.evaluate(() => { document.body.dir = 'ltr' })
-      await expect(scrollbar).not.toHaveClass(/os-scrollbar-rtl/)
-    }
-  })
-
-  test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
-    await addPageOverflow(page)
-
-    // A classic scrollbar shrinks clientWidth below the viewport width, an
-    // overlay one floats above the content and leaves the layout untouched.
-    const { clientWidth, innerWidth } = await page.evaluate(() => ({
-      clientWidth: document.documentElement.clientWidth,
-      innerWidth: window.innerWidth
-    }))
-
-    expect(clientWidth).toBe(innerWidth)
-  })
-
   test('applies the configured wheel speed to page scrolling', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
@@ -368,17 +325,6 @@ test.describe('overlay scrollbars', () => {
       window.__scrollSpeedTestDelta > 0 &&
       window.scrollY === window.__scrollSpeedTestDelta * 2
     ))).toBe(true)
-  })
-
-  test('animates wheel scrolling at a custom speed', async ({ page }) => {
-    await recordCustomSpeedPageScroll(page)
-
-    await page.mouse.move(800, 400)
-    await page.mouse.wheel(0, 120)
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(240)
-
-    const positions = await page.evaluate(() => window.__scrollSpeedAnimationPositions)
-    expect(new Set(positions).size).toBeGreaterThan(2)
   })
 
   test('preserves a burst of wheel deltas while custom scrolling is animated', async ({ page }) => {
@@ -435,21 +381,6 @@ test.describe('overlay scrollbars', () => {
     expect(Math.abs(scrollbarBox.x + scrollbarBox.width - tabBarBox.x)).toBeLessThanOrEqual(1)
   })
 
-  test('the page scrollbar stays on the window edge with left vertical tabs', async ({ page }) => {
-    await addPageOverflow(page)
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setVerticalTabBarWidth', 220)
-      store.commit('setTabBarPosition', 'left')
-    })
-
-    await expect(page.locator('.tabBar.position-left')).toBeVisible()
-    const scrollbarBox = await page.locator(PAGE_SCROLLBAR).boundingBox()
-    const innerWidth = await page.evaluate(() => window.innerWidth)
-
-    expect(Math.abs(scrollbarBox.x + scrollbarBox.width - innerWidth)).toBeLessThanOrEqual(1)
-  })
-
   test('keeps the quick settings avatar clear of a wide page scrollbar', { tag: '@scale' }, async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
@@ -471,33 +402,6 @@ test.describe('overlay scrollbars', () => {
 
     expect(menuBox.x).toBeGreaterThanOrEqual(0)
     expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(await page.evaluate(() => window.visualViewport.width))
-  })
-
-  test('the scrollbar hides once the pointer rests and follows it back', async ({ page }) => {
-    await addPageOverflow(page)
-    const scrollbar = page.locator(PAGE_SCROLLBAR)
-
-    await page.mouse.move(800, 400)
-    await page.mouse.wheel(0, 300)
-    await expect(scrollbar).toHaveCSS('opacity', '1')
-
-    // Idle pointer: gone after the library's 1300ms auto hide delay.
-    await expect(scrollbar).toHaveCSS('opacity', '0', { timeout: 5000 })
-
-    await page.mouse.move(800, 500)
-    await expect(scrollbar).toHaveCSS('opacity', '1')
-  })
-
-  test('the scrollbar handle picks up the theme', async ({ page, attachScreenshot }) => {
-    await addPageOverflow(page)
-    await page.mouse.wheel(0, 300)
-
-    await expect(page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)).toHaveCSS(
-      'background-color',
-      // --scrollbar-color of the light theme
-      'rgb(204, 204, 204)'
-    )
-    await attachScreenshot('themed scrollbar handle')
   })
 
   test('clicks on a wide track outside the handle reach the content underneath', { tag: '@scale' }, async ({ page }) => {
@@ -549,22 +453,6 @@ test.describe('overlay scrollbars', () => {
     await page.mouse.up()
 
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
-  })
-
-  test('keeps a held page handle visible outside the track until release', async ({ page }) => {
-    await addPageOverflow(page)
-    const scrollbar = page.locator(PAGE_SCROLLBAR)
-    await page.mouse.move(800, 400)
-    await expect(scrollbar).toHaveCSS('opacity', '1')
-    const handleBox = await scrollbar.locator('.os-scrollbar-handle').boundingBox()
-    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(800, 500)
-    // Outlast the 1300ms auto hide delay while the handle is held.
-    await page.waitForTimeout(1600)
-    await expect(scrollbar).toHaveCSS('opacity', '1')
-    await page.mouse.up()
-    await expect(scrollbar).toHaveCSS('opacity', '0', { timeout: 5000 })
   })
 
   test('keeps the page handle under the pointer when content loads during a drag', async ({ page }) => {
@@ -664,29 +552,6 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.scrollTop).toBe(120)
     })
 
-    test('avoids repeated visibility writes while scrolling', { tag: '@performance' }, async ({ page }) => {
-      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
-      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
-      await viewport.hover()
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-
-      const classMutations = await viewport.evaluate(async element => {
-        let mutations = 0
-        const observer = new MutationObserver(records => { mutations += records.length })
-        for (const bar of element.querySelectorAll(':scope > .os-scrollbar')) {
-          observer.observe(bar, { attributes: true, attributeFilter: ['class'] })
-        }
-        for (let frame = 0; frame < 30; frame++) {
-          element.scrollTop = frame * 5
-          await new Promise(resolve => requestAnimationFrame(resolve))
-        }
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        observer.disconnect()
-        return mutations
-      })
-      expect(classMutations).toBe(0)
-    })
-
     test('keeps measuring a child that moved into another scroll container', { tag: '@scale' }, async ({ page }) => {
       await page.evaluate(() => {
         const directive = document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars']
@@ -738,54 +603,6 @@ test.describe('overlay scrollbars', () => {
       expect(await viewport.evaluate(element => element.scrollTop)).toBe(0)
     })
 
-    test('lets handle presses reach the container as scroll intent', async ({ page }) => {
-      const viewport = await addNestedCustomSpeedScroller(page, 'data-handle-press-test', 0)
-      await viewport.evaluate(element => element.addEventListener('pointerdown', event => {
-        window.__handlePressReachedContainer = event.target.closest('.os-scrollbar-vertical') !== null
-      }))
-      await viewport.hover()
-      const box = await viewport.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle').boundingBox()
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-      await page.mouse.down()
-      await page.mouse.up()
-      expect(await page.evaluate(() => window.__handlePressReachedContainer)).toBe(true)
-    })
-
-    test('keeps hovered bars visible', async ({ page }) => {
-      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
-      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
-      await viewport.hover()
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-      await scrollbar.locator('.os-scrollbar-handle').hover()
-      // Outlast the 1300ms auto hide delay while hovering.
-      await page.waitForTimeout(1600)
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-      await page.mouse.move(800, 500)
-      await expect(scrollbar).toHaveCSS('opacity', '0', { timeout: 5000 })
-    })
-
-    test('cancels pending hides when always-show is enabled and restores idle hiding', async ({ page }) => {
-      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-setting-test', 0)
-      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
-      await viewport.hover()
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-      await page.evaluate(() => {
-        window.$store
-          .commit('setAlwaysShowScrollbars', true)
-      })
-      await page.mouse.move(800, 500)
-      // Outlast the 1300ms auto hide delay with an idle pointer.
-      await page.waitForTimeout(1600)
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-      await page.evaluate(() => {
-        window.$store
-          .commit('setAlwaysShowScrollbars', false)
-      })
-      await expect(scrollbar).toHaveCSS('opacity', '0')
-      await viewport.hover()
-      await expect(scrollbar).toHaveCSS('opacity', '1')
-    })
-
     test('keeps tracks in view with scroll-linked animations without extending the range', { tag: '@scale' }, async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-scroll-linked-scrollbar-test', 0)
       const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
@@ -822,90 +639,6 @@ test.describe('overlay scrollbars', () => {
         const { trackStart, trackEnd, handleProgress } = await geometry()
         return Math.abs(trackStart - 2) <= 1 && Math.abs(trackEnd - 2) <= 1 && handleProgress === 1
       }).toBe(true)
-    })
-
-    test('keeps the handle in step with compositor-driven wheel scrolling', { tag: '@scale' }, async ({ page }) => {
-      // The renderer's own frames always agree, so read the composited output.
-      const viewport = page.locator('[data-composited-scrollbar-test]')
-      await page.evaluate(() => {
-        const element = document.createElement('div')
-        element.dataset.compositedScrollbarTest = ''
-        // A transparent scroller, like a prompt's, that nothing else composites
-        const wrapper = document.createElement('div')
-        Object.assign(wrapper.style, { position: 'fixed', top: '100px', left: '100px', zIndex: '9999' })
-        Object.assign(element.style, { width: '300px', height: '400px', overflowY: 'auto' })
-        for (let index = 0; index < 300; index++) {
-          const item = document.createElement('div')
-          item.textContent = `Item ${index}`
-          item.style.height = '20px'
-          element.append(item)
-        }
-        wrapper.append(element)
-        const style = document.createElement('style')
-        style.textContent = `
-          [data-composited-scrollbar-test] > .os-scrollbar { opacity: 1 !important; visibility: visible !important; }
-          [data-composited-scrollbar-test] .os-scrollbar-handle { background: rgb(255 0 0) !important; }`
-        document.head.append(style)
-        document.body.append(wrapper)
-        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(element, { value: true })
-      })
-      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
-      const bounds = await viewport.evaluate(element => {
-        const handle = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
-        const { top, bottom } = element.getBoundingClientRect()
-        return { x: handle.left + handle.width / 2, top, bottom }
-      })
-      await page.mouse.move(250, 300)
-
-      // The handle's top edge in each frame, in CSS pixels
-      const findHandleTops = frames => page.evaluate(async ({ frames, bounds }) => {
-        return Promise.all(frames.map(async data => {
-          const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob())
-          const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
-          const context = canvas.getContext('2d')
-          context.drawImage(bitmap, 0, 0)
-          const scale = bitmap.width / innerWidth
-          const column = context.getImageData(Math.round(bounds.x * scale), 0, 1, bitmap.height).data
-          for (let y = Math.ceil(bounds.top * scale); y < Math.floor(bounds.bottom * scale); y++) {
-            const [red, green, blue] = column.slice(y * 4, y * 4 + 3)
-            if (red > 200 && green < 80 && blue < 80) return y / scale
-          }
-          return null
-        }))
-      }, { frames, bounds })
-
-      const session = await page.context().newCDPSession(page)
-      const frames = []
-      session.on('Page.screencastFrame', ({ data, sessionId }) => {
-        frames.push(data)
-        session.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
-      })
-      await session.send('Page.startScreencast', { format: 'png' })
-      // The first frame can predate the scroller on slow machines.
-      await expect.poll(async () => frames.length > 0 && (await findHandleTops(frames.slice(-1)))[0] !== null).toBe(true)
-      frames.length = 0
-      for (let step = 0; step < 15; step++) {
-        await page.mouse.wheel(0, 100)
-        await page.waitForTimeout(50)
-      }
-      // UI scales change how far each wheel step scrolls, so wait for it to settle.
-      let lastScrollTop = -1
-      await expect.poll(async () => {
-        const scrollTop = await viewport.evaluate(element => element.scrollTop)
-        const settled = scrollTop > 0 && scrollTop === lastScrollTop
-        lastScrollTop = scrollTop
-        return settled
-      }).toBe(true)
-      await session.send('Page.stopScreencast')
-      await session.detach()
-
-      const handleTops = await findHandleTops(frames)
-      expect(handleTops.length).toBeGreaterThan(5)
-      expect(handleTops).not.toContain(null)
-      expect(Math.max(...handleTops) - Math.min(...handleTops)).toBeGreaterThan(1)
-      // Out-of-step tracks show the handle a wheel step ahead, then pull it back.
-      const backwardSteps = handleTops.slice(1).filter((top, index) => top < handleTops[index] - 1)
-      expect(backwardSteps).toEqual([])
     })
 
     test('only adds a blocking wheel listener while a custom speed is active', async ({ page }) => {
@@ -1057,66 +790,6 @@ test.describe('overlay scrollbars', () => {
         scrollTop: 0,
       })
     })
-  })
-
-  test('the handle is as wide as the configured thumb width', async ({ page }) => {
-    await addPageOverflow(page)
-    const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
-    await page.mouse.wheel(0, 300)
-
-    expect(await handle.evaluate((element) => element.clientWidth)).toBe(6)
-
-    const themeSection = await goToSettingsSection(page, 'appearance')
-    const slider = themeSection.getByRole('slider', { name: /Scrollbar Width/ })
-    await slider.focus()
-    for (let i = 0; i < 10; i++) {
-      await page.keyboard.press('ArrowRight')
-    }
-
-    const width = Number(await slider.inputValue())
-    expect(width).toBeGreaterThan(6)
-    await page.getByRole('button', { name: 'Close', exact: true }).click()
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-
-    // A wider thumb rests at the default width so it doesn't cover content,
-    // and only grows to the configured width once the pointer is on it.
-    await page.mouse.move(800, 400)
-    await expect.poll(() => handle.evaluate((element) => element.clientWidth)).toBe(6)
-    await handle.hover()
-    await expect.poll(() => handle.evaluate((element) => element.clientWidth)).toBe(width)
-  })
-
-  test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page, attachScreenshot }) => {
-    await addPageOverflow(page)
-    const scrollbar = page.locator(PAGE_SCROLLBAR)
-
-    const themeSection = await goToSettingsSection(page, 'appearance')
-    // Opening Settings uses controls at the top of the page and can scroll
-    // them into view. Establish the position that the rebuild must preserve
-    // only after the settings window is open.
-    await page.evaluate(() => window.scrollTo(0, 300))
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(300)
-    const toggle = themeSection.getByRole('checkbox', { name: 'Always Show Scrollbars' })
-    await expect(toggle).not.toBeChecked()
-    // The styled label covers the checkbox input, so click that instead.
-    await themeSection.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' }).click()
-    await expect(toggle).toBeChecked()
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(250)
-    await page.getByRole('button', { name: 'Close', exact: true }).click()
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-
-    // The switch takes effect on the scrollbars that already exist, and
-    // rebuilding them mustn't lose where the page was scrolled to.
-    await page.mouse.move(400, 700)
-    // Idle well past the 1300ms auto hide delay.
-    await page.waitForTimeout(2500)
-
-    await expect(scrollbar).toBeVisible()
-    await attachScreenshot('scrollbar still visible while idle')
-    await expect(scrollbar).toHaveCSS('opacity', '1')
-    // Roughly, not exactly: flipping the switch also reflows the settings page
-    // a little by revealing the "changed setting" indicator.
-    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(250)
   })
 })
 

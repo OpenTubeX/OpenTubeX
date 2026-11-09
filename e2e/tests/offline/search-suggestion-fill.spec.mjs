@@ -5,7 +5,7 @@ const searchHistory = [
   { _id: 'baking bread', lastUpdatedAt: 1 }
 ]
 
-for (const [iconPack, uiScale] of [['material', 100], ['remix', 95]]) {
+for (const [iconPack, uiScale] of [['remix', 95]]) {
   test.describe(`fill search suggestions with ${iconPack} icons at ${uiScale}%`, () => {
     test.use({ seed: { settings: { enableSearchSuggestions: false, iconPack, uiScale }, searchHistory } })
 

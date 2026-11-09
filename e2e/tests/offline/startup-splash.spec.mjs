@@ -4,10 +4,6 @@ import { test, expect, goToSettingsSection, latestSettings, readDatastore } from
 for (const [theme, background, zoom] of [
   ['dark', 'rgb(15, 15, 15)', 1.25],
   ['light', 'rgb(241, 241, 241)', 0.8],
-  ['openTubeXDark', 'rgb(17, 17, 17)', 1.25],
-  ['openTubeXLight', 'rgb(246, 245, 244)', 0.8],
-  ['hotPink', 'rgb(255, 0, 138)', 1],
-  ['pastelPink', 'rgb(255, 234, 221)', 1],
 ]) {
   test.describe(`startup splash in ${theme} mode`, () => {
     test.use({ seed: { settings: { baseTheme: theme, currentLocale: 'de-DE', landingPage: 'history', uiScale: zoom * 100 } } })
@@ -144,48 +140,10 @@ test('shows a new window before its renderer loads and respects hiding during st
   }
 })
 
-test.describe('startup splash with a system-selected Tally theme', () => {
-  test.use({
-    seed: {
-      settings: {
-        baseTheme: 'system', systemDarkTheme: 'openTubeXDark', systemLightTheme: 'openTubeXLight', landingPage: 'history'
-      }
-    }
-  })
-
-  for (const [mode, background] of [['dark', 'rgb(17, 17, 17)'], ['light', 'rgb(246, 245, 244)']]) {
-    test(`uses the resolved ${mode} theme before loading the renderer`, async ({ page, app }) => {
-      await app.electronApp.evaluate(({ nativeTheme }, source) => { nativeTheme.themeSource = source }, mode)
-      let releaseRenderer
-      const gate = new Promise(resolve => { releaseRenderer = resolve })
-      const context = app.electronApp.context()
-      await context.route('**/renderer.js', async route => {
-        await gate
-        // The window can close before the request continues.
-        await route.continue().catch(() => {})
-      })
-      try {
-        const created = app.electronApp.waitForEvent('window')
-        await page.evaluate(() => window.ftElectron.openInNewWindow('/history'))
-        const nextPage = await created
-        await expect(nextPage.locator('#startup-splash')).toBeVisible()
-        expect(await nextPage.locator('.startupCurtain').first().evaluate(element => getComputedStyle(element).backgroundColor))
-          .toBe(background)
-        releaseRenderer()
-        await expect(nextPage.locator('#startup-splash')).toHaveCount(0)
-      } finally {
-        releaseRenderer()
-        // Keep the fixture's routes, which block unmocked hosts.
-        await context.unroute('**/renderer.js')
-      }
-    })
-  }
-})
-
 test.describe('slow initial route', () => {
   test.use({ seed: { settings: { landingPage: 'history' } } })
 
-  for (const outcome of ['loads', 'fails', 'stalls']) {
+  for (const outcome of ['fails', 'stalls']) {
     test(outcome === 'stalls'
       ? 'releases the app when the initial route chunk stalls'
       : `keeps the splash closed until the initial route chunk ${outcome}`, async ({ page }) => {

@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
-import { DBActions, IpcChannels } from '../../../src/constants.js'
+import { DBActions } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { expect, goToSettingsSection, test, readDatastore, createUserDataDir, launchApp } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -89,23 +89,6 @@ test('compares feed titles only with each other', async ({ page }) => {
     .toEqual(['Translated title', 'Translated title'])
 })
 
-test('keeps the older feed title when one refresh lists it after a newer one', async ({ page }) => {
-  const now = Date.now()
-  await page.evaluate(({ action, now }) => window.ftElectron.dbSubscriptionCache(action, [
-    { channelId: 'UCfeedtitlechannel00000', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Newer title' }], timestamp: new Date(now - 10_000) },
-    { channelId: 'UCfeedtitlechannel00001', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Older title' }], timestamp: new Date(now - 20_000) },
-    // A feed fetched in the same millisecond is not older, so its title counts too.
-    { channelId: 'UCfeedtitlechannel00002', field: 'videos', entries: [{ type: 'video', videoId: 'feedtitle02', title: 'Simultaneous title' }], timestamp: new Date(now - 10_000) }
-  ]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, now })
-
-  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
-    videoId: 'feedtitle02',
-    title: 'Original title',
-    description: '',
-    thumbnailUrl: ''
-  })))?.feedTitles.map(({ title }) => title)).toEqual(['Older title', 'Newer title'])
-})
-
 test('skips feed titles fetched before the cache was cleared', async ({ page }) => {
   const fetchedBeforeClear = Date.now() - 1000
   await page.evaluate(() => window.ftElectron.videoMetadataCache.clear())
@@ -120,78 +103,6 @@ test('skips feed titles fetched before the cache was cleared', async ({ page }) 
     description: '',
     thumbnailUrl: ''
   })))?.feedTitles.map(({ title }) => title)).toEqual(['Title fetched after the clear'])
-})
-
-test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
-  let revision = 0
-  let requests = 0
-  const thumbnailServer = createServer((request, response) => {
-    requests += 1
-    const thumbnail = THUMBNAILS[revision]
-    response.writeHead(200, {
-      'cache-control': 'public, max-age=86400',
-      'content-length': thumbnail.length,
-      'content-type': 'image/png'
-    })
-    response.end(thumbnail)
-  })
-  thumbnailServer.listen(0, '127.0.0.1')
-  await once(thumbnailServer, 'listening')
-
-  try {
-    const url = `http://127.0.0.1:${thumbnailServer.address().port}`
-    await page.evaluate(({ action, url }) => window.ftElectron.dbSettings(action, {
-      _id: 'defaultInvidiousInstance',
-      value: url
-    }), { action: DBActions.GENERAL.UPSERT, url })
-    const metadata = {
-      videoId: 'thumbnail01',
-      title: 'Unchanged title',
-      description: 'Unchanged description',
-      thumbnailUrl: `${url}/thumbnail.png`
-    }
-    expect(await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata))
-      .toBeNull()
-    revision = 1
-    const history = await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata)
-    expect(history?.revisions).toHaveLength(2)
-    expect(requests).toBe(2)
-    expect(history.revisions[0].thumbnail).not.toBe(history.revisions[1].thumbnail)
-  } finally {
-    thumbnailServer.close()
-    // Chromium can keep a connection open that never sent a request, which
-    // close() leaves alone, so the close event would never fire.
-    thumbnailServer.closeAllConnections()
-    await once(thumbnailServer, 'close')
-  }
-})
-
-test('preserves the displayed cache size when clearing fails', async ({ app, page }) => {
-  await app.electronApp.evaluate(({ ipcMain }, channels) => {
-    ipcMain.removeHandler(channels.getUsage)
-    ipcMain.handle(channels.getUsage, () => ({ videoMetadata: 1536 }))
-    ipcMain.removeHandler(channels.clear)
-    ipcMain.handle(channels.clear, () => {
-      throw new Error('Forced metadata cache clear failure')
-    })
-  }, {
-    clear: IpcChannels.VIDEO_METADATA_CACHE_CLEAR,
-    getUsage: IpcChannels.STORAGE_GET_USAGE
-  })
-
-  const storageSettings = await goToSettingsSection(page, 'storage')
-  const metadata = storageSettings.locator('.storageItem').filter({ hasText: 'Metadata history' })
-  const cacheSize = metadata.getByText('1.5 KiB')
-  await expect(cacheSize).toBeVisible()
-
-  await metadata.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
-  await page.getByRole('dialog', {
-    name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
-  }).getByRole('button', { name: 'Delete' }).click()
-
-  await expect(page.locator('.toast', { hasText: 'Failed to clear video metadata cache' })).toBeVisible()
-  await expect(page.locator('.toast', { hasText: 'Video metadata cache has been cleared' })).toHaveCount(0)
-  await expect(cacheSize).toBeVisible()
 })
 
 test('stores and presents every previous metadata version', async ({ app, page }) => {

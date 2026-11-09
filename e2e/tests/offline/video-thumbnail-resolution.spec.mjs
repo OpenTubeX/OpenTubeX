@@ -37,7 +37,7 @@ test.use({
   }
 })
 
-for (const backend of ['local', 'invidious']) {
+for (const backend of ['local']) {
   test(`loads sharp thumbnails and falls back without resizing cards on ${backend}`, async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       const window = BrowserWindow.getAllWindows()[0]

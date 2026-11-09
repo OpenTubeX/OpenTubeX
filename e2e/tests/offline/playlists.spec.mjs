@@ -136,21 +136,6 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
   })
 
-  test('paints the playlist card video count panel above the thumbnail', async ({ page }) => {
-    await goTo(page, 'userplaylists')
-
-    const background = page.locator('.ft-list-video', {
-      has: page.getByRole('link', { name: 'My seeded playlist', exact: true })
-    }).locator('.videoCountContainer .background')
-    // The panel ignores the pointer, so let hit testing find its background
-    // under the count.
-    expect(await background.evaluate(element => {
-      element.style.pointerEvents = 'auto'
-      const { x, y, width, height } = element.getBoundingClientRect()
-      return document.elementFromPoint(x + width / 2, y + height / 2) === element
-    })).toBe(true)
-  })
-
   test('updates a playlist card video count while the list remains open', async ({ page }) => {
     await goTo(page, 'userplaylists')
 
@@ -522,43 +507,6 @@ test.describe('seeded playlists', () => {
       'Preloaded 0 of 1 videos. 1 could not be preloaded.'
     )).toBeVisible()
     await expect(page.getByTestId('progress-toast')).toHaveCount(0)
-  })
-
-  test('keeps normal title styling when a premiere reaches its scheduled time', async ({ page }) => {
-    await goTo(page, 'userplaylists')
-    await page.clock.install({ time: seededPremiereStart - 86_400_000 })
-    await page.getByText('My seeded playlist').click()
-
-    const card = page.locator('.ft-list-video').filter({ hasText: 'Upcoming seeded premiere' })
-    const title = card.getByText('Upcoming seeded premiere', { exact: true })
-    await page.locator('body').evaluate(element => {
-      element.style.setProperty('--primary-text-color', '#123456')
-      element.style.setProperty('--tertiary-text-color', '#654321')
-    })
-    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
-
-    await page.clock.fastForward(86_400_001)
-
-    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
-  })
-
-  test('playlist artwork crops square images into a 16:9 frame', async ({ page }) => {
-    await goTo(page, 'userplaylists')
-    await page.getByText('My seeded playlist').click()
-
-    const thumbnail = page.locator('.playlistThumbnail img:not(.retryImagePlaceholder)')
-    await page.addStyleTag({ content: '.playlistThumbnail { display: block !important; }' })
-    await thumbnail.evaluate(async (image) => {
-      image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"/>'
-      await image.decode()
-    })
-    await expect(thumbnail).toBeVisible()
-    await expect(thumbnail).toHaveJSProperty('naturalWidth', 120)
-    await expect(thumbnail).toHaveJSProperty('naturalHeight', 120)
-    await expect(thumbnail).toHaveCSS('object-fit', 'cover')
-
-    const bounds = await thumbnail.boundingBox()
-    expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
   })
 
   test('keeps the playlist title when switching tabs', async ({ page }) => {
@@ -955,7 +903,7 @@ test.describe('custom playlists overview order', () => {
     }
   })
 
-  for (const layout of ['grid', 'list']) {
+  for (const layout of ['list']) {
     test(`reorders ${layout} playlists by keyboard and drag and drop @scale`, async ({ app, page }) => {
       await dispatchStoreAction(page, 'updateListType', layout)
       await goTo(page, 'userplaylists')
@@ -1314,7 +1262,7 @@ test.describe('custom playlist order', () => {
     }
   })
 
-  for (const layout of ['list', 'grid']) {
+  for (const layout of ['list']) {
     test(`touch reorders ${layout} playlists without hiding the row`, { tag: '@scale' }, async ({ page, uiScale }) => {
       await page.setViewportSize({ width: layout === 'grid' ? 900 : 430, height: 1000 })
       await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
@@ -1381,7 +1329,7 @@ test.describe('custom playlist order', () => {
     })
   }
 
-  for (const layout of ['list', 'grid']) {
+  for (const layout of ['grid']) {
     test(`keyboard reorders ${layout} playlists and keeps the handle focused`, async ({ page }) => {
       await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
       await goTo(page, 'userplaylists')

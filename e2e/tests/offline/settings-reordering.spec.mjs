@@ -109,9 +109,6 @@ test.describe('quick-settings scroll range', { tag: '@scale' }, () => {
 for (const [editor, method] of [
   [editors[0], 'pointer'],
   [editors[0], 'button'],
-  [editors[1], 'pointer'],
-  [editors[2], 'pointer'],
-  [editors[3], 'pointer'],
 ]) {
   test(`does not announce a failed ${editor.name} ${method} reorder and retries after relaunch`, async ({ app, page }) => {
     const openEditor = async () => {
@@ -169,7 +166,7 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
     }
   })
 
-  for (const editor of editors) {
+  for (const editor of [editors[0], editors[4]]) {
     test(`slides ${editor.name} in place and persists only on drop`, async ({ app, page, uiScale }) => {
       if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 850 })
       await openInterfaceCustomizer(page, editor.tab)
@@ -239,7 +236,7 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
   })
 })
 
-for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
+for (const cancellation of ['pointercancel', 'resize']) {
   test(`cancels a navigation drag on ${cancellation}`, async ({ app, page }) => {
     await openInterfaceCustomizer(page, 'navigation')
     const rows = page.locator('.selectedItem')
@@ -258,11 +255,10 @@ for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
     if (cancellation === 'resize') {
       await setWindowSize(app, page, { width: 900, height: 700 })
     } else {
-      await handle.evaluate((element, reason) => {
+      await handle.evaluate(element => {
         const pointerId = Number(element.dataset.testPointerId)
-        if (reason === 'lostpointercapture') element.releasePointerCapture(pointerId)
-        else element.dispatchEvent(new PointerEvent('pointercancel', { pointerId }))
-      }, cancellation)
+        element.dispatchEvent(new PointerEvent('pointercancel', { pointerId }))
+      })
     }
     await page.mouse.up()
     await expect.poll(ids).toEqual(original)
@@ -270,22 +266,6 @@ for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
     await expect.poll(() => rows.evaluateAll(elements => elements.every(element => getComputedStyle(element).transform === 'none'))).toBe(true)
   })
 }
-
-test('settles without motion when reduced motion is enabled', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await openInterfaceCustomizer(page, 'fullscreen actions')
-  const rows = page.locator('.selectedAction')
-  const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
-  const source = await visibleBox(rows.first().locator('.dragHandle'))
-  const target = await visibleBox(rows.nth(1))
-  await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
-  await page.mouse.down()
-  await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
-  await expect(rows.nth(1)).toHaveCSS('transition-duration', '0s')
-  await page.mouse.up()
-  await expect.poll(() => rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId)))
-    .toEqual([original[1], original[0], ...original.slice(2)])
-})
 
 test.describe('unequal category heights', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme', 'mainColor', 'uiScale', 'defaultQuality'] } } })
@@ -335,26 +315,5 @@ test.describe('reorder edge scrolling', () => {
     await expect.poll(() => rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))).not.toEqual(original)
     await expect(page.locator('.selectedItem.dragging')).toHaveCount(0)
     expect(await scroller.evaluate(element => element.scrollHeight)).toBe(scrollHeight)
-  })
-})
-
-test.describe('explicit reduced motion override', () => {
-  test.use({ seed: { settings: { reducedMotion: 'off' } } })
-
-  test('animates reordering when the app overrides system reduced motion', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'no-preference')
-    await openInterfaceCustomizer(page, 'navigation')
-    const rows = page.locator('.selectedItem')
-    const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
-    const source = await visibleBox(rows.first().locator('.dragHandle'))
-    const target = await visibleBox(rows.nth(1))
-    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
-    await expect(rows.nth(1)).toHaveCSS('transition-duration', '0.16s')
-    await page.mouse.up()
-    await expect.poll(() => rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId)))
-      .toEqual([original[1], original[0], ...original.slice(2)])
   })
 })

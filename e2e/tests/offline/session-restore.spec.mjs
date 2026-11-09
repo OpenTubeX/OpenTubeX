@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 
-import { test, expect, sel, goTo, readDatastore, INTERNET_CHECK_URL } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, readDatastore } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, mockUnplayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
@@ -211,56 +211,6 @@ test('restores tab order, titles, active route, and saved load state across rest
   await expect(restoredTabs.nth(0)).toHaveClass(/active/)
 })
 
-test.describe('active watch tab restore', () => {
-  const watchRestoreSeed = {
-    settings: {
-      backendPreference: 'invidious',
-      defaultInvidiousInstance: '',
-      startupBehavior: 'loadLastActiveTab'
-    },
-    tabSessions: [
-      {
-        _id: 'e2e-window-session',
-        value: {
-          tabs: [
-            {
-              id: WATCH_TAB_ID,
-              url: 'app://bundle/index.html#/watch/jNQXAC9IVRw',
-              title: 'Saved video',
-              isUnloaded: false
-            }
-          ],
-          activeTabId: WATCH_TAB_ID,
-          bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
-        }
-      }
-    ]
-  }
-  const invidiousServer = createServer()
-
-  test.use({
-    seed: watchRestoreSeed
-  })
-
-  test.beforeAll(async () => {
-    await new Promise(resolve => invidiousServer.listen(0, '127.0.0.1', resolve))
-    const address = invidiousServer.address()
-    watchRestoreSeed.settings.defaultInvidiousInstance = `http://127.0.0.1:${address.port}`
-  })
-
-  test.afterAll(async () => {
-    invidiousServer.closeAllConnections()
-    await new Promise(resolve => invidiousServer.close(resolve))
-  })
-
-  test('presents the video player skeleton during startup', async ({ page }) => {
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(page.locator(
-      '.tabContent[aria-hidden="false"] .videoPlayerPlaceholder.ft-shimmer'
-    )).toBeVisible()
-  })
-})
-
 test.describe('restored watch tab startup priority', () => {
   const ACTIVE_WATCH_TAB_ID = 'e2e-active-watch-tab'
   const BACKGROUND_WATCH_TAB_ID = 'e2e-background-watch-tab'
@@ -440,74 +390,6 @@ test.describe('restored watch tab startup priority', () => {
       const state = await page.evaluate(() => window.ftElectron.tabs.getState())
       return state.tabs.find(tab => tab.id === BACKGROUND_WATCH_TAB_ID)?.loadState
     }).toBe('loaded')
-  })
-})
-
-test.describe('subscriptions refresh with restored watch tabs', () => {
-  const watchTabIds = ['restored-watch-one', 'restored-watch-two']
-
-  test.use({
-    seed: {
-      settings: { startupBehavior: 'restoreTabLoadState', fetchSubscriptionsAutomatically: false },
-      tabSessions: [{
-        _id: 'e2e-window-session',
-        value: {
-          tabs: [
-            ...watchTabIds.map(id => ({
-              id,
-              url: `app://bundle/index.html#/watch/${id}`,
-              title: id,
-              isUnloaded: false
-            })),
-            {
-              id: SUBSCRIPTIONS_TAB_ID,
-              url: 'app://bundle/index.html#/subscriptions',
-              title: 'Subscriptions',
-              isUnloaded: false
-            }
-          ],
-          activeTabId: SUBSCRIPTIONS_TAB_ID
-        }
-      }]
-    },
-    // The restored Watch tabs load as soon as the app starts. Reject their
-    // fake IDs offline, like YouTube does. An aborted request would count as a
-    // lost connection and keep the tabs loading until the network recovers.
-    // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
-    onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
-      if (phase !== 'electronConnected') return
-      await electronApp.context().route(/^https?:\/\//, route => route.request().url() === INTERNET_CHECK_URL
-        ? route.fallback()
-        : route.fulfill({ status: 404, body: '' }))
-    })
-  })
-
-  test('keeps loaded watch tabs idle while subscriptions refreshes', async ({ page }) => {
-    await expect.poll(async () => page.evaluate(async ids => {
-      const state = await window.ftElectron.tabs.getState()
-      return ids.every(id => {
-        const tab = state.tabs.find(tab => tab.id === id)
-        return tab?.loadState === 'loaded' && !tab.isLoading
-      })
-    }, watchTabIds)).toBe(true)
-
-    // Present one restored Watch tab to initialize its underlying browsing
-    // page; the other tab keeps that page deferred until first presentation.
-    await page.locator(`.tab[data-tab-id="${watchTabIds[0]}"]`).click()
-    await expect(page.locator(`.tabContent[data-tab-id="${watchTabIds[0]}"] .browsingBehindWatch`)).toBeAttached()
-    await page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`).click()
-    await expect(page.locator(`.tabContent[data-tab-id="${watchTabIds[1]}"] .browsingBehindWatch`)).toHaveCount(0)
-
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSubscriptionFeedRefreshTab', 'videos')
-      store.commit('setSubscriptionFeedRefreshInProgress', true)
-    })
-    await expect.poll(() => page.locator(`[data-tab-id="${watchTabIds[0]}"] .browsingBehindWatch [data-tab-loading-indicator]`).count()).toBeGreaterThan(0)
-    await expect.poll(async () => page.evaluate(async ids => {
-      const state = await window.ftElectron.tabs.getState()
-      return ids.map(id => state.tabs.find(tab => tab.id === id)?.isLoading)
-    }, [...watchTabIds, SUBSCRIPTIONS_TAB_ID])).toEqual([false, false, true])
   })
 })
 

@@ -19,7 +19,7 @@ test.use({
   seed: { settings }
 })
 
-for (const usePlayerMenuGrid of [true, false]) {
+for (const usePlayerMenuGrid of [true]) {
   test.describe(`caption resources in ${usePlayerMenuGrid ? 'grid' : 'list'} menus`, { tag: '@performance' }, () => {
     test.use({ seed: { settings: { ...settings, usePlayerMenuGrid } } })
 

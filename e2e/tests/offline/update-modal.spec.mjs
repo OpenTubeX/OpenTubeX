@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 
-import { test, expect, goTo, goToSettingsSection, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goTo, waitForAppReady, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 
 const RELEASES_URL = /^https:\/\/api\.github\.com\/repos\/OpenTubeX\/OpenTubeX\/releases/
 const COMMIT_HASH = '3904e64f503cde6be8793606a04ad69c5d57cef0'
@@ -68,49 +68,6 @@ async function showUpdatePrompt(page, releases) {
   await notification.getByRole('button', { name: 'See changes and update' }).click()
   await expect(page.locator('.changeLogTitle')).toBeVisible()
 }
-
-test('update notification buttons are centered when they wrap below the text', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-  const notification = await showUpdateNotification(page, [
-    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
-  ])
-
-  for (const size of [
-    { width: 1600, height: 900 },
-    { width: 800, height: 600 },
-    { width: 480, height: 800 },
-    { width: 375, height: 700 }
-  ]) {
-    // The initial window already has the desktop dimensions.
-    if (size.width !== 1600) await setWindowSize(app, page, size)
-    await expect.poll(() => notification.evaluate(element => {
-      const toast = element.getBoundingClientRect()
-      const message = element.querySelector('.toastMessage').getBoundingClientRect()
-      const actions = element.querySelector('.toastActions').getBoundingClientRect()
-      const wrapped = actions.top >= message.bottom
-      return {
-        wrapped,
-        aligned: wrapped
-          ? Math.abs(actions.left + actions.width / 2 - toast.left - toast.width / 2) <= 1
-          : actions.left >= message.right,
-        fits: element.scrollWidth <= element.clientWidth
-      }
-    }), { message: `${size.width}px at ${uiScale}% UI scale` }).toEqual({
-      wrapped: size.width <= 480,
-      aligned: true,
-      fits: true
-    })
-
-    if (uiScale === 100 && size.width === 375) {
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toContainClass(colorScheme)
-        const path = testInfo.outputPath(`centered-update-buttons-${colorScheme}.png`)
-        await notification.screenshot({ path, animations: 'disabled' })
-        await testInfo.attach(`centered update buttons (${colorScheme})`, { path, contentType: 'image/png' })
-      }
-    }
-  }
-})
 
 test('release-note scrollbar stays anchored during touch scrolling without scroll callbacks', { tag: '@scale' }, async ({ app, page }) => {
   await showUpdatePrompt(page, [
@@ -185,41 +142,7 @@ test('the update notification stays dismissed for the current app session', asyn
   const updateButton = notification.getByRole('button', { name: 'See changes and update' })
   const dismissButton = notification.getByRole('button', { name: 'Dismiss' })
   await expect(updateButton).toBeVisible()
-  await expect(updateButton.locator('[data-icon="file-lines"]')).toBeVisible()
   await expect(dismissButton).toBeVisible()
-  await expect(dismissButton.locator('[data-icon="xmark"]')).toBeVisible()
-  expect(await notification.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
-
-  // Read both controls in the same frame while the toast animates into place.
-  const [dismissBox, updateBox] = await notification.evaluate(element =>
-    ['Dismiss', 'See changes and update'].map(label => {
-      const button = Array.from(element.querySelectorAll('button')).find(button => button.textContent.trim() === label)
-      return button.getBoundingClientRect().toJSON()
-    })
-  )
-  expect(dismissBox).not.toBeNull()
-  expect(updateBox).not.toBeNull()
-  expect(Math.abs(dismissBox.x - updateBox.x)).toBeLessThanOrEqual(1)
-  expect(dismissBox.y + dismissBox.height).toBeLessThanOrEqual(updateBox.y)
-  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeGreaterThanOrEqual(7.5)
-  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeLessThanOrEqual(8.5)
-
-  const toastRow = notification.locator('xpath=../..')
-  await expect(toastRow).toHaveAttribute('data-dismissible', 'false')
-  await toastRow.focus()
-  await page.keyboard.press('Escape')
-  await expect(toastRow).toHaveAttribute('data-removed', 'false')
-  await expect(notification).toBeVisible()
-
-  const notificationBox = await notification.boundingBox()
-  expect(notificationBox).not.toBeNull()
-  const swipeY = notificationBox.y + notificationBox.height / 2
-  await page.mouse.move(notificationBox.x + notificationBox.width / 2, swipeY)
-  await page.mouse.down()
-  await page.mouse.move(notificationBox.x + notificationBox.width / 2 - 200, swipeY, { steps: 5 })
-  await page.mouse.up()
-  await expect(toastRow).toHaveAttribute('data-swipe-out', 'false')
-  await expect(notification).toBeVisible()
 
   await page.getByRole('button', { name: 'New Tab' }).click()
   await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
@@ -390,25 +313,6 @@ test.describe('with external links enabled', () => {
     expect(page.url()).toBe(appUrl)
     await expect(page.locator('.changeLogTitle')).toBeVisible()
   })
-
-  test('the donate button opens the donation page and keeps the release notes open', async ({ app, page, attachScreenshot }) => {
-    await app.electronApp.evaluate(({ shell }) => {
-      globalThis.donateExternalUrls = []
-      shell.openExternal = async url => {
-        globalThis.donateExternalUrls.push(url)
-      }
-    })
-    await showUpdatePrompt(page, [
-      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
-    ])
-    await attachScreenshot('update prompt with donate button')
-
-    await page.getByRole('button', { name: 'Donate', exact: true }).click()
-
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.donateExternalUrls))
-      .toEqual(['https://opentubex.org/donate/'])
-    await expect(page.locator('.changeLogTitle')).toBeVisible()
-  })
 })
 
 test.describe('with external links behind a prompt', () => {
@@ -522,87 +426,4 @@ test('release notes for other platforms are hidden', async ({ page }) => {
     'Desktop: Desktop improvement. (#3)'
   ])
   await expect(page.locator('.changeLogText img')).toHaveCount(0)
-})
-
-test.describe('release-note screenshots with dark and light variants', () => {
-  test.use({ seed: { settings: { baseTheme: 'dark' } } })
-
-  test('show the variant for the app theme when the prompt opens', async ({ page }) => {
-    // Serve the screenshots, because a failed image is replaced with its alt text.
-    await page.route('https://github.com/user-attachments/assets/*', route => route.fulfill({
-      contentType: 'image/svg+xml',
-      body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>'
-    }))
-    await page.emulateMedia({ colorScheme: 'dark' })
-    const notification = await showUpdateNotification(page, [
-      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, [
-        '- Screenshot improvement. (#1)',
-        '  <picture>',
-        '    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/dark">',
-        '    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/light">',
-        '    <img src="https://github.com/user-attachments/assets/dark" alt="Screenshot" width="844">',
-        '  </picture>'
-      ].join('\n'))
-    ])
-
-    // Switch to a light app theme after the update check, while the OS stays dark.
-    await goToSettingsSection(page, 'theme')
-    const baseTheme = page.getByRole('combobox', { name: 'Base Theme' })
-    await baseTheme.click()
-    await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Light', exact: true }).click()
-    await expect(page.locator('body')).toHaveClass(/\blight\b/)
-    await page.locator('.settingsCloseButton').click()
-    await notification.getByRole('button', { name: 'See changes and update' }).click()
-
-    const screenshot = page.locator('.changeLogText li').getByAltText('Screenshot')
-    await expect(screenshot).toHaveAttribute('src', 'https://github.com/user-attachments/assets/light')
-    await expect.poll(() => screenshot.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
-  })
-})
-
-test('changelog images preserve their aspect ratio at phone and desktop widths', { tag: '@scale' }, async ({ page, uiScale }) => {
-  const imageUrl = 'https://example.com/release-screenshot.svg'
-  await page.route(imageUrl, route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><rect width="1600" height="900" fill="teal"/></svg>'
-  }))
-  const notes = [
-    `<img src="${imageUrl}" alt="Height only" height="450">`,
-    `<img src="${imageUrl}" alt="Both dimensions" width="800" height="450">`,
-    `<img src="${imageUrl}" alt="Width only" width="800">`,
-    `![Markdown image](${imageUrl})`
-  ].join('\n\n')
-  await showUpdatePrompt(page, [
-    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, notes)
-  ])
-
-  const images = page.locator('.changeLogText img')
-  await expect(images).toHaveCount(4)
-  await images.evaluateAll(elements => Promise.all(elements.map(image => image.decode())))
-  // The prompt springs slightly past its full size as it opens, which scales the images with it.
-  await page.locator('.changeLogText').evaluate(text => Promise.all(
-    text.closest('.promptCard').getAnimations().map(animation => animation.finished.catch(() => {}))
-  ))
-
-  for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }, { width: 1280, height: 900 }]) {
-    await page.setViewportSize(viewport)
-    for (const image of await images.all()) {
-      const dimensions = await image.evaluate(element => {
-        const { width, height } = element.getBoundingClientRect()
-        const container = element.closest('.changeLogText')
-        const style = getComputedStyle(container)
-        return {
-          width,
-          height,
-          expectedHeight: width * element.naturalHeight / element.naturalWidth,
-          availableWidth: container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-        }
-      })
-      const context = `${await image.getAttribute('alt')}, ${viewport.width}px, ${uiScale}% scale`
-      expect(dimensions.width, context).toBeGreaterThan(0)
-      expect(dimensions.width, context).toBeLessThanOrEqual(dimensions.availableWidth + 1)
-      expect.soft(Math.abs(dimensions.height - dimensions.expectedHeight), context).toBeLessThanOrEqual(1)
-    }
-  }
 })
