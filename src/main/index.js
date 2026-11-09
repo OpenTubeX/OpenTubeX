@@ -2942,6 +2942,7 @@ function runApp() {
         case DBActions.GENERAL.UPSERT:
           // Destinations and executables require a native picker. Backup status is written by the scheduler.
           if (!canRendererWriteSetting(data._id, data.value)) {
+            console.warn(`Refused a renderer write to the ${String(data._id)} setting`)
             return null
           }
 

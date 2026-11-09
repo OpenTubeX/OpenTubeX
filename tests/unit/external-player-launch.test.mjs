@@ -107,7 +107,14 @@ test('custom arguments run only after the user approves them for that player', a
     settingValues.set('externalPlayerCustomArgs', '[]')
     await launch()
     assert.equal(messageBoxes.length, 4)
+
+    // So does another program for the same player and arguments.
+    settingValues.set('externalPlayerCustomArgs', JSON.stringify(['--eval', '1']))
+    settingValues.set('externalPlayerExecutable', fileURLToPath(new URL('./missing-external-player', import.meta.url)))
+    await launch()
+    assert.equal(messageBoxes.length, 5)
   } finally {
+    settingValues.set('externalPlayerExecutable', process.execPath)
     settingValues.delete('externalPlayerCustomArgs')
     messageBoxResponse = 1
   }

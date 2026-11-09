@@ -236,12 +236,13 @@ function parseCustomArguments(value) {
 /**
  * The value the user approves: custom arguments can run code or write files
  * through some players, and the renderer can change them, so a native
- * dialog in this process asks before they are first used with a player.
+ * dialog in this process asks before they are first used with a player and program.
  * @param {string} externalPlayer
+ * @param {string} executable
  * @param {string[]} customArgs
  */
-function customArgumentsApprovalKey(externalPlayer, customArgs) {
-  return JSON.stringify([externalPlayer, customArgs])
+function customArgumentsApprovalKey(externalPlayer, executable, customArgs) {
+  return JSON.stringify([externalPlayer, executable, customArgs])
 }
 
 /**
@@ -254,7 +255,7 @@ function customArgumentsApprovalKey(externalPlayer, customArgs) {
 async function confirmCustomArguments(webContents, externalPlayer, executable, customArgs) {
   if (customArgs.length === 0) return true
 
-  const approvalKey = customArgumentsApprovalKey(externalPlayer, customArgs)
+  const approvalKey = customArgumentsApprovalKey(externalPlayer, executable, customArgs)
   if ((await settings._findOne(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING))?.value === approvalKey) return true
 
   const t = await createMainTranslator()
