@@ -379,6 +379,11 @@ public class AndroidProxyIntegrationTest {
      * is explicit. That bypassed an unreachable proxy and doubled the wait during an outage. */
     @Test public void nativeHttpNeverBypassesAnUnreachableProxy() throws Exception {
         AndroidProxy.ready().get(10, TimeUnit.SECONDS);
+        // Only loopback literals and localhost itself go direct; DNS resolves other *.localhost names.
+        java.net.ProxySelector selector = java.net.ProxySelector.getDefault();
+        assertEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://localhost:1/")).get(0));
+        assertEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://[::1]:1/")).get(0));
+        assertNotEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://app.localhost.:1/")).get(0));
         // An origin on this device's own network address, which the relay proxies like any host
         InetAddress device = java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces()).stream()
             .flatMap(network -> java.util.Collections.list(network.getInetAddresses()).stream())

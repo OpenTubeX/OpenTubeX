@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 /** Installed before activities and background workers can send requests. */
@@ -84,9 +85,13 @@ final class AndroidProxy {
             @Override public List<Proxy> select(URI uri) {
                 if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
                     // The relay refuses loopback destinations, and their traffic never leaves
-                    // the device, so a server on this device is reached directly.
+                    // the device, so a server on this device is reached directly. Only literals
+                    // and "localhost" itself qualify: DNS resolves other *.localhost names.
                     String host = uri.getHost() == null ? "" : uri.getHost().replace("[", "").replace("]", "");
-                    return Collections.singletonList(AndroidProxyRelay.isLoopbackName(host) ? Proxy.NO_PROXY : local);
+                    String name = host.toLowerCase(Locale.ROOT).replaceFirst("\\.$", "");
+                    boolean direct = name.equals("localhost") ||
+                        (!name.endsWith(".localhost") && AndroidProxyRelay.isLoopbackName(name));
+                    return Collections.singletonList(direct ? Proxy.NO_PROXY : local);
                 }
                 return systemSelector == null ? Collections.singletonList(Proxy.NO_PROXY) : systemSelector.select(uri);
             }
