@@ -18,7 +18,8 @@ final class YtDlpArguments {
         "--ignore-errors", "--abort-on-error", "--continue", "--no-continue", "--write-thumbnail",
         "--write-info-json", "--write-description", "--restrict-filenames", "--windows-filenames",
         "--no-mtime", "--no-embed-subs", "--no-embed-thumbnail", "--no-embed-metadata",
-        "--no-embed-chapters", "--no-write-subs", "--no-write-auto-subs", "--no-check-certificates"
+        "--no-embed-chapters", "--no-write-subs", "--no-write-auto-subs", "--no-check-certificates",
+        "--live-from-start"
     );
     private static final List<String> VALUES = asList(
         "--output", "--output-na-placeholder", "--format", "-f", "--format-sort", "-S",

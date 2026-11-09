@@ -6327,6 +6327,8 @@ export default defineComponent({
         this.activeFormat = 'dash'
       }
       this.isLive = source.isLive
+      // YouTube's metadata, when known, decides whether viewers may rewind
+      this.isLiveDvrEnabled ??= source.isLiveDvrEnabled ?? null
       if (Number.isFinite(source.duration) && source.duration > 0) {
         this.videoLengthSeconds = source.duration
       }

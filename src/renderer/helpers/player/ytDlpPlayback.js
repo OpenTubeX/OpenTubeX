@@ -5,7 +5,7 @@ import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './manifestTypes'
 import { fetchGoogleVideo } from './googleVideoFallback'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
-import { hasLimitedLiveDvrWindow } from './liveManifest'
+import { getLiveHeadSegment, hasLimitedLiveDvrWindow, toLiveDashManifest } from './liveManifest'
 import { generateAudioTrackField } from '../api/local'
 import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
@@ -25,6 +25,7 @@ import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
  * @property {boolean} incomplete whether a timeout may have omitted formats
  * @property {string | null} title
  * @property {boolean} isLive
+ * @property {boolean} [isLiveDvrEnabled] whether the live source can be rewound, regardless of YouTube's metadata
  * @property {'EQUIRECTANGULAR' | null} [vrProjection]
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
  * @property {boolean} [twitchSubOnlyVod]
@@ -539,15 +540,31 @@ function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
 }
 
 /**
+ * Whether a format is requested as one self-initializing segment per `sq` number.
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isSequencedFormat(format) {
+  return format.url !== null &&
+    isVideoFormat(format) !== isAudioFormat(format) &&
+    format.targetDuration !== null &&
+    Number.isFinite(format.targetDuration) &&
+    format.targetDuration > 0
+}
+
+/**
+ * The formats yt-dlp lists for an ongoing stream with `--live-from-start`.
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isLiveSegmentedFormat(format) {
+  return format.protocol === 'http_dash_segments_generator' && isSequencedFormat(format)
+}
+
+/**
  * @param {YtDlpPlaybackFormat} format
  */
 function isPostLiveDvrSegmentedFormat(format) {
   return format.protocol === 'http_dash_segments' &&
-    format.url !== null &&
-    isVideoFormat(format) !== isAudioFormat(format) &&
-    format.targetDuration !== null &&
-    Number.isFinite(format.targetDuration) &&
-    format.targetDuration > 0 &&
+    isSequencedFormat(format) &&
     format.fragmentCount !== null &&
     Number.isInteger(format.fragmentCount) &&
     format.fragmentCount > 0
@@ -672,12 +689,12 @@ async function convertAdaptiveFormats(formats, duration, onTimeout) {
 }
 
 /**
- * Converts Post-Live-DVR formats without probing byte ranges. Each `sq` fragment
- * is a self-initializing MP4 segment, and yt-dlp provides its duration and count.
+ * Converts live and Post-Live-DVR formats without probing byte ranges. Each `sq`
+ * fragment is a self-initializing segment, and yt-dlp provides its duration.
  * @param {YtDlpPlaybackFormat[]} formats
  * @param {number} duration
  */
-async function convertPostLiveDvrFormats(formats, duration) {
+async function convertSequencedFormats(formats, duration) {
   const results = await Promise.all(formats.map(async format => {
     return await waitForYtDlpFormatAvailability(format)
       ? convertYtDlpToLocalFormat(format, null, duration)
@@ -728,9 +745,70 @@ function createPostLiveDvrActions(duration, fragmentCount) {
 }
 
 /**
+ * Asks googlevideo for the newest segment of an ongoing stream.
+ * @param {string} url
+ */
+async function probeLiveHeadSegment(url) {
+  try {
+    const response = await fetchGoogleVideo(url, { method: 'HEAD', signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
+    return response.ok ? getLiveHeadSegment(response.headers, Date.now()) : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Builds a live DASH manifest from yt-dlp's `--live-from-start` formats, which,
+ * unlike YouTube's live HLS manifests, include resolutions above 1080p.
+ * @param {YtDlpPlaybackFormat[]} formats
+ * @returns {Promise<{ manifestSrc: string, localFormats: import('youtubei.js').Misc.Format[] } | null>}
+ *   null when the formats cannot be played
+ */
+async function createLiveDashManifestSrc(formats) {
+  const liveFormats = formats.filter(isLiveSegmentedFormat)
+  const segmentDuration = liveFormats[0]?.targetDuration
+  if (
+    segmentDuration == null ||
+    liveFormats.some(format => format.targetDuration !== segmentDuration) ||
+    !liveFormats.some(isVideoFormat) ||
+    !liveFormats.some(isAudioFormat)
+  ) {
+    return null
+  }
+
+  // The formats share one sequence of segments, as with YouTube's own live manifests
+  const head = await probeLiveHeadSegment(liveFormats.find(isAudioFormat).url)
+  if (head === null) return null
+
+  const duration = head.mediaTimeMs / 1000 + segmentDuration
+  const localFormats = await convertSequencedFormats(liveFormats, duration)
+  if (!localFormats.some(format => format.has_video) || !localFormats.some(format => format.has_audio)) {
+    return null
+  }
+
+  const manifest = toLiveDashManifest(
+    await createDashManifest(
+      { adaptive_formats: localFormats },
+      true,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      createPostLiveDvrActions(duration, head.sequenceNumber + 1)
+    ),
+    head,
+    segmentDuration
+  )
+  return manifest === null
+    ? null
+    : { manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`, localFormats }
+}
+
+/**
  * Uses yt-dlp to get the stream URLs for a video, which avoids YouTube's error prone
- * SABR streaming protocol. Live streams use YouTube's HLS manifests, which keep the
- * DVR window available, so that they can be rewound.
+ * SABR streaming protocol. Live streams use the segmented formats that also back
+ * YouTube's live DASH manifests, falling back to its HLS manifests, which are
+ * limited to 1080p. Both keep the DVR window available, so they can be rewound.
  * @param {string} videoId
  * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
  * @param {() => void} [onDefaultClientsFallback] called before retrying with yt-dlp's default clients
@@ -859,7 +937,11 @@ async function loadYtDlpPlaybackSource(
   // an immediately preceding extraction returned URLs that respond with 403. Give
   // yt-dlp's defaults one bounded retry before falling back to the built-in source.
   let defaultClientsFallbackAnnounced = false
-  for (const [attemptIndex, useDefaultClients] of [false, true, true].entries()) {
+  // iOS only proxies progressive googlevideo URLs, not live segments
+  let liveFromStart = !process.env.IS_IOS
+  const attempts = [false, true, true]
+  for (let attemptIndex = 0; attemptIndex < attempts.length; attemptIndex++) {
+    const useDefaultClients = attempts[attemptIndex]
     if (useDefaultClients && !defaultClientsFallbackAnnounced) {
       defaultClientsFallbackAnnounced = true
       onDefaultClientsFallback?.()
@@ -871,7 +953,8 @@ async function loadYtDlpPlaybackSource(
       // Try authenticated default clients before using the final attempt for
       // a public DVR stream without cookies. Keep the limited source if it fails.
       useAuthentication && (attemptIndex < 2 || limitedLiveSource === null),
-      includeSubtitles
+      includeSubtitles,
+      liveFromStart
     )
 
     if (info === null) {
@@ -906,6 +989,41 @@ async function loadYtDlpPlaybackSource(
     }
 
     const isLive = info.isLive || info.liveStatus === 'is_live'
+
+    if (liveFromStart && isLive) {
+      const live = await createLiveDashManifestSrc(info.formats)
+      if (live !== null) {
+        const source = {
+          manifestSrc: live.manifestSrc,
+          manifestMimeType: MANIFEST_TYPE_DASH,
+          legacyFormats: [],
+          expiryDate: getEarliestYtDlpFormatExpiry(info.formats.filter(isLiveSegmentedFormat)),
+          incomplete: info.incomplete === true,
+          title: info.title,
+          isLive: true,
+          // YouTube serves the earlier segments even when the stream's DVR is disabled
+          isLiveDvrEnabled: true,
+          vrProjection: null,
+          duration: info.duration,
+          storyboardSrc: null,
+          captions: info.captions ?? [],
+          captionTranslations: info.captionTranslations ?? [],
+          subtitlesIncluded: includeSubtitles,
+          version: info.version
+        }
+
+        if (deferIncompleteSource(source, live.localFormats)) continue
+        return source
+      }
+
+      if (info.hlsManifestUrl === null) {
+        // Repeat this attempt for yt-dlp's HLS formats, which --live-from-start omits
+        liveFromStart = false
+        attemptIndex--
+        continue
+      }
+    }
+
     const postLiveDvrFormats = info.liveStatus === 'post_live'
       ? info.formats.filter(isPostLiveDvrSegmentedFormat)
       : []
@@ -915,7 +1033,7 @@ async function loadYtDlpPlaybackSource(
       const duration = info.duration !== null && info.duration > 0
         ? info.duration
         : Math.max(...postLiveDvrFormats.map(format => format.targetDuration * format.fragmentCount))
-      const localFormats = await convertPostLiveDvrFormats(postLiveDvrFormats, duration)
+      const localFormats = await convertSequencedFormats(postLiveDvrFormats, duration)
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
         const manifest = await createDashManifest(

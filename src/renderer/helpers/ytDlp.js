@@ -186,7 +186,7 @@ const capacitor = {
       return historyRepairYtDlpError(error.message)
     }
   },
-  async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true) {
+  async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true, liveFromStart = false) {
     const isYouTubeVideo = /^[\w-]{11}$/.test(videoId)
     if (!isYouTubeVideo) {
       try {
@@ -197,6 +197,7 @@ const capacitor = {
     try {
       const args = ['--no-playlist', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR, '--print', isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE]
       if (includeSubtitles) args.push(...playbackSubtitleArguments(isYouTubeVideo))
+      if (isYouTubeVideo && liveFromStart) args.push('--live-from-start')
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])

@@ -236,3 +236,67 @@ test('waits for delayed legacy probes before caching an adaptive source', async 
   assert.equal(saved.length, 1)
   assert.equal(extractions.length, 2)
 })
+
+test('plays ongoing streams from their sq segments and falls back to HLS', async () => {
+  const { getLiveHeadSegment, toLiveDashManifest } = await import('../../src/renderer/helpers/player/liveManifest.js')
+  const load = (headResponse) => {
+    const liveFromStartCalls = []
+    const dependencies = {
+      process: { env: {} },
+      ytDlp: {
+        ytDlpPlaybackCacheGet: async () => null,
+        ytDlpGetPlaybackInfo: async (videoId, _defaults, _auth, _subtitles, liveFromStart = false) => {
+          liveFromStartCalls.push(liveFromStart)
+          return {
+            isLive: true, liveStatus: 'is_live', duration: null, storyboardVtt: null, version: 'test',
+            // --live-from-start replaces the HLS formats with segmented ones
+            hlsManifestUrl: liveFromStart ? null : 'https://manifest.test/live.m3u8',
+            formats: liveFromStart
+              ? [
+                  { formatId: '315', ext: 'webm', vcodec: 'vp9', acodec: 'none', width: 3840, height: 2160 },
+                  { formatId: '140', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2', width: null, height: null }
+                ].map(format => ({
+                  ...format, protocol: 'http_dash_segments_generator', targetDuration: 5, fps: 60, bitrate: 100_000,
+                  audioSampleRate: 44_100, audioChannels: 2, language: null, formatNote: null, dynamicRange: 'SDR',
+                  url: `https://rr1---sn-test.googlevideo.com/videoplayback?itag=${format.formatId}&live=1&expire=4102444800`
+                }))
+              : []
+          }
+        },
+      },
+      fetchGoogleVideo: async (_url, init) => {
+        assert.equal(init.method, 'HEAD')
+        return headResponse
+      },
+      console: { error() {}, warn() {} },
+      FormatUtils,
+      Misc,
+      MANIFEST_TYPE_DASH: 'application/dash+xml',
+      MANIFEST_TYPE_HLS: 'application/x-mpegurl',
+      getEarliestYtDlpFormatExpiry,
+      YtDlpPlaybackSourceCache,
+      waitForYtDlpFormatAvailability,
+      getLiveHeadSegment,
+      toLiveDashManifest,
+      hasLimitedLiveDvrWindow: () => false,
+      probeYtDlpHlsManifest: async () => true,
+    }
+    const getSource = compileFunction(`${code}\nreturn getYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
+    return { getSource, liveFromStartCalls }
+  }
+
+  const dash = load({ ok: true, headers: new Headers({ 'X-Head-Seqnum': '4100807', 'X-Head-Time-Millis': '20503031733' }) })
+  const dashSource = await dash.getSource('live0000001')
+  assert.equal(dashSource.manifestMimeType, 'application/dash+xml')
+  assert.equal(dashSource.isLive, true)
+  const manifest = decodeURIComponent(dashSource.manifestSrc)
+  assert.match(manifest, /type="dynamic"/)
+  assert.match(manifest, /height="2160"/)
+  assert.deepEqual(dash.liveFromStartCalls, [true])
+
+  // Without the head segment, the same attempt is repeated for yt-dlp's HLS formats
+  const hls = load({ ok: false, headers: new Headers() })
+  const hlsSource = await hls.getSource('live0000002')
+  assert.equal(hlsSource.manifestSrc, 'https://manifest.test/live.m3u8')
+  assert.deepEqual(hls.liveFromStartCalls, [true, false])
+})

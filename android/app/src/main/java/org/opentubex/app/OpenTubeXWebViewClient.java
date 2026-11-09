@@ -305,7 +305,9 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
         headers.put("Access-Control-Allow-Headers", "Range");
-        headers.put("Access-Control-Expose-Headers", "Accept-Ranges, Content-Length, Content-Range");
+        // The live head headers locate the newest segment of an ongoing stream
+        headers.put("Access-Control-Expose-Headers",
+            "Accept-Ranges, Content-Length, Content-Range, X-Head-Seqnum, X-Head-Time-Millis");
         return headers;
     }
 
