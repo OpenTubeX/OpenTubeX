@@ -269,6 +269,9 @@ dependencies {
     if (!optimizedTestBuild) {
         androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
         androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+        // PairingCameraTest serves a sync server over HTTPS and shows the scanner a QR code.
+        androidTestImplementation "com.squareup.okhttp3:okhttp-tls:5.5.1"
+        androidTestImplementation "com.google.zxing:core:3.5.4"
     }
     implementation project(':capacitor-cordova-android-plugins')
 }
