@@ -65,14 +65,21 @@ export function setupMenuTransitions(menu, controls) {
    * Only the zoom of the current marker clears it, as going back before the
    * submenu has zoomed in cancels that zoom under the new marker. The menu
    * zooms itself for the views of the menu groups in it too, which may have
-   * been marked while it zoomed, while on phones the entries of the marked
-   * view zoom.
+   * been marked while it zoomed, while on phones the entries of a view with a
+   * header action zoom (`playerMenu.css`). Leaving such a view while it zooms
+   * cancels its entries' zoom while the next view zooms under the same
+   * marker, so the marker stays while a zoom of its kind still runs.
    *
    * @param {AnimationEvent} event
    */
   function onAnimationEnd({ animationName, target }) {
     const zoom = animationName.match(/^ft-menu-zoom-(in|out)\b/)?.[1]
     if (!zoom || !(target instanceof HTMLElement)) return
+    if (menu.getAnimations({ subtree: true }).some(animation => (
+      animation instanceof CSSAnimation && animation.animationName.startsWith(`ft-menu-zoom-${zoom}`)
+    ))) {
+      return
+    }
     const parents = target === menu
       ? [menu, ...menu.querySelectorAll('[data-ft-menu-transition]')]
       : [target.closest('[data-ft-menu-transition]')]

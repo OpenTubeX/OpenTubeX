@@ -812,9 +812,10 @@
 
 /*
   The menu scrolls the views in the sheet, so it zooms them as a whole, on a
-  single layer instead of one for each entry, also when Shaka marks a group
-  inside it that can't scale itself. Its grow-in stays in the list, so that it
-  doesn't start over once the zoom has ended.
+  single layer instead of one for each entry (except for views with a header
+  action, below), also when Shaka marks a group inside it that can't scale
+  itself. Its grow-in stays in the list, so that it doesn't start over once the
+  zoom has ended.
 */
 :deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden):is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in']))) {
   animation:
@@ -831,19 +832,33 @@
 }
 
 /*
-  While the menu zooms, it is the containing block of a header action that sits
-  in the dialog's header, which would show it in the menu instead. The action
-  waits out of view until then, and fades in by itself.
+  A zooming menu would become the containing block of a header action that sits
+  in the dialog's header, and clip it. So a view with one, such as captions or
+  quality, zooms its other entries instead, while the action fades in with the
+  menu right away. These views only have a few entries.
 */
-:deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
-  animation: ft-menu-fade-in 150ms ease-out;
+/* stylelint-disable selector-max-compound-selectors -- Telling the open view and its header action apart takes compounds of their own. */
+:deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden):is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in'])):has(> .shaka-sub-menu:not(.shaka-hidden) > .ft-submenu-header-action:not(.shaka-hidden))) {
+  animation:
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
+    ft-menu-fade-in 150ms ease-out;
 }
 
-:deep(.phonePlayerOptions[data-header-action]:has([data-ft-menu-transition]) .ft-submenu-header-action) {
-  pointer-events: none;
-  opacity: 0;
-  animation: none;
+:deep(.phonePlayerOptions > .shaka-overflow-menu:not(.shaka-hidden):is([data-ft-menu-transition='out'], :has([data-ft-menu-transition='out'])):has(> .shaka-sub-menu:not(.shaka-hidden) > .ft-submenu-header-action:not(.shaka-hidden))) {
+  animation:
+    ft-menu-open 200ms cubic-bezier(0.2, 0, 0, 1),
+    ft-menu-fade-in-again 150ms ease-out;
 }
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu:is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in'])) > .shaka-sub-menu:not(.shaka-hidden):has(> .ft-submenu-header-action:not(.shaka-hidden)) > :not(.ft-submenu-header-action, .os-scrollbar)) {
+  animation: ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+:deep(.phonePlayerOptions > .shaka-overflow-menu:is([data-ft-menu-transition='out'], :has([data-ft-menu-transition='out'])) > .shaka-sub-menu:not(.shaka-hidden):has(> .ft-submenu-header-action:not(.shaka-hidden)) > :not(.ft-submenu-header-action, .os-scrollbar)) {
+  animation: ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* stylelint-enable selector-max-compound-selectors */
 
 :deep(.phonePlayerOptions) {
   transition: opacity 150ms ease-in;
