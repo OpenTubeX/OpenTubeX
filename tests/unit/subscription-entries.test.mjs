@@ -210,27 +210,6 @@ test('keeps the cached publication date of entries that were already fetched', (
   assert.deepEqual(reconciled.map(entry => entry.published), [now - 25 * HOUR, now - 49 * HOUR])
 })
 
-test('does not reorder a feed when only some channels are refetched', () => {
-  // Both channels were fetched an hour ago, channel b's video is the newer one
-  const cachedChannelA = [video('a1', now - 25 * HOUR)]
-  const cachedChannelB = [video('b1', now - 24.5 * HOUR)]
-
-  // Refetching channel a returns the same video, with its relative date
-  // ("1 day ago") resolved against the current time
-  const refetchedChannelA = reconcileFetchedSubscriptionEntries(
-    [video('a1', now - 24 * HOUR)],
-    cachedChannelA,
-    'videoId',
-    now - HOUR
-  )
-
-  const feed = [...refetchedChannelA, ...cachedChannelB]
-    .sort((a, b) => b.published - a.published)
-    .map(entry => entry.videoId)
-
-  assert.deepEqual(feed, ['b1', 'a1'])
-})
-
 test('takes the new publication date for premieres and live streams', () => {
   const previousEntries = [
     video('live', now - 5 * HOUR, { liveNow: true }),

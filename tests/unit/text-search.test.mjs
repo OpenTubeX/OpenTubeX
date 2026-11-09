@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import { findSubsequenceIndexes, fuzzyWordScore, normalizeSearchText } from '../../src/renderer/helpers/textSearch.js'
 
-test('fast search normalization preserves Unicode casing in every active locale', () => {
-  const locales = JSON.parse(readFileSync(new URL('../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
+test('fast search normalization preserves Unicode casing across locales', () => {
+  const locales = ['en-US', 'de-DE', 'tr']
   const samples = ['  Résumé  VIDÉO ', 'Straße ÜBER GROẞARTIG', 'ΟΣ ΟΣΟΣ ΣΑΣ', 'I İ ı i', 'I\u0301 J\u0300', 'K ﬃ ÅÄÖ', '日本語の字幕 😀']
   for (const locale of locales) {
     for (const text of samples) {

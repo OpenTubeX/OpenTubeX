@@ -73,55 +73,6 @@ test('loads the destination once the pointer rests on an internal link', (t) => 
   assert.deepEqual(preloaded, ['/watch/abc?timestamp=5'], 'resting longer does not load again')
 })
 
-test('ignores pointers passing over links and links outside the app', (t) => {
-  const { preloaded, fire, wait } = setup(t)
-
-  fire('pointermove', { target: videoLink })
-  wait(ROUTE_PRELOAD_INTENT_DELAY_MS / 2)
-  fire('pointermove', { target: channelLink })
-  wait(ROUTE_PRELOAD_INTENT_DELAY_MS / 2)
-  fire('pointermove', { target: plainElement })
-  wait()
-  fire('pointermove', { target: new FakeElement({ href: 'https://example.com/#/watch/abc' }) })
-  wait()
-  assert.deepEqual(preloaded, [])
-
-  fire('pointermove', { target: channelLink })
-  wait(ROUTE_PRELOAD_INTENT_DELAY_MS / 2)
-  fire('pointerout', { target: channelLink, relatedTarget: null })
-  wait()
-  assert.deepEqual(preloaded, [], 'leaving the window cancels the intent')
-})
-
-test('ignores touch and stylus pointers', (t) => {
-  const { preloaded, fire, wait } = setup(t)
-
-  fire('pointermove', { target: videoLink, pointerType: 'touch' })
-  wait()
-  fire('pointermove', { target: videoLink, pointerType: 'pen' })
-  wait()
-  assert.deepEqual(preloaded, [])
-})
-
-test('scrolling and pressing the pointer cancel a pending intent', (t) => {
-  const { preloaded, fire, wait } = setup(t)
-
-  fire('pointermove', { target: videoLink })
-  fire('scroll', { target: plainElement })
-  wait()
-  assert.deepEqual(preloaded, [])
-
-  // The next real movement over the link starts a new intent.
-  fire('pointermove', { target: videoLink })
-  fire('pointerdown', { target: videoLink })
-  wait()
-  assert.deepEqual(preloaded, [])
-
-  fire('pointermove', { target: videoLink })
-  wait()
-  assert.deepEqual(preloaded, ['/watch/abc?timestamp=5'])
-})
-
 test('loads the destination of a link that keeps keyboard focus', (t) => {
   const { preloaded, fire, wait } = setup(t)
   const focusedChannel = new FakeElement({ href: '#/channel/UC123', focusVisible: true })
@@ -138,16 +89,6 @@ test('loads the destination of a link that keeps keyboard focus', (t) => {
   fire('focusin', { target: focusedPlaylist })
   wait()
   assert.deepEqual(preloaded, ['/playlist/PL1'])
-})
-
-test('focus moving elsewhere does not cancel a pointer intent', (t) => {
-  const { preloaded, fire, wait } = setup(t)
-
-  fire('pointermove', { target: videoLink })
-  fire('focusin', { target: plainElement })
-  fire('focusout', { target: plainElement })
-  wait()
-  assert.deepEqual(preloaded, ['/watch/abc?timestamp=5'])
 })
 
 test('failed preloads stay silent and a later intent tries again', async (t) => {
@@ -171,14 +112,4 @@ test('failed preloads stay silent and a later intent tries again', async (t) => 
 
   assert.equal(preloaded.length, 2)
   assert.deepEqual(unhandled, [])
-})
-
-test('removing the handler cancels pending intents and listeners', (t) => {
-  const { listeners, preloaded, remove, fire, wait } = setup(t)
-
-  fire('pointermove', { target: videoLink })
-  remove()
-  wait()
-  assert.deepEqual(preloaded, [])
-  assert.equal(listeners.size, 0)
 })

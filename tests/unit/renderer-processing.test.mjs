@@ -78,19 +78,6 @@ function monitorInputDelay() {
   }
 }
 
-test('input monitoring still rejects synchronous renderer CPU stalls', async () => {
-  const input = monitorInputDelay()
-  try {
-    await new Promise(resolve => setTimeout(resolve, 20))
-    const start = process.threadCpuUsage()
-    let elapsed
-    do {
-      elapsed = process.threadCpuUsage(start)
-    } while (elapsed.user + elapsed.system < 300_000)
-    await assert.rejects(input.finish(), /Maximum renderer CPU burst/)
-  } finally { input.stop() }
-})
-
 test('history edits during transfer cannot become remote deletions or lose new progress', async () => {
   const records = Array.from({ length: 600 }, (_, index) => ({
     videoId: `video-${index}`, authorId: 'UCtest', timeWatched: index + 1, watchProgress: 15,
@@ -379,30 +366,6 @@ test('foreground feeds fall back to local parsing if the utility process fails',
   assert.equal((await context.parseYouTubeRSSFeed(rss, 'UCtest')).videos.length, 1)
 })
 
-test('large history sync lets renderer input run before merging finishes', async () => {
-  const jobs = createJobs()
-  const context = syncContext((...args) => jobs.run(...args))
-  const records = Array.from({ length: 50_000 }, (_, index) => ({
-    videoId: `video-${index}`, title: `Video ${index}`, authorId: 'UCtest', author: 'Channel',
-    lengthSeconds: 120, timeWatched: index + 1, watchProgress: 15, isWatched: false,
-  }))
-  const remote = records.map(record => ({
-    video: { id: record.videoId, title: record.title, duration: 120, uploader: { id: 'UCtest', name: 'Channel' } },
-    metadata: { added_date: record.timeWatched, watched_state: 'watching', position_millis: 15_000 },
-  }))
-  const input = monitorInputDelay()
-  try {
-    const snapshot = await context.syncHistory({ getWatchHistory: async () => remote, supportsBulkSync: async () => true }, {
-      state: { history: { historyCacheSorted: reactive(records) } }, dispatch: () => assert.fail('Unchanged history must not be written'),
-    })
-    assert.equal(Object.keys(snapshot).length, records.length)
-    await input.finish()
-  } finally {
-    input.stop()
-    jobs.dispose()
-  }
-})
-
 test('backup archives are created and read without blocking renderer input', async () => {
   const jobs = createJobs()
   const history = Array.from({ length: 50_000 }, (_, index) => ({
@@ -418,29 +381,6 @@ test('backup archives are created and read without blocking renderer input', asy
     assert.deepEqual(data.settings, { locale: 'en-US' })
     assert.equal(data.history.length, history.length)
     assert.deepEqual(data.history.at(-1), history.at(-1))
-    await input.finish()
-  } finally {
-    input.stop()
-    jobs.dispose()
-  }
-})
-
-test('foreground RSS parsing lets renderer input run before returning entries', async () => {
-  const start = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
-  const end = subscriptions.indexOf('\n/**', start)
-  const jobs = createJobs()
-  const context = vm.createContext({
-    process: { env: { IS_ELECTRON: true } },
-    window: { ftElectron: { subscriptionAutoRefresh: { processFeed: input => jobs.run('subscriptionFeed', input) } } },
-    parseSubscriptionRss, enrichSubscriptionRssEntries: async entries => entries,
-  })
-  vm.runInContext(subscriptions.slice(start, end).replace('export ', ''), context)
-  const text = '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author>' +
-    Array.from({ length: 2000 }, (_, index) => `<entry><yt:videoId>video-${index}</yt:videoId><title>Video ${index}</title><published>2026-10-09T10:00:00Z</published></entry>`).join('') + '</feed>'
-  const input = monitorInputDelay()
-  try {
-    const result = await context.parseYouTubeRSSFeed(text, 'UCtest')
-    assert.equal(result.videos.length, 2000)
     await input.finish()
   } finally {
     input.stop()

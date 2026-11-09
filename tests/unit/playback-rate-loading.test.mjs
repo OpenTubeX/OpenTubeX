@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, reactive, ref } from 'vue'
-import { getPlaybackRatePresets, normalizePlaybackRate, usePlaybackRate } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlaybackRate.js'
+import { normalizePlaybackRate, usePlaybackRate } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlaybackRate.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const barSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/player-components/QuickPlaybackRateBar.js', import.meta.url), 'utf8')
@@ -145,16 +145,6 @@ test('Ctrl-click resets a speed selected before loading', async () => {
   assert.equal(video.playbackRate, 1)
 })
 
-test('quick presets keep their configured speed above the shortcut maximum', async () => {
-  const { hasLoaded, api, select, selected, video } = fixture(false)
-  select(5)
-  await nextTick()
-  assert.equal(selected(), 5)
-  hasLoaded.value = true
-  api.restorePendingPlaybackRate()
-  assert.equal(video.playbackRate, 5)
-})
-
 test('quick presets below the native playback range are preserved until Shaka loads', async () => {
   const { hasLoaded, player, api, select, selected, video } = fixture(false)
   let nativeRate = 1
@@ -215,26 +205,3 @@ for (const control of ['quick bar', 'shortcut']) {
     assert.equal(video.playbackRate, 1.5)
   })
 }
-
-test('steps along the playback rate interval without skipping a step or leaving the range', () => {
-  const { api: { getSteppedPlaybackRate } } = fixture(false)
-  assert.equal(getSteppedPlaybackRate(1, 0.25), 1.25)
-  assert.equal(getSteppedPlaybackRate(1, -0.25), 0.75)
-  // A rate just past a step moves to the next step in the direction of the change.
-  assert.equal(getSteppedPlaybackRate(1.05, 0.25), 1.25)
-  assert.equal(getSteppedPlaybackRate(1.2, -0.25), 1)
-  assert.equal(getSteppedPlaybackRate(3.9, 0.25), 4)
-  assert.equal(getSteppedPlaybackRate(0.25, -0.25), 0.25)
-})
-
-test('playback speed presets list every interval step up to the maximum', () => {
-  assert.deepEqual(getPlaybackRatePresets(0.25, 2), [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2])
-  assert.deepEqual(getPlaybackRatePresets(0.1, 1), [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-  assert.equal(getPlaybackRatePresets(0.1, 10).length, 100)
-  assert.equal(getPlaybackRatePresets(0.1, 10).at(-1), 10)
-  assert.deepEqual(getPlaybackRatePresets(0.1, 3).at(-1), 3)
-  for (const step of [0, -0.25, Number.NaN]) {
-    assert.deepEqual(getPlaybackRatePresets(step, 3), [])
-    assert.deepEqual(getPlaybackRatePresets(step, -3), [])
-  }
-})

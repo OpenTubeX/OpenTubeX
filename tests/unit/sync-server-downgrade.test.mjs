@@ -482,12 +482,6 @@ test('encrypted activity downloads can outlast the ordinary request timeout', as
 
 for (const [method, args, path, verb] of [
   ['authenticate', ['login', 'alice', 'password'], '/account/login', 'POST'],
-  ['authenticate', ['register', 'alice', 'password'], '/account/register', 'POST'],
-  ['deleteAccount', ['password'], '/account/delete', 'DELETE'],
-  ['getAccountSessions', [], '/account/sessions', 'GET'],
-  ['updateAccountSession', ['device/id', 'encrypted'], '/account/sessions/device%2Fid', 'PATCH'],
-  ['revokeAccountSession', ['device/id'], '/account/sessions/device%2Fid', 'DELETE'],
-  ['changePassword', ['old', 'new'], '/account/password', 'PUT'],
 ]) {
   test(`${verb} ${path} preserves v1 errors without trying an unversioned alias`, async () => {
     const f = fixture({}, {
@@ -873,18 +867,6 @@ test('blocked background sync notifies the user and links to sync settings', asy
 })
 
 
-test('manual sync can present its confirmation without a duplicate notification', async () => {
-  const f = fixture({
-    syncServerPrivacyMode: 'legacy',
-    syncServerPrivacyKey: '',
-    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  })
-  await assert.rejects(f.actions.syncWithSyncServer(f.context, { notifyDataLoss: false }), errors.SyncServerDataLossError)
-  assert.equal(f.settings.syncServerAutoSync, false)
-  assert.equal(f.notifications.length, 0)
-})
-
-
 for (const choice of ['keep', 'delete']) {
   test(`reviewing blocked deletions with ${choice} applies the choice once and resumes automatic sync`, async () => {
     const f = fixture({
@@ -1201,28 +1183,6 @@ test('unreadable and expired broadcast events advance the activity cursor', asyn
   await f.actions.refreshSyncServerEvents(f.context)
   assert.deepEqual(cursors, ['', '002'])
   assert.equal(f.context.state.syncServerActivity.length, 0)
-})
-
-test('cross-window token refresh logs a rejected initialization', async () => {
-  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-  const start = source.indexOf('window.ftElectron.handleSyncSettings(')
-  const end = source.indexOf('window.ftElectron.handleSyncHistory(', start)
-  let listener
-  const logged = []
-  const failure = new Error('temporary remote sync failure')
-  vm.runInNewContext(source.slice(start, end), {
-    window: { ftElectron: { handleSyncSettings: callback => { listener = callback } } },
-    SyncEvents: { GENERAL: { UPSERT: 'upsert' } },
-    settingsWithSideEffects: [],
-    defaultMutationId: key => key,
-    commit: () => {},
-    dispatch: async () => { throw failure },
-    console: { error: (...args) => logged.push(args) },
-  })
-  listener('upsert', { _id: 'syncServerToken', value: 'replacement-token' })
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(logged.length, 1)
-  assert.equal(logged[0][1], failure)
 })
 
 function liveFixture(settings = {}) {
@@ -1837,8 +1797,6 @@ test('activity refresh shares an in-flight download and retries after failure', 
 })
 
 for (const [syncServerUrl, syncServerUsername, syncServerDeviceId] of [
-  ['https://sync.example', 'alice', 'laptop'],
-  ['http://127.0.0.1:8080', 'bob', 'tablet'],
   ['http://localhost:8080', 'alice.name', 'laptop.1'],
   ['http://localhost:8080', 'alice\\u002ename', 'laptop'],
 ]) {

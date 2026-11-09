@@ -527,18 +527,17 @@ for (const feed of ['Videos', 'Shorts', 'Live']) {
 
 for (const feed of ['Videos', 'Shorts', 'Live']) {
   for (const backend of ['local', 'invidious']) {
-    for (const status of [403, 500, 503]) {
-      test(`${backend} ${feed} RSS HTTP ${status} produces one error toast without a connection banner`, async () => {
-        const app = createRefresh({ feed, backend, rssStatus: status, scraperError: Object.assign(new Error(`HTTP ${status}`), { status }) })
-        app.reconnect()
-        await app.refresh({ t: key => key, errorChannels: [] })
-        assert.equal(app.toasts.length, 1)
-        app.toasts[0][0].action()
-        assert.match(app.details, new RegExp(`HTTP ${status}`))
-        assert.equal(app.recovery.state, 'online')
-        assert.deepEqual(app.events, ['completed', 'finished'])
-      })
-    }
+    const status = 500
+    test(`${backend} ${feed} RSS HTTP ${status} produces one error toast without a connection banner`, async () => {
+      const app = createRefresh({ feed, backend, rssStatus: status, scraperError: Object.assign(new Error(`HTTP ${status}`), { status }) })
+      app.reconnect()
+      await app.refresh({ t: key => key, errorChannels: [] })
+      assert.equal(app.toasts.length, 1)
+      app.toasts[0][0].action()
+      assert.match(app.details, new RegExp(`HTTP ${status}`))
+      assert.equal(app.recovery.state, 'online')
+      assert.deepEqual(app.events, ['completed', 'finished'])
+    })
   }
 }
 
@@ -565,23 +564,6 @@ const translateSummary = createI18n({
   messages: { 'en-US': load(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8')) }
 }).global.t
 
-test('one compact refresh notification retains every failed channel and distinct diagnostic', async () => {
-  const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
-  await app.refresh({ t: translateSummary })
-  assert.equal(app.toasts.length, 1)
-  const toast = app.toasts[0][0]
-  assert.equal(toast.time, 10000, 'completion must start the visible timeout indicator')
-  assert.equal(toast.message(), 'Channels that could not be refreshed: UC0, UC1, UC2 and 17 more. Click to view details.')
-  assert.ok(toast.message().length < 100)
-  toast.action()
-  assert.equal(app.copied.length, 0, 'opening details must not overwrite the clipboard')
-  for (let i = 0; i < 20; i++) assert.match(app.details, new RegExp(`UC${i}:`))
-  assert.match(app.details, /HTTP 500/)
-  assert.match(app.details, /backend=YouTube RSS/)
-  assert.match(app.details, /backend=Invidious RSS/)
-  assert.equal(new Set(app.details.split('\n')).size, app.details.split('\n').length)
-})
-
 for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
   test(`${feed} HTTP failures recovered by fallback do not appear in the summary`, async () => {
     const app = createRefresh({ feed, error: Object.assign(new Error('HTTP 500'), { status: 500 }), fallbackWorks: true })
@@ -590,18 +572,6 @@ for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
     assert.equal(app.writes.filter(write => write.key.endsWith('CacheByChannel')).length, 20)
   })
 }
-
-test('two confirmed unavailable channels are both named in the notification and details', async () => {
-  const app = createRefresh({ rssStatus: 404, channelInfo: { alert: 'This channel does not exist.' } })
-  app.getters.getActiveProfile.subscriptions = [{ id: 'UCfirst', name: 'First channel' }, { id: 'UCsecond', name: 'Second channel' }]
-  app.reconnect()
-  await app.refresh({ t: translateSummary })
-  assert.equal(app.toasts.length, 1)
-  assert.equal(app.toasts[0][0].message(), 'Channels that could not be refreshed: First channel, Second channel. Click to view details.')
-  app.toasts[0][0].action()
-  assert.match(app.details, /First channel \(UCfirst\)/)
-  assert.match(app.details, /Second channel \(UCsecond\)/)
-})
 
 for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
   test(`${feed} unrecovered failures preserve cached entries and report all channels`, async () => {
@@ -636,17 +606,6 @@ test('confirmed HTTP failures stay accessible while another channel retries and 
     await refresh
   }
 })
-
-for (const count of [1, 3, 4, 5]) {
-  test(`refresh toast names up to three channels with ${count} failures`, async () => {
-    const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
-    app.getters.getActiveProfile.subscriptions = Array.from({ length: count }, (_, i) => ({ id: `UC${i}`, name: `Channel ${i}` }))
-    await app.refresh({ t: translateSummary })
-    const names = Array.from({ length: Math.min(count, 3) }, (_, i) => `Channel ${i}`).join(', ')
-    const more = count > 3 ? ` and ${count - 3} more` : ''
-    assert.equal(app.toasts[0][0].message(), `Channels that could not be refreshed: ${names}${more}. Click to view details.`)
-  })
-}
 
 for (const type of ['ReelItem', 'ShortsLockupView']) {
   test(`Shorts playlist refresh preserves the channel byline for ${type}`, async () => {

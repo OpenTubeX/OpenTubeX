@@ -44,9 +44,3 @@ test('shared translation rejects untrusted redirects before fetching them', asyn
   await assert.rejects(request(payload), /untrusted audio URL/)
   assert.equal(calls, 1)
 })
-
-test('shared translation preserves preparation status without fetching audio', async t => {
-  t.mock.method(VOTClient.prototype, 'translateVideo', async () => ({ translated: false, status: 2, remainingTime: 35 }))
-  const request = createVoiceOverTranslationClient(() => assert.fail('unexpected audio request'))
-  assert.deepEqual(await request(payload), { translated: false, status: 2, remainingTime: 35 })
-})

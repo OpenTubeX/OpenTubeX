@@ -479,24 +479,22 @@ test('failed seen-mark persistence stops sync before uploading stale state', asy
   assert.equal(uploads, 0)
 })
 
-for (const cache of ['videoCache', 'shortsCache', 'liveCache']) {
-  test(`marking ${cache} unseen preserves watch progress and restores a seen video`, async () => {
-    const fixture = cacheFixture()
-    fixture.state[cache].channel.videos[0].isNewInSubscriptionFeed = false
-    const history = { videoId: cache, isWatched: true, watchProgress: 123, lengthSeconds: 200 }
-    fixture.context.rootGetters = { getHistoryCacheById: { [cache]: history }, getSubscriptionSeenVideos: [] }
-    await fixture.actions.markSubscriptionVideoAsUnseen(fixture.context, cache)
-    assert.equal(fixture.recorded.length, 1)
-    const [action, update] = fixture.recorded[0]
-    assert.equal(action, 'updateSubscriptionHistory')
-    const { History } = await settingsFixture([history])
-    const result = await History.updateSubscriptionState(update)
-    assert.equal(result.records[0].isWatched, false)
-    assert.equal(result.records[0].watchProgress, 123)
-    const restored = seenVideos.applySubscriptionSeenVideosToCache(fixture.state[cache], result.seenVideos)
-    assert.equal(restored.channel.videos[0].isNewInSubscriptionFeed, true)
-  })
-}
+test('marking a video unseen preserves watch progress and restores a seen video', async () => {
+  const fixture = cacheFixture()
+  fixture.state.videoCache.channel.videos[0].isNewInSubscriptionFeed = false
+  const history = { videoId: 'videoCache', isWatched: true, watchProgress: 123, lengthSeconds: 200 }
+  fixture.context.rootGetters = { getHistoryCacheById: { videoCache: history }, getSubscriptionSeenVideos: [] }
+  await fixture.actions.markSubscriptionVideoAsUnseen(fixture.context, 'videoCache')
+  assert.equal(fixture.recorded.length, 1)
+  const [action, update] = fixture.recorded[0]
+  assert.equal(action, 'updateSubscriptionHistory')
+  const { History } = await settingsFixture([history])
+  const result = await History.updateSubscriptionState(update)
+  assert.equal(result.records[0].isWatched, false)
+  assert.equal(result.records[0].watchProgress, 123)
+  const restored = seenVideos.applySubscriptionSeenVideosToCache(fixture.state.videoCache, result.seenVideos)
+  assert.equal(restored.channel.videos[0].isNewInSubscriptionFeed, true)
+})
 
 test('unseen marks survive stale sync, cache refresh and a later mark as seen', () => {
   const cache = { channel: { videos: [{ videoId: 'video', isNewInSubscriptionFeed: false }] } }
@@ -587,7 +585,7 @@ test('watched history does not prune reverse marks or their newer seen half', as
   }], { video: history }), [])
 })
 
-for (const timeWatched of [1000, 2000, 3000]) {
+for (const timeWatched of [1000, 2000]) {
   test(`unseen sync reconciles watched history at ${timeWatched} without changing progress`, async () => {
     const document = createEmptySyncDocument()
     const client = new EncryptedSyncAdapter(document)

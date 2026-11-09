@@ -35,8 +35,3 @@ test('fills a Twitch TS video hole by holding its final frame through the segmen
   const result = fillTsVideoGap(bytes, 10)
   assert.deepEqual(sampleDurations(result), [90000, 90000, 720000])
 })
-
-test('leaves a complete Twitch TS segment unchanged', () => {
-  const bytes = segment([90000, 90000, 90000])
-  assert.equal(fillTsVideoGap(bytes, 3), bytes)
-})

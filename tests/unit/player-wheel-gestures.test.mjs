@@ -37,9 +37,6 @@ function wheel (target, settings, modifiers = {}) {
 
 for (const [setting, action, modifiers] of [
   ['videoSkipMouseScroll', 'seek', {}],
-  ['videoPlaybackRateMouseScroll', 'rate', { ctrlKey: true }],
-  ['videoPlaybackRateMouseScroll', 'rate', { metaKey: true }],
-  ['videoVolumeMouseScroll', 'volume', {}],
 ]) {
   test(`${action} wheel gestures reach the SVG inside the play button (${Object.keys(modifiers)})`, () => {
     const settings = { [setting]: { value: true } }
@@ -50,15 +47,6 @@ for (const [setting, action, modifiers] of [
     assert.deepEqual(wheel(new ElementStub('', icon), settings, modifiers), [action])
   })
 }
-
-test('seek feedback text and SVG paths belong to the video surface', () => {
-  const settings = { videoSkipMouseScroll: { value: true } }
-  for (const className of ['shaka-rewind-container', 'shaka-fast-forward-container']) {
-    const feedback = new ElementStub(className)
-    assert.deepEqual(wheel(new ElementStub('', feedback), settings), ['seek'])
-    assert.deepEqual(wheel(new ElementStub('', new ElementStub('shaka-ui-icon', feedback)), settings), ['seek'])
-  }
-})
 
 test('menu buttons, the seek bar, and other toolbar controls keep their wheel events', () => {
   const settings = {

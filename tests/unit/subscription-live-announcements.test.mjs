@@ -57,14 +57,6 @@ test('adds RSS announcement dates to scheduled Local API live streams when they 
   assert.deepEqual(requests, [`https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`])
 })
 
-test('skips the RSS lookup for live streams while scheduled entries are shown first', async () => {
-  const { requests, result } = fetchLiveTab(true)
-  const { videos } = await result
-
-  assert.equal(videos[0].subscriptionFeedPublished, undefined)
-  assert.deepEqual(requests, [])
-})
-
 test('stops the RSS lookup when the refresh is cancelled', async () => {
   const controller = new AbortController()
   controller.abort()

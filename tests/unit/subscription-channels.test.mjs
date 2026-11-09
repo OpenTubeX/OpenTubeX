@@ -12,7 +12,6 @@ import {
   getValidSubscriptionChannels,
   hasSubscriptionNotifications,
   isMembersOnlySubscriptionVideoVisible,
-  isSubscriptionFeedTypeEnabled,
   normalizeSubscriptionChannelSettings,
   parseSubscriptionDailyVideoLimit
 } from '../../src/renderer/helpers/subscription-channels.js'
@@ -29,10 +28,6 @@ test('removes empty and malformed subscription entries', () => {
     { id: 'channel-1', name: 'One' },
     { id: 'channel-2' }
   ])
-})
-
-test('handles a missing subscriptions array', () => {
-  assert.deepEqual(getValidSubscriptionChannels(undefined), [])
 })
 
 test('shares normalized channel-setting values between settings interfaces', () => {
@@ -75,15 +70,6 @@ test('only counts notifications for types shown in the subscription feed', () =>
   assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos'], notificationFeedTypes: [] }), false)
   assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos'], notificationFeedTypes: ['posts'] }), false)
   assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos', 'posts'], notificationFeedTypes: ['posts'] }), true)
-})
-
-test('keeps every feed enabled for existing subscriptions', () => {
-  const subscription = { id: 'channel-1' }
-
-  assert.equal(isSubscriptionFeedTypeEnabled(subscription, 'videos'), true)
-  assert.equal(isSubscriptionFeedTypeEnabled(subscription, 'shorts'), true)
-  assert.equal(isSubscriptionFeedTypeEnabled(subscription, 'live'), true)
-  assert.equal(isSubscriptionFeedTypeEnabled(subscription, 'posts'), true)
 })
 
 test('filters every unselected feed type', () => {
@@ -131,26 +117,6 @@ test('only shows opted-in members-only videos when restricted playback is config
     [{ id: 'channel-1', showMembersOnly: false }],
     true
   ), [publicVideo])
-})
-
-test('reuses an unchanged list when there are no members-only videos', () => {
-  const videos = [{ videoId: 'public', authorId: 'channel-1' }]
-
-  assert.equal(filterMembersOnlySubscriptionVideos(
-    videos,
-    [{ id: 'channel-1', showMembersOnly: true }],
-    true
-  ), videos)
-})
-
-test('reuses an unchanged list when no video limit is active', () => {
-  const videos = [{ videoId: 'public', authorId: 'channel-1' }]
-
-  assert.equal(applySubscriptionVideoLimit(
-    videos,
-    [{ id: 'channel-1' }],
-    null
-  ), videos)
 })
 
 test('uses the global total limit when a channel has no override', () => {

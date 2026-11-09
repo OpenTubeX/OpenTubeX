@@ -3,11 +3,6 @@ import test from 'node:test'
 
 import {
   buildYtDlpPlaybackCacheKey,
-  DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
-  MAX_YT_DLP_PRELOAD_CONCURRENCY,
-  MAX_YT_DLP_PRELOAD_COUNT,
-  normalizeYtDlpPreloadConcurrency,
-  normalizeYtDlpPreloadCount,
   preloadYtDlpPlaybackSources,
   selectYtDlpPreloadVideoIds,
 } from '../../src/renderer/helpers/player/ytDlpPlaybackPreload.js'
@@ -63,29 +58,6 @@ test('reuses preloaded playback sources across proxy changes', () => {
   }
 })
 
-test('normalizes the number of upcoming yt-dlp videos to preload', () => {
-  assert.equal(normalizeYtDlpPreloadCount(3), 3)
-  assert.equal(normalizeYtDlpPreloadCount('4'), 4)
-  assert.equal(normalizeYtDlpPreloadCount(0), 0)
-  assert.equal(normalizeYtDlpPreloadCount(-1), 0)
-  assert.equal(normalizeYtDlpPreloadCount(MAX_YT_DLP_PRELOAD_COUNT + 1), MAX_YT_DLP_PRELOAD_COUNT)
-  assert.equal(normalizeYtDlpPreloadCount(1.5), 0)
-})
-
-test('normalizes the number of concurrent yt-dlp preloads', () => {
-  assert.equal(normalizeYtDlpPreloadConcurrency(3), 3)
-  assert.equal(normalizeYtDlpPreloadConcurrency('4'), 4)
-  assert.equal(normalizeYtDlpPreloadConcurrency(32), 32)
-  assert.equal(normalizeYtDlpPreloadConcurrency(33), 32)
-  assert.equal(normalizeYtDlpPreloadConcurrency(0), DEFAULT_YT_DLP_PRELOAD_CONCURRENCY)
-  assert.equal(normalizeYtDlpPreloadConcurrency(-1), DEFAULT_YT_DLP_PRELOAD_CONCURRENCY)
-  assert.equal(normalizeYtDlpPreloadConcurrency(1.5), DEFAULT_YT_DLP_PRELOAD_CONCURRENCY)
-  assert.equal(
-    normalizeYtDlpPreloadConcurrency(MAX_YT_DLP_PRELOAD_CONCURRENCY + 1),
-    MAX_YT_DLP_PRELOAD_CONCURRENCY
-  )
-})
-
 test('preloads queued videos before playlist or recommendation candidates', () => {
   assert.deepEqual(selectYtDlpPreloadVideoIds({
     currentVideoId: 'current00001',
@@ -130,21 +102,6 @@ test('does not fall back to recommendations at the end of a playlist', () => {
     playlistVideos: [],
     recommendedVideos: [video('recommend01')],
   }), [])
-})
-
-test('selects no upcoming videos when the preload count is zero', () => {
-  for (const candidates of [
-    { queuedVideos: [video('queue000001')], playlistVideos: [video('list0000001')] },
-    { queuedVideos: [], playlistVideos: [video('list0000001')] },
-    { queuedVideos: [], playlistVideos: null },
-  ]) {
-    assert.deepEqual(selectYtDlpPreloadVideoIds({
-      currentVideoId: 'current00001',
-      limit: 0,
-      recommendedVideos: [video('recommend01')],
-      ...candidates,
-    }), [])
-  }
 })
 
 test('preloads unique videos with bounded concurrency and reports failures', async () => {

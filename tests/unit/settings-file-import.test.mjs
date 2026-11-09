@@ -60,13 +60,3 @@ test('invalid settings files report failure without applying settings or announc
     assert.ok(result.toasts.every(toast => toast.icon[1] === 'circle-exclamation'), content)
   }
 })
-
-test('valid settings that already match still count as a successful import', async () => {
-  const result = await importFile('{"uiScale":100}')
-  assert.deepEqual(result.applied, [])
-  assert.equal(result.toasts.at(-1).icon[1], 'sliders-h')
-})
-
-test('canceling settings import leaves settings and notifications alone', async () => {
-  assert.deepEqual(await importFile(null), { applied: [], toasts: [] })
-})

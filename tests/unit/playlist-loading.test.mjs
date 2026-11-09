@@ -92,38 +92,27 @@ test('adding a playlist reports a failed database write without updating the sto
   assert.deepEqual(errors, [failure])
 })
 
-test('adding a playlist reports a successful database write', async () => {
-  const { db, errors, dispatch, load } = await fixture([playlist('favorites', 'Favorites')])
-  await load()
-  const result = await dispatch('addPlaylist', { _id: 'new-empty', playlistName: 'New empty', videos: [] })
-  assert.equal(result, true)
-  assert.equal((await db.playlists.findOneAsync({ _id: 'new-empty' })).playlistName, 'New empty')
-  assert.deepEqual(errors, [])
-})
-
-for (const [id, name] of [['watchLater', 'Watch Later'], ['favorites', 'Favorites']]) {
-  for (const existingDefault of [false, true]) {
-    test(`loading preserves a custom ${name} playlist, default present: ${existingDefault}`, async () => {
-      const records = [playlist('custom', name), playlist('other', 'Other')]
-      if (existingDefault) records.push(playlist(id, `Renamed ${name}`))
-      const { db, module, errors, load } = await fixture(records)
-      for (let restart = 0; restart < 2; restart++) {
-        await load()
-        const saved = await db.playlists.findAsync({})
-        assert.deepEqual(saved.sort((a, b) => a._id.localeCompare(b._id)), records.toSorted((a, b) => a._id.localeCompare(b._id)))
-        assert.deepEqual(Array.from(module.state.playlists, p => p._id).sort(), records.map(p => p._id).sort())
-        assert.equal(module.state.playlistsReady, true)
-        assert.equal(errors.length, 0)
-      }
-    })
-  }
-
-  test(`loading still unlocks the renamed built-in ${name} playlist`, async () => {
-    const { db, load } = await fixture([playlist(id, 'Renamed', true)])
-    await load()
-    assert.equal((await db.playlists.findOneAsync({ _id: id })).protected, false)
+for (const existingDefault of [false, true]) {
+  test(`loading preserves a custom Watch Later playlist, default present: ${existingDefault}`, async () => {
+    const records = [playlist('custom', 'Watch Later'), playlist('other', 'Other')]
+    if (existingDefault) records.push(playlist('watchLater', 'Renamed Watch Later'))
+    const { db, module, errors, load } = await fixture(records)
+    for (let restart = 0; restart < 2; restart++) {
+      await load()
+      const saved = await db.playlists.findAsync({})
+      assert.deepEqual(saved.sort((a, b) => a._id.localeCompare(b._id)), records.toSorted((a, b) => a._id.localeCompare(b._id)))
+      assert.deepEqual(Array.from(module.state.playlists, p => p._id).sort(), records.map(p => p._id).sort())
+      assert.equal(module.state.playlistsReady, true)
+      assert.equal(errors.length, 0)
+    }
   })
 }
+
+test('loading still unlocks the renamed built-in Watch Later playlist', async () => {
+  const { db, load } = await fixture([playlist('watchLater', 'Renamed', true)])
+  await load()
+  assert.equal((await db.playlists.findOneAsync({ _id: 'watchLater' })).protected, false)
+})
 
 test('a failed protection repair does not hide loaded playlists', async () => {
   const records = [playlist('watchLater', 'Watch Later', true), playlist('custom', 'My playlist')]

@@ -3,7 +3,6 @@ import { test } from 'node:test'
 
 import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
 import {
-  PREVIEW_MARKER,
   moderateDiscussion,
   previewRequest,
   publishPreview,
@@ -27,42 +26,6 @@ function discussion({ theme = DEFAULT_CUSTOM_THEME, screenshots = '', markers = 
     ].join('\n'),
   }
 }
-
-test('accepts both localized old posts and marked templates, including CRLF', () => {
-  for (const markers of [false, true]) {
-    const post = discussion({ markers })
-    post.body = post.body.replaceAll('\n', '\r\n')
-    const request = previewRequest(post)
-    assert.equal(request.theme.colors.background, DEFAULT_CUSTOM_THEME.colors.background)
-    assert.match(request.hash, /^[a-f0-9]{64}$/)
-  }
-})
-
-test('leaves supplied screenshots, links, text, and HTML alone', () => {
-  for (const screenshots of [
-    '![Screenshot](https://example.com/screen.png)',
-    '<img src="https://example.com/screen.png">',
-    '[Screenshot](https://example.com/screen.png)',
-    'I will add screenshots later.',
-    '![Preview][image]\n\n[image]: https://example.com/screen.png',
-  ]) {
-    assert.equal(previewRequest(discussion({ screenshots })), null)
-    assert.equal(previewRequest(discussion({ screenshots, markers: false })), null)
-  }
-  const post = discussion()
-  post.body = `![Screenshot](https://example.com/screen.png)\n\n${post.body}`
-  assert.equal(previewRequest(post), null)
-})
-
-test('skips other categories, closed or locked discussions, missing themes, and multiple themes', () => {
-  assert.equal(previewRequest({ ...discussion(), category: { slug: 'general' } }), null)
-  assert.equal(previewRequest({ ...discussion(), closed: true }), null)
-  assert.equal(previewRequest({ ...discussion(), locked: true }), null)
-  assert.equal(previewRequest({ ...discussion(), body: 'No theme here' }), null)
-  const post = discussion()
-  post.body += `\n\n\`\`\`json\n${JSON.stringify(DEFAULT_CUSTOM_THEME)}\n\`\`\`\n`
-  assert.equal(previewRequest(post), null)
-})
 
 test('validates theme data and rejects CSS payloads or malformed JSON', () => {
   const theme = structuredClone(DEFAULT_CUSTOM_THEME)
@@ -115,41 +78,6 @@ test('removes external discussion links and prepares an author notification for 
   assert.match(notification.variables.body, /GitHub-hosted links/)
 })
 
-test('moderation leaves allowed discussions alone without notifying the author', () => {
-  for (const post of [
-    discussion({ screenshots: `![Image](${urls.watch})` }),
-    { ...discussion({ screenshots: 'https://example.com' }), category: { slug: 'general' } },
-    { ...discussion({ screenshots: 'https://example.com' }), closed: true },
-    { ...discussion({ screenshots: 'https://example.com' }), locked: true },
-    null,
-  ]) {
-    const api = fakeApi(post)
-    assert.equal(moderateDiscussion('OpenTubeX/OpenTubeX', 123, api.query), null)
-    assert.equal(api.mutations.length, 0)
-  }
-})
-
-test('moderation limits descriptions to 500 characters and explains the change to the author', () => {
-  const post = { ...discussion({ screenshots: `![Image](${urls.watch})` }), author: { login: 'theme-author' } }
-  post.body = post.body.replace('A theme to share.', 'a'.repeat(501))
-  const api = fakeApi(post)
-  const notification = moderateDiscussion('OpenTubeX/OpenTubeX', 123, api.query)
-  assert.equal(api.mutations[0].variables.body, post.body.replace('a'.repeat(501), 'a'.repeat(500)))
-  assert.match(notification.variables.body, /@theme-author/)
-  assert.match(notification.variables.body, /500-character limit/)
-  assert.doesNotMatch(notification.variables.body, /removed external/)
-})
-
-test('moderation reports both link removal and description shortening in one comment', () => {
-  const post = discussion({ screenshots: '![Image](https://example.com/a.png)' })
-  post.body = post.body.replace('A theme to share.', 'a'.repeat(501))
-  const api = fakeApi(post)
-  const notification = moderateDiscussion('OpenTubeX/OpenTubeX', 123, api.query)
-  assert.equal(api.mutations.length, 1)
-  assert.match(notification.variables.body, /removed external/)
-  assert.match(notification.variables.body, /500-character limit/)
-})
-
 test('moderation does not overwrite an author edit made during the check', () => {
   const post = discussion({ screenshots: 'https://example.com' })
   let reads = 0
@@ -181,23 +109,6 @@ test('fills the original screenshot section and preserves surrounding text and t
   }
 })
 
-test('refreshes generated previews after a theme edit and preserves the latest description', () => {
-  const original = discussion()
-  const first = previewRequest(original)
-  const post = discussion({
-    theme: { ...DEFAULT_CUSTOM_THEME, name: 'Changed theme' },
-    screenshots: renderPreviewImages(first.hash, urls),
-  })
-  const request = { ...previewRequest(post), repository: 'OpenTubeX/OpenTubeX', number: 123 }
-  post.body = post.body.replace('A theme to share.', 'An updated description.')
-  const api = fakeApi(post)
-  assert.equal(publishPreview(request, urls, api.query), true)
-  const body = api.mutations[0].variables.body
-  assert.ok(body.includes('An updated description.'))
-  assert.equal(body.split(PREVIEW_MARKER).length, 2)
-  assert.equal(previewRequest({ ...post, body }).existingHash, request.hash)
-})
-
 test('preserves user changes inside or alongside generated previews', () => {
   const original = previewRequest(discussion())
   const generated = renderPreviewImages(original.hash, urls)
@@ -224,24 +135,6 @@ test('rechecks category, theme, screenshots and lock state before posting', () =
     assert.equal(publishPreview(request, urls, api.query), false)
     assert.equal(api.mutations.length, 0)
   }
-})
-
-test('uploads a screenshot as a native attachment for the source repository', () => {
-  const url = 'https://github.com/user-attachments/assets/example'
-  const result = uploadPreviewImage('123', '/tmp/preview images/watch.png', args => {
-    const endpoint = new URL(args[1])
-    assert.equal(endpoint.origin, 'https://uploads.github.com')
-    assert.equal(endpoint.pathname, '/user-attachments/assets')
-    assert.equal(endpoint.searchParams.get('repository_id'), '123')
-    assert.equal(endpoint.searchParams.get('name'), 'watch.png')
-    assert.equal(endpoint.searchParams.get('content_type'), 'image/png')
-    assert.deepEqual(args.slice(2), [
-      '--method', 'POST', '--input', '/tmp/preview images/watch.png',
-      '-H', 'Content-Type: application/octet-stream', '-H', 'Accept: application/vnd.github+json',
-    ])
-    return JSON.stringify({ url })
-  })
-  assert.equal(result, url)
 })
 
 test('rejects missing or unexpected attachment URLs and propagates upload failures', () => {

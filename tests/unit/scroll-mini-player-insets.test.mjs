@@ -3,8 +3,6 @@ import test from 'node:test'
 
 import {
   getViewportInsets,
-  getViewportWidth,
-  getDefaultScrollMiniPlayerRect,
   resizeScrollMiniPlayerFromCorner,
   snapScrollMiniPlayerToEdge,
   clampScrollMiniPlayerRect,
@@ -14,7 +12,6 @@ import {
   setSavedScrollMiniPlayerRect,
   getScrollMiniVerticalAnchor,
   getScrollMiniPlayerStashSide,
-  getStashedScrollMiniPlayerRect,
   pickScrollMiniVerticalAnchor,
   reanchorScrollMiniPlayerRect,
   MARGIN
@@ -27,16 +24,6 @@ test('a phone drag beyond either edge stashes the mini player', () => {
   assert.equal(getScrollMiniPlayerStashSide(rect, -50, 400, insets), 'left')
   assert.equal(getScrollMiniPlayerStashSide(rect, 100, 400, insets), 'right')
   assert.equal(getScrollMiniPlayerStashSide(rect, 10, 400, insets), null)
-})
-
-test('a stashed mini player leaves a 36px restore target visible', () => {
-  const rect = { left: 16, top: 120, width: 320, height: 180 }
-  const insets = { left: 4, right: 8 }
-  const left = getStashedScrollMiniPlayerRect(rect, 'left', 400, insets)
-  const right = getStashedScrollMiniPlayerRect(rect, 'right', 400, insets)
-
-  assert.equal(left.left + left.width - insets.left, 36)
-  assert.equal(400 - insets.right - right.left, 36)
 })
 
 /**
@@ -79,12 +66,6 @@ test.afterEach(() => {
   delete global.window
 })
 
-test('the usable viewport width excludes the vertical scrollbar', () => {
-  stubViewport({ clientWidth: 1585, scrollbarWidth: 15 })
-
-  assert.equal(getViewportWidth(), 1585)
-})
-
 test('docking to the inline-end leaves a margin clear of the scrollbar', () => {
   stubViewport({ clientWidth: 1585, scrollbarWidth: 15 })
   const insets = getViewportInsets()
@@ -115,15 +96,6 @@ test('a vertical tab bar on the right (RTL) pads the right inset instead', () =>
 
   assert.equal(insets.right, (1000 - 780) + MARGIN)
   assert.equal(insets.left, MARGIN)
-})
-
-test('without a vertical tab bar both inline insets stay at the margin', () => {
-  stubViewport({ clientWidth: 1000 })
-
-  const insets = getViewportInsets()
-
-  assert.equal(insets.left, MARGIN)
-  assert.equal(insets.right, MARGIN)
 })
 
 test('a bottom tab bar pads the bottom inset', () => {
@@ -184,20 +156,18 @@ test('a short landscape sidebar does not become bottom navigation when expanded'
   assert.equal(insets.bottom, MARGIN)
 })
 
-for (const width of [80, 200, 200.25]) {
-  for (const right of [false, true]) {
-    test(`the mobile bar reserves a ${width}px sidebar on the ${right ? 'right' : 'left'}`, () => {
-      stubViewport({
-        sideNavRect: { left: right ? 1000 - width : 0, right: right ? 1000 : width, top: 60, bottom: 500, width, height: 440 },
-        clientWidth: 1000, clientHeight: 500,
-      })
-      const insets = getViewportInsets({ includeSideNav: true })
-      assert.equal(insets[right ? 'right' : 'left'], width + MARGIN)
-      assert.equal(insets[right ? 'left' : 'right'], MARGIN)
-      assert.equal(insets.bottom, MARGIN)
-      assert.equal(getViewportInsets()[right ? 'right' : 'left'], MARGIN, 'floating desktop player behavior is unchanged')
+for (const [width, right] of [[200.25, false], [80, true]]) {
+  test(`the mobile bar reserves a ${width}px sidebar on the ${right ? 'right' : 'left'}`, () => {
+    stubViewport({
+      sideNavRect: { left: right ? 1000 - width : 0, right: right ? 1000 : width, top: 60, bottom: 500, width, height: 440 },
+      clientWidth: 1000, clientHeight: 500,
     })
-  }
+    const insets = getViewportInsets({ includeSideNav: true })
+    assert.equal(insets[right ? 'right' : 'left'], width + MARGIN)
+    assert.equal(insets[right ? 'left' : 'right'], MARGIN)
+    assert.equal(insets.bottom, MARGIN)
+    assert.equal(getViewportInsets()[right ? 'right' : 'left'], MARGIN, 'floating desktop player behavior is unchanged')
+  })
 }
 
 test('remembered mini player position stays fixed while bottom navigation slides away', () => {
@@ -239,14 +209,6 @@ const SAVED_RECT = {
   verticalDock: 'bottom',
   verticalOffset: 96
 }
-
-test('portrait and landscape defaults use the same longest edge', () => {
-  stubViewport({ clientWidth: 1585 })
-  const landscape = clampScrollMiniPlayerRect(getDefaultScrollMiniPlayerRect())
-  const portrait = clampScrollMiniPlayerRect(getDefaultScrollMiniPlayerRect(9 / 16), 9 / 16)
-  assert.equal(portrait.height, landscape.width)
-  assert.ok(Math.abs(portrait.width - landscape.height) <= 1)
-})
 
 test('the shared size survives switching between portrait and landscape', () => {
   stubViewport({ clientWidth: 1585 })

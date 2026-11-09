@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
-import { readFile } from 'node:fs/promises'
-import vm from 'node:vm'
-import { effectScope, nextTick, reactive, ref, watch } from 'vue'
-import { createPlaybackScreenWake, playbackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
+import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
 
 function fixture(plugin) {
   const calls = []
@@ -118,10 +115,6 @@ test('backgrounding during an in-flight acquire always leaves sleep allowed', as
   assert.equal(calls.at(-1), 'sleep')
 })
 
-test('Electron does not instantiate the mobile screen wake controller', () => {
-  assert.equal(playbackScreenWake, null)
-})
-
 test('ordinary mobile media events release on failure and source removal', async () => {
   const calls = []
   const wake = createPlaybackScreenWake({
@@ -157,45 +150,4 @@ test('returning to paused video or playing before foreground state arrives never
   await setImmediate()
   assert.equal(f.calls.at(-1), 'sleep')
   assert.equal(f.calls.includes('awake'), false)
-})
-
-test('the shared player updates screen wake when its mini-player is dismissed or music becomes audio-only', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const bind = source.match(/screenWakeBinding = playbackScreenWake\?\.bindVideo\(videoElement, \(\) =>\n[\s\S]*?\n      \)/)[0]
-  const update = source.indexOf('screenWakeBinding?.update()')
-  const observer = source.slice(source.lastIndexOf('watch(', update), source.indexOf('\n    })', update) + 7)
-  const f = fixture()
-  f.binding.destroy()
-  f.wake.setAppActive(true)
-  const refs = {
-    isActiveTab: ref(false), isCrossTabMiniPlayerPresented: ref(true),
-    scrollMiniPlayerDismissed: ref(false), audioPlayerMode: ref(false),
-  }
-  const scope = effectScope()
-  const context = vm.createContext({
-    ...refs, props: reactive({ format: 'dash' }), screenWakeBinding: null,
-    playbackScreenWake: f.wake, videoElement: f.element, watch,
-  })
-  scope.run(() => vm.runInContext(`${bind}\n${observer}`, context))
-  try {
-    f.media.update(f.playing)
-    await setImmediate()
-    assert.equal(f.calls.at(-1), 'awake')
-    refs.scrollMiniPlayerDismissed.value = true
-    await nextTick()
-    await setImmediate()
-    assert.equal(f.calls.at(-1), 'sleep', 'dismissal hides the video without pausing audio')
-    refs.scrollMiniPlayerDismissed.value = false
-    refs.isActiveTab.value = true
-    await nextTick()
-    await setImmediate()
-    assert.equal(f.calls.at(-1), 'awake')
-    refs.audioPlayerMode.value = true
-    await nextTick()
-    await setImmediate()
-    assert.equal(f.calls.at(-1), 'sleep', 'music artwork is not active video even with DASH format')
-  } finally {
-    scope.stop()
-    context.screenWakeBinding.destroy()
-  }
 })

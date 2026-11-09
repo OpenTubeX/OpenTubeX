@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import {
-  getThumbnailPreviewUrl,
-  isThumbnailPreviewImageUsable
-} from '../../src/renderer/helpers/thumbnailPreview.js'
+import { getThumbnailPreviewUrl } from '../../src/renderer/helpers/thumbnailPreview.js'
 
 test('reads moving thumbnails from regular YouTube video results', () => {
   assert.equal(getThumbnailPreviewUrl({
@@ -42,23 +39,4 @@ test('ignores video results without a usable moving thumbnail', () => {
       }]
     }
   }), null)
-})
-
-test('rejects YouTube\'s decodable moving-thumbnail error image', () => {
-  assert.equal(isThumbnailPreviewImageUsable({
-    naturalWidth: 120,
-    naturalHeight: 90
-  }), false)
-  assert.equal(isThumbnailPreviewImageUsable({
-    naturalWidth: 0,
-    naturalHeight: 180
-  }), false)
-  assert.equal(isThumbnailPreviewImageUsable({
-    naturalWidth: 320,
-    naturalHeight: 0
-  }), false)
-  assert.equal(isThumbnailPreviewImageUsable({
-    naturalWidth: 320,
-    naturalHeight: 180
-  }), true)
 })

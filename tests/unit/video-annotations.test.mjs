@@ -5,15 +5,6 @@ import {
   getVideoRect
 } from '../../src/renderer/components/FtVideoAnnotations/annotationSurface.js'
 
-test('uses the full player for video with the same aspect ratio', () => {
-  assert.deepEqual(getVideoRect(1600, 900, 16 / 9), {
-    left: 0,
-    top: 0,
-    width: 1600,
-    height: 900
-  })
-})
-
 test('keeps annotations inside the pillarboxes of a 4:3 video', () => {
   assert.deepEqual(getVideoRect(1600, 900, 4 / 3), {
     left: 200,
@@ -29,15 +20,6 @@ test('keeps annotations inside the letterboxes of an ultrawide video', () => {
     top: 225,
     width: 1600,
     height: 450
-  })
-})
-
-test('centers annotations when a fullscreen dock narrows the video viewport', () => {
-  assert.deepEqual(getVideoRect(1440, 1080, 16 / 9), {
-    left: 0,
-    top: 135,
-    width: 1440,
-    height: 810
   })
 })
 

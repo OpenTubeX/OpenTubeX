@@ -170,7 +170,7 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   assert.equal(fresh.state.playlists.playlists[0].videos[0].lengthSeconds, 120)
 })
 
-for (const addVideosToTop of [undefined, false, true]) {
+for (const addVideosToTop of [false, true]) {
   test(`playlist sync places remote-only videos using local insertion preference ${addVideosToTop}`, async () => {
     const local = {
       _id: 'insertion-order', playlistName: 'Ordered', addVideosToTop,

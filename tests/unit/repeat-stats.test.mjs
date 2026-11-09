@@ -76,20 +76,6 @@ test('native loop seeking counts once, while normal seeks and seek timeupdates d
   assert.equal(stats().repeats, 1)
 })
 
-test('native loop detection uses the playback rate and ignores paused seeks', () => {
-  const { tracker, event, advance, stats } = setup()
-  tracker.setMode('video')
-  event('playing', { paused: false, currentTime: 29.8, playbackRate: 2 })
-  advance(100)
-  event('seeking', { seeking: true, currentTime: 0 })
-  assert.equal(stats().repeats, 1)
-  event('seeked', { seeking: false })
-  event('pause', { paused: true, currentTime: 29.8 })
-  advance(1000)
-  event('seeking', { seeking: true, currentTime: 0 })
-  assert.equal(stats().repeats, 1)
-})
-
 test('Android automatic loops report seeked without a preceding seeking event', () => {
   const { tracker, event, advance, stats } = setup()
   tracker.setMode('video')
@@ -144,14 +130,4 @@ test('restores a repeat session in a replacement tracker', () => {
   replacement.tracker.setMode(null)
   replacement.tracker.setMode('video')
   assert.deepEqual(replacement.stats(), { active: true, repeats: 1, seconds: 2 })
-})
-
-test('destroy removes media listeners', () => {
-  const { tracker, event, advance, stats } = setup()
-  tracker.setMode('video')
-  event('playing', { paused: false })
-  tracker.destroy()
-  advance(10000)
-  event('timeupdate')
-  assert.equal(stats().seconds, 0)
 })

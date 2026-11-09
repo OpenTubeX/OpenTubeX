@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
-import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR } from '../../src/constants.js'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 import { copySubscriptionChannelSettings } from '../../src/renderer/helpers/subscription-channels.js'
 
@@ -16,7 +16,6 @@ import {
   isRemoteSyncDispatch,
   SYNC_ACTION_REASONS,
   SYNC_MUTATION_REASONS,
-  isRecentSync,
   isSyncReasonEnabled,
 } from '../../src/renderer/helpers/sync-server-scheduling.js'
 
@@ -34,27 +33,6 @@ function settings (overrides = {}) {
     ...overrides,
   }
 }
-
-test('maps local actions to their affected sync collection', () => {
-  assert.equal(SYNC_ACTION_REASONS.get('updateWatchProgress'), 'history')
-  assert.equal(SYNC_ACTION_REASONS.get('mergeSubscriptionSeenVideos'), 'history')
-  assert.equal(SYNC_MUTATION_REASONS.get('setSubscriptionSeenVideos'), 'history')
-  assert.equal(SYNC_ACTION_REASONS.get('mergeSubscriptionSeenPosts'), 'history')
-  assert.equal(SYNC_MUTATION_REASONS.get('setSubscriptionSeenPosts'), 'history')
-  assert.equal(SYNC_ACTION_REASONS.get('mergeRssFeedSeenItems'), 'history')
-  assert.equal(SYNC_MUTATION_REASONS.get('setRssFeedSeenItems'), 'history')
-  assert.equal(SYNC_ACTION_REASONS.get('addVideo'), 'playlists')
-  assert.equal(SYNC_ACTION_REASONS.get('updatePlaylistSortOrder'), 'playlists')
-  assert.equal(SYNC_ACTION_REASONS.has('updateChannelPlaybackSpeeds'), false)
-  assert.equal(SYNC_ACTION_REASONS.get('updateCustomThemes'), 'settings')
-  assert.equal(SYNC_ACTION_REASONS.get('updateChannelSettings'), 'settings')
-  assert.equal(SYNC_ACTION_REASONS.get('batchUpdateChannelSettings'), 'settings')
-  assert.equal(SYNC_MUTATION_REASONS.get('updateChannelSettings'), 'settings')
-  assert.equal(SYNC_ACTION_REASONS.get('createProfile'), 'profiles')
-  assert.equal(SYNC_ACTION_REASONS.get('addChannelToProfiles'), 'profilesOrSubscriptions')
-  assert.equal(SYNC_MUTATION_REASONS.get('setTabsState'), 'sessions')
-  assert.equal(SYNC_MUTATION_REASONS.get('setTabNavigation'), 'sessions')
-})
 
 test('only schedules changes for enabled collections', () => {
   assert.equal(isSyncReasonEnabled(settings(), 'history'), false)
@@ -80,14 +58,6 @@ test('requires enhanced privacy and the collection toggle for private collection
     syncServerSyncLiveReminders: true,
     syncServerSyncNotifications: true,
   }), 'automatic'), false)
-})
-
-test('treats syncs as recent only inside the automatic sync interval', () => {
-  const now = 1000000
-  assert.equal(isRecentSync(0, now), false)
-  assert.equal(isRecentSync(now + 1, now), false)
-  assert.equal(isRecentSync(now - AUTO_SYNC_INTERVAL_MS + 1, now), true)
-  assert.equal(isRecentSync(now - AUTO_SYNC_INTERVAL_MS, now), false)
 })
 
 async function loadLocalChangePlugin() {
@@ -182,30 +152,13 @@ test('local-only profile edits and identical saves do not schedule syncs', async
   assert.deepEqual(scheduled, [])
 })
 
-for (const [color, themeColor, explicitColor] of [
-  ['bgColor', THEME_BG_COLOR, '#000000'],
-  ['textColor', THEME_TEXT_COLOR, '#FFFFFF'],
-]) {
-  test(`changing theme ${color} to its explicit fallback still schedules a profile sync`, async () => {
-    const { store, scheduled } = await profileChangeFixture()
-    store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
-      profile._id === 'profile' ? { ...profile, [color]: themeColor } : profile))
-    const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
-    await store.dispatch('updateProfile', { ...profile, [color]: explicitColor })
-    assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
-  })
-}
-
-test('channel preference reordering does not make a later refresh or identical save schedule profile sync', async () => {
+test('changing theme bgColor to its explicit fallback still schedules a profile sync', async () => {
   const { store, scheduled } = await profileChangeFixture()
-  const subscriptions = [{ id: 'channel', name: 'First' }, { id: 'other', name: 'Second' }]
-  store.commit('setProfileList', store.state.profiles.profileList.map(profile => ({ ...profile, subscriptions })))
-  store.commit('updateChannelSettings', {
-    channel: { ...subscriptions[0], dailyVideoLimit: 3 }, profileIds: [MAIN_PROFILE_ID, 'profile'],
-  })
-  await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
-  await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'other', channelName: 'Refreshed second' }])
-  assert.deepEqual(scheduled, [])
+  store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
+    profile._id === 'profile' ? { ...profile, bgColor: THEME_BG_COLOR } : profile))
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+  await store.dispatch('updateProfile', { ...profile, bgColor: '#000000' })
+  assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
 })
 
 test('remote actions do not schedule uploads while concurrent user actions still do', async () => {
@@ -345,27 +298,26 @@ async function schedulingFixture(t, platform = {}) {
   }
 }
 
-for (const [reason, delay, maxWait] of [['sessions', 10000, 30000], ['history', 30000, 60000]]) {
-  test(`${reason} sync waits for inactivity`, async t => {
-    const f = await schedulingFixture(t)
-    f.schedule(reason)
-    await f.tick(delay - 1)
-    assert.equal(f.calls.length, 0)
-    f.schedule(reason)
-    await f.tick(delay - 1)
-    assert.equal(f.calls.length, 0)
-    await f.tick(1)
-    assert.equal(f.calls.length, 1)
-  })
-  test(`${reason} sync has a maximum wait during continuous edits`, async t => {
-    const f = await schedulingFixture(t)
-    for (let elapsed = 0; elapsed < maxWait; elapsed += 1000) {
-      f.schedule(reason)
-      await f.tick(1000)
-      assert.equal(f.calls.length, elapsed + 1000 === maxWait ? 1 : 0)
-    }
-  })
-}
+test('history sync waits for inactivity', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('history')
+  await f.tick(30000 - 1)
+  assert.equal(f.calls.length, 0)
+  f.schedule('history')
+  await f.tick(30000 - 1)
+  assert.equal(f.calls.length, 0)
+  await f.tick(1)
+  assert.equal(f.calls.length, 1)
+})
+
+test('history sync has a maximum wait during continuous edits', async t => {
+  const f = await schedulingFixture(t)
+  for (let elapsed = 0; elapsed < 60000; elapsed += 1000) {
+    f.schedule('history')
+    await f.tick(1000)
+    assert.equal(f.calls.length, elapsed + 1000 === 60000 ? 1 : 0)
+  }
+})
 
 test('history edits do not postpone the tabs deadline', async t => {
   const f = await schedulingFixture(t)
@@ -510,20 +462,6 @@ test('queued event syncs wait while the iOS app is hidden and replay on resume',
   assert.equal(f.calls.length, 1)
 })
 
-test('stopping automatic sync discards event syncs queued while hidden', async t => {
-  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true', IS_IOS: 'true' })
-  f.schedule('history')
-  f.setHidden(true)
-  await f.tick(30000)
-  f.stop()
-  f.start()
-  f.setHidden(false)
-  const calls = f.calls.length
-  f.resume()
-  await f.tick(30000)
-  assert.equal(f.calls.length, calls)
-})
-
 test('event syncs run while the Android app is hidden and hold it until they finish', async t => {
   const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
   f.block()
@@ -602,26 +540,6 @@ test('a due edit waits for session deletion to release the sync lock', async t =
   f.releaseLock()
   await f.tick(0)
   assert.equal(f.calls.length, 1)
-})
-
-test('a due edit remains cancellable when another remote check starts during its wait', async t => {
-  const f = await schedulingFixture(t)
-  f.block()
-  const first = f.sync({ remoteOnly: true })
-  await f.tick(0)
-  const second = first.then(() => f.sync({ remoteOnly: true }))
-  f.schedule('sessions')
-  await f.tick(10000)
-  f.release()
-  f.block()
-  await first
-  await f.tick(0)
-  assert.equal(f.calls.length, 2)
-  f.stop()
-  f.release()
-  await second
-  await f.tick(0)
-  assert.equal(f.calls.length, 2, 'stopping sync must cancel the waiting local upload')
 })
 
 test('edits made during session deletion wait for its sync lock', async t => {

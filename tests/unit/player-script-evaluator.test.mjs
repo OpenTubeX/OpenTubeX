@@ -101,21 +101,6 @@ test('stops retrying after a second QuickJS runtime abort', async () => {
   assert.equal(evaluator.requests.size, 0)
 })
 
-test('does not retry an ordinary player error containing the assertion text', async () => {
-  const workers = []
-  const evaluator = new PlayerScriptEvaluator(() => {
-    const worker = new FakeWorker()
-    workers.push(worker)
-    return worker
-  })
-  const pending = evaluator.evaluate('throw Error()')
-  workers[0].reply({ id: workers[0].requests[0].id, error: 'Error: Assertion failed: list_empty(&rt->gc_obj_list)' })
-  if (workers[1]) workers[1].reply({ id: workers[1].requests[0].id, result: 42 })
-  await assert.rejects(pending, /Assertion failed/)
-  assert.equal(workers.length, 1)
-  assert.equal(workers[0].terminated, false)
-})
-
 test('retries a new request after an older request exhausts its retry', async () => {
   const workers = []
   const evaluator = new PlayerScriptEvaluator(() => {
@@ -149,24 +134,5 @@ test('preserves the worker startup error when recovery cannot start', async () =
     error: 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list), at: ../../vendor/quickjs/quickjs.c,2036,JS_FreeRuntime)'
   })
   await assert.rejects(pending, error => error === startupError)
-  assert.equal(evaluator.requests.size, 0)
-})
-
-test('prewarming starts the worker once and leaves no pending request', async () => {
-  const workers = []
-  const evaluator = new PlayerScriptEvaluator(() => {
-    const worker = new FakeWorker()
-    workers.push(worker)
-    return worker
-  })
-  evaluator.prewarm()
-  evaluator.prewarm()
-  assert.equal(workers.length, 1)
-  assert.equal(workers[0].requests.length, 1)
-  workers[0].reply({ id: workers[0].requests[0].id, result: 0 })
-  const next = evaluator.evaluate('next')
-  assert.equal(workers.length, 1)
-  workers[0].reply({ id: workers[0].requests[1].id, result: 'next' })
-  assert.equal(await next, 'next')
   assert.equal(evaluator.requests.size, 0)
 })

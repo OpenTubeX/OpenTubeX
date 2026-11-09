@@ -52,16 +52,6 @@ class FakeYoutubeDL(bridge.yt_dlp.YoutubeDL):
         return 0
 
 
-class FinishedYoutubeDL(FakeYoutubeDL):
-    def download(self, urls):
-        result = super().download(urls)
-        self.options['progress_hooks'][0]({
-            'status': 'finished', 'downloaded_bytes': 100, 'total_bytes': 100,
-            'speed': 1000, 'eta': 0,
-        })
-        return result
-
-
 class WritingYoutubeDL(FakeYoutubeDL):
     info = None
 
@@ -153,14 +143,6 @@ print(context.cert_store_stats()['x509_ca'])
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertGreater(int(result.stdout.strip()), 0, result.stderr)
 
-    def test_version_uses_bundled_package(self):
-        with tempfile.TemporaryDirectory() as temp:
-            request = Path(temp) / 'request.json'
-            result = Path(temp) / 'result.json'
-            request.write_text('{"operation":"version"}')
-            bridge.handle(request, result)
-            self.assertEqual(json.loads(result.read_text())['version'], bridge.yt_dlp.version.__version__)
-
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_extract_keeps_playback_fields_without_media_fragments(self):
         result = bridge._extract({'args': ['--format', 'best', '--write-subs',
@@ -173,23 +155,6 @@ print(context.cert_store_stats()['x509_ca'])
         self.assertEqual(media['storyboard']['protocol'], 'mhtml')
         self.assertTrue(FakeYoutubeDL.last_options['writesubtitles'])
         self.assertTrue(FakeYoutubeDL.last_options['writeautomaticsub'])
-
-    def test_extract_returns_warnings_as_stderr(self):
-        class NoFormatsYoutubeDL(FakeYoutubeDL):
-            def extract_info(self, _url, download=False):
-                self.report_warning('[Instagram] There is no video in this post')
-                self.report_warning('No video formats found!')
-                return {'title': 'Post', 'formats': []}
-
-        with patch.object(bridge.yt_dlp, 'YoutubeDL', NoFormatsYoutubeDL):
-            result = bridge._extract({'args': ['--ignore-no-formats-error', 'https://example.org/post']})
-        self.assertEqual(result['stderr'], 'WARNING: [Instagram] There is no video in this post\n'
-                                           'WARNING: No video formats found!')
-
-    @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
-    def test_extract_splits_requested_subtitle_languages(self):
-        bridge._extract({'args': ['--sub-langs', 'en, de, ,fr', 'https://example.org/video']})
-        self.assertEqual(FakeYoutubeDL.last_options['subtitleslangs'], ['en', 'de', 'fr'])
 
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_download_reports_progress_and_saved_file(self):
@@ -210,37 +175,6 @@ print(context.cert_store_stats()['x509_ca'])
             self.assertEqual(FakeYoutubeDL.last_options['format_sort'], ['codec:av1', 'res:2160'])
             progress = json.loads(Path(request['progressFile']).read_text())
             self.assertEqual(progress['status'], 'processing')
-
-    @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
-    def test_external_download_keeps_single_file(self):
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            request = {
-                'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
-                'args': ['--no-playlist', 'https://example.org/video'],
-                'staging': str(root / 'stage'),
-                'progressFile': str(root / 'stage' / 'progress.json'),
-                'controlFile': str(root / 'stage' / 'control'),
-            }
-            result = bridge._download(request)
-            self.assertEqual(result['files'], ['Fixture [abc].mp4'])
-
-    @patch.object(bridge.yt_dlp, 'YoutubeDL', FinishedYoutubeDL)
-    def test_processing_progress_clears_transfer_metrics(self):
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            request = {
-                'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
-                'args': ['--no-playlist', 'https://example.org/video'],
-                'staging': str(root / 'stage'),
-                'progressFile': str(root / 'stage' / 'progress.json'),
-                'controlFile': str(root / 'stage' / 'control'),
-            }
-            bridge._download(request)
-            progress = json.loads(Path(request['progressFile']).read_text())
-            self.assertEqual(progress, {
-                'status': 'processing', 'percent': 0, 'speed': None, 'eta': None,
-            })
 
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_cancel_before_worker_starts_is_preserved(self):

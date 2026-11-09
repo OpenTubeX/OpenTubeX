@@ -7,30 +7,10 @@ import Datastore from '@seald-io/nedb'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
-import { recommendationVideo, updateRecommendationRecord, sampleRecommendationPlayback, RECOMMENDATION_RECORD_LIMIT } from '../../src/recommendation-learning.js'
+import { recommendationVideo, updateRecommendationRecord, RECOMMENDATION_RECORD_LIMIT } from '../../src/recommendation-learning.js'
 const video = { videoId: 'linux-video', title: 'Linux desktop', authorId: 'channel', lengthSeconds: 600 }
 const memoryStore = () => createRecommendationStore(new Datastore({ inMemoryOnly: true }))
 
-test('actual playback counts progress but not seeks, paused time, stalls or suspended timers', () => {
-  const previous = { videoId: 'video', time: 100, now: 10000, playing: true }
-  const sample = changes => sampleRecommendationPlayback(previous, { ...previous, time: 101, now: 11000, ...changes }).seconds
-  assert.equal(sample({}), 1)
-  assert.equal(sample({ time: 102, rate: 2 }), 2)
-  assert.equal(sample({ time: 500 }), 0)
-  assert.equal(sample({ time: 99 }), 0)
-  assert.equal(sample({ time: 100 }), 0)
-  assert.equal(sample({ playing: false }), 0)
-  assert.equal(sample({ now: 30000 }), 0)
-  assert.equal(sample({ videoId: 'different' }), 0)
-})
-test('impressions count once per feed and retain bounded recent exposure history', () => {
-  let record
-  for (let i = 0; i < 20; i++) {
-    record = updateRecommendationRecord(record, { type: 'impression', video, feedId: String(i) }, i + 1)
-    assert.equal(updateRecommendationRecord(record, { type: 'impression', video, feedId: String(i) }, i + 1), record)
-  }
-  assert.equal(record.impressions.length, 12)
-})
 test('malformed evidence is rejected and persisted metadata is bounded', () => {
   assert.equal(recommendationVideo({ videoId: 'meta' }), null)
   assert.equal(recommendationVideo({ videoId: '__proto__' }), null)

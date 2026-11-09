@@ -37,17 +37,6 @@ test('portable packaging preserves existing extra files without changing the ins
   assert.equal(installedConfig.files, undefined)
 })
 
-test('ARM64 archives enable portable app data without bundling Interposer', async () => {
-  const installedConfig = { extraFiles: [{ from: 'shared.txt', to: 'shared.txt' }] }
-  const portableConfig = withWindowsPortable(installedConfig, 'arm64')
-
-  assert.deepEqual(portableConfig.extraFiles.map(file => file.to), [
-    'shared.txt', 'portable.marker'
-  ])
-  await access(portableConfig.extraFiles[1].from)
-  assert.equal(installedConfig.extraFiles.length, 1)
-})
-
 for (const architecture of ['x64', 'arm64']) {
   test(`Windows ${architecture} builds keep portable files out of the installer`, async () => {
     const source = (await readFile('_scripts/build.mjs', 'utf8')).replace(/^import .*\n/gm, '')

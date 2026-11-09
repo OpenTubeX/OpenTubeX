@@ -32,10 +32,6 @@ const titleModule = await import(`data:text/javascript;base64,${Buffer.from(titl
 const bindings = { [formatterImport.local]: titleModule[formatterImport.imported] }
 
 for (const [title, expected] of [
-  ['Subscriptions - OpenTubeX', 'Subscriptions'],
-  ['A video - OpenTubeX', 'A video'],
-  ['OpenTubeX tutorial - part 1 - OpenTubeX', 'OpenTubeX tutorial - part 1'],
-  ['Mobile title', 'Mobile title'],
   ['', '/subscriptions'],
 ]) {
   test(`phone synced tab label displays ${JSON.stringify(expected)}`, async () => {

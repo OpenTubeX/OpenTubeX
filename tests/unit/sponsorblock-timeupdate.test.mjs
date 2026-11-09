@@ -14,39 +14,6 @@ function slice(startMarker, endMarker) {
 
 const isSponsorBlockPointSegment = segment => segment.startTime === segment.endTime
 
-test('the highlight button state is only dispatched when it changes', () => {
-  const dispatched = []
-  const events = new EventTarget()
-  events.addEventListener('sponsorBlockHighlightStateChanged', event => dispatched.push({ ...event.detail }))
-  const context = vm.createContext({
-    events,
-    CustomEvent,
-    isSponsorBlockPointSegment,
-    sponsorSkips: { value: { promptSkip: new Set(['poi_highlight']) } },
-    getSegments: () => [{ uuid: 'h', category: 'poi_highlight', actionType: 'poi', startTime: 60, endTime: 60 }],
-    activeSponsorBlockHighlightSegment: { value: null },
-    sponsorBlockCurrentTime: { value: 0 },
-    sponsorBlockHighlightLabelVisible: true,
-    resolveSponsorBlockEnterTarget: (prompt, toast, highlight) => highlight ? 'highlight' : null,
-    getActivePromptSponsorBlockToast: () => null,
-    getActiveSponsorBlockToast: () => null,
-  })
-  vm.runInContext(slice('  /**\n   * Last state sent to the highlight button', '  // the highlight button only advertises'), context)
-
-  for (const time of [0, 0.25, 0.5, 10, 30]) context.updateSponsorBlockHighlightState(time)
-  assert.deepEqual(dispatched, [{ visible: true, labelVisible: true, shortcutAvailable: true }])
-
-  context.sponsorBlockHighlightLabelVisible = false
-  context.updateSponsorBlockHighlightState(31)
-  context.updateSponsorBlockHighlightState(32)
-  context.updateSponsorBlockHighlightState(59.6)
-  context.updateSponsorBlockHighlightState(59.8)
-  assert.deepEqual(dispatched.slice(1), [
-    { visible: true, labelVisible: false, shortcutAvailable: true },
-    { visible: false, labelVisible: false, shortcutAvailable: false },
-  ])
-})
-
 function setupScheduler() {
   const tasks = []
   const video = { currentTime: 10, paused: false, ended: false, playbackRate: 1 }

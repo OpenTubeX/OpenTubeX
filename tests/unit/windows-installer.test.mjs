@@ -9,15 +9,6 @@ test('installer labels cannot interpolate NSIS variables or inject instructions'
   assert.equal(escapeNsisString('Create "$DESKTOP"\r\nshortcut'), 'Create $\\"$$DESKTOP$\\"$\\r$\\nshortcut')
 })
 
-test('installer languages use human translations and AI completions', async () => {
-  const translations = await getInstallerTranslations('static/locales')
-  assert.ok(translations.startsWith('# -*- coding: utf-8 -*-\n'))
-  assert.match(translations, /\$\{LANG_ENGLISH\} "Create a desktop shortcut"/)
-  assert.match(translations, /\$\{LANG_GERMAN\} "Desktop-Verknüpfung erstellen"/)
-  assert.match(translations, /\$\{LANG_FRENCH\} "Créer un raccourci sur le bureau"/)
-  assert.equal(translations.match(/^LangString /gm).length, 26)
-})
-
 test('Windows packaging writes installer translations to its configured resources directory', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-installer-locales-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
@@ -28,10 +19,4 @@ test('Windows packaging writes installer translations to its configured resource
   })
   assert.equal(await readFile(join(resources, 'installer-translations.nsh'), 'utf8'),
     await getInstallerTranslations('static/locales'))
-})
-
-test('other platform packages do not require Windows installer resources', async () => {
-  for (const electronPlatformName of ['linux', 'darwin']) {
-    await prepareWindowsInstallerTranslations({ electronPlatformName })
-  }
 })

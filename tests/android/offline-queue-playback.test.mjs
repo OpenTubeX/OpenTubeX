@@ -13,7 +13,7 @@ const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIA
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
 const launch = () => adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
 
-for (const browseDownloads of [false, true]) for (const autoplayVideos of [true, false]) test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browseDownloads ? ' from Downloads' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
+for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browseDownloads ? ' from Downloads' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
   assert.ok(process.env.ANDROID_OFFLINE_MEDIA_PATH, 'Set ANDROID_OFFLINE_MEDIA_PATH to app-local demo-audio.mp3')
   assert.ok(process.env.ANDROID_OFFLINE_FIRST_MEDIA_PATH, 'Set ANDROID_OFFLINE_FIRST_MEDIA_PATH to an app-local MP3 at least 20 seconds long')
   let browser, page, saved

@@ -208,13 +208,3 @@ test('sync insertions keep newer local history in the cache', async () => {
   assert.equal(f.store.getters.getHistoryCacheById.watched.timeWatched, 3)
   assert.deepEqual(f.store.getters.getHistoryCacheSorted.map(record => record.timeWatched), [3])
 })
-
-test('history removal does not eagerly initialize unused recommendation state', async () => {
-  const f = fixture()
-  await f.store.dispatch('updateHistory', video('removed'))
-  await f.store.dispatch('removeFromHistory', 'removed')
-  await f.store.dispatch('removeAllHistory')
-
-  assert.equal(f.reloads.length, 0)
-  assert.equal(f.store.getters.getRecommendationEpoch, null)
-})

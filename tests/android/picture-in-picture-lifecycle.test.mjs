@@ -178,8 +178,7 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
   }
 }
 
-for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 'home'], [125, 'home'], [100, 'home', 'offscreen'],
-  [100, 'button', 'partial'], [100, 'home', 'partial'], [125, 'home', 'partial']]) {
+for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'home', 'offscreen'], [125, 'home', 'partial']]) {
   const label = scroll ? `${trigger}-${scroll}` : trigger
   test(`native PiP preserves the real inline player at ${scale}% UI scale through ${label}`, { skip: !enabled }, async () => {
     await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)

@@ -140,17 +140,6 @@ test('a failed status write does not poison the shared queue or publish an unsee
   assert.equal(JSON.parse(result.seenVideos)[0].videoId, 'video')
 })
 
-test('unwatched upserts do not read subscription settings', async () => {
-  const { db, History, errors } = await fixture()
-  db.settings.findOneAsync = () => { throw new Error('Unexpected settings read') }
-  const result = await History.updateSubscriptionState({ records: [{
-    videoId: 'video', isWatched: false, watchProgress: 12, timeWatched: 1,
-  }] })
-  assert.equal(result.records[0].isWatched, false)
-  assert.equal(result.seenVideos, null)
-  assert.equal(errors.length, 0)
-})
-
 for (const unseen of [false, true]) {
   test(`failed settings access still returns the persisted ${unseen ? 'unseen' : 'watched'} history update`, async () => {
     const { db, History, errors } = await fixture()

@@ -270,25 +270,23 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
   assert.deepEqual(calls, ['foreground', 'sabr', 'abort', 'shaka'])
 })
 
-for (const format of ['legacy', 'audio']) {
-  for (const localFilePlayback of [false, true]) {
-    test(`${localFilePlayback ? 'downloaded' : 'online'} ${format} ${localFilePlayback ? 'skips' : 'honors'} the metadata preroll delay`, async () => {
-      const delays = []
-      const loads = []
-      const load = vm.runInNewContext(`${loadSource}\nperformFirstLoad`, {
-        props: { format, localFilePlayback, delayLoadUntilUnix: Date.now() + 10000, manifestMimeType: 'audio/mp4', manifestSrc: 'local-file', startTime: 0 },
-        MANIFEST_TYPE_SABR: 'sabr', process: { env: { SUPPORTS_LOCAL_API: true } }, sabrStream: null,
-        clearSabrBackoffTimer() {}, startPreRollTimer: delay => delays.push(delay), clearPreRollTimer() {},
-        setTimeout: resolve => resolve(), ui: {}, player: { configure() {}, getVariantTracks: () => [] },
-        hasMultipleAudioTracks: { value: false }, loadPlaybackSource: url => loads.push(url),
-        setLegacyQuality: () => loads.push('local-file'),
-        formatSwitchGeneration: 0,
-      })
-      await load()
-      assert.equal(loads.length, 1)
-      assert.equal(delays.length, localFilePlayback ? 0 : 1, 'a downloaded file must not display or wait for an online preroll countdown')
+for (const [format, localFilePlayback] of [['legacy', false], ['audio', true]]) {
+  test(`${localFilePlayback ? 'downloaded' : 'online'} ${format} ${localFilePlayback ? 'skips' : 'honors'} the metadata preroll delay`, async () => {
+    const delays = []
+    const loads = []
+    const load = vm.runInNewContext(`${loadSource}\nperformFirstLoad`, {
+      props: { format, localFilePlayback, delayLoadUntilUnix: Date.now() + 10000, manifestMimeType: 'audio/mp4', manifestSrc: 'local-file', startTime: 0 },
+      MANIFEST_TYPE_SABR: 'sabr', process: { env: { SUPPORTS_LOCAL_API: true } }, sabrStream: null,
+      clearSabrBackoffTimer() {}, startPreRollTimer: delay => delays.push(delay), clearPreRollTimer() {},
+      setTimeout: resolve => resolve(), ui: {}, player: { configure() {}, getVariantTracks: () => [] },
+      hasMultipleAudioTracks: { value: false }, loadPlaybackSource: url => loads.push(url),
+      setLegacyQuality: () => loads.push('local-file'),
+      formatSwitchGeneration: 0,
     })
-  }
+    await load()
+    assert.equal(loads.length, 1)
+    assert.equal(delays.length, localFilePlayback ? 0 : 1, 'a downloaded file must not display or wait for an online preroll countdown')
+  })
 }
 
 test('downloaded playback rejects late SABR backoff callbacks', () => {

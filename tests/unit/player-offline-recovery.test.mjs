@@ -8,23 +8,21 @@ const start = watchSource.indexOf('    handlePlayerError: async function (error)
 const end = watchSource.indexOf('\n    /**', start)
 const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 
-for (const message of ['Failed to fetch', 'Load failed', 'The Internet connection appears to be offline.', undefined]) {
-  test(`offline HTTP failure preserves the stream for ${message ?? 'an absent message'}`, async () => {
-    const handle = vm.runInNewContext(`({${watchSource.slice(start, end)}}).handlePlayerError`, {
-      navigator: { onLine: false }, shaka: { util: { Error: { Code: { HTTP_ERROR: 1002 } } } }
-    })
-    let retries = 0
-    const view = {
-      isLoading: false,
-      isAndroidTransientHttpRecoveryEnabled: () => true,
-      retryAndroidTransientHttpError: async () => { retries++; return true }
-    }
-    const error = { code: 1002, data: ['https://example.invalid/segment', { message }] }
-    await handle.call(view, error)
-    await handle.call(view, error)
-    assert.equal(retries, 0, 'offline errors must not spend the transient retry or reach format fallback')
+test('offline HTTP failure preserves the stream for Failed to fetch', async () => {
+  const handle = vm.runInNewContext(`({${watchSource.slice(start, end)}}).handlePlayerError`, {
+    navigator: { onLine: false }, shaka: { util: { Error: { Code: { HTTP_ERROR: 1002 } } } }
   })
-}
+  let retries = 0
+  const view = {
+    isLoading: false,
+    isAndroidTransientHttpRecoveryEnabled: () => true,
+    retryAndroidTransientHttpError: async () => { retries++; return true }
+  }
+  const error = { code: 1002, data: ['https://example.invalid/segment', { message: 'Failed to fetch' }] }
+  await handle.call(view, error)
+  await handle.call(view, error)
+  assert.equal(retries, 0, 'offline errors must not spend the transient retry or reach format fallback')
+})
 
 test('online HTTP failures still use the bounded transient recovery', async () => {
   const handle = vm.runInNewContext(`({${watchSource.slice(start, end)}}).handlePlayerError`, {

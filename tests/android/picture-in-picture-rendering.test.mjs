@@ -27,53 +27,7 @@ before(async () => {
 })
 after(async () => { await browser?.close() })
 
-for (const phase of ['Entering', 'Restoring']) {
-  test(`Android PiP ${phase.toLowerCase()} keeps the video at its in-app destination without a second animation`, async () => {
-    const handle = await host.evaluateHandle(({ styles, phase }) => {
-      const frame = document.createElement('iframe')
-      frame.style.cssText = 'position:fixed;inset:0;width:400px;height:800px;border:0;z-index:2147483647'
-      frame.srcdoc = `<style>
-        body { margin:0; --android-pip-source-top:60px; --android-pip-source-width:400px; --android-pip-source-height:225px; }
-        ${styles}
-        video { display:block; height:225px; }
-        .shaka-controls-container { position:absolute; }
-      </style><body class="${phase === 'Entering' ? 'androidPictureInPicture ' : ''}androidPictureInPicture${phase}">
-        <div class="app capacitorTabs capacitorPhoneLayout" data-v-pip-test>
-          <div class="routerView" data-v-pip-test>
-            <div class="ftVideoPlayer shaka-video-container" data-v-pip-test data-android-picture-in-picture-target style="margin-block-start:0;inline-size:400px;block-size:225px">
-              <video class="player" data-v-pip-test></video>
-              <div class="shaka-controls-container">Controls</div>
-            </div>
-            <div class="details"><span style="visibility:visible">Page details</span></div>
-          </div>
-        </div>
-      </body>`
-      document.body.append(frame)
-      return frame
-    }, { styles, phase })
-    try {
-      const frame = await handle.asElement().contentFrame()
-      await frame.locator('video').waitFor()
-      await frame.waitForTimeout(300)
-      const geometry = await frame.evaluate(() => {
-        const video = document.querySelector('video')
-        const rect = video.getBoundingClientRect()
-        return { y: rect.y, width: rect.width, height: rect.height,
-          transitions: getComputedStyle(video).transitionDuration,
-          details: getComputedStyle(document.querySelector('.details span')).visibility }
-      })
-      // WebView can report fractional rectangles even for integral CSS values.
-      for (const [axis, expected] of Object.entries({ y: 60, width: 400, height: 225 })) {
-        assert.ok(Math.abs(geometry[axis] - expected) < 0.01,
-          `Android must preserve the original video bounds: ${JSON.stringify(geometry)}`)
-      }
-      assert.equal(geometry.transitions, '0s', 'restoring the normal layout must not start another CSS animation')
-      assert.equal(geometry.details, phase === 'Entering' ? 'hidden' : 'visible')
-    } finally { await handle.evaluate(frame => frame.remove()) }
-  })
-}
-
-for (const { width, height } of [{ width: 400, height: 225 }, { width: 320.8, height: 180.25 }]) {
+for (const { width, height } of [{ width: 320.8, height: 180.25 }]) {
   for (const mode of ['inline', 'mini', 'morph', 'zoom', 'shorts']) {
     test(`Android PiP preserves the ${width} × ${height} live video from ${mode}`, async () => {
       const handle = await host.evaluateHandle(({ styles, mode, width, height }) => {

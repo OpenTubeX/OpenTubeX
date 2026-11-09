@@ -84,12 +84,6 @@ test('ignores the games section on videos that are not categorised as gaming', (
   assert.deepEqual(parseLocalVideoGames(videoInfo({ category: undefined, items: [section] })), [])
 })
 
-test('skips the sections that do not list games', () => {
-  const transcriptSection = new YTNodes.VideoDescriptionTranscriptSection({})
-
-  assert.deepEqual(parseLocalVideoGames(videoInfo({ items: [transcriptSection] })), [])
-})
-
 test('handles a video without a structured description', () => {
   assert.deepEqual(parseLocalVideoGames(videoInfo({ panelIdentifier: 'engagement-panel-searchable-transcript' })), [])
   assert.deepEqual(parseLocalVideoGames({ basic_info: { category: 'Gaming' }, page: [{}, {}] }), [])

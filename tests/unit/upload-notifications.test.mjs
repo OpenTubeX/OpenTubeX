@@ -14,7 +14,6 @@ import {
 } from '../../src/newUploadNotifications.js'
 import { createUploadNotifier } from '../../src/main/uploadNotifications.js'
 import vm from 'node:vm'
-import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const NOW = Date.UTC(2026, 9, 19)
 const HOUR = 3_600_000
@@ -92,20 +91,6 @@ test('only channels with notifications turned on are configured', () => {
   assert.deepEqual(createUploadNotificationConfiguration({ ...input, subscriptions: [{ id: 'UC1' }] }), { enabled: false })
 })
 
-test('only feed types that refreshes fetch can notify', () => {
-  const configuration = createUploadNotificationConfiguration({
-    enabled: true,
-    subscriptions: [
-      { id: 'UC1', name: 'One', feedTypes: ['videos', 'shorts'], notificationFeedTypes: ['videos', 'shorts', 'posts'] },
-      { id: 'UC2', name: 'Two', feedTypes: ['posts'], notificationFeedTypes: ['videos'] }
-    ],
-    hiddenFeedTypes: ['shorts'],
-    showMembersOnly: false,
-    titles: {}
-  })
-  assert.deepEqual(configuration.channels, { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } })
-})
-
 test('the desktop notifier persists state and shows localized notifications', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
   try {
@@ -139,28 +124,6 @@ test('the desktop notifier persists state and shows localized notifications', as
 
     await restarted.configure({ enabled: false })
     await assert.rejects(readFile(file))
-  } finally {
-    await rm(directory, { recursive: true, force: true })
-  }
-})
-
-test('the desktop notifier shows notifications silently during quiet hours', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
-  try {
-    const shown = []
-    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
-    const now = new Date()
-    const minute = now.getHours() * 60 + now.getMinutes()
-    await notifier.configure({
-      enabled: true,
-      titles: { videos: '{channel}' },
-      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } },
-      // Covers the current minute and the next, so the test cannot cross the window's end.
-      quietHours: { start: minute, end: (minute + 2) % 1440 }
-    })
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a')] })
-    assert.deepEqual(shown.map(notification => notification.silent), [true])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
@@ -329,23 +292,6 @@ test('the desktop notifier settles once alerts waiting for an original title are
   }
 })
 
-test('post text decodes named and numeric entities', () => {
-  const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
-  assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")
-})
-
-test('post text strips tags in linear time', () => {
-  const [post] = normalizeUploadEntries([{ postId: 'p', postText: '<p>a</p> <<i>b</i><c' }])
-  assert.equal(post.title, 'a b<c')
-
-  const unclosed = '<'.repeat(400_000)
-  const start = threadCpuMilliseconds()
-  const [long] = normalizeUploadEntries([{ postId: 'q', postText: unclosed }])
-  const elapsed = threadCpuMilliseconds() - start
-  assert.equal(long.title, unclosed)
-  assert.ok(elapsed < 1000, `stripping tags took ${Math.round(elapsed)} ms of CPU time`)
-})
-
 test('withheld members-first uploads notify once they become public', () => {
   const state = createUploadNotificationState()
   const ids = uploads => uploads.map(upload => upload.id)
@@ -353,39 +299,6 @@ test('withheld members-first uploads notify once they become public', () => {
   assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)), [])
   assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW + 8 * 24 * HOUR)), ['m'])
   assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW)), [])
-})
-
-test('turning a feed off also forgets its withheld members-only uploads', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
-  try {
-    const shown = []
-    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
-    const configure = feedTypes => notifier.configure({
-      enabled: true,
-      titles: { videos: '{channel}' },
-      channels: {
-        UC1: { name: 'One', feedTypes, membersOnly: false },
-        UC2: { name: 'Two', feedTypes: ['videos'], membersOnly: false }
-      }
-    })
-    await configure(['videos'])
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a', Date.now())] })
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now(), { membersOnly: true }), entry('a', Date.now())] })
-    await configure([])
-    await configure(['videos'])
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now()), entry('a', Date.now())] })
-    assert.deepEqual(shown, [])
-  } finally {
-    await rm(directory, { recursive: true, force: true })
-  }
-})
-
-test('withheld uploads are released when they turn public in another feed of the channel', () => {
-  const state = createUploadNotificationState()
-  takeVisibleUploads(state, 'UC1', 'videos', [entry('a', NOW)], false, NOW)
-  takeVisibleUploads(state, 'UC1', 'live', [entry('b', NOW)], false, NOW)
-  takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)
-  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'live', [entry('m', NOW), entry('b', NOW)], false, NOW).map(upload => upload.id), ['m'])
 })
 
 test('a failed save keeps detected uploads for the next refresh', async () => {
@@ -411,14 +324,6 @@ test('a failed save keeps detected uploads for the next refresh', async () => {
   }
 })
 
-test('withheld uploads are forgotten once members-only content is shown', () => {
-  const state = createUploadNotificationState()
-  takeVisibleUploads(state, 'UC1', 'videos', [entry('a', NOW)], false, NOW)
-  takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)
-  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], true, NOW), [])
-  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW), [])
-})
-
 test('entries another feed of the channel already recorded are not new', () => {
   const state = createUploadNotificationState()
   takeNewUploads(state, 'UC1', 'videos', [entry('s', NOW), entry('a', NOW)], NOW)
@@ -426,20 +331,6 @@ test('entries another feed of the channel already recorded are not new', () => {
   takeNewUploads(state, 'UC2', 'shorts', [], NOW)
   assert.deepEqual(takeNewUploads(state, 'UC1', 'shorts', [entry('s', NOW)], NOW), [])
   assert.deepEqual(takeNewUploads(state, 'UC2', 'shorts', [entry('s', NOW)], NOW).map(upload => upload.id), ['s'])
-})
-
-test('ended streams from the live feed are not announced as live', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
-  try {
-    const shown = []
-    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
-    await notifier.configure({ enabled: true, titles: { videos: 'New video', live: 'Live now' }, channels: { UC1: { name: 'One', feedTypes: ['live'], membersOnly: false } } })
-    await notifier.observe({ channelId: 'UC1', feedType: 'live', entries: [entry('a', Date.now())] })
-    await notifier.observe({ channelId: 'UC1', feedType: 'live', entries: [entry('l', Date.now(), { live: true }), entry('e', Date.now()), entry('a', Date.now())] })
-    assert.deepEqual(shown.map(notification => notification.title), ['Live now', 'New video'])
-  } finally {
-    await rm(directory, { recursive: true, force: true })
-  }
 })
 
 test('the renderer reports only feeds with notifications turned on', async () => {

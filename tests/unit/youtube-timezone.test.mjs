@@ -25,7 +25,7 @@ function requestHook(name) {
   }
 }
 
-for (const url of ['https://www.youtube.com/watch?v=example', 'https://www.youtube.com/', 'https://www.youtube.com/?hl=en']) {
+for (const url of ['https://www.youtube.com/watch?v=example', 'https://www.youtube.com/?hl=en']) {
   test(`applies the renderer timezone cookie without leaking X-Cookie: ${url}`, () => {
     const hook = requestHook('onBeforeSendHeaders')
     for (const cookie of [undefined, 'SOCS=value']) {

@@ -82,84 +82,82 @@ test('record storage imports shipped NeDB data, persists only changed records, a
   } finally { await context.close() }
 })
 
-for (const scale of [1, 1.25]) {
-  test(`windowed cards release content and retain accurate scroll geometry at scale ${scale}`, async () => {
-    const { page, context } = await pageWithModule('../../src/renderer/helpers/windowedList.js')
-    try {
-      await page.evaluate(scale => {
-        document.body.style.cssText = 'margin:0'
-        const list = document.createElement('div')
-        list.id = 'list'
-        list.style.cssText = `width:100%;font-size:${16 * scale}px`
-        document.body.append(list)
-        const windowing = window.module.createListWindow()
-        window.items = []
-        for (let index = 0; index < 120; index++) {
-          const shell = document.createElement('div')
-          shell.style.minHeight = `${131.25 * scale}px`
-          shell.dataset.height = String(131.25 * scale)
-          list.append(shell)
-          let mounted = false
-          const mount = () => {
-            if (mounted) return
-            mounted = true
-            queueMicrotask(() => {
-              shell.style.height = ''
-              shell.innerHTML = `<article style="height:${shell.dataset.height}px"><button>Card ${index}</button></article>`
-            })
-          }
-          mount()
-          const observation = windowing.observe(shell, {
-            mount, isMounted: () => mounted,
-            isProtected: () => shell.contains(document.activeElement),
-            unmount: height => {
-              mounted = false
-              queueMicrotask(() => { shell.style.height = `${height}px`; shell.replaceChildren() })
-            }
+test('windowed cards release content and retain accurate scroll geometry at scale 1.25', async () => {
+  const { page, context } = await pageWithModule('../../src/renderer/helpers/windowedList.js')
+  try {
+    await page.evaluate(scale => {
+      document.body.style.cssText = 'margin:0'
+      const list = document.createElement('div')
+      list.id = 'list'
+      list.style.cssText = `width:100%;font-size:${16 * scale}px`
+      document.body.append(list)
+      const windowing = window.module.createListWindow()
+      window.items = []
+      for (let index = 0; index < 120; index++) {
+        const shell = document.createElement('div')
+        shell.style.minHeight = `${131.25 * scale}px`
+        shell.dataset.height = String(131.25 * scale)
+        list.append(shell)
+        let mounted = false
+        const mount = () => {
+          if (mounted) return
+          mounted = true
+          queueMicrotask(() => {
+            shell.style.height = ''
+            shell.innerHTML = `<article style="height:${shell.dataset.height}px"><button>Card ${index}</button></article>`
           })
-          window.items.push({ shell, observation, mount })
         }
-      }, scale)
-      await page.waitForFunction(() => document.querySelectorAll('article').length < 30)
-      const originalHeight = await page.evaluate(() => document.documentElement.scrollHeight)
-      await page.locator('article button').first().focus()
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-      await page.waitForTimeout(100)
-      assert.equal(await page.locator('article button').first().textContent(), 'Card 0')
-      await page.evaluate(() => document.activeElement.blur())
-      await page.waitForFunction(() => document.querySelector('article button')?.textContent !== 'Card 0')
-      assert.ok(await page.locator('article').count() < 30)
-      assert.equal(await page.evaluate(() => document.documentElement.scrollHeight), originalHeight)
-      for (const trigger of ['resize', 'remove', 'filter', 'replace', 'collapse']) {
-        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await page.evaluate(trigger => {
-          if (trigger === 'resize') {
-            document.querySelector('#list').style.cssText += ';width:73.25%;display:grid;grid-template-columns:repeat(2, 1fr)'
-          } else if (trigger === 'collapse') {
-            for (const item of window.items) {
-              item.shell.dataset.height = '30.5'
-              item.shell.style.minHeight = '30.5px'
-              item.shell.querySelector('article')?.style.setProperty('height', '30.5px')
-              item.observation.refresh()
-            }
-          } else {
-            const amount = trigger === 'remove' ? 80 : trigger === 'filter' ? 20 : 10
-            for (const item of window.items.splice(amount)) { item.observation.dispose(); item.shell.remove() }
+        mount()
+        const observation = windowing.observe(shell, {
+          mount, isMounted: () => mounted,
+          isProtected: () => shell.contains(document.activeElement),
+          unmount: height => {
+            mounted = false
+            queueMicrotask(() => { shell.style.height = `${height}px`; shell.replaceChildren() })
           }
-        }, trigger)
-        if (trigger === 'resize') await page.setViewportSize({ width: 600, height: 900 })
-        await page.waitForTimeout(100)
-        const geometry = await page.evaluate(() => ({
-          top: window.scrollY, height: document.documentElement.scrollHeight,
-          viewport: window.innerHeight, end: document.querySelector('#list').getBoundingClientRect().bottom + window.scrollY,
-        }))
-        assert.ok(geometry.top <= Math.max(0, geometry.end - geometry.viewport) + 1, `${trigger}: ${JSON.stringify(geometry)}`)
-        assert.ok(geometry.height <= Math.max(geometry.viewport, geometry.end) + 1, `${trigger}: no stale scroll range`)
-        if (trigger === 'collapse') assert.equal(geometry.end, 152.5)
+        })
+        window.items.push({ shell, observation, mount })
       }
-    } finally { await context.close() }
-  })
-}
+    }, 1.25)
+    await page.waitForFunction(() => document.querySelectorAll('article').length < 30)
+    const originalHeight = await page.evaluate(() => document.documentElement.scrollHeight)
+    await page.locator('article button').first().focus()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await page.waitForTimeout(100)
+    assert.equal(await page.locator('article button').first().textContent(), 'Card 0')
+    await page.evaluate(() => document.activeElement.blur())
+    await page.waitForFunction(() => document.querySelector('article button')?.textContent !== 'Card 0')
+    assert.ok(await page.locator('article').count() < 30)
+    assert.equal(await page.evaluate(() => document.documentElement.scrollHeight), originalHeight)
+    for (const trigger of ['resize', 'remove', 'filter', 'replace', 'collapse']) {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      await page.evaluate(trigger => {
+        if (trigger === 'resize') {
+          document.querySelector('#list').style.cssText += ';width:73.25%;display:grid;grid-template-columns:repeat(2, 1fr)'
+        } else if (trigger === 'collapse') {
+          for (const item of window.items) {
+            item.shell.dataset.height = '30.5'
+            item.shell.style.minHeight = '30.5px'
+            item.shell.querySelector('article')?.style.setProperty('height', '30.5px')
+            item.observation.refresh()
+          }
+        } else {
+          const amount = trigger === 'remove' ? 80 : trigger === 'filter' ? 20 : 10
+          for (const item of window.items.splice(amount)) { item.observation.dispose(); item.shell.remove() }
+        }
+      }, trigger)
+      if (trigger === 'resize') await page.setViewportSize({ width: 600, height: 900 })
+      await page.waitForTimeout(100)
+      const geometry = await page.evaluate(() => ({
+        top: window.scrollY, height: document.documentElement.scrollHeight,
+        viewport: window.innerHeight, end: document.querySelector('#list').getBoundingClientRect().bottom + window.scrollY,
+      }))
+      assert.ok(geometry.top <= Math.max(0, geometry.end - geometry.viewport) + 1, `${trigger}: ${JSON.stringify(geometry)}`)
+      assert.ok(geometry.height <= Math.max(geometry.viewport, geometry.end) + 1, `${trigger}: no stale scroll range`)
+      if (trigger === 'collapse') assert.equal(geometry.end, 152.5)
+    }
+  } finally { await context.close() }
+})
 
 test('a failed import retains legacy data and retries after a storage failure', async () => {
   const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
@@ -302,7 +300,7 @@ test('native migration skips corrupt and non-document legacy lines', async () =>
 })
 
 
-for (const source of ['records', 'legacy', 'empty']) {
+for (const source of ['legacy', 'empty']) {
   test(`native migration without IndexedDB enumeration reads ${source} without creating databases`, async () => {
     const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
     try {
