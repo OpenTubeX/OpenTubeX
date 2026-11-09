@@ -282,8 +282,8 @@ import { usesInvidiousApi } from '../../../apiBackends'
 
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { getSearchFilterTabId, getSearchHistoryEntryQuery } from '../../../search-history'
-import { CHANNEL_HANDLE_REGEX, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, showInvidiousFallbackToast } from '../../helpers/utils'
+import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFromRouteQuery } from '../../../search-history'
+import { CHANNEL_HANDLE_REGEX, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
@@ -726,6 +726,32 @@ function clearSearchFilters() {
   store.commit('setSearchDuration', { tabId, value: '' })
   store.commit('setSearchFeatures', { tabId, value: [] })
   store.commit('setSearchFilterValueChanged', { tabId, value: false })
+  rerunPresentedSearchWithFilters()
+}
+
+watch(() => store.getters.getShowSearchFilters, (shown, wasShown) => {
+  if (wasShown && !shown) {
+    rerunPresentedSearchWithFilters()
+  }
+})
+
+/**
+ * Applies changed search filters to the search results that are already shown.
+ */
+function rerunPresentedSearchWithFilters() {
+  const presented = presentedRoute.value
+  const searchText = presented == null ? null : getSearchTextFromPath(presented.path)
+  if (searchText == null ||
+    searchFiltersMatch(getSearchSettingsFromRouteQuery(presented.query), searchSettings.value)) {
+    return
+  }
+
+  const destination = getTextSearchDestination(searchText, null)
+  const { spellCorrection } = presented.query
+  openInternalPath({
+    ...destination,
+    query: spellCorrection == null ? destination.query : { ...destination.query, spellCorrection },
+  })
 }
 
 const searchInput = useTemplateRef('searchInput')
@@ -766,14 +792,16 @@ function getSearchTextForTab(tabId) {
   return getSearchTextFromPath(path) ?? ''
 }
 
-const presentedRoutePath = computed(() => {
+const presentedRoute = computed(() => {
   if (!usesLogicalTabs) {
-    return route.path
+    return route
   }
 
   const tabId = store.getters.getPresentedTabId
-  return store.getters.getTabById(tabId)?.route.path ?? ''
+  return store.getters.getTabById(tabId)?.route ?? null
 })
+
+const presentedRoutePath = computed(() => presentedRoute.value?.path ?? '')
 
 watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) => {
   // Tab switches restore that tab's cached draft in the watcher below. Route
