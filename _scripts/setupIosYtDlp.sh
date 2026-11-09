@@ -14,9 +14,10 @@ webkit_patch="$root/_scripts/iosYtDlpWebkitNavigation.patch"
 package_version="${pins[*]} $(shasum -a 256 "$webkit_patch" | cut -d' ' -f1)"
 
 if [[ ! -d "$runtime" || "$(cat "$runtime_stamp" 2>/dev/null || true)" != "$release_tag" ]]; then
+  archive="Python-${release_tag%-*}-iOS-support.${release_tag#*-}.tar.gz"
   gh release download "$release_tag" --repo beeware/Python-Apple-support \
-    --pattern 'Python-3.14-iOS-support.b11.tar.gz' --dir "$scratch"
-  tar -xzf "$scratch/Python-3.14-iOS-support.b11.tar.gz" -C "$scratch"
+    --pattern "$archive" --dir "$scratch"
+  tar -xzf "$scratch/$archive" -C "$scratch"
   rm -rf "$runtime"
   mv "$scratch/Python.xcframework" "$runtime"
   printf '%s' "$release_tag" > "$runtime_stamp"
