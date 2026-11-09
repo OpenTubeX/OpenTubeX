@@ -15,7 +15,8 @@ for (const backend of ['local', 'invidious']) {
           assert.equal(request.authorization, backend === 'local' ? undefined : 'Basic private')
           assert.ok(!request.url.includes('%CHANNEL%'))
         }
-        assert.equal(plans[0].format, feed === 'posts' ? backend : (useRss ? 'rss' : backend))
+        // Shorts tabs and APIs omit dates, which would cost a watch page per Short on every refresh
+        assert.equal(plans[0].format, feed === 'posts' ? backend : (useRss || feed === 'shorts' ? 'rss' : backend))
       }
     })
   }
@@ -106,8 +107,9 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
     const requests = createBackgroundSubscriptionRequests({ useRss: false })
     const calls = []
     const result = await fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+      if (request.format !== 'local') throw new Error('HTTP 404')
       calls.push(request)
-      if (request.format !== 'local' || JSON.parse(request.body).params) throw new Error('HTTP 404')
+      if (JSON.parse(request.body).params) throw new Error('HTTP 404')
       return JSON.stringify(channelPage('UCtest', ['/@channel/videos']))
     })
     assert.deepEqual(result, feed === 'posts' ? { comments: [] } : { videos: [] })
@@ -373,6 +375,13 @@ test('utility completes missing Local Shorts dates without forwarding backend cr
   assert.equal(requests.length, 1)
   assert.equal(requests[0].url, 'https://www.youtube.com/watch?v=short')
   assert.equal(requests[0].authorization, undefined)
+  // Dates from an earlier run spare the watch page
+  const [cached] = await context.parseAndEnrichBackgroundFeed({ backgroundFormat: 'local' }, 'shorts', 'UCtest', '', async request => {
+    requests.push(request)
+    return ''
+  }, new AbortController().signal, [{ videoId: 'short', published: 123 }])
+  assert.equal(cached.published, 123)
+  assert.equal(requests.length, 1)
 })
 
 test('a disabled configuration stops due work before its persistence finishes', async () => {

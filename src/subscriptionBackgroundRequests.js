@@ -17,8 +17,10 @@ export function createBackgroundSubscriptionRequests({ backend = 'local', useRss
     const invidiousApi = { format: 'invidious', url: `${instance}/api/v1/channels/%CHANNEL%/${RESOURCES[feed]}`, authorization }
     const localRss = { format: 'rss', url: 'https://www.youtube.com/feeds/videos.xml?playlist_id=%PLAYLIST%' }
     const invidiousRss = { format: 'rss', url: `${instance}/feed/playlist/%PLAYLIST%`, authorization }
-    const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? (useRss ? [localRss, localPlaylist, localApi] : [localApi, localPlaylist, localRss]) : [...(useRss ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
-    const invidious = feed === 'posts' ? [invidiousApi] : (useRss ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
+    // Like foreground refreshes, Shorts always try RSS first: other sources omit dates, so each Short would need a watch page.
+    const rssFirst = useRss || feed === 'shorts'
+    const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? [localRss, localPlaylist, localApi] : [...(rssFirst ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
+    const invidious = feed === 'posts' ? [invidiousApi] : (rssFirst ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
     // Yattee servers have neither RSS feeds nor posts
     const yattee = feed === 'posts' ? [] : [invidiousApi]
     if (backend === 'yattee') return [feed, [...yattee, ...(fallback ? local : [])]]
