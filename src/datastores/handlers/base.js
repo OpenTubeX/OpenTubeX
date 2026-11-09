@@ -1150,8 +1150,7 @@ class Playlists {
         {
           $pull: { videos: { playlistItemId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else if (videoId != null) {
       return db.playlists.updateAsync(
@@ -1159,8 +1158,7 @@ class Playlists {
         {
           $pull: { videos: { videoId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else {
       throw new Error(`Both videoId & playlistItemId are absent, _id: ${_id}`)
@@ -1173,8 +1171,7 @@ class Playlists {
       {
         $pull: { videos: createIdQuery('playlistItemId', playlistItemIds) },
         $set: { lastUpdatedAt }
-      },
-      { upsert: true }
+      }
     )
   }
 
