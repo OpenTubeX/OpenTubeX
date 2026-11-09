@@ -90,7 +90,7 @@ test.describe('settings', () => {
 
   test('opens a background About tab only once it is selected', async ({ page }) => {
     const tab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/about', makeActive: false }))
-    await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"] .routerView`)).toBeAttached()
+    await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"] .settingsRoute`)).toBeAttached()
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await expect(page.locator('.settingsWindow')).toBeHidden()
     const routeOf = () => page.evaluate(id => window.ftElectron.tabs.getState()

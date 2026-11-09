@@ -1,5 +1,8 @@
 <template>
-  <span hidden />
+  <span
+    class="settingsRoute"
+    hidden
+  />
 </template>
 
 <script setup>
@@ -39,7 +42,8 @@ async function openWindow() {
   const browserBackPath = window.history.state?.back
   const safePreviousPath = process.env.IS_ELECTRON ? previousPath : browserBackPath
 
-  const previousWasUtilityRoute = ['/downloads', '/about'].includes(safePreviousPath) || safePreviousPath?.startsWith('/settings')
+  const previousRouteName = typeof safePreviousPath === 'string' ? router.resolve(safePreviousPath).name : null
+  const previousWasUtilityRoute = ['downloads', 'about'].includes(previousRouteName) || safePreviousPath?.startsWith('/settings')
   if (typeof safePreviousPath === 'string' && !previousWasUtilityRoute) {
     await router.back()
   } else {
