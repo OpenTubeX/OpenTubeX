@@ -659,6 +659,10 @@ async function startYtDlpDownload(
 
   /** @type {string[]} */
   const stderrLines = []
+  // Progress lines also go to stderr, so a playlist's earlier per-video
+  // errors do not stay among the last few lines.
+  /** @type {string[]} */
+  const errorLines = []
   /** @type {Set<string>} */
   const subtitleDestinations = new Set()
 
@@ -832,6 +836,10 @@ async function startYtDlpDownload(
     if (stderrLines.length > 5) {
       stderrLines.splice(0, stderrLines.length - 5)
     }
+    if (line.startsWith('ERROR:')) {
+      errorLines.push(line)
+      if (errorLines.length > 5) errorLines.shift()
+    }
   }
 
   child.on('error', (error) => {
@@ -866,27 +874,34 @@ async function startYtDlpDownload(
       status.eta = null
     } else if (entry.cancelled) {
       status.status = 'cancelled'
-    } else if (code === 0) {
+    } else {
       if (subtitleFormat !== '') {
-        const convertedSubtitleDestinations = new Map([...subtitleDestinations].map((subtitlePath) => [
-          subtitlePath,
-          subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)
-        ]))
+        const convertedSubtitleDestinations = new Map([...subtitleDestinations]
+          .map((subtitlePath) => [subtitlePath, subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)])
+          // A failed download may have stopped before converting some subtitles
+          .filter(([, convertedPath]) => code === 0 || existsSync(convertedPath)))
         status.destinations = status.destinations.map((destination) => (
           convertedSubtitleDestinations.get(destination) ?? destination
         ))
         status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
       }
-      status.status = payload.automatic === true && status.destinations.length === 0
-        ? 'skipped'
-        : 'completed'
-      if (status.status === 'completed') {
-        status.percent = 100
-        status.completedAt = Date.now()
+      // yt-dlp skips playlist entries it cannot download, such as members-only
+      // videos, but still exits with an error after downloading the others.
+      const skippedPlaylistVideos = code !== 0 && payload.isPlaylist === true &&
+        status.destinations.some(destination => existsSync(destination))
+      if (code === 0 || skippedPlaylistVideos) {
+        if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n')
+        status.status = payload.automatic === true && status.destinations.length === 0
+          ? 'skipped'
+          : 'completed'
+        if (status.status === 'completed') {
+          status.percent = 100
+          status.completedAt = Date.now()
+        }
+      } else {
+        status.status = 'failed'
+        status.errorMessage = stderrLines.join('\n')
       }
-    } else {
-      status.status = 'failed'
-      status.errorMessage = stderrLines.join('\n')
     }
 
     if (status.status === 'completed') {

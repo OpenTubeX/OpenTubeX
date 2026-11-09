@@ -2422,6 +2422,7 @@ Downloads:
   Download Cancelled: 下载已取消
   Download Failed: 下载失败
   File Name Shortened: 视频标题过长，因此已缩短文件名。
+  Some Videos Not Downloaded: 此播放列表中的部分视频无法下载。
   Insufficient Disk Space: 磁盘空间不足。需要约 {required}，当前可用空间为 {available}。
   Unknown Download Size: 下载大小未知。目标文件系统有 {available} 可用空间。
   Disk Space Check Unavailable: 开始此下载前无法检查可用磁盘空间。

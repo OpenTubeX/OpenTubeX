@@ -2425,6 +2425,7 @@ Downloads:
   Download Cancelled: Allalaadimine tühistati
   Download Failed: Allalaadimine nurjus
   File Name Shortened: Failinime lühendati, sest video pealkiri oli liiga pikk.
+  Some Videos Not Downloaded: Mõnda selle esitusloendi videot ei õnnestunud alla laadida.
   Insufficient Disk Space: Kettaruumi pole piisavalt. Vaja on umbes {required}, saadaval on {available}.
   Unknown Download Size: Allalaadimise maht pole teada. Sihtfailisüsteemis on saadaval {available}.
   Disk Space Check Unavailable: Enne selle allalaadimise alustamist ei saanud saadaolevat kettaruumi kontrollida.

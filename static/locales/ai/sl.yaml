@@ -3033,6 +3033,7 @@ Downloads:
   Download Cancelled: Prenos je preklican
   Download Failed: Prenos ni uspel
   File Name Shortened: Ime datoteke je bilo skrajšano, ker je bil naslov videoposnetka predolg.
+  Some Videos Not Downloaded: Nekaterih videoposnetkov s tega seznama predvajanja ni bilo mogoče prenesti.
   Insufficient Disk Space: Na disku ni dovolj prostora. Potrebnih je približno {required}, na voljo pa je {available}.
   Unknown Download Size: Velikost prenosa ni znana. V ciljnem datotečnem sistemu je na voljo {available}.
   Disk Space Check Unavailable: Pred začetkom prenosa ni bilo mogoče preveriti razpoložljivega prostora na disku.

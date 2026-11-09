@@ -13,7 +13,11 @@ from yt_dlp.postprocessor.common import PostProcessor
 
 class _QuietLogger:
     def __init__(self):
-        self.last_error = ''
+        self.errors = []
+
+    @property
+    def last_error(self):
+        return self.errors[-1] if self.errors else ''
 
     def debug(self, _message):
         pass
@@ -22,7 +26,7 @@ class _QuietLogger:
         pass
 
     def error(self, message):
-        self.last_error = message
+        self.errors = [*self.errors[-4:], message]
 
 
 class _ExtractionLogger(_QuietLogger):
@@ -227,8 +231,6 @@ def _download(request):
             ydl.prepare_filename = contained_filename
             ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
             result = ydl.download(parsed.urls)
-        if result != 0:
-            raise ValueError(logger.last_error or 'yt-dlp could not download this media')
         files = []
         for path in sorted(saved_files):
             if not path.is_file():
@@ -236,6 +238,12 @@ def _download(request):
             if not path.resolve().is_relative_to(folder.resolve()):
                 raise ValueError('Downloaded file escapes the download folder')
             files.append(str(path.relative_to(folder)))
+        if result != 0:
+            # yt-dlp skips playlist entries it cannot download, such as members-only
+            # videos, but still reports an error after downloading the others.
+            if payload.get('isPlaylist') is True and files:
+                return {'files': files, 'skippedError': _redact('\n'.join(logger.errors), 2000)}
+            raise ValueError(logger.last_error or 'yt-dlp could not download this media')
         return {'files': files}
     finally:
         set_control_file('')
@@ -256,6 +264,11 @@ def _version():
     return {'version': yt_dlp.version.__version__, 'tools': tools}
 
 
+def _redact(message, limit=300):
+    # Signed media URLs and cookie paths can appear in yt-dlp errors.
+    return re.sub(r'https?://\S+', '[media URL]', message)[:limit]
+
+
 def handle(request_path, result_path):
     try:
         request = json.loads(Path(request_path).read_text(encoding='utf-8'))
@@ -269,7 +282,5 @@ def handle(request_path, result_path):
         else:
             raise ValueError('Unsupported yt-dlp operation')
     except Exception as error:
-        # Signed media URLs and cookie paths can appear in yt-dlp exceptions.
-        message = re.sub(r'https?://\S+', '[media URL]', str(error))
-        result = {'error': type(error).__name__ + ': ' + message[:300]}
+        result = {'error': type(error).__name__ + ': ' + _redact(str(error))}
     Path(result_path).write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')

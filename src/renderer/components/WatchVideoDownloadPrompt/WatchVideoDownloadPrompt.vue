@@ -272,7 +272,17 @@
             </p>
           </div>
           <p
-            v-if="activeDownload.status === 'failed' && activeDownload.errorMessage !== 'ENOENT' && activeDownload.errorMessage"
+            v-if="activeDownload.status === 'completed' && activeDownload.errorMessage"
+            class="downloadWarning"
+          >
+            <FtIcon
+              :icon="['fas', 'triangle-exclamation']"
+              aria-hidden="true"
+            />
+            {{ t('Downloads.Some Videos Not Downloaded') }}
+          </p>
+          <p
+            v-if="['failed', 'completed'].includes(activeDownload.status) && activeDownload.errorMessage !== 'ENOENT' && activeDownload.errorMessage"
             class="downloadErrorDetails"
           >
             {{ downloadErrorMessage(activeDownload.errorMessage, t) }}

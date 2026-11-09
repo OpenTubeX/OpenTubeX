@@ -2481,6 +2481,7 @@ Downloads:
   Download Cancelled: Lataus peruutettu
   Download Failed: Lataus epäonnistui
   File Name Shortened: Tiedostonimeä lyhennettiin, koska videon nimi oli liian pitkä.
+  Some Videos Not Downloaded: Joitakin tämän soittolistan videoita ei voitu ladata.
   Insufficient Disk Space: Levytilaa ei ole tarpeeksi. Tilaa tarvitaan noin {required}, ja {available} on vapaana.
   Unknown Download Size: Latauksen kokoa ei tiedetä. Kohdetiedostojärjestelmässä on vapaana {available}.
   Disk Space Check Unavailable: Vapaan levytilan määrää ei voitu tarkistaa ennen tämän latauksen aloittamista.

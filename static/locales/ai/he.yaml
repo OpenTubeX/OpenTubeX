@@ -2483,6 +2483,7 @@ Downloads:
   Download Cancelled: ההורדה בוטלה
   Download Failed: ההורדה נכשלה
   File Name Shortened: שם הקובץ קוצר כי כותרת הסרטון הייתה ארוכה מדי.
+  Some Videos Not Downloaded: לא ניתן היה להוריד חלק מהסרטונים ברשימת ההשמעה הזו.
   Insufficient Disk Space: אין מספיק מקום בכונן. נדרשים כ-{required} וזמינים {available}.
   Unknown Download Size: גודל ההורדה אינו ידוע. במערכת הקבצים של היעד זמינים {available}.
   Disk Space Check Unavailable: לא ניתן היה לבדוק את המקום הפנוי בכונן לפני תחילת ההורדה.

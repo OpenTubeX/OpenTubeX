@@ -2435,6 +2435,7 @@ Downloads:
   Download Cancelled: Endirmə ləğv edildi
   Download Failed: Endirmə alınmadı
   File Name Shortened: Videonun başlığı çox uzun olduğu üçün fayl adı qısaldıldı.
+  Some Videos Not Downloaded: Bu pleylistdəki bəzi videoları endirmək mümkün olmadı.
   Insufficient Disk Space: Diskdə kifayət qədər yer yoxdur. Təxminən {required} lazımdır, {available} mövcuddur.
   Unknown Download Size: Endirmə ölçüsü məlum deyil. Hədəf fayl sistemində {available} mövcuddur.
   Disk Space Check Unavailable: Bu endirmə başlamazdan əvvəl diskdəki boş yeri yoxlamaq mümkün olmadı.

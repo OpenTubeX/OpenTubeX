@@ -2423,6 +2423,7 @@ Downloads:
   Download Cancelled: Nedladdningen har avbrutits
   Download Failed: Nedladdningen misslyckades
   File Name Shortened: Filnamnet förkortades eftersom videotiteln var för lång.
+  Some Videos Not Downloaded: Vissa videor i den här spellistan kunde inte laddas ned.
   Insufficient Disk Space: Det finns inte tillräckligt med diskutrymme. Cirka {required} krävs och {available} är tillgängligt.
   Unknown Download Size: Nedladdningens storlek är okänd. {available} är tillgängligt i målfilsystemet.
   Disk Space Check Unavailable: Det gick inte att kontrollera tillgängligt diskutrymme innan nedladdningen startades.

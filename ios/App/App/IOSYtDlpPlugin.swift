@@ -543,6 +543,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                         self.records[id]?["sizeBytes"] = exported.sizeBytes
                         self.records[id]?["percent"] = 100
                         self.records[id]?["status"] = "completed"
+                        // Lists the playlist videos that yt-dlp skipped
+                        self.records[id]?["errorMessage"] = value["skippedError"] ?? NSNull()
                         completed = true
                     }
                     if !completed {
