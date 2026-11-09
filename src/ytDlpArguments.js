@@ -45,10 +45,14 @@ const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'inte
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500
 // Options that run programs, load configs or inputs, replace yt-dlp, or write
 // files outside the download folder (a written config can carry `--exec`).
+// Metadata options can set internal fields such as `__finaldir` and
+// `filepath`, which move or write the download anywhere, and compatibility
+// options can turn off yt-dlp's file extension safety checks.
 const DENIED_CUSTOM_ARGS = [
   '--alias',
   '--batch-file',
   '--cache-dir',
+  '--compat-options',
   '--config-location',
   '--config-locations',
   '--cookies',
@@ -63,15 +67,18 @@ const DENIED_CUSTOM_ARGS = [
   '--js-runtimes',
   '--load-info-json',
   '--load-pages',
+  '--metadata-from-title',
   '--netrc-cmd',
   '--output',
   '--output-na-placeholder',
+  '--parse-metadata',
   '--paths',
   '--plugin-dirs',
   '--postprocessor-args',
   '--ppa',
   '--print-to-file',
   '--remote-components',
+  '--replace-in-metadata',
   '--update',
   '--update-to',
   '--use-postprocessor',

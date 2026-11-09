@@ -96,7 +96,11 @@ test('custom arguments cannot write files, load inputs or replace yt-dlp', () =>
     '--output=/tmp/x', '--out /tmp/x', '-P /tmp', '-xP/tmp', '--paths=temp:/tmp', '-a urls.txt', '--batch-file urls.txt',
     '-ka urls.txt', '--load-info-json info.json', '--cookies ~/.config/yt-dlp/config', '--cache-dir /tmp',
     '--download-archive ~/.bashrc', '--output-na-placeholder ../..', '--ppa ffmpeg:-y', '--postprocessor-args=ffmpeg:-y',
-    '-U', '-xU', '--update', '--update-to evil/yt-dlp@latest', '--write-pages', '--write-pa', '--load-pages', '--load-p']) {
+    '-U', '-xU', '--update', '--update-to evil/yt-dlp@latest', '--write-pages', '--write-pa', '--load-pages', '--load-p',
+    // `__finaldir` moves the finished file to any folder, and `all` includes allow-unsafe-ext.
+    '--parse-metadata "post_process:/home/user/.config/autostart:(?P<__finaldir>.+)"', '--parse-m=title:%(filepath)s',
+    '--replace-in-metadata __finaldir .* /tmp', '--metadata-from-title %(__finaldir)s', '--compat-options all',
+    '--compat=allow-unsafe-ext']) {
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs }), /unsupported-custom-argument/, customArgs)
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video' }, customArgs), /unsupported-custom-argument/, customArgs)
   }
