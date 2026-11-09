@@ -1178,6 +1178,7 @@ Settings:
     Hide Startup Splash: Sembunyikan Layar Pembuka
     Hide Header Sync Indicator: Sembunyikan indikator sinkronisasi di header aplikasi
     Hide Repeat Stats: Sembunyikan statistik pengulangan
+    Hide Playlist Stats: Sembunyikan statistik daftar putar
     Sections:
       Digital Wellbeing: "Kesejahteraan Digital"
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
@@ -2217,6 +2218,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
     Use cookies for subtitles: "Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis. Juga diaktifkan oleh \"Selalu Gunakan Kuki\"."
   Distraction Free Settings:
+    Hide Playlist Stats: Menyembunyikan jumlah video, jumlah tayangan, tanggal terakhir diperbarui, dan total durasi di halaman daftar putar.
     Count Watch Time From: "“Semua perangkat” menghitung setiap perangkat yang menyinkronkan statistik tontonan. “Perangkat ini” hanya menghitung apa yang Anda tonton di sini."
     When a Limit Is Reached: "“Jeda Pemutaran” memungkinkan Anda menambah 15 menit atau mengabaikan batas untuk hari ini. Dengan sandi pengaturan, Anda hanya dapat menaikkan batas di Pengaturan."
     Grayscale: "Menampilkan seluruh aplikasi, termasuk video, dalam nuansa abu-abu agar tidak terlalu menarik perhatian. “Saat Waktu Tidur” mengikuti jadwal pengingat waktu tidur."

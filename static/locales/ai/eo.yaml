@@ -1209,6 +1209,7 @@ Settings:
     Hide Startup Splash: Kaŝi startan ekranon
     Hide Header Sync Indicator: Kaŝi sinkronigan indikilon en la kapo
     Hide Repeat Stats: Kaŝi ripetajn statistikojn
+    Hide Playlist Stats: Kaŝi statistikojn de ludlisto
     Sections:
       Digital Wellbeing: Cifereca bonfarto
       Visible While Paused: Videbla dum paŭzo en plena fenestro / plena ekrano
@@ -2239,6 +2240,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg necesas por kunfandi apartajn video- kaj sonfluojn kaj por sonkonvertado. Defaŭlte, OpenTubeX supozas, ke FFmpeg troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
     Use cookies for subtitles: Uzi la agorditajn kuketojn por subtekstoj kaj aŭtomataj tradukoj. Ankaŭ ŝaltita per "Ĉiam uzi kuketojn".
   Distraction Free Settings:
+    Hide Playlist Stats: Kaŝas la nombron de videoj, la nombron de spektoj, la daton de la lasta ĝisdatigo kaj la tutan daŭron en ludlistaj paĝoj.
     Count Watch Time From: Ĉiuj aparatoj kalkulas ĉiun aparaton, kiu sinkronigas spektajn statistikojn. Ĉi tiu aparato kalkulas nur tion, kion vi spektas ĉi tie.
     When a Limit Is Reached: Paŭzigi ludadon ebligas al vi aldoni 15 minutojn aŭ ignori la limon por hodiaŭ. Kun agorda pasvorto, vi povas altigi limon nur en la agordoj.
     Grayscale: Montras la tutan aplikaĵon, inkluzive de videaĵoj, en grizaj nuancoj, por ke ĝi altiru malpli da atento. Dum dormotempo sekvas la horaron de la memorigo pri dormotempo.

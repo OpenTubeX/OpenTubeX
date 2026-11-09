@@ -1394,6 +1394,7 @@ Settings:
     Hide Startup Splash: Slėpti paleidimo ekraną
     Hide Header Sync Indicator: Slėpti sinchronizavimo indikatorių programos antraštėje
     Hide Repeat Stats: Slėpti kartojimo statistiką
+    Hide Playlist Stats: Slėpti grojaraščio statistiką
     Sections:
       Digital Wellbeing: "Skaitmeninė gerovė"
       Subscriptions Page: Prenumeratų puslapis
@@ -2619,6 +2620,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
     Use cookies for subtitles: "Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Taip pat įjungiama pasirinkus „Visada naudoti slapukus“."
   Distraction Free Settings:
+    Hide Playlist Stats: Grojaraščių puslapiuose paslepia vaizdo įrašų skaičių, peržiūrų skaičių, paskutinio atnaujinimo datą ir bendrą trukmę.
     Count Watch Time From: "„Visi įrenginiai“ skaičiuoja kiekvieną įrenginį, kuris sinchronizuoja žiūrėjimo statistiką. „Šis įrenginys“ skaičiuoja tik tai, ką žiūrite čia."
     When a Limit Is Reached: "„Pristabdyti atkūrimą“ leidžia pridėti 15 minučių arba šiandien ignoruoti limitą. Nustačius nustatymų slaptažodį, limitą padidinti galima tik nustatymuose."
     Grayscale: "Visą programą, įskaitant vaizdo įrašus, rodo pilkais tonais, kad ji mažiau trauktų dėmesį. „Miego metu“ vadovaujasi miego laiko priminimo tvarkaraščiu."

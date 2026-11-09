@@ -1177,6 +1177,7 @@ Settings:
     Hide Startup Splash: Fela upphafsskjá
     Hide Header Sync Indicator: Fela samstillingarvísi í haus forritsins
     Hide Repeat Stats: Fela tölfræði endurtekninga
+    Hide Playlist Stats: Fela tölfræði spilunarlista
     Sections:
       Digital Wellbeing: "Stafræn vellíðan"
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum
@@ -2213,6 +2214,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg er nauðsynlegt til að sameina aðskilið mynd- og hljóðstreymi og til að umbreyta hljóði. Sjálfgefið gerir OpenTubeX ráð fyrir að FFmpeg finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
     Use cookies for subtitles: "Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar. Virkjast einnig með „Nota alltaf vafrakökur“."
   Distraction Free Settings:
+    Hide Playlist Stats: Felur fjölda myndskeiða, fjölda áhorfa, dagsetningu síðustu uppfærslu og heildarlengd á síðum spilunarlista.
     Count Watch Time From: "„Öll tæki“ telur öll tæki sem samstilla áhorfstölfræði. „Þetta tæki“ telur aðeins það sem þú horfir á hér."
     When a Limit Is Reached: "„Gera hlé á spilun“ gerir þér kleift að bæta við 15 mínútum eða hunsa hámarkið í dag. Með lykilorði fyrir stillingar geturðu aðeins hækkað hámark í stillingunum."
     Grayscale: "Sýnir allt forritið, þar á meðal myndbönd, í gráum tónum svo það dragi minni athygli að sér. „Á háttatíma“ fylgir tímaáætlun áminningar um háttatíma."

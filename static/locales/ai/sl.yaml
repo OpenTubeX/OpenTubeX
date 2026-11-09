@@ -1411,6 +1411,7 @@ Settings:
     Hide Startup Splash: Skrij začetni zaslon
     Hide Header Sync Indicator: Skrij kazalnik sinhronizacije v glavi aplikacije
     Hide Repeat Stats: Skrij statistiko ponavljanja
+    Hide Playlist Stats: Skrij statistiko seznama predvajanja
     Sections:
       Digital Wellbeing: "Digitalno dobro počutje"
       Side Bar: Stranska vrstica
@@ -2712,6 +2713,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:
+    Hide Playlist Stats: Na straneh seznamov predvajanja skrije število videoposnetkov, število ogledov, datum zadnje posodobitve in skupno trajanje.
     Count Watch Time From: "Možnost »Vse naprave« šteje vse naprave, ki sinhronizirajo statistiko gledanja. »Ta naprava« šteje samo to, kar gledate tukaj."
     When a Limit Is Reached: "Možnost »Začasno ustavi predvajanje« omogoča, da dodate 15 minut ali omejitev za danes prezrete. Z geslom za nastavitve lahko omejitev povečate samo v nastavitvah."
     Grayscale: "Celotno aplikacijo, vključno z videoposnetki, prikaže v odtenkih sive, da manj pritegne pozornost. Možnost »Med časom za spanje« sledi urniku opomnika za spanje."

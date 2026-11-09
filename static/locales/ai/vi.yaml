@@ -1175,6 +1175,7 @@ Settings:
     Hide Startup Splash: Ẩn màn hình khởi động
     Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
     Hide Repeat Stats: Ẩn thống kê lặp lại
+    Hide Playlist Stats: Ẩn thống kê danh sách phát
     Sections:
       Digital Wellbeing: "Sức khỏe kỹ thuật số"
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
@@ -2207,6 +2208,7 @@ Tooltips:
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
+    Hide Playlist Stats: Ẩn số lượng video, số lượt xem, ngày cập nhật gần nhất và tổng thời lượng trên các trang danh sách phát.
     Count Watch Time From: "\"Tất cả thiết bị\" tính mọi thiết bị đồng bộ thống kê xem. \"Thiết bị này\" chỉ tính những gì bạn xem tại đây."
     When a Limit Is Reached: "\"Tạm dừng phát\" cho phép bạn thêm 15 phút hoặc bỏ qua giới hạn trong hôm nay. Khi có mật khẩu cài đặt, bạn chỉ có thể tăng giới hạn trong Cài đặt."
     Grayscale: "Hiển thị toàn bộ ứng dụng, kể cả video, bằng các sắc xám để ít thu hút sự chú ý hơn. \"Trong giờ đi ngủ\" tuân theo lịch của lời nhắc giờ đi ngủ."

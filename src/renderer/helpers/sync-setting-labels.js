@@ -157,6 +157,7 @@ export const SYNC_SETTING_LABELS = {
   hideLiveChatReplay: 'Settings.Distraction Free Settings.Hide Live Chat Replay',
   hideLiveStreams: 'Settings.Distraction Free Settings.Hide Live Streams',
   hidePaidPromotion: 'Settings.Distraction Free Settings.Hide Paid Promotion Badge',
+  hidePlaylistStats: 'Settings.Distraction Free Settings.Hide Playlist Stats',
   hidePlaylists: 'Settings.Distraction Free Settings.Hide Playlists',
   hidePopularVideos: 'Settings.Distraction Free Settings.Hide Popular Videos',
   hidePopularityGraph: 'Settings.Distraction Free Settings.Hide Popularity Graph',

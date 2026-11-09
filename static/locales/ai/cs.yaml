@@ -1175,6 +1175,7 @@ Settings:
     Hide Startup Splash: Skrýt úvodní obrazovku
     Hide Header Sync Indicator: Skrýt indikátor synchronizace v záhlaví aplikace
     Hide Repeat Stats: Skrýt statistiky opakování
+    Hide Playlist Stats: Skrýt statistiky playlistu
     Sections:
       Digital Wellbeing: "Digitální pohoda"
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky
@@ -2192,6 +2193,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg je nutný ke slučování samostatných streamů obrazu a zvuku a k převodu zvuku. OpenTubeX ve výchozím nastavení předpokládá, že nástroj FFmpeg lze najít pomocí proměnné prostředí PATH. V případě potřeby zde můžete nastavit vlastní cestu.
     Use cookies for subtitles: "Používat nastavené cookies pro titulky a automatické překlady. Zapne se také volbou „Vždy používat cookies“."
   Distraction Free Settings:
+    Hide Playlist Stats: Skryje počet videí, počet zhlédnutí, datum poslední aktualizace a celkovou délku na stránkách playlistů.
     Count Watch Time From: "„Všechna zařízení“ započítává každé zařízení, které synchronizuje statistiky sledování. „Toto zařízení“ započítává jen to, co sledujete zde."
     When a Limit Is Reached: "„Pozastavit přehrávání“ umožňuje přidat 15 minut nebo limit pro dnešek ignorovat. S heslem nastavení lze limit zvýšit pouze v Nastavení."
     Grayscale: "Zobrazí celou aplikaci včetně videí v odstínech šedi, aby méně přitahovala pozornost. Možnost „V době spánku“ se řídí rozvrhem připomínky času spánku."

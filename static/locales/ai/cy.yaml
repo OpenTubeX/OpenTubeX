@@ -1178,6 +1178,7 @@ Settings:
     Hide Startup Splash: Cuddio’r sgrin gychwyn
     Hide Header Sync Indicator: Cuddio’r dangosydd cysoni ym mhennyn yr ap
     Hide Repeat Stats: Cuddio ystadegau ailadrodd
+    Hide Playlist Stats: Cuddio ystadegau’r rhestr chwarae
     Sections:
       Digital Wellbeing: "Llesiant Digidol"
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
@@ -2228,6 +2229,7 @@ Tooltips:
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:
+    Hide Playlist Stats: Yn cuddio nifer y fideos, nifer y gwyliadau, dyddiad y diweddariad diwethaf a’r hyd cyfan ar dudalennau rhestrau chwarae.
     Count Watch Time From: "Mae \"Pob dyfais\" yn cyfrif pob dyfais sy'n cysoni ystadegau gwylio. Mae \"Y ddyfais hon\" yn cyfrif dim ond yr hyn rydych yn ei wylio yma."
     When a Limit Is Reached: "Mae \"Seibio Chwarae\" yn gadael i chi ychwanegu 15 munud neu anwybyddu'r terfyn am heddiw. Gyda chyfrinair gosodiadau, dim ond yn y Gosodiadau y gallwch godi terfyn."
     Grayscale: "Mae'n dangos yr ap cyfan, gan gynnwys fideos, mewn graddlwyd, fel ei fod yn tynnu llai o sylw. Mae \"Yn Ystod Amser Gwely\" yn dilyn amserlen y nodyn atgoffa amser gwely."

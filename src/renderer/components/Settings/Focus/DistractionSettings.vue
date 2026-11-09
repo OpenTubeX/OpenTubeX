@@ -99,6 +99,14 @@
           setting-key="hidePlaylists"
           @change="updateHidePlaylists"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Playlist Stats')"
+          :compact="true"
+          :default-value="hidePlaylistStats"
+          setting-key="hidePlaylistStats"
+          :tooltip="t('Tooltips.Distraction Free Settings.Hide Playlist Stats')"
+          @change="store.dispatch('updateHidePlaylistStats', $event)"
+        />
       </div>
     </div>
     <FtFlexBox>
@@ -581,6 +589,9 @@ const hidePlaylists = computed(() => store.getters.getHidePlaylists)
 function updateHidePlaylists(value) {
   store.dispatch('updateHidePlaylists', value)
 }
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hidePlaylistStats = computed(() => store.getters.getHidePlaylistStats)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLiveChat = computed(() => store.getters.getHideLiveChat)
