@@ -68,8 +68,9 @@ self.addEventListener('activate', function (event) {
 // If any fetch fails, it will look for the request in the cache and serve it from there first
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return
-  // Requests that must reach the server, such as connectivity checks, skip the cache.
-  if (['no-store', 'no-cache', 'reload'].includes(event.request.cache)) return
+  // Requests from the app that must reach the server, such as connectivity checks, skip the cache.
+  // Page reloads also revalidate but keep the cache, so the app still opens offline.
+  if (event.request.mode !== 'navigate' && ['no-store', 'no-cache', 'reload'].includes(event.request.cache)) return
 
   if (comparePaths(event.request.url, networkFirstPaths)) {
     networkFirstFetch(event)
