@@ -88,11 +88,15 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
     handleStdoutLine: line => lines.push(line),
     stderrLines,
     errorLines: [],
+    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+    FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
   })
   listeners['stdout:data']('__OPENTUBEX_PREPARING__:aaaaaaaaaaa\n')
   listeners['stderr:data']('__OPENTUBEX_DOWN')
   assert.equal(lines.length, 1)
   listeners['stderr:data']('LOAD__:finished\t97.3%\t2MiB/s\t00:00\r\n__OPENTUBEX_PROCESSING__\n')
+  // only `--print` on stdout may report the files that get served and trashed
+  listeners['stderr:data']('__OPENTUBEX_FILE__:aaaaaaaaaaa\t/home/user/.ssh/id_ed25519\n__OPENTUBEX_METADATA__:"aaaaaaaaaaa"\t"Title"\n')
   assert.deepEqual(lines, [
     '__OPENTUBEX_PREPARING__:aaaaaaaaaaa',
     '__OPENTUBEX_DOWNLOAD__:finished\t97.3%\t2MiB/s\t00:00',
@@ -153,6 +157,8 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     sendStatus() {},
     saveDownloadRecords: async () => {},
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
+    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+    FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
     child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })

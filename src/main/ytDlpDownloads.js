@@ -131,6 +131,8 @@ let shuttingDownDownloads = false
 let downloadQueuePaused = false
 let downloadQueuePauseAllRequested = false
 let powerSourceListenersAdded = false
+/** @type {ReturnType<typeof downloadManagedFfmpeg> | null} */
+let missingFfmpegInstall = null
 /** @type {NodeJS.Timeout | null} */
 let powerSourcePollTimer = null
 
@@ -460,7 +462,11 @@ async function startYtDlpDownload(
   if (ffmpeg.source === 'managed') {
     const ffprobe = await resolveFfprobeExecutable()
     if (!existsSync(ffmpeg.executable) || !existsSync(ffprobe.executable)) {
-      const result = await downloadManagedFfmpeg()
+      // downloads that start together share one FFmpeg installation
+      missingFfmpegInstall ??= downloadManagedFfmpeg().finally(() => {
+        missingFfmpegInstall = null
+      })
+      const result = await missingFfmpegInstall
 
       if ('error' in result) {
         return { error: result.error }
@@ -830,7 +836,11 @@ async function startYtDlpDownload(
 
   /** @param {string} line */
   function handleStderrLine(line) {
-    handleStdoutLine(line)
+    // `--print` writes the file and metadata sentinels to stdout. Extractor and
+    // server text can reach stderr, so it must not choose files to serve or trash.
+    if (!line.startsWith(FINAL_PATH_PREFIX) && !line.startsWith(FINAL_METADATA_PREFIX)) {
+      handleStdoutLine(line)
+    }
     if (line.length > 0) stderrLines.push(line)
     // only keep the last few lines for error reporting
     if (stderrLines.length > 5) {

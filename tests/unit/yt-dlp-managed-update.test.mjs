@@ -34,7 +34,10 @@ test('concurrent managed yt-dlp updates verify against the baseline the previous
       if (minimumSignedAt !== undefined && signedAt < minimumSignedAt) throw new Error('rollback')
       return signedAt
     },
-    installBinary: async (data) => { installs.push(Number(data.toString())) },
+    installBinariesAtomically: async ([binary], validate) => {
+      installs.push(Number(binary.data.toString()))
+      return validate()
+    },
     getYtDlpVersion: async () => '2026.10.21',
     writeDownloadValidators: async (path, validators) => { installed = { ...validators } },
     broadcastToRenderers: () => {},
@@ -66,7 +69,8 @@ async function downloadUnusableYtDlp(binaryExists) {
     downloadFile: async () => ({ data: Buffer.from('yt-dlp'), validators: {} }),
     fetchBuffer: async () => Buffer.alloc(0),
     verifyYtDlpReleaseAsset: () => 100,
-    installBinary: async () => {},
+    // the version check must run inside the transaction, so a failure restores the previous binary
+    installBinariesAtomically: async (binaries, validate) => validate(),
     getYtDlpVersion: async () => null,
     existsSync: () => binaryExists,
     writeDownloadValidators: async () => {},
