@@ -298,8 +298,8 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17
       eld:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       fflate:
         specifier: ^0.8.3
         version: 0.8.3
@@ -2662,8 +2662,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  eld@2.1.0:
-    resolution: {integrity: sha512-hDQ9FX17th7NDNMO8/St6m3ADQVqjF0sQoOHI6NUAxC7yDaPmZ9wC9d8zau/9FIqOV7KtNwrPKRt6fkkrzZj0g==}
+  eld@2.1.1:
+    resolution: {integrity: sha512-+WPgDcsV5rAuZR3BTW3rnnv03YvlP2JoHnFGDMLAp13XrDt7n58TBIL9hTmFs4VBVcozGxG/GC5WQILqRqd1pw==}
     engines: {node: '>=14.17.0'}
 
   electron-builder-squirrel-windows@26.18.0:
@@ -7836,7 +7836,7 @@ snapshots:
     dependencies:
       jake: 10.9.4
 
-  eld@2.1.0: {}
+  eld@2.1.1: {}
 
   electron-builder-squirrel-windows@26.18.0(dmg-builder@26.18.0)(supports-color@10.2.2):
     dependencies:
