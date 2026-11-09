@@ -82,7 +82,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const storedReceipts = new Map()
   const local = { notificationDismissals }
   const common = {
-    DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
+    DBSettingHandlers: {
+      find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })),
+      async findValue(_id) { return (await this.find()).find(setting => setting._id === _id)?.value },
+    },
     DEFAULT_CHANNEL_AVATAR,
     UNKNOWN_SYNC_UPLOADER_ID,
     uploaderToLocal,

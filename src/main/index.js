@@ -2991,6 +2991,9 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.settings.find()
 
+        case DBActions.SETTINGS.FIND_ONE:
+          return typeof data === 'string' ? (await baseHandlers.settings._findOne(data))?.value : undefined
+
         case DBActions.GENERAL.UPSERT:
           // Destinations and executables require a native picker. Backup status is written by the scheduler.
           if (!canRendererWriteSetting(data._id, data.value)) {

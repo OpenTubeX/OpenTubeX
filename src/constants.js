@@ -275,6 +275,7 @@ const DBActions = {
     MERGE_SEEN_VIDEOS: 20,
     MERGE_SEEN_POSTS: 21,
     MERGE_SEEN_RSS_ITEMS: 22,
+    FIND_ONE: 23,
   },
 
   HISTORY: {

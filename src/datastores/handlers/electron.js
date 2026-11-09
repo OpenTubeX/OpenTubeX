@@ -73,6 +73,11 @@ class Settings {
     return dbSettings(DBActions.GENERAL.FIND)
   }
 
+  /** Reads one setting's value without transferring the whole settings store */
+  static findValue(_id) {
+    return dbSettings(DBActions.SETTINGS.FIND_ONE, _id)
+  }
+
   static upsert(_id, value) {
     return dbSettings(DBActions.GENERAL.UPSERT, { _id, value })
   }
