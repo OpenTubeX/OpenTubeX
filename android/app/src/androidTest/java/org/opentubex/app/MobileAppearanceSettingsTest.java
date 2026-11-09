@@ -97,18 +97,19 @@ public class MobileAppearanceSettingsTest {
                 for (String target : new String[] {
                     ".settingsMenu [data-section=appearance]",
                     "[data-settings-subpage=customize-interface]",
-                    ".interfaceCustomizer [data-settings-subpage-tab=player]",
+                    // On phones the control bar tab previews the player menu.
+                    ".interfaceCustomizer [data-settings-subpage-tab=controlBar]",
                     ".interfaceCustomizer [data-preview-mode=menu]",
                 }) {
                     awaitCondition(view, "!!document.querySelector('" + target + "')");
                     evaluate(view, "document.querySelector('" + target + "').click()");
                 }
                 awaitCondition(view, "!!document.querySelector('.previewOverflowLabel')");
-                // The preview scales an 800px wide player down to the phone, which
-                // puts its text below WebView's default 8px minimum font size.
+                // On phones the menu preview scales a 360px wide phone player down to
+                // the stage, which puts its text below WebView's default 8px minimum font size.
                 JSONObject sizes = json(view, """
                     (() => ({
-                        expected: 11 * document.querySelector('.previewPlayer').getBoundingClientRect().width / 800,
+                        expected: 11 * document.querySelector('.previewPlayer').getBoundingClientRect().width / 360,
                         actual: parseFloat(getComputedStyle(document.querySelector('.previewOverflowLabel')).fontSize),
                     }))()
                     """);
@@ -735,8 +736,8 @@ public class MobileAppearanceSettingsTest {
                 int colorId = context.getResources().getIdentifier(
                     "system_accent1_" + (dark ? "200" : "600"), "color", "android");
                 String expected = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(colorId) & 0xffffff);
-                assertEquals("Renderer uses the actual system accent", JSONObject.quote(expected),
-                    evaluate(view, primary + ".toLowerCase()"));
+                String actualPrimary = (String) new JSONTokener(evaluate(view, primary + ".toLowerCase()")).nextValue();
+                assertSimilarColor("Renderer uses the actual system accent", expected, actualPrimary);
                 assertEquals("Dynamic fields, tracks and text retain accessible contrast", "true", evaluate(view,
                     """
                     (() => {
@@ -750,12 +751,16 @@ public class MobileAppearanceSettingsTest {
                             const values = [luminance(color(a)), luminance(color(b))].sort((a, b) => b - a);
                             return (values[0] + 0.05) / (values[1] + 0.05);
                         };
-                        const surfaces = ['--bg-color', '--card-bg-color', '--search-bar-color', '--dropdown-item-hover-color'];
+                        const surfaces = ['--bg-color', '--card-bg-color', '--search-bar-color'];
                         return document.body.classList.contains('dynamicColors') &&
-                            color('--search-bar-color') !== color('--card-bg-color') && surfaces.every(background =>
+                            color('--search-bar-color') !== color('--card-bg-color') &&
+                            // Hovered menu and suggestion rows only hold text.
+                            [...surfaces, '--dropdown-item-hover-color'].every(background =>
                                 ['--primary-text-color', '--secondary-text-color', '--link-color', '--red-500'].every(
-                                    foreground => contrast(foreground, background) >= 4.5) &&
-                                ['--input-border-color', '--slider-track-color', '--toggle-track-color',
+                                    foreground => contrast(foreground, background) >= 4.5)) &&
+                            surfaces.every(background =>
+                                // Unchecked switch tracks are outlined with the secondary text color.
+                                ['--input-border-color', '--slider-track-color',
                                  '--toggle-checked-track-color', '--scrollbar-color-hover'].every(
                                     foreground => contrast(foreground, background) >= 3)) &&
                             contrast('--toggle-thumb-color', '--toggle-track-color') >= 3 &&
@@ -765,7 +770,7 @@ public class MobileAppearanceSettingsTest {
                 evaluate(view, "document.body.style.removeProperty('--primary-color')");
                 scenario.onActivity(activity -> activity.onConfigurationChanged(
                     new android.content.res.Configuration(activity.getResources().getConfiguration())));
-                awaitCondition(view, primary + ".toLowerCase() === '" + expected + "'");
+                awaitCondition(view, primary + ".toLowerCase() === '" + actualPrimary + "'");
                 evaluate(view, store + ".commit('setBaseTheme', 'light')");
                 awaitCondition(view, primary + " === '' && document.body.classList.contains('light')");
                 assertEquals("Dynamic backgrounds are removed", "\"\"", evaluate(view,
@@ -779,13 +784,16 @@ public class MobileAppearanceSettingsTest {
 
     @Test
     public void dynamicBackgroundRespectsSystemThemeOverlays() throws Exception {
-        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        // Android 14 added the Material 3 surface roles that dynamic colors resolve to.
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 34);
         android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         boolean dark = (context.getResources().getConfiguration().uiMode &
             android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
             android.content.res.Configuration.UI_MODE_NIGHT_YES;
-        int backgroundId = dark ? android.R.color.system_neutral1_900 : android.R.color.system_neutral1_50;
-        String expected = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(backgroundId) & 0xffffff);
+        // Some distributions offer pure-black system surfaces, which the background keeps.
+        boolean blackSurface = dark && (context.getColor(android.R.color.system_neutral1_900) & 0xffffff) == 0;
+        String expected = blackSurface ? "#000000" : String.format(java.util.Locale.ROOT, "#%06x", context.getColor(
+            dark ? android.R.color.system_surface_dark : android.R.color.system_surface_light) & 0xffffff);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
             String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
@@ -798,29 +806,50 @@ public class MobileAppearanceSettingsTest {
                     store + ".commit('setSettingsWindowOpen', true)");
                 String background = "document.body.style.getPropertyValue('--bg-color').toLowerCase()";
                 awaitCondition(view, background + " !== '' && !!document.querySelector('.settingsWindow')");
-                assertEquals("Dynamic background respects system dark-theme overlays", JSONObject.quote(expected),
-                    evaluate(view, background));
-                int cardId = dark ? android.R.color.system_neutral1_800 : android.R.color.system_neutral1_100;
-                String expectedCard = dark && expected.equals("#000000") ? "#191919" :
-                    String.format(java.util.Locale.ROOT, "#%06x", context.getColor(cardId) & 0xffffff);
-                assertEquals("Cards remain distinguishable above pure-black backgrounds", JSONObject.quote(expectedCard),
-                    evaluate(view, "document.body.style.getPropertyValue('--card-bg-color').toLowerCase()"));
-                int rgb = Integer.parseInt(expectedCard.substring(1), 16);
-                String expectedRgb = "rgb(" + ((rgb >> 16) & 255) + ", " + ((rgb >> 8) & 255) + ", " + (rgb & 255) + ")";
-                assertEquals("The visible settings panel uses the system surface", JSONObject.quote(expectedRgb),
+                String actualBackground = (String) new JSONTokener(evaluate(view, background)).nextValue();
+                assertSimilarColor("Dynamic background respects system dark-theme overlays", expected, actualBackground);
+                String expectedCard = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(dark
+                    ? android.R.color.system_surface_container_low_dark
+                    : android.R.color.system_surface_container_low_light) & 0xffffff);
+                String actualCard = (String) new JSONTokener(evaluate(view,
+                    "document.body.style.getPropertyValue('--card-bg-color').toLowerCase()")).nextValue();
+                if (blackSurface) {
+                    assertTrue("Cards remain distinguishable above pure-black backgrounds", !actualCard.equals("#000000"));
+                } else {
+                    assertSimilarColor("Cards use the system's low surface container", expectedCard, actualCard);
+                }
+                assertEquals("The visible settings panel uses the background", JSONObject.quote(rgb(actualBackground)),
                     evaluate(view, "getComputedStyle(document.querySelector('.settingsWindow')).backgroundColor"));
-                assertEquals("The status-bar inset uses the system surface", JSONObject.quote(expectedRgb),
+                assertEquals("The status-bar inset uses the card surface", JSONObject.quote(rgb(actualCard)),
                     evaluate(view, "getComputedStyle(document.querySelector('.app'), '::before').backgroundColor"));
                 evaluate(view, "document.body.style.removeProperty('--bg-color')");
                 scenario.onActivity(activity -> activity.onConfigurationChanged(
                     new android.content.res.Configuration(activity.getResources().getConfiguration())));
-                awaitCondition(view, background + " === '" + expected + "'");
+                awaitCondition(view, background + " === '" + actualBackground + "'");
             } finally {
                 evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
                 evaluate(view, store + ".commit('setSettingsWindowOpen', " + savedWindowOpen + "); " +
                     store + ".commit('setSettingsWindowMinimized', " + savedWindowMinimized + ")");
             }
         }
+    }
+
+    /**
+     * The app resolves Material 3 roles from the wallpaper palette itself, which
+     * can round a channel differently from Android's own roles.
+     */
+    private static void assertSimilarColor(String message, String expected, String actual) {
+        int a = Integer.parseInt(expected.substring(1), 16);
+        int b = Integer.parseInt(actual.substring(1), 16);
+        for (int shift = 0; shift <= 16; shift += 8) {
+            assertTrue(message + ": expected " + expected + " but was " + actual,
+                Math.abs(((a >> shift) & 255) - ((b >> shift) & 255)) <= 2);
+        }
+    }
+
+    private static String rgb(String hex) {
+        int rgb = Integer.parseInt(hex.substring(1), 16);
+        return "rgb(" + ((rgb >> 16) & 255) + ", " + ((rgb >> 8) & 255) + ", " + (rgb & 255) + ")";
     }
 
     @Test

@@ -192,8 +192,11 @@ public class MobileTabSelectionTest {
                         await(view, "!document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
                         assertCompactTabletHeader(view, scale, pinned);
                         evaluate(view, "document.querySelector('.profileTrigger').click()");
-                        await(view, "document.querySelector('.downloadsShortcut')?.getBoundingClientRect().width > 0 && " +
-                            "document.querySelector('.allSettingsShortcut')?.getBoundingClientRect().width > 0");
+                        // Downloads and Settings move into quick settings only when the header has no room for them.
+                        await(view, "!!document.querySelector('.mobileSheet[open] .commandPaletteShortcut') && " +
+                            "[['.downloadsButton', '.downloadsShortcut'], ['.settingsButton', '.allSettingsShortcut']]" +
+                            ".every(([button, shortcut]) => [`.topNav ${button}`, shortcut].filter(selector =>" +
+                            " document.querySelector(selector)?.getBoundingClientRect().width > 0).length === 1)");
                         scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                         await(view, "document.querySelector('.profileTrigger').getAttribute('aria-expanded') === 'false'");
                         await(view, "!document.querySelector('.mobileSheet[open]')");
@@ -273,14 +276,16 @@ public class MobileTabSelectionTest {
                 for (int scale : new int[] {100, 125}) {
                     evaluate(view, STORE + ".commit('setUiScale', " + scale + ")");
                     await(view, "document.querySelector('.topNav').classList.contains('phoneLayout')");
+                    // At 125% the header has room for the logo but not its name.
                     assertEquals("The brand replaces desktop navigation at scale " + scale, "true", evaluate(view, """
                         (() => {
                             const header = document.querySelector('.topNav');
                             return getComputedStyle(header.querySelector('.navBackButton')).display === 'none' &&
                                 getComputedStyle(header.querySelector('.navForwardButton')).display === 'none' &&
-                                header.querySelector('.logoText').getBoundingClientRect().width > 40;
+                                header.querySelector('.logoIcon').getBoundingClientRect().width > 0 &&
+                                (%d > 100 || header.querySelector('.logoText').getBoundingClientRect().width > 40);
                         })()
-                        """));
+                        """.formatted(scale)));
                     evaluate(view, "window.mobileHeaderHistoryIndex = " + STORE + ".getters.getActiveTab.historyIndex;" +
                         "document.querySelector('.navSearchButton').click()");
                     await(view, "document.activeElement === document.querySelector('.topNav .ft-input')");
@@ -467,58 +472,64 @@ public class MobileTabSelectionTest {
             await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
             TutorialTestHelper.dismissIfPending(view);
-            evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
-                "document.querySelector('.capacitorTabletNewTab').click()");
-            await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
-                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
-            assertEquals("The loaded neighboring page is rendered behind the current page", "true",
-                evaluate(view, "(() => { const neighbor = document.querySelector('.tabContent[data-tab-id=\"' + window.pageSwipeFirstId + '\"]');" +
-                    "const viewport = document.querySelector('.app > .routerView').getBoundingClientRect();" +
-                    "const rect = neighbor.getBoundingClientRect();" +
-                    "return getComputedStyle(neighbor).display !== 'none' && rect.width === viewport.width &&" +
-                    "rect.left === viewport.left && neighbor.inert && neighbor.getAttribute('aria-hidden') === 'true'; })()"));
-            evaluate(view, "window.pageSwipeOriginalAnimationSpeed = " + STORE + ".getters.getAnimationSpeed;" +
-                STORE + ".commit('setAnimationSpeed', 25)");
+            // New tabs would change the neighbors and starting state of later tests.
+            evaluate(view, "window.pageSwipeOriginalTabs = { ..." + STORE + ".state.tabs, tabs: " + STORE + ".state.tabs.tabs.map(tab => ({ ...tab })) }");
             try {
-                evaluate(view, """
-                window.pageSwipeTransitions = [];
-                for (const type of ['transitionrun', 'transitionend', 'transitioncancel']) {
-                    document.querySelector('.app > .routerView').addEventListener(type, event => {
-                        if (event.target.classList.contains('tabContent')) {
-                            window.pageSwipeTransitions.push(type + ':' + event.propertyName + ':' +
-                                (event.target.dataset.tabId === String(window.pageSwipeFirstId) ? 'to' : 'from'));
-                        }
-                    });
+                evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
+                    "document.querySelector('.capacitorTabletNewTab').click()");
+                await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                    STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
+                assertEquals("The loaded neighboring page is rendered behind the current page", "true",
+                    evaluate(view, "(() => { const neighbor = document.querySelector('.tabContent[data-tab-id=\"' + window.pageSwipeFirstId + '\"]');" +
+                        "const viewport = document.querySelector('.app > .routerView').getBoundingClientRect();" +
+                        "const rect = neighbor.getBoundingClientRect();" +
+                        "return getComputedStyle(neighbor).display !== 'none' && rect.width === viewport.width &&" +
+                        "rect.left === viewport.left && neighbor.inert && neighbor.getAttribute('aria-hidden') === 'true'; })()"));
+                evaluate(view, "window.pageSwipeOriginalAnimationSpeed = " + STORE + ".getters.getAnimationSpeed;" +
+                    STORE + ".commit('setAnimationSpeed', 25)");
+                try {
+                    evaluate(view, """
+                    window.pageSwipeTransitions = [];
+                    for (const type of ['transitionrun', 'transitionend', 'transitioncancel']) {
+                        document.querySelector('.app > .routerView').addEventListener(type, event => {
+                            if (event.target.classList.contains('tabContent')) {
+                                window.pageSwipeTransitions.push(type + ':' + event.propertyName + ':' +
+                                    (event.target.dataset.tabId === String(window.pageSwipeFirstId) ? 'to' : 'from'));
+                            }
+                        });
+                    }
+                    """);
+
+                    float x = emptyHeaderSwipeX(view);
+                    float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
+                    float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
+                    long downTime = SystemClock.uptimeMillis();
+                    touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                    touch(view, downTime, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
+                    touch(view, downTime, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
+                    await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
+                        "!document.querySelector('.pageSwipeTo')");
+                    assertEquals("A fast release animates both pages before selecting the neighboring tab", "true",
+                        evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                            "window.pageSwipeTransitions.includes('transitionrun:left:to')"));
+
+                    evaluate(view, "window.pageSwipeTransitions = []");
+                    downTime = SystemClock.uptimeMillis();
+                    touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                    touch(view, downTime, MotionEvent.ACTION_MOVE, (x - 80) * scale, y * scale);
+                    await(view, "!!document.querySelector('.pageSwipeTo')");
+                    touch(view, downTime, MotionEvent.ACTION_CANCEL, (x - 80) * scale, y * scale);
+                    await(view, "!document.querySelector('.pageSwipeTo')");
+                    assertEquals("A cancelled drag animates back to the original tab", "true",
+                        evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                            "window.pageSwipeTransitions.includes('transitionrun:left:to') && " +
+                            STORE + ".getters.getActiveTabId === window.pageSwipeFirstId"));
+                } finally {
+                    evaluate(view, STORE + ".commit('setAnimationSpeed', window.pageSwipeOriginalAnimationSpeed);" +
+                        "delete window.pageSwipeOriginalAnimationSpeed");
                 }
-                """);
-
-                float x = emptyHeaderSwipeX(view);
-                float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
-                float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
-                long downTime = SystemClock.uptimeMillis();
-                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
-                await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
-                    "!document.querySelector('.pageSwipeTo')");
-                assertEquals("A fast release animates both pages before selecting the neighboring tab", "true",
-                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
-                        "window.pageSwipeTransitions.includes('transitionrun:left:to')"));
-
-                evaluate(view, "window.pageSwipeTransitions = []");
-                downTime = SystemClock.uptimeMillis();
-                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_MOVE, (x - 80) * scale, y * scale);
-                await(view, "!!document.querySelector('.pageSwipeTo')");
-                touch(view, downTime, MotionEvent.ACTION_CANCEL, (x - 80) * scale, y * scale);
-                await(view, "!document.querySelector('.pageSwipeTo')");
-                assertEquals("A cancelled drag animates back to the original tab", "true",
-                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
-                        "window.pageSwipeTransitions.includes('transitionrun:left:to') && " +
-                        STORE + ".getters.getActiveTabId === window.pageSwipeFirstId"));
             } finally {
-                evaluate(view, STORE + ".commit('setAnimationSpeed', window.pageSwipeOriginalAnimationSpeed);" +
-                    "delete window.pageSwipeOriginalAnimationSpeed");
+                evaluate(view, STORE + ".commit('setTabsState', window.pageSwipeOriginalTabs); delete window.pageSwipeOriginalTabs");
             }
         }
     }
@@ -532,79 +543,85 @@ public class MobileTabSelectionTest {
             await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
             TutorialTestHelper.dismissIfPending(view);
-            evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
-                "document.querySelector('.capacitorTabletNewTab').click()");
-            await(view, STORE + ".getters.getTabs.length >= 2 && " +
-                STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
-                STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
-                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
-            evaluate(view, "window.pageSwipeSecondId = " + STORE + ".getters.getActiveTabId");
+            // New tabs would change the neighbors and starting state of later tests.
+            evaluate(view, "window.pageSwipeOriginalTabs = { ..." + STORE + ".state.tabs, tabs: " + STORE + ".state.tabs.tabs.map(tab => ({ ...tab })) }");
+            try {
+                evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
+                    "document.querySelector('.capacitorTabletNewTab').click()");
+                await(view, STORE + ".getters.getTabs.length >= 2 && " +
+                    STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                    STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
+                    STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
+                evaluate(view, "window.pageSwipeSecondId = " + STORE + ".getters.getActiveTabId");
 
-            float x = emptyHeaderSwipeX(view);
-            float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
-            float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
-            float distance = Math.min(150, (view.getWidth() / scale) - x - 20);
-            assertTrue("App bar has enough empty space for a swipe", distance > 80);
-            evaluate(view, "document.querySelector('.app > .routerView').style.direction = 'rtl'");
-            long downTime = SystemClock.uptimeMillis();
-            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
-            await(view, "!!document.querySelector('.pageSwipeTo') && " +
-                STORE + ".getters.getPresentedTabId !== window.pageSwipeFirstId");
-            assertEquals("The neighboring page stays flush with the moving page", "true",
-                evaluate(view, "Math.abs(document.querySelector('.pageSwipeTo').getBoundingClientRect().right - document.querySelector('.pageSwipeFrom').getBoundingClientRect().left) <= 1"));
-            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance) * scale, y * scale);
-            touch(view, downTime, MotionEvent.ACTION_UP, (x + distance) * scale, y * scale);
-            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeFirstId && " +
-                STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
-                "!document.querySelector('.pageSwipeTo')");
-            float leftDistance = Math.min(150, x - 20);
-            assertTrue("App bar has enough empty space in both directions", leftDistance > 80);
-            downTime = SystemClock.uptimeMillis();
-            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-            touch(view, downTime, MotionEvent.ACTION_MOVE, (x - leftDistance) * scale, y * scale);
-            touch(view, downTime, MotionEvent.ACTION_UP, (x - leftDistance) * scale, y * scale);
-            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
-                STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
-                "!document.querySelector('.pageSwipeTo')");
+                float x = emptyHeaderSwipeX(view);
+                float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
+                float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
+                float distance = Math.min(150, (view.getWidth() / scale) - x - 20);
+                assertTrue("App bar has enough empty space for a swipe", distance > 80);
+                evaluate(view, "document.querySelector('.app > .routerView').style.direction = 'rtl'");
+                long downTime = SystemClock.uptimeMillis();
+                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+                await(view, "!!document.querySelector('.pageSwipeTo') && " +
+                    STORE + ".getters.getPresentedTabId !== window.pageSwipeFirstId");
+                assertEquals("The neighboring page stays flush with the moving page", "true",
+                    evaluate(view, "Math.abs(document.querySelector('.pageSwipeTo').getBoundingClientRect().right - document.querySelector('.pageSwipeFrom').getBoundingClientRect().left) <= 1"));
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance) * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_UP, (x + distance) * scale, y * scale);
+                await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeFirstId && " +
+                    STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
+                    "!document.querySelector('.pageSwipeTo')");
+                float leftDistance = Math.min(150, x - 20);
+                assertTrue("App bar has enough empty space in both directions", leftDistance > 80);
+                downTime = SystemClock.uptimeMillis();
+                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x - leftDistance) * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_UP, (x - leftDistance) * scale, y * scale);
+                await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
+                    STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
+                    "!document.querySelector('.pageSwipeTo')");
 
-            evaluate(view, "document.querySelector('.capacitorTabletNewTab').click()");
-            await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
-                STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
-                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId && " +
-                STORE + ".getters.getActiveTabId !== window.pageSwipeSecondId");
-            evaluate(view, "window.pageSwipeThirdId = " + STORE + ".getters.getActiveTabId");
-            evaluate(view, "document.querySelector('.capacitorTabletTabTarget[data-tab-id=\"' + " +
-                "window.pageSwipeSecondId + '\"]').click()");
-            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
-                STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
-                "!!document.querySelector('.pageSwipePrewarm[data-tab-id=\"' + window.pageSwipeThirdId + '\"]')");
-            downTime = SystemClock.uptimeMillis();
-            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
-            await(view, "document.querySelector('.pageSwipeTo')?.dataset.tabId === String(window.pageSwipeFirstId)");
-            assertEquals("The previous tab paints above the other prewarmed tab", "true",
-                evaluate(view, """
-                    (() => {
-                        const target = document.querySelector('.pageSwipeTo');
-                        const other = [...document.querySelectorAll('.pageSwipePrewarm')]
-                            .find(page => page !== target);
-                        const rect = target.getBoundingClientRect();
-                        target.inert = false;
-                        other.inert = false;
-                        other.style.pointerEvents = 'auto';
-                        try {
-                            return document.elementFromPoint(rect.right - 30, rect.top + 30)
-                                ?.closest('.tabContent') === target;
-                        } finally {
-                            target.inert = true;
-                            other.inert = true;
-                            other.style.pointerEvents = '';
-                        }
-                    })()
-                    """));
-            touch(view, downTime, MotionEvent.ACTION_CANCEL, (x + distance / 2) * scale, y * scale);
-            await(view, "!document.querySelector('.pageSwipeTo')");
+                evaluate(view, "document.querySelector('.capacitorTabletNewTab').click()");
+                await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                    STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
+                    STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId && " +
+                    STORE + ".getters.getActiveTabId !== window.pageSwipeSecondId");
+                evaluate(view, "window.pageSwipeThirdId = " + STORE + ".getters.getActiveTabId");
+                evaluate(view, "document.querySelector('.capacitorTabletTabTarget[data-tab-id=\"' + " +
+                    "window.pageSwipeSecondId + '\"]').click()");
+                await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
+                    STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
+                    "!!document.querySelector('.pageSwipePrewarm[data-tab-id=\"' + window.pageSwipeThirdId + '\"]')");
+                downTime = SystemClock.uptimeMillis();
+                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+                await(view, "document.querySelector('.pageSwipeTo')?.dataset.tabId === String(window.pageSwipeFirstId)");
+                assertEquals("The previous tab paints above the other prewarmed tab", "true",
+                    evaluate(view, """
+                        (() => {
+                            const target = document.querySelector('.pageSwipeTo');
+                            const other = [...document.querySelectorAll('.pageSwipePrewarm')]
+                                .find(page => page !== target);
+                            const rect = target.getBoundingClientRect();
+                            target.inert = false;
+                            other.inert = false;
+                            other.style.pointerEvents = 'auto';
+                            try {
+                                return document.elementFromPoint(rect.right - 30, rect.top + 30)
+                                    ?.closest('.tabContent') === target;
+                            } finally {
+                                target.inert = true;
+                                other.inert = true;
+                                other.style.pointerEvents = '';
+                            }
+                        })()
+                        """));
+                touch(view, downTime, MotionEvent.ACTION_CANCEL, (x + distance / 2) * scale, y * scale);
+                await(view, "!document.querySelector('.pageSwipeTo')");
+            } finally {
+                evaluate(view, STORE + ".commit('setTabsState', window.pageSwipeOriginalTabs); delete window.pageSwipeOriginalTabs");
+            }
         }
     }
 
@@ -853,8 +870,10 @@ public class MobileTabSelectionTest {
                 assertEquals("Ordinary navigation stays in the current page", currentId, evaluate(view, STORE + ".getters.getPresentedTabId"));
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, STORE + ".getters.getPresentedTab.route.path === '/history'");
-                evaluate(view, "location.reload()");
-                await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+                // Mark the old page so the wait cannot pass before it unloads.
+                evaluate(view, "window.disableTabsBeforeReload = true; location.reload()");
+                await(view, "!window.disableTabsBeforeReload && !!document.querySelector('.app') && " +
+                    STORE + ".getters.getActiveTab?.loadState === 'loaded'");
                 assertEquals("The preference survives restarting the renderer", "true", evaluate(view,
                     STORE + ".getters.getEnableMobileTabs === false && " + STORE + ".getters.getTabs.length === 1 && " +
                     "!document.querySelector('.capacitorPhoneTabSwitcher, .capacitorTabletTabBar')"));
