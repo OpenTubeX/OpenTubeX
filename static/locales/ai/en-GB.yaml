@@ -2421,6 +2421,7 @@ Downloads:
   Download Cancelled: Download cancelled
   Download Failed: Download failed
   File Name Shortened: The file name was shortened because the video title was too long.
+  Some Videos Not Downloaded: Some videos in this playlist could not be downloaded.
   Insufficient Disk Space: Not enough disk space. About {required} is needed and {available} is available.
   Unknown Download Size: Download size is unknown. {available} is available on the destination filesystem.
   Disk Space Check Unavailable: Available disk space could not be checked before starting this download.

@@ -2423,6 +2423,7 @@ Downloads:
   Download Cancelled: İndirme iptal edildi
   Download Failed: İndirme başarısız oldu
   File Name Shortened: Video başlığı çok uzun olduğu için dosya adı kısaltıldı.
+  Some Videos Not Downloaded: Bu oynatma listesindeki bazı videolar indirilemedi.
   Insufficient Disk Space: Yeterli disk alanı yok. Yaklaşık {required} gerekli, {available} kullanılabilir.
   Unknown Download Size: İndirme boyutu bilinmiyor. Hedef dosya sisteminde {available} kullanılabilir.
   Disk Space Check Unavailable: İndirme başlatılmadan önce kullanılabilir disk alanı denetlenemedi.

@@ -2819,6 +2819,7 @@ Downloads:
   Download Cancelled: Nedlastinga er avbroten
   Download Failed: Nedlastinga feila
   File Name Shortened: Filnamnet vart korta ned fordi videotittelen var for lang.
+  Some Videos Not Downloaded: Nokre videoar i denne spelelista kunne ikkje lastast ned.
   Insufficient Disk Space: Ikkje nok diskplass. Det trengst om lag {required}, og {available} er tilgjengeleg.
   Unknown Download Size: Storleiken på nedlastinga er ukjend. {available} er tilgjengeleg i målfilsystemet.
   Disk Space Check Unavailable: Klarte ikkje å kontrollere tilgjengeleg diskplass før nedlastinga starta.

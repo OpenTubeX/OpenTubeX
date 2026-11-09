@@ -2423,6 +2423,7 @@ Downloads:
   Download Cancelled: A letöltés megszakítva
   Download Failed: A letöltés sikertelen
   File Name Shortened: A fájlnevet lerövidítettük, mert a videó címe túl hosszú volt.
+  Some Videos Not Downloaded: A lejátszási lista néhány videóját nem sikerült letölteni.
   Insufficient Disk Space: Nincs elég lemezterület. Körülbelül {required} szükséges, és {available} érhető el.
   Unknown Download Size: A letöltés mérete ismeretlen. A célfájlrendszeren {available} érhető el.
   Disk Space Check Unavailable: A letöltés indítása előtt nem sikerült ellenőrizni a rendelkezésre álló lemezterületet.

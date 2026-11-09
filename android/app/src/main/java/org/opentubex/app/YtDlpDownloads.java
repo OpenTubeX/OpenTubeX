@@ -273,10 +273,17 @@ final class YtDlpDownloads {
                 if (estimate > 0 && root.getUsableSpace() < estimate) throw new IOException("INSUFFICIENT_SPACE");
             }
             StringBuilder completedOutput = new StringBuilder();
+            // The runtime's error only keeps the end of the output, where progress
+            // lines can hide a playlist's earlier per-video errors.
+            ArrayDeque<String> errorLines = new ArrayDeque<>();
             Exception downloadError = null;
             try {
                 YtDlpRuntime.execute(context, args, "download-" + id, line -> {
                     if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line).append('\n');
+                    if (line.startsWith("ERROR:")) synchronized (errorLines) {
+                        errorLines.add(line);
+                        if (errorLines.size() > 5) errorLines.removeFirst();
+                    }
                     progress(id, line);
                 });
             } catch (Exception error) {
@@ -341,17 +348,26 @@ final class YtDlpDownloads {
                     save();
                 }
             }
+            boolean finished;
             synchronized (this) {
                 if (!isExecuting(id)) return;
-                if (downloadError == null) {
+                String error = downloadError == null ? null
+                    : downloadError.getMessage() == null ? downloadError.getClass().getSimpleName() : downloadError.getMessage();
+                // yt-dlp skips playlist entries it cannot download, such as members-only
+                // videos, but still exits with an error after downloading the others.
+                boolean skippedPlaylistVideos = downloadError != null &&
+                    record.getJSONObject("retryPayload").optBoolean("isPlaylist") && record.getJSONArray("destinations").length() > 0;
+                finished = downloadError == null || skippedPlaylistVideos;
+                if (finished) {
                     record.put("percent", 100);
                     if (record.getJSONArray("destinations").length() > 0) record.put("completedAt", System.currentTimeMillis());
-                    updateStatus(id, record.getJSONArray("destinations").length() > 0 ? "completed" : "skipped", null);
+                    updateStatus(id, record.getJSONArray("destinations").length() > 0 ? "completed" : "skipped",
+                        skippedPlaylistVideos ? (errorLines.isEmpty() ? error : String.join("\n", errorLines)) : null);
                 } else {
-                    updateStatus(id, "failed", downloadError.getMessage() == null ? downloadError.getClass().getSimpleName() : downloadError.getMessage());
+                    updateStatus(id, "failed", error);
                 }
             }
-            if (downloadError == null) YtDlpFiles.deleteTree(root);
+            if (finished) YtDlpFiles.deleteTree(root);
         } catch (Exception error) {
             synchronized (this) {
                 if (isExecuting(id)) updateStatus(id, "failed", error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());

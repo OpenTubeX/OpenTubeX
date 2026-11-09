@@ -2439,6 +2439,7 @@ Downloads:
   Download Cancelled: Đã hủy tải
   Download Failed: Tải không thành công
   File Name Shortened: Tên tệp đã được rút gọn vì tiêu đề video quá dài.
+  Some Videos Not Downloaded: Không thể tải xuống một số video trong danh sách phát này.
   Insufficient Disk Space: Không đủ dung lượng đĩa. Cần khoảng {required}, hiện có {available}.
   Unknown Download Size: Không rõ kích thước tải xuống. Hệ thống tệp đích còn {available}.
   Disk Space Check Unavailable: Không thể kiểm tra dung lượng đĩa còn trống trước khi bắt đầu tải.

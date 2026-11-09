@@ -2888,6 +2888,7 @@ Downloads:
   Download Cancelled: 다운로드 취소됨
   Download Failed: 다운로드 실패
   File Name Shortened: 동영상 제목이 너무 길어 파일 이름을 줄였습니다.
+  Some Videos Not Downloaded: 이 재생목록의 일부 동영상을 다운로드하지 못했습니다.
   Insufficient Disk Space: 디스크 공간이 부족합니다. 약 {required}이(가) 필요하며 {available}을(를) 사용할 수 있습니다.
   Unknown Download Size: 다운로드 크기를 알 수 없습니다. 대상 파일 시스템에서 {available}을(를) 사용할 수 있습니다.
   Disk Space Check Unavailable: 다운로드를 시작하기 전에 사용 가능한 디스크 공간을 확인할 수 없습니다.

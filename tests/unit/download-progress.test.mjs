@@ -79,7 +79,7 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
   const wiring = source.slice(source.indexOf("  let stdoutBuffer = ''"), source.indexOf("  child.on('error',", source.indexOf("  let stdoutBuffer = ''")))
   vm.runInNewContext(wiring, {
     child: { stdout: stream('stdout'), stderr: stream('stderr') },
-    handleStdoutLine: line => lines.push(line), stderrLines,
+    handleStdoutLine: line => lines.push(line), stderrLines, errorLines: [],
   })
   listeners['stdout:data']('__OPENTUBEX_PREPARING__:aaaaaaaaaaa\n')
   listeners['stderr:data']('__OPENTUBEX_DOWN')
@@ -116,4 +116,46 @@ test('storage history includes only terminal downloads that the backend can clea
     computed: getter => ({ value: getter() }), downloads: { value: records },
   })
   assert.deepEqual(Array.from(result, record => record.status), ['completed', 'failed', 'cancelled', 'skipped'])
+})
+
+function finishDownload({ code, payload, destinations, stderr }) {
+  const start = source.indexOf('  /** @param {string} line */\n  function handleStderrLine(line) {')
+  const closeStart = source.indexOf("  child.on('close', (code) => {", start)
+  const closeEnd = source.indexOf('\n  })\n', closeStart) + 5
+  const status = { status: 'downloading', percent: 40, destinations, destination: destinations.at(-1) ?? null, errorMessage: null }
+  const notifications = []
+  let close
+  vm.runInNewContext(`${source.slice(start, source.indexOf("  child.on('error',", start))}${source.slice(closeStart, closeEnd)}
+    for (const line of stderr) handleStderrLine(line)`, {
+    id: 1, stderr, stderrLines: [], errorLines: [], status, payload, subtitleFormat: '', finished: false,
+    entry: { cancelled: false, restarting: false }, activeDownloads: new Map(),
+    handleStdoutLine() {}, releaseDownloadSlot() {}, removeTemporaryDownloadFolder() {}, sendStatus() {},
+    saveDownloadRecords: async () => {}, showAutomaticDownloadNotification: (_, state) => notifications.push(state),
+    child: { on: (event, callback) => { if (event === 'close') close = callback } },
+    Date,
+  })
+  close(code)
+  return { status, notifications }
+}
+
+const membersOnlyError = 'ERROR: [youtube] bbbbbbbbbbb: Join this channel to get access to members-only content like this video'
+
+test('a playlist completes with the skipped videos when yt-dlp reports errors for some entries', () => {
+  const { status } = finishDownload({
+    code: 1,
+    payload: { isPlaylist: true },
+    destinations: ['/downloads/Playlist/001 - First [aaaaaaaaaaa].mp4'],
+    stderr: [membersOnlyError, ...Array(5).fill('__OPENTUBEX_DOWNLOAD__:downloading\t50.0%\t2MiB/s\t00:01')],
+  })
+  assert.equal(status.status, 'completed')
+  assert.equal(status.percent, 100)
+  assert.equal(status.errorMessage, membersOnlyError)
+})
+
+test('a playlist without any downloaded file and a failed single video still fail', () => {
+  const playlist = finishDownload({ code: 1, payload: { isPlaylist: true }, destinations: [], stderr: [membersOnlyError] })
+  assert.equal(playlist.status.status, 'failed')
+  const video = finishDownload({ code: 1, payload: {}, destinations: ['/downloads/Video [aaaaaaaaaaa].mp4'], stderr: [membersOnlyError] })
+  assert.equal(video.status.status, 'failed')
+  assert.equal(video.status.errorMessage, membersOnlyError)
 })

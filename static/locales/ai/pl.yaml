@@ -1603,6 +1603,7 @@ Downloads:
   Paused: Wstrzymano
   Pausing: Po zakończeniu bieżącego zadania kolejka zostanie wstrzymana
   File Name Shortened: Nazwa pliku została skrócona, ponieważ tytuł filmu był za długi.
+  Some Videos Not Downloaded: Nie udało się pobrać niektórych filmów z tej playlisty.
   Insufficient Disk Space: Za mało miejsca na dysku. Potrzeba około {required}, a dostępne jest {available}.
   Unknown Download Size: Rozmiar pobierania jest nieznany. W docelowym systemie plików dostępne jest {available}.
   Disk Space Check Unavailable: Przed rozpoczęciem pobierania nie udało się sprawdzić dostępnego miejsca na dysku.

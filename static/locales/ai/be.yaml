@@ -2531,6 +2531,7 @@ Downloads:
   Download Cancelled: Спампоўванне скасавана
   Download Failed: Памылка спампоўвання
   File Name Shortened: Назву файла скарочана, бо назва відэа была занадта доўгай.
+  Some Videos Not Downloaded: Некаторыя відэа з гэтага плэйліста не ўдалося спампаваць.
   Insufficient Disk Space: Недастаткова месца на дыску. Патрабуецца каля {required}, даступна {available}.
   Unknown Download Size: Памер спампоўвання невядомы. У мэтавай файлавай сістэме даступна {available}.
   Disk Space Check Unavailable: Не ўдалося праверыць даступнае месца на дыску перад пачаткам гэтага спампоўвання.

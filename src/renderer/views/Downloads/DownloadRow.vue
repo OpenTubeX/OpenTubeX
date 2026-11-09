@@ -94,6 +94,16 @@
             {{ spaceWarningText }}
           </p>
           <p
+            v-if="hasSkippedPlaylistVideos"
+            class="downloadWarning"
+          >
+            <FtIcon
+              :icon="['fas', 'triangle-exclamation']"
+              aria-hidden="true"
+            />
+            {{ t('Downloads.Some Videos Not Downloaded') }}
+          </p>
+          <p
             v-if="errorText"
             class="downloadError"
             dir="auto"
@@ -548,8 +558,10 @@ const availabilityText = computed(() => {
   }
   return ''
 })
+// Playlist downloads complete with an error message when yt-dlp skipped videos
+const hasSkippedPlaylistVideos = computed(() => props.download.status === 'completed' && !!props.download.errorMessage)
 const errorText = computed(() => {
-  if (props.download.status !== 'failed' || !props.download.errorMessage) return ''
+  if ((props.download.status !== 'failed' && !hasSkippedPlaylistVideos.value) || !props.download.errorMessage) return ''
   if (props.download.errorMessage === 'INSUFFICIENT_SPACE') {
     return t('Downloads.Insufficient Disk Space', {
       required: formatBytes(props.download.estimatedSizeBytes),

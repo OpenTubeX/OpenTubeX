@@ -2492,6 +2492,7 @@ Downloads:
   Download Cancelled: Download geannuleerd
   Download Failed: Download mislukt
   File Name Shortened: De bestandsnaam is ingekort omdat de videotitel te lang was.
+  Some Videos Not Downloaded: Sommige video's in deze afspeellijst konden niet worden gedownload.
   Insufficient Disk Space: Onvoldoende schijfruimte. Er is ongeveer {required} nodig en {available} beschikbaar.
   Unknown Download Size: De downloadgrootte is onbekend. Er is {available} beschikbaar op het doelbestandssysteem.
   Disk Space Check Unavailable: De beschikbare schijfruimte kon niet worden gecontroleerd voordat deze download werd gestart.

@@ -2475,6 +2475,7 @@ Downloads:
   Download Cancelled: Завантаження скасовано
   Download Failed: Завантаження не вдалося
   File Name Shortened: Назву файла скорочено, оскільки назва відео була надто довгою.
+  Some Videos Not Downloaded: Не вдалося завантажити деякі відео з цього плейлиста.
   Insufficient Disk Space: Недостатньо місця на диску. Потрібно близько {required}, доступно {available}.
   Unknown Download Size: Розмір завантаження невідомий. У цільовій файловій системі доступно {available}.
   Disk Space Check Unavailable: Не вдалося перевірити доступне місце на диску перед початком завантаження.

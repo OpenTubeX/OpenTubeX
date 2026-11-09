@@ -122,6 +122,33 @@ public class YtDlpDownloadsTest {
         } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
     }
 
+    @Test public void playlistWithUnavailableEntriesCompletesWithTheirErrors() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-skipped-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+        try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri);
+            JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "").put("isPlaylist", true);
+            JSONArray args = new JSONArray(asList("--output", "%(id)s.%(ext)s", server.url().replace("demo.webm", "missing.webm"), server.url()));
+            long id = queue.add(payload, args, config, -1).getLong("id");
+            assertEquals(asList(id), queue.claim());
+            queue.run(id);
+            JSONObject completed = queue.list().getJSONObject(0);
+            assertEquals(completed.toString(), "completed", completed.getString("status"));
+            assertEquals(1, completed.getJSONArray("files").length());
+            String error = completed.getString("errorMessage");
+            assertTrue(error, error.startsWith("ERROR:") && error.contains("404"));
+            assertFalse("Progress lines must not hide the skipped entries", error.contains("[download]"));
+            assertFalse("Completed playlists must not keep staging data", new File(new File(state, "yt-dlp-downloads"), Long.toString(id)).exists());
+            assertTrue(queue.remove(id));
+        } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
+    }
+
     @Test public void interruptedExportReusesItsAllocatedDocument() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File root = new File(context.getCacheDir(), "yt-dlp-export-" + UUID.randomUUID());

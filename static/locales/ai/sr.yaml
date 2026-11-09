@@ -2508,6 +2508,7 @@ Downloads:
   Download Cancelled: Преузимање је отказано
   Download Failed: Преузимање није успело
   File Name Shortened: Назив датотеке је скраћен јер је наслов видео-снимка предугачак.
+  Some Videos Not Downloaded: Неке видео снимке са ове плејлисте није било могуће преузети.
   Insufficient Disk Space: Нема довољно простора на диску. Потребно је око {required}, а доступно је {available}.
   Unknown Download Size: Величина преузимања није позната. На одредишном систему датотека доступно је {available}.
   Disk Space Check Unavailable: Није било могуће проверити доступан простор на диску пре почетка овог преузимања.
