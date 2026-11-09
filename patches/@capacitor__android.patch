@@ -1,8 +1,26 @@
 diff --git a/capacitor/src/main/java/com/getcapacitor/Bridge.java b/capacitor/src/main/java/com/getcapacitor/Bridge.java
-index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..0cca9fb306c9a5ff8b7450a132bb2427cc979c2b 100644
+index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..64d6c7777412652d7a46ed043caae400fc749aea 100644
 --- a/capacitor/src/main/java/com/getcapacitor/Bridge.java
 +++ b/capacitor/src/main/java/com/getcapacitor/Bridge.java
-@@ -939,7 +939,8 @@ public class Bridge {
+@@ -884,12 +884,15 @@ public class Bridge {
+         logToJs(message, "log");
+     }
+ 
++    // An event sent before the page loads the Capacitor runtime, such as one
++    // from the first onResume of a cold start, has no listener yet. Skip it
++    // instead of throwing an uncaught TypeError in the page.
+     public void triggerJSEvent(final String eventName, final String target) {
+-        eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\")", (s) -> {});
++        eval("window.Capacitor?.triggerEvent(\"" + eventName + "\", \"" + target + "\")", (s) -> {});
+     }
+ 
+     public void triggerJSEvent(final String eventName, final String target, final String data) {
+-        eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\", " + data + ")", (s) -> {});
++        eval("window.Capacitor?.triggerEvent(\"" + eventName + "\", \"" + target + "\", " + data + ")", (s) -> {});
+     }
+ 
+     public void triggerWindowJSEvent(final String eventName) {
+@@ -939,7 +942,8 @@ public class Bridge {
          return this.savedCalls.get(callbackId);
      }
  
