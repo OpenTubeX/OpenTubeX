@@ -2973,7 +2973,7 @@ export default defineComponent({
     })
 
     function getBigButtons(showPlayButton, mobile) {
-      if (!mobile) return showPlayButton ? ['play_pause'] : []
+      if (!mobile && !showPlayButton) return []
       return [
         ...(props.canSkipPrevious ? ['ft_skip_previous'] : []),
         'play_pause',

@@ -1727,3 +1727,93 @@ test('mobile skip buttons switch videos when tapped', async ({ app, page }) => {
   await view.dispose()
   await session.detach()
 })
+
+test('desktop skip buttons flank the centered play button without a backdrop', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.$store.dispatch('updateDisplayVideoPlayButton', true))
+  await openMockedVideo(page)
+
+  const view = await watchViewHandle(page)
+  const openEntry = (videoId, playlistItemId) => view.evaluate(async (component, { videoId, playlistItemId }) => {
+    await component.tabRouter.push({
+      path: `/watch/${videoId}`,
+      query: { playlistId: 'ft-playlist--desktop-skip-test', playlistType: 'user', playlistItemId }
+    })
+  }, { videoId, playlistItemId })
+  await view.evaluate(async component => {
+    component.$store.commit('addPlaylist', {
+      _id: 'ft-playlist--desktop-skip-test',
+      playlistName: 'Desktop skip test',
+      videos: [
+        { videoId: 'dQw4w9WgXcQ', playlistItemId: 'first', title: 'First' },
+        { videoId: 'jNQXAC9IVRw', playlistItemId: 'middle', title: 'Middle' },
+        { videoId: '9bZkp7q19f0', playlistItemId: 'last', title: 'Last' },
+      ]
+    })
+    await component.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+  })
+  await openEntry('jNQXAC9IVRw', 'middle')
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const buttons = player.locator('.shaka-big-buttons-container > button')
+  const centerOf = (locator) => locator.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+  })
+  await player.locator('video').evaluate(video => video.pause())
+  await player.hover()
+
+  await expect(buttons).toHaveCount(3)
+  await expect(buttons.nth(0)).toHaveClass(/skip-previous-button/)
+  await expect(buttons.nth(1)).toHaveClass(/shaka-play-button/)
+  await expect(buttons.nth(2)).toHaveClass(/skip-next-button/)
+  // The control bar keeps its own skip buttons on desktop.
+  await expect(player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button')).toHaveCount(2)
+
+  const styles = await buttons.evaluateAll(elements => elements.map(element => {
+    const { backgroundColor, boxShadow } = getComputedStyle(element)
+    return { backgroundColor, boxShadow }
+  }))
+  for (const style of styles) {
+    expect(style).toEqual({ backgroundColor: 'rgba(0, 0, 0, 0)', boxShadow: 'none' })
+  }
+
+  const bounds = await buttons.evaluateAll(elements => elements.map(element => {
+    const { x, y, width, height } = element.getBoundingClientRect()
+    return { x, y, width, height }
+  }))
+  const playerCenter = await centerOf(player.locator('.shaka-big-buttons-container'))
+  expect(bounds[0].x + bounds[0].width).toBeLessThan(bounds[1].x)
+  expect(bounds[1].x + bounds[1].width).toBeLessThan(bounds[2].x)
+  expect(bounds[0].width).toBeLessThan(bounds[1].width)
+  expect(bounds[0].width).toBeCloseTo(bounds[2].width, 1)
+  expect(bounds[1].x + bounds[1].width / 2).toBeCloseTo(playerCenter.x, 0)
+  for (const { y, height } of [bounds[0], bounds[2]]) {
+    expect(Math.abs(y + height / 2 - (bounds[1].y + bounds[1].height / 2))).toBeLessThan(1)
+  }
+
+  // Only the neighbors that exist get a button, and play/pause stays centered.
+  await buttons.nth(2).click()
+  await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0\?.*playlistItemId=last/)
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && !component.canSkipToNextVideo)).toBe(true)
+  await player.locator('video').evaluate(video => video.pause())
+  await player.hover()
+  await expect(buttons).toHaveCount(2)
+  await expect(buttons.nth(0)).toHaveClass(/skip-previous-button/)
+  expect((await centerOf(player.locator('.shaka-big-buttons-container > .shaka-play-button'))).x).toBeCloseTo(playerCenter.x, 0)
+
+  await buttons.nth(0).click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?.*playlistItemId=middle/)
+
+  await openEntry('dQw4w9WgXcQ', 'first')
+  await expect.poll(() => view.evaluate(component => !component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
+  await expect(buttons).toHaveCount(2)
+  await expect(buttons.nth(1)).toHaveClass(/skip-next-button/)
+
+  // Hiding the center play button hides the whole center group.
+  await page.evaluate(() => window.$store.dispatch('updateDisplayVideoPlayButton', false))
+  await expect(buttons).toHaveCount(0)
+
+  await view.dispose()
+})
