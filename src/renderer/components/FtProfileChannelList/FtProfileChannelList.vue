@@ -145,9 +145,17 @@ if (typeof props.profile.subscriptions !== 'undefined') {
   loadSubscriptions()
 }
 
-watch(() => props.profile, () => {
+watch(() => props.profile, (profile, oldProfile) => {
   loadSubscriptions()
-  selectNone()
+  if (profile._id !== oldProfile._id) {
+    selectNone()
+    return
+  }
+  // Feed refreshes update channel names and thumbnails, so only drop channels that are gone
+  const channelIds = new Set(subscriptions.value.map(channel => channel.id))
+  selected.forEach(channelId => {
+    if (!channelIds.has(channelId)) selected.delete(channelId)
+  })
 }, { deep: true })
 
 /** @type {import('vue').Reactive<Set<string>>} */
