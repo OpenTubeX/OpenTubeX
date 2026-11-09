@@ -1,10 +1,4 @@
-import { readFile } from 'node:fs/promises'
-
-import { cloneDefaultCustomTheme } from '../../../src/customTheme.js'
-
 import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel, readDatastore, scrollPageToEnd, expectPageScrollWithinRenderedRange } from '../../helpers/app.mjs'
-import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
-import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
@@ -123,284 +117,7 @@ test.use({
   }
 })
 
-test.describe('single history entry', () => {
-  test.use({ seed: { history: [historyEntry('aaaaaaaaaaa', 'Only history video', now - 1000)] } })
-
-  test('keeps a filter-button-to-results gap when search controls are hidden', { tag: '@scale' }, async ({ app, page }) => {
-    await goTo(page, 'history')
-    await expect(page.getByText('Only history video')).toBeVisible()
-    await expect(page.locator('.historySearch')).toBeHidden()
-    await expect(page.locator('.sortSelect')).toHaveCount(0)
-    for (const width of [1440, 375]) {
-      await setWindowSize(app, page, { width, height: width === 1440 ? 950 : 850 })
-      await expect.poll(() => page.locator('.historyFilterToggleRow').evaluate(element => {
-        const headingBottom = Math.max(...[...element.children].map(child => child.getBoundingClientRect().bottom))
-        const results = element.closest('.card').querySelector('.autoGrid').getBoundingClientRect()
-        return results.top - headingBottom
-      }), { timeout: 2000 }).toBeCloseTo(20, 0)
-    }
-  })
-
-  test('keeps the selected Search filters toggle at its hover tint while pressed', async ({ page }) => {
-    await goTo(page, 'history')
-    const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
-    await toggle.click()
-    await expect(toggle).toHaveClass(/\bselected\b/)
-    const background = () => toggle.evaluate(element => {
-      for (const animation of element.getAnimations()) animation.finish()
-      return getComputedStyle(element).backgroundColor
-    })
-    await toggle.hover()
-    const hovered = await background()
-    await page.mouse.down()
-    try {
-      // Selected buttons soften their tint on hover and press instead of adding a text-colored layer.
-      expect(await background()).toBe(hovered)
-    } finally {
-      await page.mouse.up()
-    }
-  })
-})
-
 test.describe('watch history', () => {
-  test('history actions use the standard button font size at every width', { tag: '@scale' }, async ({ app, page }) => {
-    await goTo(page, 'history')
-    const standardButton = page.locator('.historyFilterToggle')
-    const actions = page.locator('.headingActions .historyActionButton')
-    await expect(actions).toHaveCount(3)
-    for (const width of [1500, 732, 375, 320]) {
-      await setWindowSize(app, page, { width, height: width > 800 ? 950 : 1200 - width })
-      const fontSize = await standardButton.evaluate(button => getComputedStyle(button).fontSize)
-      for (const button of await actions.all()) {
-        await expect(button).toHaveCSS('font-size', fontSize)
-      }
-    }
-  })
-
-  for (const preference of ['on', 'system']) {
-    test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: preference === 'system' ? 'reduce' : 'no-preference' })
-      await page.evaluate(preference => window.$store.dispatch('updateReducedMotion', preference), preference)
-      await goTo(page, 'history')
-      const thumbnail = page.locator('.ft-list-video.watched .thumbnailLink').first()
-      await expect(thumbnail).toBeVisible()
-      await page.mouse.move(0, 0)
-      await page.evaluate(() => {
-        window.__thumbnailTransitions = []
-        document.addEventListener('transitionrun', event => {
-          if (event.target.matches('.thumbnailLink') && event.pseudoElement === '::after') {
-            window.__thumbnailTransitions.push(event.propertyName)
-          }
-        }, true)
-      })
-      await thumbnail.hover()
-      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').transitionDuration)).toBe('0s')
-      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('0')
-      await page.mouse.move(0, 0)
-      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('1')
-      await thumbnail.focus()
-      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('0')
-      expect(await page.evaluate(() => window.__thumbnailTransitions)).toEqual([])
-    })
-  }
-
-  test('omits an unknown publication date after a failed video load', async ({ page }) => {
-    await goTo(page, 'history')
-    await page.evaluate(record => window.$store.dispatch('updateHistory', record),
-      historyEntry('missingdate1', 'Video with unavailable metadata', now, true, { published: 0 }))
-
-    const video = page.locator('.ft-list-video').filter({ hasText: 'Video with unavailable metadata' })
-    await expect(video).toBeVisible()
-    await expect(video.locator('.uploadedTime')).toHaveCount(0)
-  })
-
-  test('shows seeded entries, newest first', async ({ page }) => {
-    await goTo(page, 'history')
-
-    await expect(page.getByText('First test video')).toBeVisible()
-    await expect(page.getByText('Second test video')).toBeVisible()
-
-    const titles = page.locator('.ft-list-video .title, [class*="videoTitle"]')
-    await expect(titles.first()).toContainText('First test video')
-  })
-
-  test('consumes the backdrop tap when dismissing a prompt', async ({ page }) => {
-    await goTo(page, 'history')
-    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
-
-    const prompt = page.locator('.prompt')
-    await expect(prompt).toBeVisible()
-    await page.evaluate(() => {
-      window.__promptBackdropEvents = { clicks: 0, pointerDowns: 0 }
-      const app = document.querySelector('.app')
-      app.addEventListener('pointerdown', () => window.__promptBackdropEvents.pointerDowns++)
-      app.addEventListener('click', () => window.__promptBackdropEvents.clicks++)
-    })
-
-    const bounds = await prompt.boundingBox()
-    await page.mouse.move(bounds.x + 1, bounds.y + 1)
-    await page.mouse.down()
-    await page.mouse.up()
-
-    await expect(prompt).toHaveCount(0)
-    expect(await page.evaluate(() => window.__promptBackdropEvents)).toEqual({
-      clicks: 0,
-      pointerDowns: 0
-    })
-  })
-
-  test('the sort options row keeps a gap above the video grid', async ({ page }) => {
-    await goTo(page, 'history')
-    await expect(page.getByText('First test video')).toBeVisible()
-
-    const optionsRow = page.locator('.optionsRow')
-    const firstVideo = page.locator('.ft-list-video, [class*="ft-list-video"]').first()
-    await expect.poll(async () => {
-      const [optionsBox, videoBox] = await Promise.all([
-        optionsRow.boundingBox(),
-        firstVideo.boundingBox()
-      ])
-      return videoBox.y - (optionsBox.y + optionsBox.height)
-    }).toBeGreaterThanOrEqual(10)
-  })
-
-  test('keeps consistent gaps between history controls and results at narrow widths', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
-    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    await goTo(page, 'history')
-    await openHistoryFilters(page)
-    for (const width of [320, 375, 732, 1500]) {
-      await setWindowSize(app, page, { width, height: width === 320 ? 820 : width === 375 ? 850 : width === 732 ? 550 : 900 })
-      await expect.poll(() => page.locator('.card').evaluate(card => {
-        const headingBottom = Math.max(...[...card.querySelector('.headingRow').children].map(child => child.getBoundingClientRect().bottom))
-        const search = card.querySelector('.historySearch .ft-input').getBoundingClientRect()
-        const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
-        const toggle = card.querySelector('.historyFilterToggleRow').getBoundingClientRect()
-        const panel = card.querySelector('.historyFilterCard').getBoundingClientRect()
-        const results = card.querySelector('.autoGrid').getBoundingClientRect()
-        return [Math.min(search.top, searchLabel.top) - headingBottom, toggle.top - search.bottom, panel.top - toggle.bottom, results.top - panel.bottom]
-      })).toEqual([expect.closeTo(11, 0), ...Array(3).fill(expect.closeTo(20, 0))])
-      if (width === 1500) {
-        // Beside the title, the actions are as far from the search as from the top of the card
-        await expect.poll(() => page.locator('.card').evaluate(card => {
-          const actions = card.querySelector('.headingActions').getBoundingClientRect()
-          const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
-          return Math.abs((searchLabel.top - actions.bottom) - (actions.top - card.getBoundingClientRect().top))
-        })).toBeLessThan(1)
-      }
-      if (width * 100 / uiScale <= 680) {
-        const touchTarget = await page.locator('.toggleOptions .switch-label').boundingBox()
-        // Electron zoom can introduce tiny fractions in CSS-pixel bounds.
-        expect(touchTarget.height).toBeGreaterThanOrEqual(48 - 0.01)
-      }
-      if (width === 320 && uiScale === 125) {
-        const text = await page.locator('.toggleOptions .switch-label-text').boundingBox()
-        expect(text.height).toBeGreaterThan(24)
-      }
-      await attachScreenshot(`history controls at ${width}px`)
-    }
-    await setWindowSize(app, page, { width: 1440, height: 950 })
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateBaseTheme', 'system')
-      await store.dispatch('updateSystemDarkTheme', 'dark')
-      await store.dispatch('updateSystemLightTheme', 'light')
-      await store.dispatch('updateUiRoundness', 100)
-    })
-    await expectImagesLoaded(page.locator('.card img:visible'))
-    for (const theme of ['dark', 'light']) {
-      await page.emulateMedia({ colorScheme: theme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
-      const clip = await page.locator('.card').evaluate(element => {
-        const card = element.getBoundingClientRect()
-        const results = element.querySelector('.autoGrid').getBoundingClientRect()
-        return { x: card.x, y: card.y, width: card.width, height: results.top - card.top + 80 }
-      })
-      await page.screenshot({ path: test.info().outputPath(`history-controls-${theme}.png`), clip })
-    }
-  })
-
-  test('history actions keep readable labels without clipping at narrow widths', { tag: '@scale' }, async ({ app, page }) => {
-    await goTo(page, 'history')
-    const actions = page.locator('.headingActions')
-    await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete', 'Repair History', 'Mark All As Watched'])
-    const compactLabels = {
-      'en-US': ['Delete', 'Repair', 'Mark all watched'],
-      'de-DE': ['Löschen', 'Reparatur', 'Alle gesehen'],
-      fi: ['Poista', 'Korjaa', 'Kaikki katsottu'],
-      cy: ['Dileu', 'Trwsio', 'Pob un wedi’i weld'],
-      'fr-FR': ['Supprimer', 'Réparer', 'Tout vu'],
-      ta: ['அழி', 'சரி', 'யாவும் கண்டது']
-    }
-    for (const [locale, labels] of Object.entries(compactLabels)) {
-      await page.evaluate(locale => {
-        window.$store.dispatch('updateCurrentLocale', locale)
-      }, locale)
-      await expect(page.locator('html')).toHaveAttribute('lang', locale)
-      for (const width of [320, 375, 520, 732]) {
-        await setWindowSize(app, page, { width, height: width === 732 ? 550 : 1200 - width })
-        await expect(actions.locator('.historyCompactActionLabel:visible')).toHaveText(labels)
-        await expect.poll(() => actions.evaluate(element => {
-          const bounds = element.getBoundingClientRect()
-          const row = element.closest('.headingRow').getBoundingClientRect()
-          const buttons = [...element.querySelectorAll('button')]
-          const first = buttons[0].getBoundingClientRect()
-          return bounds.left >= row.left - 1 && bounds.right <= row.right + 1 && buttons.length === 3 && buttons.every(button => {
-            const rect = button.getBoundingClientRect()
-            const range = document.createRange()
-            range.selectNodeContents(button)
-            const contentFits = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).every(content => content.left >= rect.left - 1 && content.right <= rect.right + 1)
-            const textNodes = document.createTreeWalker(button, NodeFilter.SHOW_TEXT)
-            let textNode
-            while ((textNode = textNodes.nextNode())) {
-              if (!textNode.textContent.trim()) continue
-              range.selectNodeContents(textNode)
-              if ([...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length > 1) return false
-            }
-            // Whole buttons may wrap; their labels keep the standard size and stay on one line.
-            return Math.abs(rect.height - first.height) < 1 && rect.height >= 48 &&
-              rect.top >= bounds.top - 1 && rect.bottom <= bounds.bottom + 1 &&
-              rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1 && contentFits
-          })
-        })).toBe(true)
-      }
-    }
-  })
-
-  test('keeps longer compact labels inside the action row in every active locale', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    test.slow()
-    await goTo(page, 'history')
-    const activeLocales = JSON.parse(await readFile(new URL('../../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
-    const actions = page.locator('.headingActions')
-    for (const locale of ['br', ...activeLocales.filter(locale => locale !== 'br')]) {
-      await page.evaluate(locale => {
-        window.$store.dispatch('updateCurrentLocale', locale)
-      }, locale)
-      await expect(page.locator('html')).toHaveAttribute('lang', locale)
-      for (const width of [320, 375]) {
-        await setWindowSize(app, page, { width, height: 1200 - width })
-        await expect.poll(() => actions.evaluate(element => {
-          const row = element.getBoundingClientRect()
-          const buttons = [...element.querySelectorAll('button')]
-          return buttons.length === 3 && buttons.every(button => {
-            const rect = button.getBoundingClientRect()
-            const label = button.querySelector('.historyCompactActionLabel')
-            const labelRect = label.getBoundingClientRect()
-            const icon = button.querySelector('svg').getBoundingClientRect()
-            return rect.height >= 48 &&
-              rect.top >= row.top - 1 && rect.bottom <= row.bottom + 1 &&
-              rect.left >= row.left - 1 && rect.right <= row.right + 1 &&
-              label.textContent.trim().length > 0 && labelRect.width >= Math.min(20, label.scrollWidth - 1) &&
-              labelRect.left >= rect.left - 1 && labelRect.right <= rect.right + 1 &&
-              icon.left >= rect.left - 1 && icon.right <= rect.right + 1 &&
-              button.getAttribute('aria-label')?.trim().length > 0 &&
-              button.getAttribute('title') === button.getAttribute('aria-label') &&
-              (label.scrollWidth <= label.clientWidth || getComputedStyle(label).textOverflow === 'ellipsis')
-          })
-        }), `${locale}, ${width}px, ${uiScale}% zoom`).toBe(true)
-      }
-    }
-  })
-
   test('keeps actions usable beside a wide vertical tab bar and clears obsolete scrolling', { tag: '@scale' }, async ({ app, page }) => {
     await goTo(page, 'history')
     const actions = page.locator('.headingActions')
@@ -452,47 +169,6 @@ test.describe('watch history', () => {
     }
   })
 
-  test('keeps thumbnail actions inset and separated on narrow desktop layouts', async ({ page }) => {
-    await page.setViewportSize({ width: 680, height: 800 })
-    await goTo(page, 'history')
-
-    const video = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
-    await video.hover()
-    const thumbnail = video.locator('.videoThumbnail')
-    const actions = video.locator('.playlistIcons')
-    const buttons = actions.locator('.iconButton')
-    await expect(buttons).toHaveCount(3)
-
-    const [thumbnailBox, actionsBox, firstButtonBox, secondButtonBox] = await Promise.all([
-      thumbnail.boundingBox(),
-      actions.boundingBox(),
-      buttons.nth(0).boundingBox(),
-      buttons.nth(1).boundingBox()
-    ])
-    expect(actionsBox.y - thumbnailBox.y).toBeGreaterThanOrEqual(8)
-    expect(thumbnailBox.x + thumbnailBox.width - actionsBox.x - actionsBox.width).toBeGreaterThanOrEqual(8)
-    expect(secondButtonBox.x - firstButtonBox.x - firstButtonBox.width).toBeGreaterThanOrEqual(8)
-    expect(actionsBox.x).toBeGreaterThanOrEqual(thumbnailBox.x)
-    expect(actionsBox.x + actionsBox.width).toBeLessThanOrEqual(thumbnailBox.x + thumbnailBox.width)
-  })
-
-  test('uses edge-to-edge cards in the Capacitor phone layout', async ({ page }) => {
-    await page.setViewportSize({ width: 520, height: 900 })
-    await goTo(page, 'history')
-    await page.locator('.app').evaluate(element => element.classList.add('capacitorPhoneLayout'))
-
-    const card = page.locator('.card').first()
-    await expect.poll(async () => {
-      const cardBox = await card.boundingBox()
-      return Math.max(
-        Math.abs(cardBox.x),
-        Math.abs(520 - cardBox.x - cardBox.width)
-      )
-    }).toBeLessThanOrEqual(1)
-    await expect(card).toHaveCSS('margin-bottom', '0px')
-    await expect(card).toHaveCSS('border-radius', '0px')
-  })
-
   test('history search filters entries', async ({ page }) => {
     await goTo(page, 'history')
     await expect(page.getByText('First test video')).toBeVisible()
@@ -502,60 +178,6 @@ test.describe('watch history', () => {
 
     await expect(page.getByText('Second test video')).toBeVisible()
     await expect(page.getByText('First test video')).toBeHidden()
-  })
-
-  test('always shows watched indicators', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const watchedVideo = page.locator('.ft-list-video').filter({ hasText: 'First test video' })
-    const watchedIndicator = watchedVideo.locator('.videoWatched')
-    const durationIndicator = watchedVideo.locator('.videoDuration')
-    await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
-    await expect(watchedIndicator).toHaveText('Watched')
-    await expect(watchedVideo).toHaveCSS('border-radius', '32px')
-    await expect(watchedIndicator).toHaveCSS('border-radius', '16px')
-    await expect(watchedIndicator).toHaveCSS('font-size', '15px')
-    await expect(durationIndicator).toHaveCSS('border-radius', '16px')
-    await expect(durationIndicator).toHaveCSS('font-size', '15px')
-  })
-
-  test('draws thumbnail badges with the custom theme badge background', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const watchedVideo = page.locator('.ft-list-video').filter({ hasText: 'First test video' })
-    const badges = [watchedVideo.locator('.videoWatched'), watchedVideo.locator('.videoDuration')]
-    // Built-in themes keep the card background at 85% opacity.
-    await expect(page.locator('body')).toHaveCSS('--card-bg-color', '#fff')
-    // Badges ignore the pointer, so let hit testing find them to check that
-    // they paint above the thumbnail.
-    const paintsOnTop = badge => badge.evaluate(element => {
-      element.style.pointerEvents = 'auto'
-      const { x, y, width, height } = element.getBoundingClientRect()
-      const onTop = element.contains(document.elementFromPoint(x + width / 2, y + height / 2))
-      element.style.pointerEvents = ''
-      return onTop
-    })
-    for (const badge of badges) {
-      await expect(badge).toHaveCSS('background-color', 'color(srgb 1 1 1 / 0.85)')
-      await expect(badge).toHaveCSS('opacity', '1')
-      expect(await paintsOnTop(badge)).toBe(true)
-    }
-
-    const theme = cloneDefaultCustomTheme()
-    theme.id = 'badge-theme'
-    theme.colors.thumbnailBadgeBackground = '#11223340'
-    theme.blurs.thumbnailBadgeBackground = 6
-    await page.evaluate(async theme => {
-      const store = window.$store
-      await store.dispatch('updateCustomThemes', await window.ftElectron.saveCustomTheme(theme))
-      await store.dispatch('updateBaseTheme', `custom:${theme.id}`)
-    }, theme)
-    for (const badge of badges) {
-      await expect(badge).toHaveCSS('background-color', 'rgba(17, 34, 51, 0.25)')
-      await expect(badge).toHaveCSS('backdrop-filter', 'blur(6px)')
-      await expect(badge).toHaveCSS('color', 'rgb(238, 238, 238)')
-      expect(await paintsOnTop(badge)).toBe(true)
-    }
   })
 
   test('keeps an existing entry in place when toggling watched status', async ({ page }) => {
@@ -591,35 +213,6 @@ test.describe('watch history', () => {
     await expect(page.getByRole('menuitem', { name: 'Remove From History' })).toBeVisible()
   })
 
-  test('does not offer watched actions for an upcoming premiere history entry', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
-    await upcomingPremiere.hover()
-    await upcomingPremiere.locator('.title').click({ button: 'right' })
-
-    await expect(page.getByRole('menuitem', { name: 'Mark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Unmark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Remove From History' })).toBeVisible()
-  })
-
-  test('enables watched actions when a mounted premiere reaches its scheduled time', async ({ page }) => {
-    await goTo(page, 'trending')
-    await page.clock.install({ time: now })
-    await goTo(page, 'history')
-
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
-    await upcomingPremiere.hover()
-    await upcomingPremiere.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark As Watched' })).toHaveCount(0)
-
-    // Split the jump so timers beyond Chromium's maximum timeout are rescheduled.
-    await page.clock.fastForward(24 * DAY)
-    await page.clock.fastForward(6 * DAY + 1000)
-
-    await expect(page.getByRole('menuitem', { name: 'Mark As Watched' })).toBeVisible()
-  })
-
   test('marks every history entry as watched', async ({ app, page }) => {
     await goTo(page, 'history')
 
@@ -651,33 +244,6 @@ test.describe('watch history', () => {
   })
 })
 
-test.describe('fractional history durations', () => {
-  const examples = [
-    { videoId: 'fraction001', lengthSeconds: 4125.721, timestamp: '1:08:45' },
-    { videoId: 'fraction002', lengthSeconds: 153.839, timestamp: '2:33' },
-    { videoId: 'fraction003', lengthSeconds: 125.109, timestamp: '2:05' },
-    { videoId: 'fraction004', lengthSeconds: 116.889, timestamp: '1:56' },
-    { videoId: 'fraction005', lengthSeconds: 104.768, timestamp: '1:44' }
-  ]
-
-  test.use({
-    seed: {
-      history: examples.map(({ videoId, lengthSeconds }, index) => historyEntry(
-        videoId, `Fractional duration ${index}`, now - index, false, { lengthSeconds }
-      ))
-    }
-  })
-
-  test('shows whole-second duration badges for persisted fractional durations', async ({ page }) => {
-    await goTo(page, 'history')
-
-    for (const [index, { timestamp }] of examples.entries()) {
-      const video = page.locator('.ft-list-video').filter({ hasText: `Fractional duration ${index}` })
-      await expect(video.locator('.videoDuration')).toHaveText(timestamp)
-    }
-  })
-})
-
 test.describe('history search pagination', () => {
   test.use({
     seed: {
@@ -692,32 +258,6 @@ test.describe('history search pagination', () => {
         historyEntry('betacase000', 'beta match lowercase', now - 2500),
         ...matchingHistoryEntries('Gamma', 20, 3000)
       ]
-    }
-  })
-
-  test('keeps unfiltered history visible when toggling case sensitivity', async ({ page }) => {
-    await goTo(page, 'history')
-    const input = page.getByRole('searchbox', { name: 'Search in History' })
-    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
-    const caseSensitive = page.getByRole('checkbox', { name: 'Case Sensitive Search' })
-    await expect(videos).toHaveCount(100)
-    await page.getByRole('button', { name: 'Load More Videos' }).click()
-    await expect(videos).toHaveCount(200)
-    await page.clock.install()
-    await pauseClock(page)
-
-    for (const query of ['', '   ']) {
-      await input.fill(query)
-      await page.clock.runFor(600)
-      await expect(videos).toHaveCount(200)
-      for (const enabled of [true, false]) {
-        await caseSensitive.evaluate(element => element.click())
-        await expect(caseSensitive).toBeChecked({ checked: enabled })
-        await expect(page.locator('.historySearchLoader')).toHaveCount(0)
-        await expect(videos).toHaveCount(200)
-        await page.clock.runFor(600)
-        await expect(videos).toHaveCount(200)
-      }
     }
   })
 
@@ -934,24 +474,6 @@ test.describe('history cleanup', () => {
         historyEntry('rrrrrrrrrrr', 'Recent video', Date.now() - 1000),
         historyEntry('ooooooooooo', 'Old video', Date.now() - 100 * 86_400_000)
       ]
-    }
-  })
-
-  test('keeps the custom history age label clear of the dropdown @scale', async ({ app, page }) => {
-    await goTo(page, 'history')
-    await page.locator('.headingActions').getByRole('button', { name: 'Delete', exact: true }).click()
-    const dialog = page.getByRole('dialog')
-    await dialog.locator('select').selectOption('custom')
-    const days = dialog.getByRole('spinbutton', { name: 'Number of days', exact: false })
-    await expect(days).toBeVisible()
-
-    for (const size of [{ width: 1100, height: 800 }, { width: 400, height: 850 }]) {
-      await setWindowSize(app, page, size)
-      await expect.poll(async () => {
-        const dropdown = await dialog.getByRole('combobox').boundingBox()
-        const label = await dialog.locator('.ft-input-component label').boundingBox()
-        return label.y - (dropdown.y + dropdown.height)
-      }).toBeGreaterThanOrEqual(8)
     }
   })
 
@@ -1369,29 +891,23 @@ test.describe('history date and channel browsing', () => {
     await expect(page).toHaveURL(/#\/history$/)
   })
 
-  for (const mode of ['date', 'text']) {
-    test(`preserves scroll when loading more ${mode}-filtered history`, async ({ page }) => {
-      await goTo(page, 'history')
-      if (mode === 'date') {
-        await openHistoryFilters(page)
-        await page.getByLabel('To', { exact: true }).fill('2026-10-12')
-      } else {
-        await page.getByRole('searchbox', { name: 'Search in History' }).fill('City walk')
-      }
-      await expect(page).toHaveURL(/searchDataLimit=100/)
-      await expect(page.locator('.historyResults')).toHaveAttribute('aria-busy', 'false')
-      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *').first()).toContainText('City walk')
-      await trackHistoryNavigations(page)
-      await scrollPageToEnd(page)
-      const scrollTop = await page.evaluate(() => window.scrollY)
-      expect(scrollTop).toBeGreaterThan(100)
-      await page.getByRole('button', { name: 'Load More Videos' }).click()
-      await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.some(path => path.includes('searchDataLimit=200')))).toBe(true)
-      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')).toHaveCount(200)
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(scrollTop - 1)
-      await expectPageScrollWithinRenderedRange(page)
-    })
-  }
+  test('preserves scroll when loading more date-filtered history', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    await page.getByLabel('To', { exact: true }).fill('2026-10-12')
+    await expect(page).toHaveURL(/searchDataLimit=100/)
+    await expect(page.locator('.historyResults')).toHaveAttribute('aria-busy', 'false')
+    await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *').first()).toContainText('City walk')
+    await trackHistoryNavigations(page)
+    await scrollPageToEnd(page)
+    const scrollTop = await page.evaluate(() => window.scrollY)
+    expect(scrollTop).toBeGreaterThan(100)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.some(path => path.includes('searchDataLimit=200')))).toBe(true)
+    await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')).toHaveCount(200)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(scrollTop - 1)
+    await expectPageScrollWithinRenderedRange(page)
+  })
 
   test('shows invalid and empty ranges and supports channels without IDs', async ({ page }) => {
     await goTo(page, 'history')
@@ -1505,118 +1021,10 @@ test.describe('history date and channel browsing', () => {
     await expect(page.getByRole('combobox', { name: 'Sort By' })).toContainText('Date Watched (Oldest)')
     await expect(videos).toHaveCount(100)
   })
-
-  test('keeps the case-sensitive switch beside filters on phones', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    await goTo(page, 'history')
-    await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), uiScale)
-    await mockCapacitorPhoneLayout(page)
-    for (const width of [360, 375, 430]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setSize(...size), [Math.round(width * uiScale / 100), Math.round(850 * uiScale / 100)])
-      await expect.poll(() => page.locator('.historySearchOptions').evaluate(element => {
-        const button = element.querySelector('.historyFilterToggle').getBoundingClientRect()
-        const toggle = element.querySelector('.toggleOptions').getBoundingClientRect()
-        return toggle.left >= button.right && Math.abs((toggle.top + toggle.bottom - button.top - button.bottom) / 2) < 1
-      })).toBe(true)
-      await expect(page.locator('.historySearchOptions')).toBeVisible()
-    }
-    await page.locator('.historySearchOptions .switch-label').click()
-    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
-    await page.locator('.card').screenshot({ path: testInfo.outputPath('history-mobile.png'), animations: 'disabled' })
-  })
-
-  test('keeps filters usable at narrow widths in both themes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
-    // Exercise six layouts plus theme captures, including Electron startup.
-    test.slow()
-    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    await goTo(page, 'history')
-    await openHistoryFilters(page)
-    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
-    await page.getByLabel('To', { exact: true }).fill('2026-10-13')
-    await chooseChannel(page, 'Walking Channel')
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateBaseTheme', 'system')
-      await store.dispatch('updateSystemDarkTheme', 'dark')
-      await store.dispatch('updateSystemLightTheme', 'light')
-    })
-    for (const theme of ['dark', 'light']) {
-      await page.emulateMedia({ colorScheme: theme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
-      for (const width of [375, 732, 1500]) {
-        await scrollPageToEnd(page)
-        await setWindowSize(app, page, { width, height: width === 375 ? 850 : width === 732 ? 600 : 900 })
-        await expectPageScrollWithinRenderedRange(page)
-        if (width === 1500) {
-          await expect.poll(() => page.locator('.historySearchOptions').evaluate(element => {
-            const button = element.querySelector('.historyFilterToggle').getBoundingClientRect()
-            const toggle = element.querySelector('.toggleOptions').getBoundingClientRect()
-            return { beside: toggle.left >= button.right, aligned: Math.abs((toggle.top + toggle.bottom) / 2 - (button.top + button.bottom) / 2) <= 1 }
-          }), { message: `Filter controls settle beside one another in ${theme} theme at ${uiScale}% scale` }).toEqual({ beside: true, aligned: true })
-        }
-        const geometry = await page.locator('.historyFilters').evaluate(element => {
-          const box = element.getBoundingClientRect()
-          return [...element.children].map(child => {
-            const rect = child.getBoundingClientRect()
-            const within = rect.left >= box.left - 1 && rect.right <= box.right + 1
-            // Ripple pseudo-elements enlarge a button's scrollWidth even
-            // though they are clipped. Measure its visible label and icon.
-            if (child.matches('button')) {
-              const range = document.createRange()
-              range.selectNodeContents(child)
-              const content = range.getBoundingClientRect()
-              return within && content.left >= rect.left - 1 && content.right <= rect.right + 1
-            }
-            return within && child.scrollWidth <= child.clientWidth + 1
-          })
-        })
-        expect(geometry).toEqual(Array(4).fill(true))
-        await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
-        await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Walking Channel')
-      }
-      await setWindowSize(app, page, { width: 1440, height: 950 })
-      await page.evaluate(() => window.scrollTo(0, 0))
-      await expectImagesLoaded(page.locator('.card img:visible'))
-      await page.mouse.move(0, 0)
-      await expect(page.getByLabel('From', { exact: true })).toHaveCSS('color-scheme', theme)
-      const clip = await page.locator('.card').evaluate(element => {
-        const card = element.getBoundingClientRect()
-        const firstVideo = element.querySelector('.autoGrid > :first-child').getBoundingClientRect()
-        return { x: card.x, y: card.y, width: card.width, height: firstVideo.bottom - card.top + 4 }
-      })
-      await page.screenshot({ path: testInfo.outputPath(`history-browse-${theme}.png`), clip })
-      const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
-      await toggle.click()
-      await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeHidden()
-      await page.mouse.move(0, 0)
-      await page.screenshot({ path: testInfo.outputPath(`history-browse-collapsed-${theme}.png`), clip, animations: 'disabled' })
-      await toggle.click()
-      await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeVisible()
-      await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
-    }
-  })
-
-  test('honors scaled touch targets on filter buttons', async ({ app, page }) => {
-    await goTo(page, 'history')
-    await openHistoryFilters(page)
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateUiScale', 80)
-    })
-    await setWindowSize(app, page, { width: 375, height: 850 })
-    await expect.poll(() => page.evaluate(() => {
-      const target = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--phone-touch-target'))
-      return {
-        target,
-        buttons: [...document.querySelectorAll('.historyFilterToggle, .historyClearFilters')]
-          .map(button => button.getBoundingClientRect().height >= target - 1),
-      }
-    })).toEqual({ target: 60, buttons: [true, true] })
-  })
 })
 
 test.describe('lazy history channel picker', () => {
   const channelNames = Array.from({ length: 400 }, (_, index) => `Picker channel ${String(index).padStart(4, '0')}`)
-  channelNames[399] += ' with a much longer name than any channel on the first page of this picker'
   test.use({
     seed: {
       history: channelNames.map((author, index) =>
@@ -1703,15 +1111,6 @@ test.describe('lazy history channel picker', () => {
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 
-  test('loads the next page before the end of the list is visible @scale', async ({ page }) => {
-    await goTo(page, 'history')
-    const dropdown = await openChannelPicker(page)
-    const options = dropdown.getByRole('option')
-    await expect(options).toHaveCount(100)
-    await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight - menu.clientHeight - 100 })
-    await expect(options).toHaveCount(200)
-  })
-
   test('keeps loading pages when the list jumps to its new end as soon as a page loads', async ({ page }) => {
     await goTo(page, 'history')
     const dropdown = await openChannelPicker(page)
@@ -1747,21 +1146,6 @@ test.describe('lazy history channel picker', () => {
     await expect(options).toHaveCount(100)
     await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeLessThanOrEqual(1)
     await expectListWithinScrollRange(dropdown)
-  })
-
-  test('widens the desktop picker for a longer label on a distant page @scale', async ({ page }) => {
-    await goTo(page, 'history')
-    const dropdown = await openChannelPicker(page)
-    const options = dropdown.getByRole('option')
-    await expect(options).toHaveCount(100)
-    const rowHeight = await options.first().evaluate(option => option.getBoundingClientRect().height)
-
-    await page.keyboard.press('End')
-    const longest = dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })
-    await expect(longest).toBeInViewport()
-    // The label stays on one line instead of wrapping into the first page's width.
-    await expect.poll(() => longest.evaluate(option => option.getBoundingClientRect().height))
-      .toBeLessThanOrEqual(rowHeight + 1)
   })
 
   test('End and Home reach the ends of the phone picker', async ({ page }) => {

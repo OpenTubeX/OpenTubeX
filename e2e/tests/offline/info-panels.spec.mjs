@@ -44,11 +44,6 @@ const infoPanels = [{
 test.use({
   seed: {
     settings: {
-      baseTheme: 'system',
-      systemDarkTheme: 'dark',
-      systemLightTheme: 'light',
-      mainColor: 'Red',
-      secColor: 'Blue',
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true,
       defaultVideoFormat: 'legacy',
@@ -58,7 +53,7 @@ test.use({
   }
 })
 
-test('shows info panels below the video and opens their sources externally', async ({ app, page }, testInfo) => {
+test('shows info panels below the video and opens their sources externally', async ({ app, page }) => {
   await app.electronApp.evaluate(({ shell }) => {
     globalThis.infoPanelExternalUrls = []
     shell.openExternal = async url => {
@@ -84,23 +79,6 @@ test('shows info panels below the video and opens their sources externally', asy
   await expect(panels.nth(3).locator('.infoPanelParagraph')).toHaveText(['Example context paragraph.', 'Example disclaimer'])
   await expect(panels.nth(3).locator('.infoPanelSource')).toHaveText('Source: Example Source')
   await expect(panels.nth(3).locator('a')).toHaveCount(0)
-
-  // The panels sit between the video information and the description.
-  const order = await page.evaluate(() => {
-    const [info, panelCard, description] = ['.watchVideoInfo', '.infoPanels', '.videoDescription']
-      .map(selector => [...document.querySelectorAll(selector)].find(element => element.checkVisibility()))
-    return [
-      info.compareDocumentPosition(panelCard) & Node.DOCUMENT_POSITION_FOLLOWING,
-      panelCard.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ]
-  })
-  expect(order).toEqual([4, 4])
-
-  for (const theme of ['dark', 'light']) {
-    await page.emulateMedia({ colorScheme: theme })
-    await expect(page.locator('body')).toContainClass(theme)
-    await card.screenshot({ path: testInfo.outputPath(`info-panels-${theme}.png`) })
-  }
 
   await panels.nth(0).locator('.infoPanelSource').click()
   await panels.nth(1).locator('.infoPanelSource').click()

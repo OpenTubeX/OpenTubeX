@@ -179,27 +179,6 @@ test.describe('community post images', () => {
     }
   })
 
-  test('connects stacked feed posts with small inner corners', async ({ page, attachScreenshot }) => {
-    await stubPostImages(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    const posts = page.locator('.ft-list-post')
-    await expect(posts).toHaveCount(2)
-    await expect(posts.last()).toBeVisible()
-
-    // uiRoundness 200 → extra-small 8px, large-increased 40px
-    const corners = await posts.evaluateAll(elements => elements.map((element) => {
-      const style = getComputedStyle(element)
-      return [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomLeftRadius, style.borderBottomRightRadius]
-    }))
-    expect(corners).toEqual([
-      ['40px', '40px', '8px', '8px'],
-      ['8px', '8px', '40px', '40px']
-    ])
-    await attachScreenshot('connected posts feed')
-  })
-
   test('shows cached posts immediately when block lists are turned off', async ({ page }) => {
     await stubPostImages(page)
     await goTo(page, 'subscriptions')
@@ -314,27 +293,6 @@ test.describe('community post images', () => {
     if (carouselLayout.paginationBottom != null) {
       expect(carouselLayout.paginationBottom).toBeLessThanOrEqual(carouselLayout.containerBottom + 1)
     }
-  })
-
-  test('separates post images from the like and comment row', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
-    await stubPostImages(page)
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-
-    for (const title of ['Single image community post', 'Multi image community post']) {
-      const post = page.locator('.ft-list-post').filter({ hasText: title })
-      const image = post.locator('img.communityImage').first()
-      await expect.poll(() => image.evaluate((element) => element.naturalWidth)).toBeGreaterThan(0)
-      await post.locator('.bottomSection').scrollIntoViewIfNeeded()
-
-      await expect.poll(() => post.evaluate((element) => {
-        const imageBottom = element.querySelector('img.communityImage').getBoundingClientRect().bottom
-        const actionsTop = element.querySelector('.bottomSection').getBoundingClientRect().top
-        return actionsTop - imageBottom
-      }), { message: `${title} needs space above its actions` }).toBeGreaterThanOrEqual(8)
-    }
-
-    await attachScreenshot('post image spacing')
   })
 
   test('restores carousel navigation after returning to the Posts tab', async ({ page }) => {

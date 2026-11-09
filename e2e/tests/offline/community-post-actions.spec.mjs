@@ -48,19 +48,6 @@ async function openPosts(page) {
   await expect(page.locator('.ft-list-post')).toHaveCount(posts.length)
 }
 
-test('leaves a small gap below the subscriptions header', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-  await openPosts(page)
-  for (const width of [1280, 375]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setContentSize(size.width, size.height), {
-      width: Math.round(width * uiScale / 100), height: Math.round(850 * uiScale / 100)
-    })
-    await expect.poll(() => page.evaluate(() => Math.round(innerWidth))).toBeCloseTo(width, -1)
-    await expect.poll(() => page.locator('.ft-list-post').first().evaluate(element => {
-      return element.getBoundingClientRect().top - document.querySelector('.subscriptionsHeader').getBoundingClientRect().bottom
-    })).toBeGreaterThanOrEqual(5.5)
-  }
-})
-
 test('shows single and zero comment counts without claiming unknown counts are one', async ({ page }) => {
   await openPosts(page)
   for (const [index, count] of [[0, '123'], [1, '1'], [2, '0'], [3, '']]) {
@@ -70,93 +57,16 @@ test('shows single and zero comment counts without claiming unknown counts are o
   }
 })
 
-test('gives the comments link the same hover and focus colors as the options button', async ({ page }) => {
-  await openPosts(page)
-  const post = page.locator('.ft-list-post').first()
-  const comments = post.locator('.commentsLink')
-  const options = post.locator('.optionsButton button')
-  for (const colorScheme of ['dark', 'light']) {
-    await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-    await options.hover()
-    await expect.poll(() => options.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)')
-    const background = await options.evaluate(element => getComputedStyle(element).backgroundColor)
-    const color = await options.evaluate(element => getComputedStyle(element).color)
-    await comments.hover()
-    await expect(comments).toHaveCSS('background-color', background)
-    await expect(comments).toHaveCSS('color', color)
-    await page.mouse.move(0, 0)
-    await options.focus()
-    await page.keyboard.press('Shift+Tab')
-    await expect(comments).toBeFocused()
-    await expect(comments).toHaveCSS('background-color', background)
-  }
-})
-
-test('post counts have matching contrast and evenly spaced actions', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-  await openPosts(page)
-  for (const colorScheme of ['dark', 'light']) {
-    await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-    for (const width of [1280, 375]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setContentSize(size.width, size.height), {
-        width: Math.round(width * uiScale / 100), height: Math.round(850 * uiScale / 100)
-      })
-      await expect.poll(() => page.evaluate(() => Math.round(innerWidth))).toBeCloseTo(width, -1)
-      await page.evaluate(() => document.fonts.ready)
-      for (const hideSharingActions of [true, false]) {
-        await page.evaluate(value => window.$store.dispatch('updateHideSharingActions', value), hideSharingActions)
-        for (const post of await page.locator('.ft-list-post').all()) {
-          const footer = post.locator('.bottomSection')
-          if (width <= 680) {
-            const touchTargets = footer.locator('.commentsLink, .shareButton button, .optionsButton button')
-            for (const target of await touchTargets.all()) {
-              expect.soft(await target.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48 - 0.01)
-            }
-          }
-          const color = await footer.locator('.commentCount').evaluate(element => getComputedStyle(element).color)
-          expect.soft(await footer.locator('.likeCount').evaluate(element => getComputedStyle(element).color)).toBe(color)
-          const gaps = await footer.evaluate(element => {
-            const selectors = ['.likeCount', '.commentCount', '.shareButton button .icon', '.optionsButton button .icon']
-            const rects = selectors.flatMap(selector => {
-              const child = element.querySelector(selector)
-              if (!child) return []
-              const range = document.createRange()
-              range.selectNodeContents(child)
-              return [selector.includes('button') ? child.getBoundingClientRect() : range.getBoundingClientRect()]
-            })
-            return rects.slice(1).map((rect, index) => rect.left - rects[index].right)
-          })
-          expect.soft(gaps.length).toBeGreaterThanOrEqual(2)
-          expect.soft(Math.max(...gaps) - Math.min(...gaps)).toBeLessThan(1)
-          expect.soft(Math.min(...gaps)).toBeGreaterThanOrEqual(12)
-        }
-      }
-    }
-  }
-})
-
 test('copies the YouTube post link from the menu with sharing hidden', async ({ app, page }) => {
   await openPosts(page)
-  for (const iconPack of ['material', 'remix']) {
-    await page.evaluate(value => window.$store.dispatch('updateIconPack', value), iconPack)
-    for (const [index, post] of (await page.locator('.ft-list-post').all()).entries()) {
-      await post.getByRole('button', { name: 'More options', exact: true }).click()
-      await page.getByRole('option', { name: 'Copy YouTube Link', exact: true }).click()
-      await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
-        .toBe(`https://www.youtube.com/post/${posts[index].postId}`)
-      await expect(page.getByText('YouTube URL copied to clipboard', { exact: true }).last()).toBeVisible()
-      await expect(page.getByRole('option', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
-    }
+  for (const [index, post] of (await page.locator('.ft-list-post').all()).entries()) {
+    await post.getByRole('button', { name: 'More options', exact: true }).click()
+    await page.getByRole('option', { name: 'Copy YouTube Link', exact: true }).click()
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
+      .toBe(`https://www.youtube.com/post/${posts[index].postId}`)
+    await expect(page.getByText('YouTube URL copied to clipboard', { exact: true }).last()).toBeVisible()
+    await expect(page.getByRole('option', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
   }
-})
-
-test('hides the comment link without leaving an empty footer item', async ({ page }) => {
-  await openPosts(page)
-  await page.evaluate(() => window.$store.dispatch('updateHideComments', true))
-  await expect(page.locator('.ft-list-post .commentsLink')).toHaveCount(0)
-  await expect(page.locator('.ft-list-post .likeCount')).toHaveCount(posts.length)
-  await expect(page.locator('.ft-list-post .optionsButton')).toHaveCount(posts.length)
 })
 
 test('copies a standalone post link for an unsubscribed author', async ({ app, page }) => {

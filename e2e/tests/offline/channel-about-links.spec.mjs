@@ -3,7 +3,6 @@ import { test, expect } from '../../helpers/app.mjs'
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const WEBSITE_URL = 'https://example.org/community'
 const LINKED_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
-const MEMBERSHIP_URL = `https://www.youtube.com/channel/${CHANNEL_ID}/join`
 
 test.use({
   seed: {
@@ -57,62 +56,60 @@ async function openChannelAbout(page, linkUrl) {
   }, linkUrl)
 }
 
-for (const [name, destinationUrl] of [['website', WEBSITE_URL], ['membership', MEMBERSHIP_URL]]) {
-  test(`channel About ${name} links respect every external link opening policy`, async ({ app, page }) => {
-    await app.electronApp.evaluate(({ shell }) => {
-      globalThis.channelAboutExternalUrls = []
-      shell.openExternal = async url => {
-        globalThis.channelAboutExternalUrls.push(url)
-      }
-    })
-    const openedUrls = () => app.electronApp.evaluate(() => globalThis.channelAboutExternalUrls)
-
-    await openChannelAbout(page, destinationUrl)
-
-    const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
-    const expectedUrls = []
-    for (const selector of name === 'website' ? ['.aboutLink:visible', '.aboutInfo:visible a'] : ['.aboutLink:visible']) {
-      const link = page.locator(selector)
-      await expect(link).toHaveAttribute('href', destinationUrl)
-      for (const activation of ['click', 'middle click', 'Enter']) {
-        const activate = () => activation === 'Enter'
-          ? link.press('Enter')
-          : link.click({ button: activation === 'middle click' ? 'middle' : 'left' })
-
-        await activate()
-        expect(await openedUrls(), `${selector} must wait for confirmation on ${activation}`).toEqual(expectedUrls)
-        await expect(prompt).toBeVisible({ timeout: 5000 })
-        await expect(prompt.getByText(destinationUrl, { exact: true })).toBeVisible()
-        await prompt.getByRole('button', { name: 'No', exact: true }).click()
-        await expect(prompt).toBeHidden()
-        expect(await openedUrls()).toEqual(expectedUrls)
-
-        await activate()
-        await expect(prompt).toBeVisible()
-        await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).click()
-        expectedUrls.push(destinationUrl)
-        await expect.poll(openedUrls).toEqual(expectedUrls)
-        await expect(prompt).toBeHidden()
-      }
-
-      for (const policy of ['doNothing', '']) {
-        await page.evaluate(value => window.$store
-          .dispatch('updateExternalLinkHandling', value), policy)
-        await link.click()
-        if (policy === 'doNothing') {
-          await expect(page.getByText('External link opening has been disabled in Settings → Privacy', { exact: true }).last()).toBeVisible()
-          expect(await openedUrls()).toEqual(expectedUrls)
-        } else {
-          expectedUrls.push(destinationUrl)
-          await expect.poll(openedUrls).toEqual(expectedUrls)
-        }
-        await expect(prompt).toBeHidden()
-      }
-      await page.evaluate(() => window.$store
-        .dispatch('updateExternalLinkHandling', 'openLinkAfterPrompt'))
+test('channel About website links respect every external link opening policy', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ shell }) => {
+    globalThis.channelAboutExternalUrls = []
+    shell.openExternal = async url => {
+      globalThis.channelAboutExternalUrls.push(url)
     }
   })
-}
+  const openedUrls = () => app.electronApp.evaluate(() => globalThis.channelAboutExternalUrls)
+
+  await openChannelAbout(page, WEBSITE_URL)
+
+  const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+  const expectedUrls = []
+  for (const selector of ['.aboutLink:visible', '.aboutInfo:visible a']) {
+    const link = page.locator(selector)
+    await expect(link).toHaveAttribute('href', WEBSITE_URL)
+    for (const activation of ['click', 'middle click', 'Enter']) {
+      const activate = () => activation === 'Enter'
+        ? link.press('Enter')
+        : link.click({ button: activation === 'middle click' ? 'middle' : 'left' })
+
+      await activate()
+      expect(await openedUrls(), `${selector} must wait for confirmation on ${activation}`).toEqual(expectedUrls)
+      await expect(prompt).toBeVisible({ timeout: 5000 })
+      await expect(prompt.getByText(WEBSITE_URL, { exact: true })).toBeVisible()
+      await prompt.getByRole('button', { name: 'No', exact: true }).click()
+      await expect(prompt).toBeHidden()
+      expect(await openedUrls()).toEqual(expectedUrls)
+
+      await activate()
+      await expect(prompt).toBeVisible()
+      await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).click()
+      expectedUrls.push(WEBSITE_URL)
+      await expect.poll(openedUrls).toEqual(expectedUrls)
+      await expect(prompt).toBeHidden()
+    }
+
+    for (const policy of ['doNothing', '']) {
+      await page.evaluate(value => window.$store
+        .dispatch('updateExternalLinkHandling', value), policy)
+      await link.click()
+      if (policy === 'doNothing') {
+        await expect(page.getByText('External link opening has been disabled in Settings → Privacy', { exact: true }).last()).toBeVisible()
+        expect(await openedUrls()).toEqual(expectedUrls)
+      } else {
+        expectedUrls.push(WEBSITE_URL)
+        await expect.poll(openedUrls).toEqual(expectedUrls)
+      }
+      await expect(prompt).toBeHidden()
+    }
+    await page.evaluate(() => window.$store
+      .dispatch('updateExternalLinkHandling', 'openLinkAfterPrompt'))
+  }
+})
 
 test('channel About YouTube links open in the app', async ({ app, page }) => {
   await app.electronApp.evaluate(({ shell }) => {

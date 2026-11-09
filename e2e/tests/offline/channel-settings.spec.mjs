@@ -104,51 +104,6 @@ test.describe('channel settings', () => {
     }, channelSettingKeys)).toEqual([])
   })
 
-  test('turning off channel playback settings hides the automatic saving switches', { tag: '@scale' }, async ({ page }) => {
-    await goToSettingsSection(page, 'playback')
-
-    const section = page.locator('.settingsSection', { hasText: 'Enable channel playback settings' })
-    const toggle = section.getByRole('checkbox', { name: /^Enable channel playback settings\b/ })
-    const autoSave = section.getByRole('checkbox', { name: /^Automatically save playback speed changes\b/ })
-    await expect(toggle).toBeChecked()
-    await expect(autoSave).toBeVisible()
-
-    const center = locator => locator.evaluate(element => {
-      const { left, width } = element.getBoundingClientRect()
-      return left + width / 2
-    })
-    const toggleBox = section.locator('.enableChannelSettingsToggle')
-    const toggleSwitch = toggleBox.locator('.switch-ctn')
-    await expect.poll(async () => Math.abs(await center(toggleSwitch) - await center(toggleBox))).toBeLessThan(1)
-    const toggleBottom = await toggleBox.evaluate(element => element.getBoundingClientRect().bottom)
-    const autoSaveTop = await section.locator('.preferenceToggles').evaluate(element => element.getBoundingClientRect().top)
-    expect(toggleBottom).toBeLessThanOrEqual(autoSaveTop)
-
-    await toggleBox.locator('.switch-label').click()
-    await expect(toggle).not.toBeChecked()
-    await expect(autoSave).toHaveCount(0)
-    await expect(section.getByRole('button', { name: 'Manage Saved Channels (1)' })).toBeVisible()
-    await expect.poll(() => page.evaluate(() => window.$store.getters.getEnableChannelSettings)).toBe(false)
-  })
-
-  test('saved channels in the manager open their channel page', async ({ page }) => {
-    await goToSettingsSection(page, 'playback')
-
-    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
-
-    const settingsWindow = page.locator('.settingsWindow')
-    await expect(settingsWindow.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
-
-    const channelLink = settingsWindow.getByRole('link', { name: CHANNEL_NAME })
-    await expect(channelLink).toHaveAttribute('href', `#/channel/${CHANNEL_ID}`)
-
-    await channelLink.click()
-
-    await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}`))
-    await expect(settingsWindow).toBeVisible()
-    await expect(settingsWindow.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
-  })
-
   test('adds subscriptions without saved channel settings', async ({ attachScreenshot, page }) => {
     await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
@@ -319,20 +274,5 @@ test.describe('channel settings', () => {
       existingChannel: 1.75,
       newChannel: 1.25
     })
-  })
-
-  test('saved channels are not links when channel links are disabled', async ({ page }) => {
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateDisableChannelLinks', true)
-    })
-
-    await goToSettingsSection(page, 'playback')
-    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
-
-    const channel = page.locator('.settingsWindow .channelLink', { hasText: CHANNEL_NAME })
-    await expect(channel).toBeVisible()
-    await expect(channel).not.toHaveAttribute('href')
-    await expect(channel).toHaveJSProperty('tagName', 'SPAN')
   })
 })

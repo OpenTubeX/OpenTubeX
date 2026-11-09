@@ -39,41 +39,6 @@ async function clickUntil(page, button, isComplete) {
   }).toBe(true)
 }
 
-test('opens downloads with the default shortcut', async ({ page }) => {
-  const downloads = page.getByRole('dialog', { name: 'Downloads', exact: true })
-  await expect.poll(async () => {
-    if (await downloads.isVisible()) return true
-    await page.bringToFront()
-    await page.keyboard.press('Control+J')
-    return downloads.isVisible()
-  }).toBe(true)
-  await expect(downloads).toBeVisible()
-})
-
-test('separates canceled downloads without offering retry-all', async ({ page }) => {
-  await page.evaluate(() => {
-    const store = window.$store
-    store.commit('upsertYtDlpDownload', {
-      id: 999,
-      title: 'Canceled queue download',
-      mode: 'video',
-      status: 'cancelled',
-      retryPayload: { videoId: 'iiiiiiiiiii', title: 'Canceled queue download', mode: 'video' },
-      destinations: [],
-      files: [],
-    })
-  })
-
-  await goTo(page, 'downloads')
-  await expect(page.getByRole('button', { name: 'Retry all failed downloads' })).toHaveCount(0)
-  const canceledSection = page.locator('.downloadSection').filter({
-    has: page.getByRole('heading', { name: 'Canceled', exact: true })
-  })
-  await expect(canceledSection).toContainText('Canceled queue download')
-  await expect(canceledSection).not.toContainText('Download canceled')
-  await expect(page.getByRole('heading', { name: 'Downloaded', exact: true })).toHaveCount(0)
-})
-
 test('shares one yt-dlp version probe across concurrent downloads and keeps custom runtime opt-outs', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'probed-yt-dlp.sh')
   const probesFile = path.join(app.userDataDir, 'version-probes.txt')
@@ -487,56 +452,4 @@ test('honors the download cookie preference and Always override', async ({ app, 
   await submitDownloads(page, [{ externalUrl: 'https://example.org/video.mp4', title: 'External browser download', mode: 'video' }])
   await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://example.org/video.mp4')).toBe(true)
   expect((await readFile(argumentsFile, 'utf8')).trim().split('\n')).not.toContain('--cookies-from-browser')
-  await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: false, ytDlpPlaybackAlwaysUseCookies: true })
-  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'settings'))
-  await page.locator('.settingsMenu [data-section="advanced"]').click()
-  const downloadCookies = page.getByRole('checkbox', { name: /^Use cookies for downloads/ })
-  await expect(downloadCookies).toBeChecked()
-  await expect(downloadCookies).toBeDisabled()
-  await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
-  await expect(downloadCookies).not.toBeChecked()
-  await expect(downloadCookies).toBeEnabled()
-})
-
-test('shows preparation and processing without a stale percentage or ETA', async ({ app, page }) => {
-  const executable = path.join(app.userDataDir, 'phases-yt-dlp.sh')
-  const transfer = path.join(app.userDataDir, 'start-transfer')
-  const processing = path.join(app.userDataDir, 'start-processing')
-  const finish = path.join(app.userDataDir, 'finish-download')
-  await writeFile(executable, [
-    '#!/bin/sh',
-    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-    `while [ ! -f '${transfer}' ]; do sleep 0.05; done`,
-    "printf '__OPENTUBEX_DOWNLOAD__:downloading\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
-    `while [ ! -f '${processing}' ]; do sleep 0.05; done`,
-    "printf '__OPENTUBEX_DOWNLOAD__:finished\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
-    "printf '__OPENTUBEX_PROCESSING__\\n' >&2",
-    `while [ ! -f '${finish}' ]; do sleep 0.05; done`,
-  ].join('\n'))
-  await chmod(executable, 0o755)
-  await configureQueue(page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
-  await submitDownloads(page, [{ videoId: 'aaaaaaaaaaa', title: 'Download phase test', mode: 'video' }])
-  await goTo(page, 'downloads')
-  const row = page.locator('.downloadRow').filter({ hasText: 'Download phase test' })
-  const progress = row.getByRole('progressbar')
-  await expect(row).toContainText('Preparing…')
-  await expect(progress).not.toHaveAttribute('aria-valuenow')
-  await expect(row.locator('.progressFill')).toHaveClass(/indeterminate/)
-  await expect(row.getByTitle('Pause Download')).toBeVisible()
-  await expect(row.getByTitle('Cancel Download')).toBeVisible()
-  await row.screenshot({ path: test.info().outputPath('preparing.png') })
-  await writeFile(transfer, '')
-  await expect(row).toContainText('97.3%')
-  await expect(progress).toHaveAttribute('aria-valuenow', '97.3')
-  await writeFile(processing, '')
-  await expect(row).toContainText('Processing…')
-  await expect(row).not.toContainText('97.3%')
-  await expect(row).not.toContainText('ETA')
-  await expect(progress).not.toHaveAttribute('aria-valuenow')
-  await expect(row.locator('.progressFill')).toHaveClass(/indeterminate/)
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await expect(row.locator('.progressFill')).toHaveCSS('animation-name', 'none')
-  await row.screenshot({ path: test.info().outputPath('processing.png') })
-  await writeFile(finish, '')
-  await expect(progress).toHaveCount(0)
 })

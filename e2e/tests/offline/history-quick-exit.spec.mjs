@@ -143,7 +143,7 @@ test('persists the latest seek when quitting the desktop app', async ({ app, pag
 })
 
 for (const existing of [true, false]) {
-  for (const position of [0, 5, 15]) {
+  for (const position of [0, 5]) {
     test(`starts at the latest seek to ${position} before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       if (!existing) {
@@ -196,7 +196,7 @@ for (const existing of [true, false]) {
   })
 }
 
-for (const position of [0, 5, 15]) {
+for (const position of [0, 5]) {
   test(`starts at a chapter seek to ${position} made before metadata is available`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let release

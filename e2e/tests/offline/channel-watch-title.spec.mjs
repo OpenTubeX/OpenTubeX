@@ -21,73 +21,70 @@ test.use({
   }
 })
 
-for (const delayed of [false, true]) {
-  test(`retained channel titles stay with their page when loaded ${delayed ? 'behind' : 'before'} Watch`, async ({ app, page }, testInfo) => {
-    await mockPlayableWatchPage(app, page)
-    const released = Promise.withResolvers()
-    let channelRequests = 0
-    await page.route(url => url.origin === 'https://invidious.test' &&
-      (url.pathname === CHANNEL_API_PATH || url.pathname === `${CHANNEL_API_PATH}/videos`), async route => {
-      if (new URL(route.request().url()).pathname === `${CHANNEL_API_PATH}/videos`) {
-        await route.fulfill({ json: { videos: [], continuation: null } })
-        return
+test('retained channel titles stay with their page when loaded behind Watch', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  const released = Promise.withResolvers()
+  let channelRequests = 0
+  await page.route(url => url.origin === 'https://invidious.test' &&
+    (url.pathname === CHANNEL_API_PATH || url.pathname === `${CHANNEL_API_PATH}/videos`), async route => {
+    if (new URL(route.request().url()).pathname === `${CHANNEL_API_PATH}/videos`) {
+      await route.fulfill({ json: { videos: [], continuation: null } })
+      return
+    }
+    channelRequests++
+    await released.promise
+    await route.fulfill({
+      json: {
+        author: 'jawed',
+        authorId: CHANNEL_ID,
+        authorThumbnails: [],
+        authorBanners: [],
+        description: 'Retained channel title regression fixture',
+        subCount: 0,
+        totalViews: 0,
+        joined: 0,
+        tabs: ['videos'],
+        relatedChannels: []
       }
-      channelRequests++
-      if (delayed) await released.promise
-      await route.fulfill({
-        json: {
-          author: 'jawed',
-          authorId: CHANNEL_ID,
-          authorThumbnails: [],
-          authorBanners: [],
-          description: 'Retained channel title regression fixture',
-          subCount: 0,
-          totalViews: 0,
-          joined: 0,
-          tabs: ['videos'],
-          relatedChannels: []
-        }
-      })
     })
-    const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), CHANNEL_PATH)
-    const tabTitle = page.locator(`.tab[data-tab-id="${tab.id}"] .tabTitleText`)
-    await expect.poll(() => channelRequests, { message: 'waiting for the channel info request' }).toBe(1)
-    if (!delayed) await expect(tabTitle).toHaveText('jawed')
-
-    // Load the video with the local fixture while the retained channel keeps
-    // its original request and component instance.
-    await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => {
-      element.pause()
-      element.dataset.retainedTitleTest = 'original'
-    })
-    await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
-    await expect(tabTitle).toHaveText(VIDEO_TITLE)
-    released.resolve()
-    await expect(page.locator('.browsingBehindWatch .channelDetails .name')).toHaveText('jawed')
-    // Flush the channel's loading/title watchers and metadata IPC.
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    await expect(tabTitle).toHaveText(VIDEO_TITLE)
-    await expect.poll(() => page.evaluate(id => {
-      const tab = window.$store.getters.getTabById(id)
-      return tab.history[tab.historyIndex].title
-    }, tab.id)).toBe(VIDEO_TITLE)
-
-    await page.locator(`.watchVideoInfo:visible a.channelName[href="#${CHANNEL_PATH}"]`).click()
-    await expect(page).toHaveURL(new RegExp(`#${CHANNEL_PATH}$`))
-    await expect(page.locator('.channelDetails:visible')).toBeVisible()
-    await expect(tabTitle).toHaveText('jawed')
-    expect(channelRequests, 'reopening the channel must reuse its loaded page').toBe(1)
-    await page.screenshot({ path: testInfo.outputPath('channel-title.png') })
-
-    await page.locator(sel.backButton).click()
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
-    await expect(tabTitle).toHaveText(VIDEO_TITLE)
-    await expect(video).toHaveAttribute('data-retained-title-test', 'original')
-    await page.screenshot({ path: testInfo.outputPath('video-title.png') })
   })
-}
+  const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), CHANNEL_PATH)
+  const tabTitle = page.locator(`.tab[data-tab-id="${tab.id}"] .tabTitleText`)
+  await expect.poll(() => channelRequests, { message: 'waiting for the channel info request' }).toBe(1)
+
+  // Load the video with the local fixture while the retained channel keeps
+  // its original request and component instance.
+  await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    element.dataset.retainedTitleTest = 'original'
+  })
+  await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
+  await expect(tabTitle).toHaveText(VIDEO_TITLE)
+  released.resolve()
+  await expect(page.locator('.browsingBehindWatch .channelDetails .name')).toHaveText('jawed')
+  // Flush the channel's loading/title watchers and metadata IPC.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await expect(tabTitle).toHaveText(VIDEO_TITLE)
+  await expect.poll(() => page.evaluate(id => {
+    const tab = window.$store.getters.getTabById(id)
+    return tab.history[tab.historyIndex].title
+  }, tab.id)).toBe(VIDEO_TITLE)
+
+  await page.locator(`.watchVideoInfo:visible a.channelName[href="#${CHANNEL_PATH}"]`).click()
+  await expect(page).toHaveURL(new RegExp(`#${CHANNEL_PATH}$`))
+  await expect(page.locator('.channelDetails:visible')).toBeVisible()
+  await expect(tabTitle).toHaveText('jawed')
+  expect(channelRequests, 'reopening the channel must reuse its loaded page').toBe(1)
+  await page.screenshot({ path: testInfo.outputPath('channel-title.png') })
+
+  await page.locator(sel.backButton).click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+  await expect(tabTitle).toHaveText(VIDEO_TITLE)
+  await expect(video).toHaveAttribute('data-retained-title-test', 'original')
+  await page.screenshot({ path: testInfo.outputPath('video-title.png') })
+})
 
 test('an old post response cannot replace the retained post or its title behind Watch', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

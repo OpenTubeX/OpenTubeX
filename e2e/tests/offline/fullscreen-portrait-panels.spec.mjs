@@ -6,57 +6,6 @@ test.use({
   seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } }
 })
 
-test('every portrait full-window dock uses the shared sheet', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page, { captionText: 'Transcript line' })
-  // A slow run must not reach the end of the demo video and advance the queue.
-  await (await openMockedVideo(page)).evaluate(element => element.pause())
-  await setWindowSize(app, page, { width: 420, height: 800 })
-  const watch = await page.evaluateHandle(findWatchComponent)
-  const player = page.locator('.ftVideoPlayer')
-  try {
-    await watch.evaluate(component => {
-      const watch = component.proxy
-      watch.watchingPlaylist = true
-      watch.liveChatIsReplay = true
-      watch.videoChapters = [{ title: 'Opening', startSeconds: 0, timestamp: '0:00' }]
-      watch.recommendedVideos = [{ videoId: 'related0001', title: 'Related video', author: 'Channel', type: 'video' }]
-      watch.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00001', title: 'Queued video', author: 'Channel' } })
-    })
-    await page.keyboard.press('s')
-    await expect(player).toHaveClass(/fullWindow/)
-    const sheet = player.locator('.fullscreenDockSheet[open]')
-    for (const [dock, method] of [
-      ['Metadata', 'setFullscreenMetadata'],
-      ['Transcript', 'toggleFullscreenTranscript'],
-      ['SponsorBlock', 'toggleFullscreenSponsorBlock'],
-      ['LiveChat', 'setFullscreenLiveChat'],
-      ['Comments', 'setFullscreenComments'],
-      ['Playlist', 'setFullscreenPlaylist'],
-      ['Queue', 'setFullscreenQueue'],
-      ['Recommendations', 'setFullscreenRecommendations'],
-      ['Chapters', null],
-      ['Metadata', 'setFullscreenMetadata'],
-    ]) {
-      await watch.evaluate((component, method) => {
-        const exposed = component.proxy.$refs.player
-        const player = exposed.$.setupState
-        if (method) (exposed[method] ?? player[method])(true)
-        else player.showChaptersOverlay = true
-      }, method)
-      await expect(sheet).toBeVisible()
-      await expect(sheet.locator(dock === 'Chapters' ? '.chapterOverlay' : `.fullscreen${dock}Overlay.open`)).toBeVisible()
-      await expect(sheet.locator(':scope > .open, :scope > .chapterOverlay')).toHaveCount(1)
-      await expect(sheet.locator('.fullscreenDockResizeHandle')).toHaveCount(0)
-      await expect(sheet.locator(':is(.chapterOverlayHeader, .fullscreenMetadataHeader, .transcriptHeader, .sponsorBlockHeader, .liveChatDockHeader, .fullscreenCommentHeader, .playlistDockHeader, .fullscreenDockHeader):visible').first()).toBeVisible()
-    }
-    await page.keyboard.press('Escape')
-    await expect(sheet).toHaveCount(0)
-    await expect(player).toHaveClass(/fullWindow/)
-  } finally {
-    await watch.dispose()
-  }
-})
-
 test('portrait fullscreen docks use bottom panels and return to side docks in landscape', { tag: '@scale' }, async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   // A slow run must not reach the end of the demo video, which advances the

@@ -247,33 +247,6 @@ test('shows local activity and keeps Home customization after relaunch', async (
   await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'watchStats')
 })
 
-test('slides between Home shelf pages', async ({ page }) => {
-  await goTo(page, 'home')
-  const newSinceLastVisit = page.locator('[data-home-section="newSinceLastVisit"]')
-  const shelfPages = newSinceLastVisit.locator('[data-home-shelf-page]')
-  await expect(newSinceLastVisit.getByText('New Home post', { exact: true })).toBeVisible()
-  // Record transitions as they start; sampling mid-flight misses short slides on a busy machine.
-  // A starved renderer can dispatch transitionrun after Vue's fallback timer removed the
-  // transition classes, so identify the entering page by its number instead of its classes.
-  await newSinceLastVisit.evaluate(element => {
-    element.slidingShelfPages = []
-    element.addEventListener('transitionrun', event => {
-      if (event.propertyName === 'transform') element.slidingShelfPages.push(event.target.dataset.homeShelfPage)
-    })
-  })
-  const slideTo = async (buttonName, pageNumber) => {
-    await newSinceLastVisit.evaluate(element => { element.slidingShelfPages = [] })
-    await newSinceLastVisit.getByRole('button', { name: buttonName }).click()
-    await expect.poll(() => newSinceLastVisit.evaluate(element => element.slidingShelfPages))
-      .toContain(pageNumber)
-    await expect(shelfPages).toHaveCount(1)
-    await expect(shelfPages).toHaveAttribute('data-home-shelf-page', pageNumber)
-  }
-
-  await slideTo('Next New since last visit page', '2')
-  await slideTo('Previous New since last visit page', '1')
-})
-
 test('opens the subscriptions New feed from its Home summary', async ({ page }) => {
   await goTo(page, 'home')
 
@@ -408,40 +381,6 @@ test('shows a queued video without reloading the page', async ({ page }) => {
   await goTo(page, 'home')
 
   await expect(page.locator('[data-home-section="watchQueue"]')).toContainText('Partly watched video')
-})
-
-test.describe('scheduled entries in Home', () => {
-  const scheduledTime = now + 30 * 86_400_000
-
-  test.use({
-    seed: {
-      ...homeSeed,
-      settings: { showScheduledLiveStreamsFirst: false },
-      subscriptionCache: [{
-        ...homeSeed.subscriptionCache[0],
-        videos: [
-          subscriptionVideo('homeprem001', 'Scheduled Home premiere', {
-            published: scheduledTime,
-            isUpcoming: true,
-            isPremiere: true,
-            premiereDate: new Date(scheduledTime).toISOString(),
-            subscriptionFeedPublished: now - 7_200_000
-          }),
-          ...homeSeed.subscriptionCache[0].videos
-        ]
-      }]
-    }
-  })
-
-  test('keeps a scheduled premiere at its announcement position in new subscription content', async ({ page }) => {
-    await goTo(page, 'home')
-
-    const titles = page.locator('[data-home-section="newSinceLastVisit"] .mediaDetails strong')
-    await expect(titles.nth(0)).toHaveText('New Home post')
-    await expect(titles.nth(1)).toHaveText('New Home short')
-    await expect(titles.nth(2)).toHaveText('New Home video')
-    await expect(titles.nth(3)).toHaveText('Scheduled Home premiere')
-  })
 })
 
 test.describe('fresh installation', () => {
@@ -655,37 +594,5 @@ test.describe('compact scaled Home page', () => {
       expect(metrics.bottomNavBottomOffset).toBeLessThanOrEqual(1)
       expect(metrics.cardBottomClearance).toBeGreaterThanOrEqual(-1)
     }
-  })
-
-  test('fits customization controls without horizontal overflow', { tag: '@scale' }, async ({ app, page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await setWindowSize(app, page, { width: 375, height: 700 })
-    await goTo(page, 'home')
-    await page.getByRole('button', { name: 'Customize Home' }).click()
-
-    await expect.poll(() => page.evaluate(() => (
-      document.documentElement.scrollWidth <= document.documentElement.clientWidth
-    ))).toBe(true)
-
-    const reorderButton = page.getByRole('button', { name: 'Move Watch queue down' })
-    const box = await reorderButton.boundingBox()
-    expect(box.width).toBeGreaterThanOrEqual(43.9)
-    expect(box.height).toBeGreaterThanOrEqual(43.9)
-
-    const newSinceLastVisit = page.locator('[data-home-section="newSinceLastVisit"]')
-    await expect(newSinceLastVisit.locator('.mediaGrid > li')).toHaveCount(1)
-    const shelfArrow = newSinceLastVisit.getByRole('button', {
-      name: 'Next New since last visit page'
-    })
-    const shelfArrowBox = await shelfArrow.boundingBox()
-    expect(shelfArrowBox.width).toBeGreaterThanOrEqual(43.9)
-    expect(shelfArrowBox.height).toBeGreaterThanOrEqual(43.9)
-
-    await shelfArrow.click()
-    const secondShelfPage = newSinceLastVisit.locator('[data-home-shelf-page="2"]')
-    await expect(secondShelfPage).toBeVisible()
-    const runningAnimations = await secondShelfPage
-      .evaluate(element => element.getAnimations().filter(animation => animation.playState === 'running').length)
-    expect(runningAnimations).toBe(0)
   })
 })

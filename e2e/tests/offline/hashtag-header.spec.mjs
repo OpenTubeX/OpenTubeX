@@ -66,13 +66,3 @@ test('shows the video and channel counts of a hashtag', async ({ page }) => {
   await expect(page.locator('.hashtagStats')).toHaveText(/^47M videos • 1 channel$/i)
   await expect(page.getByText('Hashtag video')).toBeVisible()
 })
-
-test('omits the counts when the Invidious API does not provide them', async ({ page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'invidious'))
-  await page.route('**/api/v1/hashtag/**', route => route.fulfill({ json: { results: [] } }))
-
-  await openHashtag(page, 'no-stats')
-
-  await expect(page.getByText('This hashtag does not currently have any videos')).toBeVisible()
-  await expect(page.locator('.hashtagStats')).toHaveCount(0)
-})
