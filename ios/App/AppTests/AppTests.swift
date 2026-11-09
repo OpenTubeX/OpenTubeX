@@ -2655,8 +2655,21 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["cross"] as? String, "authorization-absent")
         XCTAssertEqual(result?["noRedirectStatus"] as? Int, 302)
         XCTAssertTrue((result?["timeoutError"] as? String)?.lowercased().contains("timed out") == true, String(describing: result?["timeoutError"]))
+        if plugin == "IOSHttp" {
+            // JavaScript recognizes the prefix, not URLSession's localized text.
+            XCTAssertTrue((result?["timeoutError"] as? String)?.hasPrefix("Failed to fetch: ") == true)
+        }
         XCTAssertLessThan(try XCTUnwrap(result?["elapsed"] as? Double), 10000)
         XCTAssertEqual(result?["afterTimeout"] as? Int, 200)
+    }
+
+    func testLocalizedConnectionFailuresStayRecognizable() {
+        let localized = { (code: URLError.Code, text: String) in URLError(code, userInfo: [NSLocalizedDescriptionKey: text]) }
+        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.timedOut, "Zeitüberschreitung bei der Anforderung.")),
+                       "Failed to fetch: Zeitüberschreitung bei der Anforderung.")
+        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.cannotFindHost, "Es wurde kein Server gefunden.")),
+                       "Failed to fetch: Es wurde kein Server gefunden.")
+        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.badURL, "Ungültige URL")), "Ungültige URL")
     }
 
     func testStreamingCancellationClosesNativeConnection() async throws {
