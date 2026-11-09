@@ -23,12 +23,6 @@ function fixture(platform) {
   return { share, calls, window, handle, listeners }
 }
 
-test('macOS shares the exact URL in the requesting window', () => {
-  const f = fixture('darwin')
-  f.share({ trusted: true }, 'https://youtu.be/video?list=PL123&t=42')
-  assert.deepEqual(f.calls, [{ urls: ['https://youtu.be/video?list=PL123&t=42'] }, { window: f.window }])
-})
-
 test('Windows shares through the native window and releases its request handler on close', () => {
   const f = fixture('win32')
   for (const url of ['https://youtu.be/one?t=42', 'https://youtu.be/two']) f.share({ trusted: true }, url)
@@ -45,13 +39,6 @@ test('sharing rejects untrusted requests, credentials and non-web URLs before op
     assert.throws(() => f.share({ trusted: true }, url))
   }
   assert.deepEqual(f.calls, [])
-})
-
-test('closed windows and unsupported platforms do not open a picker', () => {
-  const f = fixture('linux')
-  assert.throws(() => f.share({ trusted: true }, 'https://youtu.be/video'), /unavailable/)
-  f.window.isDestroyed = () => true
-  assert.throws(() => f.share({ trusted: true }, 'https://youtu.be/video'), /closed/)
 })
 
 

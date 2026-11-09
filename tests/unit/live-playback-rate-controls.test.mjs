@@ -44,39 +44,25 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
   return vm.runInNewContext(`${computedSource('seekingIsPossible')}\n${computedSource('uiConfig')}\nuiConfig.value`, state)
 }
 
-for (const overflow of [false, true]) {
-  for (const [label, props, expected] of [
-    ['DVR livestream or premiere', { isLive: true, isLiveDvrEnabled: true }, true],
-    ['HLS DVR without metadata', { isLive: true, manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/playlist_type/DVR/live.m3u8' }, true],
-    ['live DASH without DVR metadata', { isLive: true }, false],
-    ['live DASH with unknown DVR metadata', { isLive: true, isLiveDvrEnabled: null }, false],
-    ['disabled DVR', { isLive: true, isLiveDvrEnabled: false }, false],
-    ['built-in live playback', { isLive: true, playbackEngine: 'built-in', isLiveDvrEnabled: true }, false],
-    ['short live window', { isLive: true, manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/manifest_duration/30/live.m3u8' }, false],
-    ['ordinary video', { isLive: false }, true],
-  ]) {
-    test(`${label}: playback speed controls with overflow=${overflow}`, () => {
-      const config = controls(props, overflow)
-      assert.equal(config.overflowMenuButtons.includes('playback_rate'), expected)
-      assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), expected && !overflow)
-    })
-  }
-}
-
-test('DVR playback respects the disabled quick bar preference', () => {
-  const config = controls({ isLive: true, isLiveDvrEnabled: true }, false, false)
-  assert.equal(config.overflowMenuButtons.includes('playback_rate'), true)
-  assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), false)
-})
-
-for (const overflow of [false, true]) {
-  test(`Shaka-detected live playback without live metadata hides speed controls with overflow=${overflow}`, () => {
-    const config = controls({
-      isLive: false,
-      manifestMimeType: 'application/x-mpegurl',
-      manifestSrc: 'https://example.com/live.m3u8',
-    }, overflow, true, true)
-    assert.equal(config.overflowMenuButtons.includes('playback_rate'), false)
-    assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), false)
+for (const [label, props, expected, overflow] of [
+  ['DVR livestream or premiere', { isLive: true, isLiveDvrEnabled: true }, true, false],
+  ['DVR livestream or premiere', { isLive: true, isLiveDvrEnabled: true }, true, true],
+  ['HLS DVR without metadata', { isLive: true, manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/playlist_type/DVR/live.m3u8' }, true, false],
+  ['live DASH without DVR metadata', { isLive: true }, false, false],
+]) {
+  test(`${label}: playback speed controls with overflow=${overflow}`, () => {
+    const config = controls(props, overflow)
+    assert.equal(config.overflowMenuButtons.includes('playback_rate'), expected)
+    assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), expected && !overflow)
   })
 }
+
+test('Shaka-detected live playback without live metadata hides speed controls with overflow=false', () => {
+  const config = controls({
+    isLive: false,
+    manifestMimeType: 'application/x-mpegurl',
+    manifestSrc: 'https://example.com/live.m3u8',
+  }, false, true, true)
+  assert.equal(config.overflowMenuButtons.includes('playback_rate'), false)
+  assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), false)
+})

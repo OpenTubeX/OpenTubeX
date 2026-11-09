@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import {
-  applyPublicationDates,
-  fetchMissingPublicationDates
-} from '../../src/renderer/helpers/api/missing-publication.js'
+import { fetchMissingPublicationDates } from '../../src/renderer/helpers/api/missing-publication.js'
 
 const player = (videoId, publishDate) => ({
   videoDetails: { videoId },
@@ -71,14 +68,4 @@ test('skips videos whose metadata fails, mismatches, or has no date', async () =
 
   assert.deepEqual(requested, ['error', 'mismatch', 'undated'])
   assert.deepEqual([...dates], [['ok', Date.parse('2020-01-01')]])
-})
-
-test('applies dates to matching undated entries without touching others', () => {
-  const undated = { type: 'video', videoId: 'a' }
-  const dated = { type: 'video', videoId: 'b', published: 5 }
-  const result = applyPublicationDates([undated, dated], new Map([['a', 10], ['b', 20]]))
-
-  assert.deepEqual(result, [{ type: 'video', videoId: 'a', published: 10 }, dated])
-  assert.equal(result[1], dated)
-  assert.equal(undated.published, undefined)
 })

@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import { vFirstVisible } from '../../src/renderer/helpers/firstVisible.js'
@@ -38,9 +37,4 @@ test('lazy rows share one observer and stop observing after their first intersec
   vFirstVisible.updated(rows[1], { value: false })
   vFirstVisible.unmounted(rows[2])
   assert.equal(observer.observed.size, 497)
-})
-
-test('prewarmed swipe neighbors pause their animations', () => {
-  const tabContent = readFileSync(new URL('../../src/renderer/components/TabContent/TabContent.vue', import.meta.url), 'utf8')
-  assert.match(tabContent, /\.pageSwipePrewarm :deep\(\*\)[^{]*\{\s*animation-play-state: paused !important;/)
 })

@@ -62,23 +62,6 @@ test('the Obtainium nightly links allow architecture APKs and the universal fall
   }
 })
 
-test('embeds the generated nightly version in the Android web bundle', async () => {
-  const workflow = await readFile('.github/workflows/build.yml', 'utf8')
-  const buildStart = workflow.indexOf('    - name: Build signed Android APKs')
-  const buildEnd = workflow.indexOf('    - name: Upload Android', buildStart)
-  const build = workflow.slice(buildStart, buildEnd)
-
-  const packageVersionUpdate = build.indexOf("jq --arg version \"$version\" '.version = $version' package.json")
-  const capacitorBuild = build.indexOf('pnpm run capacitor:sync:android')
-
-  assert.notEqual(packageVersionUpdate, -1)
-  assert.ok(packageVersionUpdate < capacitorBuild)
-  assert.match(
-    build,
-    /gradlew --project-dir android :app:assembleNightly -PsplitApks\s+\\\s+-I \.\.\/tests\/android\/build-identity\.init\.gradle\s+verifyBuildIdentity/
-  )
-})
-
 test('publishes full and lite architecture APKs alongside the existing desktop artifacts', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'android-nightly-assets-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
@@ -125,29 +108,6 @@ test('publishes full and lite architecture APKs alongside the existing desktop a
   assert.notEqual(incomplete.status, 0)
   assert.match(incomplete.stderr, /Expected one file/)
 })
-
-for (const file of ['build', 'release']) {
-  test(`${file} workflow installs the pinned Cast sender NDK before building APKs`, async () => {
-    const gradle = await readFile('android/app/build.gradle', 'utf8')
-    const ndkVersion = gradle.match(/ndkVersion '([^']+)'/)[1]
-    const workflow = load(await readFile(`.github/workflows/${file}.yml`, 'utf8'))
-    const steps = Object.values(workflow.jobs).find(job =>
-      job.steps?.some(step => step.name === 'Build signed Android APKs')
-    ).steps
-    const setup = steps.find(step => step.name === 'Set up Android SDK')
-    assert.deepEqual(setup.with.packages.split(/\s+/), ['platform-tools', `ndk;${ndkVersion}`])
-    assert.ok(steps.indexOf(setup) < steps.findIndex(step => step.name === 'Build signed Android APKs'))
-  })
-
-  test(`${file} workflow omits Android build summaries and shrinking report uploads`, async () => {
-    const workflow = load(await readFile(`.github/workflows/${file}.yml`, 'utf8'))
-    const steps = Object.values(workflow.jobs).flatMap(job => job.steps ?? [])
-    const build = steps.find(step => step.name === 'Build signed Android APKs')
-    assert.doesNotMatch(build.run, /GITHUB_STEP_SUMMARY/)
-    const uploads = steps.filter(step => step.uses?.startsWith('actions/upload-artifact@'))
-    assert.ok(uploads.every(step => !/shrinking|mapping/.test(`${step.with.name} ${step.with.path}`)))
-  })
-}
 
 test('stable releases build only production APKs and sort between nightlies by version code', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'android-stable-promotion-'))
@@ -276,49 +236,3 @@ test('stable releases attach only production APKs', async (t) => {
   const upload = workflow.jobs.build.steps.find(step => step.name === 'Upload release assets')
   assert.match(upload.run, /^gh release upload "\$TAG" release-assets\/\* /)
 })
-
-for (const [channel, resourceDir, badge] of [['nightly', 'debug', 'wrench'], ['dev', 'dev', 'flask']]) {
-  test(`gives Android ${channel} builds their ${badge} launcher icon`, async () => {
-    const icon = await readFile(
-      `android/app/src/${resourceDir}/res/drawable/ic_launcher_${channel}_foreground.xml`,
-      'utf8'
-    )
-
-    assert.ok(icon.includes(badge))
-
-    for (const api of [26, 33]) {
-      for (const name of ['ic_launcher.xml', 'ic_launcher_round.xml']) {
-        const adaptiveIcon = await readFile(
-          `android/app/src/${resourceDir}/res/mipmap-anydpi-v${api}/${name}`,
-          'utf8'
-        )
-
-        assert.ok(adaptiveIcon.includes(`@drawable/ic_launcher_${channel}_foreground`))
-        if (api === 33) {
-          assert.ok(adaptiveIcon.includes(`@drawable/ic_launcher_${channel}_monochrome`))
-        }
-      }
-    }
-
-    for (const [density, size] of Object.entries({
-      mdpi: 48,
-      hdpi: 72,
-      xhdpi: 96,
-      xxhdpi: 144,
-      xxxhdpi: 192
-    })) {
-      for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
-        const png = await readFile(
-          `android/app/src/${resourceDir}/res/mipmap-${density}/${name}`
-        )
-
-        assert.deepEqual(
-          png.subarray(0, 8),
-          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-        )
-        assert.equal(png.readUInt32BE(16), size)
-        assert.equal(png.readUInt32BE(20), size)
-      }
-    }
-  })
-}

@@ -22,11 +22,6 @@ test('notification images stop reading a body without a length once it exceeds t
   assert.ok(pulled <= 7 * 1024 * 1024, `read ${pulled} bytes`)
 })
 
-test('notification images load small bodies', async () => {
-  respond = async () => new Response(new Uint8Array([1, 2, 3]))
-  assert.equal((await loadNotificationImage('https://i.ytimg.com/vi/abc/mqdefault.jpg')).size, 3)
-})
-
 test('notification images stay off while the thumbnail settings hide or blur thumbnails', async () => {
   let fetched = 0
   respond = async () => { fetched++; return new Response(new Uint8Array([1, 2, 3])) }

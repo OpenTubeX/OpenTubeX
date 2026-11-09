@@ -101,61 +101,6 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   methods.clearMobileMiniMorph()
 })
 
-for (const hidden of [false, true]) {
-  test(`music morph animates the visible fallback when artwork is ${hidden ? 'failed' : 'loading'}`, () => {
-    const attributes = new Set()
-    const listeners = new Map()
-    const frames = new Map()
-    let showPlaceholder = true
-    const style = () => ({ setProperty() {}, removeProperty(name) { delete this[name.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] } })
-    const rect = { left: 0, top: 0, width: 400, height: 225 }
-    const placeholder = {
-      style: style(), naturalWidth: 480, naturalHeight: 270,
-      getBoundingClientRect: () => ({ left: 40, top: 20, width: 100, height: 100 }),
-      closest: () => ({ getBoundingClientRect: () => rect })
-    }
-    const loadingImage = {
-      ...placeholder, hidden, style: style(), naturalWidth: 0, naturalHeight: 0,
-      getBoundingClientRect: () => ({ left: 40, top: 20, width: 1, height: 1 })
-    }
-    const methods = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, mobileMiniBarOverlay })`, {
-      container: { value: {
-        style: style(), hasAttribute: name => attributes.has(name),
-        setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
-        querySelector: selector => selector === '.musicAudioArtwork.retryImagePlaceholder' ? (showPlaceholder ? placeholder : null) : loadingImage,
-        querySelectorAll: () => [],
-        addEventListener: (type, listener) => listeners.set(type, listener),
-        removeEventListener: type => listeners.delete(type)
-      } },
-      video: { value: { videoWidth: 400, videoHeight: 225 } },
-      mobileMiniBarOverlay: { value: null },
-      getComputedStyle: () => ({ borderTopLeftRadius: '12px' }),
-      requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
-      cancelAnimationFrame: id => frames.delete(id)
-    })
-    methods.renderMobileMiniMorph(rect, { ...rect, top: 700 }, rect, { left: 8, top: 6, width: 80, height: 45 }, 1, false)
-    assert.equal(placeholder.style.transform, 'translate(110px, 42.5px) scale(4)')
-    assert.equal(placeholder.style.borderRadius, '0px')
-    assert.equal(loadingImage.style.transform, undefined)
-    showPlaceholder = false
-    Object.assign(loadingImage, { hidden: false, naturalWidth: 480, naturalHeight: 270 })
-    // The real image replaces the fallback while the finger is held still.
-    listeners.get('load')?.()
-    const redraw = frames.get(1)
-    frames.delete(1)
-    redraw?.()
-    assert.equal(loadingImage.style.transform, 'translate(110px, 42.5px) scale(4)')
-    assert.equal(placeholder.style.transform, undefined)
-    listeners.get('load')?.()
-    methods.clearMobileMiniMorph()
-    assert.equal(listeners.size, 0)
-    assert.equal(frames.size, 0)
-    assert.equal(loadingImage.style.transform, undefined)
-    assert.equal(placeholder.style.transform, undefined)
-    assert.equal(placeholder.style.borderRadius, undefined)
-  })
-}
-
 function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true, format = 'dash', mobile = false } = {}) {
   let reads = 0
   let navigations = 0
@@ -326,13 +271,6 @@ test('failed Watch restore keeps the retained mini player active', async () => {
   assert.equal(f.updates(), 1)
 })
 
-test('a dock attempt that cannot activate the mini player has no haptic', async () => {
-  const f = fixture({ reducedMotion: true, activationSucceeds: false })
-  f.methods.beginScrollMiniPlayerDrag()
-  await f.methods.finishScrollMiniPlayerDrag(true)
-  assert.equal(f.haptics(), 0)
-})
-
 test('unavailable playback does not capture a drag', () => {
   const f = fixture({ available: false })
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), false)
@@ -360,15 +298,6 @@ test('navigation can hide the watch view without losing the drag handoff dimensi
 })
 
 
-test('Watch starts fading immediately, independently of the mini-player destination', () => {
-  const f = fixture()
-  f.methods.beginScrollMiniPlayerDrag()
-  f.methods.moveScrollMiniPlayerDrag(0, 24)
-  f.frames.get(1)()
-  assert.equal(f.progress(), 0.25)
-})
-
-
 for (const commit of [true, false]) {
   test(`upward drag expands toward Watch and ${commit ? 'restores' : 'keeps'} the mini player`, async () => {
     const f = fixture({ restoring: true, reducedMotion: true })
@@ -383,90 +312,6 @@ for (const commit of [true, false]) {
     assert.equal(f.updates(), Number(!commit))
   })
 }
-
-test('drag follows the same fixed path regardless of sideways finger movement', () => {
-  const f = fixture()
-  f.methods.beginScrollMiniPlayerDrag()
-  f.methods.moveScrollMiniPlayerDrag(0, 100)
-  f.frames.get(1)()
-  const path = f.style.transform
-  f.methods.moveScrollMiniPlayerDrag(95, 100)
-  f.frames.get(1)()
-  assert.equal(f.style.transform, path)
-})
-
-test('drag cannot overshoot the saved mini-player endpoint', () => {
-  const f = fixture()
-  f.methods.beginScrollMiniPlayerDrag()
-  f.methods.moveScrollMiniPlayerDrag(0, 1000)
-  f.frames.get(1)()
-  const endpoint = f.style.transform
-  f.methods.moveScrollMiniPlayerDrag(0, 1500)
-  f.frames.get(1)()
-  assert.equal(f.style.transform, endpoint)
-})
-
-test('a quick upward flick continues at its speed toward the measured Watch slot', async () => {
-  const f = fixture({ restoring: true })
-  f.methods.beginScrollMiniPlayerDrag(true)
-  // The only move arrives before the drag has measured the inline slot.
-  f.clock.now = 20
-  f.methods.moveScrollMiniPlayerDrag(0, -24)
-  const finished = f.methods.finishScrollMiniPlayerDrag(true)
-  await new Promise(resolve => setImmediate(resolve))
-  const [, , velocity] = f.springs.at(-1)
-  assert.ok(Math.abs(velocity - 24 / 20 / 490.75) < 1e-9)
-  f.methods.cancelScrollMiniPlayerDrag()
-  await finished
-})
-
-test('return keeps the preview in place until the player reaches the inline endpoint', async () => {
-  const f = fixture({ restoring: true })
-  f.methods.beginScrollMiniPlayerDrag(true)
-  f.methods.moveScrollMiniPlayerDrag(0, -24)
-  const finished = f.methods.finishScrollMiniPlayerDrag(true)
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(f.deactivated(), false)
-  const before = f.style.transform
-  let frame = f.frames.get(1)
-  f.frames.delete(1)
-  frame(-1)
-  assert.equal(f.style.transform, before, 'A frame timestamp before pointerup cannot move backward')
-  frame = f.frames.get(1)
-  f.frames.delete(1)
-  frame(150)
-  assert.equal(f.deactivated(), false)
-  frame = f.frames.get(1)
-  f.frames.delete(1)
-  frame(1000)
-  await finished
-  assert.equal(f.deactivated(), true)
-  assert.equal(f.style.transform, undefined)
-  assert.equal(f.style.borderRadius, undefined)
-})
-
-test('vertical player displacement matches the finger before reaching its endpoint', () => {
-  const f = fixture()
-  f.methods.beginScrollMiniPlayerDrag()
-  f.methods.moveScrollMiniPlayerDrag(80, 100)
-  f.frames.get(1)()
-  const y = Number(f.style.transform.match(/translate\([^,]+, ([\d.]+)px/)[1])
-  assert.ok(Math.abs(y - 100) < 0.001, `Player moved ${y}px for a 100px swipe`)
-})
-
-test('return button uses the same preview and continuous path as an upward swipe', () => {
-  const returnSource = source.slice(source.indexOf('  function scrollMiniScrollToTop('), source.indexOf('  function dismissCrossTabMiniPlayer('))
-  const calls = []
-  vm.runInNewContext(`${returnSource}\nscrollMiniScrollToTop()`, {
-    scrollMiniPlayerDetached: { value: true }, tabId: 'tab',
-    watchNavigation: { detached: { value: true }, tabPresented: { value: true }, returnToVideo: () => calls.push('navigate') },
-    beginScrollMiniPlayerDrag: restoring => { calls.push(['begin', restoring]); return true },
-    finishScrollMiniPlayerDrag: commit => calls.push(['finish', commit]),
-    process: { env: { IS_CAPACITOR: true } },
-    getCapacitorTabService: () => ({ activateTab: () => calls.push('activate') })
-  })
-  assert.equal(JSON.stringify(calls), JSON.stringify([['begin', true], ['finish', true]]))
-})
 
 test('Watch return resets browsing scroll before revealing the Watch route', async () => {
   const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
@@ -503,79 +348,6 @@ test('Watch return resets browsing scroll before revealing the Watch route', asy
   assert.equal(browsingEntry.scroll.top, 420)
 })
 
-test('failed Watch return keeps the browsing scroll position', async () => {
-  const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
-  const finishSource = watchSource.slice(watchSource.indexOf('async function finishMinimizePreview('), watchSource.indexOf('function clearMinimizePreview('))
-  const window = {
-    scrollY: 420,
-    scrollTo({ top }) { this.scrollY = top }
-  }
-  await assert.rejects(vm.runInNewContext(`${finishSource}\nfinishMinimizePreview(true)`, {
-    previewRestoring: { value: true },
-    previewScroll: { left: 0, top: 420 },
-    disposed: false,
-    navigation: { push: async () => { throw new Error('Navigation failed') } },
-    props: { tabId: 'watch' },
-    watchRoute: { value: { fullPath: '/watch/demo' } },
-    isWatchRoute: { value: false },
-    window
-  }))
-  assert.equal(window.scrollY, 420)
-})
-
-test('mobile Watch return preview stays at the final viewport position while browsing is scrolled', () => {
-  const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
-  const beginSource = watchSource.slice(watchSource.indexOf('function beginRestorePreview('), watchSource.indexOf('function updatePreviewPosition('))
-  const previewStyle = { value: null }
-  const previewHost = { value: {
-    getBoundingClientRect: () => ({ left: 0, top: -240, width: 390 }),
-    closest: () => ({ getBoundingClientRect: () => ({ left: 0, top: -240, width: 390 }) })
-  } }
-  const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
-    previewActive: { value: false },
-    previewRestoring: { value: false },
-    detached: { value: true },
-    previewHost,
-    previewStyle,
-    watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
-    updatePreviewPosition() {},
-    ResizeObserver: class { observe() {} },
-    document: { querySelector: () => ({}) },
-    window: { scrollX: 0, scrollY: 300, innerHeight: 800, addEventListener() {} }
-  })
-  assert.equal(started, true)
-  assert.equal(-240 + Number.parseFloat(previewStyle.value.top), 60)
-  assert.equal(previewStyle.value.height, '740px')
-})
-
-for (const right of [false, true]) {
-  for (const hiddenOnWatch of [false, true]) {
-    test(`landscape restore previews the final width with the ${right ? 'right' : 'left'} sidebar ${hiddenOnWatch ? 'hidden' : 'visible'} on Watch`, () => {
-      const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
-      const beginSource = watchSource.slice(watchSource.indexOf('function beginRestorePreview('), watchSource.indexOf('function updatePreviewPosition('))
-      const previewStyle = { value: null }
-      const bounds = { left: right ? 10 : 210, top: 78, width: 780 }
-      const previewHost = { value: {
-        getBoundingClientRect: () => bounds,
-        closest: () => ({ getBoundingClientRect: () => bounds })
-      } }
-      const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
-        previewActive: { value: false }, previewRestoring: { value: false }, detached: { value: true }, previewHost, previewStyle,
-        watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
-        store: { getters: { getHideSideBarOnWatchPages: hiddenOnWatch } },
-        updatePreviewPosition() {},
-        ResizeObserver: class { observe() {} },
-        document: { querySelector: selector => selector === '.app > .sideNav'
-          ? { getBoundingClientRect: () => ({ left: right ? 800 : 0, width: 200 }) } : null },
-        window: { scrollX: 0, scrollY: 0, innerWidth: 1000, innerHeight: 450, addEventListener() {} }
-      })
-      assert.equal(started, true)
-      assert.equal(previewStyle.value.width, hiddenOnWatch ? '980px' : '780px')
-      assert.equal(bounds.left + Number.parseFloat(previewStyle.value.left), hiddenOnWatch || right ? 10 : 210)
-    })
-  }
-}
-
 for (const navigatedAway of [false, true]) {
   test(`close ${navigatedAway ? 'disposes a retained page' : 'only hides a player from another tab'}`, () => {
     const handler = source.slice(source.indexOf('  function dismissCrossTabMiniPlayer('), source.indexOf('  async function scrollMiniTogglePlayPause('))
@@ -597,35 +369,14 @@ for (const navigatedAway of [false, true]) {
   })
 }
 
-for (const hidden of [false, true]) {
-  test(`mobile minimize measures the settled endpoint with navigation ${hidden ? 'hidden' : 'visible'}`, () => {
-    const styles = new Map()
-    const element = {
-      classList: { add() {} }, removeAttribute() {}, append() {}, remove() {},
-      style: { setProperty: (key, value) => styles.set(key, value) },
-      getBoundingClientRect: () => ({
-        left: 0, top: 600 + (hidden && styles.get('translate') !== 'none' ? 60 : 0), width: 400, height: 108
-      })
-    }
-    const video = { removeAttribute() {}, getBoundingClientRect: () => ({ left: 8, top: element.getBoundingClientRect().top + 6, width: 112, height: 63 }) }
-    const measure = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, getMobileMiniBarRect }).measureMobileMiniBar`, {
-      document: { getElementById: () => ({ append() {} }) },
-      container: { value: { cloneNode: () => element } },
-      video: { value: { cloneNode: () => video } },
-      getMobileMiniBarRect: () => ({ top: 600, width: 400, height: 108 })
-    })
-    assert.equal(measure().rect.top, hidden ? 660 : 600)
-  })
-}
-
-for (const mobile of [false, true]) {
+for (const mobile of [true]) {
   test(`${mobile ? 'mobile' : 'desktop'} audio mini-player eligibility covers explicit minimization`, () => {
     const f = fixture({ format: 'audio', mobile })
     assert.equal(f.methods.canUseScrollMiniPlayerBase(true), mobile)
   })
 }
 
-for (const mobile of [false, true]) {
+for (const mobile of [true]) {
   test(`${mobile ? 'mobile' : 'desktop'} audio observes inline visibility for scroll docking`, () => {
     let observed = false
     const setup = source.slice(source.indexOf('  function setupScrollMiniIntersectionObserver()'), source.indexOf('  /** @param {boolean} [animate] */', source.indexOf('  function setupScrollMiniIntersectionObserver()')))

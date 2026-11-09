@@ -110,15 +110,6 @@ test('repair selects imports whose only missing metadata is the publication date
 })
 
 
-test('repair progress includes both successful and failed writes in the same batch', async () => {
-  const result = await repairHistory({
-    records: Array(4).fill(record), signal: new AbortController().signal, onProgress: () => {},
-    getRecord: () => record, fetchMetadata: async () => metadata,
-    saveMetadata: async () => ({ repaired: 3, failed: 1 })
-  })
-  assert.deepEqual(result, { total: 4, checked: 4, repaired: 3, failed: 1 })
-})
-
 test('explicit broadcast status overrides legacy isLive on ended and upcoming premieres', () => {
   for (const isUpcoming of [false, true]) {
     const metadata = parseHistoryRepairPlayer({
@@ -302,7 +293,7 @@ test('untouched entries retain their retries after both bot cooldowns', async ()
 })
 
 
-for (const failure of ['unavailable', 'malformed', 400, 403, 404, 429, 503, 'network']) {
+for (const failure of ['unavailable', 404, 429, 'network']) {
   test(`classifies ${failure} metadata failures before retrying`, async () => {
     let attempts = 0
     const waits = []

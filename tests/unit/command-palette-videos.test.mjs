@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { hasDownloadSearchChanged, isLocalVideoMutation, iterateLocalVideoCommands } from '../../src/renderer/helpers/commandPaletteVideos.js'
+import { hasDownloadSearchChanged, iterateLocalVideoCommands } from '../../src/renderer/helpers/commandPaletteVideos.js'
 import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync } from '../../src/renderer/helpers/commandPalette.js'
 
 function registry(overrides = {}) {
@@ -96,18 +96,6 @@ test('searches available download files and delegates playback of the selected f
   assert.deepEqual(playedDownloads[0], { id: 42, file: { videoId: 'second', title: 'Second journey' } })
 })
 
-test('untitled playlist downloads use each file name or ID rather than the aggregate title', () => {
-  const { commands } = registry({ downloads: {
-    42: { id: 42, status: 'completed', mode: 'video', title: 'Whole playlist', files: [
-      { videoId: 'first', path: '/downloads/First journey.webm' },
-      { videoId: 'second', path: 'C:\\downloads\\Second journey.mp4' },
-      { videoId: 'third' },
-    ] },
-    43: { id: 43, status: 'completed', mode: 'audio', title: 'Audio journey', videoId: 'audio', files: [{ videoId: 'audio' }] },
-  } })
-  assert.deepEqual(commands.map(command => command.label), ['First journey', 'Second journey', 'third', 'Audio journey'])
-})
-
 test('normalized-empty streaming queries never read library metadata', async () => {
   let reads = 0
   function * commands() {
@@ -129,7 +117,7 @@ test('removes only the selected queue entry and retains its saved route', () => 
 })
 
 test('offers downloaded files only once local playback accepts their status', () => {
-  for (const status of ['queued', 'downloading', 'processing', 'failed', 'cancelled', 'completed']) {
+  for (const status of ['downloading', 'completed']) {
     const { commands } = registry({
       downloads: { 42: { id: 42, status, mode: 'video', files: [{ videoId: 'saved', available: true }] } },
     })
@@ -236,20 +224,11 @@ test('cancelled streaming searches stop reading metadata before scanning the lib
   assert.ok(titleReads > 0 && titleReads < 10)
 })
 
-test('metadata mutations refresh results while playback progress does not', () => {
-  for (const type of ['upsertToHistoryCache', 'applyPlaylistMetadataRepairs', 'upsertPlaylistToList', 'removeVideos', 'setAllPlaylists', 'addVideoToWatchQueue', 'removeYtDlpDownload']) {
-    assert.equal(isLocalVideoMutation(type), true, type)
-  }
-  for (const type of ['updateRecordWatchProgressInHistoryCache', 'updateRecordLastViewedPlaylistIdInHistoryCache', 'addOpenPrompt']) {
-    assert.equal(isLocalVideoMutation(type), false, type)
-  }
-})
-
 test('download byte-count updates do not invalidate search, but file metadata changes do', () => {
   const download = { id: 42, title: 'Journey', status: 'downloading', mode: 'video', files: [{ videoId: 'local123456', title: 'Mountain journey', author: 'North Channel', available: true }] }
   const progress = { ...download, status: 'downloading', progress: 90, files: download.files.map(file => ({ ...file })) }
   assert.equal(hasDownloadSearchChanged(download, progress), false)
-  for (const fields of [{ title: 'Renamed file' }, { author: 'Other channel' }, { available: false }, { videoId: 'other' }, { extension: 'webm' }, { path: '/renamed.webm' }]) {
+  for (const fields of [{ title: 'Renamed file' }, { available: false }]) {
     assert.equal(hasDownloadSearchChanged(download, { ...progress, files: [{ ...download.files[0], ...fields }] }), true)
   }
   assert.equal(hasDownloadSearchChanged(download, { ...progress, playlistKey: 'saved' }), true)

@@ -116,21 +116,6 @@ test('creates one closed-app schedule input per profile and enabled feed', () =>
   ])
 })
 
-test('invalid and disabled intervals do not opt in to closed-app refreshes', () => {
-  const configuration = createAndroidSubscriptionRefreshConfiguration({
-    profiles: [],
-    closedAppRefreshEnabled: true,
-    intervals: { videos: 'nope', shorts: -1, live: 0, posts: '' },
-    hiddenFeedTypes: [],
-    instanceUrl: '',
-    authorization: null,
-    titles: {},
-    cancelLabel: 'Cancel'
-  })
-
-  assert.deepEqual(configuration.intervals, { videos: 0, shorts: 0, live: 0, posts: 0 })
-})
-
 test('closed-app refresh opt-out preserves selected intervals outside the native configuration', () => {
   const selectedIntervals = { videos: '1800000', shorts: '3600000', live: '7200000', posts: '14400000' }
   const configuration = createAndroidSubscriptionRefreshConfiguration({

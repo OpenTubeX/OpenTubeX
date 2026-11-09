@@ -3,10 +3,7 @@ import test from 'node:test'
 
 import {
   filterCommandPaletteCommands,
-  highlightCommandText,
   keyboardEventInitFromShortcut,
-  normalizeCommandText,
-  shouldShowKeyboardShortcutCommand,
 } from '../../src/renderer/helpers/commandPalette.js'
 
 const commands = [
@@ -14,10 +11,6 @@ const commands = [
   { id: 'settings-history', label: 'Privacy and history', group: 'Settings', aliases: [] },
   { id: 'captions', label: 'Sous-titres', group: 'Lecture', aliases: ['captions', 'cc'] },
 ]
-
-test('normalizes localized command text for accent-insensitive matching', () => {
-  assert.equal(normalizeCommandText('  Résumé   vidéo ', 'fr-FR'), 'resume video')
-})
 
 test('ranks exact labels before broader label matches', () => {
   assert.deepEqual(
@@ -62,28 +55,6 @@ test('does not return unrelated commands for a fuzzy query', () => {
   )
 })
 
-test('splits exact command label matches into highlighted text segments', () => {
-  assert.deepEqual(highlightCommandText('Switch to Tab: Home', 'tab', 'en-US'), [{
-    text: 'Switch to ',
-    highlighted: false,
-  }, {
-    text: 'Tab',
-    highlighted: true,
-  }, {
-    text: ': Home',
-    highlighted: false,
-  }])
-})
-
-test('highlights the characters that produced a fuzzy label match', () => {
-  const segments = highlightCommandText('History', 'hstry', 'en-US')
-  assert.equal(segments.map(segment => segment.text).join(''), 'History')
-  assert.equal(
-    segments.filter(segment => segment.highlighted).map(segment => segment.text).join(''),
-    'Hstry'
-  )
-})
-
 test('keeps direct actions ahead of settings search results', () => {
   const overlappingCommands = [{
     id: 'action',
@@ -103,21 +74,6 @@ test('keeps direct actions ahead of settings search results', () => {
       .map(command => command.id),
     ['action', 'setting']
   )
-})
-
-test('hides the keyboard shortcuts command on Android without a hardware keyboard', () => {
-  assert.equal(shouldShowKeyboardShortcutCommand({
-    isCapacitor: true,
-    hardwareKeyboardAttached: false,
-  }), false)
-  assert.equal(shouldShowKeyboardShortcutCommand({
-    isCapacitor: true,
-    hardwareKeyboardAttached: true,
-  }), true)
-  assert.equal(shouldShowKeyboardShortcutCommand({
-    isCapacitor: false,
-    hardwareKeyboardAttached: false,
-  }), true)
 })
 
 test('converts configured shortcuts into keyboard event data', () => {

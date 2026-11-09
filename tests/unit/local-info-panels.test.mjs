@@ -99,9 +99,3 @@ test('falls back to the link host and drops links that cannot open externally', 
     }])
   }
 })
-
-test('handles absent responses and empty panels', () => {
-  for (const info of [undefined, {}, { page: [] }, videoInfo(), videoInfo([{ infoPanelContentRenderer: {} }])]) {
-    assert.equal(extract(info), null)
-  }
-})

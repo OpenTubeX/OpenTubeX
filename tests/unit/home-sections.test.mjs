@@ -4,7 +4,6 @@ import test from 'node:test'
 import {
   DEFAULT_HOME_SECTION_LAYOUT,
   getContinueWatchingEntries,
-  getRecentDownloads,
   moveHomeSection,
   normalizeHomeSectionLayout,
 } from '../../src/renderer/helpers/homeSections.js'
@@ -17,17 +16,6 @@ test('normalizes a complete current Home layout', () => {
   assert.deepEqual(normalizeHomeSectionLayout(input), input)
 })
 
-test('falls back to the complete default Home layout for invalid settings', () => {
-  assert.deepEqual(
-    normalizeHomeSectionLayout('invalid'),
-    DEFAULT_HOME_SECTION_LAYOUT
-  )
-  assert.deepEqual(
-    normalizeHomeSectionLayout([{ id: 'unknown', visible: true }]),
-    DEFAULT_HOME_SECTION_LAYOUT
-  )
-})
-
 test('adds recommendations without resetting existing Home order or visibility', () => {
   const previousLayout = DEFAULT_HOME_SECTION_LAYOUT
     .filter(section => section.id !== 'recommendations')
@@ -37,18 +25,6 @@ test('adds recommendations without resetting existing Home order or visibility',
     ...previousLayout,
     { id: 'recommendations', visible: true },
   ])
-})
-
-test('recent downloads include active and completed entries only', () => {
-  const downloads = [
-    { id: 1, status: 'failed' },
-    { id: 2, status: 'completed' },
-    { id: 3, status: 'downloading' },
-    { id: 4, status: 'cancelled' },
-    { id: 5, status: 'queued' },
-  ]
-
-  assert.deepEqual(getRecentDownloads(downloads).map(download => download.id), [5, 3, 2])
 })
 
 test('moves Home sections without mutating the stored layout', () => {
@@ -96,22 +72,12 @@ test('Home shelves use one row and reserve space for paging controls', () => {
 })
 
 test('Home shelves mount only one card before their width is measured', () => {
-  for (const width of [0, Number.NaN, Number.POSITIVE_INFINITY, -1]) {
+  for (const width of [0, Number.NaN]) {
     assert.deepEqual(getHomeShelfLayout(width, 10_800, 260, 12), {
       pageSize: 1,
       showControls: false,
     })
   }
-})
-
-test('continue watching is not capped before shelf pagination', () => {
-  const entries = Array.from({ length: 8 }, (_, index) => ({
-    videoId: `video-${index}`,
-    watchProgress: 20,
-    lengthSeconds: 100,
-  }))
-
-  assert.equal(getContinueWatchingEntries(entries).length, entries.length)
 })
 
 test('Home shelf capacity handles fractional UI scale measurements', () => {

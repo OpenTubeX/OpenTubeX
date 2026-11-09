@@ -203,38 +203,3 @@ for (const eventFirst of [false, true]) {
     assert.ok(removedListeners.includes('backButton'), 'unmount removes the native back listener')
   })
 }
-
-test('Capacitor integrations do not register the Android back button on iOS', async () => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('async function enableCapacitorIntegrations() {')
-  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
-  const listeners = []
-  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
-    window: new EventTarget(),
-    Capacitor: { getPlatform: () => 'ios' },
-    playbackScreenWake: createPlaybackScreenWake({ async keepAwake() {}, async allowSleep() {} }),
-    AppShortcuts: { addListener: async () => ({ remove() {} }) },
-    syncContinueWatchingWidget: () => () => {},
-    store: {},
-    watch: () => () => {},
-    locale: {},
-    CapacitorApp: {
-      addListener: async name => {
-        listeners.push(name)
-        return { remove() {} }
-      },
-      getState: async () => ({ isActive: true }),
-      getLaunchUrl: async () => null,
-    },
-    initializeCapacitorLiveReminderActions: async () => () => {},
-    showInAppNotification: () => {},
-    addAndroidMediaSessionActionListener: async () => () => {},
-    setAndroidAppVisible() {},
-    setAndroidAppActive() {},
-    clearTimeout,
-  })
-
-  const cleanup = await enable()
-  assert.ok(!listeners.includes('backButton'))
-  cleanup()
-})

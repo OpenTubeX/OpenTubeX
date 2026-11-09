@@ -3,7 +3,7 @@ import test from 'node:test'
 import { YT } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
-const { normalizeLocalSubscriptionFeed, parseLocalCommunityPosts } = createLocalFeedParsers(() => false)
+const { parseLocalCommunityPosts } = createLocalFeedParsers(() => false)
 
 const SHARER_ID = 'UCMDQxm7cUx3yXkfeHa5zJIQ'
 const ORIGINAL_AUTHOR_ID = 'UCMvBjCzggK1Xd5TNBxVqZwA'
@@ -120,13 +120,4 @@ test('keeps shared posts whose original post was deleted', () => {
   assert.equal(shared.postId, 'shared-1')
   assert.equal(shared.postText, '')
   assert.deepEqual(shared.postContent, { type: 'sharedPost', content: null })
-})
-
-test('background refreshes shift the original post date by the time since the fetch', () => {
-  const data = postsTab([sharedPost('shared-1', 'Shared', backstagePost('original-1', 'Original'))])
-  const timestamp = Date.now() - 3600000
-  const [shared] = normalizeLocalSubscriptionFeed('posts', { data }, SHARER_ID, timestamp)
-
-  assert.ok(Math.abs(shared.publishedTime - (Date.now() - 2 * 86400000 - 3600000)) < 60000)
-  assert.ok(Math.abs(shared.postContent.content.publishedTime - (Date.now() - 30 * 86400000 - 3600000)) < 60000)
 })

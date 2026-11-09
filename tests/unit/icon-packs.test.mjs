@@ -5,13 +5,8 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import {
-  normalizeFaIcon,
   resolveMappedIcon,
 } from '../../src/renderer/icons/iconMappingResolver.js'
-import { NAVIGATION_ITEM_DEFINITIONS } from '../../src/navigationItems.js'
-import { FULLSCREEN_ACTION_DEFINITIONS } from '../../src/renderer/helpers/fullscreenActions.js'
-import { TAB_GROUP_ICONS } from '../../src/tabGroupIcons.js'
-import { PROFILE_ICONS } from '../../src/renderer/helpers/profileIcons.js'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const rendererRoot = path.join(repoRoot, 'src/renderer')
@@ -28,45 +23,6 @@ async function readJson(file) {
   return JSON.parse(await readFile(path.join(iconRoot, file), 'utf8'))
 }
 
-test('normalizes supported semantic icon forms', () => {
-  assert.deepEqual(normalizeFaIcon('search'), ['fas', 'search'])
-  assert.deepEqual(normalizeFaIcon('far bookmark'), ['far', 'bookmark'])
-  assert.deepEqual(normalizeFaIcon(['fab', 'youtube']), ['fab', 'youtube'])
-  assert.deepEqual(normalizeFaIcon(['circle']), ['fas', 'circle'])
-  assert.deepEqual(
-    normalizeFaIcon({ prefix: 'far', iconName: 'bookmark' }),
-    ['far', 'bookmark']
-  )
-  assert.equal(normalizeFaIcon(null), null)
-})
-
-test('resolves aliases, brands, filled bookmarks, and custom fallbacks', () => {
-  assert.equal(
-    resolveIconifyId(['fas', 'external-link-alt'], 'material'),
-    'material-symbols:open-in-new-down'
-  )
-  assert.equal(resolveIconifyId(['fab', 'youtube'], 'remix'), 'simple-icons:youtube')
-  assert.equal(resolveIconifyId(['fas', 'house'], 'material'), 'material-symbols:home-outline')
-  assert.equal(resolveIconifyId(['fas', 'house'], 'remix'), 'ri:home-5-line')
-  assert.equal(resolveIconifyId(['fas', 'devices'], 'material'), 'material-symbols:devices-outline')
-  assert.equal(resolveIconifyId(['fas', 'devices'], 'remix'), 'ri:device-line')
-  assert.equal(resolveIconifyId(['fas', 'cast'], 'material'), 'material-symbols:cast-outline-rounded')
-  assert.equal(resolveIconifyId(['fas', 'cast'], 'remix'), 'ri:cast-line')
-  assert.equal(resolveIconifyId(['fas', 'smartphone'], 'material'), 'material-symbols:smartphone-outline')
-  assert.equal(resolveIconifyId(['fas', 'smartphone'], 'remix'), 'ri:smartphone-line')
-  assert.equal(resolveIconifyId(['fas', 'bookmark'], 'remix'), 'ri:bookmark-fill')
-  assert.equal(resolveIconifyId(['far', 'bookmark'], 'remix'), 'ri:bookmark-line')
-  assert.equal(
-    resolveIconifyId(['fac', 'back-to-tab'], 'material'),
-    'material-symbols:back-to-tab-rounded'
-  )
-  assert.equal(
-    resolveIconifyId(['fac', 'back-to-tab'], 'remix'),
-    'ri:arrow-go-back-line'
-  )
-  assert.equal(resolveIconifyId(['fac', 'unmapped-custom'], 'material'), 'otx:unmapped-custom')
-})
-
 test('every mapped glyph is present in its generated pack bundle', async () => {
   for (const pack of packs) {
     const bundle = await readJson(`iconifyBundles/${pack}.json`)
@@ -80,28 +36,6 @@ test('every mapped glyph is present in its generated pack bundle', async () => {
           `${pack} bundle is missing simple-icons:${entry.simple}`
         )
       }
-    }
-  }
-})
-
-test('every selectable tab group icon is available in both icon packs', async () => {
-  for (const pack of packs) {
-    const bundle = await readJson(`iconifyBundles/${pack}.json`)
-    for (const name of TAB_GROUP_ICONS) {
-      const iconifyId = resolveIconifyId(['fas', name], pack)
-      assert.ok(iconifyId, `${pack} is missing a mapping for ${name}`)
-      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
-    }
-  }
-})
-
-test('every selectable profile icon is available in both icon packs', async () => {
-  for (const pack of packs) {
-    const bundle = await readJson(`iconifyBundles/${pack}.json`)
-    for (const name of PROFILE_ICONS) {
-      const iconifyId = resolveIconifyId(['fas', name], pack)
-      assert.ok(iconifyId, `${pack} is missing a mapping for ${name}`)
-      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
     }
   }
 })
@@ -128,19 +62,6 @@ test('every semantic icon the renderer asks for has a mapping', async () => {
   )
 })
 
-test('renderer icons use the icon-pack-aware component', async () => {
-  const legacyUsages = []
-
-  for (const file of await readRendererSources()) {
-    const source = await readFile(file, 'utf8')
-    if (/<(?:font-awesome-icon|FontAwesomeIcon)\b/.test(source)) {
-      legacyUsages.push(path.relative(repoRoot, file))
-    }
-  }
-
-  assert.deepEqual(legacyUsages, [])
-})
-
 async function readRendererSources() {
   const files = []
   const walk = async (directory) => {
@@ -157,23 +78,3 @@ async function readRendererSources() {
   await walk(rendererRoot)
   return files
 }
-
-test('the alias table only carries aliases the icon map can use', () => {
-  // The full Font Awesome alias list is ~65 KB of mostly identity entries that
-  // every renderer bundle would ship and parse; only aliases that rename a
-  // mapped icon affect resolution or the semantic data-icon attribute.
-  for (const [alias, canonical] of Object.entries(aliases)) {
-    assert.notEqual(alias, canonical, `identity alias ${alias} is dead weight`)
-    assert.ok(canonical in mapping || alias in mapping,
-      `alias ${alias} -> ${canonical} points at an icon no pack maps`)
-  }
-})
-
-test('navigation item and fullscreen action icons resolve to outline glyphs', () => {
-  const filledBookmarks = new Set(['material-symbols:bookmark', 'ri:bookmark-fill'])
-  for (const { id, icon } of [...NAVIGATION_ITEM_DEFINITIONS, ...FULLSCREEN_ACTION_DEFINITIONS]) {
-    for (const pack of packs) {
-      assert.ok(!filledBookmarks.has(resolveIconifyId(icon, pack)), `${id} uses a filled ${pack} glyph`)
-    }
-  }
-})

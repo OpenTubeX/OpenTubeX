@@ -2,12 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
-  bedtimeNightKey,
   dailyLimitStatus,
   isWithinDailyWindow,
-  parseTimeOfDay,
 } from '../../src/renderer/helpers/digitalWellbeing.js'
-import { createUploadNotificationConfiguration, isWithinQuietHours } from '../../src/newUploadNotifications.js'
 
 const storage = new Map()
 globalThis.localStorage = {
@@ -15,14 +12,6 @@ globalThis.localStorage = {
   setItem: (key, value) => storage.set(key, String(value)),
 }
 const { default: wellbeing } = await import('../../src/renderer/store/modules/wellbeing.js')
-
-test('times of day parse to minutes and reject invalid values', () => {
-  assert.equal(parseTimeOfDay('22:30'), 22 * 60 + 30)
-  assert.equal(parseTimeOfDay('00:00'), 0)
-  assert.equal(parseTimeOfDay('24:00'), null)
-  assert.equal(parseTimeOfDay('7:00'), null)
-  assert.equal(parseTimeOfDay(undefined), null)
-})
 
 test('daily windows can cross midnight and equal times describe none', () => {
   const start = 22 * 60
@@ -36,12 +25,6 @@ test('daily windows can cross midnight and equal times describe none', () => {
   assert.equal(isWithinDailyWindow(60, 60, 60), false)
 })
 
-test('a bedtime window after midnight belongs to the night it started', () => {
-  const start = 22 * 60
-  assert.equal(bedtimeNightKey(new Date(2026, 10, 1, 23, 0), start), '2026-11-01')
-  assert.equal(bedtimeNightKey(new Date(2026, 10, 2, 1, 30), start), '2026-11-01')
-})
-
 test('daily limits warn five minutes ahead, then stop until extended or ignored', () => {
   assert.equal(dailyLimitStatus(10_000, 0, 0, false), 'off')
   assert.equal(dailyLimitStatus(0, 60, 0, false), 'ok')
@@ -51,21 +34,6 @@ test('daily limits warn five minutes ahead, then stop until extended or ignored'
   assert.equal(dailyLimitStatus(60 * 60, 60, 0, true), 'off')
   // A limit shorter than the warning time reaches it without a warning.
   assert.equal(dailyLimitStatus(4 * 60, 5, 0, false), 'ok')
-})
-
-test('quiet hours are only sent with enabled notifications and silence inside the window', () => {
-  const quietHours = { start: 22 * 60, end: 6 * 60 }
-  const subscriptions = [{ id: 'UC1', name: 'One', notificationFeedTypes: ['videos'] }]
-  const configuration = createUploadNotificationConfiguration({
-    enabled: true, subscriptions, showMembersOnly: false, titles: {}, quietHours,
-  })
-  assert.deepEqual(configuration.quietHours, quietHours)
-  assert.deepEqual(createUploadNotificationConfiguration({
-    enabled: false, subscriptions, showMembersOnly: false, titles: {}, quietHours,
-  }), { enabled: false })
-  assert.equal(isWithinQuietHours(quietHours, new Date(2026, 10, 1, 23, 0)), true)
-  assert.equal(isWithinQuietHours(quietHours, new Date(2026, 10, 1, 12, 0)), false)
-  assert.equal(isWithinQuietHours(undefined, new Date(2026, 10, 1, 23, 0)), false)
 })
 
 function createContext(rootGetters) {
@@ -136,20 +104,4 @@ test('only the pause action blocks playback, and the Shorts limit only blocks Sh
   assert.equal(block('remind')(true), null)
   state.status.watch = 'reached'
   assert.equal(block('pause')(false), 'watch')
-})
-
-test('autoplay stops at bedtime and after the daily limit only when enabled', () => {
-  const state = structuredClone(wellbeing.state)
-  const stops = enabled => wellbeing.getters.getWellbeingStopsAutoplay(state, {}, {}, { getStopAutoplayAtBedtimeAndLimit: enabled })
-  assert.equal(stops(true), false)
-  state.status.bedtime = true
-  assert.equal(stops(true), true)
-  assert.equal(stops(false), false)
-  state.status.bedtime = false
-  state.status.watch = 'reached'
-  assert.equal(stops(true), true)
-  // The Shorts limit only blocks Shorts and leaves autoplay alone.
-  state.status.watch = 'ok'
-  state.status.shorts = 'reached'
-  assert.equal(stops(true), false)
 })

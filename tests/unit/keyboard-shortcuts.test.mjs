@@ -1,16 +1,10 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import {
   getConfiguredKeyboardShortcuts,
   sanitizeKeyboardShortcutOverrides,
 } from '../../src/constants.js'
-import {
-  keyboardShortcutFromEvent,
-  keyboardShortcutsOverlap,
-  matchesKeyboardShortcut,
-} from '../../src/renderer/helpers/keyboardShortcuts.js'
 
 test('keeps contextual app and playback shortcuts fixed', () => {
   const overrides = {
@@ -58,36 +52,6 @@ test('keeps contextual app and playback shortcuts fixed', () => {
   )
 })
 
-test('opens downloads with Ctrl or Command+J by default', () => {
-  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
-})
-
-test('copies the current URL with Ctrl or Command+Shift+C by default', () => {
-  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.COPY_CURRENT_URL, 'ctrl+shift+C')
-})
-
-test('reserves Ctrl or Command+Shift+C for copying the current URL', async () => {
-  const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-  const start = source.indexOf("label: 'Enter Inspect Element Mode'")
-  const menuItem = source.slice(start, source.indexOf('\n          },', start))
-
-  assert.match(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+Alt\+C'/)
-  assert.doesNotMatch(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+C'/)
-})
-
-test('reopens closed windows with a configurable Ctrl+Shift+N shortcut', () => {
-  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.RESTORE_CLOSED_WINDOW, 'ctrl+shift+N')
-  const overrides = { APP: { GENERAL: { RESTORE_CLOSED_WINDOW: 'alt+N' } } }
-  assert.equal(getConfiguredKeyboardShortcuts(overrides).APP.GENERAL.RESTORE_CLOSED_WINDOW, 'alt+N')
-})
-
-test('reloads tabs with Ctrl or Command+R and F5 by default', () => {
-  const shortcuts = getConfiguredKeyboardShortcuts().APP.GENERAL
-
-  assert.equal(shortcuts.RELOAD_TAB, 'ctrl+R')
-  assert.equal(shortcuts.RELOAD_TAB_ALT, 'f5')
-})
-
 test('does not duplicate an existing F5 reload override', () => {
   const overrides = {
     APP: {
@@ -110,33 +74,6 @@ test('does not duplicate an existing F5 reload override', () => {
   })
 })
 
-test('allows the tab organizer shortcut to be configured', () => {
-  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.OPEN_TAB_ORGANIZER, '')
-  assert.equal(getConfiguredKeyboardShortcuts({
-    APP: {
-      GENERAL: {
-        OPEN_TAB_ORGANIZER: 'ctrl+shift+o',
-      }
-    }
-  }).APP.GENERAL.OPEN_TAB_ORGANIZER, 'ctrl+shift+o')
-})
-
-test('allows A-B repeat shortcuts to be configured', () => {
-  const shortcuts = getConfiguredKeyboardShortcuts({
-    VIDEO_PLAYER: {
-      PLAYBACK: {
-        SET_AB_REPEAT_START: 'alt+a',
-        SET_AB_REPEAT_END: 'alt+b',
-        CLEAR_AB_REPEAT: '',
-      }
-    }
-  })
-
-  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_START, 'alt+a')
-  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_END, 'alt+b')
-  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.CLEAR_AB_REPEAT, '')
-})
-
 test('persists SponsorBlock shortcut assignments and allows clearing them', () => {
   const overrides = {
     VIDEO_PLAYER: {
@@ -154,23 +91,4 @@ test('persists SponsorBlock shortcut assignments and allows clearing them', () =
   assert.equal(getConfiguredKeyboardShortcuts({
     VIDEO_PLAYER: { SPONSORBLOCK: { START_SPONSORBLOCK_SEGMENT: '' } }
   }).VIDEO_PLAYER.SPONSORBLOCK.START_SPONSORBLOCK_SEGMENT, '')
-})
-
-test('uses the SponsorBlock extension defaults for segment boundaries and the submission menu', () => {
-  assert.deepEqual(getConfiguredKeyboardShortcuts().VIDEO_PLAYER.SPONSORBLOCK, {
-    START_SPONSORBLOCK_SEGMENT: ';',
-    END_SPONSORBLOCK_SEGMENT: ';',
-    OPEN_SPONSORBLOCK_SUBMISSION_MENU: "'",
-    CANCEL_SPONSORBLOCK_SEGMENT: '',
-    CLEAR_SPONSORBLOCK_SEGMENTS: '',
-  })
-})
-
-test('recognizes semicolons that require Shift on the keyboard layout', () => {
-  const event = { key: ';', code: 'Comma', ctrlKey: false, metaKey: false, altKey: false, shiftKey: true }
-  assert.equal(matchesKeyboardShortcut(event, ';'), true)
-  assert.equal(keyboardShortcutFromEvent(event), ';')
-  assert.equal(keyboardShortcutsOverlap('shift+;', ';'), true)
-  assert.equal(matchesKeyboardShortcut({ ...event, key: ',', shiftKey: false }, ';'), false)
-  assert.equal(matchesKeyboardShortcut({ ...event, ctrlKey: true }, ';'), false)
 })

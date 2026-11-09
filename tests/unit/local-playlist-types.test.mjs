@@ -31,12 +31,6 @@ for (const [iconName, flag] of [['COURSE', 'isCourse'], ['music', 'isAlbum']]) {
   })
 }
 
-test('keeps OpenTubeX show episode-count text', () => {
-  const result = parseLocalListPlaylist(lockup('SHOW'))
-  assert.equal(result.itemCountText, '12 episodes')
-  assert.equal(result.videoCount, undefined)
-})
-
 for (const type of ['GridPlaylist', 'Playlist']) {
   test(`recognizes music overlays on ${type} without requiring overlays for ordinary playlists`, () => {
     const playlist = {

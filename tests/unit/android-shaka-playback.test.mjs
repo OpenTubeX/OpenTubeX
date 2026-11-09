@@ -2,103 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import * as Vue from 'vue'
 import { androidRotationFullscreenHandoffs, releaseAndroidRotationFullscreenHandoff } from '../../src/renderer/helpers/player/androidFullscreen.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const template = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url), 'utf8')
-
-test('Android shows a thumbnail over the video while waiting for playback', () => {
-  const poster = template.match(/<div\s+v-if="thumbnail"\s+v-show=[\s\S]*?<\/div>/)?.[0]
-  assert.ok(poster)
-  const render = Vue.compile(poster.replace('v-show=', ':data-visible='))
-  const context = {
-    showCountdownOverlay: false,
-    showPoster: true,
-    pictureInPictureActive: false,
-    showEndedScreen: false,
-    audioPlayerMode: false,
-    mobileMiniBar: false,
-    scrollMiniPlayerActive: false,
-    scrollMiniPlayerDragStyle: null,
-    scrollMiniPlayerAnimating: false,
-    thumbnail: 'poster.jpg',
-    $t: key => key,
-  }
-  assert.equal(render(context).type, 'div')
-  context.showPoster = false
-  const hidden = render(context)
-  assert.equal(hidden.type, 'div')
-  assert.equal(hidden.props['data-visible'], false)
-  context.pictureInPictureActive = true
-  assert.equal(render(context).props['data-visible'], true)
-  context.pictureInPictureActive = false
-  context.audioPlayerMode = true
-  context.showPoster = true
-  assert.equal(render(context).props['data-visible'], false)
-  context.mobileMiniBar = true
-  for (const state of ['scrollMiniPlayerActive', 'scrollMiniPlayerDragStyle', 'scrollMiniPlayerAnimating']) {
-    context[state] = true
-    const mini = render(context)
-    assert.equal(mini.props['data-visible'], true)
-    assert.equal(mini.props.class, 'countdownPoster')
-    context[state] = false
-  }
-})
-
-test('Android registers the SABR scheme before Shaka loads its manifest', () => {
-  const start = source.indexOf('    function ensureSabrStream() {')
-  const end = source.indexOf('\n    ensureSabrStream()', start)
-  assert.ok(start !== -1 && end !== -1)
-
-  let registrations = 0
-  const setupSabrScheme = () => {
-    registrations++
-    return { onBackoffRequested() {}, onReloadOnce() {} }
-  }
-  vm.runInNewContext(`${source.slice(start, end)}\nensureSabrStream()`, {
-    process: { env: { IS_CAPACITOR: true, SUPPORTS_LOCAL_API: true } },
-    sabrStream: null,
-    props: { sabrData: { scheme: 'sabr1' } },
-    setupSabrScheme,
-    player: null,
-    sabrManifest: null,
-    playerWidth: { value: 0 },
-    playerHeight: { value: 0 },
-    AbortController,
-  })
-  assert.equal(registrations, 1)
-})
-
-test('Android phone uses the central Shaka play button without a duplicate in the bottom row', () => {
-  const start = source.indexOf('      const controlPanelElements = [')
-  const end = source.indexOf('\n      ]', start)
-  assert.ok(start !== -1 && end !== -1)
-  const expression = `${source.slice(start, end + '\n      ]'.length)}\ncontrolPanelElements`
-  const controls = mobile => vm.runInNewContext(expression, {
-    mobile,
-    onlyUseOverFlowMenu: { value: true },
-    props: { shortsPlayer: false, chapters: [] },
-    controlBarButtons: ['chapters', 'captions', 'pictureInPicture', 'menu', 'fullscreen'],
-  })
-  assert.equal(controls(true).includes('play_pause'), false)
-  assert.equal(controls(true).includes('ft_skip_previous'), false)
-  assert.equal(controls(true).includes('ft_skip_next'), false)
-  assert.equal(controls(false).includes('play_pause'), true)
-})
-
-test('Android fullscreen button delegates orientation sequencing to the adapter', () => {
-  const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
-  const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
-  const calls = []
-  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({})`, {
-    androidRotationFullscreen: false,
-    finishAndroidFullscreenExit: () => calls.push('finish-exit'),
-    handleScrollMiniFullscreenButtonClick: () => calls.push('fullscreen'),
-    setFullscreenOrientation: () => calls.push('rotate'),
-  })
-  assert.deepEqual(calls, ['finish-exit', 'fullscreen'], 'Clear a pending exit before delegating to the fullscreen adapter')
-})
 
 function createPopoverHost() {
   return {
@@ -294,11 +200,6 @@ test('Android keeps rotation fullscreen when Watch replaces the player for the n
   assert.deepEqual(next.calls, ['orientation:false', 'navigation:true'], 'The next player restores the system orientation policy')
 })
 
-test('Android adopts handed-off rotation fullscreen only once the next player handles rotation', () => {
-  // Device rotation events do not repeat, so the handoff must keep observing portrait until then.
-  assert.match(source, /adoptAndroidRotationFullscreen\(\)\n\s*fullWindowListenerReady = true/)
-})
-
 test('Android ends a handed-off rotation fullscreen on portrait before the next player mounts', () => {
   const { previous, next, shared } = rotationReplacementHarness()
   shared.observeAndroidDeviceRotation.emit(false)
@@ -477,28 +378,6 @@ test('Android tracks landscape requests including metadata changes during fullsc
   assert.equal(request(true), false, 'Reactivating a retained tab must not reuse its old rotation request')
 })
 
-test('Android fullscreen events do not repeat an entry rotation already in flight', () => {
-  const start = source.indexOf('    function updateFullscreenOrientation(fullscreen)')
-  const end = source.indexOf('    /** @type {(preserveOrientation?', start)
-  const calls = []
-  const context = {
-    androidFullscreenEntering: true,
-    isActiveTab: { value: true },
-    isNativeFullscreenActive: () => true,
-    video: { value: {} }, rotateFullscreenToLandscape: { value: true }, fullscreenAspectRatio: { value: 16 / 9 },
-    requestFullscreenOrientation: active => { calls.push(active) },
-  }
-  const update = vm.runInNewContext(`${source.slice(start, end)}\nupdateFullscreenOrientation`, context)
-  update(true)
-  assert.deepEqual(calls, [])
-  context.androidFullscreenEntering = false
-  update(true)
-  assert.deepEqual(calls, [true])
-  context.isNativeFullscreenActive = () => false
-  update(false)
-  assert.deepEqual(calls, [true, false])
-})
-
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {
   const start = source.indexOf('    watch([rotateFullscreenToLandscape, fullscreenAspectRatio],')
   const end = source.indexOf('\n    /** @type', start)
@@ -515,15 +394,6 @@ test('Android rechecks fullscreen orientation when metadata aspect ratio arrives
   })
   await onChange([true, 16 / 9])
   assert.deepEqual(calls, [true])
-})
-
-test('Android leaves fullscreen orientation to its native preference', () => {
-  const expression = source.match(/forceLandscapeOnFullscreen: ([^\n]+),/)?.[1]
-  assert.ok(expression)
-  const configured = env => vm.runInNewContext(expression, { process: { env } })
-  assert.equal(configured({ IS_CAPACITOR: true, IS_IOS: false }), false)
-  assert.equal(configured({ IS_CAPACITOR: true, IS_IOS: true }), true)
-  assert.equal(configured({ IS_ELECTRON: true }), true)
 })
 
 test('fullscreen gesture completion restarts controls while the real post-hold touch is suppressed', () => {

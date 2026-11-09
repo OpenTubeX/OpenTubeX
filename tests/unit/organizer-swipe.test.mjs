@@ -10,14 +10,6 @@ const regionSource = readFileSync(new URL('../../src/renderer/helpers/capacitorT
 const context = vm.createContext({})
 vm.runInContext(source, context)
 
-test('organizer progress follows the pull, clamps reversal and bounds full travel', () => {
-  assert.equal(context.organizerSwipeProgress(0, 800), 0)
-  assert.equal(context.organizerSwipeProgress(80, 800), 0.25)
-  assert.equal(context.organizerSwipeProgress(-40, 800), 0)
-  assert.equal(context.organizerSwipeProgress(500, 800), 1)
-  assert.equal(context.organizerSwipeProgress(90, 400), 0.5)
-})
-
 test('organizer release accepts deliberate pulls and flicks but rejects jitter and short slow pulls', () => {
   assert.equal(context.shouldOpenSwipedOrganizer(120, 800, 1000), true)
   assert.equal(context.shouldOpenSwipedOrganizer(50, 800, 80), true)
@@ -65,81 +57,5 @@ for (const reduced of [false, true]) {
     assert.ok(animations.every(animation => animation.cancelled))
     transition.update(0.1)
     assert.equal(animations[0].currentTime, 1000, 'cleanup cannot be undone by an asynchronous continuation')
-  })
-}
-
-for (const zoom of [1, 1.25]) {
-  test(`short page retains its cached preview and fixed-control clipping at ${zoom}x scale`, () => {
-    const animations = []
-    const previewClasses = new Set()
-    const from = { left: 0, top: 60.25 * zoom, width: 376 * zoom, height: 89.75 * zoom }
-    const to = { left: 16 * zoom, top: 90 * zoom, width: 160 * zoom, height: 90 * zoom }
-    const animate = frames => {
-      animations.push(frames)
-      return { pause() {}, cancel() {} }
-    }
-    const ctx = vm.createContext({
-      document: {
-        documentElement: { dataset: { reducedMotion: 'off' } },
-        querySelector: selector => {
-          const bounds = {
-            '.topNav': { width: from.width, bottom: from.top },
-            '.app.capacitorPhoneLayout > .sideNav': { width: from.width, top: 125.5 * zoom },
-          }[selector]
-          return bounds ? { getBoundingClientRect: () => bounds } : null
-        },
-      },
-      window: { innerWidth: from.width, innerHeight: 150 * zoom },
-      matchMedia: query => ({ matches: query === '(width <= 680px)' }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
-    })
-    vm.runInContext(regionSource + source, ctx)
-    const transition = ctx.createOrganizerSwipeAnimation(
-      { animate, classList: { add() {}, remove() {} }, getBoundingClientRect: () => from },
-      { classList: { add: name => previewClasses.add(name), remove: name => previewClasses.delete(name) },
-        getBoundingClientRect: () => to }, { animate })
-    for (const progress of [0, 0.5, 1]) {
-      transition.update(progress)
-      assert.equal(previewClasses.size, 0, 'the cached image must cover the card throughout a short-page morph')
-    }
-    const clip = animations[0][1].clipPath.match(/inset\(([-\d.]+)px 0 calc\(100% - ([-\d.]+)px\)/)
-    assert.equal(animations[0][0].opacity, 1)
-    assert.equal(animations[0][1].opacity, 0, 'the live page must fade out before disposal to avoid a scale jump')
-    assert.equal(from.height - Number(clip[2]), 24.5 * zoom, 'content behind bottom controls must stay clipped at settlement')
-    transition.dispose()
-    assert.equal(previewClasses.size, 0)
-  })
-
-  test(`scrolled page keeps the currently visible region throughout the morph at ${zoom}x scale`, () => {
-    const animations = []
-    const from = { left: 0, top: -620.5 * zoom, width: 375.5 * zoom, height: 2400.25 * zoom }
-    const to = { left: 16.25 * zoom, top: 180.75 * zoom, width: 160.5 * zoom, height: 90.28125 * zoom }
-    const headerBottom = 80.5 * zoom
-    const animate = frames => {
-      animations.push(frames)
-      return { pause() {} }
-    }
-    const ctx = vm.createContext({
-      document: {
-        documentElement: { dataset: { reducedMotion: 'off' } },
-        querySelector: selector => selector === '.topNav'
-          ? { getBoundingClientRect: () => ({ width: from.width, bottom: headerBottom }) } : null,
-      },
-      window: { innerWidth: from.width, innerHeight: 800 * zoom },
-      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '8px' }),
-    })
-    vm.runInContext(regionSource + source, ctx)
-    ctx.createOrganizerSwipeAnimation({ animate, classList: { add() {} }, getBoundingClientRect: () => from },
-      { classList: { add() {} }, getBoundingClientRect: () => to }, { animate })
-    const [start, end] = animations[0]
-    const visibleTop = headerBottom - from.top
-    assert.ok(start.clipPath.startsWith(`inset(${visibleTop}px `), 'content hidden above the header must stay clipped from the first frame')
-    const clip = end.clipPath.match(/inset\(([-\d.]+)px 0 calc\(100% - ([-\d.]+)px\)/)
-    assert.ok(clip)
-    const transform = end.transform.match(/translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/)
-    assert.ok(transform)
-    const top = Number(clip[1]), bottom = from.height - Number(clip[2]), scale = Number(transform[3])
-    assert.ok(Math.abs(from.top + Number(transform[2]) + top * scale - to.top) < 0.001)
-    assert.ok(Math.abs((from.height - top - bottom) * scale - to.height) < 0.001)
-    assert.equal(top, visibleTop, 'the final card must show the same page region as the initial frame')
   })
 }

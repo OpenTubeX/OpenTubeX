@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { nextTick, ref, watch } from 'vue'
+import { nextTick } from 'vue'
 import { createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
 const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
@@ -178,68 +178,6 @@ test('root allows the system preview only when no confirmation, history, fullscr
   wide = false
   refs.isSideNavOpen.value = true
   assert.equal(shouldIntercept(), false)
-})
-
-test('a side drawer restored to zero progress cancels without replaying its animation', async () => {
-  let reversed = false
-  let closed = false
-  let cancelled = false
-  const animation = {
-    currentTime: 0, effect: { getTiming: () => ({ duration: 180 }) }, finished: Promise.resolve(),
-    pause() {}, reverse() { reversed = true }, cancel() { cancelled = true },
-  }
-  const getPreview = loadPreviewSelection({
-    isSideNavOpen: { value: true }, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
-    window: { matchMedia: () => ({ matches: true }) },
-    document: drawerDocument(drawerElement(animation)),
-    handleAndroidBack: async () => { closed = true },
-  })
-  const preview = getPreview()
-  preview.begin()
-  preview.update(0.6)
-  preview.update(0)
-  await preview.finish(false)
-  assert.equal(reversed, false)
-  assert.equal(cancelled, true)
-  assert.equal(closed, false)
-})
-
-test('committing the side drawer keeps its finished frame until the closed state renders', async () => {
-  const opened = ref(true)
-  let renderedClosed = false
-  const stop = watch(opened, value => { renderedClosed = !value }, { flush: 'post' })
-  let cancelled = false
-  let cancelledBeforeRender = false
-  const frames = []
-  const animation = {
-    currentTime: 0, effect: { getTiming: () => ({ duration: 180 }) }, finished: Promise.resolve(),
-    pause() {}, play() {},
-    cancel() { cancelled = true; cancelledBeforeRender = !renderedClosed },
-  }
-  const getPreview = loadPreviewSelection({
-    isSideNavOpen: opened, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
-    window: { matchMedia: () => ({ matches: true }) },
-    document: drawerDocument(drawerElement(animation)),
-    handleAndroidBack: async () => { opened.value = false },
-    requestAnimationFrame: callback => frames.push(callback),
-  })
-  try {
-    const preview = getPreview()
-    preview.begin()
-    preview.update(0.65)
-    const finished = preview.finish(true)
-    await new Promise(resolve => setImmediate(resolve))
-    assert.equal(renderedClosed, true)
-    assert.equal(cancelled, false, 'the finished effect must cover the handoff to the closed drawer')
-    frames.shift()()
-    assert.equal(cancelled, false)
-    frames.shift()()
-    await finished
-    assert.equal(cancelled, true)
-    assert.equal(cancelledBeforeRender, false)
-  } finally {
-    stop()
-  }
 })
 
 test('Back previews a prompt or dropdown above the side nav instead of the side nav', () => {

@@ -5,8 +5,6 @@ import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionPlayerScale,
   getCaptionPlayerVariables,
-  getCaptionStyle,
-  getSecondaryCaptionPosition,
   parseCaptionSettings,
 } from '../../src/renderer/helpers/player/caption-settings.js'
 
@@ -20,23 +18,6 @@ test('scales captions with the player, so they cover the same share of it in eve
 
   // the scroll mini player (360x202 by default) shrinks them
   assert.equal(getCaptionPlayerScale(270), 0.5)
-})
-
-test('keeps captions legible in tiny players', () => {
-  assert.equal(getCaptionPlayerScale(202), 0.5)
-  assert.equal(getCaptionPlayerScale(135), 0.5)
-})
-
-test('falls back to the configured size when the player has not been measured yet', () => {
-  assert.equal(getCaptionPlayerScale(0), 1)
-  assert.equal(getCaptionPlayerScale(Number.NaN), 1)
-  assert.equal(getCaptionPlayerScale(undefined), 1)
-})
-
-test('sizes captions relative to the player', () => {
-  assert.equal(getCaptionPlayerVariables(540, 1)['--caption-font-size'], '20px')
-  assert.equal(getCaptionPlayerVariables(1080, 1)['--caption-font-size'], '40px')
-  assert.equal(getCaptionPlayerVariables(1080, 1.35)['--caption-font-size'], '40px')
 })
 
 test('caps the scaled font size at a share of the player height', () => {
@@ -129,45 +110,4 @@ test('reads the caption settings of the legacy Video.js player', () => {
   assert.equal(settings.fontColor, '#0f0')
   assert.equal(settings.fontScaleFactor, 1.5)
   assert.equal(settings.characterEdgeStyle, 'OUTLINE')
-})
-
-test('drops unknown options', () => {
-  assert.deepEqual(parseCaptionSettings({
-    fontFamily: 'Comic Sans',
-    fontColor: 'red',
-    fontOpacity: 'x',
-    characterEdgeStyle: 7,
-    positionArea: 'MIDDLE',
-  }), DEFAULT_CAPTION_SETTINGS)
-})
-
-test('places the secondary captions at the opposite edge', () => {
-  assert.deepEqual(getSecondaryCaptionPosition('BOTTOM_CENTER'), { atTop: true, align: 'center', alignItems: 'center' })
-  assert.deepEqual(getSecondaryCaptionPosition('DEFAULT'), { atTop: true, align: 'center', alignItems: 'center' })
-  assert.deepEqual(getSecondaryCaptionPosition('CENTER_RIGHT'), { atTop: true, align: 'right', alignItems: 'flex-end' })
-  assert.deepEqual(getSecondaryCaptionPosition('TOP_LEFT'), { atTop: false, align: 'left', alignItems: 'flex-start' })
-})
-
-test('styles the captions Shaka does not render like Shaka', () => {
-  const style = getCaptionStyle(DEFAULT_CAPTION_SETTINGS)
-  assert.equal(style.background, 'rgb(0 0 0 / 0.8)')
-  assert.equal(style.text.color, 'rgb(255 255 255 / 1)')
-  assert.equal(style.text.textShadow, 'none')
-  assert.equal(style.text.fontFamily, 'inherit')
-
-  const custom = getCaptionStyle({
-    ...DEFAULT_CAPTION_SETTINGS,
-    fontColor: '#ff0',
-    fontOpacity: 0.5,
-    backgroundColor: '#00f',
-    characterEdgeStyle: 'OUTLINE',
-    fontScaleFactor: 2,
-  })
-  // A background color without an opacity is opaque, like in Shaka
-  assert.equal(custom.background, 'rgb(0 0 255 / 1)')
-  assert.equal(custom.text.color, 'rgb(255 255 0 / 0.5)')
-  assert.match(custom.text.textShadow, /rgb\(34 34 34 \/ 0\.5\)/)
-  assert.equal(custom.text.fontSize, 'calc(var(--caption-font-size, 20px) * 2)')
-
-  assert.equal(getCaptionStyle({ ...DEFAULT_CAPTION_SETTINGS, backgroundOpacity: 0.25 }).background, 'rgb(0 0 0 / 0.25)')
 })

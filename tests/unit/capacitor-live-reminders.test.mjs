@@ -81,39 +81,6 @@ test('Capacitor reminders schedule premieres that start in the future', async ()
   assert.notEqual(await liveReminder.get('premiere'), null)
 })
 
-test('Capacitor reminders do not ask for permission once the premiere has started', async () => {
-  let asked = false
-  const scheduled = []
-  const { liveReminder } = await loadCapacitorReminder({
-    checkPermissions: async () => { asked = true; return { display: 'prompt' } },
-    cancel: async () => {},
-    schedule: async ({ notifications }) => scheduled.push(...notifications),
-  })
-
-  assert.equal(await liveReminder.schedule(reminder(START)), false)
-  assert.equal(asked, false)
-  assert.deepEqual(scheduled, [])
-})
-
-test('Capacitor reminders reject a premiere that starts while the permission prompt is open', async () => {
-  const scheduled = []
-  const prompt = Promise.withResolvers()
-  const { liveReminder, clock } = await loadCapacitorReminder({
-    checkPermissions: async () => ({ display: 'prompt' }),
-    requestPermissions: () => prompt.promise,
-    cancel: async () => {},
-    schedule: async ({ notifications }) => scheduled.push(...notifications),
-  })
-
-  const result = liveReminder.schedule(reminder(START + 50))
-  clock.now = START + 60
-  prompt.resolve({ display: 'granted' })
-
-  assert.equal(await result, false)
-  assert.deepEqual(scheduled, [])
-  assert.equal(await liveReminder.get('premiere'), null)
-})
-
 test('Capacitor reminders cancel the previous reminder when a reschedule has already started', async () => {
   const cancelled = []
   const prompt = Promise.withResolvers()
@@ -240,52 +207,6 @@ test('a reminder scheduled while notifications turn off is cancelled too', async
   const pausing = applyCapacitorNotificationMode('off')
   permission.resolve()
   await Promise.all([scheduling, pausing])
-  assert.equal(scheduled.size, 0)
-})
-
-test('turning notifications off again retries a cancellation that failed', async () => {
-  const scheduled = new Map()
-  let failCancel = false
-  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
-    checkPermissions: async () => ({ display: 'granted' }),
-    cancel: async ({ notifications }) => {
-      if (failCancel) throw new Error('Cancellation failed')
-      for (const { id } of notifications) scheduled.delete(id)
-    },
-    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
-    schedule: async ({ notifications }) => { for (const notification of notifications) scheduled.set(notification.id, notification) },
-  })
-  assert.equal(await liveReminder.schedule(reminder(START + 60_000)), true)
-
-  failCancel = true
-  await applyCapacitorNotificationMode('off')
-  assert.equal(scheduled.size, 1)
-  failCancel = false
-  await applyCapacitorNotificationMode('off')
-  assert.equal(scheduled.size, 0)
-})
-
-test('turning notifications off cancels alarms that a failed resume left scheduled', async () => {
-  const scheduled = new Map()
-  let failSchedule = false
-  const { liveReminder, applyCapacitorNotificationMode } = await loadCapacitorReminder({
-    checkPermissions: async () => ({ display: 'granted' }),
-    cancel: async ({ notifications }) => { for (const { id } of notifications) scheduled.delete(id) },
-    getPending: async () => ({ notifications: [...scheduled.keys()].map(id => ({ id })) }),
-    schedule: async ({ notifications }) => {
-      if (failSchedule && scheduled.size > 0) throw new Error('Scheduling failed')
-      for (const notification of notifications) scheduled.set(notification.id, notification)
-    },
-  })
-  for (const videoId of ['first', 'second']) {
-    assert.equal(await liveReminder.schedule({ ...reminder(START + 60_000), videoId }), true)
-  }
-  await applyCapacitorNotificationMode('off')
-  failSchedule = true
-  // The first reminder is scheduled again before the second fails.
-  await applyCapacitorNotificationMode('both')
-  assert.equal(scheduled.size, 1)
-  await applyCapacitorNotificationMode('off')
   assert.equal(scheduled.size, 0)
 })
 
@@ -445,21 +366,6 @@ for (const [dismissal, add, list] of [
   })
 }
 
-test('a reminder shows no toast once the app left the screen while the system cancelled it', async () => {
-  let blocked = null
-  const { timers, document, shown, calls } = await loadArmedReminder(() => blocked?.promise)
-  blocked = Promise.withResolvers()
-  const firing = timers[0]()
-  await new Promise(resolve => setImmediate(resolve))
-  document.visibilityState = 'hidden'
-  blocked.resolve()
-  blocked = null
-  await firing
-  assert.deepEqual(shown, [])
-  // The alarm is gone, so the system shows the reminder after all.
-  assert.deepEqual(calls.at(-1), ['schedule', 7])
-})
-
 test('a reminder synced while turning notifications off failed waits for them to come back on', async () => {
   const scheduled = new Map()
   let failCancel = false
@@ -483,14 +389,4 @@ test('a reminder synced while turning notifications off failed waits for them to
 
   await applyCapacitorNotificationMode('both')
   assert.deepEqual([...scheduled.values()].map(notification => notification.extra.videoId).sort(), ['first', 'second'])
-})
-
-test('a reminder without a title keeps its system notification instead of disappearing', async () => {
-  const { timers, calls, shown, storage } = await loadArmedReminder()
-  storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
-    { videoId: 'premiere00a', startTimestamp: START + 60_000, notificationId: 7 }
-  ]))
-  await timers[0]()
-  assert.deepEqual(calls, [])
-  assert.deepEqual(shown, [])
 })

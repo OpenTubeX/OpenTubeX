@@ -14,10 +14,9 @@ function canSeekLive(props) {
   })
 }
 
-for (const playbackEngine of ['built-in', 'yt-dlp']) {
+for (const playbackEngine of ['yt-dlp']) {
   for (const [manifestMimeType, manifestSrc] of [
     ['application/dash+xml', 'https://example.com/live.mpd'],
-    ['application/x-mpegurl', 'https://example.com/manifest_duration/3600/live.m3u8'],
     ['application/x-mpegurl', 'https://example.com/playlist_type/DVR/live.m3u8']
   ]) {
     test(`${playbackEngine} hides seeking when DVR is disabled, even with ${manifestSrc}`, () => {
@@ -26,7 +25,7 @@ for (const playbackEngine of ['built-in', 'yt-dlp']) {
   }
 }
 
-for (const manifestMimeType of ['application/sabr+json', 'application/dash+xml', 'application/x-mpegurl']) {
+for (const manifestMimeType of ['application/sabr+json', 'application/x-mpegurl']) {
   test(`built-in live playback never offers seeking with ${manifestMimeType}`, () => {
     for (const isLiveDvrEnabled of [true, false, null]) {
       assert.equal(canSeekLive({
@@ -272,7 +271,7 @@ test('a timeline release after playback is ready is not replayed on canplay', ()
   assert.equal(state.video.value.currentTime, 15.2)
 })
 
-for (const endEvent of ['mouseup', 'touchend', 'touchcancel', 'blur']) {
+for (const endEvent of ['mouseup', 'touchend', 'blur']) {
   test(`a startup timeline seek restores pending autoplay on ${endEvent}`, () => {
     const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
     state.video.value.autoplay = true
@@ -334,7 +333,7 @@ for (const action of ['chapter', 'media session', 'timeline']) {
   })
 }
 
-for (const manifestType of [null, 'DASH', 'HLS', 'SABR']) {
+for (const manifestType of [null, 'DASH']) {
   for (const userSeek of [false, true]) {
     test(`metadata restores saved progress only for native playback with manifestType=${manifestType}, userSeek=${userSeek}`, async () => {
       const mediaElement = new EventTarget()

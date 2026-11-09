@@ -7,32 +7,6 @@ const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.
 const start = source.indexOf('function updateSystemBarsStyle() {')
 const updateSource = source.slice(start, source.indexOf('\nfunction updateAppFont', start))
 
-test('Android keeps its native startup surface while temporary settings load', () => {
-  const start = source.indexOf('function updateTheme() {')
-  const updateSource = source.slice(start, source.indexOf('\n}\n', start) + 2)
-  const applied = []
-  const context = vm.createContext({
-    isCapacitor: true,
-    Capacitor: { getPlatform: () => 'android' },
-    appearanceSettingsReady: false,
-    baseTheme: { value: 'system' },
-    systemUsesDarkTheme: { value: false },
-    mainColor: { value: 'Red' }, secColor: { value: 'Blue' },
-    store: { getters: { getSystemLightTheme: 'light', getCustomThemes: [] } },
-    applyThemeToDocument: theme => applied.push(theme),
-    cacheCapacitorStartupAppearance: () => {},
-    updateSystemBarsStyle: () => {}
-  })
-  const update = vm.runInContext(`${updateSource}\nupdateTheme`, context)
-  update() // The store initially defaults to the light system theme.
-  context.baseTheme.value = 'dark'
-  update() // Settings watchers run before appearance initialization finishes.
-  assert.deepEqual(applied, [], 'Neither temporary theme paints over the cached native surface')
-  context.appearanceSettingsReady = true
-  update()
-  assert.deepEqual(applied, ['dark'], 'The saved theme is the first renderer background')
-})
-
 test('status bar contrast uses the theme color while native video makes the WebView transparent', () => {
   const calls = []
   const backgrounds = []

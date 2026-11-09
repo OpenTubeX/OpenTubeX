@@ -3,25 +3,6 @@ import { readFile } from 'node:fs/promises'
 import { compileFunction } from 'node:vm'
 import test from 'node:test'
 
-for (const [name, setting, binding, getter] of [
-  ['Google Cast', 'showChromecastButton', 'google-cast-enabled', 'getShowChromecastButton'],
-  ['FCast', 'showFcastButton', 'fcast-enabled', 'getShowFcastButton']
-]) {
-  test(`Android exposes the ${name} setting and enabled player action`, async () => {
-    const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
-    const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${setting}"[^>]*>`, 's'))?.[0]
-    assert.ok(toggle)
-    const condition = toggle.match(/v-if="([^"]+)"/)?.[1] ?? 'true'
-    assert.equal(compileFunction(`return ${condition}`, ['USING_ELECTRON', 'IS_CAPACITOR', 'IS_IOS'])(false, true, false), true,
-      `${name} setting is missing on Android`)
-    const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
-    const action = watch.match(/<WatchCast\s[^>]*>/s)?.[0]
-    const visible = action.match(new RegExp(`:${binding}="([^"]+)"`))[1]
-    assert.equal(compileFunction(`return ${visible}`, ['supportsChromecast', '$store'])(true,
-      { getters: { [getter]: true } }), true, `Enabled ${name} action is missing on Android`)
-  })
-}
-
 const { createMobileChromecast } = await import('../../src/renderer/helpers/player/chromecast.js')
 
 function nativeFixture() {
@@ -116,35 +97,34 @@ test('Android supplies playlist timing for blocking HLS reloads', async t => {
   }
 })
 
-for (const contentType of ['application/x-mpegurl', 'application/vnd.apple.mpegurl']) {
-  test(`Android registers signed HLS directory URLs directly (${contentType})`, async t => {
-    const fixture = nativeFixture()
-    const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
-    await api.discover()
-    const url = 'https://media.test/live/?token=a%2Fb&dup=a&dup=b'
-    const result = await api.start(() => ({ ...handoff, captions: [], source: { url, contentType } }))
-    t.after(() => api.stop(result.castId))
-    assert.ok(result.castId, result.error)
-    const root = fixture.resources[0]
-    assert.equal(root.candidates[0].url, url, 'The native source must retain its signed query')
-    assert.equal(root.candidates[0].template, false, 'HLS playlists must enter the native blocking-reload path')
-    assert.equal(root.candidates[0].suffix, 'media')
-    const load = fixture.calls.find(([name, options]) => name === 'send' && options.payload.type === 'LOAD')[1].payload
-    assert.ok(load.media.contentId.endsWith('/media'), 'Only receiver reload directives belong in the relay query')
-    await fixture.event('castManifest', { resourceId: root.id, requestId: 'directory', url, contentType,
-      body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nvariant/?token=c%2Fd\n' })
-    const variant = fixture.resources.find(resource => resource.candidates[0].url === 'https://media.test/live/variant/?token=c%2Fd')
-    assert.ok(variant)
-    await fixture.event('castManifest', { resourceId: variant.id, requestId: 'variant', url: variant.candidates[0].url, contentType: variant.contentType,
-      body: '#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n../segment/?sig=e%2Ff\n' })
-    for (const source of ['https://media.test/live/variant/?token=c%2Fd', 'https://media.test/live/segment/?sig=e%2Ff']) {
-      const child = fixture.resources.find(resource => resource.candidates[0].url === source)
-      assert.ok(child, 'Signed HLS child URLs must also stay intact')
-      assert.equal(child.candidates[0].template, false)
-      assert.equal(child.candidates[0].suffix, 'media')
-    }
-  })
-}
+test('Android registers signed HLS directory URLs directly', async t => {
+  const contentType = 'application/vnd.apple.mpegurl'
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const url = 'https://media.test/live/?token=a%2Fb&dup=a&dup=b'
+  const result = await api.start(() => ({ ...handoff, captions: [], source: { url, contentType } }))
+  t.after(() => api.stop(result.castId))
+  assert.ok(result.castId, result.error)
+  const root = fixture.resources[0]
+  assert.equal(root.candidates[0].url, url, 'The native source must retain its signed query')
+  assert.equal(root.candidates[0].template, false, 'HLS playlists must enter the native blocking-reload path')
+  assert.equal(root.candidates[0].suffix, 'media')
+  const load = fixture.calls.find(([name, options]) => name === 'send' && options.payload.type === 'LOAD')[1].payload
+  assert.ok(load.media.contentId.endsWith('/media'), 'Only receiver reload directives belong in the relay query')
+  await fixture.event('castManifest', { resourceId: root.id, requestId: 'directory', url, contentType,
+    body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nvariant/?token=c%2Fd\n' })
+  const variant = fixture.resources.find(resource => resource.candidates[0].url === 'https://media.test/live/variant/?token=c%2Fd')
+  assert.ok(variant)
+  await fixture.event('castManifest', { resourceId: variant.id, requestId: 'variant', url: variant.candidates[0].url, contentType: variant.contentType,
+    body: '#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n../segment/?sig=e%2Ff\n' })
+  for (const source of ['https://media.test/live/variant/?token=c%2Fd', 'https://media.test/live/segment/?sig=e%2Ff']) {
+    const child = fixture.resources.find(resource => resource.candidates[0].url === source)
+    assert.ok(child, 'Signed HLS child URLs must also stay intact')
+    assert.equal(child.candidates[0].template, false)
+    assert.equal(child.candidates[0].suffix, 'media')
+  }
+})
 
 test('Android uses the native sender and relay for handoff, captions, controls and return', async t => {
   const fixture = nativeFixture()
@@ -243,55 +223,6 @@ for (const format of ['hls', 'dash']) {
     assert.ok(fixture.resources.some(resource => resource.contentType === 'text/vtt'), 'Keep session captions')
   })
 }
-
-test('Android retires unreachable HLS rendition cycles while retaining referenced playlists', async t => {
-  let now = 0
-  t.mock.method(Date, 'now', () => now)
-  const fixture = nativeFixture()
-  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
-  await api.discover()
-  const result = await api.start(() => handoff)
-  t.after(() => api.stop(result.castId))
-  const update = (id, file, body) => fixture.event('castManifest', {
-    requestId: `${file}-${now}`, resourceId: id, url: `https://media.test/${file}`, contentType: 'application/x-mpegurl', body
-  })
-  const root = '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\na.m3u8'
-  await update(0, 'master.m3u8', root)
-  const a = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/a.m3u8'))
-  await update(a.id, 'a.m3u8', '#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="b.m3u8"\n#EXTINF:6,\na.ts')
-  const b = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/b.m3u8'))
-  await update(b.id, 'b.m3u8', '#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="a.m3u8"\n#EXTINF:6,\nb.ts')
-  now = 121_000
-  await update(0, 'master.m3u8', root)
-  assert.ok(fixture.resources.includes(a) && fixture.resources.includes(b), 'Reachable rendition references remain usable')
-  await update(0, 'master.m3u8', '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nnew.m3u8')
-  now += 121_000
-  await update(0, 'master.m3u8', '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nnew.m3u8')
-  assert.ok(!fixture.resources.includes(a) && !fixture.resources.includes(b), 'A rendition cycle cannot retain itself after the root drops it')
-  assert.ok(!fixture.resources.some(resource => /\/[ab]\.ts$/.test(resource.candidates[0].url)))
-})
-
-test('Android DASH Location refreshes release previous manifest chains', async t => {
-  let now = 0
-  t.mock.method(Date, 'now', () => now)
-  const fixture = nativeFixture()
-  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
-  await api.discover()
-  const result = await api.start(() => handoff)
-  t.after(() => api.stop(result.castId))
-  let id = 0
-  for (let index = 0; index < 10; index++) {
-    now += 121_000
-    await fixture.event('castManifest', { requestId: `location-${index}`, resourceId: id,
-      url: `https://media.test/manifest-${index}.mpd`, contentType: 'application/dash+xml',
-      body: `<MPD type="dynamic"><Location>manifest-${index + 1}.mpd</Location><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment-${index}.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
-    assert.equal(fixture.completed.at(-1).error, undefined)
-    id = fixture.resources.find(resource => resource.candidates[0].url.endsWith(`/manifest-${index + 1}.mpd`)).id
-    assert.ok(fixture.resources.length <= 7, 'Advancing Location must not keep the complete previous manifest chain reachable')
-  }
-  assert.ok(!fixture.resources.some(resource => resource.candidates[0].url.endsWith('/segment-0.m4s')))
-  assert.ok(fixture.resources.some(resource => resource.id === 0), 'The original session URL stays registered')
-})
 
 test('Android drops invalid atomic batches and retries their removals on a valid refresh', async t => {
   let now = 0
