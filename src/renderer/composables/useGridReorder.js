@@ -127,6 +127,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     })
     session.slots = slots
     session.linear = slots.every(slot => Math.abs(slot.left - slots[0].left) < 1)
+    list.classList.toggle('reorderGrid', !session.linear)
     session.gap = slots[1].top - slots[0].top - slots[0].height
     session.bounds = {
       left: Math.min(...slots.map(slot => slot.left)),
@@ -306,7 +307,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     document.removeEventListener('scroll', update, { capture: true })
     document.removeEventListener('keydown', cancelFromKeyboard, true)
     window.removeEventListener('blur', cancel)
-    active.list.classList.remove('reorderActive')
+    active.list.classList.remove('reorderActive', 'reorderGrid')
     active.item.classList.remove('reorderDragged', 'reorderDropping')
     active.items.forEach(element => { element.style.translate = '' })
   }

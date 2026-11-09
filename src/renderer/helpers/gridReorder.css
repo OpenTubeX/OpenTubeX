@@ -11,6 +11,14 @@
   transition: translate var(--motion-fast-spatial) !important;
 }
 
+/*
+  A spring would carry a card that wraps between rows past the grid's edge,
+  briefly widening the page and showing a horizontal scrollbar.
+*/
+.reorderActive.reorderGrid > * {
+  transition: translate var(--motion-slow-effects) !important;
+}
+
 .reorderActive > .reorderDragged {
   position: relative;
   z-index: 1;
