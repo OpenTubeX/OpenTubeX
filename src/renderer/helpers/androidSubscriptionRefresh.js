@@ -83,12 +83,12 @@ export function observeAndroidUploads(value) {
 }
 
 /**
- * Takes the upload notifications Android has shown since the last call.
- * @returns {Promise<{ feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[]>}
- */
-/**
  * Takes the upload notifications Android showed, and the ones the user opened
  * or dismissed, since the last call.
+ * @returns {Promise<{
+ *   notifications: { feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[],
+ *   dismissed: { feedType: string, id: string, live: boolean }[]
+ * }>}
  */
 export async function takeAndroidUploadNotifications() {
   if (!SubscriptionRefresh) return { notifications: [], dismissed: [] }
