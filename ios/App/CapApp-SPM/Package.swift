@@ -20,7 +20,7 @@ let package = Package(
         .package(name: "CapacitorDevice", path: "../../../node_modules/.pnpm/@capacitor+device@8.0.3_@capacitor+core@8.6.0/node_modules/@capacitor/device"),
         .package(name: "CapacitorFilesystem", path: "../../../node_modules/.pnpm/@capacitor+filesystem@8.1.5_@capacitor+core@8.6.0/node_modules/@capacitor/filesystem"),
         .package(name: "CapacitorHaptics", path: "../../../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.6.0/node_modules/@capacitor/haptics"),
-        .package(name: "CapacitorLocalNotifications", path: "../../../node_modules/.pnpm/@capacitor+local-notifications@8.3.1_@capacitor+core@8.6.0/node_modules/@capacitor/local-notifications"),
+        .package(name: "CapacitorLocalNotifications", path: "../../../node_modules/.pnpm/@capacitor+local-notifications@8.3.1_patch_hash=59d1a3665fb92225eb3e377f2653c476dd7220a_6b4e6796b0c073ead53a0470f07c7b7f/node_modules/@capacitor/local-notifications"),
         .package(name: "CapacitorShare", path: "../../../node_modules/.pnpm/@capacitor+share@8.0.3_patch_hash=61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb_@capacitor+core@8.6.0/node_modules/@capacitor/share"),
         .package(name: "CapawesomeCapacitorAppShortcuts", path: "../../../node_modules/.pnpm/@capawesome+capacitor-app-shortcuts@8.0.2_patch_hash=2581c86d60ce7892c0b3136523994591d2_a14919168703aefe95e95f75933b5bdb/node_modules/@capawesome/capacitor-app-shortcuts"),
         .package(name: "CapawesomeCapacitorClipboard", path: "../../../node_modules/.pnpm/@capawesome+capacitor-clipboard@0.1.2_patch_hash=729c6071cbf0e196e2212b015677cdd162c287_5f6300846c89798f564316ce9d8c8a8f/node_modules/@capawesome/capacitor-clipboard"),
