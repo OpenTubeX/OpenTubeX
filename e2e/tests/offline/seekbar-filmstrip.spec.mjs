@@ -383,7 +383,9 @@ test.describe('with a short interface hide delay', () => {
       settings: {
         videoPlaybackEngine: 'built-in',
         ytDlpPlaybackEngineDefaultMigration: true,
-        playingInterfaceHideDelay: 0.5
+        // Long enough that slow steps cannot fade the controls before the drag
+        // starts; the drag itself switches to the short delay below.
+        playingInterfaceHideDelay: 60
       }
     }
   })
@@ -409,6 +411,8 @@ test.describe('with a short interface hide delay', () => {
     await page.mouse.down()
     await page.mouse.move(bounds.x + bounds.width * 0.4, y, { steps: 4 })
     await expect(filmstrip).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updatePlayingInterfaceHideDelay', 0.5))
+    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
 
     // Neither leaving the player nor resting outside it hides the controls mid-drag.
     const outside = { x: bounds.x + bounds.width * 0.5, y: playerBox.y + playerBox.height + 20 }
