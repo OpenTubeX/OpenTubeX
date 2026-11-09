@@ -1952,6 +1952,9 @@ Settings:
     Username: Username
     Log In: Log in
     Register: Register
+    Log In with Provider: 'Log in with {provider}'
+    Log In with Single Sign-On: Log in with single sign-on
+    Continue in Browser: Continue in your browser. OpenTubeX resumes when you are done.
     Pair Another Device: Pair another device
     Pair With Existing Device: Pair with an existing device
     Device Name: Device name
@@ -2010,6 +2013,7 @@ Settings:
     Delete Account Confirmation: Delete sync account?
     Delete Account Warning: This permanently deletes your sync account and all data stored on this server. Your local OpenTubeX data will not be deleted.
     Confirm Delete Account: Delete account
+    Delete Single Sign-On Account Hint: Your browser opens so that you can confirm the deletion with your sign-in provider.
     Password Required: Password is required
     Account Deleted: Sync account deleted
     Devices: Devices
@@ -2043,6 +2047,7 @@ Settings:
     New Passwords Do Not Match: The new passwords do not match.
     Password Changed: Password changed. Other devices have been signed out.
     Connected as: 'Connected as {username}'
+    Connected with Single Sign-On: Connected with single sign-on
     Profiles: Profiles
     Open Tabs: Open tabs and session
     Use Shared Tabs: Use one shared tab set across devices

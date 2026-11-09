@@ -6,6 +6,7 @@ import vm from 'node:vm'
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
 import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
+import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
@@ -60,6 +61,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     isAnyPromptOpen: { value: false },
     getHomeWidgetPage,
     shouldOpenExternalMediaUrl,
+    isSyncServerOidcCallbackUrl,
     syncContinueWatchingWidget: () => () => { widgetSyncStopped = true },
     Capacitor: { getPlatform: () => 'android' },
     supportsYtDlp: true,

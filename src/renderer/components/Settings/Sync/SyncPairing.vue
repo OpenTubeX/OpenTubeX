@@ -380,7 +380,7 @@
             <dt>{{ t('Settings.Sync Settings.Server URL') }}</dt>
             <dd>{{ pairingRequest.origin }}</dd>
           </div>
-          <div>
+          <div v-if="!isSyncServerOidcUsername(username)">
             <dt>{{ t('Settings.Sync Settings.Username') }}</dt>
             <dd>{{ username }}</dd>
           </div>
@@ -498,6 +498,7 @@ import {
   decryptSyncDocument,
 } from '../../../helpers/sync-server-privacy'
 import { SyncServerClient, normalizeSyncServerUrl } from '../../../helpers/sync-server'
+import { isSyncServerOidcUsername } from '../../../helpers/sync-server-oidc'
 import {
   encryptSyncServerDeviceInfo,
   getCurrentSyncServerDeviceInfo,

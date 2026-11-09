@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Digeriñ an holl ivinelloù'
     Open All Tabs Confirmation: "Digeriñ an holl ivinelloù?"
     Server Update Required: "Hizivait ar servijer-mañ evit ma vo skoret ar c’henamzeriañ sifret en amzer wir."
+    Log In with Provider: 'Kevreañ gant {provider}'
+    Log In with Single Sign-On: 'Kevreañ gant an anaouadur unel'
+    Continue in Browser: 'Kendalc''hit en ho merdeer. OpenTubeX a gendalc''ho pa vo echu ganeoc''h.'
+    Connected with Single Sign-On: 'Kevreet gant an anaouadur unel'
+    Delete Single Sign-On Account Hint: 'Digoret e vo ho merdeer evit ma kadarnafec''h an dilemel gant ho pourchaser kevreañ.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript adtapout goude ur stankadur IP
     Select IP Block Recovery Script File: "Dibab restr ar skript adtapout goude ur stankadur IP"

@@ -1399,6 +1399,11 @@ Settings:
     Open All Tabs: 'Open all tabs'
     Open All Tabs Confirmation: "Open all tabs?"
     Server Update Required: "Update this server to support encrypted live sync."
+    Log In with Provider: 'Log in with {provider}'
+    Log In with Single Sign-On: 'Log in with single sign-on'
+    Continue in Browser: 'Continue in your browser. OpenTubeX resumes when you are done.'
+    Connected with Single Sign-On: 'Connected with single sign-on'
+    Delete Single Sign-On Account Hint: 'Your browser opens so that you can confirm the deletion with your sign-in provider.'
   Proxy Settings:
     IP Block Recovery Script Path: IP block recovery script
     Select IP Block Recovery Script File: Select IP Block Recovery Script File

@@ -1487,6 +1487,11 @@ Settings:
     Keep Deleted Items: آئٹمز رکھیں
     Confirm Data Loss: حذف کریں اور جاری رکھیں
     Server Update Required: انکرپٹڈ لائیو سنک کو سپورٹ کرنے کے لیے یہ سرور اپ ڈیٹ کریں۔
+    Log In with Provider: '{provider} کے ساتھ لاگ ان کریں'
+    Log In with Single Sign-On: 'سنگل سائن آن کے ساتھ لاگ ان کریں'
+    Continue in Browser: 'اپنے براؤزر میں جاری رکھیں۔ مکمل ہونے پر OpenTubeX دوبارہ شروع ہو جائے گا۔'
+    Connected with Single Sign-On: 'سنگل سائن آن کے ساتھ منسلک'
+    Delete Single Sign-On Account Hint: 'آپ کا براؤزر کھلے گا تاکہ آپ اپنے سائن ان فراہم کنندہ کے ساتھ حذف کی تصدیق کر سکیں۔'
   Proxy Settings:
     IP Block Recovery Script Path: IP بلاک سے بحالی کا اسکرپٹ
     Select IP Block Recovery Script File: IP بلاک سے بحالی کی اسکرپٹ فائل منتخب کریں

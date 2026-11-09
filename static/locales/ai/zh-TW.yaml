@@ -1416,6 +1416,11 @@ Settings:
     Open All Tabs: '開啟所有分頁'
     Open All Tabs Confirmation: "開啟所有分頁？"
     Server Update Required: "請更新此伺服器以支援加密即時同步。"
+    Log In with Provider: '使用 {provider} 登入'
+    Log In with Single Sign-On: '使用單一登入'
+    Continue in Browser: '請在瀏覽器中繼續。完成後 OpenTubeX 會繼續。'
+    Connected with Single Sign-On: '已透過單一登入連線'
+    Delete Single Sign-On Account Hint: '瀏覽器將開啟，讓你在登入提供者處確認刪除。'
   Proxy Settings:
     IP Block Recovery Script Path: IP 封鎖復原指令碼
     Select IP Block Recovery Script File: 選取 IP 封鎖復原指令碼檔案

@@ -1522,6 +1522,11 @@ Settings:
     Open All Tabs: 'Abrir todas las pestañas'
     Open All Tabs Confirmation: "¿Abrir todas las pestañas?"
     Server Update Required: "Actualizá este servidor para admitir la sincronización cifrada en tiempo real."
+    Log In with Provider: 'Iniciar sesión con {provider}'
+    Log In with Single Sign-On: 'Iniciar sesión con inicio de sesión único'
+    Continue in Browser: 'Continuá en tu navegador. OpenTubeX va a seguir cuando termines.'
+    Connected with Single Sign-On: 'Conectado con inicio de sesión único'
+    Delete Single Sign-On Account Hint: 'Se va a abrir tu navegador para que confirmes la eliminación con tu proveedor de inicio de sesión.'
   Proxy Settings:
     Proxy Username: Nombre de Usuario del proxy
     Proxy Password: Contraseña del proxy

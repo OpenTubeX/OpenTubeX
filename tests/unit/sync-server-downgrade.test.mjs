@@ -21,6 +21,7 @@ import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } f
 import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
+import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
 import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
@@ -52,7 +53,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {} } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -100,6 +101,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     delegateRequests: () => () => {},
     ...subscriptionSettingsSync,
     ...errors,
+    ...oidc,
+    openExternalLink: url => openExternalLink(url),
     showToast: options => notifications.push(options),
     showToastOnAllTabs: (message, time, icon, buttonAction) => notifications.push({
       message, time, icon, buttonAction, broadcast: true,
@@ -2402,3 +2405,84 @@ for (const rememberHistory of [false, true]) for (const position of [0, 125.75])
     assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
   })
 }
+
+test('OIDC sign-in reports a browser that fails to open', async () => {
+  const unhandled = []
+  const onUnhandled = error => unhandled.push(error)
+  process.on('unhandledRejection', onUnhandled)
+  try {
+    const { actions, context } = fixture({ syncServerToken: '' }, {
+      respond: () => ({ capabilities: {} }),
+      openExternalLink: async () => { throw new Error('no browser') },
+    })
+    const login = { serverUrl: 'https://sync.example', privacyPassphrase: '', deviceId: 'device-1' }
+    await assert.rejects(actions.loginSyncServerWithOidc(context, login), /no browser/)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(unhandled, [])
+  } finally {
+    process.off('unhandledRejection', onUnhandled)
+  }
+})
+
+test('a replaced OIDC sign-in leaves the newer one waiting', async () => {
+  const { actions, context, dispatched } = fixture({ syncServerToken: '' }, {
+    respond: () => ({ capabilities: {} }),
+  })
+  const login = { serverUrl: 'https://sync.example', privacyPassphrase: '', deviceId: 'device-1' }
+  const first = actions.loginSyncServerWithOidc(context, login)
+  const firstRejected = assert.rejects(first, error => error.name === 'SyncServerCancelledError')
+  await new Promise(resolve => setTimeout(resolve, 10))
+  const second = actions.loginSyncServerWithOidc(context, login)
+  await firstRejected
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  assert.equal(actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc?token=a.b.c'), true)
+  await second
+  assert.equal(dispatched.at(-1)[0], 'authenticateSyncServer')
+  assert.equal(dispatched.at(-1)[1].token, 'a.b.c')
+})
+
+test('OIDC deletion does not take a revoked session as proof of deletion', async () => {
+  let callbackSent = false
+  const { actions, context, dispatched, settings } = fixture({}, {
+    respond: (url) => {
+      const { pathname } = new URL(url)
+      if (pathname === '/health') return { capabilities: { account_sessions: 1 } }
+      if (pathname === '/v1/account/oidc/delete') return { authorization_url: 'https://auth.example/authorize' }
+      if (callbackSent && pathname === '/v1/account/sessions') {
+        return new Response('invalid or missing authentication token', { status: 401 })
+      }
+    },
+    openExternalLink: async () => {
+      setTimeout(() => {
+        callbackSent = true
+        actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc')
+      })
+    },
+  })
+  await assert.rejects(actions.deleteSyncServerOidcAccount(context), error => error.status === 401)
+  assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), false)
+  assert.equal(settings.syncServerToken, 'saved-token')
+})
+
+test('OIDC deletion clears the account a background sync already signed out', async () => {
+  let deleted = false
+  const { actions, context, dispatched, settings } = fixture({ syncServerUsername: 'OIDC-ACCOUNT-1' }, {
+    respond: (url) => {
+      const { pathname } = new URL(url)
+      if (pathname === '/health') return { capabilities: { account_sessions: 1 } }
+      if (pathname === '/v1/account/oidc/delete') return { authorization_url: 'https://auth.example/authorize' }
+      if (deleted) return new Response("account doesn't exist", { status: 404 })
+    },
+    openExternalLink: async () => {
+      setTimeout(() => {
+        deleted = true
+        // Sync saw the deletion first and expired the session.
+        settings.syncServerToken = ''
+        actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc')
+      })
+    },
+  })
+  await actions.deleteSyncServerOidcAccount(context)
+  assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), true)
+})

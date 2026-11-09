@@ -1893,6 +1893,9 @@ Settings:
     Username: Benutzername
     Log In: Anmelden
     Register: Registrieren
+    Log In with Provider: 'Mit {provider} anmelden'
+    Log In with Single Sign-On: Mit Single Sign-On anmelden
+    Continue in Browser: Fahre in deinem Browser fort. OpenTubeX macht weiter, sobald du fertig bist.
     Pair Another Device: Weiteres Gerät koppeln
     Pair With Existing Device: Mit vorhandenem Gerät koppeln
     Device Name: Gerätename
@@ -1953,6 +1956,7 @@ Settings:
       Dadurch werden dein Synchronisierungskonto und alle auf diesem Server gespeicherten Daten dauerhaft gelöscht. Deine
       lokalen OpenTubeX-Daten werden nicht gelöscht.
     Confirm Delete Account: Konto löschen
+    Delete Single Sign-On Account Hint: Dein Browser öffnet sich, damit du die Löschung bei deinem Anmeldeanbieter bestätigen kannst.
     Password Required: Passwort erforderlich
     Account Deleted: Synchronisierungskonto gelöscht
     Devices: Geräte
@@ -1986,6 +1990,7 @@ Settings:
     New Passwords Do Not Match: Die neuen Passwörter stimmen nicht überein.
     Password Changed: Passwort geändert. Andere Geräte wurden abgemeldet.
     Connected as: Verbunden als {username}
+    Connected with Single Sign-On: Mit Single Sign-On verbunden
     Profiles: Profile
     Open Tabs: Offene Tabs und Sitzung
     Use Shared Tabs: Einen gemeinsamen Tab-Satz auf allen Geräten verwenden

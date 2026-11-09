@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   SyncServerCancelledError,
   SyncServerError,
+  isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
 } from '../../src/renderer/helpers/sync-server-errors.js'
@@ -19,6 +20,19 @@ test('treats 401 as an expired session', () => {
     isSessionExpiredError(new SyncServerError('invalid or missing authentication token', 401)),
     true
   )
+})
+
+test('treats a token whose account was deleted as an expired session', () => {
+  // Servers answer authenticated requests for a deleted account with 404.
+  assert.equal(isSessionExpiredError(new SyncServerError("account doesn't exist", 404)), true)
+  assert.equal(isSessionExpiredError(new SyncServerError("playlist doesn't exist", 404)), false)
+})
+
+test('only a missing account proves that the account was deleted', () => {
+  assert.equal(isAccountDeletedError(new SyncServerError("account doesn't exist", 404)), true)
+  // A revoked session also rejects the token, but the account may still exist.
+  assert.equal(isAccountDeletedError(new SyncServerError('invalid or missing authentication token', 401)), false)
+  assert.equal(isAccountDeletedError(new SyncServerError("playlist doesn't exist", 404)), false)
 })
 
 test('does not treat other sync server failures as an expired session', () => {

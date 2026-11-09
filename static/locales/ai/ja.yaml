@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'すべてのタブを開く'
     Open All Tabs Confirmation: "すべてのタブを開きますか？"
     Server Update Required: "暗号化されたリアルタイム同期に対応するため、このサーバーを更新してください。"
+    Log In with Provider: '{provider} でログイン'
+    Log In with Single Sign-On: 'シングルサインオンでログイン'
+    Continue in Browser: 'ブラウザーで続行してください。完了すると OpenTubeX が再開します。'
+    Connected with Single Sign-On: 'シングルサインオンで接続済み'
+    Delete Single Sign-On Account Hint: 'ブラウザーが開き、ログインプロバイダーで削除を確認できます。'
   Proxy Settings:
     IP Block Recovery Script Path: IPブロック復旧スクリプト
     Select IP Block Recovery Script File: IPブロック復旧スクリプトを選択

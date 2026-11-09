@@ -1419,6 +1419,11 @@ Settings:
     Open All Tabs: 'Mở tất cả thẻ'
     Open All Tabs Confirmation: "Mở tất cả thẻ?"
     Server Update Required: "Cập nhật máy chủ này để hỗ trợ đồng bộ theo thời gian thực được mã hóa."
+    Log In with Provider: 'Đăng nhập bằng {provider}'
+    Log In with Single Sign-On: 'Đăng nhập một lần (SSO)'
+    Continue in Browser: 'Tiếp tục trong trình duyệt. OpenTubeX sẽ tiếp tục khi bạn hoàn tất.'
+    Connected with Single Sign-On: 'Đã kết nối bằng đăng nhập một lần'
+    Delete Single Sign-On Account Hint: 'Trình duyệt sẽ mở để bạn xác nhận việc xóa với nhà cung cấp đăng nhập.'
   Proxy Settings:
     IP Block Recovery Script Path: Tập lệnh khôi phục chặn IP
     Select IP Block Recovery Script File: Chọn tệp tập lệnh khôi phục khi bị chặn IP

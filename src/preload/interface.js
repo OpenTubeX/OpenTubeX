@@ -928,6 +928,16 @@ export default {
   },
 
   /**
+   * @param {(url: string) => void} handler
+   * @returns {() => void}
+   */
+  handleSyncServerOidcCallback: (handler) => {
+    const listener = (_event, url) => handler(url)
+    ipcRenderer.on(IpcChannels.SYNC_SERVER_OIDC_CALLBACK, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.SYNC_SERVER_OIDC_CALLBACK, listener)
+  },
+
+  /**
    * @param {(url: string, tabId?: string) => void} handler
    * @returns {() => void}
    */

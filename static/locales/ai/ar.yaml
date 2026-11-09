@@ -1438,6 +1438,11 @@ Settings:
     Open All Tabs: 'فتح كل علامات التبويب'
     Open All Tabs Confirmation: "هل تريد فتح كل علامات التبويب؟"
     Server Update Required: "حدّث هذا الخادم لدعم المزامنة المباشرة المشفّرة."
+    Log In with Provider: 'تسجيل الدخول باستخدام {provider}'
+    Log In with Single Sign-On: 'تسجيل الدخول الموحّد'
+    Continue in Browser: 'تابع في متصفحك. سيستأنف OpenTubeX عند الانتهاء.'
+    Connected with Single Sign-On: 'متصل عبر تسجيل الدخول الموحّد'
+    Delete Single Sign-On Account Hint: 'سيفتح متصفحك لتتمكن من تأكيد الحذف لدى مزوّد تسجيل الدخول.'
   Proxy Settings:
     IP Block Recovery Script Path: برنامج استعادة حظر عنوان IP
     Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP

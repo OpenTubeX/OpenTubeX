@@ -21,6 +21,7 @@ import {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
   syncServerResponseErrorMessage,
@@ -90,6 +91,7 @@ export {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
 }
@@ -225,6 +227,27 @@ export class SyncServerClient {
     } catch {
       return null
     }
+  }
+
+  /**
+   * The OIDC login the server offers, or null. Servers report it through
+   * `/meta`, which older servers do not serve.
+   * @returns {Promise<{ name: string } | null>}
+   */
+  async getOidcLogin() {
+    let meta
+    try {
+      // Without session listing the app cannot tell whether a login callback
+      // belongs to a sign-in this device started.
+      if (!await this.supportsAccountSessions()) return null
+      meta = await this.request('/meta')
+    } catch (error) {
+      if (error instanceof SyncServerCancelledError) throw error
+      return null
+    }
+    if (meta?.oidc !== true) return null
+    const name = typeof meta.oidc_display_name === 'string' ? meta.oidc_display_name.trim() : ''
+    return { name }
   }
 
   async supportsEncryptedSync() {
@@ -399,6 +422,27 @@ export class SyncServerClient {
     })
     this.token = response.jwt
     return response.jwt
+  }
+
+  /**
+   * Starts deleting an OIDC account. The server deletes it once its owner signs
+   * in at the returned URL.
+   * @param {string} redirectUrl
+   * @returns {Promise<string>}
+   */
+  async startOidcAccountDeletion(redirectUrl) {
+    const response = await this.request('/v1/account/oidc/delete', {
+      method: 'POST',
+      body: { redirect_url: redirectUrl },
+    })
+    let url = null
+    try {
+      url = new URL(response?.authorization_url)
+    } catch {}
+    if (url?.protocol !== 'https:' && url?.protocol !== 'http:') {
+      throw new SyncServerError('The sync server returned an invalid sign-in URL')
+    }
+    return url.href
   }
 
   deleteAccount(password) {

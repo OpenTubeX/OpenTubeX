@@ -1419,6 +1419,11 @@ Settings:
     Open All Tabs: 'Agor pob tab'
     Open All Tabs Confirmation: "Agor pob tab?"
     Server Update Required: "Diweddarwch y gweinydd hwn i gefnogi cysoni byw wedi’i amgryptio."
+    Log In with Provider: 'Mewngofnodi gyda {provider}'
+    Log In with Single Sign-On: 'Mewngofnodi gydag un mewngofnod'
+    Continue in Browser: 'Parhewch yn eich porwr. Bydd OpenTubeX yn ailddechrau pan fyddwch wedi gorffen.'
+    Connected with Single Sign-On: 'Wedi cysylltu gydag un mewngofnod'
+    Delete Single Sign-On Account Hint: 'Bydd eich porwr yn agor er mwyn i chi gadarnhau''r dileu gyda''ch darparwr mewngofnodi.'
   Proxy Settings:
     IP Block Recovery Script Path: Sgript adfer bloc IP
     Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP

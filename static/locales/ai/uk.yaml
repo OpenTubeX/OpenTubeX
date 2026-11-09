@@ -1438,6 +1438,11 @@ Settings:
     Open All Tabs: 'Відкрити всі вкладки'
     Open All Tabs Confirmation: "Відкрити всі вкладки?"
     Server Update Required: "Оновіть цей сервер для підтримки зашифрованої синхронізації в реальному часі."
+    Log In with Provider: 'Увійти через {provider}'
+    Log In with Single Sign-On: 'Увійти через єдиний вхід'
+    Continue in Browser: 'Продовжте в браузері. OpenTubeX продовжить, коли ви закінчите.'
+    Connected with Single Sign-On: 'Підключено через єдиний вхід'
+    Delete Single Sign-On Account Hint: 'Відкриється браузер, щоб ви підтвердили видалення в постачальника входу.'
   Proxy Settings:
     IP Block Recovery Script Path: Скрипт відновлення після блокування IP
     Select IP Block Recovery Script File: Вибрати файл сценарію відновлення після блокування IP-адреси

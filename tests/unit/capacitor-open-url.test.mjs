@@ -3,26 +3,46 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
+import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 
 const app = readFileSync('src/renderer/App.vue', 'utf8')
 const start = app.indexOf('  const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
 const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start))
 
-function urlOpener(supportsYtDlp = true) {
+function urlOpener(supportsYtDlp = true, platform = 'android') {
   const youtube = []
   const externalMedia = []
   const externalLinks = []
+  const dispatched = []
+  const browserClosed = []
   const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, {
     URL,
+    isSyncServerOidcCallbackUrl,
+    Capacitor: { getPlatform: () => platform },
+    Browser: { close: async () => { browserClosed.push(true) } },
     getHomeWidgetPage: () => null,
     handleYoutubeLink: url => youtube.push(url),
     openExternalMedia: url => externalMedia.push(url),
     handleExternalLink: url => externalLinks.push(url),
     shouldOpenExternalMediaUrl,
     supportsYtDlp,
-    store: { dispatch: async () => {}, getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' } }
+    store: {
+      dispatch: async (...args) => { dispatched.push(args) },
+      getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' },
+    }
   })
-  return { openUrl, youtube, externalMedia, externalLinks }
+  return { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed }
+}
+
+for (const platform of ['android', 'ios']) {
+  test(`${platform} hands sync server OIDC callbacks to sync instead of opening them`, async () => {
+    const { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed } = urlOpener(true, platform)
+    await openUrl('opentubex://oidc?token=a.b.c')
+    assert.deepEqual(dispatched, [['receiveSyncServerOidcCallback', 'opentubex://oidc?token=a.b.c']])
+    // Android returns to the app on its own; iOS keeps the browser above it.
+    assert.equal(browserClosed.length, platform === 'ios' ? 1 : 0)
+    assert.deepEqual([...youtube, ...externalMedia, ...externalLinks], [])
+  })
 }
 
 for (const [input, expected] of [

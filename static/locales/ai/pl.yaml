@@ -895,6 +895,11 @@ Settings:
     Open All Tabs Confirmation: "Otworzyć wszystkie karty?"
     Server Update Required: "Zaktualizuj ten serwer, aby obsługiwał szyfrowaną synchronizację w czasie rzeczywistym."
     Keep Deleted Items: "Zachowaj elementy"
+    Log In with Provider: 'Zaloguj się przez {provider}'
+    Log In with Single Sign-On: 'Zaloguj się przez logowanie jednokrotne'
+    Continue in Browser: 'Kontynuuj w przeglądarce. OpenTubeX wznowi działanie, gdy skończysz.'
+    Connected with Single Sign-On: 'Połączono przez logowanie jednokrotne'
+    Delete Single Sign-On Account Hint: 'Otworzy się przeglądarka, aby potwierdzić usunięcie u dostawcy logowania.'
   SponsorBlock Settings:
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor

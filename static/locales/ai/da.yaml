@@ -1459,6 +1459,11 @@ Settings:
     Open All Tabs: 'Åbn alle faner'
     Open All Tabs Confirmation: "Åbn alle faner?"
     Server Update Required: "Opdater denne server for at understøtte krypteret synkronisering i realtid."
+    Log In with Provider: 'Log ind med {provider}'
+    Log In with Single Sign-On: 'Log ind med single sign-on'
+    Continue in Browser: 'Fortsæt i din browser. OpenTubeX fortsætter, når du er færdig.'
+    Connected with Single Sign-On: 'Forbundet med single sign-on'
+    Delete Single Sign-On Account Hint: 'Din browser åbnes, så du kan bekræfte sletningen hos din login-udbyder.'
   Proxy Settings:
     Proxy Username: Proxybrugernavn
     Proxy Password: Proxyadgangskode

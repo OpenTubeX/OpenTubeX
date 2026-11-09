@@ -105,6 +105,14 @@
                 <data android:scheme="https" android:host="youtu.be" />
             </intent-filter>
 
+            <!-- Sync servers return here after an OIDC sign-in or account deletion. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="opentubex" android:host="oidc" />
+            </intent-filter>
+
         </activity>
 
         <!-- Popular sites with a dedicated extractor in the bundled yt-dlp.

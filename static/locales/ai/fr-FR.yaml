@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Ouvrir tous les onglets'
     Open All Tabs Confirmation: "Ouvrir tous les onglets ?"
     Server Update Required: "Mettez à jour ce serveur pour prendre en charge la synchronisation chiffrée en temps réel."
+    Log In with Provider: 'Se connecter avec {provider}'
+    Log In with Single Sign-On: 'Se connecter avec l’authentification unique'
+    Continue in Browser: 'Poursuivez dans votre navigateur. OpenTubeX reprendra une fois que vous aurez terminé.'
+    Connected with Single Sign-On: 'Connecté avec l’authentification unique'
+    Delete Single Sign-On Account Hint: 'Votre navigateur s’ouvre pour que vous confirmiez la suppression auprès de votre fournisseur d’identité.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de récupération après blocage IP
     Select IP Block Recovery Script File: Sélectionner le fichier du script de récupération après blocage d’IP

@@ -4,7 +4,8 @@ import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard, ClipboardItem,
-  shell, Tray, Notification, ShareMenu, nativeImage
+  shell, Tray, Notification, ShareMenu, nativeImage,
+  webContents as electronWebContents
 } from 'electron'
 import './applicationDataBootstrap'
 import { isPortableBuild } from './applicationDataPaths'
@@ -105,6 +106,7 @@ import { getSystemAccentColor, setupSystemInfoIpc } from './systemInfoIpc'
 import { setupToastIpc } from './toastIpc'
 import { setupWatchQueueIpc } from './watchQueueIpc'
 import { handleDownloadMediaRequest, setupYtDlpIpc } from './ytDlpIpc'
+import { isSyncServerOidcCallbackUrl } from '../renderer/helpers/sync-server-oidc'
 
 const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
 const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker)
@@ -961,6 +963,8 @@ function runApp() {
 
       // Someone tried to run a second instance
       if (typeof commandLine !== 'undefined') {
+        if (sendSyncServerOidcCallback(commandLine.slice(1))) return
+
         const newStartupUrl = getLinkUrl(commandLine)
 
         if (!(mainWindow && mainWindow.webContents)) {
@@ -3868,6 +3872,7 @@ function runApp() {
    */
   app.on('open-url', async (event, url) => {
     event.preventDefault()
+    if (sendSyncServerOidcCallback([url])) return
 
     const newStartupUrl = baseUrl(url)
     if (!(mainWindow && mainWindow.webContents)) {
@@ -3926,6 +3931,33 @@ function runApp() {
   const url = getLinkUrl(process.argv)
   if (url) {
     startupUrl = url
+  }
+
+  /**
+   * Hands a sync server OIDC callback to the app's renderers. Each ignores it
+   * unless it started the sign-in, so a cold start, which no window could have started,
+   * needs no handling: getLinkUrl skips the link.
+   * @param {string[]} args
+   * @returns {boolean} whether the arguments contained a callback
+   */
+  function sendSyncServerOidcCallback(args) {
+    const url = args.find(isSyncServerOidcCallbackUrl)
+    if (!url) return false
+    // Tabs run in their own renderers. Only app pages may receive the token.
+    for (const contents of electronWebContents.getAllWebContents()) {
+      if (!contents.isDestroyed() && isOpenTubeXUrl(contents.getURL())) {
+        contents.send(IpcChannels.SYNC_SERVER_OIDC_CALLBACK, url)
+      }
+    }
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (trayWindows.includes(mainWindow)) {
+        trayClick(mainWindow)
+      } else if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      mainWindow.focus()
+    }
+    return true
   }
 
   function baseUrl(arg) {

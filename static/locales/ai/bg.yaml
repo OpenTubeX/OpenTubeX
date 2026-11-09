@@ -1423,6 +1423,11 @@ Settings:
     Open All Tabs: 'Отваряне на всички раздели'
     Open All Tabs Confirmation: "Отваряне на всички раздели?"
     Server Update Required: "Обновете този сървър за поддръжка на шифрована синхронизация в реално време."
+    Log In with Provider: 'Вход с {provider}'
+    Log In with Single Sign-On: 'Вход с единно влизане'
+    Continue in Browser: 'Продължете в браузъра си. OpenTubeX ще продължи, когато приключите.'
+    Connected with Single Sign-On: 'Свързано чрез единно влизане'
+    Delete Single Sign-On Account Hint: 'Браузърът ви ще се отвори, за да потвърдите изтриването при доставчика си за вход.'
   Proxy Settings:
     IP Block Recovery Script Path: Скрипт за възстановяване при блокиран IP
     Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса

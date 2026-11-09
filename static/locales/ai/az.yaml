@@ -1418,6 +1418,11 @@ Settings:
     Keep Deleted Items: Elementləri saxla
     Confirm Data Loss: Sil və davam et
     Server Update Required: "Şifrələnmiş canlı sinxronizasiyanı dəstəkləmək üçün bu serveri yeniləyin."
+    Log In with Provider: '{provider} ilə daxil ol'
+    Log In with Single Sign-On: 'Vahid girişlə daxil ol'
+    Continue in Browser: 'Brauzerinizdə davam edin. Bitirdikdən sonra OpenTubeX davam edəcək.'
+    Connected with Single Sign-On: 'Vahid girişlə qoşulub'
+    Delete Single Sign-On Account Hint: 'Brauzeriniz açılacaq ki, silinməni giriş provayderinizdə təsdiqləyəsiniz.'
   Proxy Settings:
     IP Block Recovery Script Path: IP blokundan bərpa skripti
     Select IP Block Recovery Script File: IP blokundan bərpa skripti faylını seç

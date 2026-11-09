@@ -1421,6 +1421,11 @@ Settings:
     Open All Tabs: 'Άνοιγμα όλων των καρτελών'
     Open All Tabs Confirmation: "Άνοιγμα όλων των καρτελών;"
     Server Update Required: "Ενημερώστε αυτόν τον διακομιστή για υποστήριξη κρυπτογραφημένου συγχρονισμού σε πραγματικό χρόνο."
+    Log In with Provider: 'Σύνδεση με {provider}'
+    Log In with Single Sign-On: 'Σύνδεση με ενιαία σύνδεση'
+    Continue in Browser: 'Συνεχίστε στο πρόγραμμα περιήγησης. Το OpenTubeX θα συνεχίσει μόλις τελειώσετε.'
+    Connected with Single Sign-On: 'Συνδέθηκε με ενιαία σύνδεση'
+    Delete Single Sign-On Account Hint: 'Θα ανοίξει το πρόγραμμα περιήγησης για να επιβεβαιώσετε τη διαγραφή στον πάροχο σύνδεσής σας.'
   Proxy Settings:
     IP Block Recovery Script Path: Σενάριο ανάκτησης από αποκλεισμό IP
     Select IP Block Recovery Script File: Επιλογή αρχείου δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
