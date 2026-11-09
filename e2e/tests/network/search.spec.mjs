@@ -1,4 +1,4 @@
-import { sel } from '../../helpers/app.mjs'
+import { goTo, sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 
@@ -39,25 +39,40 @@ test.describe('search', () => {
       })
     })
 
-    await page.locator(sel.searchInput).fill('big buck bunny')
-    await page.locator(sel.searchInput).press('Enter')
-
-    await expect(page).toHaveURL(/#\/search\//)
-    await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
-    expect(await page.locator('.ft-list-video').count()).toBeGreaterThan(3)
-
     const video = page.locator('.ft-list-video').first()
     const thumbnail = video.locator('.thumbnailLink')
     const preview = video.locator('.thumbnailPreview')
+    let videoId
+    let hasThumbnailPreview = false
+    // Some YouTube search responses leave out every moving thumbnail, so
+    // search again until the first result has one to hover.
+    for (let attempt = 0; attempt < 5 && !hasThumbnailPreview; attempt++) {
+      if (attempt > 0) {
+        await page.evaluate(() => window.$store.dispatch('clearSessionSearchHistory'))
+        await goTo(page, 'history')
+      }
+      await page.locator(sel.searchInput).fill('big buck bunny')
+      await page.locator(sel.searchInput).press('Enter')
+
+      await expect(page).toHaveURL(/#\/search\//)
+      await expect(video).toBeVisible({ timeout: 30_000 })
+      expect(await page.locator('.ft-list-video').count()).toBeGreaterThan(3)
+
+      const href = await thumbnail.getAttribute('href')
+      videoId = /\/watch\/([^?]+)/.exec(href)?.[1]
+      expect(videoId).toBeTruthy()
+      hasThumbnailPreview = await page.evaluate((videoId) => {
+        const search = window.$store.getters.getSessionSearchHistory.find(entry => entry.query === 'big buck bunny')
+        const result = search?.data.find(item => item.videoId === videoId)
+        return typeof result?.thumbnailPreviewUrl === 'string'
+      }, videoId)
+    }
+    expect(hasThumbnailPreview, 'YouTube must return a moving thumbnail for the first search result').toBe(true)
 
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
-
-    const href = await thumbnail.getAttribute('href')
-    const videoId = /\/watch\/([^?]+)/.exec(href)?.[1]
-    expect(videoId).toBeTruthy()
     await page.evaluate((videoId) => {
       const store = window.$store
       store.commit('upsertToHistoryCache', { videoId, isWatched: true })
