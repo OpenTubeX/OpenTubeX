@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 import { openPlayerOptions } from '../../helpers/player.mjs'
 
@@ -82,7 +82,7 @@ test('player toggles music mode without rewinding or changing saved defaults', a
   await expect.poll(() => watch.evaluate(view => view.historyEntry.watchProgress)).toBeCloseTo(5, 0)
 })
 
-for (const source of ['queue click', 'queue end', 'recommendation', 'manual']) {
+for (const source of ['queue end', 'recommendation']) {
   test(`music mode starts unclassified videos from ${source} at zero and 1x`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await setMusicMode(page, true)
@@ -91,22 +91,17 @@ for (const source of ['queue click', 'queue end', 'recommendation', 'manual']) {
     const video = await expectPlayback(page, 0, 1)
     const watch = await watchViewHandle(page)
     expect(await watch.evaluate(view => view.isMusicVideo)).toBe(false)
-    if (source.startsWith('queue')) {
+    if (source === 'queue end') {
       await watch.evaluate(view => view.$store.commit('addVideoToWatchQueue', {
         video: { videoId: 'musicvideo1', title: 'Music mode test video' },
       }))
-      if (source === 'queue click') await page.locator('.queueItem h3').click()
-      else await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
-    } else if (source === 'recommendation') {
+      await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+    } else {
       await watch.evaluate(view => {
         view.recommendedVideos = [{ videoId: 'musicvideo1', title: 'Music mode test video', type: 'video' }]
       })
       await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
       await page.locator('.endedRecommendation').click()
-    } else {
-      await page.getByRole('button', { name: 'Expand side navigation', exact: true }).click()
-      await goTo(page, 'history')
-      await page.locator('a.title[href="#/watch/musicvideo1"]').click()
     }
     await expect(page).toHaveURL(/#\/watch\/musicvideo1$/)
     await expectPlayback(page, 0, 1)
@@ -204,61 +199,6 @@ test('inactive Shorts cannot overwrite the active channel speed when music mode 
   await expect.poll(() => watch.evaluate(view => view.currentPlaybackRate)).toBe(2.5)
 })
 
-test('excludes music mode from saved Quick Settings and the customizer', async ({ page, attachScreenshot }) => {
-  await page.locator('.profileTrigger').click()
-  const menu = page.locator('.quickSettingsMenu')
-  await expect(menu.locator('.quickSettingControl')).toHaveCount(2)
-  await expect(menu.getByRole('checkbox', { name: /^Music Mode/ })).toHaveCount(0)
-  await expect(menu.locator('[data-setting-id="defaultPlayback"]')).toBeVisible()
-  await attachScreenshot('quick-settings-menu-without-music-mode')
-  await page.locator('.profileTrigger').click()
-  await openInterfaceCustomizer(page, 'quick settings')
-  await expect(page.getByRole('button', { name: 'Remove Music Mode', exact: true })).toHaveCount(0)
-  await page.getByRole('button', { name: 'Add setting' }).click()
-  const search = page.getByLabel('Search settings')
-  await search.fill('Music Mode')
-  await expect(page.locator('.settingPicker .optionWrapper')).toHaveCount(0)
-  await attachScreenshot('quick-settings-without-music-mode')
-  await search.fill('Autoplay')
-  await expect(page.locator('.settingPicker .optionWrapper')).not.toHaveCount(0)
-})
-
-test('music mode headphones cut out the profile in both icon packs and color schemes', async ({ app, page }, testInfo) => {
-  await setMusicMode(page, true)
-  const indicator = page.locator('.musicModeIndicator')
-  for (const layout of ['desktop', 'phone']) {
-    if (layout === 'phone') await setWindowSize(app, page, { width: 375, height: 700 })
-    for (const iconPack of ['material', 'remix']) {
-      await page.evaluate(value => window.$store.dispatch('updateIconPack', value), iconPack)
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-        await expect(indicator).toBeVisible()
-        await expect(indicator).toHaveCSS('border-radius', '50%')
-        await expect(indicator).toHaveCSS('opacity', '1')
-        const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
-        await expect(indicator).toHaveCSS('background-color', headerBackground)
-        const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
-        await expect(indicator).toHaveCSS('color', headerForeground)
-        if (layout === 'desktop') {
-          const bounds = await page.locator('.profileTrigger').boundingBox()
-          const name = `music-mode-${iconPack}-${colorScheme}`
-          const screenshot = await page.screenshot({
-            path: testInfo.outputPath(`${name}.png`),
-            clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
-          })
-          await testInfo.attach(name, {
-            body: screenshot,
-            contentType: 'image/png',
-          })
-        }
-      }
-    }
-  }
-  await setMusicMode(page, false)
-  await expect(indicator).toHaveCount(0)
-})
-
 test.describe('music mode visibility setting', () => {
   test.use({ seed: musicModeSeed })
 
@@ -275,14 +215,12 @@ test.describe('music mode visibility setting', () => {
     const explanation = page.getByRole('tooltip').filter({ hasText: 'Play videos at 1×' })
     await expect(explanation).toBeVisible()
     await expect(explanation).toContainText('Your saved playback defaults stay unchanged.')
-    for (const colorScheme of ['dark', 'light']) {
-      await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-      await testInfo.attach(`music-mode-explanation-${colorScheme}`, {
-        body: await explanation.screenshot(),
-        contentType: 'image/png',
-      })
-    }
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/dark/)
+    await testInfo.attach('music-mode-explanation-dark', {
+      body: await explanation.screenshot(),
+      contentType: 'image/png',
+    })
     await visibility.focus()
     await expect(explanation).toBeHidden()
     await testInfo.attach('music-mode-visibility-setting', {

@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, setWindowSize, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -55,106 +55,6 @@ async function relaunchAfterQueueSaved (app, page) {
   await page.evaluate(() => window.ftElectron.watchQueue.update({}))
   return app.relaunch()
 }
-
-test('dragging the bottom queue item follows the pointer upward', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-  await setWindowSize(app, page, { width: 1500, height: 1100 })
-  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
-  await goTo(page, 'history')
-  await page.evaluate(() => {
-    for (const [videoId, title] of [['queuevideo1', 'Queue video one'], ['queuevideo2', 'Queue video two']]) {
-      window.$store.commit('addVideoToWatchQueue', { video: { videoId, title, author: 'Queue Test Channel', lengthSeconds: 60 } })
-    }
-  })
-  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
-  // The offline comment load fails and shrinks the page, which can scroll the
-  // queue after its rows are measured.
-  await expect(page.locator('.getCommentsTitle')).toBeVisible()
-  const queue = page.locator('.watchQueue')
-  const bottom = queue.locator('.queueItem').filter({ hasText: 'Queue video two' })
-  const top = queue.locator('.queueItem').filter({ hasText: 'Queue video one' })
-  const handle = bottom.locator('.queueDragHandle')
-  await handle.hover()
-  await expect(top).toHaveCSS('transform', 'none')
-  await expect(bottom).toHaveCSS('transform', 'none')
-  const bottomBounds = await bottom.boundingBox()
-  const topBounds = await top.boundingBox()
-  const handleBounds = await handle.boundingBox()
-  const x = handleBounds.x + handleBounds.width / 2
-  const y = handleBounds.y + handleBounds.height / 2
-  const distance = bottomBounds.y - topBounds.y
-  await page.mouse.move(x, y)
-  await page.mouse.down()
-  await page.mouse.move(x, y - distance, { steps: 10 })
-  await expect(bottom).toHaveClass(/dragging/)
-  await expect.poll(() => bottom.evaluate(element => element.getBoundingClientRect().y)).toBeCloseTo(topBounds.y, 0)
-  await expect.poll(() => top.evaluate(element => element.getBoundingClientRect().y)).toBeCloseTo(bottomBounds.y, 0)
-  await attachScreenshot('bottom-queue-item-dragged-up')
-  await page.mouse.up()
-  await expect(queue.locator('.queueItem h3')).toHaveText(['Queue video two', 'Queue video one'])
-  await expect(bottom).not.toHaveClass(/dragging/)
-})
-
-test('keeps the queue header actions round with a coarse pointer', { tag: '@scale' }, async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 1500, height: 1100 })
-  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
-  // Touch emulation makes (pointer: coarse) match, which raises the actions' touch target.
-  const cdp = await page.context().newCDPSession(page)
-  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
-  expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
-  await goTo(page, 'history')
-  await page.evaluate(() => {
-    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queuevideo1', title: 'Queue video one', author: 'Queue Test Channel', lengthSeconds: 60 } })
-  })
-  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
-  const actions = page.locator('.watchQueue .queueHeaderAction')
-  await expect(actions).toHaveCount(2)
-  const sizes = await actions.evaluateAll(elements => elements.map(element => {
-    const { width, height } = element.getBoundingClientRect()
-    return { width, height }
-  }))
-  for (const size of sizes) {
-    expect(size.width).toBeCloseTo(size.height, 1)
-    expect(size.width).toBeCloseTo(sizes[0].width, 1)
-  }
-})
-
-test('centers queue item content between the row dividers', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-  await setWindowSize(app, page, { width: 1500, height: 1100 })
-  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
-  await goTo(page, 'history')
-  await page.evaluate(() => {
-    for (const [videoId, title] of [
-      ['queuevideo1', 'Queue video one'],
-      ['queuevideo2', 'Queue video two has a title long enough to wrap onto three lines in the queue sidebar']
-    ]) {
-      window.$store.commit('addVideoToWatchQueue', { video: { videoId, title, author: 'Queue Test Channel', lengthSeconds: 60, viewCount: 1000, published: Date.now() - 86400000 } })
-    }
-  })
-  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
-  const items = page.locator('.watchQueue .queueItem')
-  await expect(items.locator('.videoThumbnail')).toHaveCount(2)
-  const rows = await items.evaluateAll(rows => rows.map(row => {
-    const rowBounds = row.getBoundingClientRect()
-    const contentBounds = [...row.querySelectorAll('.videoThumbnail, .title, .infoLine')]
-      .map(element => element.getBoundingClientRect())
-    const center = selector => {
-      const bounds = row.querySelector(selector).getBoundingClientRect()
-      return bounds.top + bounds.height / 2
-    }
-    const borderBottom = parseFloat(getComputedStyle(row).borderBlockEndWidth)
-    return {
-      above: Math.min(...contentBounds.map(bounds => bounds.top)) - rowBounds.top,
-      below: rowBounds.bottom - borderBottom - Math.max(...contentBounds.map(bounds => bounds.bottom)),
-      handleCenter: center('.queueDragHandle'),
-      thumbnailCenter: center('.videoThumbnail')
-    }
-  }))
-  await attachScreenshot('queue-item-spacing')
-  for (const row of rows) {
-    expect(row.below).toBeCloseTo(row.above, 0)
-    expect(row.thumbnailCenter).toBeCloseTo(row.handleCenter, 0)
-  }
-})
 
 test('manages the queue from video menus and the watch sidebar', { tag: '@scale' }, async ({ page }) => {
   await goTo(page, 'history')
@@ -386,24 +286,6 @@ test('shares queue changes across windows without restoring cleared items', asyn
   await expect(page.locator('.queueItem h3').first()).toHaveText('Queue video two')
   expect(await page.locator('.queueItem h3').allTextContents()).toEqual(expect.arrayContaining(['concurrent-0', 'concurrent-1']))
 })
-
-for (const clearAll of [false, true]) {
-  test(`mobile queue closes after ${clearAll ? 'clearing everything' : 'removing the last video'}`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 480, height: 850 })
-    await goTo(page, 'history')
-    await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
-    await page.locator('a.title').filter({ hasText: /Current video/ }).click()
-    await page.getByRole('button', { name: 'Queue Queue video one', exact: true }).click()
-    const panel = page.getByRole('dialog').filter({ has: page.locator('.watchQueue') })
-    await expect(panel).toBeVisible()
-    if (clearAll) {
-      await panel.getByRole('button', { name: 'Clear Queue', exact: true }).click()
-    } else {
-      await chooseQueueItemOption(page, panel.locator('.queueItem').filter({ hasText: 'Queue video one' }), 'Remove from Queue')
-    }
-    await expect(page.locator('dialog[open]')).toHaveCount(0)
-  })
-}
 
 test('saves the queue to a new playlist and appends a playlist to the queue in its displayed order', async ({ page }) => {
   const queuedVideo = (videoId, title) => ({

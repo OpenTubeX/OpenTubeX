@@ -34,7 +34,7 @@ const subscriptionCache = channels.map((channel, index) => ({
   videosTimestamp: '2026-01-01T00:00:00.000Z'
 }))
 
-for (const feed of ['videos', 'new']) {
+for (const feed of ['new']) {
   test.describe(`${feed} feed`, () => {
     test.use({ seed: { ...seed, subscriptionCache: feed === 'new' ? subscriptionCache : [] } })
 

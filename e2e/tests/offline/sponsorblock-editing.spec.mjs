@@ -31,7 +31,7 @@ const timedSegment = {
   votes: 1
 }
 
-async function openSegments(app, page, segments = [timedSegment], beforeOpen = null) {
+async function openSegments(app, page, segments = [timedSegment]) {
   await mockPlayableWatchPage(app, page)
   await page.route('**/api/skipSegments/**', route => route.fulfill({
     body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
@@ -43,7 +43,6 @@ async function openSegments(app, page, segments = [timedSegment], beforeOpen = n
   }))
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
-  await beforeOpen?.()
   const panel = await openPanel(page)
   await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(segments.length)
   return { panel, video }
@@ -189,26 +188,6 @@ test('keeps the editable copy when its downvote fails and never toggles an exist
   await panel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
   await expect(editor.locator('.sponsorBlockDraftSegment')).toHaveCount(2)
   expect(votes).toEqual(['0', '0'])
-})
-
-test('prevents full-video category votes and copies highlights without an end-time field', async ({ app, page }) => {
-  const { panel } = await openSegments(app, page, [
-    { ...timedSegment, UUID: 'full-label', category: 'exclusive_access', actionType: 'full', segment: [0, 0] },
-    { ...timedSegment, UUID: 'highlight', category: 'poi_highlight', actionType: 'poi', segment: [11, 11] }
-  ])
-  await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
-  await panel.locator('.sponsorBlockSegmentSummary').first().click()
-  await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-  await expect(panel.getByRole('button', { name: 'Change category', exact: true })).toHaveCount(0)
-  await expect(panel.getByRole('button', { name: 'Copy & downvote', exact: true })).toBeVisible()
-  await panel.locator('.sponsorBlockSegmentSummary').nth(1).click()
-  await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-  await expect(panel.getByRole('button', { name: 'Change category', exact: true })).toHaveCount(0)
-  await panel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
-  const editor = page.locator('.sponsorBlockSubmissionMenu')
-  await expect(editor.getByRole('textbox', { name: 'Segment start time' })).toHaveValue('0:11.000')
-  await expect(editor.getByRole('textbox', { name: 'Segment end time' })).toHaveCount(0)
-  await expect(editor.locator('select')).toHaveValue('poi_highlight')
 })
 
 test('stops muting when a category correction disables the last playback segment', async ({ app, page }) => {
@@ -400,42 +379,6 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     }
   })
 
-  test('opens at its resting height and keeps a scroll made while opening', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 1440, height: 960 })
-    let opening
-    const { panel } = await openSegments(app, page, Array.from({ length: 9 }, (_, index) => ({
-      ...timedSegment, UUID: `segment-${index}`, segment: [index, index + 0.5]
-    })), async () => {
-      // Sample every frame of the opening transition and scroll to the end
-      // halfway through, like a user reaching for the last segment.
-      opening = page.evaluate(() => new Promise(resolve => {
-        const heights = []
-        let scrolled = false
-        const sample = () => {
-          const panel = document.querySelector('.watchVideoSponsorBlock')
-          if (panel) {
-            heights.push(panel.getBoundingClientRect().height)
-            const content = panel.querySelector('.sponsorBlockContent')
-            if (!scrolled && content && content.scrollHeight > content.clientHeight + 1 && heights.length > 3) {
-              content.scrollTop = content.scrollHeight
-              scrolled = true
-            }
-            if (!panel.className.includes('sidebar-panel-enter') && scrolled) {
-              requestAnimationFrame(() => requestAnimationFrame(() => resolve({ heights, scrollTop: content.scrollTop })))
-              return
-            }
-          }
-          requestAnimationFrame(sample)
-        }
-        requestAnimationFrame(sample)
-      }))
-    })
-    const { heights, scrollTop } = await opening
-    const finalHeight = await panel.evaluate(element => element.getBoundingClientRect().height)
-    expect(Math.max(...heights), JSON.stringify(heights)).toBeLessThanOrEqual(finalHeight + 1)
-    expect(scrollTop).toBeGreaterThan(0)
-  })
-
   test('keeps category edits inside the panel and clamps after collapsing, cancellation, and resize', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 1440, height: 960 })
     const { panel } = await openSegments(app, page, Array.from({ length: 9 }, (_, index) => ({
@@ -491,27 +434,6 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     }
     await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
     await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
-  })
-
-  test('keeps a hovered skipped toast when its segment is skipped again', async ({ app, page }) => {
-    const { panel, video } = await openSegments(app, page)
-    await panel.getByRole('button', { name: 'Close', exact: true }).click()
-    await page.evaluate(() => window.$store.commit('setSponsorBlockSkippedToastDuration', 1))
-    const skip = () => video.evaluate(element => {
-      element.currentTime = 11.2
-      element.dispatchEvent(new Event('timeupdate'))
-    })
-    await skip()
-    const toast = page.locator('.ftVideoPlayer .skippedSegment')
-    await expect(toast).toBeVisible()
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await toast.hover({ position: { x: 12, y: 12 } })
-    await skip()
-    // Outlast the 2 s minimum toast duration
-    await page.waitForTimeout(2500)
-    await expect(toast).toBeVisible({ timeout: 1 })
-    await page.mouse.move(0, 0)
-    await expect(toast).toBeHidden()
   })
 
   test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {

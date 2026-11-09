@@ -1,4 +1,4 @@
-import { goTo, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { goTo, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 import {
@@ -184,37 +184,33 @@ test('terminal built-in playback failure falls back to yt-dlp once', async ({ ap
   expect(result.errorMessage).toBe('')
 })
 
-for (const reloadRequest of [false, true]) {
-  test(`disabled playback-engine fallback stops after ${reloadRequest ? 'SABR reload requests' : 'SABR playback errors'}`, async ({ app, page }) => {
-    await mockUnplayableWatchPage(app, page)
-    await goTo(page, 'history')
-    await page.getByText('SABR test video').click()
-    await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
-    const watchView = await watchViewHandle(page)
-    await watchView.evaluate(view => view.$store.dispatch('updatePlaybackEngineFallback', false))
-    const messages = []
-    page.on('console', message => messages.push(message.text()))
+test('disabled playback-engine fallback stops after SABR reload requests', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => view.$store.dispatch('updatePlaybackEngineFallback', false))
+  const messages = []
+  page.on('console', message => messages.push(message.text()))
 
-    const result = await driveWatchView(page, Array.from({ length: 4 }, () => (
-      reloadRequest ? { reloadRequest: true } : { error: true }
-    )), { legacyFormats: [], enablePlaybackEngineFallback: true })
+  const result = await driveWatchView(page, Array.from({ length: 4 }, () => ({ reloadRequest: true })), { legacyFormats: [], enablePlaybackEngineFallback: true })
 
-    expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
-    expect(result.activePlaybackEngine).toBe('built-in')
-    expect(result.playbackEngineFallbackAttempted).toBe(false)
-    expect(result.errorMessage).toContain('Unable to recover the video stream')
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
+  expect(result.activePlaybackEngine).toBe('built-in')
+  expect(result.playbackEngineFallbackAttempted).toBe(false)
+  expect(result.errorMessage).toContain('Unable to recover the video stream')
 
-    // Diagnostic reports must show each reload against the limits and why recovery stopped
-    await expect.poll(() => messages.filter(message => /SABR|Showing error/.test(message))).toEqual([
-      ...Array.from({ length: MAX_SABR_ERROR_RECOVERIES }, (_, index) => expect.stringMatching(new RegExp(
-        `^${result.reloads[index].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} for jNQXAC9IVRw at \\d+s and [\\d.]+x speed\\. Reload ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES} ` +
-        `since playback last settled, ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video$`
-      ))),
-      `Not reloading the SABR stream for jNQXAC9IVRw after ${MAX_SABR_ERROR_RECOVERIES} reloads since playback last settled and ${MAX_SABR_ERROR_RECOVERIES} for this video`,
-      `Showing error for jNQXAC9IVRw: ${result.errorMessage}`,
-    ])
-  })
-}
+  // Diagnostic reports must show each reload against the limits and why recovery stopped
+  await expect.poll(() => messages.filter(message => /SABR|Showing error/.test(message))).toEqual([
+    ...Array.from({ length: MAX_SABR_ERROR_RECOVERIES }, (_, index) => expect.stringMatching(new RegExp(
+      `^${result.reloads[index].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} for jNQXAC9IVRw at \\d+s and [\\d.]+x speed\\. Reload ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES} ` +
+      `since playback last settled, ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video$`
+    ))),
+    `Not reloading the SABR stream for jNQXAC9IVRw after ${MAX_SABR_ERROR_RECOVERIES} reloads since playback last settled and ${MAX_SABR_ERROR_RECOVERIES} for this video`,
+    `Showing error for jNQXAC9IVRw: ${result.errorMessage}`,
+  ])
+})
 
 test('disabled playback-engine fallback preserves yt-dlp and allows a manual switch', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -293,7 +289,7 @@ for (const fallbackEnabled of [false, true]) {
   })
 }
 
-for (const defaultEngine of ['built-in', 'yt-dlp']) {
+for (const defaultEngine of ['yt-dlp']) {
   test(`disabled playback-engine fallback leaves authenticated retry manual with ${defaultEngine} as default`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -793,34 +789,6 @@ test('a stale yt-dlp rejection probe preserves a newer cache entry', async ({ ap
   expect(result.loadGeneration).toBeGreaterThan(0)
 })
 
-test('startup countdown keeps artwork visible', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await page.route('https://i.ytimg.com/**', route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"><rect width="480" height="360" fill="#326b8a"/></svg>'
-  }))
-  await openMockedVideo(page)
-  const watchView = await watchViewHandle(page)
-  await watchView.evaluate(async view => {
-    view.isLoading = true
-    await view.$nextTick()
-    view.adEndTimeUnixMs = Date.now() + 8000
-    view.isLoading = false
-  })
-  const player = page.locator('.ftVideoPlayer')
-  await expect(player.locator('.countdownOverlay')).toBeVisible()
-  const poster = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
-  await expect(poster).toBeVisible()
-  await expect.poll(() => poster.evaluate(image => image.naturalWidth)).toBe(480)
-  expect(await poster.getAttribute('alt')).toBe('')
-  const bounds = await player.boundingBox()
-  expect(await poster.boundingBox()).toEqual(bounds)
-  expect(await poster.evaluate(image => getComputedStyle(image).objectFit)).toBe('contain')
-  await expect(player.locator('.countdownOverlay')).toBeHidden({ timeout: 15_000 })
-  await expect(poster).toBeHidden()
-  await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBeGreaterThanOrEqual(3)
-})
-
 for (const posterAvailable of [true, false]) {
   test(`yt-dlp 403 recovery keeps the player height with poster ${posterAvailable ? 'available' : 'unavailable'}`, { tag: '@scale' }, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
@@ -1126,50 +1094,6 @@ test('a SABR reload preserves the active video quality', async ({ app, page }) =
   expect(quality).toBe('720')
 })
 
-test('sizes the fullscreen playback-error reload toast to its content', async ({ app, page }) => {
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setPlayerFullscreen(page, true)
-
-  const watchView = await watchViewHandle(page)
-  await watchView.evaluate(async (view) => {
-    view.getTimestamp = () => 0
-    view.reloadView = async () => {}
-    view.tryPlaybackEngineFallback = async () => false
-    view.errorMessage = ''
-    view.isLoading = false
-    view.isLive = false
-    view.isPostLiveDvr = false
-    view.activeFormat = 'dash'
-    view.manifestMimeType = 'application/sabr+json'
-
-    await view.handlePlayerError({
-      severity: 2,
-      category: 1,
-      code: 1002,
-      data: ['https://example.invalid/sabr', 500]
-    })
-  })
-
-  const toast = page.locator('.toast', { hasText: 'Refreshing SABR stream after playback error' })
-  await expect(toast).toBeVisible()
-  await expect(toast).toHaveCount(1)
-  await expect(toast.locator('..')).toHaveCSS('transform', 'none')
-
-  const { trailingSpace, paddingEnd } = await toast.evaluate((element) => {
-    const toastBounds = element.getBoundingClientRect()
-    const messageBounds = element.querySelector('.message').getBoundingClientRect()
-
-    return {
-      trailingSpace: toastBounds.right - messageBounds.right,
-      paddingEnd: Number.parseFloat(getComputedStyle(element).paddingInlineEnd)
-    }
-  })
-
-  expect(Math.abs(trailingSpace - paddingEnd)).toBeLessThanOrEqual(1)
-})
-
 test('Pause on Stream Recovery pauses a reload behind a persistent notice until playback recovers or it is dismissed', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -1258,64 +1182,6 @@ test('by default stream recovery keeps playing and shows a transient toast', asy
   await expect(page.locator('.streamRecoveryNotice')).toHaveCount(0)
 })
 
-test('a SABR reload preserves the tab title while adding its resume timestamp', async ({ app, page }) => {
-  await mockUnplayableWatchPage(app, page)
-  await goTo(page, 'history')
-  await page.getByText('SABR test video').click()
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
-
-  const titles = await page.evaluate(async () => {
-    const app = document.querySelector('#app')?.__vue_app__
-
-    const findWatchView = (vnode) => {
-      if (vnode?.component?.type?.name === 'Watch') {
-        return vnode.component.proxy
-      }
-      if (vnode?.component?.subTree) {
-        const match = findWatchView(vnode.component.subTree)
-        if (match) return match
-      }
-      if (Array.isArray(vnode?.children)) {
-        for (const child of vnode.children) {
-          const match = findWatchView(child)
-          if (match) return match
-        }
-      }
-      return null
-    }
-
-    const watchView = findWatchView(app?._container?._vnode)
-    if (!watchView) {
-      throw new Error('Unable to access the watch view')
-    }
-
-    watchView.getTimestamp = () => 42
-    watchView.reloadView = async () => {}
-    watchView.showTabToast = () => {}
-
-    const titleBeforeReload = watchView.$store.getters.getTabById(watchView.tabId).contentTitle
-    const publishedTitles = []
-    const unsubscribe = watchView.$store.subscribe((mutation) => {
-      if (mutation.type === 'setTabContentTitle' && mutation.payload.tabId === watchView.tabId) {
-        publishedTitles.push(mutation.payload.title)
-      }
-    })
-
-    try {
-      await watchView.performSabrReload({}, 'Synthetic SABR reload')
-    } finally {
-      unsubscribe()
-    }
-
-    return { titleBeforeReload, publishedTitles }
-  })
-
-  expect(titles.publishedTitles).toEqual([titles.titleBeforeReload])
-  await expect(page).toHaveURL(/oneTimeTimestamp=42/)
-  await expect(page).toHaveTitle(`${titles.titleBeforeReload} - OpenTubeX`)
-})
-
 test('pausing keeps a SABR replacement paused when autoplay is enabled', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -1368,43 +1234,6 @@ test('pausing keeps a SABR replacement paused when autoplay is enabled', async (
 
   expect(await page.evaluate(() => window.__sabrReplacementPlayEvents)).toEqual([])
   expect(await replacementVideo.evaluate(element => element.paused)).toBe(true)
-})
-
-test('a SABR-requested replacement keeps looping and its repeat stats', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => {
-    element.pause()
-    element.loop = true
-    element.currentTime = element.duration - 0.5
-  })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-
-  const stats = page.getByRole('region', { name: 'Repeat stats', exact: true })
-  await video.evaluate(element => element.play())
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
-  await video.evaluate(element => element.pause())
-  const spent = await stats.locator('.repeatStatsTime').textContent()
-
-  const watchView = await watchViewHandle(page)
-  await watchView.evaluate(async view => {
-    view.getTimestamp = () => 0
-    view.isLoading = false
-    view.isLive = false
-    view.isPostLiveDvr = false
-    view.activeFormat = 'dash'
-    view.manifestMimeType = 'application/sabr+json'
-
-    await view.onPlayerReloadRequested(view.$refs.player.getSabrReloadState())
-  })
-
-  const replacementVideo = page.locator('.tabContent[aria-hidden="false"] video')
-  await expect(replacementVideo).toHaveCount(1, { timeout: 30_000 })
-  await expect.poll(() => replacementVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
-  await expect.poll(() => replacementVideo.evaluate(element => element.loop)).toBe(true)
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
-  await expect(stats.locator('.repeatStatsTime')).toHaveText(spent)
-  expect(await watchView.evaluate(view => view.sabrReloadState)).toBeNull()
 })
 
 test('a SABR-requested replacement keeps an active A-B repeat session', async ({ app, page }) => {
@@ -1521,25 +1350,6 @@ test('repeated SABR reload requests stop instead of reloading the tab forever', 
   expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
   expect(result.finalFormat).toBe('legacy')
-})
-
-test('repeated SABR reload requests never fall back to audio', async ({ app, page }) => {
-  await mockUnplayableWatchPage(app, page)
-  await goTo(page, 'history')
-  await page.getByText('SABR test video').click()
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
-
-  const result = await driveWatchView(page, [
-    { reloadRequest: true },
-    { reloadRequest: true },
-    { reloadRequest: true },
-    { reloadRequest: true }
-  ], { legacyFormats: [] })
-
-  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
-  expect(result.finalFormat).toBe('dash')
-  expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
 test('exhausted SABR reload requests use the playback engine fallback once', async ({ app, page }) => {

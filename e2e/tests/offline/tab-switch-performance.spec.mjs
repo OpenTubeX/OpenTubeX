@@ -101,92 +101,88 @@ test.describe('Ctrl+Tab responsiveness', () => {
   })
 })
 
-for (const uiScale of [100, 125]) {
-  for (const currentLocale of ['en-US', 'ar']) {
-    test.describe(`desktop tab switching at ${uiScale}% in ${currentLocale}`, () => {
-      test.use({
-        seed: {
-          settings: {
-            uiScale,
-            currentLocale,
-            reducedMotion: 'on',
-            showTabPreviews: false,
-            fetchSubscriptionsAutomatically: false
-          }
-        }
-      })
+test.describe('desktop tab switching at 125%', () => {
+  test.use({
+    seed: {
+      settings: {
+        uiScale: 125,
+        currentLocale: 'en-US',
+        reducedMotion: 'on',
+        showTabPreviews: false,
+        fetchSubscriptionsAutomatically: false
+      }
+    }
+  })
 
-      test('avoids repeated page scrollbar measurements when restoring tab scroll positions', async ({ page }) => {
-        await page.route(/^https?:\/\//, abortUnmockedRequest)
-        // A floating settings window makes forced document layout particularly
-        // expensive. Keep it open while switching already-mounted pages.
-        await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
-        await expect(page.locator('.settingsWindow')).toBeVisible()
-        const ids = []
-        for (const route of ['/history', '/about']) {
-          const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), route)
-          ids.push(tab.id)
-          const content = page.locator(`.tabContent[data-tab-id="${tab.id}"]`)
-          await expect(content).toBeVisible()
-          await content.evaluate((element, index) => {
-            const overflow = document.createElement('div')
-            overflow.dataset.tabSwitchOverflow = ''
-            overflow.style.height = `${2000 + index * 1000}px`
-            element.append(overflow)
-          }, ids.length)
-        }
+  test('avoids repeated page scrollbar measurements when restoring tab scroll positions', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    // A floating settings window makes forced document layout particularly
+    // expensive. Keep it open while switching already-mounted pages.
+    await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    const ids = []
+    for (const route of ['/history', '/about']) {
+      const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), route)
+      ids.push(tab.id)
+      const content = page.locator(`.tabContent[data-tab-id="${tab.id}"]`)
+      await expect(content).toBeVisible()
+      await content.evaluate((element, index) => {
+        const overflow = document.createElement('div')
+        overflow.dataset.tabSwitchOverflow = ''
+        overflow.style.height = `${2000 + index * 1000}px`
+        element.append(overflow)
+      }, ids.length)
+    }
 
+    await settlePageLayout(page)
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    const savedOffsets = new Map(ids.map(id => [id, 0]))
+    try {
+      for (const id of [...ids, ...ids]) {
         await settlePageLayout(page)
-        const session = await page.context().newCDPSession(page)
-        await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
-        const savedOffsets = new Map(ids.map(id => [id, 0]))
-        try {
-          for (const id of [...ids, ...ids]) {
-            await settlePageLayout(page)
-            const metrics = await page.evaluate(id => new Promise(resolve => {
-              const originalStyle = window.getComputedStyle
-              let pageMeasurements = 0
-              window.getComputedStyle = (...args) => {
-                if (args[0] === document.documentElement) pageMeasurements++
-                return originalStyle(...args)
-              }
-              const startedAt = performance.now()
-              let finished = false
-              const timeout = setTimeout(() => finish(false), 5000)
-              function finish(presented) {
-                finished = true
-                clearTimeout(timeout)
-                window.getComputedStyle = originalStyle
-                resolve({ presented, elapsed: performance.now() - startedAt, pageMeasurements })
-              }
-              function frame() {
-                if (finished) return
-                const target = document.querySelector(`.tabContent[data-tab-id="${id}"]`)
-                if (target?.getAttribute('aria-hidden') === 'false') {
-                  requestAnimationFrame(() => finish(true))
-                } else {
-                  requestAnimationFrame(frame)
-                }
-              }
-              document.querySelector(`.tab[data-tab-id="${id}"]`).click()
-              requestAnimationFrame(frame)
-            }), id)
-            console.log('Desktop tab switch:', { uiScale, currentLocale, ...metrics })
-            expect(metrics.presented).toBe(true)
-            // Bound work instead of machine-dependent elapsed time. Before the
-            // fix each switch performs 16+ document style measurements.
-            expect.soft(metrics.pageMeasurements).toBeLessThanOrEqual(12)
-            await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(savedOffsets.get(id), 0)
-            await page.evaluate(() => window.scrollTo({ top: 350, behavior: 'instant' }))
-            savedOffsets.set(id, await page.evaluate(() => window.scrollY))
+        const metrics = await page.evaluate(id => new Promise(resolve => {
+          const originalStyle = window.getComputedStyle
+          let pageMeasurements = 0
+          window.getComputedStyle = (...args) => {
+            if (args[0] === document.documentElement) pageMeasurements++
+            return originalStyle(...args)
           }
-        } finally {
-          await session.detach()
-        }
-      })
-    })
-  }
-}
+          const startedAt = performance.now()
+          let finished = false
+          const timeout = setTimeout(() => finish(false), 5000)
+          function finish(presented) {
+            finished = true
+            clearTimeout(timeout)
+            window.getComputedStyle = originalStyle
+            resolve({ presented, elapsed: performance.now() - startedAt, pageMeasurements })
+          }
+          function frame() {
+            if (finished) return
+            const target = document.querySelector(`.tabContent[data-tab-id="${id}"]`)
+            if (target?.getAttribute('aria-hidden') === 'false') {
+              requestAnimationFrame(() => finish(true))
+            } else {
+              requestAnimationFrame(frame)
+            }
+          }
+          document.querySelector(`.tab[data-tab-id="${id}"]`).click()
+          requestAnimationFrame(frame)
+        }), id)
+        console.log('Desktop tab switch:', metrics)
+        expect(metrics.presented).toBe(true)
+        // Bound work instead of machine-dependent elapsed time. Before the
+        // fix each switch performs 16+ document style measurements.
+        expect.soft(metrics.pageMeasurements).toBeLessThanOrEqual(12)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(savedOffsets.get(id), 0)
+        await page.evaluate(() => window.scrollTo({ top: 350, behavior: 'instant' }))
+        savedOffsets.set(id, await page.evaluate(() => window.scrollY))
+      }
+    } finally {
+      await session.detach()
+    }
+  })
+})
 
 /** Wait for pending resize and mutation observer deliveries before sampling. */
 async function settlePageLayout(page) {

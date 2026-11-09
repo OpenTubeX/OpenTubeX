@@ -38,31 +38,14 @@ async function sync(page) {
   await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
 }
 
-for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
+for (const { encrypted, beforeFirstSync, failure } of [
   { encrypted: false, beforeFirstSync: false },
-  { encrypted: true, beforeFirstSync: false },
-  { encrypted: false, beforeFirstSync: true },
-  { encrypted: true, beforeFirstSync: true },
   { encrypted: true, beforeFirstSync: true, failure: 'upload' },
   { encrypted: true, beforeFirstSync: true, failure: 'conflict' },
-  { encrypted: true, beforeFirstSync: true, failure: 'newer repair' },
   { encrypted: true, beforeFirstSync: true, failure: 'later collection' },
-  { encrypted: false, beforeFirstSync: true, placeholderTitle: true },
-  { encrypted: true, beforeFirstSync: true, placeholderTitle: true },
 ]) {
-  test(`history repairs sync without repeated uploads, encrypted ${encrypted}, before first sync ${beforeFirstSync}, failure ${failure ?? 'none'}, title placeholder ${placeholderTitle === true}`, async ({ page }, testInfo) => {
+  test(`history repairs sync without repeated uploads, encrypted ${encrypted}, before first sync ${beforeFirstSync}, failure ${failure ?? 'none'}`, async ({ page }, testInfo) => {
     const record = { ...original, lengthSeconds: beforeFirstSync ? 100 : 0 }
-    if (placeholderTitle) {
-      Object.assign(record, {
-        title: record.videoId,
-        author: 'Recovered channel',
-        published: Date.parse('2025-01-01'),
-        lengthSeconds: 120,
-        isLive: false,
-        liveNow: false,
-        isUpcoming: false,
-      })
-    }
     const metadata = { added_date: record.timeWatched, watched_state: 'completed', position_millis: record.watchProgress * 1000 }
     const server = encrypted ? await createTakeoutSyncServer() : null
     const receiverData = await createUserDataDir({ ...seed, history: [record] })

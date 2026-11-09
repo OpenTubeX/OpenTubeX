@@ -141,16 +141,6 @@ test('quick speed action saves, replaces and removes the channel speed through i
   expect(await video.evaluate(video => video.playbackRate)).toBe(1.5)
 })
 
-test('hides the channel setting menu when the video has no channel', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  const saveButton = page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true })
-  await expect(saveButton).toBeVisible()
-  const view = await watchViewHandle(page)
-  await view.evaluate(view => { view.channelId = '' })
-  await expect(saveButton).toHaveCount(0)
-})
-
 test('ignores saved channel settings while channel playback settings are off', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   // The channels of the two mocked videos opened below

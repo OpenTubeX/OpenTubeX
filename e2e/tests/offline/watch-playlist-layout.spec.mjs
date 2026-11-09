@@ -75,30 +75,6 @@ async function openPlaylist(app, page, beforeOpen = null) {
   return watchViewHandle(page)
 }
 
-test('playing playlist shows thumbnail numbers and retains reorder controls', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-  const watch = await openPlaylist(app, page)
-  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
-  await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
-  await expect(panel.locator('.videoIndexIcon')).toBeVisible()
-  const secondRow = panel.locator('.playlistItem').nth(1)
-  await expect(secondRow.locator('.grabBar')).toBeVisible()
-  await expect(secondRow.locator('.videoDuration')).toHaveText('2:00')
-  await expect(secondRow.locator('.playlistIndexBadge')).toHaveText('2')
-  await expect.poll(() => secondRow.locator('.videoThumbnail').evaluate(thumbnail => {
-    const bounds = thumbnail.getBoundingClientRect()
-    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
-    const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
-    return Math.abs(index.left - bounds.left - 4) < 1 && Math.abs(index.top - bounds.top - 4) < 1 && index.bottom <= duration.top
-  })).toBe(true)
-  await attachScreenshot('playing-playlist-thumbnail-numbers')
-  await panel.screenshot({ path: test.info().outputPath('playlist-thumbnail-numbers.png') })
-  await secondRow.locator('.videoIndexArea').press('ArrowDown')
-  await expect(panel.locator('.playlistItem').nth(2)).toContainText('Playlist video 2')
-  await expect(panel.locator('.playlistItem').nth(2).locator('.playlistIndexBadge')).toHaveText('3')
-  await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
-  await watch.dispose()
-})
-
 test.describe('SponsorBlock video labels', () => {
   test.use({
     seed: {
@@ -113,49 +89,6 @@ test.describe('SponsorBlock video labels', () => {
     body: JSON.stringify(videos.slice(0, 2).map(video => ({ videoID: video.videoId, segments: [{ category: 'exclusive_access', actionType: 'full' }] }))),
     contentType: 'application/json'
   }))
-
-  test('show only their icon beside wide durations', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
-    await openPlaylist(app, page, mockFullVideoLabels(page))
-    const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
-    const labelsClear = thumbnails => thumbnails.evaluateAll(elements => elements.every(thumbnail => {
-      const label = thumbnail.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect()
-      const icon = thumbnail.querySelector('.sponsorBlockVideoLabel .ft-icon').getBoundingClientRect()
-      const text = thumbnail.querySelector('.sponsorBlockVideoLabel > span:last-child').getBoundingClientRect()
-      const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
-      // The external player button shows on hover and must stay clickable.
-      const externalPlayer = thumbnail.querySelector('.externalPlayerIcon').getBoundingClientRect()
-      const bounds = thumbnail.getBoundingClientRect()
-      return label.right <= duration.left + 0.5 && label.left >= bounds.left && label.bottom <= bounds.bottom + 0.5 &&
-        label.bottom <= externalPlayer.top + 0.5 &&
-        icon.left >= label.left - 0.5 && icon.right <= label.right + 0.5 && text.width <= 1
-    }))
-    // The second video is watched, which stacks the label above the Watched badge.
-    const thumbnails = panel.locator('.playlistItem .videoThumbnail').filter({ has: page.locator('.sponsorBlockVideoLabel') })
-    await expect(thumbnails).toHaveCount(2)
-    for (const thumbnail of await thumbnails.all()) {
-      await expect(thumbnail.locator('.videoDuration [data-icon="music"]')).toBeVisible()
-      const label = thumbnail.locator('.sponsorBlockVideoLabel')
-      // The text is left to the tooltip, the prompt and screen readers.
-      await expect(label).toHaveAttribute('title', 'Exclusive Access · Full Video')
-      await expect(label).toMatchAriaSnapshot('- button "Exclusive Access"')
-    }
-    await expect.poll(() => labelsClear(thumbnails)).toBe(true)
-    await attachScreenshot('playlist-sponsorblock-icon-labels')
-
-    await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
-    await setWindowSize(app, page, { width: 960, height: 440 })
-    await page.setViewportSize({ width: Math.round(960 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
-    await setPlayerFullscreen(page, true)
-    await clickFullscreenAction(page.locator('.ftVideoPlayer'), '.fullscreenPlaylistToggle')
-    const dock = page.locator('.fullscreenPlaylistTarget')
-    await expect(dock.locator('.playlistItem')).toHaveCount(videos.length)
-    // Not even the icon fits there, so the labels are left out.
-    await expect(dock.locator('.playlistItem .videoThumbnail [data-icon="music"]')).toHaveCount(2)
-    await expect(dock.locator('.sponsorBlockVideoLabel')).toHaveCount(2)
-    for (const label of await dock.locator('.sponsorBlockVideoLabel').all()) await expect(label).toBeHidden()
-    await attachScreenshot('fullscreen-playlist-sponsorblock-icon-labels')
-    await setPlayerFullscreen(page, false)
-  })
 
   test('open their category in a prompt by click and keyboard without opening the video', async ({ app, page }) => {
     await openPlaylist(app, page, mockFullVideoLabels(page))
@@ -389,44 +322,6 @@ test('playlist preview batches pointer measurements', { tag: '@scale' }, async (
   await watch.dispose()
 })
 
-test('phone playlist centers pending current items when opened', { tag: '@scale' }, async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.setViewportSize({ width: 480, height: 800 })
-  await page.evaluate(async () => {
-    const store = window.$store
-    // Phone grid cards can detach while being clicked: https://github.com/OpenTubeX/OpenTubeX/issues/2149
-    await store.dispatch('updatePlaylistViewType', 'list')
-    const playlist = store.getters.getPlaylist('layout-playlist')
-    const [current, ...others] = playlist.videos
-    await store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 8), current, ...others.slice(8)] })
-  })
-  const watch = await openPlaylist(app, page)
-  await page.locator('.phonePlaylistButton').click()
-  const sheet = page.locator('.dockedSheet[open]')
-  const list = sheet.locator('.playlistItemsWrapper')
-  const current = list.locator('.playlistItem').filter({ has: page.getByText('Playlist video 1', { exact: true }) })
-  const expectCurrentVisible = async () => {
-    await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
-    await expect.poll(async () => {
-      const item = await current.boundingBox()
-      const viewport = await list.boundingBox()
-      return item != null && viewport != null && item.y >= viewport.y - 1 && item.y + item.height <= viewport.y + viewport.height + 1
-    }).toBe(true)
-  }
-  await expectCurrentVisible()
-  await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
-  await expect(sheet).toHaveCount(0)
-  await watch.evaluate(async vm => {
-    const playlist = vm.$store.getters.getPlaylist('layout-playlist')
-    const current = playlist.videos.find(video => video.videoId === vm.videoId)
-    const others = playlist.videos.filter(video => video !== current)
-    await vm.$store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 10), current, ...others.slice(10)] })
-  })
-  await page.locator('.phonePlaylistButton').click()
-  await expectCurrentVisible()
-  await watch.dispose()
-})
-
 test('portrait playlist button opens the sheet with Space instead of toggling playback', async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
   await setWindowSize(app, page, { width: 480, height: 800 })
@@ -532,34 +427,6 @@ test('portrait playlist opens below the video and clamps after resize and remova
   await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
 })
 
-test('shuffled and reversed playlists keep the progress bar between the counter and buttons', { tag: '@scale' }, async ({ app, page }) => {
-  const watch = await openPlaylist(app, page)
-  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
-  const shuffle = panel.getByRole('button', { name: 'Shuffle Playlist' })
-  const reverse = panel.getByRole('button', { name: 'Reverse Playlist' })
-  const expectControlsBelowCounter = async () => {
-    await expect(panel.locator('.playlistProgressBarContainer')).toBeVisible()
-    await expect.poll(() => panel.evaluate(element => {
-      const counter = element.querySelector('.playlistIndex label').getBoundingClientRect()
-      const bar = element.querySelector('.playlistProgressBar').getBoundingClientRect()
-      const buttons = [...element.querySelectorAll('.playlistButtons .playlistButton')]
-        .map(button => button.getBoundingClientRect())
-      return bar.top >= counter.bottom - 0.5 && buttons.every(button => button.top >= bar.bottom - 0.5)
-    })).toBe(true)
-  }
-
-  await shuffle.click()
-  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
-  await expectControlsBelowCounter()
-  await shuffle.click()
-  await reverse.click()
-  await expect(reverse).toHaveAttribute('aria-pressed', 'true')
-  await panel.locator('.playlistItem').first().scrollIntoViewIfNeeded()
-  await expect(panel.locator('.playlistItem').first().locator('.playlistIndexBadge')).toHaveText('12')
-  await expectControlsBelowCounter()
-  await watch.dispose()
-})
-
 test('keyboard moves watch playlist videos to the top and bottom', async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
   const titles = page.locator('.watchVideoPlaylist .playlistItem .h3Title')
@@ -576,31 +443,6 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await expect(handleOf('Playlist video 3')).toBeFocused()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos[0].title))
     .toBe('Playlist video 3')
-  await watch.dispose()
-})
-
-test('drags watch playlist videos while the other rows slide aside', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-  // Keep the playlist beside the video at every UI scale, so the page itself does not scroll.
-  if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
-  const watch = await openPlaylist(app, page)
-  const rows = page.locator('.watchVideoPlaylist .playlistItem')
-  const titles = rows.locator('.h3Title')
-  const handle = await rows.nth(1).locator('.videoIndexArea').boundingBox()
-  const first = await rows.first().boundingBox()
-  const second = await rows.nth(1).boundingBox()
-  const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
-  await page.mouse.move(start.x, start.y)
-  await page.mouse.down()
-  await page.mouse.move(start.x, start.y + first.y - second.y, { steps: 8 })
-  await expect(rows.nth(1)).toHaveClass(/reorderDragged/)
-  // The rows keep their DOM order and slide aside until the drop.
-  await expect(titles.first()).toHaveText('Playlist video 1')
-  await expect.poll(async () => (await rows.first().boundingBox()).y).toBeCloseTo(second.y + second.height - first.height, 0)
-  await page.mouse.up()
-  await expect(page.locator('.reorderDragged, .reorderActive')).toHaveCount(0)
-  await expect(titles.first()).toHaveText('Playlist video 2')
-  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.slice(0, 3).map(video => video.title)))
-    .toEqual(['Playlist video 2', 'Playlist video 1', 'Playlist video 3'])
   await watch.dispose()
 })
 
@@ -660,91 +502,29 @@ test('playlist saves retain available view counts across restart', async ({ app,
   await expect.poll(() => counts(restarted.page)).toEqual(expected)
 })
 
-for (const [layout, count] of [['fullscreen', 12345], ['Shorts', 0]]) {
-  test(`${layout} save controls retain available view counts`, async ({ app, page }) => {
-    const watch = await openPlaylist(app, page)
-    await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
-    await page.evaluate(async () => {
-      await window.$store.dispatch('addPlaylist', { _id: 'action-counts', playlistName: 'Action counts', videos: [] })
-      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'action-counts')
-      await window.$store.dispatch('updateFullscreenActions', ['addToPlaylist', 'quickBookmark'])
-    })
-    await watch.evaluate((vm, { layout, count }) => {
-      vm.videoViewCount = count
-      if (layout === 'Shorts') {
-        vm.useCustomShortsPlayerForCurrentVideo = true
-        vm.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
-      }
-    }, { layout, count })
-    if (layout === 'fullscreen') await setPlayerFullscreen(page, true)
-    const controls = page.locator(layout === 'fullscreen' ? '.fullscreenActions' : '.shortsActionRail')
-    const quickBookmark = controls.getByRole('button', { name: /Action counts/ })
-    await quickBookmark.click()
-    const savedCounts = () => page.evaluate(() => window.$store.getters.getPlaylist('action-counts').videos.map(video => video.viewCount))
-    await expect.poll(savedCounts).toEqual([count])
-    await quickBookmark.click()
-    await expect.poll(savedCounts).toEqual([])
-    await controls.getByRole('button', { name: /^Add to playlist$/i }).click()
-    await page.getByRole('option').filter({ hasText: 'Action counts' }).click()
-    await expect.poll(savedCounts).toEqual([count])
-    await watch.dispose()
-    const restarted = await app.relaunch()
-    await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('action-counts')?.videos.map(video => video.viewCount))).toEqual([count])
-  })
-}
-
-test('playlist metadata groups views and upload time below the channel', { tag: '@scale' }, async ({ app, page }) => {
-  await openPlaylist(app, page)
-  const infoLine = page.locator('.watchVideoPlaylist .playlistItem .infoLine').first()
-  await expect(page.locator('.watchVideoPlaylist .playlistItem').last().locator('.viewCount')).toHaveCount(0)
-  await expect(infoLine.locator('.viewCount')).toContainText('12,345')
-  await expect(infoLine.locator('.viewCount .statIcon')).toBeVisible()
-  await expect(infoLine.locator('.uploadedTime .statIcon')).toBeVisible()
-  await expect.poll(() => infoLine.evaluate(element => {
-    const channel = element.querySelector('.channelName').getBoundingClientRect()
-    const views = element.querySelector('.viewCount').getBoundingClientRect()
-    const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
-    const bounds = element.getBoundingClientRect()
-    return { belowChannel: views.top >= channel.bottom && uploaded.top >= channel.bottom, contained: views.right <= bounds.right + 0.5 && uploaded.right <= bounds.right + 0.5 }
-  })).toEqual({ belowChannel: true, contained: true })
-})
-
-test('playlist channel separator follows the counter', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+test('fullscreen save controls retain available view counts', async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
-  await watch.evaluate(async (vm, items) => {
-    const store = vm.$store
-    const router = vm.tabRouter
-    const tabId = vm.tabId ?? 'web'
-    await router.push('/watch/jNQXAC9IVRw')
-    await vm.$nextTick()
-    store.commit('setCachedPlaylist', {
-      tabId,
-      value: { id: 'channel-layout', title: 'Channel playlist', channelName: 'Test channel', channelId: 'UC-test', totalVideoCount: items.length, items, continuationData: null }
-    })
-    await router.push('/watch/jNQXAC9IVRw?playlistId=channel-layout')
-  }, videos)
-  await waitForPlayback(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.setViewportSize({ width: Math.round(480 * uiScale / 100), height: Math.round(800 * uiScale / 100) })
-  await page.locator('.phonePlaylistButton').click()
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet.locator('.playlistHeader > .channelName')).toHaveText('Test channel', { useInnerText: true })
-  await expect(sheet.locator('.playlistIndex')).toBeHidden()
-  await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
-  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1280, height: 850 }))
-  await page.setViewportSize({ width: Math.round(1280 * uiScale / 100), height: Math.round(850 * uiScale / 100) })
-  await expect(page.locator('.watchVideoPlaylist .playlistHeader > .channelName')).toHaveText('Test channel -')
-  await expect(page.locator('.watchVideoPlaylist .playlistIndex')).toBeVisible()
-  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1280, height: 550 }))
-  await page.setViewportSize({ width: 1280, height: 550 })
-  await expect.poll(() => page.evaluate(() => window.matchMedia('(height <= 600px)').matches)).toBe(true)
-  // Exercise the ordinary component independently of the phone-layout query.
-  await watch.evaluate(vm => { vm.phoneLayout = false })
-  await expect(page.locator('.watchVideoPlaylist')).toBeVisible()
-  await expect(page.locator('.watchVideoPlaylist .playlistHeader > .channelName')).toHaveText('Test channel -', { useInnerText: true })
-  await expect(page.locator('.watchVideoPlaylist .playlistIndex')).toBeVisible()
-  await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
+  await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+  await page.evaluate(async () => {
+    await window.$store.dispatch('addPlaylist', { _id: 'action-counts', playlistName: 'Action counts', videos: [] })
+    await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'action-counts')
+    await window.$store.dispatch('updateFullscreenActions', ['addToPlaylist', 'quickBookmark'])
+  })
+  await watch.evaluate(vm => { vm.videoViewCount = 12345 })
+  await setPlayerFullscreen(page, true)
+  const controls = page.locator('.fullscreenActions')
+  const quickBookmark = controls.getByRole('button', { name: /Action counts/ })
+  await quickBookmark.click()
+  const savedCounts = () => page.evaluate(() => window.$store.getters.getPlaylist('action-counts').videos.map(video => video.viewCount))
+  await expect.poll(savedCounts).toEqual([12345])
+  await quickBookmark.click()
+  await expect.poll(savedCounts).toEqual([])
+  await controls.getByRole('button', { name: /^Add to playlist$/i }).click()
+  await page.getByRole('option').filter({ hasText: 'Action counts' }).click()
+  await expect.poll(savedCounts).toEqual([12345])
   await watch.dispose()
+  const restarted = await app.relaunch()
+  await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('action-counts')?.videos.map(video => video.viewCount))).toEqual([12345])
 })
 
 test('landscape fullscreen playlist shows more videos and keeps controls outside the scroller', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {

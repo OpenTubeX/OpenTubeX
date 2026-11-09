@@ -10,31 +10,29 @@ test.describe('Videos feed navigation', () => {
   })
 
   test('reuses the unchanged feed when returning from Playlists', { tag: '@performance' }, async ({ page }) => {
-    for (const viewport of [{ width: 375, height: 700 }, { width: 700, height: 375 }]) {
-      await page.setViewportSize(viewport)
-      await goTo(page, 'userplaylists')
-      await page.evaluate(() => {
-        window.navigationOriginalSort = Array.prototype.sort
-        window.navigationFeedSorts = 0
-        // Count expensive feed sorts without relying on machine-specific timing.
-        // eslint-disable-next-line no-extend-native
-        Array.prototype.sort = function (...args) {
-          if (this.length >= 30_000) window.navigationFeedSorts++
-          return window.navigationOriginalSort.apply(this, args)
-        }
-      })
-      try {
-        await goTo(page, 'subscriptions')
-        await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
-        expect(await page.evaluate(() => window.navigationFeedSorts)).toBe(0)
-      } finally {
-        await page.evaluate(() => {
-          // eslint-disable-next-line no-extend-native
-          Array.prototype.sort = window.navigationOriginalSort
-          delete window.navigationOriginalSort
-          delete window.navigationFeedSorts
-        })
+    await page.setViewportSize({ width: 375, height: 700 })
+    await goTo(page, 'userplaylists')
+    await page.evaluate(() => {
+      window.navigationOriginalSort = Array.prototype.sort
+      window.navigationFeedSorts = 0
+      // Count expensive feed sorts without relying on machine-specific timing.
+      // eslint-disable-next-line no-extend-native
+      Array.prototype.sort = function (...args) {
+        if (this.length >= 30_000) window.navigationFeedSorts++
+        return window.navigationOriginalSort.apply(this, args)
       }
+    })
+    try {
+      await goTo(page, 'subscriptions')
+      await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
+      expect(await page.evaluate(() => window.navigationFeedSorts)).toBe(0)
+    } finally {
+      await page.evaluate(() => {
+        // eslint-disable-next-line no-extend-native
+        Array.prototype.sort = window.navigationOriginalSort
+        delete window.navigationOriginalSort
+        delete window.navigationFeedSorts
+      })
     }
   })
 

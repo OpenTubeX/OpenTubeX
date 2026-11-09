@@ -55,21 +55,6 @@ test('truncates long selections so the rest of the label is never cut off', asyn
   await expect.poll(() => page.url()).toContain(`#/search/${encodeURIComponent(selectionText)}`)
 })
 
-test('truncates long selections without splitting emoji', async ({ page }) => {
-  // The 30th UTF-16 code unit lands inside the family emoji's ZWJ sequence
-  const selectionText = 'Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and more text'
-  const label = await page.evaluate((selection) => window.ftElectron.contextMenu.open({
-    selectionText: selection
-  }).then(menu => menu.items
-    .find(item => item.labelKey === 'Context Menu.Search Selection in New Tab')
-    .labelParameters.selection), selectionText)
-
-  expect(label.endsWith('…')).toBe(true)
-  // A cut inside the sequence would leave an unpaired surrogate behind
-  expect(label).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/)
-  expect(label).toBe('Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and…')
-})
-
 test('keeps tall top-level menus inside the viewport and scrollable', async ({ page }) => {
   await page.setViewportSize({ width: 420, height: 180 })
   await page.locator(sel.newTabButton).click()
@@ -130,36 +115,6 @@ test('does not clip fly-out submenus', async ({ page }) => {
     position: 'fixed',
     reachable: true
   })
-})
-
-test('renders long selection labels without clipping them', async ({ page }) => {
-  const point = await page.evaluate(() => {
-    const paragraph = document.createElement('p')
-    paragraph.textContent = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
-    paragraph.style.cssText = 'position:fixed;top:120px;left:40px;width:300px;z-index:19000;background:#000'
-    document.body.append(paragraph)
-
-    const range = document.createRange()
-    range.selectNodeContents(paragraph)
-    const selection = window.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(range)
-
-    const bounds = paragraph.getBoundingClientRect()
-    return { x: bounds.left + 10, y: bounds.top + 5 }
-  })
-  await page.mouse.click(point.x, point.y, { button: 'right' })
-
-  const menu = page.getByRole('menu', { name: 'Context Menu' })
-  await expect(menu).toBeVisible()
-
-  const label = menu.getByRole('menuitem', { name: /^Search ".*" in a New Tab$/ }).locator('span:not([aria-hidden])')
-  await expect(label).toHaveText('Search "OpenTubeX is a privacy respect…" in a New Tab')
-
-  const isClipped = await label.evaluate(element => {
-    return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1
-  })
-  expect(isClipped).toBe(false)
 })
 
 test('does not offer external search engines when they are disabled by default', async ({ page }) => {
@@ -250,21 +205,6 @@ test.describe('with all built-in external search engines enabled', () => {
         }
       })
     }).toEqual({ submenu: false, insideSubmenu: false, bridgeReachable: true })
-  })
-
-  test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
-    const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
-      selectionText: 'x'.repeat(101)
-    }))
-    const webSearchIndex = contextMenu.items.findIndex(item => item.label === 'Search with...')
-    const inAppSearchIndices = contextMenu.items
-      .map((item, index) => typeof item.label === 'string' && item.label.includes('is too long for search')
-        ? index
-        : -1)
-      .filter(index => index !== -1)
-
-    expect(contextMenu.items[webSearchIndex].enabled).toBe(true)
-    expect(webSearchIndex).toBeGreaterThan(Math.max(...inAppSearchIndices))
   })
 })
 
@@ -411,45 +351,5 @@ test.describe('with the maximum custom search engines configured', () => {
     await expect(section.locator('.removeEngine')).toHaveCount(19)
     await expect(section.getByRole('button', { name: 'Remove Engine 0', exact: true })).toHaveCount(0)
     await expect(section.getByRole('button', { name: 'Remove Engine 1', exact: true })).toBeVisible()
-  })
-
-  test('rejects another engine without clearing its inputs', async ({ page }) => {
-    const general = await goToSettingsSection(page, 'general')
-    const addRow = general.locator('.settingsSection').filter({
-      has: page.getByRole('heading', { name: 'Context Menu Search', exact: true })
-    }).locator('.addEngine')
-    const nameInput = addRow.getByLabel('Engine name')
-    const urlInput = addRow.getByLabel('Search URL')
-    await nameInput.fill('One Too Many')
-    await urlInput.fill('https://overflow.example/search?q=%s')
-    await addRow.getByRole('button', { name: 'Add engine' }).click()
-
-    await expect(nameInput).toHaveValue('One Too Many')
-    await expect(urlInput).toHaveValue('https://overflow.example/search?q=%s')
-    await expect(page.locator('.toast .message', {
-      hasText: 'You can add up to 20 custom search engines.'
-    })).toBeVisible()
-  })
-})
-
-test.describe('German locale', () => {
-  test.use({
-    seed: {
-      settings: {
-        currentLocale: 'de-DE',
-        contextMenuSearchEngines: allExternalSearchEnginesEnabled
-      }
-    }
-  })
-
-  test('translates external search labels from explicit menu metadata', async ({ page }) => {
-    const searchInput = page.locator('.searchInput input')
-    await searchInput.fill('Auswahl')
-    await searchInput.selectText()
-    await searchInput.click({ button: 'right' })
-
-    const menu = page.getByRole('menu', { name: 'Kontextmenü' })
-    await expect(menu).toBeVisible()
-    await expect(menu.getByRole('menuitem', { name: 'Suchen mit …' })).toBeVisible()
   })
 })

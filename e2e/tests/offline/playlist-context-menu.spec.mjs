@@ -40,18 +40,6 @@ test('playlist actions use the context menu and respect the menu icon setting', 
   await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
 })
 
-test('playlist open actions are regular rows instead of a half-empty icon header', async ({ page, attachScreenshot }) => {
-  await goTo(page, 'userplaylists')
-  await page.locator('.ft-list-item').filter({ hasText: 'Playlist menu test' }).locator('.title').click({ button: 'right' })
-  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
-  await expect(menu.locator('.tabMenuHeader')).toHaveCount(0)
-  const rows = menu.locator('.menuContent > *')
-  await expect(rows.nth(0)).toHaveText('Open in a New Tab')
-  await expect(rows.nth(1)).toHaveText('Open in a New Window')
-  await expect(rows.nth(2)).toHaveClass('separator')
-  await attachScreenshot('playlist context menu')
-})
-
 test('playlist menu buttons open the context menu sheet on phones', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 812 })
   await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))

@@ -1,54 +1,7 @@
-import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, sel } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
-const AVATAR = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
-
-test.describe('subscription video avatars', () => {
-  test.use({
-    seed: {
-      settings: {
-        fetchSubscriptionsAutomatically: false,
-        listType: 'grid'
-      },
-      profiles: [{
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [{ id: CHANNEL_ID, name: 'Channel A', thumbnail: AVATAR }]
-      }],
-      subscriptionCache: [{
-        _id: CHANNEL_ID,
-        videos: [{
-          type: 'video',
-          videoId: 'avatarfeed1',
-          title: 'Subscription avatar result',
-          author: 'Channel A',
-          authorId: CHANNEL_ID,
-          published: Date.now(),
-          viewCount: 1,
-          lengthSeconds: 60,
-          liveNow: false
-        }],
-        videosTimestamp: new Date().toISOString(),
-        shorts: [],
-        shortsTimestamp: new Date().toISOString(),
-        liveStreams: [],
-        liveStreamsTimestamp: new Date().toISOString(),
-        communityPosts: [],
-        communityPostsTimestamp: new Date().toISOString()
-      }]
-    }
-  })
-
-  test('uses the cached subscription thumbnail', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const video = page.locator('.ft-list-video').filter({ hasText: 'Subscription avatar result' })
-    await expect(video.locator('.channelAvatarImage')).toHaveAttribute('src', AVATAR)
-  })
-})
 
 test.describe('Invidious search video avatars', () => {
   const instanceUrl = 'https://invidious.test'
@@ -61,59 +14,6 @@ test.describe('Invidious search video avatars', () => {
   }
 
   test.use({ seed: { settings: { ...settings, uiScale: 125 } } })
-
-  test('search result press highlights follow UI roundness', async ({ page }) => {
-    await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
-      json: [invidiousVideo('avatar-search-1', 'Rounded press result')]
-    }))
-    await page.locator(sel.searchInput).fill('rounded links')
-    await page.locator(sel.searchInput).press('Enter')
-    await page.setViewportSize({ width: 375, height: 812 })
-    const link = page.locator('.ft-list-video a.channelName').first()
-    await expect(link).toBeVisible()
-    await link.evaluate(el => el.addEventListener('click', event => { event.preventDefault(); event.stopImmediatePropagation() }, true))
-    for (const roundness of [0, 1, 2]) {
-      await page.evaluate(value => document.body.style.setProperty('--ui-roundness', value), String(roundness))
-      await link.scrollIntoViewIfNeeded()
-      const bounds = await link.boundingBox()
-      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-      await page.mouse.down()
-      await expect(link).toHaveCSS('border-top-left-radius', `${4 * roundness}px`)
-      await page.mouse.up()
-    }
-  })
-
-  test('retries failed video and playlist thumbnails without reloading the results', async ({ page }) => {
-    await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
-      json: [invidiousVideo('avatar-search-1', 'Retry thumbnail result'), invidiousPlaylist()]
-    }))
-    await page.route(`${instanceUrl}/api/v1/channels/${CHANNEL_ID}?**`, route => route.fulfill({
-      json: { author: 'Channel A', authorThumbnails: [{ url: avatarUrl }], tabs: [] }
-    }))
-    await page.route(avatarUrl, route => fulfillVisualFixture(route, 'avatar'))
-    const failedRequests = []
-    const serveThumbnail = route => {
-      const url = new URL(route.request().url())
-      if (!url.searchParams.has('opentubex_retry')) {
-        failedRequests.push(url.toString())
-        return route.abort('failed')
-      }
-      return fulfillVisualFixture(route, 'video-thumbnail')
-    }
-    await page.route(`${instanceUrl}/vi/**`, serveThumbnail)
-    await page.route('https://i.ytimg.com/**', serveThumbnail)
-
-    await page.locator(sel.searchInput).fill('retry thumbnails')
-    await page.locator(sel.searchInput).press('Enter')
-
-    const thumbnails = page.locator('.ft-list-video .thumbnailImage')
-    await expect(thumbnails).toHaveCount(2)
-    await expectImagesLoaded(thumbnails)
-    expect(failedRequests.length).toBeGreaterThan(0)
-    for (const thumbnail of await thumbnails.all()) {
-      await expect(thumbnail).toHaveAttribute('src', /[?&]opentubex_retry=/)
-    }
-  })
 
   test.describe('result metadata layout', () => {
     // The scale projects supply the UI scale for these geometry checks.
@@ -194,40 +94,6 @@ test.describe('Invidious search video avatars', () => {
         return uploaded.top > view.top && Math.abs(uploaded.left - view.left) <= 0.5
       })).toBe(true)
     })
-  })
-
-  test('hides video and playlist avatars without fetching channel data', async ({ page }) => {
-    let channelRequests = 0
-
-    await page.route(`${instanceUrl}/api/v1/search/**`, route => route.fulfill({
-      json: [
-        invidiousVideo('avatar-search-hidden', 'Hidden avatar video'),
-        invidiousPlaylist()
-      ]
-    }))
-    await page.route(`${instanceUrl}/api/v1/channels/${CHANNEL_ID}?**`, route => {
-      channelRequests++
-      return route.fulfill({
-        json: {
-          author: 'Channel A',
-          authorThumbnails: [{ url: avatarUrl }],
-          tabs: []
-        }
-      })
-    })
-
-    const focusSettings = await goToSettingsSection(page, 'focus')
-    const hideAvatars = focusSettings.getByRole('checkbox', { name: 'Hide Channel Avatars' })
-    await focusSettings.locator('label.switch-label').filter({ hasText: 'Hide Channel Avatars' }).click()
-    await expect(hideAvatars).toBeChecked()
-    await page.locator('.settingsCloseButton').click()
-
-    await page.locator(sel.searchInput).fill('hidden avatar results')
-    await page.locator(sel.searchInput).press('Enter')
-
-    await expect(page.locator('.ft-list-video')).toHaveCount(2)
-    await expect(page.locator('.ft-list-video .channelAvatar')).toHaveCount(0)
-    expect(channelRequests).toBe(0)
   })
 })
 

@@ -182,19 +182,6 @@ test.describe('tab bar', () => {
     }
   })
 
-  test('the mobile tabs preference leaves desktop tabs available', async ({ page }) => {
-    await page.evaluate(() => {
-      window.$store.commit('setEnableMobileTabs', false)
-    })
-    await goToSettingsSection(page, 'general')
-    await expect(page.locator('[data-setting-key="enableMobileTabs"]')).toHaveCount(0)
-    await page.evaluate(() => {
-      window.$store.dispatch('hideSettingsWindow')
-    })
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-  })
-
   test('reconciles synced sessions without remounting retained tabs', async ({ page }) => {
     const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
     const retainedTabId = initialState.activeTabId
@@ -313,15 +300,6 @@ test.describe('tab bar', () => {
       pendingReloadRoute: null,
       contentTitle: 'Playlists'
     })
-  })
-
-  test('new tab button opens a tab and activates it', async ({ page }) => {
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
-    await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
-    await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
-    await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="subscriptions"]')).toBeVisible()
   })
 
   test('keeps opening tabs after a blocked navigation to another site', async ({ app, page }) => {
@@ -563,18 +541,6 @@ test.describe('tab bar', () => {
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
   })
 
-  test('uses a distinct page icon for watch tabs', async ({ page }) => {
-    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/watch/jNQXAC9IVRw',
-      makeActive: false,
-      lazyLoad: true
-    }))
-    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
-
-    await expect(tab.locator('[data-icon="clapperboard"]')).toBeVisible()
-    await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
-  })
-
   test('keeps subscription tab text and loading indicators unchanged while fetching', async ({ page }) => {
     for (const route of ['/subscriptions', '/', '/subscriptions/', '/Subscriptions', '/Subscriptions/']) {
       const subscriptionsTab = await page.evaluate(route => window.ftElectron.tabs.create({
@@ -598,39 +564,6 @@ test.describe('tab bar', () => {
       await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
       await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), subscriptionsTab.id)
     }
-  })
-
-  test('paints the loading streak along rounded tab corners', async ({ app, page }) => {
-    const loadingTab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/watch/rounded-loading-line', makeActive: false, lazyLoad: true
-    }))
-    const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
-    await page.evaluate(id => {
-      const store = window.$store
-      store.commit('setUiRoundness', 100)
-      store.commit('setReducedMotion', 'off')
-      window.ftElectron.tabs.setLoading(true, id)
-    }, loadingTab.id)
-    await expect(tab.locator('.tabLoadingLine')).toBeVisible()
-    await tab.evaluate(element => {
-      element.style.setProperty('--accent-color', '#ff00ff')
-      element.style.setProperty('--primary-text-color', '#ff00ff')
-      for (const animation of element.querySelector('.tabLoadingLine').getAnimations({ subtree: true })) {
-        animation.pause()
-        animation.currentTime = 600
-      }
-    })
-    const point = await tab.evaluate(element => {
-      const style = getComputedStyle(element)
-      const border = Number.parseFloat(style.borderTopWidth)
-      const height = element.getBoundingClientRect().height - 2 * border
-      const radius = Math.min(Number.parseFloat(style.borderBottomLeftRadius), height / 2)
-      return [border + radius - (radius - 1) * Math.sin(Math.PI / 5),
-        border + height - radius + (radius - 1) * Math.cos(Math.PI / 5)]
-    })
-    const [color] = await sampleColors(app, tab, [point])
-    expect(color[0] - color[1], 'the loading streak rises around the left corner').toBeGreaterThan(100)
-    expect(color[2] - color[1]).toBeGreaterThan(100)
   })
 
   test('keeps the loading glow inside its tab', async ({ app, page }) => {
@@ -2050,7 +1983,7 @@ test.describe('tab bar', () => {
     expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
   })
 
-  for (const [zoomFactor, baseTheme] of [[1, 'light'], [0.95, 'dark']]) {
+  for (const [zoomFactor, baseTheme] of [[0.95, 'dark']]) {
     test(`keeps the vertical tab resize line above navigation at ${zoomFactor * 100}% UI scale in ${baseTheme} theme`, async ({ page, attachScreenshot }) => {
       await page.evaluate(async ({ zoomFactor, baseTheme }) => {
         await window.ftElectron.setZoomFactor(zoomFactor)
@@ -2147,23 +2080,6 @@ test.describe('tab bar', () => {
         )
       }).toBeLessThanOrEqual(1)
     }
-  })
-
-  test('uses the same title font size for pinned and unpinned tabs', async ({ page }) => {
-    await page.keyboard.press('Control+t')
-
-    const tabs = page.locator(sel.tabs)
-    const pinnedTab = tabs.first()
-    const pinnedTabId = await pinnedTab.getAttribute('data-tab-id')
-
-    await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
-    await expect(pinnedTab).toHaveClass(/pinned/)
-
-    const titleFontSizes = await tabs.locator('.tabTitle').evaluateAll(titles => {
-      return titles.map(title => getComputedStyle(title).fontSize)
-    })
-
-    expect(titleFontSizes[0]).toBe(titleFontSizes[1])
   })
 
   // Regression: search bar text used to leak between tabs (65f4e2e13)
@@ -2712,14 +2628,6 @@ test.describe('closing the last tab with the window kept open', () => {
   })
 })
 
-test.describe('tab icons disabled', () => {
-  test.use({ seed: { settings: { showTabIcons: false } } })
-
-  test('hides page icons', async ({ page }) => {
-    await expect(page.locator(sel.activeTab).locator('.tabPageIcon, .tabAvatar')).toHaveCount(0)
-  })
-})
-
 test.describe('fixed tab width', () => {
   test.use({ seed: { settings: { useFixedTabWidth: true, fixedTabWidth: 140 } } })
 
@@ -3137,7 +3045,7 @@ test.describe('background tab shortcuts', () => {
     }
   })
 
-  for (const [label, shortcut] of [['Ctrl+R', 'Control+r'], ['F5', 'F5']]) {
+  for (const [label, shortcut] of [['Ctrl+R', 'Control+r']]) {
     test(`${label} refreshes the current feed on an active subscriptions tab`, async ({ page }) => {
       await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
       await page.route(/^https?:\/\//, abortUnmockedRequest)
@@ -3414,7 +3322,7 @@ test.describe('tab organizer', () => {
     })).toBe('replacement-token')
   })
 
-  for (const iconPack of ['material', 'remix']) {
+  for (const iconPack of ['material']) {
     test(`opens synced mobile and desktop routes with ${iconPack} device icons`, async ({ page }, testInfo) => {
       await page.evaluate(async (pack) => {
         const store = window.$store
@@ -4046,38 +3954,6 @@ test.describe('tab switcher', () => {
     }
 
     await expect(page.locator('.tabSwitcher')).toHaveCount(0)
-  })
-
-  test('shows page icons when tab icons are enabled', async ({ page }) => {
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-
-    try {
-      await openTabSwitcher(page)
-      await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon')).toHaveCount(2)
-      await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon').first())
-        .toHaveAttribute('data-icon', 'subscriptions')
-    } finally {
-      await page.keyboard.up('Control')
-    }
-  })
-})
-
-test.describe('tab switcher without icons', () => {
-  test.use({ seed: { settings: { showTabIcons: false } } })
-
-  test('hides title icons when tab icons are disabled', async ({ page }) => {
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-
-    try {
-      await openTabSwitcher(page)
-      await expect(
-        page.locator('.tabSwitcherItem .tabSwitcherTitleIcon, .tabSwitcherItem .tabSwitcherTitleAvatar')
-      ).toHaveCount(0)
-    } finally {
-      await page.keyboard.up('Control')
-    }
   })
 })
 

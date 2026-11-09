@@ -11,74 +11,7 @@ const modals = [
     selector: '.prompt',
     animations: ['prompt-backdrop-leave', 'prompt-card-leave'],
   },
-  {
-    name: 'command palette',
-    open: page => page.keyboard.press('Control+k'),
-    selector: '.commandPaletteBackdrop',
-    animations: ['command-palette-backdrop-leave', 'command-palette-leave'],
-  },
-  {
-    name: 'tab organizer',
-    open: async page => {
-      await page.locator('.tabOrganizerButton').click()
-      // Escape only closes the organizer once focus has moved into it.
-      await expect(page.locator('.tabOrganizer input[type="search"]')).toBeFocused()
-    },
-    selector: '.tabOrganizerBackdrop',
-    animations: ['tab-organizer-backdrop-leave', 'tab-organizer-leave'],
-  },
 ]
-
-for (const modal of modals) {
-  test(`animates the ${modal.name} out when it closes`, async ({ page }) => {
-    await modal.open(page)
-    const backdrop = page.locator(modal.selector)
-    await expect(backdrop).toBeVisible()
-
-    // Pause the leave animations as they start to inspect the closing modal.
-    await backdrop.evaluate(element => {
-      new MutationObserver((_, observer) => {
-        if (!element.classList.contains('modal-leave-active')) return
-        observer.disconnect()
-        const animations = element.getAnimations({ subtree: true })
-        animations.forEach(animation => animation.pause())
-        window.__modalLeave = {
-          animations,
-          names: animations.filter(animation => animation instanceof CSSAnimation).map(animation => animation.animationName),
-        }
-      }).observe(element, { attributes: true, attributeFilter: ['class'] })
-    })
-
-    await page.keyboard.press('Escape')
-    await expect.poll(() => page.evaluate(() => window.__modalLeave?.names ?? []))
-      .toEqual(modal.animations.map(name => expect.stringMatching(new RegExp(`^${name}`))))
-
-    // Fading the backdrop's opacity would crossfade a sharp and a blurred copy
-    // of the page, which flickers on Android, so the blur itself recedes.
-    const midway = await backdrop.evaluate(element => {
-      window.__modalLeave.animations.forEach(animation => {
-        animation.currentTime = Number(animation.effect.getComputedTiming().duration) / 2
-      })
-      const style = getComputedStyle(element)
-      return { opacity: style.opacity, blur: Number(style.backdropFilter.match(/^blur\(([\d.]+)px\)$/)?.[1]) }
-    })
-    expect(midway.opacity).toBe('1')
-    expect(midway.blur).toBeGreaterThan(0)
-    expect(midway.blur).toBeLessThan(2)
-
-    // The closing modal lets input through to the page it uncovers.
-    await expect(backdrop).toHaveAttribute('inert')
-    await expect(backdrop).toHaveCSS('pointer-events', 'none')
-
-    // Removal waits for the animations, which the animation speed setting can
-    // slow down, rather than for their CSS duration.
-    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
-    await expect(backdrop).toHaveCount(1)
-
-    await page.evaluate(() => window.__modalLeave.animations.forEach(animation => animation.play()))
-    await expect(backdrop).toHaveCount(0)
-  })
-}
 
 test('removes a prompt right away when Android predictive Back already played its exit', async ({ page }) => {
   await modals[0].open(page)

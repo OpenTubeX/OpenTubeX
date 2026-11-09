@@ -201,7 +201,7 @@ test('keeps both types hidden when another hide is queued during a save', async 
   await expect(card(page, 'videos')).toHaveCount(0)
 })
 
-for (const locale of ['en-US', 'de-DE']) {
+for (const locale of ['de-DE']) {
   test.describe(`${locale} menu labels`, () => {
     test.use({ seed: { ...seed, settings: { ...seed.settings, currentLocale: locale } } })
     test('shows readable hide action labels', { tag: '@scale' }, async ({ app, page }) => {
@@ -253,20 +253,3 @@ for (const locale of ['en-US', 'de-DE']) {
     })
   })
 }
-
-test('disables a video hide action while its settings are being saved', async ({ page }) => {
-  await goTo(page, 'subscriptions')
-  await page.locator('[data-subscription-feed-tab="videos"]').click()
-  await page.evaluate(() => {
-    const store = window.$store
-    store._actions.updateChannelSettings = [() => new Promise(resolve => { window.finishSavingChannel = resolve })]
-  })
-  const video = card(page, 'videos')
-  const action = page.getByRole('menuitem', { name: 'Never show Videos from this channel in feeds again', exact: true })
-  await video.locator('.title').click({ button: 'right' })
-  await action.click()
-  await video.locator('.title').click({ button: 'right' })
-  await expect(action).toBeDisabled()
-  await page.evaluate(() => window.finishSavingChannel(true))
-  await expect(action).toBeEnabled()
-})

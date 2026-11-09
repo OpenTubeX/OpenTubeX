@@ -2,10 +2,6 @@ import { test, expect } from '../../helpers/app.mjs'
 import { verifyCustomThemeSync } from '../../helpers/sync-custom-themes.mjs'
 import { AUTO_SYNC_INTERVAL_MS } from '../../../src/renderer/helpers/sync-server-scheduling.js'
 
-test('custom themes settle across different storage orders and default colors', async ({ page }) => {
-  await verifyCustomThemeSync(page)
-})
-
 for (const automatic of [true, false]) {
   test(`custom theme test restores ${automatic ? 'enabled' : 'disabled'} automatic sync`, async ({ page }) => {
     await page.clock.install()

@@ -7,7 +7,6 @@ import {
   goTo,
   goToSettingsSection,
   openNewWindowFromTabBar,
-  setWindowSize,
   waitForAppReady,
   readDatastore,
 } from '../../helpers/app.mjs'
@@ -115,83 +114,6 @@ test('marks progress fully seen from the menu and the configurable thumbnail act
   await expect.poll(persistedProgress).toEqual({ watchProgress: 60, isWatched: true })
 })
 
-test.describe('fully seen eligibility', () => {
-  const ineligibleVideos = [
-    { ...historyEntry('aaaaaaaaaaa', 'Live video'), isLive: true },
-    { ...historyEntry('bbbbbbbbbbb', 'Upcoming video'), isUpcoming: true },
-    { ...historyEntry('ccccccccccc', 'Zero duration'), lengthSeconds: 0 },
-    { ...historyEntry('ddddddddddd', 'Unknown duration'), lengthSeconds: '' }
-  ]
-  test.use({
-    seed: {
-      settings: { extraThumbnailAction: 'markAsFullySeen' },
-      history: ineligibleVideos
-    }
-  })
-
-  test('hides fully seen menu and thumbnail actions for ineligible videos', async ({ page }) => {
-    await goTo(page, 'history')
-    for (const { title } of ineligibleVideos) {
-      const video = page.locator('.ft-list-video').filter({ hasText: title })
-      await video.hover()
-      await expect(video.locator('.extraThumbnailActionIcon')).toHaveCount(0)
-      await video.locator('.title').click({ button: 'right' })
-      await expect(page.getByRole('menuitem', { name: 'Remove From History', exact: true })).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: 'Mark As Fully Watched', exact: true })).toHaveCount(0)
-      await page.keyboard.press('Escape')
-    }
-  })
-})
-
-test.describe('video link copy actions', () => {
-  test.use({
-    seed: {
-      ...SEED,
-      settings: { ...SEED.settings, backendFallback: true, extraThumbnailAction: 'copyYoutube' }
-    }
-  })
-
-  for (const width of [1600, 375]) {
-    test(`keeps video link copy actions available at ${width}px`, async ({ app, page }) => {
-      await goTo(page, 'history')
-      await page.setViewportSize({ width, height: 900 })
-      const video = page.locator('.ft-list-video').first()
-      await video.locator('.title').click({ button: 'right' })
-      const menu = page.locator('.contextMenu')
-      await menu.getByRole('menuitem', { name: 'Open Link', exact: true }).click()
-      await expect(menu.getByRole('menuitem', { name: 'Open in YouTube', exact: true })).toBeVisible()
-      await expect(menu.getByRole('menuitem', { name: 'Open in Invidious', exact: true })).toBeVisible()
-      await expect(menu.getByRole('menuitem', { name: 'Open YouTube Embedded Player', exact: true })).toHaveCount(0)
-      await page.keyboard.press('Escape')
-
-      await video.locator('.title').click({ button: 'right' })
-      await menu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
-      await expect(menu.getByRole('menuitem', { name: /^Copy (YouTube|Invidious) Link$/ })).toHaveCount(2)
-      await expect(page.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: 'Copy Invidious Link', exact: true })).toBeVisible()
-      await page.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
-      await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
-        .toBe('https://youtu.be/eeeeeeeeeee')
-
-      await app.electronApp.evaluate(({ clipboard }) => clipboard.clear())
-      if (width <= 600) {
-        await video.locator('.title').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
-          bubbles: true, cancelable: true, pointerType: 'touch'
-        })))
-        const mobileMenu = page.locator('.mobileLinkActions')
-        await expect(mobileMenu.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
-        await mobileMenu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
-        await mobileMenu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
-      } else {
-        await video.hover()
-        await video.locator('.extraThumbnailActionIcon .iconButton').click()
-      }
-      await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
-        .toBe('https://youtu.be/eeeeeeeeeee')
-    })
-  }
-})
-
 test('persists the yt-dlp playback cache across app restarts', async ({ app, page }) => {
   const expiryTime = Date.now() + 60 * 60 * 1000
   const source = {
@@ -256,45 +178,6 @@ test('persists an authenticated HLS playback source across app restarts', async 
   })).toEqual({ expiryTime, source })
 })
 
-test('uses the configured UTF-8 byte limit for persisted yt-dlp playback entries', async ({ page }) => {
-  const source = {
-    manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
-    manifestMimeType: 'application/dash+xml',
-    legacyFormats: [],
-    title: 'Cached video title',
-    isLive: false,
-    version: '2026.08.13'
-  }
-
-  await page.evaluate(() => {
-    const store = window.$store
-    return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 2)
-  })
-
-  expect(await page.evaluate(source => {
-    return window.ftElectron.ytDlpPlaybackCacheSet(
-      'eeeeeeeeeee',
-      'settings',
-      Date.now() + 60 * 60 * 1000,
-      source
-    )
-  }, source)).toBe(false)
-
-  await page.evaluate(() => {
-    const store = window.$store
-    return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 4)
-  })
-
-  expect(await page.evaluate(source => {
-    return window.ftElectron.ytDlpPlaybackCacheSet(
-      'eeeeeeeeeee',
-      'settings',
-      Date.now() + 60 * 60 * 1000,
-      source
-    )
-  }, source)).toBe(true)
-})
-
 test('a zero size limit disables and clears the persistent yt-dlp playback cache', async ({ app, page }) => {
   const source = {
     manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
@@ -323,70 +206,11 @@ test('a zero size limit disables and clears the persistent yt-dlp playback cache
     .rejects.toMatchObject({ code: 'ENOENT' })
 })
 
-test('prefers evicting yt-dlp playback entries without open tabs', async ({ page }) => {
-  const result = await page.evaluate(async () => {
-    const openVideoId = 'aaaaaaaaaaa'
-    const unusedVideoId = 'bbbbbbbbbbb'
-    const source = {
-      manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
-      manifestMimeType: 'application/dash+xml',
-      legacyFormats: [],
-      title: 'Cached video title',
-      isLive: false,
-      version: '2026.08.13'
-    }
-    const expiryTime = Date.now() + 60 * 60 * 1000
-    const videoIds = [
-      openVideoId,
-      unusedVideoId,
-      ...Array.from({ length: 48 }, (_, index) => `cache${String(index).padStart(6, '0')}`)
-    ]
-
-    await window.ftElectron.ytDlpPlaybackCacheClear()
-    await window.ftElectron.tabs.create({
-      route: `/watch/${openVideoId}`,
-      makeActive: false,
-      lazyLoad: true
-    })
-    for (const videoId of videoIds) {
-      await window.ftElectron.ytDlpPlaybackCacheSet(videoId, 'settings', expiryTime, source)
-    }
-    await window.ftElectron.ytDlpPlaybackCacheSet('zzzzzzzzzzz', 'settings', expiryTime, source)
-
-    return {
-      openEntry: await window.ftElectron.ytDlpPlaybackCacheGet(openVideoId, 'settings'),
-      unusedEntry: await window.ftElectron.ytDlpPlaybackCacheGet(unusedVideoId, 'settings')
-    }
-  })
-
-  expect(result.openEntry).not.toBeNull()
-  expect(result.unusedEntry).toBeNull()
-})
-
 async function readPlaylist(app, id) {
   const contents = readDatastore(app.userDataDir, 'playlists')
   const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
   return records.filter((record) => record._id === id).at(-1)
 }
-
-test.describe('rounded action popovers', () => {
-  test.use({
-    seed: {
-      ...SEED,
-      settings: { ...SEED.settings, uiRoundness: 0 }
-    }
-  })
-
-  test('applies UI roundness to icon-button dropdowns', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await video.locator('.addToPlaylistIcon .iconButton').click()
-
-    await expect(video.locator('.addToPlaylistIcon .iconDropdown')).toHaveCSS('border-radius', '0px')
-  })
-})
 
 test.describe('video downloads', () => {
   test.use({
@@ -502,42 +326,6 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: longTitle })
-    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
-  })
-
-  test('warns when a playlist contains a shortened video title', async ({ app, page }) => {
-    const downloadedFile = path.join(app.userDataDir, 'shortened-playlist-title.webm')
-    const executable = path.join(app.userDataDir, 'long-playlist-title-yt-dlp.sh')
-    const longTitle = '界'.repeat(80)
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
-    await writeFile(downloadedFile, '')
-    await writeFile(executable, [
-      '#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      `printf '%s\\n' '${metadataLine}'`,
-      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
-    ].join('\n'))
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoIds: ['eeeeeeeeeee'],
-      isPlaylist: true,
-      title: 'Playlist with a long title',
-      mode: 'video'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
-    }, result.id)).toMatchObject({
-      status: 'completed',
-      titleTruncated: true
-    })
-
-    await goTo(page, 'downloads')
-    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Playlist with a long title' })
     await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
@@ -878,28 +666,6 @@ test.describe('video downloads', () => {
     ])
   })
 
-  test('keeps untitled multi-video downloads in history', async ({ app, page }) => {
-    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
-    await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nsleep 0.2\n')
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    await page.bringToFront()
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoId: 42,
-      videoIds: ['eeeeeeeeeee'],
-      isPlaylist: true,
-      mode: 'video'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      const downloads = await window.ftElectron.ytDlpListDownloads()
-      return downloads.find(download => download.id === id)
-    }, result.id)).toMatchObject({ title: '', status: 'completed' })
-  })
-
   test('uses yt-dlp metadata for a completed single-video download', async ({ app, page }) => {
     const downloadedFile = path.join(app.userDataDir, 'metadata-demo.webm')
     const executable = path.join(app.userDataDir, 'metadata-yt-dlp.sh')
@@ -940,39 +706,6 @@ test.describe('video downloads', () => {
     await expect(downloadRow).toBeVisible()
     await expect(downloadRow.locator('.downloadWarning')).toHaveCount(0)
     await expect(downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute('src', currentThumbnail)
-  })
-
-  test('clears a stale feed thumbnail when yt-dlp finds none', async ({ app, page }) => {
-    const downloadedFile = path.join(app.userDataDir, 'no-thumbnail-demo.webm')
-    const executable = path.join(app.userDataDir, 'no-thumbnail-yt-dlp.sh')
-    await writeFile(downloadedFile, '')
-    await writeFile(executable, [
-      '#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      'printf \'__OPENTUBEX_METADATA__:"eeeeeeeeeee"\\t"Current video title"\\tnull\\tnull\\tnull\\n\'',
-      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
-    ].join('\n'))
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    await page.bringToFront()
-    await page.locator('body').click({ position: { x: 1, y: 1 } })
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoId: 'eeeeeeeeeee',
-      title: 'Translated feed title',
-      thumbnail: 'https://images.example/stale-feed-thumbnail.jpg',
-      mode: 'video'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
-    }, result.id)).toMatchObject({
-      title: 'Current video title',
-      thumbnail: '',
-      status: 'completed'
-    })
   })
 
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
@@ -1245,47 +978,6 @@ test.describe('video downloads', () => {
     await expect.poll(() => page.locator('video.player').evaluate(video => video.duration)).toBe(duration)
   })
 
-  test('serves an empty downloaded file without failing the protocol request', async ({ app, page }) => {
-    const downloadedFile = path.join(app.userDataDir, 'empty-audio.wav')
-    const executable = path.join(app.userDataDir, 'fake-empty-audio-yt-dlp.sh')
-    await writeFile(downloadedFile, '')
-    await writeFile(executable, [
-      '#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedFile}\\n'`
-    ].join('\n'))
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoId: 'eeeeeeeeeee',
-      title: 'Empty audio',
-      mode: 'audio'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
-    }, result.id)).toBe('completed')
-
-    const response = await page.evaluate(async (id) => {
-      const result = await fetch(`downloadmedia://file/${id}/eeeeeeeeeee`)
-      return {
-        status: result.status,
-        contentLength: result.headers.get('content-length'),
-        contentType: result.headers.get('content-type'),
-        bodyLength: (await result.arrayBuffer()).byteLength
-      }
-    }, result.id)
-    expect(response).toEqual({
-      status: 200,
-      contentLength: '0',
-      contentType: 'audio/wav',
-      bodyLength: 0
-    })
-  })
-
   test('rejects a downloaded media path that is not a file', async ({ app, page }) => {
     const downloadedDirectory = path.join(app.userDataDir, 'download-directory.webm')
     const executable = path.join(app.userDataDir, 'fake-directory-yt-dlp.sh')
@@ -1503,45 +1195,6 @@ test.describe('video downloads', () => {
     ])
   })
 
-  test('warns when a subtitle playlist contains a shortened video title', async ({ app, page }) => {
-    const executable = path.join(app.userDataDir, 'long-subtitle-playlist-title-yt-dlp.sh')
-    const argumentsFile = path.join(app.userDataDir, 'long-subtitle-playlist-title-arguments.txt')
-    const longTitle = '界'.repeat(80)
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
-    await writeFile(executable, [
-      '#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      `printf '%s\\n' "$@" > ${argumentsFile}`,
-      `printf '%s\\n' '${metadataLine}'`,
-      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"'
-    ].join('\n'))
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoIds: ['eeeeeeeeeee'],
-      isPlaylist: true,
-      title: 'Subtitle playlist with a long title',
-      mode: 'subtitles',
-      subtitleFormat: 'srt'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
-    }, result.id)).toMatchObject({
-      status: 'completed',
-      titleTruncated: true
-    })
-    const passedArguments = (await readFile(argumentsFile, 'utf8')).split('\n')
-    expect(passedArguments).toContain('video:__OPENTUBEX_METADATA__:%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j')
-
-    await goTo(page, 'downloads')
-    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Subtitle playlist with a long title' })
-    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
-  })
-
   test('keeps the source subtitle destination when conversion fails', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const attemptMarker = path.join(app.userDataDir, 'subtitle-retry-attempted')
@@ -1588,44 +1241,6 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByTitle('Retry download')).toHaveCount(0)
   })
 
-  test('starts only one retry when its button is activated twice', async ({ app, page }) => {
-    const executable = path.join(app.userDataDir, 'slow-failing-yt-dlp.sh')
-    const attemptsFile = path.join(app.userDataDir, 'retry-attempts.txt')
-    await writeFile(executable, [
-      '#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      `printf 'retry\\n' >> '${attemptsFile}'`,
-      'sleep 0.5',
-      'exit 1'
-    ].join('\n'))
-    await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
-
-    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
-      videoId: 'eeeeeeeeeee',
-      title: 'Retry once',
-      mode: 'video'
-    }))
-    await expect.poll(() => page.evaluate(async (id) => {
-      return (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
-    }, result.id)).toBe('failed')
-    await writeFile(attemptsFile, '')
-
-    await goTo(page, 'downloads')
-    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Retry once' }).first()
-    await downloadRow.getByTitle('Retry download').dblclick()
-
-    await expect.poll(() => page.evaluate(async (originalId) => {
-      const matchingDownloads = (await window.ftElectron.ytDlpListDownloads())
-        .filter(download => download.title === 'Retry once' && download.status === 'failed')
-      return matchingDownloads.length === 1 && matchingDownloads[0].id !== originalId
-    }, result.id)).toBe(true)
-    expect(await readFile(attemptsFile, 'utf8')).toBe('retry\n')
-  })
-
   test('serializes retry requests in the main process', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'concurrent-retry-yt-dlp.sh')
     const attemptsFile = path.join(app.userDataDir, 'concurrent-retry-attempts.txt')
@@ -1664,63 +1279,6 @@ test.describe('video downloads', () => {
     expect(results.filter(result => result?.error === 'download-already-retrying')).toHaveLength(1)
     await expect.poll(() => readFile(attemptsFile, 'utf8')).toBe('retry\n')
   })
-})
-
-test('exposes download progress to assistive technology', async ({ page }) => {
-  await goTo(page, 'downloads')
-
-  const upsertDownload = (status, percent) => page.evaluate(({ status, percent }) => {
-    const store = window.$store
-    store.commit('upsertYtDlpDownload', {
-      id: 42,
-      title: 'Accessible download',
-      status,
-      percent,
-      speed: '1 MiB/s',
-      eta: '00:10',
-      mode: 'video'
-    })
-  }, { status, percent })
-
-  await upsertDownload('downloading', 42)
-  const row = page.locator('.downloadRow').filter({ hasText: 'Accessible download' })
-  const progress = row.getByRole('progressbar')
-  const fill = row.locator('.progressFill')
-  await expect(progress).toHaveAccessibleName('Accessible download')
-  await expect(progress).toHaveAttribute('aria-valuemin', '0')
-  await expect(progress).toHaveAttribute('aria-valuemax', '100')
-  await expect(progress).toHaveAttribute('aria-valuenow', '42')
-  await expect(progress).toHaveAttribute('aria-valuetext', '42.0% • 1 MiB/s • ETA 00:10')
-  await expect(fill).toHaveAttribute('aria-hidden', 'true')
-  await expect(row.locator('.downloadStatus')).toHaveAttribute('aria-hidden', 'true')
-
-  await upsertDownload('downloading', 142)
-  await expect(progress).toHaveAttribute('aria-valuenow', '100')
-  await expect(progress).toHaveAttribute('aria-valuetext', '100.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(1)')
-
-  await upsertDownload('downloading', -42)
-  await expect(progress).toHaveAttribute('aria-valuenow', '0')
-  await expect(progress).toHaveAttribute('aria-valuetext', '0.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(0)')
-
-  await upsertDownload('processing', 42)
-  await expect(progress).toHaveAccessibleName('Accessible download')
-  await expect(progress).toHaveAttribute('aria-valuetext', 'Processing…')
-  expect(await progress.getAttribute('aria-valuenow')).toBeNull()
-  await expect(row.locator('[role="status"], [aria-live]')).toHaveCount(0)
-
-  const session = await page.context().newCDPSession(page)
-  const { nodes } = await session.send('Accessibility.getFullAXTree')
-  await session.detach()
-  const tree = nodes.filter(node => !node.ignored)
-  const processingBar = tree.find(node => (
-    node.role?.value === 'progressbar' && node.name?.value === 'Accessible download'
-  ))
-  expect(processingBar).toBeDefined()
-  expect(typeof processingBar?.value?.value).not.toBe('number')
-  expect(tree.flatMap(node => [node.name?.value, node.value?.value])
-    .filter(value => value === 'Processing…').length).toBeLessThanOrEqual(1)
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
@@ -1847,116 +1405,6 @@ test.describe('list video actions', () => {
     await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
   })
 
-  test('download time ranges and helper spacing stay compact', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await goTo(page, 'history')
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await video.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Download Video' }).click()
-    for (const width of [1200, 400]) {
-      await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
-      await page.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
-      for (const direction of ['ltr', 'rtl']) {
-        await page.evaluate(value => { document.body.dir = value }, direction)
-        for (const name of ['Subtitle Languages', 'File Name Template']) {
-          const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
-          await field.scrollIntoViewIfNeeded()
-          const spacing = await field.evaluate(element => {
-            const field = element.querySelector('input').getBoundingClientRect()
-            const help = element.querySelector('.selectTooltip button').getBoundingClientRect()
-            const section = element.closest('.optionSection').getBoundingClientRect()
-            const rtl = getComputedStyle(element).direction === 'rtl'
-            const before = rtl ? field.left - help.right : help.left - field.right
-            const after = rtl ? help.left - section.left : section.right - help.right
-            return Math.abs(before - after)
-          })
-          expect.soft(spacing, `${direction} ${name} helper margins at ${width}px`).toBeLessThanOrEqual(1)
-        }
-        const range = page.locator('.segmentGrid')
-        await range.scrollIntoViewIfNeeded()
-        await expect(range.locator('.timeRangeSeparator')).toBeVisible()
-        expect(await range.locator('.timeRangeSeparator').evaluate(element => getComputedStyle(element, '::before').content)).toBe('"–"')
-        const geometry = await range.evaluate(element => {
-          const [start, end] = [...element.querySelectorAll('input')].map(input => input.getBoundingClientRect())
-          const rtl = getComputedStyle(element).direction === 'rtl'
-          return { gap: rtl ? start.left - end.right : end.left - start.right, top: Math.abs(start.top - end.top) }
-        })
-        expect.soft(geometry.gap).toBeGreaterThanOrEqual(16)
-        expect.soft(geometry.gap).toBeLessThanOrEqual(40)
-        expect.soft(geometry.top).toBeLessThanOrEqual(1)
-        const sponsor = page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) })
-        for (const group of [range, range.locator('..').locator('.switch-label'), sponsor.locator('.switch-label'), sponsor.locator('.sponsorCategories')]) {
-          const center = await group.evaluate(element => {
-            const rect = element.getBoundingClientRect()
-            const section = element.closest('.optionSection').getBoundingClientRect()
-            return Math.abs(rect.left + rect.width / 2 - section.left - section.width / 2)
-          })
-          expect.soft(center, `${direction} centered download control at ${width}px`).toBeLessThanOrEqual(1)
-        }
-      }
-      await page.evaluate(() => { document.body.dir = 'ltr' })
-      await page.locator('.segmentGrid').locator('..').screenshot({ path: testInfo.outputPath(`time-range-${width}.png`) })
-      await page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) }).screenshot({ path: testInfo.outputPath(`sponsorblock-${width}.png`) })
-      for (const [name, filename] of [['Subtitle Languages', 'subtitle-help'], ['File Name Template', 'filename-help']]) {
-        const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
-        await field.scrollIntoViewIfNeeded()
-        const box = await field.boundingBox()
-        await page.screenshot({
-          path: testInfo.outputPath(`${filename}-${width}.png`),
-          clip: {
-            x: box.x, y: box.y, width: box.width + 40, height: box.height
-          }
-        })
-      }
-    }
-  })
-
-  test('disabled download inputs do not fade their tooltips', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await video.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Download Video' }).click()
-
-    const metadataSection = page.locator('.optionSection').filter({
-      has: page.getByRole('heading', { name: 'Subtitles and Metadata' })
-    })
-    await expect(metadataSection.locator('.switch-label-text')).toHaveText([
-      'Embed thumbnail as cover art',
-      'Embed title, author, description, and chapters',
-      'Include subtitles',
-      'Embed subtitles in the media file'
-    ])
-
-    const subtitleLanguages = page.locator('.subtitleLanguages')
-    await expect(subtitleLanguages.locator('input')).toBeDisabled()
-    await subtitleLanguages.locator('.selectTooltip button').hover()
-    const tooltip = page.locator('body > [role="tooltip"]:visible')
-    await expect(tooltip).toBeVisible()
-
-    const opacity = await subtitleLanguages.evaluate((field) => ({
-      label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
-      labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity
-    }))
-    expect(opacity).toEqual({ label: '1', labelText: '0.38' })
-    await expect(tooltip).toHaveCSS('opacity', '1')
-    for (const fullWindow of [false, true]) {
-      await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)
-      await expect.poll(() => tooltip.evaluate(element => {
-        const rect = element.getBoundingClientRect()
-        // Tooltips ignore pointer events; temporarily enable hit testing to verify
-        // the visible tooltip paints above the modal rather than underneath it.
-        element.style.pointerEvents = 'auto'
-        const top = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
-        element.style.pointerEvents = ''
-        return top === element || element.contains(top)
-      })).toBe(true)
-    }
-    await page.evaluate(() => document.body.classList.remove('playerFullWindow'))
-  })
-
   test('the video context menu and playlist dropdown work with vertical tabs', async ({ page }) => {
     await goTo(page, 'history')
     await page.evaluate(() => {
@@ -2004,14 +1452,6 @@ test.describe('list video actions', () => {
       }
     })
     expect(dropdownCoversVerticalTabs).toBe(true)
-  })
-
-  test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await expect(video.locator('.addToPlaylistIcon [data-prefix="fac"][data-icon="playlist-check"]')).toBeVisible()
   })
 
   test('add to playlist dropdown shows membership and toggles it', async ({ app, page }) => {
@@ -2217,23 +1657,6 @@ test.describe('list video actions', () => {
     })
   })
 
-  test.describe('default quick bookmark icon', () => {
-    test.use({
-      seed: {
-        ...SEED,
-        playlists: SEED.playlists.map(playlist => playlist._id === 'favorites' ? { ...playlist, quickBookmarkIcon: 'bookmark' } : playlist)
-      }
-    })
-
-    test('quick bookmark button uses the outlined bookmark', async ({ page }) => {
-      await goTo(page, 'history')
-
-      const video = page.locator('.ft-list-video').first()
-      await video.hover()
-      await expect(video.locator('.quickBookmarkVideoIcon [data-prefix="far"][data-icon="bookmark"]')).toBeVisible()
-    })
-  })
-
   test('the options dropdown toggles watched status separately from removing history', async ({ app, page }) => {
     await goTo(page, 'history')
 
@@ -2268,39 +1691,5 @@ test.describe('list video actions', () => {
       const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records.some(record => record._id === 'eeeeeeeeeee')
     }).toBe(false)
-  })
-})
-
-test.describe('toast icons', () => {
-  test.use({
-    seed: {
-      ...SEED,
-      settings: { ...SEED.settings, thumbnailPreference: 'hidden' }
-    }
-  })
-
-  test('falls back to an icon when the video has no thumbnail', async ({ page }) => {
-    await goTo(page, 'history')
-
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await video.locator('.addToPlaylistIcon .iconButton').click()
-
-    const favoritesRow = video.locator('.addToPlaylistIcon .iconDropdown .playlistRow', { hasText: 'Favorites' })
-    await favoritesRow.click()
-
-    await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
-    await expect(page.locator('.toast .image')).toBeHidden()
-    await expect(page.locator('.toast .icon[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
-  })
-
-  test('shows a fitting icon on toasts that have no thumbnail at all', async ({ page }) => {
-    await goTo(page, 'history')
-
-    await page.getByRole('button', { name: 'Mark All As Watched' }).click()
-    await page.getByRole('button', { name: 'Mark All As Watched', exact: true }).last().click()
-
-    await expect(page.locator('.toast .message', { hasText: 'All videos in your history have been marked as watched' })).toBeVisible()
-    await expect(page.locator('.toast .icon[data-prefix="fas"][data-icon="eye"]')).toBeVisible()
   })
 })

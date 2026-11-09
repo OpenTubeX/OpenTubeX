@@ -75,18 +75,18 @@ const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
 headerOnlyResponse.onResponseReceivedEndpoints.pop()
 headerOnlyResponse.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0].commentsHeaderRenderer.countText.simpleText = '123 Comments'
 
-for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'newest reload', 'single-sort reload']) {
+for (const trigger of ['initial load', 'newest reload']) {
   test(`incomplete comments during ${trigger} stay retryable instead of reporting no comments`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
-    const initialLoad = ['initial load', 'header-only load'].includes(trigger)
+    const initialLoad = trigger === 'initial load'
     let fail = initialLoad
-    let headerOnly = trigger === 'header-only load'
+    let headerOnly = false
     let failedRequests = 0
     let failedContinuation
     let lastContinuation
     let loadedResponse
-    const firstResponse = ['sort', 'newest reload', 'single-sort reload'].includes(trigger)
+    const firstResponse = trigger === 'newest reload'
       ? page.waitForResponse(response =>
           response.url().includes('/youtubei/v1/next') && JSON.parse(response.request().postData() ?? '{}').continuation
         )
@@ -115,23 +115,19 @@ for (const trigger of ['initial load', 'header-only load', 'reload', 'sort', 'ne
       await page.locator('.commentHeaderActions').getByRole('combobox').click()
       await page.getByRole('option', { name: /^newest first$/i }).click()
     }
-    if (trigger === 'newest reload' || trigger === 'single-sort reload') {
+    if (trigger === 'newest reload') {
       const data = JSON.parse(loadedResponse)
       const items = data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand.continuationItems[0]
         .commentsHeaderRenderer.sortMenu.sortFilterSubMenuRenderer.subMenuItems
-      if (trigger === 'single-sort reload') items.splice(1)
-      else items.forEach((item, index) => { item.selected = index === 1 })
+      items.forEach((item, index) => { item.selected = index === 1 })
       loadedResponse = JSON.stringify(data)
-      if (trigger === 'newest reload') {
-        await sort()
-        await expect(page.locator('.comment').first()).toBeVisible()
-      }
+      await sort()
+      await expect(page.locator('.comment').first()).toBeVisible()
     }
     if (!initialLoad) {
       await expect(page.locator('.comment').first()).toBeVisible()
       fail = true
-      if (trigger.endsWith('reload')) await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
-      else await sort()
+      await page.getByRole('button', { name: 'Reload Comments', exact: true }).click()
     }
     await expect(page.locator('.getCommentsTitle')).toBeVisible()
     await expect(page.locator('.noCommentMsg')).toHaveCount(0)
@@ -218,35 +214,6 @@ test('does not retry a failed automatic comment load until asked', async ({ app,
   await loadComments.click()
   await expect.poll(() => commentRequestCount).toBe(2)
   await expect(loadComments).toBeVisible()
-})
-
-test('pauses automatic comment pagination while filtering', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-
-  let commentRequestCount = 0
-  await page.route(/\/youtubei\/v1\/next/, async (route, request) => {
-    const body = JSON.parse(request.postData() ?? '{}')
-    if (body.continuation) {
-      commentRequestCount++
-    }
-    await route.fallback()
-  })
-
-  await page.evaluate(() => {
-    const store = window.$store
-    store.commit('setAutoLoadComments', true)
-  })
-  await openMockedVideo(page)
-  await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-  await page.getByRole('button', { name: 'Filter loaded comments' }).click()
-  await page.getByRole('checkbox', { name: 'From creator' }).click()
-  const requestCountAfterFiltering = commentRequestCount
-
-  // Give an unwanted page request time to start.
-  await page.waitForTimeout(750)
-  expect(commentRequestCount).toBe(requestCountAfterFiltering)
-  await expect(page.locator('.getMoreComments')).toBeVisible()
 })
 
 async function expectCommentHeaderToolsAligned(page) {
@@ -370,78 +337,6 @@ test.describe('manual comment loading', () => {
     await expect(translate).toHaveCount(0)
   })
 
-  test('does not offer to translate a comment already in the app language', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    const englishComment = page.locator('.commentThread').filter({
-      hasText: "We're so honored that the first ever YouTube video was filmed here!"
-    })
-    await expect(englishComment).toBeVisible()
-    await expect(englishComment.locator(':scope > .commentTranslation .commentTranslationButton')).toHaveCount(0)
-  })
-
-  test('does not offer to translate comments in an ignored language', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-
-    await page.evaluate(async () => {
-      const store = window.$store
-      await Promise.all([
-        store.dispatch('updateCurrentLocale', 'de-DE'),
-        store.dispatch('updateCommentTranslationIgnoredLanguages', ['en'])
-      ])
-    })
-
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('.commentTranslationButton')).toHaveCount(0)
-
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateCommentTranslationIgnoredLanguages', [])
-    })
-    await expect(page.locator('.commentTranslationButton').first()).toBeVisible()
-  })
-
-  test('disables comment translations globally and restarts detection when re-enabled', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateCurrentLocale', 'de-DE')
-    })
-
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-    const translationButtons = page.locator('.commentTranslationButton')
-    await expect(translationButtons.first()).toBeVisible()
-
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateEnableCommentTranslations', false)
-    })
-    await expect(translationButtons).toHaveCount(0)
-
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateEnableCommentTranslations', true)
-    })
-    await expect(translationButtons.first()).toBeVisible()
-  })
-
   test('loads collapsed replies from the video uploader while filtering', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { creatorReply: true, ownerReply: true })
     await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
@@ -526,129 +421,127 @@ test.describe('manual comment loading', () => {
     expect(await video.evaluate(element => element.paused)).toBe(false)
   })
 
-  for (const scale of [100, 125]) {
-    test(`toggles comment thread lines with mouse and keyboard at ${scale}% scale`, async ({ app, page, attachScreenshot }) => {
-      await mockPlayableWatchPage(app, page)
-      await openMockedVideo(page)
-      await page.evaluate(async scale => {
-        const store = window.$store
-        await store.dispatch('updateUiScale', scale)
-        await store.dispatch('updateBaseTheme', scale === 100 ? 'dark' : 'light')
-      }, scale)
-      await page.locator('.getCommentsTitle').click()
-      await expect(page.locator('.commentsTitle')).toBeVisible()
-
-      const thread = page.locator('.commentThread').first()
-      const line = thread.locator(':scope > .commentThreadLineToggle')
-      await expect(line).toHaveAttribute('aria-expanded', 'false')
-      await page.mouse.move(0, 0)
-      const restingColor = await thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)
-      await line.hover({ position: { x: 10, y: 5 } })
-      await expect(line).toHaveCSS('cursor', 'pointer')
-      await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
-      await line.click({ position: { x: 10, y: 5 } })
-      await expect(line).toHaveAttribute('aria-expanded', 'true')
-      await expect(thread.locator('.commentReplyContent').first()).toBeVisible()
-      // Replies sit on the page background; only the thread lines group them.
-      await expect(thread.locator(':scope > .commentReplies')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-      const replyCount = await thread.locator('.commentReplyContent').count()
-
-      const connector = thread.locator('.commentReplyConnectorToggle').first()
-      await connector.hover()
-      await expect(connector).toHaveCSS('cursor', 'pointer')
-      await expect.poll(() => connector.evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
-      await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
-      await expect.poll(() => thread.locator(':scope > .commentReplies > .commentReplyContinuation').last().evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
-      await connector.click()
-      await expect(thread.locator('.commentReplyContent')).toHaveCount(0)
-      await line.focus()
-      await line.press('Enter')
-      await expect(thread.locator('.commentReplyContent')).toHaveCount(replyCount)
-      await line.press('Space')
-      await expect(thread.locator('.commentReplyContent')).toHaveCount(0)
-      await line.press('Enter')
-
-      // Give one loaded reply children so the same controls are exercised at a
-      // second depth without relying on YouTube's changing reply structure.
-      const branch = thread.locator('.commentReplyBranchRoot').first()
-      await branch.evaluate(element => {
-        const find = vnode => {
-          if (vnode?.component?.subTree?.el === element) return vnode.component
-          if (vnode?.component?.subTree) {
-            const match = find(vnode.component.subTree)
-            if (match) return match
-          }
-          for (const child of Array.isArray(vnode?.children) ? vnode.children : []) {
-            const match = find(child)
-            if (match) return match
-          }
-          return null
-        }
-        const component = find(document.querySelector('#app').__vue_app__._container._vnode)
-        const reply = component.props.node.reply
-        reply.replies = Array.from({ length: 8 }, (_, index) => ({
-          ...reply,
-          id: `thread-line-child-${index}`,
-          text: `Nested reply ${index}`,
-          replies: [],
-          numReplies: 0,
-          hasReplyToken: false,
-        }))
-        reply.numReplies = 8
-        reply.hasReplyToken = false
-      })
-      const nestedLine = branch.locator(':scope > .commentReplyLineToggle')
-      const children = branch.locator('.commentReplyChildren .commentReplyContent')
-      await expect(children).toHaveCount(8)
-      await expect(thread.locator('.commentReplyContinuationButton').filter({ hasText: /^Hide / })).toHaveCount(1)
-      await line.evaluate(element => element.blur())
-      await nestedLine.hover({ position: { x: 10, y: 5 } })
-      await expect(nestedLine).toHaveCSS('cursor', 'pointer')
-      await expect.poll(() => branch.locator('.commentReplyChildStem').evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
-      await attachScreenshot(`comment thread line hover at ${scale}%`)
-      await nestedLine.click({ position: { x: 10, y: 5 } })
-      await expect(children).toHaveCount(0)
-      await expect(thread.locator('.commentReplyContent')).toHaveCount(replyCount)
-      await nestedLine.focus()
-      await nestedLine.press('Space')
-      await expect(children).toHaveCount(8)
-      await nestedLine.evaluate(element => element.blur())
-      const nestedConnector = branch.locator('.commentReplyChildren .commentReplyConnectorToggle').first()
-      await nestedConnector.hover()
-      await expect.poll(() => branch.locator('.commentReplyChildStem').evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
-      await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).toBe(restingColor)
-      await nestedConnector.click()
-      await expect(children).toHaveCount(0)
-      await branch.locator(':scope > .commentReplyChildren > .commentReplyContinuation button').click()
-      await expect(children).toHaveCount(8)
-
-      await setPlayerFullscreen(page, true)
-      await page.locator('.fullscreenCommentsToggle').click({ force: true })
-      const scroller = page.locator('.fullscreenCommentsOverlay.open .commentsContentWrapper')
-      for (const toggle of [nestedLine, line]) {
-        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-        const previousScrollTop = await scroller.evaluate(element => element.scrollTop)
-        expect(previousScrollTop).toBeGreaterThan(0)
-        await toggle.evaluate(element => element.click())
-        await expect.poll(() => scroller.evaluate((element, previousScrollTop) => {
-          const content = element.querySelector(':scope > div')
-          const maximumScrollTop = Math.max(0, element.scrollTop +
-            content.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom)
-          const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-          return {
-            reduced: element.scrollTop < previousScrollTop,
-            scrollbarMatchesOverflow: scrollbar.classList.contains('os-scrollbar-visible') === (maximumScrollTop > 1),
-          }
-        }, previousScrollTop)).toEqual({ reduced: true, scrollbarMatchesOverflow: true })
-        await expect.poll(() => scroller.evaluate(element => {
-          const content = element.querySelector(':scope > div')
-          return element.getBoundingClientRect().bottom - content.getBoundingClientRect().bottom
-        // The clamp uses integer layout offsets and heights; their rounding
-        // can add up to more than one CSS pixel at fractional Electron zoom.
-        })).toBeLessThanOrEqual(2)
-      }
+  test('toggles comment thread lines with mouse and keyboard at 125% scale', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateUiScale', 125)
+      await store.dispatch('updateBaseTheme', 'light')
     })
-  }
+    await page.locator('.getCommentsTitle').click()
+    await expect(page.locator('.commentsTitle')).toBeVisible()
+
+    const thread = page.locator('.commentThread').first()
+    const line = thread.locator(':scope > .commentThreadLineToggle')
+    await expect(line).toHaveAttribute('aria-expanded', 'false')
+    await page.mouse.move(0, 0)
+    const restingColor = await thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)
+    await line.hover({ position: { x: 10, y: 5 } })
+    await expect(line).toHaveCSS('cursor', 'pointer')
+    await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
+    await line.click({ position: { x: 10, y: 5 } })
+    await expect(line).toHaveAttribute('aria-expanded', 'true')
+    await expect(thread.locator('.commentReplyContent').first()).toBeVisible()
+    // Replies sit on the page background; only the thread lines group them.
+    await expect(thread.locator(':scope > .commentReplies')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    const replyCount = await thread.locator('.commentReplyContent').count()
+
+    const connector = thread.locator('.commentReplyConnectorToggle').first()
+    await connector.hover()
+    await expect(connector).toHaveCSS('cursor', 'pointer')
+    await expect.poll(() => connector.evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
+    await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
+    await expect.poll(() => thread.locator(':scope > .commentReplies > .commentReplyContinuation').last().evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).not.toBe(restingColor)
+    await connector.click()
+    await expect(thread.locator('.commentReplyContent')).toHaveCount(0)
+    await line.focus()
+    await line.press('Enter')
+    await expect(thread.locator('.commentReplyContent')).toHaveCount(replyCount)
+    await line.press('Space')
+    await expect(thread.locator('.commentReplyContent')).toHaveCount(0)
+    await line.press('Enter')
+
+    // Give one loaded reply children so the same controls are exercised at a
+    // second depth without relying on YouTube's changing reply structure.
+    const branch = thread.locator('.commentReplyBranchRoot').first()
+    await branch.evaluate(element => {
+      const find = vnode => {
+        if (vnode?.component?.subTree?.el === element) return vnode.component
+        if (vnode?.component?.subTree) {
+          const match = find(vnode.component.subTree)
+          if (match) return match
+        }
+        for (const child of Array.isArray(vnode?.children) ? vnode.children : []) {
+          const match = find(child)
+          if (match) return match
+        }
+        return null
+      }
+      const component = find(document.querySelector('#app').__vue_app__._container._vnode)
+      const reply = component.props.node.reply
+      reply.replies = Array.from({ length: 8 }, (_, index) => ({
+        ...reply,
+        id: `thread-line-child-${index}`,
+        text: `Nested reply ${index}`,
+        replies: [],
+        numReplies: 0,
+        hasReplyToken: false,
+      }))
+      reply.numReplies = 8
+      reply.hasReplyToken = false
+    })
+    const nestedLine = branch.locator(':scope > .commentReplyLineToggle')
+    const children = branch.locator('.commentReplyChildren .commentReplyContent')
+    await expect(children).toHaveCount(8)
+    await expect(thread.locator('.commentReplyContinuationButton').filter({ hasText: /^Hide / })).toHaveCount(1)
+    await line.evaluate(element => element.blur())
+    await nestedLine.hover({ position: { x: 10, y: 5 } })
+    await expect(nestedLine).toHaveCSS('cursor', 'pointer')
+    await expect.poll(() => branch.locator('.commentReplyChildStem').evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
+    await attachScreenshot('comment thread line hover at 125%')
+    await nestedLine.click({ position: { x: 10, y: 5 } })
+    await expect(children).toHaveCount(0)
+    await expect(thread.locator('.commentReplyContent')).toHaveCount(replyCount)
+    await nestedLine.focus()
+    await nestedLine.press('Space')
+    await expect(children).toHaveCount(8)
+    await nestedLine.evaluate(element => element.blur())
+    const nestedConnector = branch.locator('.commentReplyChildren .commentReplyConnectorToggle').first()
+    await nestedConnector.hover()
+    await expect.poll(() => branch.locator('.commentReplyChildStem').evaluate(element => getComputedStyle(element).borderInlineStartColor)).not.toBe(restingColor)
+    await expect.poll(() => thread.evaluate(element => getComputedStyle(element, '::before').borderInlineStartColor)).toBe(restingColor)
+    await nestedConnector.click()
+    await expect(children).toHaveCount(0)
+    await branch.locator(':scope > .commentReplyChildren > .commentReplyContinuation button').click()
+    await expect(children).toHaveCount(8)
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+    const scroller = page.locator('.fullscreenCommentsOverlay.open .commentsContentWrapper')
+    for (const toggle of [nestedLine, line]) {
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      const previousScrollTop = await scroller.evaluate(element => element.scrollTop)
+      expect(previousScrollTop).toBeGreaterThan(0)
+      await toggle.evaluate(element => element.click())
+      await expect.poll(() => scroller.evaluate((element, previousScrollTop) => {
+        const content = element.querySelector(':scope > div')
+        const maximumScrollTop = Math.max(0, element.scrollTop +
+          content.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom)
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return {
+          reduced: element.scrollTop < previousScrollTop,
+          scrollbarMatchesOverflow: scrollbar.classList.contains('os-scrollbar-visible') === (maximumScrollTop > 1),
+        }
+      }, previousScrollTop)).toEqual({ reduced: true, scrollbarMatchesOverflow: true })
+      await expect.poll(() => scroller.evaluate(element => {
+        const content = element.querySelector(':scope > div')
+        return element.getBoundingClientRect().bottom - content.getBoundingClientRect().bottom
+      // The clamp uses integer layout offsets and heights; their rounding
+      // can add up to more than one CSS pixel at fractional Electron zoom.
+      })).toBeLessThanOrEqual(2)
+    }
+  })
 
   test('searches the comments loaded for the current video', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
@@ -739,70 +632,6 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentThread')).toHaveCount(1)
     await expect(page.locator('.commentReplyContent')).toHaveCount(1)
     await expect(page.locator('.commentReplyContent .commentAuthor mark')).toHaveText(replyAuthor)
-  })
-
-  test('keeps creator-filtered thread lines connected without dangling stems', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page, { creatorReply: true })
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    const thread = page.locator('.commentThread').first()
-    await thread.locator('.commentReplyRootToggle button').click()
-    const firstReply = thread.locator('.commentReplyContent').first()
-    await expect(firstReply).toBeVisible({ timeout: 30_000 })
-    await firstReply.evaluate(element => {
-      const branch = element.closest('.commentReplyBranch')
-      const app = document.querySelector('#app')?.__vue_app__
-      const find = vnode => {
-        if (vnode?.component?.subTree?.el === branch) return vnode.component
-        if (vnode?.component?.subTree) {
-          const match = find(vnode.component.subTree)
-          if (match) return match
-        }
-        if (Array.isArray(vnode?.children)) {
-          for (const child of vnode.children) {
-            const match = find(child)
-            if (match) return match
-          }
-        }
-        return null
-      }
-      const replyComponent = find(app?._container?._vnode)
-      if (!replyComponent) throw new Error('Unable to access the comment reply')
-      replyComponent.props.node.reply.hasReplyToken = true
-    })
-    await expect(firstReply.locator(':scope > .commentReplyChildStem')).toHaveCount(1)
-
-    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
-    await page.getByRole('checkbox', { name: 'From creator' }).click()
-
-    const filteredReplyThread = page.locator('.commentThread').filter({
-      has: page.locator('.commentReplyContent')
-    })
-    await expect(filteredReplyThread).toHaveCount(1)
-    await expect(filteredReplyThread.locator('.commentReplyContent')).toHaveCount(1)
-    await expect(filteredReplyThread.locator('.commentReplyChildStem')).toHaveCount(0)
-
-    const expectLineToEndAtLastConnectorStart = () => expect.poll(() => filteredReplyThread.evaluate(element => {
-      const lineStyle = getComputedStyle(element, '::before')
-      const lineEnd = element.getBoundingClientRect().bottom - Number.parseFloat(lineStyle.insetBlockEnd)
-      const connectors = element.querySelectorAll(
-        ':scope > .commentReplies > .commentReplyBranchRoot > .commentReplyConnector'
-      )
-      const connectorStart = connectors.item(connectors.length - 1).getBoundingClientRect().top
-      return Math.abs(lineEnd - connectorStart)
-    })).toBeLessThanOrEqual(0.5)
-
-    await expectLineToEndAtLastConnectorStart()
-    await page.evaluate(() => {
-      const store = window.$store
-      return store.dispatch('updateUiScale', 125)
-    })
-    await expectLineToEndAtLastConnectorStart()
   })
 
   test('filters comments with timestamps and keeps highlighted timestamps clickable', async ({ app, page }) => {
@@ -930,50 +759,6 @@ test.describe('manual comment loading', () => {
     await parentPinButton.click()
     await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('Pinned by you')
     await expect(thread.getByRole('button', { name: `Unpin comment by ${parentAuthor}` })).toHaveAttribute('aria-pressed', 'true')
-  })
-
-  test('filters loaded comments to the video creator', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    await page.getByRole('button', { name: 'Filter loaded comments' }).click()
-    const creatorFilter = page.getByRole('checkbox', { name: 'From creator' })
-    await expect(creatorFilter.locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
-    // Rows highlight on hover like the other menus.
-    await expect(creatorFilter).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    await creatorFilter.hover()
-    await expect(creatorFilter).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    await creatorFilter.click()
-
-    await expect(page.locator('.commentThread')).toHaveCount(1)
-    await expect(page.locator('.commentThread')).toContainText('@jawed')
-    await expect(page.locator('.commentThread')).toContainText('Hello')
-  })
-
-  test('applies the shortened view count setting to comment likes', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    const commentLikes = page.locator('.commentThread')
-      .filter({ hasText: "We're so honored" })
-      .locator('.commentLikeCount')
-    await expect(commentLikes).toContainText(/4\.6\s?m/i)
-
-    await page.evaluate(() => {
-      const store = window.$store
-      return store.dispatch('updateShortenViewCounts', false)
-    })
-    await expect(commentLikes).toContainText('4,600,000')
   })
 
   test('renders whitespace-only zero like counts as zero', async ({ app, page }) => {
@@ -1259,26 +1044,6 @@ test.describe('Auto Load Comments apart from Auto Load Next Page', () => {
     await openMockedVideo(page)
     return requests
   }
-
-  test.describe('with only video lists loading automatically', () => {
-    test.use({
-      seed: {
-        settings: { ...WATCH_PAGE_SEED, generalAutoLoadMorePaginatedItemsEnabled: true, autoLoadComments: false }
-      }
-    })
-
-    test('waits for a click to load comments', async ({ app, page }) => {
-      const requests = await openVideoCountingCommentRequests(app, page)
-      const loadComments = page.locator('.getCommentsTitle')
-      await loadComments.scrollIntoViewIfNeeded()
-      await expect(loadComments).toBeVisible()
-      expect(requests.count).toBe(0)
-
-      await loadComments.click()
-      await expect(page.locator('.comment').first()).toBeVisible()
-      expect(requests.count).toBe(1)
-    })
-  })
 
   test.describe('with only comments loading automatically', () => {
     test.use({

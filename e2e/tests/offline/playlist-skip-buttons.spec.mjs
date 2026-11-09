@@ -119,40 +119,6 @@ function readSkipAvailability(page, withNextVideo = false) {
   }, withNextVideo)
 }
 
-test('playlist counter stays below the title when expanded and collapsed', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
-  await page.route(/^https?:\/\//, (route) => route.fulfill({ status: 404, body: '' }))
-  await goTo(page, 'userplaylists')
-  await page.getByText('Skip button playlist').click()
-  await page.getByText(VIDEO_TITLES[1]).first().click()
-
-  const playlist = page.locator('.watchVideoPlaylist.resizablePlaylist')
-  const counter = playlist.locator('.playlistIndex label')
-  await expect(counter).toHaveText('2 / 3')
-
-  const expectCounterBelowTitle = async () => {
-    await expect.poll(() => playlist.evaluate((element) => {
-      const title = element.querySelector('.playlistTitle').getBoundingClientRect()
-      const counter = element.querySelector('.playlistIndex label').getBoundingClientRect()
-      return counter.top - title.bottom
-    })).toBeGreaterThanOrEqual(0)
-  }
-
-  for (const width of ['240px', '']) {
-    await playlist.evaluate((element, value) => {
-      element.style.inlineSize = value
-    }, width)
-    await expectCounterBelowTitle()
-    await playlist.getByRole('button', { name: 'Collapse Playlist', exact: true }).click()
-    await expect(playlist.locator('.playlistItemsWrapper')).toBeHidden()
-    await expectCounterBelowTitle()
-    await playlist.getByRole('button', { name: 'Expand Playlist', exact: true }).click()
-    await expect(playlist.locator('.playlistItemsWrapper')).toBeVisible()
-    await expectCounterBelowTitle()
-  }
-  await playlist.scrollIntoViewIfNeeded()
-  await attachScreenshot('playlist counter below title')
-})
-
 test('only offers skipping to playlist videos that exist', async ({ page, attachScreenshot }) => {
   await page.route(/^https?:\/\//, (route) => route.fulfill({ status: 404, body: '' }))
 

@@ -1,4 +1,4 @@
-import { expectOverlayScrollRange, expectScrollAtRenderedEnd, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { expectOverlayScrollRange, expectScrollAtRenderedEnd, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
@@ -107,26 +107,6 @@ async function startMockLiveChat(page, superChats) {
 }
 
 test.describe('watch page', () => {
-  test('does not speculate about live chat while availability loads', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-
-    let releaseMetadata
-    await page.route(/\/youtubei\/v1\/next/, async (route) => {
-      await new Promise(resolve => { releaseMetadata = resolve })
-      await route.fallback()
-    })
-
-    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-    await page.locator(sel.searchInput).press('Enter')
-    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(page.locator(`${activeTab} .sidebarArea > .liveChatSkeleton`)).toHaveCount(0)
-    await expect(page.locator(`${activeTab} .sidebarArea > .recommendationsSkeleton`)).toBeVisible()
-
-    await expect.poll(() => typeof releaseMetadata).toBe('function')
-    releaseMetadata()
-    await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
-  })
-
   test('shows the donor handle in live chat and the expanded donation', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

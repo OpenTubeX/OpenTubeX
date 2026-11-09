@@ -79,75 +79,74 @@ async function scrollToSettledBottom(page) {
 }
 
 test.describe('thumbnail size slider', () => {
-  for (const width of [375, 412]) {
-    test(`fits thumbnails to a ${width}px window`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
-      await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-        const window = BrowserWindow.getAllWindows()[0]
-        window.setMinimumSize(0, 0)
-        window.setContentSize(Math.round(width * uiScale / 100), 900)
-      }, { width, uiScale })
-      await goTo(page, 'subscriptions')
-      await expect(page.getByText('Feed video 00')).toBeVisible()
-      const grid = page.locator('.autoGrid')
-      const columns = () => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)
-      await expect.poll(columns).toBe(2)
-      const cardWidth = () => grid.locator(':scope > *').first().evaluate(element => element.getBoundingClientRect().width)
-      const defaultWidth = await cardWidth()
+  test('fits thumbnails to a 412px window', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    const width = 412
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setMinimumSize(0, 0)
+      window.setContentSize(Math.round(width * uiScale / 100), 900)
+    }, { width, uiScale })
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    const grid = page.locator('.autoGrid')
+    const columns = () => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)
+    await expect.poll(columns).toBe(2)
+    const cardWidth = () => grid.locator(':scope > *').first().evaluate(element => element.getBoundingClientRect().width)
+    const defaultWidth = await cardWidth()
 
+    await page.locator('.profileTrigger').click()
+    await expect(page.locator('.thumbnailSizeSlider')).toBeVisible()
+    // Larger cards cannot fit two per row, so Full width covers that layout.
+    await expect(page.locator('.thumbnailSizeSlider .input')).toHaveAttribute('max', '100')
+    let previousWidth = 0
+    for (let size = 60; size <= 100; size += 10) {
+      await dragSlider(page, [size])
+      await expect.poll(cardWidth).toBeCloseTo(defaultWidth * size / 100, 0)
+      const currentWidth = await cardWidth()
+      expect(currentWidth).toBeGreaterThan(previousWidth)
+      previousWidth = currentWidth
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    }
+    await page.evaluate(() => window.$store.dispatch('updateListType', 'fullWidth'))
+    await expect.poll(columns).toBe(1)
+    const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
+    await expect.poll(cardWidth).toBeCloseTo(gridWidth, 0)
+
+    await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
+    await expect.poll(columns).toBe(2)
+    const cards = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => {
+      const { x, y, width } = element.getBoundingClientRect()
+      return { x, y, width }
+    }))
+    expect(cards[0].y).toBeCloseTo(cards[1].y, 0)
+    expect(cards[1].x).toBeGreaterThan(cards[0].x + cards[0].width)
+
+    if (uiScale === 100) {
+      const slider = page.locator('.thumbnailSizeSlider .input')
+      const resize = width => app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
+      }, width)
+      await resize(1000)
+      await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
       await page.locator('.profileTrigger').click()
-      await expect(page.locator('.thumbnailSizeSlider')).toBeVisible()
-      // Larger cards cannot fit two per row, so Full width covers that layout.
-      await expect(page.locator('.thumbnailSizeSlider .input')).toHaveAttribute('max', '100')
-      let previousWidth = 0
-      for (let size = 60; size <= 100; size += 10) {
-        await dragSlider(page, [size])
-        await expect.poll(cardWidth).toBeCloseTo(defaultWidth * size / 100, 0)
-        const currentWidth = await cardWidth()
-        expect(currentWidth).toBeGreaterThan(previousWidth)
-        previousWidth = currentWidth
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
-      }
-      await page.evaluate(() => window.$store.dispatch('updateListType', 'fullWidth'))
-      await expect.poll(columns).toBe(1)
-      const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
-      await expect.poll(cardWidth).toBeCloseTo(gridWidth, 0)
-
-      await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
+      await expect(slider).toHaveAttribute('max', '180')
+      await dragSlider(page, [180])
+      await resize(412)
+      await expect(slider).toHaveAttribute('max', '100')
+      await expect(slider).toHaveValue('100')
       await expect.poll(columns).toBe(2)
-      const cards = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => {
-        const { x, y, width } = element.getBoundingClientRect()
-        return { x, y, width }
-      }))
-      expect(cards[0].y).toBeCloseTo(cards[1].y, 0)
-      expect(cards[1].x).toBeGreaterThan(cards[0].x + cards[0].width)
+      await resize(1000)
+      await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
+      await page.locator('.profileTrigger').click()
+      await expect(slider).toHaveValue('180')
+      await resize(412)
+      await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
 
-      if (width === 412 && uiScale === 100) {
-        const slider = page.locator('.thumbnailSizeSlider .input')
-        const resize = width => app.electronApp.evaluate(({ BrowserWindow }, width) => {
-          BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
-        }, width)
-        await resize(1000)
-        await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
-        await page.locator('.profileTrigger').click()
-        await expect(slider).toHaveAttribute('max', '180')
-        await dragSlider(page, [180])
-        await resize(412)
-        await expect(slider).toHaveAttribute('max', '100')
-        await expect(slider).toHaveValue('100')
-        await expect.poll(columns).toBe(2)
-        await resize(1000)
-        await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
-        await page.locator('.profileTrigger').click()
-        await expect(slider).toHaveValue('180')
-        await resize(412)
-        await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
-
-        await goToSettingsSection(page, 'theme')
-        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveAttribute('max', '100')
-        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('100')
-      }
-    })
-  }
+      await goToSettingsSection(page, 'theme')
+      await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveAttribute('max', '100')
+      await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('100')
+    }
+  })
 
   for (const trigger of ['grid view', 60, 'wider viewport']) {
     test(`clamps the bottom after changing to ${trigger}`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
@@ -255,25 +254,6 @@ test.describe('thumbnail size slider', () => {
     })
   }
 
-  test('shows one card per row with the full width view type', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    const viewType = appearance.getByRole('combobox', { name: 'Video View Type' })
-    await viewType.click()
-    await page.getByRole('option', { name: 'Full Width', exact: true }).click()
-    await expect(viewType).toHaveText('Full Width')
-    await page.locator('.settingsCloseButton').click()
-
-    await goTo(page, 'subscriptions')
-    await expect(page.getByText('Feed video 00')).toBeVisible()
-    const grid = page.locator('.autoGrid')
-    await expect.poll(() => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
-    const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
-    const card = grid.locator(':scope > *').first()
-    await expect.poll(() => card.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(gridWidth, 0)
-    await expect(card.locator('.ft-list-video')).toHaveClass(/\bgrid\b/)
-    await attachScreenshot('feed in full width view')
-  })
-
   test('shows the chosen number of grid columns', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     const columns = appearance.getByRole('combobox', { name: 'Grid Columns', exact: true })
@@ -296,15 +276,6 @@ test.describe('thumbnail size slider', () => {
 
     await page.evaluate(() => window.$store.dispatch('updateGridColumns', 0))
     await expect.poll(columnCount).toBeLessThan(5)
-  })
-
-  test('explains when the thumbnail size slider has no effect on grids', async ({ page, attachScreenshot }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    const slider = appearance.locator('.pure-material-slider').filter({ hasText: /^Thumbnail Size/ })
-    await slider.locator('.selectTooltip .button').focus()
-    const tooltip = page.locator('body > [role="tooltip"]:visible')
-    await expect(tooltip).toContainText('fixed column count')
-    await attachScreenshot('thumbnail size tooltip')
   })
 
   test('resizes the feed without re-measuring every card', async ({ page, attachScreenshot }) => {

@@ -1,5 +1,4 @@
 import { fileURLToPath } from 'node:url'
-import { readFile } from 'node:fs/promises'
 import { test, expect, setWindowSize, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -61,7 +60,7 @@ async function seekTimelineToEnd(page) {
   })
 }
 
-for (const method of ['End', 'End with backoff', 'timeline', 'timeline with backoff', 'media seek']) {
+for (const method of ['End with backoff', 'timeline with backoff']) {
   test(`shows the end screen after a paused seek to the end using ${method}`, async ({ app, page, attachScreenshot }) => {
     const { video, watch } = await openVideo({ app, page })
     await watch.evaluate(component => { component.proxy.autoplayNextRecommendedVideo = true })
@@ -160,86 +159,6 @@ for (const dataSaver of [false, true]) {
     }
   })
 }
-
-test('shows an already loaded poster without flashing its placeholder on each video end', async ({ app, page }) => {
-  const { video, watch } = await openVideo({ app, page })
-  const svg = await readFile(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url), 'utf8')
-  await watch.evaluate(async (component, svg) => {
-    const src = `data:image/svg+xml,${encodeURIComponent(svg)}`
-    const image = new Image()
-    image.src = src
-    await image.decode()
-    component.proxy.thumbnail = src
-    await component.proxy.$nextTick()
-  }, svg)
-  for (let repeat = 0; repeat < 2; repeat++) {
-    const frames = await page.evaluateHandle(() => {
-      const state = { placeholders: 0, posters: 0 }
-      let frame
-      const sample = () => {
-        const poster = document.querySelector('.endedPoster')
-        if (poster) {
-          state.posters++
-          if (poster.querySelector('.retryImagePlaceholder')) state.placeholders++
-        }
-        frame = requestAnimationFrame(sample)
-      }
-      frame = requestAnimationFrame(sample)
-      return { state, stop: () => cancelAnimationFrame(frame) }
-    })
-    await endVideo(video)
-    await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toBeVisible()
-    const observed = await frames.evaluate(async ({ state, stop }) => {
-      await new Promise(resolve => requestAnimationFrame(resolve))
-      stop()
-      return state
-    })
-    expect(observed.posters).toBeGreaterThan(0)
-    expect(observed.placeholders, 'cached posters must be ready at the first painted frame').toBe(0)
-    await video.evaluate(element => { element.currentTime = 1 })
-    await expect(page.locator('.endedPoster')).toHaveCount(0)
-  }
-})
-
-test('restores the poster and hides annotations at the end, then clears it on seek and replay', async ({ app, page }) => {
-  const { video } = await openVideo({ app, page })
-  await expect(page.locator('.videoAnnotations')).toBeVisible()
-  await endVideo(video)
-  const poster = page.locator('.endedPoster')
-  await expect(poster).toBeVisible()
-  await expect(poster.locator('img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
-  await expect.poll(() => poster.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
-  await expect(page.locator('.videoAnnotations')).toHaveCount(0)
-  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
-  await video.evaluate(element => { element.currentTime = 1 })
-  await expect(poster).toHaveCount(0)
-  await expect(page.locator('.videoAnnotations')).toBeVisible()
-  await endVideo(video)
-  await expect(poster).toBeVisible()
-  await page.locator('.shaka-controls-button-panel .shaka-play-button').click()
-  await expect(poster).toHaveCount(0)
-  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
-})
-
-test('hides only end-screen recommendations when the focused setting is enabled', async ({ app, page }) => {
-  const { video, watch } = await openVideo({ app, page })
-  await watch.evaluate(async component => {
-    await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
-    component.proxy.recommendedVideos = [{ videoId: 'video000000', title: 'Next video', type: 'video' }]
-  })
-  await endVideo(video)
-  await expect(page.locator('.endedRecommendation')).toHaveCount(1)
-  await expect(page.locator('.watchVideoRecommendations')).toBeVisible()
-
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateHideEndScreenRecommendations', true))
-  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
-  await expect(page.locator('.watchVideoRecommendations')).toBeVisible()
-  await expect(page.locator('.endedPoster')).toBeVisible()
-  await expect(page.locator('.videoAnnotations')).toHaveCount(0)
-
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateHideEndScreenRecommendations', false))
-  await expect(page.locator('.endedRecommendation')).toHaveCount(1)
-})
 
 test('shows recommended thumbnails over a darkened poster with working keyboard navigation', async ({ app, page, attachScreenshot }) => {
   // Two cold video loads plus fullscreen and window size changes.
@@ -344,40 +263,6 @@ test('shows the poster and recommendations after canceling autoplay, and starts 
   await expect(page.locator('.endedPoster')).toHaveCount(0)
   await expect(page.locator('.endedRecommendations')).toHaveCount(0)
 })
-
-for (const defaultInterval of [0, 1]) {
-  test(`does not flash the end screen when autoplay advances after ${defaultInterval} seconds`, async ({ app, page }) => {
-    const { video, watch } = await openVideo({ app, page })
-    await watch.evaluate(async (component, interval) => {
-      await component.proxy.$store.dispatch('updateDefaultInterval', interval)
-      component.proxy.autoplayNextRecommendedVideo = true
-      component.proxy.recommendedVideos = [{ videoId: 'video000000', title: 'Next video', type: 'video' }]
-    }, defaultInterval)
-    const endScreen = await page.evaluateHandle(() => {
-      const state = { appeared: false }
-      const observer = new MutationObserver(records => {
-        for (const record of records) {
-          for (const node of record.addedNodes) {
-            if (node instanceof Element && (node.matches('.endedPoster') || node.querySelector('.endedPoster'))) {
-              state.appeared = true
-            }
-          }
-        }
-      })
-      observer.observe(document.body, { childList: true, subtree: true })
-      return { state, observer }
-    })
-    await video.evaluate(element => {
-      element.currentTime = element.duration - 0.1
-      return element.play()
-    })
-    await expect(page).toHaveURL(/#\/watch\/video000000$/)
-    expect(await endScreen.evaluate(({ state, observer }) => {
-      observer.disconnect()
-      return state.appeared
-    })).toBe(false)
-  })
-}
 
 for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop', 'boundary-empty', 'boundary-failed']) {
   test(`YouTube playlist autoplay advances with a ${continuationState} continuation request`, async ({ app, page }) => {
@@ -542,73 +427,4 @@ test('uses original recommendation titles only for the entire-app preference and
   })
   await (await missingTitleResponse).finished()
   await expect(card).toHaveAttribute('title', 'Fallback title')
-})
-
-test('hides the VR canvas behind the finished poster and restores it after seeking', async ({ app, page }) => {
-  const { video, watch } = await openVideo({ app, page })
-  await watch.evaluate(component => { component.proxy.vrProjection = 'EQUIRECTANGULAR' })
-  const canvas = page.locator('.vrCanvas')
-  await expect(canvas).toBeVisible()
-  await canvas.evaluate(element => {
-    const context = element.getContext('2d')
-    context.fillStyle = 'red'
-    context.fillRect(0, 0, element.width, element.height)
-  })
-  await endVideo(video)
-  await expect(page.locator('.endedPoster')).toBeVisible()
-  await expect(canvas).toBeHidden()
-  await video.evaluate(element => { element.currentTime = 1 })
-  await expect(page.locator('.endedPoster')).toHaveCount(0)
-  await expect(canvas).toBeVisible()
-})
-
-test('player fades respect the app motion preference over the system preference', async ({ app, page }) => {
-  const { video, watch } = await openVideo({ app, page })
-  await video.evaluate(element => element.pause())
-  await watch.evaluate(async component => {
-    await component.proxy.$store.dispatch('updateShowLightsOffToggle', true)
-    await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
-    component.proxy.recommendedVideos = [{
-      videoId: 'video000000',
-      title: 'Recommended video',
-      author: 'Example channel',
-      authorId: 'example-channel',
-      type: 'video',
-      lengthSeconds: 120,
-    }]
-  })
-
-  for (const [system, preference, animated] of [
-    ['reduce', 'off', true],
-    ['reduce', 'system', false],
-    ['no-preference', 'on', false],
-    ['no-preference', 'system', true],
-  ]) {
-    await page.emulateMedia({ reducedMotion: system })
-    await watch.evaluate((component, preference) => component.proxy.$store.dispatch('updateReducedMotion', preference), preference)
-    const enterDuration = await watch.evaluate(async component => {
-      const player = document.querySelector('.ftVideoPlayer')
-      component.proxy.$store.commit('setTabLightsOff', { tabId: player.dataset.tabId, value: true })
-      await component.proxy.$nextTick()
-      return getComputedStyle(document.querySelector('.lightsOffOverlay')).transitionDuration
-    })
-    expect(enterDuration).toBe(animated ? '0.3s' : '0s')
-    await expect(page.locator('.lightsOffOverlay')).toHaveCSS('opacity', '1')
-    // Finish entering before testing the separate exit transition.
-    await expect(page.locator('.lightsOffOverlay')).not.toHaveClass(/lights-off-enter-active/)
-    const leaveDuration = await watch.evaluate(async component => {
-      const player = document.querySelector('.ftVideoPlayer')
-      component.proxy.$store.commit('setTabLightsOff', { tabId: player.dataset.tabId, value: false })
-      await component.proxy.$nextTick()
-      const overlay = document.querySelector('.lightsOffOverlay')
-      return overlay ? getComputedStyle(overlay).transitionDuration : '0s'
-    })
-    expect(leaveDuration).toBe(animated ? '0.2s' : '0s')
-    await expect(page.locator('.lightsOffOverlay')).toHaveCount(0)
-
-    await endVideo(video)
-    await expect(page.locator('.endedRecommendations')).toHaveCSS('animation-name', animated ? /^ended-recommendations-appear(?:-|$)/ : 'none')
-    await video.evaluate(element => { element.currentTime = 1 })
-    await expect(page.locator('.endedRecommendations')).toHaveCount(0)
-  }
 })

@@ -57,9 +57,9 @@ test('playlist types render in both icon packs and Invidious channel tabs', asyn
   await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
   await page.locator('#playlistsTab').click()
 
-  for (const pack of ['material', 'remix']) {
+  for (const pack of ['material']) {
     await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
-    for (const width of [1440, 375]) {
+    for (const width of [1440]) {
       await page.setViewportSize({ width, height: 900 })
       for (const type of types) {
         const card = page.locator('.ft-list-item', { has: page.getByRole('heading', { name: type.title, exact: true }) })

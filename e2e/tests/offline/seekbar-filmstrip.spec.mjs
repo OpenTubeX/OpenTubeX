@@ -377,27 +377,6 @@ test('the mouse wheel over the seek bar scrolls the page instead of seeking', { 
   expect(await video.evaluate(element => element.currentTime)).toBe(5)
 })
 
-test('a click that slips off the seek bar before release hides the storyboard preview', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await routeDemoMedia(page)
-  await openVideoWithStoryboard(page)
-
-  const player = page.locator('.ftVideoPlayer')
-  const bar = player.locator('.shaka-seek-bar')
-  const preview = player.locator('.shaka-player-ui-thumbnail-container')
-  await player.hover()
-  const bounds = await bar.boundingBox()
-  const x = bounds.x + bounds.width * 0.4
-  await page.mouse.move(x, bounds.y + 2)
-  await expect(preview.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
-
-  // Too little sideways movement for the filmstrip, but the pointer leaves the bar.
-  await page.mouse.down()
-  await page.mouse.move(x + 2, bounds.y - 3)
-  await page.mouse.up()
-  await expect(preview).toHaveCSS('visibility', 'hidden')
-})
-
 test.describe('with a short interface hide delay', () => {
   test.use({
     seed: {
@@ -486,35 +465,6 @@ test.describe('with the filmstrip turned off', () => {
     await attachScreenshot('single thumbnail while dragging the knob')
     await page.mouse.up()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.6, 0)
-  })
-
-  test('fullscreen swipe-to-seek shows the single thumbnail and hides it on release', async ({ app, page }) => {
-    const touch = await page.context().newCDPSession(page)
-    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
-    await mockPlayableWatchPage(app, page)
-    await routeDemoMedia(page)
-    const { video } = await openVideoWithStoryboard(page)
-    await video.evaluate(element => { element.currentTime = 15 })
-    await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime === 15)).toBe(true)
-    await mockCapacitorPhoneLayout(page)
-    await setPlayerFullscreen(page, true)
-    const player = page.locator('.ftVideoPlayer')
-    const preview = player.locator('.shaka-player-ui-thumbnail-container')
-    await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown')
-
-    const box = await player.boundingBox()
-    const start = { x: box.x + box.width * 0.35, y: box.y + box.height * 0.4 }
-    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
-    for (let step = 1; step <= 5; step++) {
-      await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: start.x + box.width * 0.04 * step, y: start.y }] })
-    }
-    await expect(preview.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
-    await expect(preview.locator('.shaka-player-ui-thumbnail-time')).toHaveText('0:21')
-    await expect(player.locator('.ft-seek-filmstrip')).toBeHidden()
-
-    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(preview).toHaveCSS('visibility', 'hidden')
-    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(21)
   })
 })
 

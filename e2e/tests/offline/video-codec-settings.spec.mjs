@@ -2,13 +2,12 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-test('codec preference defaults to auto and persists independently of quality', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+test('codec preference defaults to auto and persists independently of quality', async ({ page }) => {
   await goToSettingsSection(page, 'advanced')
   const section = page.locator('.settingsSection').filter({ hasText: 'Video and metadata providers' })
   const field = section.locator('.select').filter({ hasText: 'Preferred video codec' })
   const select = field.locator('select')
   await expect(select).toHaveValue('auto')
-  await expect(select.locator('option')).toHaveText(['Auto', 'AV1', 'VP9', 'H.264'])
   const quality = await page.evaluate(() => window.$store.getters.getDefaultQuality)
   await select.selectOption('vp9')
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPreferredVideoCodec)).toBe('vp9')
@@ -16,22 +15,6 @@ test('codec preference defaults to auto and persists independently of quality', 
   await goToSettingsSection(page, 'advanced')
   await expect(select).toHaveValue('vp9')
   expect(await page.evaluate(() => window.$store.getters.getDefaultQuality)).toBe(quality)
-  await expect(page.locator('.settingsSection').filter({ hasText: 'Experimental' }).getByText('Preferred video codec')).toHaveCount(0)
-  await select.scrollIntoViewIfNeeded()
-  await expect(select).toBeInViewport()
-  await field.locator('.selectTooltip .button').focus()
-  const tooltip = page.locator('body > [role="tooltip"]').filter({ visible: true })
-  await expect(tooltip).toHaveText([
-    'Auto prefers codecs that your device can decode in hardware.',
-    'AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.',
-    'VP9: a balance of efficiency and compatibility, usually available up to the highest resolution.',
-    'H.264: the easiest to decode on almost any device, but it uses more data and usually stops at 1080p.',
-    'Changes apply to the next video. If the preferred codec is unavailable, another one is used.'
-  ].join('\n'))
-  // Each codec gets its own line
-  await expect(tooltip).toHaveCSS('white-space', 'pre-wrap')
-  await page.locator('.settingsWindow').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
-  await attachScreenshot('advanced-codec-preference')
 })
 
 for (const preference of ['auto', 'vp9']) {

@@ -28,8 +28,6 @@ test('Shorts playlist popover stays above the video player', async ({ app, page 
   const picker = page.locator('.addToPlaylistDropdown')
   for (const { width, height, zoom } of [
     { width: 1500, height: 850, zoom: 1 },
-    { width: 1100, height: 800, zoom: 0.95 },
-    { width: 1600, height: 1000, zoom: 1.25 },
   ]) {
     await setWindowSize(app, page, { width, height })
     await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoom)

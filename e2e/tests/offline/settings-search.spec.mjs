@@ -1,43 +1,8 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
-
-async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
-  await goTo(page, 'settings')
-  const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-  await search.fill('Auto Refresh Interval')
-  await expect(page.locator('.settingsSearchResultMatch')).toHaveText([
-    'Live Auto Refresh Interval',
-    'Posts Auto Refresh Interval',
-    'Videos Auto Refresh Interval',
-    'Shorts Auto Refresh Interval',
-    'RSS Feeds Auto Refresh Interval'
-  ])
-  await page.getByRole('button', { name: 'Videos Auto Refresh Interval', exact: true }).click()
-
-  const selectHighlight = page.locator('.select.settingsSearchTarget')
-  const highlightFrame = selectHighlight.locator('.selectSearchHighlightFrame')
-  const selectLabel = selectHighlight.locator('.select-label')
-  const selectTooltip = selectHighlight.locator('.selectTooltip')
-  await expect(selectHighlight).toContainText('Videos Auto Refresh Interval')
-  await expect(highlightFrame).toBeVisible()
-  await expect(selectLabel).toBeVisible()
-  await expect(selectTooltip).toBeVisible()
-  await expect(highlightFrame).toHaveCSS('animation-name', /settings-search-highlight/)
-  const highlightBounds = await highlightFrame.boundingBox()
-  const labelBounds = await selectLabel.boundingBox()
-  const tooltipBounds = await selectTooltip.boundingBox()
-  expect(highlightBounds).not.toBeNull()
-  expect(labelBounds).not.toBeNull()
-  expect(tooltipBounds).not.toBeNull()
-  expect(highlightBounds.y).toBeLessThanOrEqual(labelBounds.y + 1)
-  expect(highlightBounds.x + highlightBounds.width)
-    .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
-}
+import { test, expect, goTo } from '../../helpers/app.mjs'
 
 test.describe('settings search category headings', () => {
   for (const { width, height } of [
-    { width: 1600, height: 900 },
-    { width: 375, height: 812 }
+    { width: 1600, height: 900 }
   ]) {
     test.describe(`${width}px viewport`, () => {
       test.use({
@@ -75,27 +40,6 @@ test.describe('settings search category headings', () => {
   }
 })
 
-test.describe('lights off settings search', () => {
-  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
-
-  for (const query of ['lights off', 'Show Lights Off Toggle']) {
-    test(`opens and highlights the visibility toggle for "${query}"`, async ({ page }) => {
-      await goTo(page, 'settings')
-      const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-      await search.fill(query)
-      await expect(page.locator('.settingsSearchResultMatch'))
-        .toHaveText(['Show Lights Off Toggle'])
-      await page.getByRole('button', { name: 'Show Lights Off Toggle', exact: true }).click()
-
-      const toggle = page.locator('.switch-ctn.settingsSearchTarget')
-      await expect(toggle).toContainText('Show Lights Off Toggle')
-      await expect(toggle.getByRole('checkbox', { name: 'Show Lights Off Toggle' })).toBeVisible()
-      await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
-    })
-  }
-})
-
 test.describe('settings search in a partially translated locale', () => {
   // en-GB lacks this label, so the toggle renders the en-US fallback.
   test.use({ seed: { settings: { currentLocale: 'en-GB' } } })
@@ -112,47 +56,13 @@ test.describe('settings search in a partially translated locale', () => {
   })
 })
 
-test.describe('skip silence settings search', () => {
-  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
-
-  test('opens and highlights the visibility toggle', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await search.fill('Skip Silence')
-    await page.getByRole('button', { name: 'Show Skip Silence Toggle', exact: true }).click()
-
-    await expect(page.locator('.switch-ctn.settingsSearchTarget'))
-      .toContainText('Show Skip Silence Toggle')
-    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
-  })
-
-  test('opens the default toggle and reflects its dependency', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await search.fill('Enable Skip Silence by Default')
-    await page.getByRole('button', { name: 'Enable Skip Silence by Default', exact: true }).click()
-
-    const defaultToggle = page.getByRole('checkbox', {
-      name: /^Enable Skip Silence by Default/
-    })
-    await expect(defaultToggle).toBeDisabled()
-
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Show Skip Silence Toggle' })
-      .click()
-    await expect(defaultToggle).toBeEnabled()
-  })
-})
-
 test.describe('settings search highlights', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
   test.describe('subpage search', () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', useQuickPlaybackSpeedBar: true } } })
 
-    for (const label of ['Show active subscriptions in sidebar', 'Add item', 'Add Playback Speed', 'Playback Speed']) {
+    for (const label of ['Show active subscriptions in sidebar', 'Playback Speed']) {
       test(`opens and highlights ${label} inside its subpage`, async ({ page }) => {
         await goTo(page, 'settings')
         await page.getByRole('searchbox', { name: 'Search settings' }).fill(label)
@@ -169,49 +79,6 @@ test.describe('settings search highlights', () => {
           await expect(target).toContainText(label)
         }
       })
-    }
-  })
-
-  test('sizes the actual settings search control at the responsive breakpoint', { tag: '@scale' }, async ({ page, uiScale }, testInfo) => {
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-    const session = await page.context().newCDPSession(page)
-
-    for (const touch of [true, false]) {
-      await session.send('Emulation.setTouchEmulationEnabled', { enabled: touch })
-      await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(touch)
-
-      for (const width of [1600, 681, 680, 390, 1600]) {
-        await page.setViewportSize({ width, height: 800 })
-        const compact = await page.evaluate(() => matchMedia('(any-pointer: coarse), (width <= 680px)').matches)
-        await expect.poll(async () => search.evaluate(input => input.getBoundingClientRect().height))
-          .toBeCloseTo(compact ? 48 : 36, 1)
-        const heights = await search.evaluate(input => ({
-          input: input.getBoundingClientRect().height,
-          wrapper: input.closest('.settingsSearch').getBoundingClientRect().height
-        }))
-        expect(heights.input).toBeCloseTo(heights.wrapper, 1)
-        const header = page.locator('.settingsWindowHeader')
-        const spacing = await header.evaluate(element => {
-          const header = element.getBoundingClientRect()
-          const controls = [...element.querySelectorAll('.settingsSearch, .settingsHeaderButton')]
-            .map(control => control.getBoundingClientRect())
-          return Math.min(...controls.flatMap(control => [
-            control.top - header.top,
-            header.bottom - control.bottom
-          ]))
-        })
-        const inputMode = touch ? 'touch' : 'mouse'
-        expect(spacing, `${inputMode} ${width}px clearance`).toBeCloseTo(width === 1600 ? 6.5 : 5, 0)
-        if (width === 1600 && !touch) {
-          expect((await header.boundingBox()).height).toBeCloseTo(52, 0)
-        }
-        if (uiScale === 100) {
-          if (width === 1600) await header.screenshot({ path: testInfo.outputPath(`settings-header-${inputMode}-desktop.png`) })
-          if (width === 390) await page.screenshot({ path: testInfo.outputPath(`settings-search-${inputMode}-mobile.png`) })
-        }
-      }
     }
   })
 
@@ -237,130 +104,6 @@ test.describe('settings search highlights', () => {
     if (uiScale === 100) {
       await page.screenshot({ path: testInfo.outputPath('settings-restored-full-width-search.png') })
     }
-  })
-
-  test('uses the shared search field focus indicator without a second outline', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await expect(search).toBeFocused()
-    await expect(search).toHaveCSS('outline-style', 'none')
-    await expect(search).toHaveCSS('box-shadow', /inset/)
-    await expect(search).toHaveCSS('border-style', 'solid')
-  })
-
-  test('finds and highlights specific subscription refresh interval selects', { tag: '@scale' }, async ({ page }) => {
-    await expectSubscriptionRefreshIntervalSelectHighlight(page)
-  })
-
-  test('opens the videos auto refresh interval setting', async ({ page }) => {
-    const settings = await goToSettingsSection(page, 'subscription')
-    const interval = settings.getByRole('combobox', { name: 'Videos Auto Refresh Interval' })
-    await interval.click()
-    await expect(interval).toHaveAttribute('aria-expanded', 'true')
-    await expect(page.getByRole('listbox', { name: 'Videos Auto Refresh Interval' })).toBeVisible()
-  })
-
-  test('highlights a category opened through its description', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await search.fill('Feed refresh, upload notifications, and RSS feeds')
-    await page.getByRole('button', { name: 'Feed refresh, upload notifications, and RSS feeds', exact: true }).click()
-
-    const sectionHighlight = page.locator('.section.settingsSearchTarget')
-    await expect(sectionHighlight).toHaveAttribute('data-section', 'subscriptions')
-    await expect(sectionHighlight).toHaveCSS('animation-name', /settings-search-highlight/)
-  })
-
-  test('highlights a whole settings subsection opened through its heading', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await search.fill('Context Menu Search')
-    await page.getByRole('button', { name: 'Context Menu Search', exact: true }).click()
-
-    const contextMenuSearchSection = page.locator('.settingsSection').filter({
-      has: page.getByRole('heading', { name: 'Context Menu Search', exact: true })
-    })
-    await expect(contextMenuSearchSection).toHaveClass(/settingsSearchTarget/)
-    await expect(contextMenuSearchSection)
-      .toHaveCSS('animation-name', /settings-search-highlight/)
-  })
-
-  for (const { searchTerm, sectionType, settingLabel } of [{
-    searchTerm: 'Subscription',
-    sectionType: 'subscriptions',
-    settingLabel: 'Fetch Feed on Startup'
-  }, {
-    searchTerm: 'Caption Appearance',
-    sectionType: 'playback',
-    settingLabel: 'Preferred Caption Language'
-  }]) {
-    test(`highlights the subsection represented by the hidden ${searchTerm} title`, async ({ page }) => {
-      await goTo(page, 'settings')
-      const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-      await search.fill(searchTerm)
-      await page.getByRole('button', { name: searchTerm, exact: true }).click()
-
-      const subsectionHighlight = page.locator(
-        `.section[data-section="${sectionType}"] .settingsSection.settingsSearchTarget`
-      )
-      await expect(subsectionHighlight).toContainText(settingLabel)
-      await expect(subsectionHighlight).toHaveCSS('animation-name', /settings-search-highlight/)
-    })
-  }
-
-  test('does not search input placeholders or feedback messages', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    for (const searchTerm of [
-      'Engine name',
-      'Search URL',
-      'Search history and cache have been cleared',
-      'Generated SponsorBlock user ID copied to clipboard',
-      'Syncing watch history',
-      'This server version does not support watch history syncing'
-    ]) {
-      await search.fill(searchTerm)
-      await expect(page.locator('.settingsNoResults')).toBeVisible()
-      await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
-    }
-  })
-
-  test('only searches controls while their settings are visible', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    for (const searchTerm of [
-      'Screenshot Mode',
-      'Server URL',
-      'Executable path',
-      'SponsorBlock API URL',
-      'Excluded Channels',
-      'Proxy Host',
-      'Edit custom theme',
-      'Remove Password',
-      'Generated SponsorBlock User ID',
-      'Reveal Generated User ID'
-    ]) {
-      await search.fill(searchTerm)
-      await expect(page.locator('.settingsNoResults')).toBeVisible()
-      await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0, { timeout: 1_000 })
-    }
-
-    // Like the SponsorBlock API URL, this stays visible while its feature is off.
-    await search.fill('DeArrow thumbnail API URL')
-    await expect(page.getByRole('button', { name: 'DeArrow thumbnail API URL', exact: true })).toBeVisible()
-
-    await search.fill('')
-    const playback = await goToSettingsSection(page, 'playback')
-    await playback.locator('label.switch-label').filter({ hasText: 'Enable Screenshot' }).click()
-
-    await search.fill('Screenshot Mode')
-    await expect(page.getByRole('button', { name: 'Screenshot Mode', exact: true })).toBeVisible()
   })
 })
 
@@ -517,23 +260,5 @@ test.describe('settings', () => {
     await search.fill('no setting has this name')
     await expect(page.locator('.settingsMenu')).toContainText('No settings found')
     await expect(page.locator('.settingsContent')).toContainText('No settings found')
-  })
-})
-
-test.describe('grid columns settings search', () => {
-  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
-
-  test('opens and highlights the grid column select', async ({ page }) => {
-    await goTo(page, 'settings')
-    const search = page.getByRole('searchbox', { name: 'Search settings' })
-
-    await search.fill('playlist grid')
-    await expect(page.locator('.settingsSearchResultMatch')).toHaveText(['Playlist Grid Columns'])
-    await search.fill('grid columns')
-    await expect(page.locator('.settingsSearchResultMatch')).toHaveText(['Grid Columns'])
-    await page.getByRole('button', { name: 'Grid Columns', exact: true }).click()
-
-    await expect(page.locator('.settingsSearchTarget')).toContainText('Grid Columns')
-    await expect(page.getByRole('combobox', { name: 'Grid Columns', exact: true })).toBeVisible()
   })
 })

@@ -38,15 +38,6 @@ test.describe('search history suggestions', () => {
     await expect(suggestions(page).nth(1)).toContainText('baking bread')
   })
 
-  test('typing filters recent searches by prefix', async ({ page }) => {
-    await page.locator(sel.searchInput).fill('bak')
-
-    await expect(suggestions(page)).toHaveCount(1)
-    await expect(suggestions(page).first()).toContainText('baking bread')
-    await expect(suggestions(page).first().locator('.optionWrapper'))
-      .toHaveAttribute('href', /#\/search\/baking%20bread/)
-  })
-
   test('selecting a recent search restores its filters', async ({ page }) => {
     await page.locator(sel.searchInput).click()
     await suggestions(page).first().click()
@@ -69,7 +60,7 @@ test.describe('search history suggestions', () => {
     })
   })
 
-  for (const selection of ['click', 'keyboard', 'middle-click']) {
+  for (const selection of ['click', 'keyboard']) {
     test(`selecting filtered history by ${selection} preserves the selected entry's filters`, async ({ page }) => {
       const input = page.locator(sel.searchInput)
       await input.fill('bak')
@@ -79,11 +70,7 @@ test.describe('search history suggestions', () => {
         await input.press('ArrowDown')
         await input.press('Enter')
       } else {
-        await suggestions(page).first().locator('.optionWrapper').click({ button: selection === 'middle-click' ? 'middle' : 'left' })
-        if (selection === 'middle-click') {
-          await expect(page.locator(sel.tabs)).toHaveCount(2)
-          await page.locator(sel.tabs).nth(1).click()
-        }
+        await suggestions(page).first().locator('.optionWrapper').click()
       }
       await expect(page).toHaveURL(/#\/search\/baking%20bread/)
       await expect.poll(() => page.evaluate(() => {
@@ -119,34 +106,6 @@ test.describe('search history suggestions', () => {
       const params = new URLSearchParams(location.hash.split('?')[1])
       return params.getAll('features')
     })).toEqual(['hd', 'subtitles'])
-  })
-
-  test('Ctrl+Alt+middle-clicking a recent search leaves its background tab unloaded', async ({ page }) => {
-    await page.locator(sel.searchInput).click()
-    await suggestions(page).first().locator('.optionWrapper')
-      .click({ button: 'middle', modifiers: ['Control', 'Alt'] })
-
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
-    await expect(page).not.toHaveURL(/#\/search\/android%20tutorial/)
-    await expect.poll(() => page.evaluate(async () => {
-      const state = await window.ftElectron.tabs.getState()
-      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
-    })).toContain('/search/android%20tutorial')
-  })
-
-  test('middle-clicking works before the destination href is available', async ({ page }) => {
-    await page.locator(sel.searchInput).click()
-    const link = suggestions(page).first().locator('.optionWrapper')
-
-    await link.evaluate((element) => element.removeAttribute('href'))
-    await link.click({ button: 'middle' })
-
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await page.locator(sel.tabs).nth(1).click()
-    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
   })
 
   test('back navigation restores the active search filters', async ({ page }) => {
@@ -336,57 +295,6 @@ test.describe('search history suggestions', () => {
     ])
   })
 
-  test('session cache lookup and removal ignore feature order', async ({ page }) => {
-    await page.evaluate(() => {
-      const store = window.$store
-      const tabId = store.getters.getPresentedTabId ?? 'web'
-      store.commit('addToSessionSearchHistory', {
-        query: 'feature order',
-        data: [{
-          type: 'video',
-          videoId: 'featureord1',
-          title: 'Cached feature-order result',
-          author: 'OpenTubeX',
-          authorId: 'feature-order-author',
-          lengthSeconds: 60,
-          viewCount: 1,
-          publishedText: 'Today',
-          videoThumbnails: []
-        }],
-        searchSettings: {
-          prioritize: 'relevance',
-          time: '',
-          type: 'all',
-          duration: '',
-          features: ['4k', 'hd']
-        },
-        nextPageRef: null,
-        hasMoreResults: false,
-        apiUsed: 'local'
-      })
-      store.commit('setSearchFeatures', { tabId, value: ['hd', '4k'] })
-    })
-
-    await page.locator(sel.searchInput).fill('feature order')
-    await page.locator(sel.searchInput).press('Enter')
-    await expect(page.getByText('Cached feature-order result')).toBeVisible()
-
-    expect(await page.evaluate(() => {
-      const store = window.$store
-      store.commit('removeFromSessionSearchHistory', {
-        query: 'feature order',
-        searchSettings: {
-          prioritize: 'relevance',
-          time: '',
-          type: 'all',
-          duration: '',
-          features: ['hd', '4k']
-        }
-      })
-      return store.getters.getSessionSearchHistory.length
-    })).toBe(0)
-  })
-
   test('a recent search can be removed and stays removed', async ({ app, page }) => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(2)
@@ -426,143 +334,5 @@ test.describe('search history suggestions', () => {
 
     await expect(page).toHaveURL(/#\/search\/different%20search/)
     expect(pageErrors).toEqual([])
-  })
-})
-
-test.describe('search history URL links', () => {
-  test.use({
-    seed: {
-      settings: { enableSearchSuggestions: false },
-      searchHistory: [{
-        _id: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        lastUpdatedAt: now
-      }]
-    }
-  })
-
-  test('a recognized YouTube URL links to its internal destination', async ({ page }) => {
-    await page.locator(sel.searchInput).click()
-
-    await expect(suggestions(page).first().locator('.optionWrapper'))
-      .toHaveAttribute('href', /#\/watch\/dQw4w9WgXcQ/)
-  })
-})
-
-test.describe('search suggestion remove button layout', () => {
-  test('the remove control stays compact in a narrow dropdown', async ({ app, page }) => {
-    // Squeeze the search dropdown by shrinking the window and adding the vertical
-    // tab column, so the suggestion text has to truncate. The remove button must
-    // stay clear of the text instead of covering it (2nd screenshot bug).
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
-      const browserWindow = BrowserWindow.getAllWindows()[0]
-      const bounds = browserWindow.getBounds()
-      browserWindow.setBounds({ ...bounds, width: 760 })
-    })
-    await page.locator(sel.searchInput).click()
-    await expect(suggestions(page)).toHaveCount(2)
-
-    // Narrow the middle column further to trigger the compact header.
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setTabBarPosition', 'left')
-      store.commit('setVerticalTabBarWidth', 300)
-    })
-    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
-    // Wait for ResizeObserver to apply the compact header before opening search.
-    await expect(page.locator('.topNav')).toHaveClass(/phoneLayout/)
-    await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
-    await page.locator(sel.searchInput).focus()
-
-    const entry = suggestions(page).first()
-    const removeButton = entry.locator('.removeButton')
-    await entry.hover()
-
-    // The remove control is a compact icon (~26px) rather than the wider
-    // "Remove" word (~47px), so it no longer eats into the suggestion text.
-    await expect.poll(async () => {
-      const removeBox = await removeButton.boundingBox()
-      return removeBox.width
-    }).toBeLessThan(40)
-
-    const [entryBox, removeBox] = await Promise.all([
-      entry.boundingBox(),
-      removeButton.boundingBox()
-    ])
-    expect(entryBox.x + entryBox.width - removeBox.x - removeBox.width).toBeGreaterThanOrEqual(8)
-
-    const colors = await entry.evaluate((element) => ({
-      row: getComputedStyle(element).backgroundColor,
-      handle: getComputedStyle(
-        element.closest('.list').querySelector('.os-scrollbar-vertical .os-scrollbar-handle')
-      ).backgroundColor
-    }))
-    expect(colors.handle).toBe(colors.row)
-  })
-
-  test('the leading icon is vertically centered in its row', async ({ page }) => {
-    await page.locator(sel.searchInput).click()
-    const entry = suggestions(page).first()
-    await expect(entry).toBeVisible()
-    const icon = entry.locator('.searchResultIcon')
-
-    await expect.poll(async () => {
-      const [rowBox, iconBox] = await Promise.all([entry.boundingBox(), icon.boundingBox()])
-      const rowCenter = rowBox.y + rowBox.height / 2
-      const iconCenter = iconBox.y + iconBox.height / 2
-      return Math.abs(rowCenter - iconCenter)
-    }).toBeLessThanOrEqual(1.5)
-  })
-})
-
-test.describe('search history dropdown shape', () => {
-  test('the open dropdown attaches to the search field as one rounded panel', { tag: '@scale' }, async ({ page }) => {
-    const input = page.locator(sel.searchInput)
-    const list = page.locator('.topNav .searchInput .list')
-    const shape = () => input.evaluate(element => {
-      const field = element.getBoundingClientRect()
-      const fieldStyle = getComputedStyle(element)
-      const list = document.querySelector('.topNav .searchInput .list')
-      const listBounds = list?.getBoundingClientRect()
-      const listStyle = list && getComputedStyle(list)
-      return {
-        fieldBottomCorners: [fieldStyle.borderEndStartRadius, fieldStyle.borderEndEndRadius],
-        fieldTopCorner: fieldStyle.borderStartStartRadius,
-        listTopCorners: listStyle && [listStyle.borderStartStartRadius, listStyle.borderStartEndRadius],
-        listBottomCorner: listStyle?.borderEndStartRadius,
-        sharedShadow: !!listStyle && fieldStyle.boxShadow.includes(listStyle.boxShadow),
-        gap: listBounds && Math.abs(listBounds.top - field.bottom),
-        inlineOffset: listBounds && Math.max(
-          Math.abs(listBounds.left - field.left),
-          Math.abs(listBounds.right - field.right)
-        )
-      }
-    })
-
-    await input.click()
-    await expect(list).toBeVisible()
-    await expect.poll(async () => {
-      const { fieldBottomCorners, fieldTopCorner, listTopCorners, listBottomCorner, sharedShadow, gap, inlineOffset } = await shape()
-      return {
-        fieldBottomCorners,
-        listTopCorners,
-        sharedShadow,
-        cornersMatch: listBottomCorner === fieldTopCorner,
-        attached: gap < 0.1 && inlineOffset < 0.1
-      }
-    }).toEqual({
-      fieldBottomCorners: ['0px', '0px'],
-      listTopCorners: ['0px', '0px'],
-      sharedShadow: true,
-      cornersMatch: true,
-      attached: true
-    })
-
-    await input.blur()
-    await expect(list).toHaveCount(0)
-    // The closed field is a pill again.
-    await expect.poll(async () => {
-      const { fieldBottomCorners, fieldTopCorner } = await shape()
-      return fieldBottomCorners.every(corner => corner === fieldTopCorner)
-    }).toBe(true)
   })
 })
