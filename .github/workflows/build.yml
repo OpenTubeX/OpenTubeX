@@ -453,7 +453,7 @@ jobs:
     - name: Test Android APK packaging
       run: python3 -m unittest discover -s tests/android
 
-    - name: Build signed Android APKs
+    - name: Build Android APKs
       id: apk
       shell: bash
       run: |
@@ -483,6 +483,27 @@ jobs:
           -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
         python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite
         printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
+    - name: Sign Android APKs with the nightly key
+      shell: bash
+      env:
+        ANDROID_NIGHTLY_KEYSTORE_BASE64: ${{ secrets.ANDROID_NIGHTLY_KEYSTORE_BASE64 }}
+        ANDROID_NIGHTLY_STORE_PASSWORD: ${{ secrets.ANDROID_NIGHTLY_KEYSTORE_PASSWORD }}
+        ANDROID_NIGHTLY_KEYSTORE: ${{ runner.temp }}/nightly-release.keystore
+      run: |
+        set -euo pipefail
+        if [[ -z "$ANDROID_NIGHTLY_KEYSTORE_BASE64" || -z "$ANDROID_NIGHTLY_STORE_PASSWORD" ]]; then
+          if [[ "$GITHUB_REPOSITORY" == OpenTubeX/OpenTubeX ]]; then
+            echo "Android nightly signing secrets are not configured." >&2
+            exit 1
+          fi
+          echo "::warning::Fork build: the APKs keep the public nightly signature."
+          exit 0
+        fi
+        printf '%s' "$ANDROID_NIGHTLY_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_NIGHTLY_KEYSTORE"
+        chmod 600 "$ANDROID_NIGHTLY_KEYSTORE"
+        _scripts/sign-nightly-apks.sh android-apks/*.apk android-lite-apks/*.apk
+        rm "$ANDROID_NIGHTLY_KEYSTORE"
 
     - name: Upload Android arm64-v8a APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
