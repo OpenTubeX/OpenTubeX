@@ -9,6 +9,12 @@ html[data-overlayscrollbars-initialize],
   scrollbar-width: none !important;
 }
 
+/* Older Android WebViews ignore scrollbar-width, and their native
+   scrollbar would take touches meant for the drawn handle. */
+[data-overlayscrollbars-viewport]::-webkit-scrollbar {
+  display: none !important;
+}
+
 /* Marking a container scrolls it on both axes, and positions its bars
    against it. Overflow and positioning it sets itself take precedence. */
 :where([data-overlayscrollbars-viewport]) {
