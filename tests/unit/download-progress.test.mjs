@@ -147,15 +147,18 @@ test('a playlist completes with the skipped videos when yt-dlp reports errors fo
     payload: { isPlaylist: true },
     destinations: ['/downloads/Playlist/001 - First [aaaaaaaaaaa].mp4'],
     stderr: [membersOnlyError, ...Array(5).fill('__OPENTUBEX_DOWNLOAD__:downloading\t50.0%\t2MiB/s\t00:01')],
+    existingFiles: ['/downloads/Playlist/001 - First [aaaaaaaaaaa].mp4'],
   })
   assert.equal(status.status, 'completed')
   assert.equal(status.percent, 100)
   assert.equal(status.errorMessage, membersOnlyError)
 })
 
-test('a playlist without any downloaded file and a failed single video still fail', () => {
+test('a playlist without any saved file and a failed single video still fail', () => {
   const playlist = finishDownload({ code: 1, payload: { isPlaylist: true }, destinations: [], stderr: [membersOnlyError] })
   assert.equal(playlist.status.status, 'failed')
+  const unwritten = finishDownload({ code: 1, payload: { isPlaylist: true }, destinations: ['/downloads/First.en.vtt'], stderr: ['ERROR: Unable to download video subtitles for \'en\': HTTP Error 429'] })
+  assert.equal(unwritten.status.status, 'failed')
   const video = finishDownload({ code: 1, payload: {}, destinations: ['/downloads/Video [aaaaaaaaaaa].mp4'], stderr: [membersOnlyError] })
   assert.equal(video.status.status, 'failed')
   assert.equal(video.status.errorMessage, membersOnlyError)
@@ -168,7 +171,7 @@ test('a playlist keeps the original subtitle when converting a skipped entry fai
     destinations: ['/downloads/First.en.vtt', '/downloads/Second.en.vtt'],
     stderr: ['ERROR: Postprocessing: Conversion failed!'],
     subtitleFormat: 'srt',
-    existingFiles: ['/downloads/First.en.srt'],
+    existingFiles: ['/downloads/First.en.srt', '/downloads/Second.en.vtt'],
   })
   assert.equal(status.status, 'completed')
   assert.deepEqual(status.destinations, ['/downloads/First.en.srt', '/downloads/Second.en.vtt'])

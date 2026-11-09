@@ -874,30 +874,34 @@ async function startYtDlpDownload(
       status.eta = null
     } else if (entry.cancelled) {
       status.status = 'cancelled'
-    } else if (code === 0 || (payload.isPlaylist === true && status.destinations.length > 0)) {
-      // yt-dlp skips playlist entries it cannot download, such as members-only
-      // videos, but still exits with an error after downloading the others.
-      if (code !== 0) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n')
+    } else {
       if (subtitleFormat !== '') {
         const convertedSubtitleDestinations = new Map([...subtitleDestinations]
           .map((subtitlePath) => [subtitlePath, subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)])
-          // A playlist entry that failed may not have been converted
+          // A failed download may have stopped before converting some subtitles
           .filter(([, convertedPath]) => code === 0 || existsSync(convertedPath)))
         status.destinations = status.destinations.map((destination) => (
           convertedSubtitleDestinations.get(destination) ?? destination
         ))
         status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
       }
-      status.status = payload.automatic === true && status.destinations.length === 0
-        ? 'skipped'
-        : 'completed'
-      if (status.status === 'completed') {
-        status.percent = 100
-        status.completedAt = Date.now()
+      // yt-dlp skips playlist entries it cannot download, such as members-only
+      // videos, but still exits with an error after downloading the others.
+      const skippedPlaylistVideos = code !== 0 && payload.isPlaylist === true &&
+        status.destinations.some(destination => existsSync(destination))
+      if (code === 0 || skippedPlaylistVideos) {
+        if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n')
+        status.status = payload.automatic === true && status.destinations.length === 0
+          ? 'skipped'
+          : 'completed'
+        if (status.status === 'completed') {
+          status.percent = 100
+          status.completedAt = Date.now()
+        }
+      } else {
+        status.status = 'failed'
+        status.errorMessage = stderrLines.join('\n')
       }
-    } else {
-      status.status = 'failed'
-      status.errorMessage = stderrLines.join('\n')
     }
 
     if (status.status === 'completed') {
