@@ -220,7 +220,9 @@ const {
   tabs,
   presentedTabId,
   afterSelect: tabId => {
-    tabsViewportRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
+    // The tab bar stays inert until its actions menu has closed.
+    if (tabActionsLocked) tabToFocus = tabId
+    else focusTab(tabId)
   },
   requestExit: () => emit('request-exit'),
   stopContextMenuPropagation: true,
@@ -285,6 +287,7 @@ watch(activeTabId, async () => {
 watch(tabs, () => nextTick(clampTabsScroll), { flush: 'post' })
 
 let tabActionsLocked = false
+let tabToFocus = null
 watch(() => actionTab.value !== null, (isOpen) => {
   if (isOpen && !tabActionsLocked) {
     lockBodyScroll()
@@ -298,6 +301,14 @@ function releaseTabActions() {
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
   tabActionsLocked = false
+  const tabId = tabToFocus
+  tabToFocus = null
+  // Focus once the tab bar renders without inert, before the menu refocuses its opener.
+  if (tabId) nextTick(() => focusTab(tabId))
+}
+
+function focusTab(tabId) {
+  tabsViewportRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
 }
 
 let tabsResizeObserver = null
