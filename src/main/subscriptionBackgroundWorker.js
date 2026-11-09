@@ -36,23 +36,24 @@ function fetchText(request, signal) {
 let uploadChannels = null
 
 /**
- * Shorts publication dates from earlier runs, by channel and video ID. Without them,
- * every refresh that falls back to the undated Shorts playlist or tab reloads a
- * watch page per Short. Merged, as RSS lists fewer Shorts than the playlist.
- * @type {Map<string, Map<string, number>>}
+ * Shorts publication dates from earlier runs, by channel ID. Without them, every
+ * refresh that falls back to the undated Shorts playlist or tab reloads a watch
+ * page per Short. Merged, as RSS lists fewer Shorts than the playlist.
+ * @type {Map<string, { videoId: string, published: number }[]>}
  */
 const shortDates = new Map()
 
 const scheduler = createSubscriptionBackgroundScheduler({
   fetchChannel: async (configuration, feed, channel, signal) => {
-    const cachedShorts = [...shortDates.get(channel) ?? []].map(([videoId, published]) => ({ videoId, published }))
+    const cachedShorts = feed === 'shorts' ? shortDates.get(channel) : undefined
     const payload = await fetchBackgroundSubscriptionChannel(configuration, feed, channel, signal, fetchText, async payload => ({
       backgroundFormat: 'entries', entries: await parseAndEnrichBackgroundFeed(payload, feed, channel, configuration.instanceUrl, fetchText, signal, cachedShorts)
     }))
     if (feed === 'shorts' && payload?.backgroundFormat === 'entries') {
-      const dates = shortDates.get(channel) ?? new Map()
+      const dates = new Map((cachedShorts ?? []).map(({ videoId, published }) => [videoId, published]))
       for (const { videoId, published } of payload.entries) if (Number.isFinite(published)) dates.set(videoId, published)
-      shortDates.set(channel, dates)
+      // The playlist, the longest Shorts source, lists the newest 100 Shorts
+      shortDates.set(channel, [...dates].sort((a, b) => b[1] - a[1]).slice(0, 100).map(([videoId, published]) => ({ videoId, published })))
     }
     if (payload?.backgroundFormat === 'entries' && uploadChannels?.[channel]?.feedTypes.includes(feed)) {
       process.parentPort.postMessage({ type: 'uploads', channelId: channel, feedType: feed, entries: normalizeUploadEntries(payload.entries) })
