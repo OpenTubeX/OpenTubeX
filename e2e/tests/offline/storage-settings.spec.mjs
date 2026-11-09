@@ -56,8 +56,8 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
     () => globalThis.__storageUsageReadCount
   )).toBe(1)
 
-  // Returning from the profile manager remounts the section, whose tabs
-  // teleport into the content header.
+  // Returning from the profile manager remounts the section, which must keep
+  // its tabs and the selected tab.
   await page.locator('.settingsWindow [data-settings-tab="data"]').click()
   await dataAndStorage.getByRole('button', { name: 'Manage Subscriptions', exact: true }).click()
   await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
