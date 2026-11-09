@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Szerkesztés"
   Pin to Navigation: "Rögzítés a navigációban"
   Unpin from Navigation: "Rögzítés feloldása a navigációban"
+  Pin to Top: "Rögzítés felülre"
+  Unpin from Top: "Rögzítés feloldása felülről"
+  Pinned to Top: "Felülre rögzítve"
   Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"

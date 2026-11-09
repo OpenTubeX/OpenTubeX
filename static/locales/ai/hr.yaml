@@ -231,6 +231,9 @@ User Playlists:
   This playlist is private or does not exist.: "Ovaj popis za reprodukciju je privatan ili ne postoji."
   Pin to Navigation: "Prikvači na navigaciju"
   Unpin from Navigation: "Otkvači s navigacije"
+  Pin to Top: "Prikvači na vrh"
+  Unpin from Top: "Otkvači s vrha"
+  Pinned to Top: "Prikvačeno na vrh"
   Reorder Hint: Povucite ili koristite tipke sa strelicama za promjenu redoslijeda
   Add new videos to the top (custom order): "Dodaj nove videozapise na vrh (prilagođeni redoslijed)"
   Shuffle videos by default: "Prema zadanim postavkama reproduciraj videozapise nasumično"

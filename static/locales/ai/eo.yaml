@@ -281,6 +281,9 @@ User Playlists:
   Remove Unavailable Videos Confirmation: 'Ĉu forigi nedisponeblajn videaĵojn? Trovitaj: {count}. Ne kontroleblaj: {uncertain}. Nekontrolitaj videaĵoj estos konservitaj.'
   Pin to Navigation: Alpingli al navigado
   Unpin from Navigation: Malalpingli el navigado
+  Pin to Top: "Fiksi supre"
+  Unpin from Top: "Malfiksi de supre"
+  Pinned to Top: "Fiksita supre"
   Reorder Hint: Trenu aŭ uzu la sagoklavojn por reordigi
   SinglePlaylistView:
     Retry: Reprovi

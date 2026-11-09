@@ -519,6 +519,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     uiScale: 100,
     userPlaylistsSortBy: 'latest_played_first',
     userPlaylistsCustomOrder: [],
+    // Playlist keys shown first on the Playlists page
+    userPlaylistsPinnedIds: [],
     userHistorySortBy: 'latest_played_first',
   }
 }

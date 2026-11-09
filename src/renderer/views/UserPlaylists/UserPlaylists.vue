@@ -248,7 +248,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, nextTick, ref, toRaw, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, nextTick, provide, ref, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -335,8 +335,17 @@ const allPlaylists = computed(() => {
       .map(playlistBookmarkToListData),
   ]
 
-  return sortUserPlaylists(playlists, sortBy.value, tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder, cachedCollator.value)
+  return sortUserPlaylists(
+    playlists,
+    sortBy.value,
+    tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder,
+    cachedCollator.value,
+    store.getters.getUserPlaylistsPinnedIds
+  )
 })
+
+// Lets the playlist cards on this page offer pinning to the top.
+provide('canPinPlaylistsToTop', true)
 
 /** @type {import('vue').Ref<string[] | null>} Order shown until a move is saved */
 const tempCustomOrder = ref(null)
@@ -349,8 +358,13 @@ const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && que
 async function movePlaylist(id, getTargetIndex) {
   const ids = allPlaylists.value.map(playlistKey)
   const index = ids.indexOf(id)
-  const targetIndex = getTargetIndex(index, ids.length - 1)
-  if (index === -1 || targetIndex === index || targetIndex < 0 || targetIndex >= ids.length) return
+  if (index === -1) return
+  // Pinned playlists stay above the others, so moves stay within their group.
+  const pinnedIds = new Set(store.getters.getUserPlaylistsPinnedIds)
+  const pinnedCount = ids.filter(key => pinnedIds.has(key)).length
+  const [first, last] = pinnedIds.has(id) ? [0, pinnedCount - 1] : [pinnedCount, ids.length - 1]
+  const targetIndex = Math.min(Math.max(getTargetIndex(index, ids.length - 1), first), last)
+  if (targetIndex === index) return
 
   ids.splice(index, 1)
   ids.splice(targetIndex, 0, id)

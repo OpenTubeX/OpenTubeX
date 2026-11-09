@@ -228,6 +228,9 @@ User Playlists:
   Edit: "編輯"
   Pin to Navigation: "釘選到導覽列"
   Unpin from Navigation: "從導覽列取消釘選"
+  Pin to Top: "置頂"
+  Unpin from Top: "取消置頂"
+  Pinned to Top: "已置頂"
   Reorder Hint: 拖曳或使用方向鍵重新排序
   Add new videos to the top (custom order): "將新影片加入頂端（自訂順序）"
   Shuffle videos by default: "預設隨機播放影片"

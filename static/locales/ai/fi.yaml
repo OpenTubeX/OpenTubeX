@@ -231,6 +231,9 @@ User Playlists:
   This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."
   Pin to Navigation: "Kiinnitä navigointiin"
   Unpin from Navigation: "Irrota navigoinnista"
+  Pin to Top: "Kiinnitä ylös"
+  Unpin from Top: "Irrota ylhäältä"
+  Pinned to Top: "Kiinnitetty ylös"
   Reorder Hint: Järjestä uudelleen vetämällä tai nuolinäppäimillä
   Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
   Shuffle videos by default: "Toista videot oletuksena satunnaisessa järjestyksessä"

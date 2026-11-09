@@ -15,7 +15,7 @@ ${source.slice(enabledStart, source.indexOf('\n}\n', enabledStart) + 2).replace(
 ${source.slice(start, source.indexOf('\n}\n', start) + 2).replace('export ', '')}
 getSyncableSettingKeys`,
   {
-    state: { pinnedChannelMetadata: {}, pinnedChannels: [], pinnedPlaylistIds: [], userPlaylistsSortBy: 'custom' },
+    state: { pinnedChannelMetadata: {}, pinnedChannels: [], pinnedPlaylistIds: [], userPlaylistsPinnedIds: [], userPlaylistsSortBy: 'custom' },
     NON_TRANSFERABLE_SETTINGS: new Set(),
     SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY: 'subscriptionChannelSettings',
     isSettingSyncableOnPlatform: () => true,
@@ -23,6 +23,6 @@ getSyncableSettingKeys`,
 )
 
 test('channel pins sync independently while playlist pins require playlist sync', () => {
-  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: true })], ['pinnedChannels', 'pinnedPlaylistIds', 'userPlaylistsSortBy'])
+  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: true })], ['pinnedChannels', 'pinnedPlaylistIds', 'userPlaylistsPinnedIds', 'userPlaylistsSortBy'])
   assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: false })], ['pinnedChannels', 'userPlaylistsSortBy'])
 })

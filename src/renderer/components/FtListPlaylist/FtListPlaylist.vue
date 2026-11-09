@@ -62,7 +62,15 @@
           class="h3Title"
           dir="auto"
         >
-          {{ titleForDisplay }}
+          <!-- No whitespace before the title, so its text content stays unchanged. -->
+          <FtIcon
+            v-if="isPinnedToTop"
+            class="pinnedIcon"
+            :icon="['fas', 'thumbtack']"
+            role="img"
+            :aria-label="t('User Playlists.Pinned to Top')"
+            :title="t('User Playlists.Pinned to Top')"
+          />{{ titleForDisplay }}
         </h3>
       </RouterLink>
       <div
@@ -169,6 +177,16 @@ const props = defineProps({
 const { t } = useI18n()
 const menuButton = useTemplateRef('menuButton')
 const openMobileContextActions = inject('openMobileContextActions')
+// Only the Playlists page sorts pinned playlists first.
+const canPinPlaylistsToTop = inject('canPinPlaylistsToTop', false)
+const isPinnedToTop = computed(() => canPinPlaylistsToTop && store.getters.getUserPlaylistsPinnedIds.includes(playlistMetadata.value.playlistId))
+function togglePinnedToTop() {
+  const id = playlistMetadata.value.playlistId
+  const pinnedIds = store.getters.getUserPlaylistsPinnedIds
+  store.dispatch('updateUserPlaylistsPinnedIds', isPinnedToTop.value
+    ? pinnedIds.filter(pinnedId => pinnedId !== id)
+    : [...pinnedIds, id])
+}
 const playlistMenuItems = computed(() => {
   const items = store.getters.getTabsEnabled
     ? [{
@@ -201,6 +219,13 @@ const playlistMenuItems = computed(() => {
       label: t('Downloads.Download Playlist'),
       icon: ['fas', 'download'],
       run: () => { showDownloadPrompt.value = true },
+    })
+  }
+  if (canPinPlaylistsToTop) {
+    items.push({
+      label: isPinnedToTop.value ? t('User Playlists.Unpin from Top') : t('User Playlists.Pin to Top'),
+      icon: ['fas', isPinnedToTop.value ? 'thumbtack-slash' : 'thumbtack'],
+      run: togglePinnedToTop,
     })
   }
   if (isUserPlaylist.value) {

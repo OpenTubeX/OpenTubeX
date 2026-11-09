@@ -229,6 +229,9 @@ User Playlists:
   This playlist is private or does not exist.: "Denne spelelista er privat eller finst ikkje."
   Pin to Navigation: "Fest til navigasjonen"
   Unpin from Navigation: "Løys frå navigasjonen"
+  Pin to Top: "Fest øvst"
+  Unpin from Top: "Løys frå toppen"
+  Pinned to Top: "Festa øvst"
   Reorder Hint: Dra eller bruk piltastane for å endre rekkjefølgja
   Add new videos to the top (custom order): "Legg til nye videoar øvst (eigendefinert rekkjefølgje)"
   Shuffle videos by default: "Spel av videoar i tilfeldig rekkjefølgje som standard"

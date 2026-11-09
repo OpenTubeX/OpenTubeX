@@ -275,6 +275,9 @@ User Playlists:
   This playlist is private or does not exist.: "Ta seznam predvajanja je zaseben ali ne obstaja."
   Pin to Navigation: "Pripni v navigacijo"
   Unpin from Navigation: "Odpni iz navigacije"
+  Pin to Top: "Pripni na vrh"
+  Unpin from Top: "Odpni z vrha"
+  Pinned to Top: "Pripeto na vrh"
   Reorder Hint: Povlecite ali uporabite smerne tipke za spreminjanje vrstnega reda
   Add new videos to the top (custom order): "Dodaj nove videoposnetke na vrh (vrstni red po meri)"
   Shuffle videos by default: "Privzeto predvajaj videoposnetke v naključnem vrstnem redu"

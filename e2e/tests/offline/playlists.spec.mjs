@@ -1100,6 +1100,70 @@ test.describe('custom playlists overview order', () => {
   })
 })
 
+test.describe('playlists pinned to the top', () => {
+  const seededPlaylist = (name, updatedDaysAgo) => ({
+    _id: `top-pin-${name.toLowerCase()}`,
+    playlistName: `Top pin ${name}`,
+    protected: false,
+    description: '',
+    videos: [],
+    createdAt: Date.now() - (10 + updatedDaysAgo) * 86_400_000,
+    lastUpdatedAt: Date.now() - updatedDaysAgo * 86_400_000
+  })
+
+  test.use({
+    seed: {
+      settings: { userPlaylistsSortBy: 'latest_updated_first' },
+      playlists: [seededPlaylist('A', 3), seededPlaylist('B', 2), seededPlaylist('C', 1)]
+    }
+  })
+
+  test('keeps pinned playlists above the sorted ones', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    let titles = page.locator('.playlistList .h3Title')
+    let menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    async function choose(name, action) {
+      await page.locator('.playlistList .title').filter({ hasText: `Top pin ${name}` }).click({ button: 'right' })
+      await menu.getByRole('menuitem', { name: action, exact: true }).click()
+      await expect(menu).toBeHidden()
+    }
+
+    await expect(titles).toHaveText(['Top pin C', 'Top pin B', 'Top pin A'])
+    await choose('A', 'Pin to Top')
+    await expect(titles).toHaveText(['Top pin A', 'Top pin C', 'Top pin B'])
+    await expect(titles.first().getByRole('img', { name: 'Pinned to Top' })).toBeVisible()
+    // Pinned playlists follow the chosen sort among themselves.
+    await choose('B', 'Pin to Top')
+    await expect(titles).toHaveText(['Top pin B', 'Top pin A', 'Top pin C'])
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    titles = page.locator('.playlistList .h3Title')
+    menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    await expect(titles).toHaveText(['Top pin B', 'Top pin A', 'Top pin C'])
+
+    // Custom order moves stay within the pinned or unpinned group.
+    await dispatchStoreAction(page, 'updateUserPlaylistsSortBy', 'custom')
+    const savedOrder = () => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder)
+    const handleOf = name => page.locator('.playlistList [data-playlist-drag-item]')
+      .filter({ hasText: `Top pin ${name}` })
+      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+    await expect(titles).toHaveText(['Top pin B', 'Top pin A', 'Top pin C'])
+    await handleOf('A').focus()
+    await page.keyboard.press('Home')
+    await expect.poll(savedOrder).toEqual(['top-pin-a', 'top-pin-b', 'top-pin-c'])
+    await choose('B', 'Unpin from Top')
+    await handleOf('C').focus()
+    await page.keyboard.press('Home')
+    await expect(titles).toHaveText(['Top pin A', 'Top pin C', 'Top pin B'])
+    await expect.poll(savedOrder).toEqual(['top-pin-a', 'top-pin-c', 'top-pin-b'])
+
+    // Deleting a pinned playlist also removes it from the synced setting.
+    await dispatchStoreAction(page, 'removePlaylist', 'top-pin-a')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsPinnedIds)).toEqual([])
+  })
+})
+
 test.describe('long custom playlists overview', () => {
   test.use({
     seed: {

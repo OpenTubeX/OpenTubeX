@@ -447,7 +447,7 @@ export function getSyncableSettingKeys(settings) {
     isSettingSyncEnabled(settings, settingKey) &&
     !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
     // Pins name playlist IDs that only exist on peers when playlists sync too.
-    !(settingKey === 'pinnedPlaylistIds' && !settings.syncServerSyncPlaylists) &&
+    !((settingKey === 'pinnedPlaylistIds' || settingKey === 'userPlaylistsPinnedIds') && !settings.syncServerSyncPlaylists) &&
     isSettingSyncableOnPlatform(settingKey)
   ))
 }
@@ -752,6 +752,7 @@ const customActions = {
 
   // Pin toggles build on the previous edit, so commit them before the save finishes.
   updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
+  updateUserPlaylistsPinnedIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', value),
   updateSubscriptionGroups: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'subscriptionGroups', value),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
@@ -812,11 +813,16 @@ const customActions = {
     return persistPlaylistBookmarks(commit, bookmarks)
   },
 
-  removePlaylistBookmark: async ({ commit, getters }, playlistId) => {
+  removePlaylistBookmark: async ({ commit, getters, state }, playlistId) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(bookmark => bookmark?.playlist?.id !== playlistId)
 
-    return persistPlaylistBookmarks(commit, bookmarks)
+    if (!await persistPlaylistBookmarks(commit, bookmarks)) return false
+    // Saving the playlist again should not bring back an old pin.
+    if (state.userPlaylistsPinnedIds.includes(playlistId)) {
+      await updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', state.userPlaylistsPinnedIds.filter(id => id !== playlistId))
+    }
+    return true
   },
 
   replacePlaylistBookmarks: async ({ commit }, bookmarks) => {
