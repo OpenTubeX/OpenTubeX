@@ -3,17 +3,33 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import store from '../../store/index'
+import { useTabContext } from '../../tabs/TabContext'
 
 const route = useRoute()
 const router = useRouter()
+const { isTabPresented } = useTabContext()
 
-onMounted(async () => {
-  const view = route.path === '/downloads' || route.path === '/about'
-    ? route.path.slice(1)
+// A tab loaded in the background must not open the window over the current
+// tab or leave its own route until the user selects it.
+onMounted(() => {
+  if (!isTabPresented || isTabPresented.value) {
+    openWindow()
+    return
+  }
+  const stop = watch(isTabPresented, (presented) => {
+    if (!presented) return
+    stop()
+    openWindow()
+  })
+})
+
+async function openWindow() {
+  const view = route.name === 'downloads' || route.name === 'about'
+    ? route.name
     : route.path.startsWith('/settings/profile') ? 'profile' : null
   await store.dispatch('showSettingsWindow', view)
   const tabId = store.getters.getPresentedTabId ?? store.getters.getActiveTabId
@@ -29,5 +45,5 @@ onMounted(async () => {
   } else {
     await router.replace('/')
   }
-})
+}
 </script>
