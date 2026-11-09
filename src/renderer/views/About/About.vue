@@ -1,93 +1,84 @@
 <template>
-  <div>
-    <FtCard class="card">
-      <h2>
-        <FtIcon
-          :icon="['fas', 'info-circle']"
-          class="headingIcon"
-        />
-        {{ $t("About.About") }}
-      </h2>
-      <section class="brand">
-        <FtLogoFull class="logo" />
-        <div class="version">
-          {{ versionNumber }} {{ $t("About.Beta") }}
-        </div>
+  <div class="about">
+    <section class="brand">
+      <FtLogoFull class="logo" />
+      <div class="version">
+        {{ versionNumber }} {{ $t("About.Beta") }}
+      </div>
+      <div
+        v-if="commitId"
+        class="commit"
+      >
+        {{ commitLabel }}
+        <a
+          :href="commitUrl"
+          :title="buildCommit"
+        >{{ commitId }}</a>
+      </div>
+      <dl
+        v-if="runtimeVersions"
+        class="runtimeVersions"
+      >
         <div
-          v-if="commitId"
-          class="commit"
+          v-for="runtime in runtimeVersions"
+          :key="runtime.name"
+          class="runtimeVersion"
         >
-          {{ commitLabel }}
-          <a
-            :href="commitUrl"
-            :title="buildCommit"
-          >{{ commitId }}</a>
+          <dt>{{ runtime.name }}</dt>
+          <dd>{{ runtime.version }}</dd>
         </div>
-        <dl
-          v-if="runtimeVersions"
-          class="runtimeVersions"
-        >
+      </dl>
+    </section>
+    <section class="about-chunks">
+      <figure
+        v-for="chunk in chunks"
+        :key="chunk.title"
+        class="chunk"
+      >
+        <FtIcon
+          class="icon"
+          :icon="chunk.icon"
+        />
+        <h3 class="title">
+          {{ chunk.title }}
+        </h3>
+        <div class="content">
           <div
-            v-for="runtime in runtimeVersions"
-            :key="runtime.name"
-            class="runtimeVersion"
+            v-for="(line, index) in chunk.lines"
+            :key="index"
+            class="links"
           >
-            <dt>{{ runtime.name }}</dt>
-            <dd>{{ runtime.version }}</dd>
-          </div>
-        </dl>
-      </section>
-      <section class="about-chunks">
-        <figure
-          v-for="chunk in chunks"
-          :key="chunk.title"
-          class="chunk"
-        >
-          <FtIcon
-            class="icon"
-            :icon="chunk.icon"
-          />
-          <h3 class="title">
-            {{ chunk.title }}
-          </h3>
-          <div class="content">
-            <div
-              v-for="(line, index) in chunk.lines"
-              :key="index"
-              class="links"
+            <span
+              v-for="item in line"
+              :key="item.href"
+              class="linkItem"
             >
-              <span
-                v-for="item in line"
-                :key="item.href"
-                class="linkItem"
+              <a
+                :href="item.href"
+                :lang="item.lang"
+                class="link"
               >
-                <a
-                  :href="item.href"
-                  :lang="item.lang"
-                  class="link"
-                >
-                  <FtIcon
-                    :icon="item.icon"
-                    class="linkIcon"
-                  />{{ item.label }}</a>
-                <span
-                  v-if="item.license"
-                  class="license"
-                >
-                  <a :href="item.license.href">{{ item.license.label }}</a>
-                </span>
+                <FtIcon
+                  :icon="item.icon"
+                  class="linkIcon"
+                />{{ item.label }}</a>
+              <span
+                v-if="item.license"
+                class="license"
+              >
+                <a :href="item.license.href">{{ item.license.label }}</a>
               </span>
-            </div>
-            <div
-              v-if="chunk.note"
-              class="note"
-            >
-              {{ chunk.note }}
-            </div>
+            </span>
           </div>
-        </figure>
-      </section>
-    </FtCard>
+          <div
+            v-if="chunk.note"
+            class="note"
+          >
+            {{ chunk.note }}
+          </div>
+        </div>
+      </figure>
+    </section>
   </div>
 </template>
 
@@ -96,7 +87,6 @@ import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 import { getNightlyCommit } from '../../helpers/versionDisplay.js'
 

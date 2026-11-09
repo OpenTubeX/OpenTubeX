@@ -15,7 +15,7 @@ test.describe('desktop tab switching', { tag: '@scale' }, () => {
   test('restores tab scroll positions and clamps reduced scroll ranges', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     const ids = []
-    for (const route of ['/history', '/about']) {
+    for (const route of ['/history', '/stats']) {
       const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), route)
       ids.push(tab.id)
       const content = page.locator(`.tabContent[data-tab-id="${tab.id}"]`)

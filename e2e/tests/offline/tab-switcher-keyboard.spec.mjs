@@ -5,7 +5,7 @@ test.describe('tab switcher hold delay', () => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.evaluate(async () => {
       await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
-      await window.ftElectron.tabs.create({ route: '/about', makeActive: false, lazyLoad: true })
+      await window.ftElectron.tabs.create({ route: '/stats', makeActive: false, lazyLoad: true })
     })
     await expect(page.locator(sel.tabs)).toHaveCount(3)
     await page.clock.install()
@@ -63,7 +63,7 @@ test.describe('tab switcher hold delay', () => {
       await expect(page.locator('.tabSwitcher')).toHaveCount(0)
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', activeId)
       await page.keyboard.press('Control+Shift+Tab')
-      await expect(page.locator(sel.activeTab)).toContainText('About')
+      await expect(page.locator(sel.activeTab)).toContainText('Stats')
     })
   }
 })

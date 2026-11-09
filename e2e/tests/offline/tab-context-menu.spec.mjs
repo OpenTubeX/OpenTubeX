@@ -2,7 +2,7 @@ import { test, expect, sel } from '../../helpers/app.mjs'
 
 test('compact tab actions keep their labels and execute on the target tab', async ({ page }) => {
   const target = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/about', makeActive: false, lazyLoad: true
+    route: '/stats', makeActive: false, lazyLoad: true
   }))
   const tab = page.locator(`.tab[data-tab-id="${target.id}"]`)
   const open = () => tab.click({ button: 'right' })

@@ -1,6 +1,6 @@
-.card {
-  margin-block: 0 60px;
+.about {
   margin-inline: auto;
+  padding-block: 24px;
   inline-size: 85%;
 }
 
@@ -12,6 +12,7 @@
 .logo {
   max-inline-size: 100%;
   inline-size: 500px;
+  margin-block-end: 24px;
 }
 
 .version {
@@ -130,12 +131,8 @@
   font-size: 0.9em;
 }
 
-.headingIcon {
-  color: var(--primary-color);
-}
-
 @media only screen and (width <=680px) {
-  .card {
+  .about {
     inline-size: 90%;
   }
 }

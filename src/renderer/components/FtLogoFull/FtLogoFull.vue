@@ -1,6 +1,6 @@
 <template>
   <svg
-    viewBox="0 0 673.262 220"
+    viewBox="0 43.9 673.262 132"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
   >

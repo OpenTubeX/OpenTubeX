@@ -186,7 +186,7 @@ test.describe('tab bar', () => {
     const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
     const retainedTabId = initialState.activeTabId
     const remoteClosedTab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/about',
+      route: '/stats',
       title: 'Closed remotely',
       makeActive: false,
       lazyLoad: true
@@ -210,7 +210,7 @@ test.describe('tab bar', () => {
       const store = window.$store
       store.commit('prepareTabReloadRoute', {
         tabId: retainedTabIds[0],
-        route: '/about'
+        route: '/stats'
       })
       store.commit('setTabContentTitle', {
         tabId: retainedTabIds[0],
@@ -1316,7 +1316,7 @@ test.describe('tab bar', () => {
       window.ftElectron.setZoomFactor(0.95)
       for (let index = 0; index < 29; index++) {
         await window.ftElectron.tabs.create({
-          route: '/about', title: `Tab ${index}`, makeActive: false, lazyLoad: true
+          route: '/stats', title: `Tab ${index}`, makeActive: false, lazyLoad: true
         })
       }
     })
@@ -1667,7 +1667,7 @@ test.describe('tab bar', () => {
   test('moves selected tabs between groups from the tab context menu', async ({ page }) => {
     const { firstTabId, secondTabId, groupId } = await page.evaluate(async () => {
       const first = await window.ftElectron.tabs.create({
-        route: '/about',
+        route: '/stats',
         title: 'First grouped tab',
         makeActive: false,
         lazyLoad: true
@@ -1730,7 +1730,7 @@ test.describe('tab bar', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
     const setup = await page.evaluate(async () => {
       const first = await window.ftElectron.tabs.create({
-        route: '/about',
+        route: '/stats',
         title: 'First research tab',
         makeActive: false,
         lazyLoad: true
@@ -2277,7 +2277,7 @@ test.describe('closed tabs', () => {
   test('restores regular and pinned tabs at their previous positions', async ({ page }) => {
     const { closedTabId, expectedRoutes } = await page.evaluate(async () => {
       await window.ftElectron.tabs.create({
-        route: '/about',
+        route: '/stats',
         title: 'Before restored tab',
         makeActive: false,
         lazyLoad: true
@@ -2434,7 +2434,7 @@ test.describe('closed tabs', () => {
     const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
 
     await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/about',
+      route: '/stats',
       makeActive: false,
       lazyLoad: true
     }))
@@ -2443,7 +2443,7 @@ test.describe('closed tabs', () => {
     ;({ page } = await app.relaunch())
     await expect(page.locator(sel.tabs)).toHaveCount(1)
     await expect(page.locator(sel.tabs)).not.toHaveAttribute('data-tab-id', closedTabId)
-    await expect(page).toHaveURL(/#\/about/)
+    await expect(page).toHaveURL(/#\/stats/)
   })
 
   test('restoring a closed tab restores its navigation history', async ({ page }) => {
