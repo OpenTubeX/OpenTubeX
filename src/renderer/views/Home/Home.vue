@@ -643,7 +643,10 @@ async function toggleRecommendationFeedback(video, type) {
       label: t('Undo'),
       icon: ['fas', 'undo'],
       primary: true,
-      action: () => recommendationFeedback(video, previous ?? 'clearFeedback'),
+      // Skip if a reset or history removal cleared the record meanwhile.
+      action: () => {
+        if (recommendationFeedbackFor(video.videoId) === 'blockChannel') recommendationFeedback(video, previous ?? 'clearFeedback')
+      },
     }],
   })
 }
