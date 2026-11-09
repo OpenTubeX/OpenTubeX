@@ -26,6 +26,7 @@ test.use({
       syncServerSyncSessions: false,
       syncServerSyncWatchStats: false,
       syncServerSyncLiveReminders: false,
+      syncServerSyncNotifications: false,
       historyRetentionDays: 0,
     },
   },

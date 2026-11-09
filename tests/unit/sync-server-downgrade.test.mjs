@@ -9,6 +9,8 @@ import { isValidSyncServerDeviceId } from '../../src/renderer/helpers/sync-serve
 import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
 import { syncLiveReminders } from '../../src/renderer/helpers/sync-live-reminders.js'
+import { syncNotificationDismissals } from '../../src/renderer/helpers/sync-notification-dismissals.js'
+import { mergeNotificationDismissals, normalizeNotificationDismissals } from '../../src/notificationHistory.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -53,7 +55,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {} } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null) } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -75,6 +77,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     ...overrides,
   }
   const storedReceipts = new Map()
+  const local = { notificationDismissals }
   const common = {
     DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
     DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
@@ -113,6 +116,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     syncSubscriptionSeenPosts,
     syncExternalMediaPositions,
     syncRssFeedSeenItems,
+    syncNotificationDismissals,
+    notificationHistory: {
+      async mergeDismissals(remote) {
+        local.notificationDismissals = mergeNotificationDismissals(local.notificationDismissals, remote)
+        return local.notificationDismissals
+      },
+      onDismissed: () => () => {},
+    },
     dispatchRemoteSyncAction,
     isRecentSync,
     isSyncReasonEnabled,
@@ -234,7 +245,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
     },
   }
-  return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+  return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, local, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
 
 test('unsupported watch-stat initialization preserves another window’s newer sync baseline', async () => {
@@ -2486,3 +2497,43 @@ test('OIDC deletion clears the account a background sync already signed out', as
   await actions.deleteSyncServerOidcAccount(context)
   assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), true)
 })
+
+for (const supported of [true, false]) {
+  test(`notification dismissals sync ${supported ? 'with' : 'only with'} the server capability`, async () => {
+    const now = Date.now()
+    const remote = { readThrough: 0, clearedThrough: now - 10, dismissals: [{ key: 'video:/watch/remote', at: now, removedAt: now }] }
+    const uploads = []
+    const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncNotifications: true }, {
+      encrypted: true,
+      capacitor: true,
+      notificationDismissals: { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'post:/post/local', at: now - 5 }] },
+      respond: async (url, options) => {
+        if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, notification_dismissals: supported ? 1 : 0 } }
+        if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'notificationDismissals', revision: 1 }], legacy_data: false }
+        if (url.endsWith('/encrypted_sync/notificationDismissals')) {
+          if (options.method === 'PUT') {
+            uploads.push(await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey))
+            return { revision: 2 }
+          }
+          return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+        }
+      },
+    })
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.state.syncServerStatus, 'success')
+    assert.equal(f.context.state.syncServerNotificationDismissalsSupported, supported)
+    if (!supported) {
+      assert.equal(uploads.length, 0)
+      assert.equal(f.local.notificationDismissals.dismissals.length, 1)
+      return
+    }
+    const merged = { readThrough: 0, clearedThrough: now - 10, dismissals: [remote.dismissals[0], { key: 'post:/post/local', at: now - 5 }] }
+    assert.deepEqual(f.local.notificationDismissals, merged)
+    assert.deepEqual(uploads, [merged])
+
+    // Nothing changed on either side, so nothing is uploaded again.
+    remote.dismissals = merged.dismissals
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(uploads.length, 1)
+  })
+}

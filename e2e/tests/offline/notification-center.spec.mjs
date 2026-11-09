@@ -35,6 +35,7 @@ test.use({ seed })
 function mockSystemNotifications({ electronApp }, { supported = true, foreground = false } = {}) {
   return electronApp.evaluate(({ BrowserWindow, Notification, net }, { supported, foreground }) => {
     globalThis.shownNotifications = []
+    globalThis.systemNotifications = []
     // Thumbnails fail right away instead of delaying system notifications.
     const fetch = net.fetch
     net.fetch = (url, ...options) => String(url).includes('/vi/') ? Promise.reject(new Error('No thumbnails offline')) : fetch(url, ...options)
@@ -42,12 +43,35 @@ function mockSystemNotifications({ electronApp }, { supported = true, foreground
     Notification.isSupported = () => supported
     Notification.prototype.show = function () {
       globalThis.shownNotifications.push({ title: this.title, body: this.body })
+      globalThis.systemNotifications.push(this)
+    }
+    Notification.prototype.close = function () {
+      this.closedByApp = true
     }
     BrowserWindow.getFocusedWindow = () => foreground ? BrowserWindow.getAllWindows()[0] : null
   }, { supported, foreground })
 }
 
 const shownNotifications = ({ electronApp }) => electronApp.evaluate(() => globalThis.shownNotifications)
+
+/**
+ * The bodies of the system notifications the app closed.
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ */
+const closedNotifications = ({ electronApp }) => electronApp.evaluate(() => (
+  globalThis.systemNotifications.filter(notification => notification.closedByApp).map(notification => notification.body)
+))
+
+/**
+ * Acts on a system notification as the user would.
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ * @param {string} body
+ * @param {'click' | 'close'} event
+ * @param {{ reason?: string }} [details]
+ */
+const emitSystemNotification = ({ electronApp }, body, event, details = {}) => electronApp.evaluate((_electron, { body, event, details }) => {
+  globalThis.systemNotifications.find(notification => notification.body === body).emit(event, details)
+}, { body, event, details })
 
 /**
  * Reports new uploads from the channel until the main process announces them.
@@ -570,6 +594,182 @@ test('the notification setting turns the bell and the notification options off a
   await (await goToSettingsSection(page, 'general')).locator('.select').filter({ hasText: 'Notifications' }).locator('select').selectOption('system')
   await expect(page.locator('.notificationCenter')).toHaveCount(0)
   await expect((await goToSettingsSection(page, 'subscription')).getByText('Notify About New Uploads', { exact: true })).toBeVisible()
+})
+
+test('system notifications and the bell stay in step', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockSystemNotifications(app)
+  const [dismissed, timedOut, clicked, readInApp] = await announceUploads(page, ['d', 'c', 'b', 'a'])
+  await expect.poll(async () => (await shownNotifications(app)).length).toBe(4)
+  const bell = page.locator('.notificationCenter')
+  await expect(bell).toHaveAttribute('data-unread-count', '4')
+
+  // Dismissing or opening a system notification marks its entry read, while one that only timed out stays unread.
+  await emitSystemNotification(app, `Upload ${dismissed}`, 'close', { reason: 'userCanceled' })
+  await emitSystemNotification(app, `Upload ${timedOut}`, 'close', { reason: 'timedOut' })
+  await emitSystemNotification(app, `Upload ${clicked}`, 'click')
+  await expect(bell).toHaveAttribute('data-unread-count', '2')
+
+  // Reading or removing an entry in the app closes its system notification.
+  await page.getByRole('button', { name: 'Notifications (2 unread)', exact: true }).click()
+  const rows = page.locator('.notificationCenterDropdown .notificationRow')
+  await rows.filter({ hasText: `Upload ${readInApp}` }).getByRole('button', { name: 'Mark as read', exact: true }).click()
+  await expect.poll(() => closedNotifications(app)).toStrictEqual([`Upload ${readInApp}`])
+  await page.locator('.notificationCenterDropdown').getByRole('button', { name: 'Clear all', exact: true }).click()
+  await expect.poll(async () => (await closedNotifications(app)).toSorted()).toStrictEqual([`Upload ${timedOut}`, `Upload ${readInApp}`].toSorted())
+})
+
+test.describe('with notification sync turned off', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: {
+        ...seed.settings,
+        syncServerEnabled: false,
+        syncServerAutoSync: true,
+        syncServerUrl: 'https://sync-notifications-off.example',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: Buffer.alloc(32, 1).toString('base64'),
+        syncServerPrivacySalt: Buffer.alloc(16, 2).toString('base64'),
+        syncServerSyncSubscriptions: false,
+        syncServerSyncPlaylists: false,
+        syncServerSyncHistory: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncSettings: false,
+        syncServerSyncSessions: false,
+        syncServerSyncWatchStats: false,
+        syncServerSyncLiveReminders: false,
+        syncServerSyncNotifications: false,
+      }
+    }
+  })
+
+  test('turning it on syncs notifications right away', async ({ page }) => {
+    const downloads = []
+    await page.route('https://sync-notifications-off.example/**', async route => {
+      const path = new URL(route.request().url()).pathname
+      let json
+      if (path === '/health') json = { capabilities: { encrypted_sync: 1, live_sync: 1, notification_dismissals: 1 } }
+      else if (path === '/v1/account/sessions') json = { sessions: [] }
+      else if (path === '/v1/encrypted_sync/events') json = []
+      else if (path === '/v1/encrypted_sync') json = { collections: [], legacy_data: false }
+      else {
+        if (path === '/v1/encrypted_sync/notificationDismissals') downloads.push(route.request().method())
+        json = { revision: 0, payload: null }
+      }
+      await route.fulfill({ json })
+    })
+    await page.evaluate(() => window.$store.dispatch('updateSyncServerEnabled', true))
+    expect(await page.evaluate(async () => {
+      await window.$store.dispatch('syncWithSyncServer')
+      return window.$store.state.syncServer.syncServerStatus
+    })).toBe('success')
+    expect(downloads).toStrictEqual([])
+
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Notifications', exact: true })
+    await expect(toggle).toBeEnabled()
+    await toggle.locator('..').getByText('Notifications', { exact: true }).click()
+    await expect(toggle).toBeChecked()
+    // Live sync downloads only on changes, so nothing else would sync them.
+    await expect.poll(() => downloads.length).toBeGreaterThan(0)
+  })
+})
+
+test.describe('with notification sync', () => {
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  test.use({
+    seed: {
+      ...seed,
+      settings: {
+        ...seed.settings,
+        syncServerEnabled: false,
+        syncServerAutoSync: false,
+        syncServerUrl: 'https://sync-notifications.example',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: key,
+        syncServerPrivacySalt: salt,
+        syncServerSyncSubscriptions: false,
+        syncServerSyncPlaylists: false,
+        syncServerSyncHistory: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncSettings: false,
+        syncServerSyncSessions: false,
+        syncServerSyncWatchStats: false,
+        syncServerSyncLiveReminders: false,
+      }
+    }
+  })
+
+  test('notifications read or removed on another device are handled here, and the other way around', async ({ app, page }) => {
+    const { encryptSyncDocument, decryptSyncDocument } = await import('../../../src/renderer/helpers/sync-server-privacy.js')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await mockSystemNotifications(app)
+    const [removedElsewhere, readElsewhere, readHere] = await announceUploads(page, ['c', 'b', 'a'])
+    await expect.poll(async () => (await shownNotifications(app)).length).toBe(3)
+
+    const now = Date.now()
+    let remote = {
+      revision: 1,
+      payload: await encryptSyncDocument({
+        readThrough: 0,
+        clearedThrough: 0,
+        dismissals: [
+          { key: `video:/watch/${removedElsewhere}`, at: now, removedAt: now },
+          { key: `video:/watch/${readElsewhere}`, at: now }
+        ]
+      }, key, salt)
+    }
+    await page.route('https://sync-notifications.example/**', async route => {
+      const request = route.request()
+      const path = new URL(request.url()).pathname
+      let json
+      if (path === '/health') json = { capabilities: { encrypted_sync: 1, live_sync: 1, notification_dismissals: 1 } }
+      else if (path === '/v1/account/sessions') json = { sessions: [] }
+      else if (path === '/v1/encrypted_sync/events') json = []
+      else if (path === '/v1/encrypted_sync') json = { collections: [{ collection: 'notificationDismissals', revision: remote.revision }], legacy_data: false }
+      else if (path === '/v1/encrypted_sync/notificationDismissals') {
+        if (request.method() === 'PUT') {
+          const { revision, payload } = request.postDataJSON()
+          expect(revision).toBe(remote.revision)
+          remote = { revision: revision + 1, payload }
+        }
+        json = remote
+      } else {
+        json = { revision: 0, payload: null }
+      }
+      await route.fulfill({ json })
+    })
+    const sync = () => page.evaluate(async () => {
+      await window.$store.dispatch('syncWithSyncServer')
+      return window.$store.state.syncServer.syncServerStatus
+    })
+    await page.evaluate(() => window.$store.dispatch('updateSyncServerEnabled', true))
+    expect(await sync()).toBe('success')
+
+    const bell = page.locator('.notificationCenter')
+    await expect(bell).toHaveAttribute('data-unread-count', '1')
+    await expect.poll(async () => (await closedNotifications(app)).toSorted()).toStrictEqual([`Upload ${removedElsewhere}`, `Upload ${readElsewhere}`].toSorted())
+    await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+    const rows = page.locator('.notificationCenterDropdown .notificationRow')
+    await expect(rows).toHaveCount(2)
+    await expect(rows.filter({ hasText: `Upload ${removedElsewhere}` })).toHaveCount(0)
+
+    // Reading one here reaches the other devices.
+    await rows.filter({ hasText: `Upload ${readHere}` }).getByRole('button', { name: 'Mark as read', exact: true }).click()
+    await expect(bell).not.toHaveAttribute('data-unread-count')
+    expect(await sync()).toBe('success')
+    expect(remote.revision).toBe(2)
+    const uploaded = await decryptSyncDocument(remote.payload, key)
+    expect(uploaded.dismissals.map(({ key, removedAt }) => [key, removedAt !== undefined]).toSorted()).toStrictEqual([
+      [`video:/watch/${readHere}`, false],
+      [`video:/watch/${readElsewhere}`, false],
+      [`video:/watch/${removedElsewhere}`, true]
+    ].toSorted())
+  })
 })
 
 test.describe('with hidden thumbnails', () => {

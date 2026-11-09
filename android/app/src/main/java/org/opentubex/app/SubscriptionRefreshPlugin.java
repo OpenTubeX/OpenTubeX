@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import androidx.core.content.ContextCompat;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 @CapacitorPlugin(name = "SubscriptionRefresh")
 public class SubscriptionRefreshPlugin extends Plugin {
@@ -225,12 +226,26 @@ public class SubscriptionRefreshPlugin extends Plugin {
     @PluginMethod
     public void takeShownNotifications(PluginCall call) {
         try {
-            JSObject response = new JSObject();
-            response.put("notifications", UploadNotifications.takeShown(getContext()));
-            call.resolve(response);
+            call.resolve(JSObject.fromJSONObject(UploadNotifications.takeShown(getContext())));
         } catch (Exception error) {
             call.reject("Unable to read shown notifications", error);
         }
+    }
+
+    @PluginMethod
+    public void cancelUploadNotifications(PluginCall call) {
+        JSArray uploads = call.getArray("uploads");
+        if (uploads == null) {
+            call.reject("Uploads are required");
+            return;
+        }
+        for (int i = 0; i < uploads.length(); i++) {
+            JSONObject upload = uploads.optJSONObject(i);
+            String feedType = upload == null ? null : upload.optString("feedType", null);
+            String id = upload == null ? null : upload.optString("id", null);
+            if (feedType != null && id != null) UploadNotifications.cancel(getContext(), feedType, id);
+        }
+        call.resolve();
     }
 
     @PluginMethod

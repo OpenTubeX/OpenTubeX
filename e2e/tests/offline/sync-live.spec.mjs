@@ -28,6 +28,7 @@ test.describe('automatic sync efficiency', () => {
         syncServerSyncHistory: false,
         syncServerSyncWatchStats: false,
         syncServerSyncLiveReminders: false,
+        syncServerSyncNotifications: false,
         syncServerSyncSessions: false,
         baseTheme: 'dark',
         autoplayVideos: true,

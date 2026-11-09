@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshData'
+import { createSubscriptionRefreshStartController } from './androidSubscriptionRefreshData.js'
 
 const SubscriptionRefresh = process.env.IS_CAPACITOR && !process.env.IS_IOS
   ? registerPlugin('SubscriptionRefresh')
@@ -83,13 +83,28 @@ export function observeAndroidUploads(value) {
 }
 
 /**
- * Takes the upload notifications Android has shown since the last call.
- * @returns {Promise<{ feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[]>}
+ * Takes the upload notifications Android showed, and the ones the user opened
+ * or dismissed, since the last call.
+ * @returns {Promise<{
+ *   notifications: { feedType: string, id: string, live: boolean, title: string, body: string, createdAt: number }[],
+ *   dismissed: { feedType: string, id: string, live: boolean }[]
+ * }>}
  */
 export async function takeAndroidUploadNotifications() {
-  if (!SubscriptionRefresh) return []
-  const { notifications } = await SubscriptionRefresh.takeShownNotifications()
-  return Array.isArray(notifications) ? notifications : []
+  if (!SubscriptionRefresh) return { notifications: [], dismissed: [] }
+  const { notifications, dismissed } = await SubscriptionRefresh.takeShownNotifications()
+  return {
+    notifications: Array.isArray(notifications) ? notifications : [],
+    dismissed: Array.isArray(dismissed) ? dismissed : []
+  }
+}
+
+/**
+ * Removes the upload notifications of entries that were read or removed.
+ * @param {{ feedType: string, id: string }[]} uploads
+ */
+export async function cancelAndroidUploadNotifications(uploads) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.cancelUploadNotifications({ uploads })
 }
 
 export async function isAndroidSubscriptionRefreshActive() {

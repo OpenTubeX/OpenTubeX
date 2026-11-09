@@ -30,9 +30,10 @@ test.describe('sync switches', { tag: '@scale' }, () => {
       const store = window.$store
       store.commit('setSyncServerWatchStatsSupported', true)
       store.commit('setSyncServerLiveRemindersSupported', true)
+      store.commit('setSyncServerNotificationDismissalsSupported', true)
     })
     const toggles = section.locator('.toggles').nth(1)
-    await expect(toggles.getByRole('checkbox')).toHaveCount(10)
+    await expect(toggles.getByRole('checkbox')).toHaveCount(11)
 
     for (const [width, height] of [[1580, 880], [1000, 800], [480, 700]]) {
       await setWindowSize(app, page, { width, height })

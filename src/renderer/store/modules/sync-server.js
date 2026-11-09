@@ -59,6 +59,8 @@ import { areJsonValuesEqual } from '../../helpers/jsonValues'
 import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
+import { syncNotificationDismissals } from '../../helpers/sync-notification-dismissals'
+import { notificationHistory } from '../../helpers/notificationHistory'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
 import { syncDeletionKey, syncDeletions } from '../../helpers/sync-deletions.js'
@@ -94,6 +96,7 @@ let eventsRefresh = null
 const activeSyncClients = new Set()
 let lifecycleSyncStarted = false
 let reminderSyncListenerStarted = false
+let notificationSyncListenerStarted = false
 let deviceRefreshId = 0
 let syncServerEnabledChange = Promise.resolve()
 
@@ -193,6 +196,7 @@ const state = {
   syncServerWatchStatsSupported: null,
   syncServerLiveRemindersSupported: null,
   syncServerLiveRemindersPending: false,
+  syncServerNotificationDismissalsSupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
   syncServerDevices: {},
@@ -219,6 +223,7 @@ const getters = {
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
   getSyncServerWatchStatsSupported: state => state.syncServerWatchStatsSupported,
   getSyncServerLiveRemindersSupported: state => state.syncServerLiveRemindersSupported,
+  getSyncServerNotificationDismissalsSupported: state => state.syncServerNotificationDismissalsSupported,
   getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions.map(session => ({
     ...session,
     syncDeviceName: state.syncServerDevices[session.syncDeviceId]?.name ?? '',
@@ -430,6 +435,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       settings.syncServerSyncLiveReminders
       ? ['liveReminders']
       : []),
+    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && settings.syncServerSyncNotifications
+      ? ['notificationDismissals']
+      : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
       encrypted &&
@@ -591,6 +599,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           }
         }
         break
+      case 'notificationDismissals':
+        result.notificationDismissals = await syncNotificationDismissals(targetClient, notificationHistory)
+        break
       case 'profiles':
         {
           const profiles = await syncProfiles(
@@ -651,6 +662,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       requiredCapabilities: [
         ...(stages.includes('watchStats') ? ['watch_stats'] : []),
         ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
+        ...(stages.includes('notificationDismissals') ? ['notification_dismissals'] : []),
         ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'seen_rss_items', 'external_media_positions'] : []),
       ],
     })
@@ -669,6 +681,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (!liveRemindersSupported) {
       commit('setSyncServerLiveRemindersPending', false)
       const index = stages.indexOf('liveReminders')
+      if (index !== -1) stages.splice(index, 1)
+    }
+    const notificationDismissalsSupported = encrypted && capabilities.notification_dismissals === 1
+    commit('setSyncServerNotificationDismissalsSupported', notificationDismissalsSupported)
+    if (!notificationDismissalsSupported) {
+      const index = stages.indexOf('notificationDismissals')
       if (index !== -1) stages.splice(index, 1)
     }
     assertEncryptionSupported(capabilities.encrypted_sync === 1, encrypted)
@@ -1075,6 +1093,7 @@ const actions = {
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
     commit('setSyncServerLiveRemindersPending', false)
+    commit('setSyncServerNotificationDismissalsSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
@@ -1771,6 +1790,10 @@ const actions = {
       reminderSyncListenerStarted = true
       liveReminder.onUpdated(() => dispatch('scheduleSyncServer', 'liveReminders'))
     }
+    if (!notificationSyncListenerStarted && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR)) {
+      notificationSyncListenerStarted = true
+      notificationHistory.onDismissed(() => dispatch('scheduleSyncServer', 'notificationDismissals'))
+    }
     if (!lifecycleSyncStarted && typeof window !== 'undefined') {
       lifecycleSyncStarted = true
       connectionEvents.addEventListener('change', async ({ detail }) => {
@@ -1837,6 +1860,7 @@ const actions = {
         const watchStatsSupported = privacySupported && capabilities.watch_stats === 1
         commit('setSyncServerWatchStatsSupported', watchStatsSupported)
         commit('setSyncServerLiveRemindersSupported', privacySupported && capabilities.live_reminders === 1)
+        commit('setSyncServerNotificationDismissalsSupported', privacySupported && capabilities.notification_dismissals === 1)
         if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
           const accountKeys = ['syncServerUrl', 'syncServerToken', 'syncServerPrivacyMode', 'syncServerPrivacyKey', 'syncServerPrivacySalt']
           const account = accountKeys.map(key => rootState.settings[key])
@@ -1926,6 +1950,7 @@ const actions = {
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
     commit('setSyncServerLiveRemindersPending', false)
+    commit('setSyncServerNotificationDismissalsSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     await dispatch('updateSyncServerToken', token, { root: true })
@@ -1966,6 +1991,7 @@ const actions = {
       commit('setSyncedWatchStats', [])
       commit('setSyncServerWatchStatsSupported', null)
       commit('setSyncServerLiveRemindersSupported', null)
+      commit('setSyncServerNotificationDismissalsSupported', null)
       clearSyncServerDevices(commit)
       return
     }
@@ -2025,6 +2051,9 @@ const mutations = {
   },
   setSyncServerOidcPending(state, kind) {
     state.syncServerOidcPending = kind
+  },
+  setSyncServerNotificationDismissalsSupported(state, supported) {
+    state.syncServerNotificationDismissalsSupported = supported
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

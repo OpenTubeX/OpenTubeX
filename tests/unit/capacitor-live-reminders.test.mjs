@@ -2,8 +2,48 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
+
+const systemNotifications = { calls: [], all: [] }
+const [{ closeCapacitorSystemNotifications }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+  '@capacitor/local-notifications': {
+    LocalNotifications: {
+      getAll: async () => ({ notifications: systemNotifications.all }),
+      cancel: async ({ notifications }) => { systemNotifications.calls.push(['cancel', notifications.map(({ id }) => id)]) },
+      removeDeliveredNotificationsById: async ({ ids }) => { systemNotifications.calls.push(['removeDelivered', ids]) },
+    }
+  },
+  [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: { cancelAndroidUploadNotifications: async () => {} }
+})
 
 const START = Date.UTC(2026, 0, 1)
+
+test('closing reminder entries removes their notifications and overdue alarms by their own IDs', async () => {
+  process.env.IS_CAPACITOR = 'true'
+  const at = offset => ({ at: new Date(Date.now() + offset).toISOString() })
+  systemNotifications.all = [
+    // Android has not delivered the inexact alarm the app already moved to the history.
+    { id: 7, schedule: at(-60_000), extra: { videoId: 'premiere00a' } },
+    { id: 8, schedule: at(-7_200_000), extra: { videoId: 'premiere00b' } },
+    // The same video premieres again later.
+    { id: 10, schedule: at(3_600_000), extra: { videoId: 'premiere00b' } },
+    // iOS lists delivered notifications without their schedule.
+    { id: 11, extra: { videoId: 'premiere00d' } },
+    { id: 9, schedule: at(-60_000), extra: { videoId: 'premiere00c' } },
+  ]
+  try {
+    await closeCapacitorSystemNotifications([
+      { kind: 'live-reminder', path: '/watch/premiere00a', createdAt: Date.now() - 63_000 },
+      // Its earlier premiere, which the history dates a little late.
+      { kind: 'live-reminder', path: '/watch/premiere00b', createdAt: Date.now() - 7_000_000 },
+      { kind: 'live-reminder', path: '/watch/premiere00d', createdAt: Date.now() - 60_000 },
+    ])
+  } finally {
+    delete process.env.IS_CAPACITOR
+  }
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7, 8]])
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8, 11]])
+})
 
 async function loadCapacitorReminder(notifications, context = {}) {
   const source = await readFile(new URL('../../src/renderer/helpers/liveReminders.js', import.meta.url), 'utf8')
@@ -328,7 +368,7 @@ test('rescheduling a reminder keeps its old foreground timer from cancelling the
   assert.equal((await loaded.liveReminder.get('premiere00a')).startTimestamp, START + 600_000)
 })
 
-async function loadArmedReminder(nativeCancel = async () => {}) {
+async function loadArmedReminder(nativeCancel = async () => {}, history = {}) {
   const calls = []
   const timers = []
   const cleared = new Set()
@@ -346,7 +386,7 @@ async function loadArmedReminder(nativeCancel = async () => {}) {
     document,
     setTimeout: callback => { timers.push(callback); return timers.length },
     clearTimeout: id => { cleared.add(id) },
-    capacitorNotificationHistory: { add: entries => entries.map((entry, index) => ({ ...entry, id: String(index) })), list: async () => [] },
+    capacitorNotificationHistory: { add: entries => entries.map((entry, index) => ({ ...entry, id: String(index) })), list: async () => [], ...history },
   })
   loaded.storage.set('opentubex-capacitor-live-reminders', JSON.stringify([
     { videoId: 'premiere00a', startTimestamp: START + 60_000, notificationId: 7, notificationTitle: 'Starting', notificationBody: 'Premiere' }
@@ -374,6 +414,36 @@ test('a reminder cancelled as its foreground timer comes due stays hidden', asyn
   assert.equal(await cancelling, true)
   assert.deepEqual(shown, [])
 })
+
+test('a reminder another device removed cancels its alarm instead of showing it', async () => {
+  // The history leaves out reminders removed elsewhere.
+  const { timers, calls, shown } = await loadArmedReminder(undefined, { add: () => [] })
+  await timers[0]()
+  assert.deepEqual(new Set(calls.map(String)), new Set(['cancel,7']))
+  assert.deepEqual(shown, [])
+})
+
+for (const [dismissal, add, list] of [
+  ['removed', () => [], async () => []],
+  ['read', entries => entries.map(entry => ({ ...entry, id: '0', read: true })), async () => [{ id: '0', kind: 'live-reminder', path: '/watch/premiere00a', read: true }]],
+]) {
+  test(`collecting a due reminder another device ${dismissal} cancels its alarm`, async () => {
+    const { liveReminder, calls, clock } = await loadArmedReminder(undefined, { add })
+    // The app resumes after the start, before the system delivered the inexact alarm.
+    clock.now = START + 120_000
+    assert.equal(await liveReminder.get('premiere00a'), null)
+    assert.deepEqual(calls, [['cancel', 7]])
+  })
+
+  test(`a reminder another device ${dismissal} after the app collected it cancels its alarm`, async () => {
+    const { timers, calls, shown, storage } = await loadArmedReminder(undefined, { add, list })
+    // The app moved the reminder to the history before the dismissal arrived.
+    storage.set('opentubex-capacitor-live-reminders', '[]')
+    await timers[0]()
+    assert.deepEqual(calls, [['cancel', 7]])
+    assert.deepEqual(shown, [])
+  })
+}
 
 test('a reminder shows no toast once the app left the screen while the system cancelled it', async () => {
   let blocked = null

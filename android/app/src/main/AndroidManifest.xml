@@ -55,6 +55,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".UploadNotificationDismissReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".ContinueWatchingWidgetProvider"
             android:exported="false"
             android:label="@string/widget_continue_watching_name">

@@ -48,17 +48,29 @@ function writeCapacitorReminders(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
 }
 
+function hasNotificationText(record) {
+  return typeof record.notificationTitle === 'string' && typeof record.notificationBody === 'string'
+}
+
 function recordFiredReminders(records) {
   if (notificationMode !== 'both') return []
-  return capacitorNotificationHistory.add(records
-    .filter(record => typeof record.notificationTitle === 'string' && typeof record.notificationBody === 'string')
-    .map(record => ({
-      title: record.notificationTitle,
-      body: record.notificationBody,
-      thumbnail: record.thumbnail,
-      createdAt: record.startTimestamp,
-      ...getLiveReminderTarget(record.videoId)
-    })))
+  const recordable = records.filter(hasNotificationText)
+  const entries = capacitorNotificationHistory.add(recordable.map(record => ({
+    title: record.notificationTitle,
+    body: record.notificationBody,
+    thumbnail: record.thumbnail,
+    createdAt: record.startTimestamp,
+    ...getLiveReminderTarget(record.videoId)
+  })))
+  // The history leaves out reminders another device removed and adds the ones
+  // it read as read, and the system may not have delivered their alarms yet.
+  const unread = new Set(entries.filter(entry => !entry.read).map(entry => entry.path))
+  const dismissed = recordable.filter(record => !unread.has(getLiveReminderTarget(record.videoId).path))
+  if (dismissed.length > 0) {
+    LocalNotifications.cancel({ notifications: dismissed.map(record => ({ id: record.notificationId })) })
+      .catch(error => console.error('Failed to cancel reminders dismissed on another device', error))
+  }
+  return entries
 }
 
 /** Moves the reminders the system has shown since the app last checked to the notification history. */
@@ -216,14 +228,17 @@ async function showReminderInApp({ id, title, body, extra }) {
     return
   }
   // The system shows reminders the app no longer can, and the bell keeps the entry.
-  // Without an entry the app has nothing to show, so the system notification stays.
-  if (!entry || !showsRemindersInApp()) {
+  // Without an entry the app has nothing to show, so the system notification stays,
+  // unless another device removed the reminder.
+  if (entry === undefined || (entry && !showsRemindersInApp())) {
     handledAlarms.delete(id)
     return
   }
   await LocalNotifications.cancel({ notifications: [{ id }] })
     .catch(error => console.error('Failed to cancel a reminder shown in the app', error))
   emitUpdated(extra.videoId, false)
+  // Read entries were dismissed on another device.
+  if (!entry || entry.read) return
   if (showsRemindersInApp()) {
     showForegroundReminder(entry)
   } else if (notificationMode !== 'off') {
@@ -242,6 +257,7 @@ async function showReminderInApp({ id, title, body, extra }) {
 /**
  * Moves a reminder the app shows itself to the history. Reading the reminders
  * after they are due may have moved it already, so that entry is reused.
+ * Null when another device removed it.
  * @param {string} videoId
  * @param {number} due
  * @param {{ title?: string, body?: string }} [notification] the system notification, for reminders without a record
@@ -253,14 +269,14 @@ async function takeFiredReminderEntry(videoId, due, notification = {}) {
     // Recorded first, so a failed history write keeps the reminder.
     const [entry] = recordFiredReminders([{ ...record, startTimestamp: Math.min(record.startTimestamp, due) }])
     writeCapacitorReminders(stored.filter(item => item !== record))
-    return entry
+    return entry ?? (notificationMode === 'both' && hasNotificationText(record) ? null : undefined)
   }
   if (notificationMode !== 'both') return undefined
   const target = getLiveReminderTarget(videoId)
   const existing = (await capacitorNotificationHistory.list())
     .find(item => item.kind === 'live-reminder' && item.path === target.path)
   if (existing || typeof notification.title !== 'string' || typeof notification.body !== 'string') return existing
-  return capacitorNotificationHistory.add([{ title: notification.title, body: notification.body, createdAt: due, ...target }])[0]
+  return capacitorNotificationHistory.add([{ title: notification.title, body: notification.body, createdAt: due, ...target }])[0] ?? null
 }
 
 function emitUpdated(videoId, scheduled) {
@@ -388,7 +404,11 @@ export async function initializeCapacitorLiveReminderActions(openVideo, showInAp
     'localNotificationActionPerformed',
     ({ notification }) => {
       const videoId = notification.extra?.videoId
-      if (typeof videoId === 'string') openVideo(videoId)
+      if (typeof videoId !== 'string') return
+      // The tap can arrive before the app moved the reminder to the history.
+      readCapacitorReminders()
+      capacitorNotificationHistory.markTargetsRead([getLiveReminderTarget(videoId)])
+      openVideo(videoId)
     }
   )
   const receivedHandle = await LocalNotifications.addListener(
@@ -421,8 +441,9 @@ export async function initializeCapacitorLiveReminderActions(openVideo, showInAp
         console.error('Failed to record a delivered reminder', error)
         return
       }
-      // Without an entry to show in the app, the system notification stays.
-      if (notificationMode === 'both' && !entry) {
+      // Without an entry to show in the app, the system notification stays,
+      // unless another device removed the reminder.
+      if (notificationMode === 'both' && entry === undefined) {
         handledAlarms.delete(id)
         emitUpdated(videoId, false)
         return
@@ -434,7 +455,8 @@ export async function initializeCapacitorLiveReminderActions(openVideo, showInAp
         console.error('Failed to collect fired reminders', error)
       }
       emitUpdated(videoId, false)
-      if (entry && notificationMode === 'both') showInApp(entry)
+      // Read entries were dismissed on another device.
+      if (entry && !entry.read && notificationMode === 'both') showInApp(entry)
     }
   )
 

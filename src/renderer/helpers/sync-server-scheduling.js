@@ -113,6 +113,8 @@ export function isSyncReasonEnabled(settings, reason) {
       return settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncWatchStats
     case 'liveReminders':
       return settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncLiveReminders
+    case 'notificationDismissals':
+      return settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncNotifications
     case 'profiles':
       return settings.syncServerSyncProfiles
     case 'profilesOrSubscriptions':
@@ -130,6 +132,7 @@ export function isSyncReasonEnabled(settings, reason) {
         settings.syncServerSyncHistory ||
         (settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncWatchStats) ||
         (settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncLiveReminders) ||
+        (settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncNotifications) ||
         settings.syncServerSyncProfiles ||
         (settings.syncServerPrivacyMode === 'enhanced' && (
           settings.syncServerSyncSessions || settings.syncServerSyncSettings

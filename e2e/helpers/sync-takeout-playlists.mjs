@@ -80,6 +80,7 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
     syncServerSyncHistory: false,
     syncServerSyncWatchStats: false,
     syncServerSyncLiveReminders: false,
+    syncServerSyncNotifications: false,
     syncServerSyncSessions: false,
     syncServerSyncSettings: false,
   }

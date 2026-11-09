@@ -79,7 +79,7 @@ import {
 } from './pictureInPictureBounds'
 import { startKwinPictureInPictureBounds } from './kwinPictureInPictureBounds'
 import { createUploadNotifier } from './uploadNotifications'
-import { createNotificationHistory, createNotifier } from './notificationHistory'
+import { createNotificationHistory, createNotifier, createSystemNotificationLinks } from './notificationHistory'
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
 import { getLiveReminderTarget } from '../notificationHistory'
@@ -654,9 +654,13 @@ function runApp() {
       console.error('Failed to load the Picture-in-Picture window integration', error)
     }
   }
+  const systemNotificationLinks = createSystemNotificationLinks(id => notificationHistory.markRead(id))
   const notificationHistory = createNotificationHistory({
     file: path.join(userDataPath, 'notification-history.json'),
-    onChange: entries => sendToAppWindows(IpcChannels.NOTIFICATION_HISTORY_UPDATED, entries)
+    dismissalsFile: path.join(userDataPath, 'notification-dismissals.json'),
+    onChange: entries => sendToAppWindows(IpcChannels.NOTIFICATION_HISTORY_UPDATED, entries),
+    onDismissalsChange: () => sendToAppWindows(IpcChannels.NOTIFICATION_DISMISSALS_UPDATED),
+    onStale: entries => systemNotificationLinks.close(entries)
   })
   /** @type {import('./notificationHistory').NotificationMode} */
   let notificationMode = 'both'
@@ -670,7 +674,8 @@ function runApp() {
       const window = BrowserWindow.getFocusedWindow()
       return window && !window.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL()) ? window : null
     },
-    showInApp: (window, entry) => window.webContents.send(IpcChannels.NOTIFICATION_SHOW_IN_APP, entry)
+    showInApp: (window, entry) => window.webContents.send(IpcChannels.NOTIFICATION_SHOW_IN_APP, entry),
+    link: systemNotificationLinks.link
   })
   setAutomaticDownloadNotifier(notify)
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_LIST, () => notificationHistory.list(), [])
@@ -679,6 +684,8 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_REMOVE, (_event, id) => (
     typeof id === 'string' ? notificationHistory.remove(id) : undefined))
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
+  handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
+  handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
@@ -835,15 +842,17 @@ function runApp() {
       body: reminder.notificationBody,
       thumbnail: reminder.thumbnail,
       url: `https://www.youtube.com/watch?v=${reminder.videoId}`,
+      // Every device dates the reminder by its start, so dismissals match it even when it fires late.
+      createdAt: reminder.startTimestamp,
       target: getLiveReminderTarget(reminder.videoId)
     })
   }
 
   /**
-   * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
+   * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, createdAt?: number, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
    */
-  function showUrlNotification({ title, body, url, silent = false, thumbnail, target }) {
-    return notify({ title, body, thumbnail, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
+  function showUrlNotification({ title, body, url, silent = false, thumbnail, createdAt, target }) {
+    return notify({ title, body, thumbnail, createdAt, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
       .catch(error => console.error('Failed to show a notification', error))
   }
 
@@ -882,6 +891,7 @@ function runApp() {
       openUrlInWindow(mainWindow, url)
     })
     notification.show()
+    return notification
   }
 
   const liveReminderManager = new LiveReminderManager({

@@ -404,6 +404,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     syncServerSyncHistory: true,
     syncServerSyncWatchStats: true,
     syncServerSyncLiveReminders: true,
+    syncServerSyncNotifications: true,
     syncServerSyncProfiles: true,
     syncServerSyncSessions: true,
     syncServerSharedTabs: false,

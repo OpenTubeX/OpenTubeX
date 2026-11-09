@@ -119,6 +119,15 @@ public class MainActivity extends BridgeActivity {
         OpenTubeXNotificationChannels.createAll(this);
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
+        // A restored activity gets the intent it was opened with again.
+        if (savedInstanceState == null) UploadNotifications.recordDismissed(this, getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        // Opening an upload notification marks its entry read.
+        UploadNotifications.recordDismissed(this, intent);
+        super.onNewIntent(intent);
     }
 
     @Override

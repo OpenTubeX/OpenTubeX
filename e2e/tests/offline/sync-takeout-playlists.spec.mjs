@@ -65,7 +65,7 @@ test.describe('playlist sync while another window edits the library', () => {
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('removeAllVideos', 'sync-race')
-      for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+      for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
         await store.dispatch(`updateSyncServerSync${collection}`, false)
       }
       await store.dispatch('updateSyncServerEnabled', true)
