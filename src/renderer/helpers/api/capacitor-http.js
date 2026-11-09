@@ -97,7 +97,8 @@ async function getRequestBody(input, init) {
  * @returns {Promise<Response>}
  */
 export async function capacitorHttpFetch(input, init = undefined) {
-  return await withNetworkRecovery(input, init, signal => nativeHttpFetch(input, { ...init, signal }))
+  // Native HTTP keeps no response cache, so every response comes from the network.
+  return await withNetworkRecovery(input, init, signal => nativeHttpFetch(input, { ...init, signal }), { uncached: true })
 }
 
 async function nativeHttpFetch(input, init) {

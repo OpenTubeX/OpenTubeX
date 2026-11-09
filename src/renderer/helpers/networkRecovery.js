@@ -262,23 +262,40 @@ function isLocalHostname(hostname) {
   return host === 'localhost' || /\.(localhost|local|lan|home\.arpa)$/.test(host)
 }
 
-// A captive portal can answer plain HTTP, but not HTTPS with a valid certificate.
-function confirmsInternetReachability(url) {
-  return url.protocol === 'https:' && !isLocalHostname(url.hostname)
+/**
+ * A captive portal can answer plain HTTP, but not HTTPS with a valid
+ * certificate. A response from the HTTP cache proves nothing either, so only
+ * requests that bypass it count, unless their transport keeps no cache.
+ * @param {RequestInfo | URL} input
+ * @param {RequestInit | undefined} init
+ * @param {boolean} uncached
+ */
+function confirmsInternetReachability(input, init, uncached) {
+  const request = input instanceof Request ? input : null
+  const url = new URL(request?.url ?? input.toString(), location.href)
+  const method = (init?.method ?? request?.method ?? 'GET').toUpperCase()
+  const cache = init?.cache ?? request?.cache ?? 'default'
+  return url.protocol === 'https:' && !isLocalHostname(url.hostname) &&
+    (uncached || !['GET', 'HEAD'].includes(method) || ['no-store', 'reload', 'no-cache'].includes(cache))
 }
 
-/** Use the same queue for native HTTP and WebView requests. */
-export function withNetworkRecovery(input, init, task, options = {}) {
+/**
+ * Use the same queue for native HTTP and WebView requests. Set `uncached` for
+ * transports without a response cache, whose responses always prove that the
+ * internet is reachable.
+ */
+export function withNetworkRecovery(input, init, task, { uncached = false, ...options } = {}) {
   if (typeof window === 'undefined') return task(init?.signal)
   const request = input instanceof Request ? input : null
   const signal = init?.signal ?? request?.signal
   let url
+  let confirmsInternet
   try {
     url = new URL(request?.url ?? input.toString(), location.href)
+    confirmsInternet = confirmsInternetReachability(input, init, uncached)
   } catch (error) {
     return Promise.reject(error)
   }
-  const confirmsInternet = confirmsInternetReachability(url)
   const confirm = response => {
     if (confirmsInternet) appRecovery?.confirmInternetReachable()
     return response
@@ -327,7 +344,20 @@ export function withoutNetworkRecovery(callback) {
  * @param {boolean} [options.internetChecksEnabled]
  */
 export function installNetworkFetch({ corsDisabled = false, getRequestError, checkInternet = false, internetChecksEnabled = true } = {}) {
-  const nativeFetch = window.fetch.bind(window)
+  const windowFetch = window.fetch.bind(window)
+  const pendingRequests = new Set()
+  // WebKit can collect an AbortSignal.any() result that only a pending fetch
+  // refers to, and the fetch then ignores its abort. A connectivity probe or
+  // timeout never ended, so keep each request reachable until it settles.
+  const nativeFetch = async (input, init) => {
+    const request = [input, init]
+    pendingRequests.add(request)
+    try {
+      return await windowFetch(input, init)
+    } finally {
+      pendingRequests.delete(request)
+    }
+  }
   // Fetch hides the network error behind a TypeError. A redirect loop, for
   // example, would otherwise be retried like a lost connection.
   const fetch = async (input, init) => {
@@ -399,9 +429,7 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
     }
     // Bypassed requests still show that the internet is reachable.
     try {
-      if (confirmsInternetReachability(new URL(input instanceof Request ? input.url : input.toString(), location.href))) {
-        appRecovery?.confirmInternetReachable()
-      }
+      if (confirmsInternetReachability(input, init, false)) appRecovery?.confirmInternetReachable()
     } catch {}
     return response
   }

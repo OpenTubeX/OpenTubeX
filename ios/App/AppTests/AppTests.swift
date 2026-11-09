@@ -2655,6 +2655,10 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["cross"] as? String, "authorization-absent")
         XCTAssertEqual(result?["noRedirectStatus"] as? Int, 302)
         XCTAssertTrue((result?["timeoutError"] as? String)?.lowercased().contains("timed out") == true, String(describing: result?["timeoutError"]))
+        if plugin == "IOSHttp" {
+            // JavaScript recognizes the prefix, not URLSession's localized text.
+            XCTAssertTrue((result?["timeoutError"] as? String)?.hasPrefix("Failed to fetch: ") == true)
+        }
         XCTAssertLessThan(try XCTUnwrap(result?["elapsed"] as? Double), 10000)
         XCTAssertEqual(result?["afterTimeout"] as? Int, 200)
     }
