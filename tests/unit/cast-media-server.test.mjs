@@ -386,6 +386,10 @@ test('destination resolution rejects non-public results without explicit authori
 })
 
 async function listen(server) {
+  // The client and server share this event loop. When synchronous test work
+  // stalls it past the idle timeout, the server can close a kept-alive socket
+  // just as the next request reuses it. close() ends every connection instead.
+  server.keepAliveTimeout = 0
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   const host = `127.0.0.1:${server.address().port}`
   // Tools on a developer's machine, such as editor port detection, probe new
@@ -962,8 +966,22 @@ test('HLS reload queries reject unknown, duplicate and invalid directives and no
   }
 })
 
+// Relaying a manifest near the resource budget can outlast the 15-second
+// request deadline on a busy host, so budget tests mock setTimeout. They avoid
+// fetch(), whose keep-alive timer would join the mocked queue.
+function get(url) {
+  return new Promise((resolve, reject) => {
+    httpRequest(url, { agent: false }, incoming => {
+      let body = ''
+      incoming.setEncoding('utf8')
+      incoming.on('data', chunk => { body += chunk })
+      incoming.on('end', () => resolve({ status: incoming.statusCode, body }))
+    }).on('error', reject).end()
+  })
+}
+
 test('live HLS refreshes reclaim retired parts beyond the session resource budget', async t => {
-  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 })
   let generation = 0
   const upstream = createServer((request, response) => {
     if (request.url === '/live.m3u8') {
@@ -979,29 +997,29 @@ test('live HLS refreshes reclaim retired parts beyond the session resource budge
   t.after(() => close(media.server))
   const root = media.mediaUrl()
   async function refresh() {
-    const response = await fetch(root)
+    const response = await get(root)
     assert.equal(response.status, 200)
-    return (await response.text()).match(/URI="([^"]+)"/)[1]
+    return response.body.match(/URI="([^"]+)"/)[1]
   }
   const first = await refresh()
   generation++
   t.mock.timers.setTime(121_000)
   const second = await refresh()
-  assert.equal((await fetch(first)).status, 200, 'recently retired parts have request grace')
+  assert.equal((await get(first)).status, 200, 'recently retired parts have request grace')
   generation++
   t.mock.timers.setTime(242_000)
   const third = await refresh()
-  assert.equal((await fetch(first)).status, 404, 'expired IDs cannot serve a different part')
-  assert.equal(await (await fetch(second)).text(), '/part-1-0')
-  assert.equal(await (await fetch(third)).text(), '/part-2-0')
+  assert.equal((await get(first)).status, 404, 'expired IDs cannot serve a different part')
+  assert.equal((await get(second)).body, '/part-1-0')
+  assert.equal((await get(third)).body, '/part-2-0')
   // Current references survive an arbitrarily long gap between refreshes.
   t.mock.timers.setTime(10_000_000)
   assert.equal(await refresh(), third)
-  assert.equal(await (await fetch(third)).text(), '/part-2-0')
+  assert.equal((await get(third)).body, '/part-2-0')
 })
 
 test('dynamic DASH Location refreshes retire old media windows beyond the session budget', async t => {
-  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 })
   const upstream = createServer((request, response) => {
     const generation = request.url.match(/^\/manifests\/(\d+)\.mpd$/)?.[1]
     if (generation !== undefined) {
@@ -1016,23 +1034,23 @@ test('dynamic DASH Location refreshes retire old media windows beyond the sessio
   media.setOrigin(await listen(media.server))
   t.after(() => close(media.server))
   async function refresh(url) {
-    const response = await fetch(url)
+    const response = await get(url)
     assert.equal(response.status, 200)
-    const xml = await response.text()
+    const xml = response.body
     return { next: xml.match(/<Location>([^<]+)<\/Location>/)[1], segment: xml.match(/<SegmentURL media="([^"]+)"/)[1] }
   }
   const first = await refresh(media.mediaUrl())
   t.mock.timers.setTime(121_000)
   const second = await refresh(first.next)
-  assert.equal(await (await fetch(first.segment)).text(), '/media/0/segment-0.m4s')
+  assert.equal((await get(first.segment)).body, '/media/0/segment-0.m4s')
   t.mock.timers.setTime(242_000)
   const third = await refresh(second.next)
-  assert.equal((await fetch(first.segment)).status, 404)
-  assert.equal(await (await fetch(second.segment)).text(), '/media/1/segment-0.m4s')
-  assert.equal(await (await fetch(third.segment)).text(), '/media/2/segment-0.m4s')
+  assert.equal((await get(first.segment)).status, 404)
+  assert.equal((await get(second.segment)).body, '/media/1/segment-0.m4s')
+  assert.equal((await get(third.segment)).body, '/media/2/segment-0.m4s')
   t.mock.timers.setTime(363_000)
   await refresh(third.next)
-  assert.equal((await fetch(first.next)).status, 404, 'obsolete Location registrations retire too')
+  assert.equal((await get(first.next)).status, 404, 'obsolete Location registrations retire too')
 })
 
 test('DASH fragments inherit the MPD time-shift window and update grace', async t => {

@@ -81,7 +81,9 @@ test('deciphers archived YouTube player data identically to the previous evaluat
   const source = gunzipSync(readFileSync(new URL('../../e2e/fixtures/innertube/shared/shared-99c4a5c04897.gz', import.meta.url))).toString()
   const player = await Player.create(undefined, async () => new Response(source), undefined, 'fixture')
   const previousEval = Platform.shim.eval
-  Platform.shim.eval = data => evaluatePlayerCode(data.output)
+  // This checks deciphered output, not evaluation speed. Concurrent unit tests
+  // can consume the production wall-clock budget on busy hosts.
+  Platform.shim.eval = data => evaluatePlayerCode(data.output, { timeoutMs: 30_000 })
   try {
     for (const [input, expected] of [
       ['abcdefghijklmno', 'lp23SSMqJ_Y3f'],

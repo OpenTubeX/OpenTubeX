@@ -59,6 +59,9 @@ test('rejects malformed D-Bus window state and runner matches', () => {
 })
 
 test('starts the KWin reporter despite a reused script ID and reloads it after reconnect', async t => {
+  // The fake KWin reports during start, so the initial-report deadline must not
+  // race the real script file I/O on a busy host.
+  t.mock.timers.enable({ apis: ['setTimeout'] })
   const originalSessionBus = dbus.sessionBus
   const bus = new EventEmitter()
   bus.name = ':1.10'

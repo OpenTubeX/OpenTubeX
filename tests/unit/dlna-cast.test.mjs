@@ -78,6 +78,9 @@ test('rejects invalid URLBase and foreign IP control endpoints', () => {
 })
 
 test('sends escaped media metadata in a SOAP AVTransport request', async t => {
+  // This checks the request body, not the renderer deadline, which a busy host
+  // can exceed for a loopback request.
+  t.mock.method(AbortSignal, 'timeout', () => new AbortController().signal)
   let action
   let body
   const renderer = createServer(async (request, response) => {
