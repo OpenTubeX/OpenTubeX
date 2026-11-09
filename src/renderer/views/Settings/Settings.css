@@ -532,6 +532,9 @@
   /* Center the page vertically, but keep its top reachable when it overflows. */
   display: grid;
   align-content: safe center;
+
+  /* Keep the page's min-content width (logo, version) from widening the column past the window. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .settingsDownloadsPage {

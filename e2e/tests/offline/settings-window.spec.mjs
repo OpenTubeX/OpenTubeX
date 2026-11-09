@@ -602,6 +602,11 @@ test.describe('settings', () => {
     const bounds = await page.locator('.settingsWindow').boundingBox()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(340)
+
+    await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
+    const aboutPage = page.locator('.settingsAboutPage')
+    await expect(aboutPage.locator('.about-chunks')).toBeVisible()
+    expect(await aboutPage.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(0)
   })
 
   test('keeps narrow settings maximized below the status bar after viewport height changes', async ({ page }) => {
