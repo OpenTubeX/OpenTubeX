@@ -184,6 +184,7 @@ export async function handleYtDlpGetSubtitle(event, url) {
  * @param {boolean} useDefaultClients
  * @param {boolean} useAuthentication
  * @param {boolean} includeSubtitles
+ * @param {boolean} liveFromStart whether ongoing YouTube streams should list their `sq` segmented formats instead of HLS
  * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
  */
 export async function handleYtDlpGetPlaybackInfo(
@@ -191,7 +192,8 @@ export async function handleYtDlpGetPlaybackInfo(
   videoId,
   useDefaultClients = false,
   useAuthentication = false,
-  includeSubtitles = true
+  includeSubtitles = true,
+  liveFromStart = false
 ) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
     return null
@@ -216,7 +218,8 @@ export async function handleYtDlpGetPlaybackInfo(
   if (
     typeof useDefaultClients !== 'boolean' ||
     typeof useAuthentication !== 'boolean' ||
-    typeof includeSubtitles !== 'boolean'
+    typeof includeSubtitles !== 'boolean' ||
+    typeof liveFromStart !== 'boolean'
   ) {
     return null
   }
@@ -245,6 +248,12 @@ export async function handleYtDlpGetPlaybackInfo(
 
   if (includeSubtitles) {
     args.push(...playbackSubtitleArguments(isYouTubeVideo))
+  }
+
+  if (isYouTubeVideo && liveFromStart) {
+    // Only YouTube's segmented live formats include 1440p and 2160p. yt-dlp
+    // then omits the HLS formats, which are limited to 1080p.
+    args.push('--live-from-start')
   }
 
   args.push(...playbackImpersonationArguments(mediaUrl))

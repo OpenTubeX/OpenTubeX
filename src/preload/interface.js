@@ -707,15 +707,17 @@ export default {
    * @param {boolean} [useDefaultClients]
    * @param {boolean} [useAuthentication]
    * @param {boolean} [includeSubtitles]
+   * @param {boolean} [liveFromStart]
    * @returns {Promise<import('../main/ytDlp').YtDlpPlaybackInfo | { error: string } | null>}
    */
-  ytDlpGetPlaybackInfo: (videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true) => {
+  ytDlpGetPlaybackInfo: (videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true, liveFromStart = false) => {
     return ipcRenderer.invoke(
       IpcChannels.YT_DLP_GET_PLAYBACK_INFO,
       videoId,
       useDefaultClients,
       useAuthentication,
-      includeSubtitles
+      includeSubtitles,
+      liveFromStart
     )
   },
 

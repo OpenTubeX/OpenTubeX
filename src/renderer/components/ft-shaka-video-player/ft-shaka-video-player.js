@@ -2462,8 +2462,11 @@ export default defineComponent({
         // and a shorter one for low latency streams
         // If we don't add a little bit of a delay, we get presented with a loading symbol every 5 seconds,
         // while shaka-player processes the new manifest and segments
-        const minimumUpdatePeriod = parseFloat(mpdNode.attributes.minimumUpdatePeriod.match(/^PT(\d+(?:\.\d+)?)S$/)[1])
-        mpdNode.attributes.suggestedPresentationDelay = `PT${(minimumUpdatePeriod * 2).toFixed(3)}S`
+        // yt-dlp's live manifests are never updated and state their own delay
+        const minimumUpdatePeriod = mpdNode.attributes.minimumUpdatePeriod?.match(/^PT(\d+(?:\.\d+)?)S$/)
+        if (minimumUpdatePeriod) {
+          mpdNode.attributes.suggestedPresentationDelay = `PT${(parseFloat(minimumUpdatePeriod[1]) * 2).toFixed(3)}S`
+        }
 
         // fix live streams with subtitles having duplicate Representation ids
         // shaka-player throws DASH_DUPLICATE_REPRESENTATION_ID if we don't fix it
