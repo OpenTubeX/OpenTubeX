@@ -2,10 +2,14 @@
 
 version: 1
 reviews:
+  # Review each PR once when it opens; request more with `@cubic-dev-ai incremental review`
+  incremental_commits: false
+  ultrareview: manual
   ignore:
     files:
-      - "tests/unit/*.test.mjs"
-      - "e2e/tests/**/*.spec.mjs"
+      - "tests/**"
+      - "e2e/tests/**"
+      - "static/locales/**"
     head_branches:
       - "upstream-sync"
       - "weblate-translations"

@@ -1,5 +1,6 @@
 {
-  "triggerOnUpdates": true,
+  "autoReview": ["open"],
+  "effort": "base",
   "autoApprove": {
     "enabled": true,
     "riskCeiling": "low"
@@ -7,5 +8,5 @@
   "ignoreKeywords": "Translations update from Weblate\nchore: sync development from FreeTubeApp/FreeTube",
   "excludeAuthors": ["dependabot[bot]"],
   "disabledLabels": ["translations"],
-  "ignorePatterns": "tests/unit/*.test.mjs\ne2e/tests/**/*.spec.mjs"
+  "ignorePatterns": "tests/**\ne2e/tests/**\nstatic/locales/**"
 }
