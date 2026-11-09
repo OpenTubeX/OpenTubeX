@@ -1165,7 +1165,9 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
-  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible({ timeout: 10_000 })
+  // Loading the page under load must not use up the 5s retry delay's budget.
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBeGreaterThan(0)
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible()
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
 
   await page.locator(`${activeTab} .videoPlayer video`).evaluate(video => {
