@@ -12,6 +12,8 @@ const helper = await readFile(new URL('../../src/renderer/helpers/androidStorage
 for (const [path, display] of [
   ['content://com.android.externalstorage.documents/tree/primary%3ADownload%2FOpenTubeX/document/primary%3ADownload%2FOpenTubeX%2FFAKE', '/sdcard/Download/OpenTubeX/FAKE'],
   ['content://com.android.externalstorage.documents/tree/%XX', 'content://com.android.externalstorage.documents/tree/%XX'],
+  ['content://com.android.providers.downloads.documents/tree/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2FOTX/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2FOTX%2Fclip.webm', '/sdcard/Download/OTX/clip.webm'],
+  ['content://com.android.providers.downloads.documents/tree/msf%3A42', 'content://com.android.providers.downloads.documents/tree/msf%3A42'],
 ]) {
   test(`download destination display: ${path}`, () => {
     const result = vm.runInNewContext(`${helper.replace(/^import .*\n/gm, '').replace(/^export /gm, '')}\n${component.slice(start, end)}; destinations.value`, {
