@@ -358,6 +358,7 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
     updateScrollMiniPlayer() {}, nextTick() {}, showOverlayControls() {},
     onDeactivated() {}, onActivated: callback => { activate = callback },
     registerMediaSessionHandlers() {}, emit() {}, handleTimeupdate() {}, handlePause() {},
+    rewindOnResumePausedAt: null,
   }
   const handler = vm.runInNewContext(`${source}\nfullscreenChangeHandler`, context)
   handler()
