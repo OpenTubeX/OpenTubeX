@@ -371,24 +371,6 @@
           setting-key="hideEndScreenAnnotations"
           @change="updateHideEndScreenAnnotations"
         />
-        <FtSelect
-          :placeholder="t('Settings.Distraction Free Settings.AI Video Summaries')"
-          :value="aiVideoSummaryMode"
-          setting-key="aiVideoSummaryMode"
-          :select-names="visibilityModeNames"
-          :select-values="VISIBILITY_MODES"
-          :show-icon="false"
-          @change="store.dispatch('updateAiVideoSummaryMode', $event)"
-        />
-        <FtSelect
-          :placeholder="t('Settings.Distraction Free Settings.Video Descriptions')"
-          :value="videoDescriptionMode"
-          setting-key="videoDescriptionMode"
-          :select-names="videoDescriptionModeNames"
-          :select-values="VISIBILITY_MODES"
-          :show-icon="false"
-          @change="store.dispatch('updateVideoDescriptionMode', $event)"
-        />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comment Likes')"
           :compact="true"
@@ -449,6 +431,28 @@
           :default-value="hidePaidPromotion"
           setting-key="hidePaidPromotion"
           @change="updateHidePaidPromotion"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtSelect
+          :placeholder="t('Settings.Distraction Free Settings.AI Video Summaries')"
+          :value="aiVideoSummaryMode"
+          setting-key="aiVideoSummaryMode"
+          :select-names="visibilityModeNames"
+          :select-values="VISIBILITY_MODES"
+          :icon="['fas', 'robot']"
+          @change="store.dispatch('updateAiVideoSummaryMode', $event)"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtSelect
+          :placeholder="t('Settings.Distraction Free Settings.Video Descriptions')"
+          :value="videoDescriptionMode"
+          setting-key="videoDescriptionMode"
+          :select-names="videoDescriptionModeNames"
+          :select-values="VISIBILITY_MODES"
+          :icon="['fas', 'file-lines']"
+          @change="store.dispatch('updateVideoDescriptionMode', $event)"
         />
       </div>
     </div>
