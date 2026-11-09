@@ -102,11 +102,14 @@ export const capacitorNotificationHistory = {
     const keys = new Set(targets.map(getNotificationKey))
     const entries = read()
     const newlyRead = entries.filter(entry => !entry.read && keys.has(getNotificationKey(entry)))
-    if (newlyRead.length === 0) return
+    // Targets without an entry, like reminders shown only by the system, still reach other devices.
+    const listed = new Set(entries.map(getNotificationKey))
+    const unlisted = targets.filter(target => !listed.has(getNotificationKey(target)))
+    if (newlyRead.length === 0 && unlisted.length === 0) return
     const ids = new Set(newlyRead.map(entry => entry.id))
     const dismissals = readDismissals()
-    dismiss(entries, entries.map(entry => ids.has(entry.id) ? { ...entry, read: true } : entry), dismissals,
-      recordNotificationDismissals(dismissals, newlyRead, { removed: false }))
+    dismiss(entries, newlyRead.length === 0 ? entries : entries.map(entry => ids.has(entry.id) ? { ...entry, read: true } : entry),
+      dismissals, recordNotificationDismissals(dismissals, [...newlyRead, ...unlisted], { removed: false }))
   },
 
   /** @param {string} [id] Omit to mark every entry read. */
