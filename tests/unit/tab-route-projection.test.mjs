@@ -33,10 +33,11 @@ test('restored routes of redirects resolve to their target', async () => {
     history: createMemoryHistory(),
     routes: [
       { path: '/', name: 'default', component: {} },
+      { path: '/history', name: 'history', component: {} },
       { path: '/settings', redirect: '/' }
     ]
   })
-  await router.push('/')
+  await router.push('/history')
   const navigation = new Service(router, {})
   const route = { name: null, path: '/settings', query: {}, hash: '', fullPath: '/settings' }
   assert.equal(navigation.resolve(route).name, 'default')
