@@ -78,17 +78,15 @@ function createPreloadedRoute(name, loader) {
 }
 
 const settingsWindowRoute = createPreloadedRoute('SettingsWindowRoute', () => import('../views/Settings/Settings.vue'))
-const aboutRoute = createPreloadedRoute('AboutRoute', () => import('../views/About/About.vue'))
 const SettingsRoute = createAsyncRoute(() => import('../views/Settings/SettingsRoute.vue'))
-const About = aboutRoute.component
 const Stats = createAsyncRoute(() => import('../views/Stats/Stats.vue'))
 
 // Keep Settings in its own chunk so its styles retain their established load
-// order. The app schedules these utility chunks once the first usable frame has
+// order. The app schedules this utility chunk once the first usable frame has
 // rendered, avoiding startup contention without leaving the first navigation
-// to pay their full parse cost.
+// to pay its full parse cost.
 export function preloadUtilityRoutes() {
-  return Promise.all([settingsWindowRoute.preload(), aboutRoute.preload()])
+  return settingsWindowRoute.preload()
 }
 
 export const routes = [
@@ -198,7 +196,7 @@ export const routes = [
     meta: {
       title: getFixedInternalRouteTitle('/about')
     },
-    component: About
+    component: SettingsRoute
   },
   {
     path: '/settings/profile',

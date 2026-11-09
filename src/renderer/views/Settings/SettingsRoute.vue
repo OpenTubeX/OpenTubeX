@@ -12,8 +12,8 @@ const route = useRoute()
 const router = useRouter()
 
 onMounted(async () => {
-  const view = route.path === '/downloads'
-    ? 'downloads'
+  const view = route.path === '/downloads' || route.path === '/about'
+    ? route.path.slice(1)
     : route.path.startsWith('/settings/profile') ? 'profile' : null
   await store.dispatch('showSettingsWindow', view)
   const tabId = store.getters.getPresentedTabId ?? store.getters.getActiveTabId
@@ -23,7 +23,7 @@ onMounted(async () => {
   const browserBackPath = window.history.state?.back
   const safePreviousPath = process.env.IS_ELECTRON ? previousPath : browserBackPath
 
-  const previousWasUtilityRoute = safePreviousPath === '/downloads' || safePreviousPath?.startsWith('/settings')
+  const previousWasUtilityRoute = ['/downloads', '/about'].includes(safePreviousPath) || safePreviousPath?.startsWith('/settings')
   if (typeof safePreviousPath === 'string' && !previousWasUtilityRoute) {
     await router.back()
   } else {

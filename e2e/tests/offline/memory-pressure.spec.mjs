@@ -9,7 +9,7 @@ test('unloads the least recently used background tabs to free memory', async ({ 
   const { activeTabId } = await page.evaluate(() => window.ftElectron.tabs.getState())
   const content = tabId => page.locator(`.tabContent[data-tab-id="${tabId}"] > *`)
   const tabIds = []
-  for (const route of ['/history', '/playlists', '/about']) {
+  for (const route of ['/history', '/playlists', '/stats']) {
     const { id } = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), route)
     await expect(content(id).first()).toBeAttached()
     tabIds.push(id)

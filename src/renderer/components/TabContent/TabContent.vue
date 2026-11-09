@@ -23,20 +23,15 @@
       <CapacitorTabPreview :tab="tab" />
       <span dir="auto">{{ formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath) }}</span>
     </div>
-    <KeepAlive
-      include="AboutRoute"
-      :max="1"
-    >
-      <component
-        :is="resolvedComponent"
-        v-if="browsingInitialized && resolvedComponent"
-        :key="resolvedComponentKey"
-        class="routerView"
-        :class="{ browsingBehindWatch: isWatchRoute }"
-        :inert="isWatchRoute"
-        :aria-hidden="String(isWatchRoute)"
-      />
-    </KeepAlive>
+    <component
+      :is="resolvedComponent"
+      v-if="browsingInitialized && resolvedComponent"
+      :key="tab.refreshKey || 0"
+      class="routerView"
+      :class="{ browsingBehindWatch: isWatchRoute }"
+      :inert="isWatchRoute"
+      :aria-hidden="String(isWatchRoute)"
+    />
     <TabWatchContent
       v-if="initialized"
       :key="tab.refreshKey || 0"
@@ -79,7 +74,6 @@ import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
 const TAB_LOADER_SETTLE_DELAY_MS = 100
-const CACHED_ROUTE_NAMES = new Set(['about'])
 
 const props = defineProps({
   tab: {
@@ -146,12 +140,6 @@ function getBrowsingRoute(route) {
   return navigation.resolve(getPreviousBrowsingRoute(props.tab) || '/subscriptions')
 }
 const browsingRoute = shallowRef(getBrowsingRoute(resolvedRoute.value))
-const resolvedComponentKey = computed(() => {
-  const refreshKey = props.tab.refreshKey || 0
-  return CACHED_ROUTE_NAMES.has(browsingRoute.value?.name)
-    ? `${browsingRoute.value.name}:${refreshKey}`
-    : refreshKey
-})
 const injectedRoute = reactive({})
 const resolvedComponent = computed(() => browsingRoute.value && resolveRouteComponent(browsingRoute.value))
 

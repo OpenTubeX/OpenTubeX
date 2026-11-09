@@ -7,7 +7,7 @@ test.describe('Ctrl+Tab responsiveness', () => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.evaluate(async () => {
       await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
-      await window.ftElectron.tabs.create({ route: '/about', makeActive: false, lazyLoad: true })
+      await window.ftElectron.tabs.create({ route: '/stats', makeActive: false, lazyLoad: true })
       window.__switcherMounts = 0
       new MutationObserver(records => {
         for (const record of records) {
@@ -121,7 +121,7 @@ test.describe('desktop tab switching at 125%', () => {
     await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
     await expect(page.locator('.settingsWindow')).toBeVisible()
     const ids = []
-    for (const route of ['/history', '/about']) {
+    for (const route of ['/history', '/stats']) {
       const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), route)
       ids.push(tab.id)
       const content = page.locator(`.tabContent[data-tab-id="${tab.id}"]`)
