@@ -17,7 +17,7 @@ function displayText(inputHtml) {
     defineProps: () => ({ inputHtml, linkTabIndex: '0', highlight: '' }),
     defineEmits: () => () => {},
     useRouter: () => ({
-      currentRoute: { value: { params: { id: 'video' } } },
+      currentRoute: { value: { params: { id: 'video' }, path: '/watch/video', query: {} } },
       resolve: ({ path, query }) => ({ href: `#${path}?timestamp=${query.timestamp}` }),
     }),
     computed,
@@ -41,4 +41,9 @@ test('scans long digit runs from remote text in linear time', () => {
   assert.equal(displayText(`${digits} ${digits}:`), `${digits} ${digits}:`)
   const elapsed = threadCpuMilliseconds() - started
   assert.ok(elapsed < 1000, `scanning took ${Math.round(elapsed)} ms of CPU time`)
+})
+
+test('leaves times in tag attributes unchanged', () => {
+  const linked = '<a href="http://192.168.0.1:8080/?t=12:34">website</a>'
+  assert.equal(displayText(`${linked} from 0:05`), `${linked} from ${link(5, '0:05')}`)
 })

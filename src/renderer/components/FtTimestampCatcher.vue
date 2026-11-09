@@ -29,7 +29,10 @@ const props = defineProps({
 })
 
 const router = useRouter()
-const videoId = router.currentRoute.value.params.id
+const route = router.currentRoute.value
+// External media has no video ID, so its timestamps link back to the same page
+const timestampPath = route.params.id ? `/watch/${route.params.id}` : route.path
+const timestampQuery = route.params.id ? {} : route.query
 
 function highlightHtmlText(inputHtml, query) {
   const normalizedQuery = query.trim().toLocaleLowerCase()
@@ -77,8 +80,13 @@ function highlightHtmlText(inputHtml, query) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const displayText = computed(() => {
+  // Tags are kept as they are, so times in attributes such as `href` stay intact.
   // Starting only at the beginning of a number keeps long digit runs in remote text from taking quadratic time
-  const timestampHtml = props.inputHtml.replaceAll(/(?<!\d)(?:(\d+):)?(\d+):(\d+)/g, (timestamp, hours, minutes, seconds) => {
+  const timestampHtml = props.inputHtml.replaceAll(/<[^>]*>|(?<!\d)(?:(\d+):)?(\d+):(\d+)/gi, (timestamp, hours, minutes, seconds) => {
+    if (minutes === undefined) {
+      return timestamp
+    }
+
     let time = 60 * Number(minutes) + Number(seconds)
 
     if (hours) {
@@ -86,8 +94,9 @@ const displayText = computed(() => {
     }
 
     const url = router.resolve({
-      path: `/watch/${videoId}`,
+      path: timestampPath,
       query: {
+        ...timestampQuery,
         timestamp: time
       }
     }).href
