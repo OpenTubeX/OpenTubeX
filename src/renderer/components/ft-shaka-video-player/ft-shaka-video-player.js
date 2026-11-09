@@ -10876,6 +10876,9 @@ export default defineComponent({
      */
     function rememberSeekPosition(time, recordSeekHistory = false) {
       if (recordSeekHistory) noteSeekHistoryJump(time)
+      // Playback should resume from the chosen position, even when it starts
+      // before the seeking event arrives.
+      rewindOnResumePausedAt = null
       // Explicit seeks supersede earlier end intent, even at its backoff position.
       endSeekTarget = null
       // Shaka temporarily pauses while scrubbing. Retain a requested end only

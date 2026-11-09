@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // yt-dlp isn't installed in the test environment, so skip its extraction attempt.
@@ -28,15 +28,16 @@ async function pause(page, video) {
  * load, playback advances before events are handled, except while seeking.
  * @param {import('@playwright/test').Page} page
  * @param {import('@playwright/test').Locator} video
+ * @param {() => Promise<unknown>} [play] Starts playback, pressing K by default
  */
-async function resume(page, video) {
+async function resume(page, video, play = () => page.keyboard.press('k')) {
   await video.evaluate((element) => {
     element.resumeTimes = []
     const track = () => element.resumeTimes.push(element.currentTime)
     element.addEventListener('timeupdate', track)
     element.addEventListener('seeking', track)
   })
-  await page.keyboard.press('k')
+  await play()
   await expect.poll(() => video.evaluate(element => !element.paused && !element.seeking && element.resumeTimes.length >= 4)).toBe(true)
   return video.evaluate(element => Math.min(...element.resumeTimes))
 }
@@ -108,6 +109,19 @@ test('only pauses of the minimum length rewind', async ({ app, page }) => {
   const resumedAt = await resume(page, video)
   expect(resumedAt).toBeGreaterThanOrEqual(pausedAt - 5)
   expect(resumedAt).toBeLessThan(pausedAt - 4.5)
+})
+
+test('a seek that starts playback resumes from the chosen position', async ({ app, page }) => {
+  const video = await openPlayingVideo(app, page, 5)
+
+  await pause(page, video)
+  // Like a transcript segment, which seeks and plays in the same task.
+  const watch = await page.evaluateHandle(findWatchComponent)
+  const resumedAt = await resume(page, video, () => watch.evaluate((component) => {
+    component.refs.player.setCurrentTime(20, true)
+    component.proxy.$el.querySelector('video').play()
+  }))
+  expect(resumedAt).toBeGreaterThanOrEqual(20)
 })
 
 test('resuming does not rewind when the setting is 0', async ({ app, page }) => {
