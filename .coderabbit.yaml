@@ -9,7 +9,8 @@ reviews:
         Besides correctness, check that each added or expanded test meets the test bar in AGENTS.md ("Test bar" under
         Testing). Flag tests that assert exact cosmetic styling or label wording, restate constants, defaults,
         configuration or source text, mirror mocks, assert wall-clock durations, duplicate an existing test, or
-        repeat one check across icon packs, themes, locales, widths or near-identical inputs. Flag @scale tags on
+        repeat one check across icon packs, themes, locales, widths or near-identical inputs when no case takes a
+        different code path. Flag @scale tags on
         tests that measure nothing fractional UI scale can break. Do not ask for more tests or more cases.
     - path: "e2e/tests/**"
       instructions: *test-bar
