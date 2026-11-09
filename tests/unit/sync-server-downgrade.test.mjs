@@ -2464,3 +2464,25 @@ test('OIDC deletion does not take a revoked session as proof of deletion', async
   assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), false)
   assert.equal(settings.syncServerToken, 'saved-token')
 })
+
+test('OIDC deletion clears the account a background sync already signed out', async () => {
+  let deleted = false
+  const { actions, context, dispatched, settings } = fixture({ syncServerUsername: 'OIDC-ACCOUNT-1' }, {
+    respond: (url) => {
+      const { pathname } = new URL(url)
+      if (pathname === '/health') return { capabilities: { account_sessions: 1 } }
+      if (pathname === '/v1/account/oidc/delete') return { authorization_url: 'https://auth.example/authorize' }
+      if (deleted) return new Response("account doesn't exist", { status: 404 })
+    },
+    openExternalLink: async () => {
+      setTimeout(() => {
+        deleted = true
+        // Sync saw the deletion first and expired the session.
+        settings.syncServerToken = ''
+        actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc')
+      })
+    },
+  })
+  await actions.deleteSyncServerOidcAccount(context)
+  assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), true)
+})

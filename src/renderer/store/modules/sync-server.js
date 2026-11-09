@@ -1709,7 +1709,7 @@ const actions = {
       throw new Error('Connect to a sync server first')
     }
 
-    const { syncServerUrl: url, syncServerToken: token } = rootState.settings
+    const { syncServerUrl: url, syncServerToken: token, syncServerUsername: username } = rootState.settings
     let client = trackSyncClient(new SyncServerClient(url, token))
     let authorizationUrl
     try {
@@ -1721,7 +1721,8 @@ const actions = {
 
     // The callback carries no proof, but the server reports the deleted
     // account. A 401 only means the session ended, for example because another
-    // device signed this one out. A sync may have disconnected already.
+    // device signed this one out. A sync may have noticed the deletion first
+    // and expired the session, which keeps the account's saved state.
     client = trackSyncClient(new SyncServerClient(url, token))
     try {
       try {
@@ -1731,7 +1732,8 @@ const actions = {
       } catch (error) {
         if (!isAccountDeletedError(error)) throw error
         assertSyncEnabled(rootState, client)
-        if (rootState.settings.syncServerToken === token) await dispatch('disconnectSyncServer')
+        const { syncServerUrl, syncServerUsername } = rootState.settings
+        if (syncServerUrl === url && syncServerUsername === username) await dispatch('disconnectSyncServer')
         return
       }
       throw new Error('The sync account was not deleted')
