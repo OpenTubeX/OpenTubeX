@@ -100,7 +100,7 @@ test('custom arguments cannot write files, load inputs or replace yt-dlp', () =>
     // `__finaldir` moves the finished file to any folder, and `all` includes allow-unsafe-ext.
     '--parse-metadata "post_process:/home/user/.config/autostart:(?P<__finaldir>.+)"', '--parse-m=title:%(filepath)s',
     '--replace-in-metadata __finaldir .* /tmp', '--metadata-from-title %(__finaldir)s', '--compat-options all',
-    '--compat=allow-unsafe-ext']) {
+    '--compat=allow-unsafe-ext', '--no-simulate --', '--trim-filenames 1', '--trim-file=1', '--trim 1']) {
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs }), /unsupported-custom-argument/, customArgs)
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video' }, customArgs), /unsupported-custom-argument/, customArgs)
   }
@@ -111,7 +111,9 @@ test('filename templates cannot leave the download folder', () => {
   // variables, and reads `TYPES:` as the files a template applies to.
   for (const filenameTemplate of ['/tmp/{title}', '\\\\server\\share\\{title}', 'C:\\Users\\{title}', 'c:{title}', '~/{title}',
     '../{title}', 'Music/../../{title}', 'Music\\..\\{title}', ' .. /{title}', '$HOME/{title}', '${HOME}/{title}',
-    '%USERPROFILE%\\{title}', '%(uploader|..)s/{title}', 'thumbnail:/tmp/x', 'Subtitle,thumbnail:x', 'pl_infojson:../x']) {
+    '%USERPROFILE%\\{title}', '%(uploader|..)s/{title}', 'thumbnail:/tmp/x', 'Subtitle,thumbnail:x', 'pl_infojson:../x',
+    // An uploader named `C` would make a Windows drive, and an empty title would leave `..`.
+    '{author}:/outside.{ext}', '..{title}/{id}.{ext}', '.{author}.{title}/{id}.{ext}']) {
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video', filenameTemplate }), /invalid-filename-template/, filenameTemplate)
     assert.equal(isSafeDownloadFilenameTemplate(filenameTemplate), false, filenameTemplate)
   }
@@ -119,6 +121,13 @@ test('filename templates cannot leave the download folder', () => {
     const args = buildYtDlpDownloadArguments({ videoId, mode: 'video', filenameTemplate }).args
     assert.ok(!args[args.indexOf('--output') + 1].startsWith('/'), filenameTemplate)
   }
+  // The literal playlist title can complete a type prefix or a drive letter.
+  for (const title of ['thumbnail', 'C']) {
+    assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video', title, filenameTemplate: '{playlist}:/outside' }), /invalid-filename-template/, title)
+  }
+  // Only text fields that name a folder get the dot-only value check.
+  assert.deepEqual(buildYtDlpDownloadArguments({ videoId, mode: 'video', filenameTemplate: '{author}/{title}.{ext}' }).directoryFields, ['uploader'])
+  assert.deepEqual(buildYtDlpDownloadArguments({ videoId, mode: 'video' }).directoryFields, [])
 })
 
 test('custom arguments keep unrelated long and short options', () => {
