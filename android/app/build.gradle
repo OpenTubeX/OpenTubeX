@@ -119,7 +119,7 @@ android {
         resValues = true
     }
     compileSdk = rootProject.ext.compileSdkVersion
-    ndkVersion '28.2.13676358'
+    ndkVersion '30.0.16248370'
     defaultConfig {
         applicationId "org.opentubex.app"
         minSdkVersion rootProject.ext.minSdkVersion
