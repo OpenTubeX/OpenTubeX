@@ -13,9 +13,10 @@ self.addEventListener('message', async ({ data }) => {
     if (data.type !== 'run') return
     const input = inputs.get(data.id)?.value
     inputs.delete(data.id)
-    // Electron already ships this shared browser bundle. Load it only when a
-    // cold player needs parsing, without adding another copy to the worker.
-    if (data.operation === 'extractPlayer' && !self.OpenTubeXYouTube) {
+    // Production Electron builds already ship this shared browser bundle. Load
+    // it only when a cold player needs parsing, without adding another copy to
+    // the worker. Development builds bundle youtubei.js and do not emit it.
+    if (process.env.NODE_ENV !== 'development' && data.operation === 'extractPlayer' && !self.OpenTubeXYouTube) {
       self.importScripts(new URL('./youtubei.js', self.location.href).href)
     }
     const result = await executeBackgroundJob(data.operation, input)
