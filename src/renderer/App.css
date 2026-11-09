@@ -54,6 +54,7 @@
   --top-tab-bar-height: calc(32px + var(--horizontal-tab-scrollbar-space));
   --bottom-tab-bar-height: calc(34px + var(--horizontal-tab-scrollbar-space));
   --mobile-nav-content-height: 60px;
+  --progress-bar-height: 10px;
 }
 
 .app {
@@ -64,7 +65,6 @@
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
   --top-nav-height: 60px;
-  --progress-bar-height: 6px;
   --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   --mobile-nav-reveal-transition: transform var(--motion-default-effects);
   --mobile-nav-hide-transition: transform var(--motion-fast-effects);
