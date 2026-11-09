@@ -141,9 +141,11 @@ test('horizontal tabs use the shared scrollbar and its appearance settings', { t
   await handle.hover()
   await expectThickness(10)
   await container.hover()
+  // Hovering the handle scrolls it into view, which can nudge the strip by a few pixels at fractional UI scales.
+  const beforeWheel = await container.evaluate(element => element.scrollLeft)
   await page.mouse.wheel(0, 300)
   // Wheel deltas are device pixels, so UI scale changes the CSS scroll distance.
-  await expect.poll(() => container.evaluate((element, distance) => Math.abs(element.scrollLeft - distance), 300 * 100 / uiScale)).toBeLessThanOrEqual(2)
+  await expect.poll(() => container.evaluate((element, target) => Math.abs(element.scrollLeft - target), beforeWheel + 300 * 100 / uiScale)).toBeLessThanOrEqual(2)
   const originalOrder = await container.locator('.tab').evaluateAll(tabs => tabs.map(tab => tab.dataset.tabId))
   await handle.hover()
   const beforeDrag = await container.evaluate(element => element.scrollLeft)
@@ -164,8 +166,17 @@ test('horizontal tabs use the shared scrollbar and its appearance settings', { t
   })
   await page.mouse.move(500, 500)
   await expect(scrollbar).toHaveClass(/app-scrollbar-idle/)
+  // The pointer move shows the bar only until the auto-hide delay, so a slow
+  // renderer can hide it again before a poll sees it. Record the change instead.
+  const shown = scrollbar.evaluate(element => new Promise(resolve => {
+    new MutationObserver((_, observer) => {
+      if (element.classList.contains('app-scrollbar-idle')) return
+      observer.disconnect()
+      resolve(true)
+    }).observe(element, { attributeFilter: ['class'] })
+  }))
   await container.hover()
-  await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
+  expect(await shown).toBe(true)
   await page.evaluate(() => {
     window.$store.commit('setAlwaysShowScrollbars', true)
   })
