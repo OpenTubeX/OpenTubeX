@@ -24,20 +24,25 @@ test('closing reminder entries removes their notifications and overdue alarms by
   systemNotifications.all = [
     // Android has not delivered the inexact alarm the app already moved to the history.
     { id: 7, schedule: at(-60_000), extra: { videoId: 'premiere00a' } },
+    { id: 8, schedule: at(-7_200_000), extra: { videoId: 'premiere00b' } },
     // The same video premieres again later.
-    { id: 8, schedule: at(3_600_000), extra: { videoId: 'premiere00b' } },
+    { id: 10, schedule: at(3_600_000), extra: { videoId: 'premiere00b' } },
+    // iOS lists delivered notifications without their schedule.
+    { id: 11, extra: { videoId: 'premiere00d' } },
     { id: 9, schedule: at(-60_000), extra: { videoId: 'premiere00c' } },
   ]
   try {
     await closeCapacitorSystemNotifications([
-      { kind: 'live-reminder', path: '/watch/premiere00a' },
-      { kind: 'live-reminder', path: '/watch/premiere00b' },
+      { kind: 'live-reminder', path: '/watch/premiere00a', createdAt: Date.now() - 63_000 },
+      // Its earlier premiere, which the history dates a little late.
+      { kind: 'live-reminder', path: '/watch/premiere00b', createdAt: Date.now() - 7_000_000 },
+      { kind: 'live-reminder', path: '/watch/premiere00d', createdAt: Date.now() - 60_000 },
     ])
   } finally {
     delete process.env.IS_CAPACITOR
   }
-  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7]])
-  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8]])
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7, 8]])
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8, 11]])
 })
 
 async function loadCapacitorReminder(notifications, context = {}) {

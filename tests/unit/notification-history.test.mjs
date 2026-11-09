@@ -404,17 +404,21 @@ test('entries that make room for new ones keep their system notifications', asyn
 })
 
 test('a dismissed reminder does not dismiss one for a later premiere of the same video', () => {
+  const hour = 3_600_000
   const reminder = createdAt => ({ kind: 'live-reminder', title: 'Live', body: '', path: '/watch/stream', createdAt })
-  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', at: 100, removedAt: 100 }] }
+  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', at: hour + 100_000, removedAt: hour + 100_000 }] }
   // Another device removed the reminder for the original start, after it fired there.
-  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(90)]), dismissals), [])
+  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(hour)]), dismissals), [])
+  // A phone shows a reminder a moment early, and the user removed it before the start.
+  const early = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', at: hour - 3000, removedAt: hour - 3000 }] }
+  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(hour)]), early), [])
   // The stream moved, and its new reminder fires later.
-  const later = addNotificationHistoryEntries([], [reminder(200)])
+  const later = addNotificationHistoryEntries([], [reminder(3 * hour)])
   assert.equal(applyNotificationDismissals(later, dismissals), later)
   // Reading the new reminder keeps the old removal from reaching it.
-  const read = mergeNotificationDismissals(dismissals, recordNotificationDismissals(dismissals, later, { removed: false, now: 300 }))
+  const read = mergeNotificationDismissals(dismissals, recordNotificationDismissals(dismissals, later, { removed: false, now: 3 * hour + 100_000 }))
   assert.deepEqual(applyNotificationDismissals(later, read).map(entry => entry.read), [true])
-  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(90)]), read), [])
+  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(hour)]), read), [])
 })
 
 test('the desktop history keeps dismissals for other devices and applies theirs', async () => {

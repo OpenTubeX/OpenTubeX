@@ -255,6 +255,12 @@ export function recordNotificationDismissals(dismissals, entries, { removed, thr
 }
 
 /**
+ * Devices may show a reminder shortly before it is due, and their clocks
+ * differ slightly, so dismissals from just before its start still apply.
+ */
+export const REMINDER_EARLY_MS = 60_000
+
+/**
  * Marks entries read or removes them as dismissals say, including entries
  * this device adds after another one dismissed them. Returns the same array
  * when nothing changes.
@@ -271,7 +277,7 @@ export function applyNotificationDismissals(entries, { readThrough, clearedThrou
     const dismissal = byKey.get(key)
     // A reminder for a later premiere of the same video is a new notification,
     // so only what happened after it was due applies to it.
-    const since = entry.kind === 'live-reminder' ? entry.createdAt : 0
+    const since = entry.kind === 'live-reminder' ? entry.createdAt - REMINDER_EARLY_MS : 0
     if ((dismissal?.removedAt ?? 0) >= Math.max(since, 1) || entry.createdAt <= clearedThrough) {
       changed = true
       return []
