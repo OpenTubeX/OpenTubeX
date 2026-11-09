@@ -264,8 +264,11 @@ test('reminders that fire while the app is visible appear in the app, and turnin
     adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
     await browser.close()
     // Like the system ending the app for memory; a force stop would also remove its notifications.
-    adb('shell', 'su', '0', 'kill', '-9', adb('shell', 'pidof', APP_ID).trim())
-    await expect.poll(() => adb('shell', 'pidof', APP_ID, '||', 'true').trim()).toBe('')
+    // Android kills it only once the activity has stopped, so it asks again until the process is gone.
+    await expect.poll(() => {
+      adb('shell', 'am', 'kill', APP_ID)
+      return adb('shell', 'pidof', APP_ID, '||', 'true').trim()
+    }, { timeout: 15_000 }).toBe('')
     await swipeAway('Background stream')
     launch();
     ({ browser, page } = await connect())
