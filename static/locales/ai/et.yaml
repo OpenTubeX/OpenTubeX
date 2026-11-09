@@ -726,6 +726,8 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Rewind on Resume: "Keri jätkamisel tagasi"
+    Minimum Pause Before Rewinding: "Minimaalne paus enne tagasikerimist"
     Mono Audio: 'Monoheli'
     Show Mono Audio Toggle: 'Näita monoheli lülitit'
     Pause on Stream Recovery: "Peata voo taastamisel"
@@ -2153,6 +2155,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
+    Rewind on Resume: "Hüppab peatatud video jätkamisel nii mitu sekundit tagasi, et saaksid viimaseid hetki uuesti näha. Väljalülitamiseks määra 0."
+    Minimum Pause Before Rewinding: "Kerib tagasi ainult siis, kui video oli vähemalt nii kaua peatatud. Iga pausi järel tagasikerimiseks määra 0."
     Mono Audio: 'Esitab vasakut ja paremat helikanalit mõlemas kõrvas. Kasuta seda, kui video heli kostab ainult kõrvaklappide ühest küljest.'
     Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'

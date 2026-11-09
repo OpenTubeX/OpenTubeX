@@ -1157,6 +1157,8 @@ Settings:
     Enable Seek History: Sprungverlauf aktivieren
     Show Seek Bar Filmstrip: Filmstreifen der Zeitleiste anzeigen
     Pause on Stream Recovery: Bei Stream-Wiederherstellung pausieren
+    Rewind on Resume: Beim Fortsetzen zurückspulen
+    Minimum Pause Before Rewinding: Mindestpause vor dem Zurückspulen
     Voice-over Translation:
       Title: Voice-over-Übersetzung
       Attribution: (bereitgestellt von Yandex)
@@ -2960,6 +2962,8 @@ Tooltips:
       Merkt sich bis zum Schließen der App, von wo du in jedem Video weggesprungen bist. Zeigt den Sprungverlauf im
       Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel.
     Pause on Stream Recovery: "Wenn der Videostream fehlschlägt und der Player ihn neu lädt oder zu einem anderen Format oder einer anderen Engine wechselt, wird die Wiedergabe pausiert und der Fehler oben im Player angezeigt, bis du ihn ausblendest. Wenn deaktiviert, läuft die Wiedergabe weiter und der Fehler erscheint kurz als Benachrichtigung."
+    Rewind on Resume: Springt beim Fortsetzen eines pausierten Videos um so viele Sekunden zurück, damit du die letzten Momente noch einmal siehst. Bei 0 ist die Funktion deaktiviert.
+    Minimum Pause Before Rewinding: Spult nur zurück, wenn das Video mindestens so lange pausiert war. Bei 0 wird nach jeder Pause zurückgespult.
     Continue Playback When Screen Is Locked: >-
       Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
       Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.

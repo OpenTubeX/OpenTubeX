@@ -95,6 +95,10 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     defaultQuality: '720',
     meteredNetworkQualityLimit: 'none',
     defaultSkipInterval: 5,
+    // Seconds to rewind when playback resumes after a pause, 0 turns it off
+    rewindOnResume: 0,
+    // Shorter pauses resume without rewinding
+    rewindOnResumeMinimumPause: 0,
     seekIntervalMultiplyByPlaybackRate: false,
     // How many segments per stream shaka-player downloads in parallel ahead of the playhead
     segmentPrefetchLimit: DEFAULT_SEGMENT_PREFETCH_LIMIT,

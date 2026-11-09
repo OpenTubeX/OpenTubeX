@@ -727,6 +727,8 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Rewind on Resume: "Mundur saat melanjutkan"
+    Minimum Pause Before Rewinding: "Jeda minimum sebelum mundur"
     Mono Audio: 'Audio mono'
     Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
     Default Media Format:
@@ -2175,6 +2177,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
   Player Settings:
+    Rewind on Resume: "Mundur sebanyak detik ini saat Anda melanjutkan video yang dijeda, agar Anda dapat melihat momen terakhir lagi. Atur ke 0 untuk menonaktifkan."
+    Minimum Pause Before Rewinding: "Hanya mundur jika video dijeda setidaknya selama ini. Atur ke 0 untuk mundur setelah setiap jeda."
     Mono Audio: 'Memutar saluran audio kiri dan kanan di kedua telinga. Gunakan saat suara video hanya keluar dari satu sisi headphone Anda.'
     Pause on Stream Recovery: "Saat streaming video gagal dan pemutar memuatnya ulang atau beralih ke format atau mesin lain, pemutaran dijeda dan galat tetap ditampilkan di bagian atas pemutar sampai Anda menutupnya. Jika dinonaktifkan, pemutaran berlanjut dan galat muncul sebentar sebagai notifikasi."
     Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'

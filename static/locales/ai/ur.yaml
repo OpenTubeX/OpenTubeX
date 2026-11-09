@@ -776,6 +776,8 @@ Settings:
       Catppuccin Macchiato Blue: Catppuccin Macchiato Blue
       Catppuccin Macchiato Lavender: Catppuccin Macchiato Lavender
   Player Settings:
+    Rewind on Resume: "دوبارہ شروع کرنے پر پیچھے کریں"
+    Minimum Pause Before Rewinding: "پیچھے کرنے سے پہلے کم از کم وقفہ"
     Sections:
       Playback: پلے بیک
       Autoplay: آٹو پلے
@@ -2263,6 +2265,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP بلاک کا پتہ چلنے پر چلانے کے لیے اسکرپٹ فائل کا راستہ۔ OpenTubeX اس کے مکمل ہونے کا انتظار کرتا ہے، پھر ویڈیو دوبارہ لوڈ کرتا ہے۔ اگر فال بیک فعال ہو تو یہ صرف فال بیک کے بھی ناکام ہونے پر چلتا ہے۔
   Player Settings:
+    Rewind on Resume: "رکی ہوئی ویڈیو دوبارہ شروع کرنے پر اتنے سیکنڈ پیچھے چلا جاتا ہے تاکہ آپ آخری لمحات دوبارہ دیکھ سکیں۔ بند کرنے کے لیے 0 پر سیٹ کریں۔"
+    Minimum Pause Before Rewinding: "صرف تب پیچھے کرتا ہے جب ویڈیو کم از کم اتنی دیر رکی رہی ہو۔ ہر وقفے کے بعد پیچھے کرنے کے لیے 0 پر سیٹ کریں۔"
     Enable Caption Translations: فعال ہونے پر، کیپشنز بٹن اور C شارٹ کٹ ترجیحی کیپشن زبان میں خودکار ترجمہ شدہ ٹریک کو ترجیح دیتے ہیں جب ویڈیو میں مماثل اصل ٹریک موجود نہ ہو۔
     Use Quick Playback Speed Bar: پلیئر کنٹرولز میں دائیں جانب فوری پلے بیک اسپیڈ بار دکھاتا ہے۔ اگر فی چینل پلے بیک اسپیڈ دستی طور پر محفوظ کرنا فعال ہو تو بار میں موجودہ چینل کی اسپیڈ محفوظ کرنے کا بٹن بھی شامل ہوتا ہے۔
     Multiply Seek Interval by Playback Rate: فعال ہونے پر، سیک کے وقفے (ایرو کیز اور J/L) موجودہ پلے بیک ریٹ سے ضرب دیے جاتے ہیں۔ غیر فعال ہونے پر سیک کے وقفے پلے بیک ریٹ سے قطع نظر یکساں رہتے ہیں۔

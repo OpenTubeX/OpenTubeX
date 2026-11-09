@@ -945,6 +945,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Rewind on Resume: "Rebobina en reprendre"
+    Minimum Pause Before Rewinding: "Pausa mínima abans de rebobinar"
     Mono Audio: 'Àudio mono'
     Show Mono Audio Toggle: 'Mostra el commutador d''àudio mono'
     Default Media Format:
@@ -2698,6 +2700,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
   Player Settings:
+    Rewind on Resume: "Torna enrere aquest nombre de segons quan reprens un vídeo en pausa, perquè puguis tornar a veure els darrers moments. Posa-ho a 0 per desactivar-ho."
+    Minimum Pause Before Rewinding: "Només rebobina quan el vídeo ha estat en pausa almenys aquest temps. Posa-ho a 0 per rebobinar després de cada pausa."
     Mono Audio: 'Reprodueix els canals d''àudio esquerre i dret a totes dues orelles. Utilitzeu-ho quan el so d''un vídeo només surti per un costat dels auriculars.'
     Pause on Stream Recovery: "Quan el flux de vídeo falla i el reproductor el torna a carregar o canvia a un altre format o motor, la reproducció es posa en pausa i l'error es manté a la part superior del reproductor fins que el descartis. Si està desactivat, la reproducció continua i l'error apareix breument com a notificació."
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'

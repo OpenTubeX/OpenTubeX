@@ -1156,6 +1156,9 @@ export default defineComponent({
     let seekBarMouseDown = false
     let resumeAutoplayAfterSeek = false
     let initialAutoplayCanceled = false
+    // When the viewer paused playback, consumed by the next play.
+    /** @type {number|null} */
+    let rewindOnResumePausedAt = null
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -1617,6 +1620,14 @@ export default defineComponent({
     })
     const seekIntervalMultiplyByPlaybackRate = computed(() => {
       return store.getters.getSeekIntervalMultiplyByPlaybackRate
+    })
+    /** @type {import('vue').ComputedRef<number>} */
+    const rewindOnResume = computed(() => {
+      return store.getters.getRewindOnResume
+    })
+    /** @type {import('vue').ComputedRef<number>} */
+    const rewindOnResumeMinimumPause = computed(() => {
+      return store.getters.getRewindOnResumeMinimumPause
     })
     const showPlaybackRateAdjustedTimestamp = computed(() => {
       return store.getters.getShowPlaybackRateAdjustedTimestamp
@@ -4925,6 +4936,15 @@ export default defineComponent({
         return
       }
 
+      if (rewindOnResumePausedAt !== null) {
+        const pausedSeconds = (performance.now() - rewindOnResumePausedAt) / 1000
+        rewindOnResumePausedAt = null
+        if (rewindOnResume.value > 0 && pausedSeconds >= rewindOnResumeMinimumPause.value && canSeek()) {
+          // Not the viewer's own seek, so it stays out of the seek history.
+          setCurrentTime(Math.max(player.seekRange().start, video.value.currentTime - rewindOnResume.value))
+        }
+      }
+
       mediaSessionStopped = false
 
       flushPendingMusicPlaybackRateToast()
@@ -4975,7 +4995,15 @@ export default defineComponent({
       if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
         initialAutoplayCanceled = true
       }
-      if (!consumeTemporaryPlaybackRatePause()) setShowUiOnPaused(true)
+      const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
+      if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
+      // Only a pause during playback rewinds on resume. Ending, scrubbing,
+      // format switches and releasing a hold that started paused don't.
+      const video_ = video.value
+      const rewindOnResumeApplies = !!video_ && video_.played.length > 0 && !video_.ended &&
+        !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause
+      // Keep the earlier time when a play in a background tab is paused again.
+      rewindOnResumePausedAt = rewindOnResumeApplies ? (rewindOnResumePausedAt ?? performance.now()) : null
       playerPaused.value = true
       clearPausedInterfaceReveal()
       shortsPaused.value = true
@@ -5076,6 +5104,8 @@ export default defineComponent({
       if (shortsNavigationSuspended.value) return
       seekRevealsFrame = mediaFrameLoaded
       hasPlaybackPosition.value = true
+      // A position chosen while paused is where playback should resume.
+      if (video.value?.paused) rewindOnResumePausedAt = null
       if (!isEndSeekPosition()) endSeekTarget = null
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
@@ -9911,6 +9941,7 @@ export default defineComponent({
         silenceSkipping.reset()
         hasLoaded.value = false
         hasPlaybackPosition.value = false
+        rewindOnResumePausedAt = null
         videoLayoutReady.value = false
         annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {

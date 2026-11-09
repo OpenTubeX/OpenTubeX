@@ -726,6 +726,8 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Rewind on Resume: "Visszatekerés folytatáskor"
+    Minimum Pause Before Rewinding: "Minimális szünet a visszatekerés előtt"
     Mono Audio: 'Monó hang'
     Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
@@ -2151,6 +2153,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
+    Rewind on Resume: "Szüneteltetett videó folytatásakor ennyi másodpercet ugrik vissza, hogy újra láthasd az utolsó pillanatokat. A kikapcsoláshoz állítsd 0-ra."
+    Minimum Pause Before Rewinding: "Csak akkor teker vissza, ha a videó legalább ennyi ideig szünetelt. Állítsd 0-ra, hogy minden szünet után visszatekerjen."
     Mono Audio: 'A bal és a jobb hangcsatornát mindkét fülben lejátssza. Használd, ha egy videó hangja csak a fejhallgató egyik oldalán szól.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'

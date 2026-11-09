@@ -148,6 +148,31 @@
         @change="updateDefaultSkipInterval"
       />
     </FtSliderGrid>
+    <FtSliderGrid>
+      <FtSlider
+        :label="t('Settings.Player Settings.Rewind on Resume')"
+        :default-value="store.getters.getRewindOnResume"
+        setting-key="rewindOnResume"
+        :min-value="0"
+        :max-value="30"
+        :step="1"
+        value-extension="s"
+        :tooltip="t('Tooltips.Player Settings.Rewind on Resume')"
+        @change="store.dispatch('updateRewindOnResume', $event)"
+      />
+      <FtSlider
+        :label="t('Settings.Player Settings.Minimum Pause Before Rewinding')"
+        :default-value="store.getters.getRewindOnResumeMinimumPause"
+        setting-key="rewindOnResumeMinimumPause"
+        :min-value="0"
+        :max-value="60"
+        :step="1"
+        value-extension="s"
+        :disabled="store.getters.getRewindOnResume === 0"
+        :tooltip="t('Tooltips.Player Settings.Minimum Pause Before Rewinding')"
+        @change="store.dispatch('updateRewindOnResumeMinimumPause', $event)"
+      />
+    </FtSliderGrid>
     <h4 class="groupTitle">
       {{ t('Settings.Player Settings.Sections.Autoplay') }}
     </h4>

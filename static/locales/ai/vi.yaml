@@ -726,6 +726,8 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Rewind on Resume: "Tua lại khi tiếp tục"
+    Minimum Pause Before Rewinding: "Thời gian tạm dừng tối thiểu trước khi tua lại"
     Mono Audio: 'Âm thanh đơn kênh'
     Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
@@ -2165,6 +2167,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:
+    Rewind on Resume: "Lùi lại số giây này khi bạn tiếp tục một video đang tạm dừng, để bạn có thể xem lại những khoảnh khắc cuối. Đặt thành 0 để tắt."
+    Minimum Pause Before Rewinding: "Chỉ tua lại khi video đã tạm dừng ít nhất trong khoảng thời gian này. Đặt thành 0 để tua lại sau mỗi lần tạm dừng."
     Mono Audio: 'Phát kênh âm thanh trái và phải ở cả hai tai. Dùng khi âm thanh của video chỉ phát ra ở một bên tai nghe.'
     Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'

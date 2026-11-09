@@ -731,6 +731,8 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Rewind on Resume: "Kelaa taaksepäin jatkettaessa"
+    Minimum Pause Before Rewinding: "Vähimmäistauko ennen kelausta"
     Mono Audio: 'Monoääni'
     Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
     Default Media Format:
@@ -2205,6 +2207,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Komentosarjatiedosto, joka suoritetaan IP-eston havaitsemisen jälkeen. OpenTubeX odottaa suorituksen päättymistä ja lataa sitten videon uudelleen. Jos varamenetelmä on käytössä, komentosarja suoritetaan vain, jos myös varamenetelmä epäonnistuu.
   Player Settings:
+    Rewind on Resume: "Hyppää näin monta sekuntia taaksepäin, kun jatkat keskeytettyä videota, jotta näet viimeiset hetket uudelleen. Poista käytöstä asettamalla arvoksi 0."
+    Minimum Pause Before Rewinding: "Kelaa taaksepäin vain, jos video oli keskeytettynä vähintään näin kauan. Aseta arvoksi 0, jos haluat kelata jokaisen tauon jälkeen."
     Mono Audio: 'Toistaa vasemman ja oikean äänikanavan molempiin korviin. Käytä tätä, kun videon ääni kuuluu vain kuulokkeiden toiselta puolelta.'
     Pause on Stream Recovery: "Kun videostriimi epäonnistuu ja soitin lataa sen uudelleen tai vaihtaa toiseen formaattiin tai moottoriin, toisto keskeytetään ja virhe näkyy soittimen yläosassa, kunnes suljet sen. Kun asetus on pois päältä, toisto jatkuu ja virhe näkyy hetken ilmoituksena."
     Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
