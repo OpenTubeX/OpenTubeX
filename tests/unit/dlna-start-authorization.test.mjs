@@ -30,6 +30,7 @@ async function fixture() {
       return { castId: 'cast-1' }
     },
     stopDlnaCast: async () => {},
+    powerSaveBlocker: { start: () => 1, stop() {} },
     console,
     URL,
     navigator: { userActivation: { isActive: true } },
@@ -102,4 +103,21 @@ test('a proxied source does not start a cast, and the relay resolves the proxy f
   assert.equal((await f.dlna.start(single)).castId, 'cast-1')
   f.context.session.defaultSession.resolveProxy = async url => `PROXY ${new URL(url).hostname}:1080`
   assert.equal(await f.attempts[0].resolveProxy('https://redirect.example/video'), 'PROXY redirect.example:1080')
+})
+
+test('a stop that finishes after the next cast started keeps that cast awake', async () => {
+  const f = await fixture()
+  const active = new Set()
+  let nextId = 1
+  f.context.powerSaveBlocker = { start: () => { active.add(nextId); return nextId++ }, stop: id => active.delete(id) }
+  let finishStop
+  f.context.stopDlnaCast = () => new Promise(resolve => { finishStop = () => resolve(true) })
+  f.context.getDlnaFfmpegExecutable = async () => '/usr/bin/ffmpeg'
+  const videoOnly = { ...payload, audioUrl: undefined, fallbackMediaUrl: undefined }
+  assert.equal((await f.dlna.start(videoOnly)).castId, 'cast-1')
+  const stopping = vm.runInContext('stopDlna', f.context)(1, 'cast-1')
+  assert.equal((await f.dlna.start(videoOnly)).castId, 'cast-1')
+  finishStop()
+  assert.equal(await stopping, true)
+  assert.equal(active.size, 1)
 })

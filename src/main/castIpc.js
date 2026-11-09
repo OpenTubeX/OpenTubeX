@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, ipcMain, session } from 'electron'
+import { BrowserWindow, dialog, ipcMain, powerSaveBlocker, session } from 'electron'
 import * as http from 'node:http'
 import * as https from 'node:https'
 import { randomUUID } from 'crypto'
@@ -62,10 +62,22 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return { privateInstance, resolveAddresses }
   }
   ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return []
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
     return discoverDlnaDevices()
   })
   const dlnaOwners = new WeakSet()
+  // This machine relays the stream, so it must stay awake like it does for Google Cast and FCast
+  let dlnaPowerSaveBlocker = null
+  const stopDlna = async (ownerId, castId) => {
+    // a cast started while this one stops gets its own blocker, which must stay
+    const blocker = dlnaPowerSaveBlocker
+    const stopped = await stopDlnaCast(ownerId, castId)
+    if (stopped && blocker !== null && dlnaPowerSaveBlocker === blocker) {
+      powerSaveBlocker.stop(blocker.id)
+      dlnaPowerSaveBlocker = null
+    }
+    return stopped
+  }
   const startDlnaForWindow = async (event, payload) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return { error: 'Casting requires an active OpenTubeX window' }
@@ -109,11 +121,13 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
     const result = await startDlnaCast(event.sender.id, payload, sourceHeaders, muxOptions, resolveAddresses, resolveProxy)
     if (result.castId) {
+      if (dlnaPowerSaveBlocker !== null) powerSaveBlocker.stop(dlnaPowerSaveBlocker.id)
+      dlnaPowerSaveBlocker = { id: powerSaveBlocker.start('prevent-app-suspension') }
       if (event.sender.isDestroyed()) {
-        stopDlnaCast(event.sender.id).catch(console.error)
+        stopDlna(event.sender.id).catch(console.error)
       } else if (!dlnaOwners.has(event.sender)) {
         dlnaOwners.add(event.sender)
-        event.sender.once('destroyed', () => stopDlnaCast(event.sender.id).catch(console.error))
+        event.sender.once('destroyed', () => stopDlna(event.sender.id).catch(console.error))
       }
     }
     return result
@@ -142,7 +156,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
       return { error: 'No failed cast is available to recover' }
     }
     const position = await getDlnaCastPosition(event.sender.id, castId)
-    await stopDlnaCast(event.sender.id, castId)
+    await stopDlna(event.sender.id, castId)
     return startDlnaForWindow(event, {
       ...payload, startSeconds: (Number.isFinite(payload?.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
     })
@@ -153,7 +167,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
   })
   ipcMain.handle(IpcChannels.DLNA_STOP, (event, castId) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
-    return stopDlnaCast(event.sender.id, castId)
+    return stopDlna(event.sender.id, castId)
   })
 
   // Google Cast and FCast share the casting IPC, selected by `protocol`.
