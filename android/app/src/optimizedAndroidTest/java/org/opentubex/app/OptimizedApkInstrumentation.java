@@ -109,6 +109,11 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 .put("title", "Optimized APK test").put("cancelLabel", "Cancel"));
             check(refresh.getBoolean("acquired"), "Subscription refresh starts");
             try {
+                // A renderer refresh moves into a foreground service with a notification
+                // only while the app is out of view.
+                resumedActivity = null;
+                getContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 NotificationManager notifications = getTargetContext().getSystemService(NotificationManager.class);
                 long deadline = SystemClock.elapsedRealtime() + 15000;
                 boolean notified;
@@ -119,11 +124,15 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                     if (notified) break;
                     Thread.sleep(100);
                 } while (SystemClock.elapsedRealtime() < deadline);
-                check(notified, "WorkManager instantiates the shrunk worker and posts its notification");
+                check(notified, "The background refresh service posts its notification");
             } finally {
+                getTargetContext().startActivity(intent);
+                long deadline = SystemClock.elapsedRealtime() + 15000;
+                while (resumedActivity != activity && SystemClock.elapsedRealtime() < deadline) Thread.sleep(100);
+                check(resumedActivity == activity, "Main activity returns to the foreground");
                 call(web, "SubscriptionRefresh", "finish", new JSONObject().put("token", refresh.getString("token")));
             }
-            report("Worker passed");
+            report("Background refresh passed");
 
             // Pairing scans QR codes from the WebView camera. Capacitor's WebChromeClient
             // must turn the WebView request into Android's camera permission prompt.
@@ -137,7 +146,7 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             await(web, "window.optimizedScan === 'opened'");
             checkPlayerFullscreen(web, fixture);
             report("Player fullscreen passed");
-            result.putString("stream", "\nOK (8 checks: bridge, shortcuts, callbacks, runtimes, playback, worker, scanner, fullscreen)\n");
+            result.putString("stream", "\nOK (8 checks: bridge, shortcuts, callbacks, runtimes, playback, refresh, scanner, fullscreen)\n");
             resultCode = Activity.RESULT_OK;
         } catch (Throwable failure) {
             result.putString("stream", "\nFAILURE\n" + android.util.Log.getStackTraceString(failure));
