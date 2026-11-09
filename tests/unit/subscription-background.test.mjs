@@ -82,6 +82,26 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
     })
   }
 
+  test(`background ${feed} refresh accepts a channel without any content`, async () => {
+    const requests = createBackgroundSubscriptionRequests({ useRss: false })
+    // YouTube answers every tab of such a channel with an endpoint-less Home tab.
+    const page = {
+      metadata: { channelMetadataRenderer: { externalId: 'UCtest' } },
+      contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { title: 'Home', selected: true, content: {
+        sectionListRenderer: { contents: [{ channelOwnerEmptyStateRenderer: { description: { simpleText: "This channel doesn't have any content" } } }] }
+      } } }] } }
+    }
+    const result = await fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+      if (request.format !== 'local') throw new Error('HTTP 404')
+      return JSON.stringify(page)
+    })
+    assert.deepEqual(result, feed === 'posts' ? { comments: [] } : { videos: [] })
+    await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+      if (request.format !== 'local') throw new Error('HTTP 404')
+      return JSON.stringify({ ...page, metadata: { channelMetadataRenderer: { externalId: 'UCother' } } })
+    }))
+  })
+
   test(`background ${feed} HTTP 404 verifies the channel before treating its tab as absent`, async () => {
     const requests = createBackgroundSubscriptionRequests({ useRss: false })
     const calls = []

@@ -143,16 +143,29 @@ final class SubscriptionRefreshHttpClient {
             tabs = browse == null ? null : browse.optJSONArray("tabs");
         }
         if (tabs == null) return false;
-        boolean hasChannelTab = false;
+        boolean isChannelPage = false;
         for (int index = 0; index < tabs.length(); index++) {
             JSONObject item = tabs.optJSONObject(index);
             JSONObject tab = item == null ? null : item.optJSONObject("tabRenderer");
+            // Channels without any content only have a Home tab showing an empty state.
+            if (tab != null && Boolean.TRUE.equals(tab.opt("selected")) && isEmptyChannelContent(tab.optJSONObject("content"))) isChannelPage = true;
             Object url = tab == null ? null : find(tab.opt("endpoint"), "url");
             if (!(url instanceof String)) continue;
             if (((String) url).endsWith(path)) return false;
-            if (((String) url).matches(".*/(featured|videos|shorts|streams|posts|playlists)$")) hasChannelTab = true;
+            if (((String) url).matches(".*/(featured|videos|shorts|streams|posts|playlists)$")) isChannelPage = true;
         }
-        return hasChannelTab;
+        return isChannelPage;
+    }
+
+    private static boolean isEmptyChannelContent(JSONObject content) {
+        JSONObject sectionList = content == null ? null : content.optJSONObject("sectionListRenderer");
+        org.json.JSONArray sections = sectionList == null ? null : sectionList.optJSONArray("contents");
+        if (sections == null) return false;
+        for (int index = 0; index < sections.length(); index++) {
+            JSONObject section = sections.optJSONObject(index);
+            if (section != null && section.has("channelOwnerEmptyStateRenderer")) return true;
+        }
+        return false;
     }
 
     private static boolean hasSelectedContentTab(JSONObject contents, String path) {

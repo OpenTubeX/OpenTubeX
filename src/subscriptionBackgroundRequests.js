@@ -39,7 +39,10 @@ function channelHasNoFeed(data, feedType, channelId) {
   const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
   if (!Array.isArray(tabs)) return false
   const urls = tabs.map(tab => tab.tabRenderer?.endpoint?.commandMetadata?.webCommandMetadata?.url).filter(url => typeof url === 'string')
-  return urls.some(url => /\/(featured|videos|shorts|streams|posts|playlists)$/.test(url)) && !urls.some(url => url.endsWith(path))
+  // Channels without any content only have a Home tab showing an empty state.
+  const isEmptyChannel = tabs.some(tab => tab.tabRenderer?.selected === true &&
+    tab.tabRenderer.content?.sectionListRenderer?.contents?.some?.(section => section?.channelOwnerEmptyStateRenderer))
+  return (isEmptyChannel || urls.some(url => /\/(featured|videos|shorts|streams|posts|playlists)$/.test(url))) && !urls.some(url => url.endsWith(path))
 }
 
 function emptyFeed(feedType) {

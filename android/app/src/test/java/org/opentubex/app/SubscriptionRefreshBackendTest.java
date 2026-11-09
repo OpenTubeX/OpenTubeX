@@ -78,6 +78,27 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void channelWithoutAnyContentDoesNotFailItsBackgroundRefresh() throws Exception {
+        // YouTube answers every tab of such a channel with an endpoint-less Home tab.
+        JSONObject tab = new JSONObject().put("title", "Home").put("selected", true)
+            .put("content", new JSONObject().put("sectionListRenderer", new JSONObject().put("contents", new JSONArray()
+                .put(new JSONObject().put("channelOwnerEmptyStateRenderer", new JSONObject())))));
+        JSONObject page = channelPage("UCtest", "videos");
+        page.getJSONObject("contents").getJSONObject("twoColumnBrowseResultsRenderer")
+            .put("tabs", new JSONArray().put(new JSONObject().put("tabRenderer", tab)));
+        for (String type : List.of("shorts", "live", "posts")) {
+            JSONArray requests = new JSONArray()
+                .put(new JSONObject().put("format", "local"))
+                .put(new JSONObject().put("format", "rss"));
+            JSONObject result = SubscriptionRefreshHttpClient.fetch(feed(type, requests), "UCtest", (request, feedType, id) -> {
+                if (!request.optString("format").equals("local")) throw new IOException("HTTP 404");
+                return page.toString();
+            });
+            assertEquals(0, result.getJSONArray(type.equals("posts") ? "comments" : "videos").length());
+        }
+    }
+
+    @Test
     public void interruptedVerificationPreservesCancellationInsteadOfReturningDataOrHttpFailure() throws Exception {
         for (boolean beforeVerification : List.of(true, false)) {
             JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local")
