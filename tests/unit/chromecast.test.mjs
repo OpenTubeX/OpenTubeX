@@ -39,6 +39,10 @@ for (const wait of [false, true]) {
   })
 }
 
+// Production deadlines bound a real receiver. Under CPU contention a fixture
+// helper can take longer than that just to start, so these only catch hangs.
+const helperTimeouts = { discoveryTimeoutMs: 60_000, responseTimeoutMs: 60_000 }
+
 // A receiver at the bridge boundary makes session tests independent of LAN
 // discovery and hardware. Native networking is covered by the emulator test.
 const receiver = `#!/usr/bin/env node
@@ -85,11 +89,11 @@ for (const code of ['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION',
     const reason = 'Receiver identity verification failed'
     await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason, code }) + '\n')}, () => process.exit(1))\n`)
     await chmod(executable, 0o755)
-    const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
+    const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 }, helperTimeouts.responseTimeoutMs)
     t.after(() => sender.close())
     await assert.rejects(sender.connect(), { message: reason, code })
     await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason, code })
-    const manager = new ChromecastManager(executable)
+    const manager = new ChromecastManager(executable, undefined, helperTimeouts)
     manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
     t.after(() => manager.stop())
     assert.deepEqual(await manager.start(42, payload), { error: reason, errorCode: code })
@@ -107,7 +111,7 @@ test('Cast discovers devices through the helper without exposing connection deta
 printf '%s\\n' '[{"id":"device","name":"Test TV","address":"127.0.0.1","port":8009}]'
 `)
   await chmod(executable, 0o755)
-  const manager = new ChromecastManager(executable)
+  const manager = new ChromecastManager(executable, undefined, helperTimeouts)
   t.after(() => manager.stop())
   assert.deepEqual(await manager.discover(), [{ id: 'device', name: 'Test TV' }])
   assert.equal(manager.devices.get('device').address, '127.0.0.1')
@@ -119,7 +123,7 @@ async function managerForTest(t, powerSaveBlocker) {
   const executable = path.join(directory, 'sender.mjs')
   await writeFile(executable, receiver)
   await chmod(executable, 0o755)
-  const manager = new ChromecastManager(executable, powerSaveBlocker)
+  const manager = new ChromecastManager(executable, powerSaveBlocker, helperTimeouts)
   t.after(async () => { await manager.stop(); await rm(directory, { recursive: true, force: true }) })
   manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
   return manager
