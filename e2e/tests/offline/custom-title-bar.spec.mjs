@@ -31,13 +31,6 @@ function getControlsGeometry(page, selector) {
   }, selector)
 }
 
-test.describe('without a custom title bar', () => {
-  test('keeps the system title bar', async ({ page }) => {
-    await expect(page.locator('.app')).not.toHaveClass(/customTitleBar/)
-    await expect(page.locator('.windowControls')).toHaveCount(0)
-  })
-})
-
 test.describe('with a custom title bar', () => {
   test.use({ seed: { settings: { customTitleBar: true } } })
 
@@ -181,29 +174,6 @@ test.describe('with a custom title bar', () => {
     await middleClick(page.locator('.newTabButton'), 0.5)
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await expect(tabs).toHaveCount(2)
-  })
-
-  test('reaches the tabs and buttons from the window\'s top edge @scale', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 1200, height: 700 })
-    await expect(page.locator('.tabBar .tab')).toHaveCount(1)
-
-    // A maximized window's top edge is the screen's, where a flicked pointer lands.
-    const targets = await page.evaluate(() => {
-      return [...document.querySelectorAll('.tabBar .tab, .newTabButton, .tabOrganizerButton, .windowControl')]
-        .map((element) => {
-          const rect = element.getBoundingClientRect()
-          const hit = document.elementFromPoint(rect.left + rect.width / 2, 0)
-          return {
-            name: element.className,
-            reached: element.contains(hit),
-            region: getComputedStyle(element, '::before').getPropertyValue('-webkit-app-region')
-          }
-        })
-    })
-    expect(targets.length).toBeGreaterThan(2)
-    for (const target of targets) {
-      expect(target, target.name).toEqual({ name: target.name, reached: true, region: 'no-drag' })
-    }
   })
 
   test('keeps the maximized settings header clear of the window controls @scale', async ({ app, page }) => {

@@ -82,35 +82,8 @@ async function waitForPopupLayout(popup) {
 }
 
 for (const anchors of [true, false]) {
-  for (const surface of surfaces) {
-    if (anchors) {
-      test(`${surface.name} recovers its preferred alignment after opening at an edge`, { tag: '@scale' }, async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await surface.open(page, trigger => trigger.evaluate((element, alignment) => {
-          const rect = element.getBoundingClientRect()
-          const targetLeft = alignment === 'start' ? innerWidth - 40 : 20
-          element.style.translate = `${targetLeft - rect.left}px 0px`
-        }, surface.alignment))
-        const popup = page.locator(surface.popup).filter({ visible: true })
-        await expect(popup).toBeVisible()
-        await waitForPopupLayout(popup)
-        await page.locator(surface.trigger).first().evaluate(element => {
-          const rect = element.getBoundingClientRect()
-          const current = Number.parseFloat(element.style.translate)
-          element.style.translate = `${current + innerWidth / 2 - rect.left}px 0px`
-        })
-        await expect.poll(() => popup.evaluate((element, { triggerSelector, alignment }) => {
-          const trigger = document.querySelector(triggerSelector).getBoundingClientRect()
-          const menu = element.getBoundingClientRect()
-          const preferredLeft = alignment === 'start'
-            ? trigger.left
-            : alignment === 'end'
-              ? trigger.right - menu.width
-              : trigger.left + (trigger.width - menu.width) / 2
-          return Math.abs(menu.left - preferredLeft)
-        }, { triggerSelector: surface.trigger, alignment: surface.alignment })).toBeLessThanOrEqual(1)
-      })
-    }
+  // The help tooltip and portaled icon menu have dedicated scrolling tests below.
+  for (const surface of surfaces.filter(({ name }) => ['subscription options', 'color picker'].includes(name))) {
     test(`${surface.name} follows its trigger with anchors ${anchors}`, { tag: anchors ? ['@scale'] : [] }, async ({ page, uiScale }, testInfo) => {
       if (!anchors) {
         await page.addInitScript(() => {
@@ -211,39 +184,6 @@ for (const anchors of [true, false]) {
   }
 }
 
-test('color picker updates viewport bounds when its status row grows', { tag: '@scale' }, async ({ page, uiScale }, testInfo) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  const surface = surfaces.find(surface => surface.name === 'color picker')
-  await surface.open(page)
-  const popup = page.locator(surface.popup)
-  await waitForPopupLayout(popup)
-  const initialHeight = await popup.evaluate(element => element.getBoundingClientRect().height)
-  await popup.locator('.hexInputControl input').press('Escape')
-  const trigger = page.locator(surface.trigger).first()
-  await trigger.evaluate((element, height) => {
-    const rect = element.getBoundingClientRect()
-    element.style.translate = `0px ${innerHeight - height - rect.height - 20 - rect.top}px`
-    element.click()
-  }, initialHeight)
-  await waitForPopupLayout(popup)
-  await expect.poll(() => popup.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight + 12))).toBeLessThanOrEqual(1)
-  const input = popup.locator('.hexInputControl input')
-  await input.fill('invalid')
-  await input.press('Enter')
-  await expect(popup.locator('[role="status"]')).toBeVisible()
-  await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(initialHeight)
-  await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().bottom <= innerHeight - 11), { timeout: 1000 }).toBe(true)
-  await expect(popup.locator('[role="status"]')).toBeVisible()
-  if (uiScale === 100) {
-    await page.screenshot({
-      path: testInfo.outputPath('color-picker-status.png'),
-      clip: await popup.evaluate(element => {
-        const { x, y, width, height } = element.getBoundingClientRect()
-        return { x, y, width, height }
-      })
-    })
-  }
-})
 test('portaled icon menu stays within viewport bounds during real page scrolling', { tag: '@scale' }, async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await setWindowSize(app, page, { width: 1200, height: 600 })

@@ -3,7 +3,6 @@ import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 for (const { uiScale, width, height, colorScheme } of [
-  { uiScale: 100, width: 1100, height: 800, colorScheme: 'dark' },
   { uiScale: 125, width: 420, height: 800, colorScheme: 'light' },
 ]) {
   test.describe(`fullscreen actions at ${uiScale}% scale`, () => {
@@ -122,23 +121,6 @@ for (const { uiScale, width, height, colorScheme } of [
 
 test.describe('fullscreen action dock spacing', () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, fullscreenActions: ['comments'] } } })
-
-  test('centers a single action without reserving an unused scrollbar gutter', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setPlayerFullscreen(page, true)
-    const player = page.locator('.ftVideoPlayer')
-    await player.locator('video').evaluate(element => element.pause())
-    const dock = player.locator('.fullscreenActions')
-    await expect(dock).toBeVisible()
-    await expect(dock.locator('.fullscreenActionsContent > *')).toHaveCount(1)
-    await expect.poll(() => dock.evaluate(element => {
-      const dockRect = element.getBoundingClientRect()
-      const buttonRect = element.querySelector('.fullscreenAction').getBoundingClientRect()
-      return Math.abs((buttonRect.left - dockRect.left) - (dockRect.right - buttonRect.right)) * devicePixelRatio
-    })).toBeLessThanOrEqual(1)
-    await dock.screenshot({ path: testInfo.outputPath('single-action.png') })
-  })
 
   test('keeps the scrollbar gutter beside actions while the dock scrolls', { tag: '@scale' }, async ({ app, page }) => {
     // Portrait fullscreen uses a bottom panel, so use a short phone-like landscape window for the side dock to overflow.

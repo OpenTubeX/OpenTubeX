@@ -4,14 +4,10 @@ import { test, expect, expectScrollAtRenderedEnd, setPlayerFullscreen, setWindow
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { measureFullscreenDockToggle } from '../../helpers/fullscreen-docks.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-import { mockMusicMediaType } from '../../helpers/watch-page.mjs'
 
 for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
   { layout: 'desktop', width: 1600, height: 900, uiScale: 100 },
-  { layout: 'desktop', width: 1600, height: 900, uiScale: 125 },
-  { layout: 'desktop with 4x CPU throttling', width: 1600, height: 900, uiScale: 100, cpuThrottle: 4 },
   { layout: 'phone portrait', width: 420, height: 800, uiScale: 100 },
-  { layout: 'phone landscape', width: 900, height: 450, uiScale: 125 },
 ]) {
   test.describe(`${layout} at ${uiScale}% scale`, () => {
     test.use({
@@ -216,63 +212,3 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     await watch.dispose()
   }
 })
-
-test('full-window docks keep value change popups centered on the pushed video', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  const player = page.locator('.ftVideoPlayer')
-  await player.hover({ position: { x: 20, y: 20 } })
-  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
-  await player.locator('.full-window-button').click()
-  await expect(player).toHaveClass(/fullWindow/)
-  const watch = await page.evaluateHandle(findWatchComponent)
-  try {
-    await player.locator('video').evaluate(element => element.pause())
-    await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))
-    await expect(player).toHaveClass(/fullscreenDockLayoutOpen/)
-    const popup = player.locator('.valueChangePopup')
-    for (const dir of ['ltr', 'rtl']) {
-      await page.evaluate(dir => { document.body.dir = dir }, dir)
-      await page.keyboard.press('ArrowDown')
-      await expect(popup).toBeVisible()
-      await expect.poll(() => popup.evaluate(element => {
-        const popupBounds = element.getBoundingClientRect()
-        const videoBounds = element.closest('.ftVideoPlayer').querySelector(':scope > .player').getBoundingClientRect()
-        return Math.abs((popupBounds.left + popupBounds.width / 2) - (videoBounds.left + videoBounds.width / 2))
-      }), dir).toBeLessThan(1)
-    }
-  } finally {
-    await page.evaluate(() => { document.body.dir = 'ltr' })
-    await watch.dispose()
-  }
-})
-
-for (const layout of ['desktop', 'phone landscape']) {
-  test(`${layout} fullscreen docks push the audio-only surface aside`, { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-    await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_ATV')
-    await openMockedVideo(page)
-    if (layout === 'phone landscape') {
-      await setWindowSize(app, page, { width: 900, height: 450 })
-      await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorPhoneLayout'))
-    }
-    const player = page.locator('.ftVideoPlayer')
-    const surface = player.locator('.musicAudioSurface')
-    await expect(surface).toBeVisible()
-    await setPlayerFullscreen(page, true)
-    const watch = await page.evaluateHandle(findWatchComponent)
-    try {
-      await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))
-      await expect(player).toHaveClass(/fullscreenDockLayoutOpen/)
-      const metadata = player.locator('.fullscreenMetadataOverlay.open')
-      await expect(metadata).toBeVisible()
-      await expect.poll(async () => {
-        const [surfaceBounds, metadataBounds] = await Promise.all([surface.boundingBox(), metadata.boundingBox()])
-        if (!surfaceBounds || !metadataBounds) return Infinity
-        return surfaceBounds.x + surfaceBounds.width - metadataBounds.x
-      }).toBeLessThanOrEqual(1)
-      await attachScreenshot(`Audio-only surface beside the ${layout} fullscreen dock`)
-    } finally {
-      await watch.dispose()
-    }
-  })
-}

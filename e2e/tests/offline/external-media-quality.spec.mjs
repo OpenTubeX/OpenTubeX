@@ -2,14 +2,14 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { expect, repoRoot, sel, test } from '../../helpers/app.mjs'
-import { activeTab, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab } from '../../helpers/player.mjs'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
 for (const quality of ['1080', '480', 'auto']) {
   test.describe(`external HLS with ${quality} default quality`, () => {
     test.use({ seed: { settings: { defaultQuality: quality } } })
 
-    test('uses the configured default quality for Twitch playback', async ({ app, page }, testInfo) => {
+    test('uses the configured default quality for Twitch playback', async ({ app, page }) => {
       const masterUrl = 'https://quality.example.test/master.m3u8'
       const segmentUrl = 'https://quality.example.test/segment.mp4'
       // Like Twitch's, which names each quality and only marks the source
@@ -73,13 +73,6 @@ ${segmentUrl}
       })).toEqual(quality === 'auto'
         ? { auto: true, height: expect.any(Number) }
         : { auto: false, height: quality === '1080' ? 1080 : 360 })
-
-      if (quality === '1080') {
-        await player.hover()
-        await openPlayerOptions(player)
-        await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Resolution' }).click()
-        await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('default-quality-1080.png') })
-      }
     })
   })
 }

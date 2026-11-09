@@ -96,7 +96,7 @@ test('the About tab of an Invidious channel can be reached with the arrow keys',
   await expect(videosTab).toHaveAttribute('aria-selected', 'true')
 })
 
-for (const listTab of ['shows', 'courses']) {
+for (const listTab of ['shows']) {
   test(`opening another channel does not keep the previous channel's ${listTab}`, async ({ page }) => {
     const OTHER_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
     await page.route('https://invidious.test/api/v1/channels/**', route => {

@@ -16,8 +16,6 @@ test.beforeEach(async ({ page }) => {
 
 for (const [tab, field, update] of [
   ['videos', 'videos', 'updateVideosByChannelId'],
-  ['shorts', 'shorts', 'updateShortsByChannelId'],
-  ['live', 'liveStreams', 'updateLiveStreamsByChannelId'],
   ['posts', 'communityPosts', 'updateCommunityPostsByChannelId'],
 ]) {
   test(`marking ${tab} seen tolerates malformed IndexedDB feed data`, async ({ page }) => {

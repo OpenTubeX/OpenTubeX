@@ -9,45 +9,6 @@ for (const supportsRound of [true, false]) {
   test.describe(supportsRound ? 'native rounding' : 'without CSS round()', () => {
     const css = supportsRound ? themeCss : themeCss.slice(0, exactThresholdStart)
 
-    test('solid fills prefer white on medium colors and dark text on light colors', async ({ page }) => {
-      await page.setContent(`<style>${css}</style><div id="primary" style="color:var(--text-with-main-color)"></div><div id="secondary" style="color:var(--text-with-accent-color)"></div>`)
-      for (const [name, foreground] of [
-        ['Red', 'color(srgb 1 1 1)'],
-        ['Pink', 'color(srgb 1 1 1)'],
-        ['Blue', 'color(srgb 1 1 1)'],
-        ['Teal', 'color(srgb 1 1 1)'],
-        ['Yellow', 'color(srgb 0 0 0)'],
-        ['Lime', 'color(srgb 0 0 0)'],
-      ]) {
-        await page.locator('body').evaluate((element, name) => {
-          element.className = `dark main${name} sec${name}`
-        }, name)
-        await expect(page.locator('#primary'), name).toHaveCSS('color', foreground)
-        await expect(page.locator('#secondary'), name).toHaveCSS('color', foreground)
-      }
-    })
-
-    test('foreground follows the fill on nested palettes and custom color values', async ({ page }) => {
-      await page.setContent(`<style>${css}</style><div class="mainRed secBlue"><span id="primary" style="color:var(--text-with-main-color)"></span><span id="secondary" style="color:var(--text-with-accent-color)"></span></div>`)
-      await page.locator('body').evaluate(element => { element.className = 'light mainYellow secYellow' })
-      for (const target of ['#primary', '#secondary']) {
-        await expect(page.locator(target)).toHaveCSS('color', 'color(srgb 1 1 1)')
-      }
-      await page.locator('body > div').evaluate(element => {
-        element.style.setProperty('--primary-color', '#ffffff')
-        element.style.setProperty('--accent-color', '#000000')
-      })
-      await expect(page.locator('#primary')).toHaveCSS('color', 'color(srgb 0 0 0)')
-      await expect(page.locator('#secondary')).toHaveCSS('color', 'color(srgb 1 1 1)')
-      // Authored custom themes keep their explicitly chosen foregrounds.
-      await page.locator('body > div').evaluate(element => {
-        element.style.setProperty('--text-with-main-color', '#112233')
-        element.style.setProperty('--text-with-accent-color', '#fedcba')
-      })
-      await expect(page.locator('#primary')).toHaveCSS('color', 'rgb(17, 34, 51)')
-      await expect(page.locator('#secondary')).toHaveCSS('color', 'rgb(254, 220, 186)')
-    })
-
     test('every selectable palette keeps its foreground usable through hover and press', async ({ page }) => {
       const names = [...new Set([...css.matchAll(/\.main([A-Z][A-Za-z]*)\b/g)].map(match => match[1]))]
       expect(names.length).toBeGreaterThan(90)

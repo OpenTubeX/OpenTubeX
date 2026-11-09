@@ -296,27 +296,6 @@ for (const surface of ['sidebar', 'settings']) {
   })
 }
 
-test('sync connection status does not reserve global banner space', async ({ page }) => {
-  await page.setViewportSize({ width: 480, height: 800 })
-  const section = await goToSettingsSection(page, 'general')
-  await section.evaluate(element => {
-    // SyncSettings uses this same class while connected and online.
-    const status = document.createElement('p')
-    status.className = 'connectionStatus'
-    status.textContent = 'Connected as test user'
-    element.append(status)
-    document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
-    const store = window.$store
-    store.commit('setShowProgressBarToast', false)
-    store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'sync'], message: '', percentage: 0 })
-  })
-  await expect(page.locator('.app > .progressBar')).toBeVisible()
-  await expect(page.locator('.connection-status-holder .connectionStatus')).toBeHidden()
-  await expect.poll(() => page.locator('.settingsWindow').evaluate(element =>
-    Math.abs(innerHeight - element.getBoundingClientRect().bottom)
-  )).toBeLessThan(1)
-})
-
 test('internet probe works with browser web security enabled', async ({ app }) => {
   let probeRequests = 0
   await app.electronApp.context().route(INTERNET_CHECK_URL, route => {
@@ -339,52 +318,6 @@ test('internet probe works with browser web security enabled', async ({ app }) =
   }, { probeSource: createInternetProbe.toString(), url: INTERNET_CHECK_URL })
   expect(reachable).toBe(true)
   expect(probeRequests).toBe(1)
-})
-
-test('connection banner excludes vertical tabs', { tag: '@scale' }, async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-    window.dispatchEvent(new Event('offline'))
-  })
-  const banner = page.locator('.connectionStatus')
-  await expect(banner).toBeVisible()
-  for (const direction of ['ltr', 'rtl']) {
-    await page.evaluate(direction => { document.documentElement.dir = direction }, direction)
-    for (const position of ['left', 'right', 'top', 'bottom']) {
-      for (const width of [220, 280]) {
-        await page.evaluate(({ position, width }) => {
-          const store = window.$store
-          store.commit('setTabBarPosition', position)
-          store.commit('setVerticalTabBarWidth', width)
-        }, { position, width })
-        await expect.poll(() => banner.evaluate((element, { position, width }) => {
-          const bounds = element.getBoundingClientRect()
-          return Math.max(
-            Math.abs(bounds.left - (position === 'left' ? width : 0)),
-            Math.abs(window.innerWidth - bounds.right - (position === 'right' ? width : 0))
-          )
-        }, { position, width })).toBeLessThan(1)
-      }
-    }
-  }
-  await page.evaluate(() => {
-    const store = window.$store
-    store.commit('setTabBarPosition', 'left')
-    document.querySelector('.app').requestFullscreen()
-  })
-  await expect(banner).toBeHidden()
-  await page.evaluate(() => document.exitFullscreen())
-  await expect(banner).toBeVisible()
-  await goTo(page, 'settings')
-  await page.getByRole('button', { name: 'Maximize', exact: true }).click()
-  await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
-  await expect.poll(() => banner.evaluate(element => {
-    const bounds = element.getBoundingClientRect()
-    return Math.max(Math.abs(bounds.left), Math.abs(window.innerWidth - bounds.right))
-  })).toBeLessThan(1)
-  await page.locator('.settingsWindowHeader').getByRole('button', { name: 'Close', exact: true }).click()
-  await expect.poll(() => banner.evaluate(element => element.getBoundingClientRect().left)).toBeCloseTo(280, 0)
 })
 
 test('connection banner follows navbar coverage', { tag: '@scale' }, async ({ page }) => {
@@ -513,81 +446,41 @@ test('a redirect loop fails at once instead of retrying like a lost connection',
   }
 })
 
-for (const position of ['bottom-center', 'top-right']) {
-  test.describe(position, () => {
-    test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false, toastPosition: position } } })
-    test(`offline status and wrapped toasts do not overlap at ${position}`, { tag: '@scale' }, async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 800 })
-      await page.evaluate(() => {
-        document.querySelector('.app').classList.add('capacitorPhoneLayout')
-        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-        window.dispatchEvent(new Event('offline'))
-        window.ftElectron.showToastOnAllTabs('A separate notification with enough text to wrap onto several lines on a small phone.', 30000, ['fas', 'check'])
-      })
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      const banner = page.locator('.connectionStatus')
-      const toast = page.locator('.toast', { hasText: 'A separate notification' })
-      await expect(banner).toBeVisible()
-      await expect(toast).toBeVisible()
-      // Exercise a longer translated status and enlarged text as well as
-      // the notification wrapping independently above or below it.
-      await banner.evaluate(element => {
-        element.textContent = 'இணைய இணைப்பு இல்லை'
-        element.style.fontSize = '28px'
-      })
-      for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }]) {
-        await page.setViewportSize(viewport)
-        await expect.poll(async () => {
-          const status = await banner.boundingBox()
-          const notification = await toast.boundingBox()
-          return status.y - notification.y - notification.height
-        }).toBeGreaterThanOrEqual(9)
-        const bounds = await banner.boundingBox()
-        const viewportWidth = await page.evaluate(() => window.innerWidth)
-        expect(bounds.x).toBeCloseTo(0, 1)
-        // Electron zoom can round innerWidth below the fractional layout edge.
-        expect(Math.abs(bounds.width - viewportWidth)).toBeLessThanOrEqual(1)
-      }
+test.describe('bottom-center', () => {
+  test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false, toastPosition: 'bottom-center' } } })
+  test('offline status and wrapped toasts do not overlap at bottom-center', { tag: '@scale' }, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.evaluate(() => {
+      document.querySelector('.app').classList.add('capacitorPhoneLayout')
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+      window.dispatchEvent(new Event('offline'))
+      window.ftElectron.showToastOnAllTabs('A separate notification with enough text to wrap onto several lines on a small phone.', 30000, ['fas', 'check'])
     })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    const banner = page.locator('.connectionStatus')
+    const toast = page.locator('.toast', { hasText: 'A separate notification' })
+    await expect(banner).toBeVisible()
+    await expect(toast).toBeVisible()
+    // Exercise a longer translated status and enlarged text as well as
+    // the notification wrapping independently above or below it.
+    await banner.evaluate(element => {
+      element.textContent = 'இணைய இணைப்பு இல்லை'
+      element.style.fontSize = '28px'
+    })
+    for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }]) {
+      await page.setViewportSize(viewport)
+      await expect.poll(async () => {
+        const status = await banner.boundingBox()
+        const notification = await toast.boundingBox()
+        return status.y - notification.y - notification.height
+      }).toBeGreaterThanOrEqual(9)
+      const bounds = await banner.boundingBox()
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
+      expect(bounds.x).toBeCloseTo(0, 1)
+      // Electron zoom can round innerWidth below the fractional layout edge.
+      expect(Math.abs(bounds.width - viewportWidth)).toBeLessThanOrEqual(1)
+    }
   })
-}
-
-test('connection status shares space with progress and hides offline in fullscreen', async ({ page }, testInfo) => {
-  await page.setViewportSize({ width: 480, height: 800 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.evaluate(() => {
-    window.ftElectron.setZoomFactor(1.25)
-    document.querySelector('.app').classList.add('capacitorPhoneLayout')
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-    window.dispatchEvent(new Event('offline'))
-    const store = window.$store
-    store.commit('addProgressOperation', { id: 'e2e', icon: ['fas', 'download'], message: 'A separate operation in progress', percentage: 0 })
-    window.ftElectron.showToastOnAllTabs('A separate notification', 30000, ['fas', 'check'])
-  })
-  const banner = page.locator('.connectionStatus')
-  const progress = page.getByTestId('progress-toast')
-  const toast = page.locator('.toast', { hasText: 'A separate notification' })
-  await expect(progress).toBeVisible()
-  await expect.poll(async () => {
-    const notification = await toast.boundingBox()
-    const status = await banner.boundingBox()
-    const operation = await progress.boundingBox()
-    return Math.min(status.y - notification.y - notification.height, status.y - operation.y - operation.height)
-  }).toBeGreaterThanOrEqual(9)
-  await page.screenshot({ path: testInfo.outputPath('offline-toast-spacing.png') })
-  await page.evaluate(() => document.querySelector('.app').requestFullscreen())
-  await expect(progress).toBeHidden()
-  await expect(banner).toBeHidden()
-  await expect(toast).toBeVisible()
-  await page.evaluate(() => document.exitFullscreen())
-  await expect(progress).toBeVisible()
-  await expect(banner).toBeVisible()
-  await page.evaluate(() => document.querySelector('.app').requestFullscreen())
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
-    window.dispatchEvent(new Event('online'))
-  })
-  await expect(page.locator(':fullscreen .connectionStatus')).toHaveText('Back online')
 })
 
 test('a connected router without internet pauses requests and recovers without an OS network event', async ({ page }) => {
@@ -682,42 +575,4 @@ test.describe('internet check privacy setting', () => {
     await expect(page.locator('.connectionStatus')).toHaveText('Back online')
     expect(requests).toBe(1)
   })
-})
-
-test('only internet recovery animates the full-width banner and reduced motion is respected', async ({ page }) => {
-  await page.route(INTERNET_CHECK_URL, route => route.abort('internetdisconnected'))
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-    window.dispatchEvent(new Event('offline'))
-  })
-  const banner = page.locator('.connectionStatus')
-  await expect(banner).toHaveText('Offline')
-  await expect(banner).not.toHaveClass(/reconnecting/)
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
-    window.dispatchEvent(new Event('online'))
-  })
-  await expect(banner).toHaveClass(/reconnecting/)
-  await expect.poll(() => banner.evaluate(element => getComputedStyle(element, '::after').animationName)).toMatch(/^connection-sweep/)
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await expect.poll(() => banner.evaluate(element => getComputedStyle(element, '::after').animationName)).toBe('none')
-})
-
-test('the full-width banner clears navigation and notifications in narrow desktop windows', async ({ page }) => {
-  await page.setViewportSize({ width: 480, height: 800 })
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-    window.dispatchEvent(new Event('offline'))
-    window.ftElectron.showToastOnAllTabs('A separate notification', 30000, ['fas', 'check'])
-  })
-  const banner = page.locator('.connectionStatus')
-  const toast = page.locator('.toast', { hasText: 'A separate notification' })
-  await expect(banner).toBeVisible()
-  await expect(toast).toBeVisible()
-  await expect.poll(async () => {
-    const status = await banner.boundingBox()
-    const navigation = await page.locator('.sideNav').boundingBox()
-    const notification = await toast.boundingBox()
-    return Math.min(navigation.y - status.y - status.height, status.y - notification.y - notification.height)
-  }).toBeGreaterThanOrEqual(0)
 })

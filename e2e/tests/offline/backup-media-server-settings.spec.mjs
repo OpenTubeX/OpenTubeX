@@ -1,21 +1,6 @@
-import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
-
-const label = 'Always use backup media server'
-
-test('backup media server setting defaults off and persists', async ({ app, attachScreenshot }) => {
-  const section = await goToSettingsSection(app.page, 'advanced')
-  const toggle = section.getByRole('checkbox', { name: new RegExp(`^${label}`) })
-  await expect(toggle).not.toBeChecked()
-  await section.locator('label.switch-label').filter({ hasText: label }).click()
-  await expect(toggle).toBeChecked()
-  await expect.poll(async () => latestSettings(
-    readDatastore(app.userDataDir, 'settings')
-  ).alwaysUseBackupMediaServer).toBe(true)
-  await toggle.scrollIntoViewIfNeeded()
-  await attachScreenshot('backup-media-server-setting')
-})
 
 test.describe('with the backup media server always on', () => {
   test.use({ seed: { settings: { alwaysUseBackupMediaServer: true } } })

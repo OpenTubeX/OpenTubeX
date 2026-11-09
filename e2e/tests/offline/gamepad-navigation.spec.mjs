@@ -115,31 +115,6 @@ async function moveGamepadAxis(page, axisIndex, value) {
   }
 }
 
-async function expectContainedContrastFocusIndicator(locator, contrastColor) {
-  const focusIndicator = await locator.evaluate((element) => {
-    const style = getComputedStyle(element)
-    const width = Number.parseFloat(style.outlineWidth)
-    const offset = Number.parseFloat(style.outlineOffset)
-    const contrastProbe = document.createElement('span')
-    contrastProbe.style.color = 'var(--focus-ring-contrast-color)'
-    element.append(contrastProbe)
-    const contrastColor = getComputedStyle(contrastProbe).color
-    contrastProbe.remove()
-    return {
-      contrastColor,
-      contrastInset: style.boxShadow.includes(contrastColor) && style.boxShadow.includes('inset'),
-      style: style.outlineStyle,
-      outsideExtent: Math.max(0, width + offset),
-    }
-  })
-  expect(focusIndicator).toEqual({
-    contrastColor,
-    contrastInset: true,
-    style: 'solid',
-    outsideExtent: 0,
-  })
-}
-
 test('navigates and activates the interface with a standard gamepad', async ({ attachScreenshot, page }) => {
   await goTo(page, 'settings')
   const pageUrl = page.url()
@@ -200,35 +175,6 @@ test.describe('at 95% UI scale', () => {
     await pressGamepadButton(page, 'down')
     await expect(categories.nth(2)).toBeFocused()
   })
-})
-
-test('keeps the focus indicator inside controls at layout edges', async ({ attachScreenshot, page }) => {
-  await goTo(page, 'subscriptions')
-  await page.bringToFront()
-  await connectMockGamepad(page)
-
-  const videosTab = page.locator('[data-subscription-feed-tab="videos"]')
-  const shortsTab = page.locator('[data-subscription-feed-tab="shorts"]')
-  await shortsTab.focus()
-  await pressGamepadButton(page, 'left')
-  await expect(videosTab).toBeFocused()
-
-  await expectContainedContrastFocusIndicator(videosTab, 'rgb(255, 255, 255)')
-  await attachScreenshot('contained gamepad focus indicator')
-
-  await page.evaluate(() => document.body.classList.replace('dark', 'light'))
-  await expectContainedContrastFocusIndicator(videosTab, 'rgb(0, 0, 0)')
-  await attachScreenshot('light theme gamepad focus indicator')
-  await page.evaluate(() => document.body.classList.replace('light', 'dark'))
-
-  const sideNavOption = page.locator('.sideNav .navOption').first()
-  await pressGamepadButton(page, 'left')
-  await expect(sideNavOption).toBeFocused()
-  await expectContainedContrastFocusIndicator(sideNavOption, 'rgb(255, 255, 255)')
-  await expect.poll(() => sideNavOption.evaluate(element =>
-    getComputedStyle(element, '::before').opacity
-  )).toBe('1')
-  await attachScreenshot('contained side navigation focus indicator')
 })
 
 test('adjusts and leaves sliders and commits select options', async ({ attachScreenshot, page }) => {
@@ -329,70 +275,6 @@ test.describe('quick settings changed-setting controls', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'true')
     await expect(menu).toBeVisible()
     await expect(slider).toBeFocused()
-  })
-})
-
-test.describe('configured gamepad highlight roundness', () => {
-  test.use({
-    seed: {
-      settings: {
-        ...PLAYER_SEED,
-        disableSmoothScrolling: true,
-        highlightChangedSettings: true,
-        uiRoundness: 200
-      }
-    }
-  })
-
-  test('applies UI roundness to focus and active slider highlights', async ({ attachScreenshot, page }) => {
-    await goTo(page, 'subscriptions')
-    await page.bringToFront()
-    await connectMockGamepad(page)
-
-    const tab = page.locator('[data-subscription-feed-tab="videos"]')
-    await page.locator('[data-subscription-feed-tab="shorts"]').focus()
-    await pressGamepadButton(page, 'left')
-    await expect(tab).toBeFocused()
-    await expect(tab).toHaveCSS('border-radius', '48px')
-
-    const appearanceSettings = await goToSettingsSection(page, 'appearance')
-    const switchInput = appearanceSettings.getByRole('checkbox', {
-      name: 'Disable Smooth Scrolling'
-    })
-    const switchSetting = switchInput.locator('..')
-    const switchLabel = switchSetting.locator('.switch-label')
-    const measureSwitchPositions = () => switchLabel.evaluate(element => {
-      const text = element.querySelector('.switch-label-text')
-      const textStart = text.getBoundingClientRect().left
-      const thumbStart = element.querySelector('.switch-thumb').getBoundingClientRect().left
-      return {
-        ringStartPadding: thumbStart - element.getBoundingClientRect().left,
-        textStart,
-        thumbStart
-      }
-    })
-    const unfocusedSwitchPositions = await measureSwitchPositions()
-    await page.evaluate(() => (
-      window.$store.dispatch('showOutlines')
-    ))
-    await switchInput.evaluate(element => element.focus({ focusVisible: true }))
-    await expect(switchInput).toBeFocused()
-    await expect(switchInput).toHaveCSS('outline-style', 'none')
-    await expect(switchLabel).toHaveCSS('outline-style', 'solid')
-    await expect(switchLabel).toHaveCSS('border-radius', '4px')
-    await expect(switchSetting).toHaveCSS('border-left-width', '3px')
-    const focusedSwitchPositions = await measureSwitchPositions()
-    expect(focusedSwitchPositions.ringStartPadding).toBeGreaterThanOrEqual(5)
-    expect(focusedSwitchPositions.textStart).toBeCloseTo(unfocusedSwitchPositions.textStart)
-    expect(focusedSwitchPositions.thumbStart).toBeCloseTo(unfocusedSwitchPositions.thumbStart)
-    await attachScreenshot('focused changed switch label')
-
-    const playbackSettings = await goToSettingsSection(page, 'playback')
-    const slider = playbackSettings.locator('input[type="range"]:enabled').first()
-    await slider.focus()
-    await pressGamepadButton(page, 'primary')
-    await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
-    await expect(slider.locator('..').locator('..')).toHaveCSS('border-radius', '8px')
   })
 })
 

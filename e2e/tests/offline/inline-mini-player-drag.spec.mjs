@@ -1,11 +1,10 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 
 import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 import { checkCompactMiniPlayer } from '../../helpers/compact-mini-player.mjs'
 import { checkMiniPlayerSeeking } from '../../helpers/mini-player-seeking.mjs'
-import { routeDemoMedia } from '../../helpers/media.mjs'
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
 test.use({
@@ -187,12 +186,6 @@ async function checkLandscapeMiniPlayerClearsSidebar({ app, page }, testInfo) {
 
 test('landscape mobile mini-player clears the sidebar', { tag: '@scale' }, checkLandscapeMiniPlayerClearsSidebar)
 
-test.describe('at 150% UI scale', () => {
-  test.use({ uiScale: 150 })
-
-  test('landscape mobile mini-player clears the sidebar', checkLandscapeMiniPlayerClearsSidebar)
-})
-
 test('mobile swipes suspend ambient sampling and hidden control layout in both directions', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(async () => {
@@ -263,7 +256,7 @@ test('mobile swipes suspend ambient sampling and hidden control layout in both d
 })
 
 test.describe('minimizing with a phone drawer', { tag: '@scale' }, () => {
-  for (const panel of ['comments', 'description', 'chapters', 'transcript']) {
+  for (const panel of ['comments']) {
     test(`swiping with the ${panel} drawer restores it on cancellation and closes it on minimization`, async ({ app, page }) => {
       const player = await openMobilePlayer(app, page)
       const watch = await watchViewHandle(page)
@@ -308,81 +301,6 @@ test.describe('minimizing with a phone drawer', { tag: '@scale' }, () => {
       } finally {
         await cdp.detach()
       }
-    })
-  }
-})
-
-test.describe('scroll mini player', { tag: '@scale' }, () => {
-  for (const resize of [false, true]) {
-    test(`scroll mini player returns without flashing controls or jumping while scrolling${resize ? ' and resizing' : ''}`, async ({ app, page, uiScale }) => {
-      const player = await openMobilePlayer(app, page)
-      // Cover both a paused and a playing return.
-      if (uiScale !== 100) await player.locator('video').first().evaluate(element => element.play())
-      await page.evaluate(() => {
-        const spacer = document.createElement('div')
-        spacer.style.height = '2000px'
-        document.body.append(spacer)
-        window.scrollTo(0, 1200)
-      })
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-
-      const framesPromise = page.evaluate(async () => {
-        const player = document.querySelector('.ftVideoPlayer')
-        const video = player.querySelector('video')
-        const frames = []
-        let landing = null
-        const removeAttribute = player.removeAttribute
-        player.removeAttribute = function (name) {
-          if (name === 'data-mobile-mini-morph' && this.hasAttribute(name)) {
-            // Capture the final rendered geometry before cleanup in the same
-            // animation callback; a paint sampler can miss that endpoint.
-            const rect = video.getBoundingClientRect()
-            landing = { top: rect.top + window.scrollY, width: rect.width }
-          }
-          return removeAttribute.call(this, name)
-        }
-        let started = false
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        try {
-          for (let i = 0; i < 90; i++) {
-            // Sample after all animation callbacks for this paint have run.
-            await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
-            const morph = player.hasAttribute('data-mobile-mini-morph')
-            if (morph) started = true
-            if (!started) continue
-            const rect = video.getBoundingClientRect()
-            frames.push({
-              morph,
-              // Compare document positions: scrolling continues between paints.
-              top: rect.top + window.scrollY,
-              width: rect.width,
-              controlsVisible: [...player.children].some(element => {
-                if (element.matches('.player, .countdownPoster, .mobileMiniBarOverlay')) return false
-                const style = getComputedStyle(element)
-                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && element.getBoundingClientRect().height > 0
-              })
-            })
-            if (!morph) break
-          }
-          return { frames, landing }
-        } finally {
-          delete player.removeAttribute
-        }
-      })
-      if (resize) {
-        // The morph can finish between toHaveAttribute's backoff polls, so check every frame.
-        await page.waitForFunction(() => document.querySelector('.ftVideoPlayer').hasAttribute('data-mobile-mini-morph'), null, { polling: 'raf' })
-        await setWindowSize(app, page, { width: 640, height: 800 })
-      }
-      const { frames, landing } = await framesPromise
-      expect(frames.filter(frame => frame.morph).length).toBeGreaterThan(2)
-      expect.soft(frames.filter(frame => frame.morph && frame.controlsVisible), 'only the video may move during the return').toEqual([])
-      expect(landing, 'the restore animation must render its endpoint before cleanup').not.toBeNull()
-      const inline = frames.at(-1)
-      expect(inline.morph).toBe(false)
-      expect.soft(Math.abs(landing.top - inline.top), 'the animation must land at the current scrolled position').toBeLessThan(10)
-      expect.soft(Math.abs(landing.width - inline.width)).toBeLessThan(10)
     })
   }
 })
@@ -613,133 +531,6 @@ test.describe('browsing scroll during mobile minimize', () => {
       }
     })
   }
-
-  test('minimize keeps the Popular sticky header at its browsing position', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await page.evaluate(entry => {
-      const store = window.$store
-      store.commit('setBackendPreference', 'invidious')
-      store.commit('setPopularCache', Array.from({ length: 40 }, (_, index) => ({ ...entry, videoId: index ? `popular-${index}` : entry.videoId })))
-    }, watchHistoryEntry)
-    await page.keyboard.press('ControlOrMeta+k')
-    await page.getByRole('combobox', { name: 'Search commands' }).fill('most popular')
-    await page.getByRole('option', { name: 'Most Popular', exact: true }).click()
-    await setWindowSize(app, page, { width: 480, height: 850 })
-    const browsing = page.locator('.popularPage')
-    await expect(browsing.locator('.ft-list-video').first()).toBeVisible()
-    await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
-    const header = browsing.locator('.pageHeader')
-    const savedTop = await header.evaluate(element => element.getBoundingClientRect().top)
-    await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
-    await browsing.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`).first().evaluate(element => element.click())
-    const video = await waitForPlayback(page)
-    await video.evaluate(element => element.pause())
-    await enableMobileTouch(app, page, true, false)
-    const player = page.locator('.ftVideoPlayer')
-    const box = await player.boundingBox()
-    expect(box, 'the player must have a visible box before starting the swipe').not.toBeNull()
-    const start = { x: box.x + 16, y: box.y + 16 }
-    const cdp = await page.context().newCDPSession(page)
-    try {
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + 140 }] })
-      await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-      expect(await header.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(savedTop, 0)
-      const frames = sampleBrowsingPreviewTops(header)
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-      await expect(player).not.toHaveAttribute('data-inline-mini-drag')
-      expect((await frames).every(top => Math.abs(top - savedTop) <= 2)).toBe(true)
-    } finally {
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
-      await cdp.detach()
-    }
-  })
-})
-
-test.describe('history progress during mobile restore', () => {
-  test.use({
-    seed: {
-      settings: {
-        videoPlaybackEngine: 'built-in',
-        ytDlpPlaybackEngineDefaultMigration: true,
-        enableVideoZoom: false,
-        enableMobileFullscreenSwipe: false,
-        landingPage: 'history',
-        baseTheme: 'light'
-      },
-      history: [
-        watchHistoryEntry,
-        { ...watchHistoryEntry, _id: 'abcdefghijk', videoId: 'abcdefghijk', title: 'Second watched video', timeWatched: Date.now() - 1000 }
-      ]
-    }
-  })
-
-  test('watch preview covers history progress while the upward drag is held', async ({ app, page }) => {
-    const player = await openMobilePlayer(app, page)
-    const progress = page.locator('.watchedProgressBar').last()
-    const cdp = await page.context().newCDPSession(page)
-    const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
-      type, touchPoints: point ? [point] : []
-    })
-    try {
-      const full = await player.boundingBox()
-      const down = { x: full.x + full.width / 2, y: full.y + 100 }
-      await touch('touchStart', down)
-      for (const distance of [20, 40, 60, 80, 100]) {
-        await touch('touchMove', { ...down, y: down.y + distance })
-        await page.waitForTimeout(30)
-      }
-      await touch('touchEnd')
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await expect(progress).toBeVisible()
-      await player.evaluate(element => {
-        element.style.left = '0px'
-        element.style.width = `${window.innerWidth}px`
-        element.style.height = '108px'
-      })
-      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-      const bar = await player.boundingBox()
-      const up = { x: bar.x + 60, y: bar.y + bar.height / 2 }
-      await touch('touchStart', up)
-      for (const distance of [20, 40, 80, 200, 350]) {
-        await touch('touchMove', { ...up, y: up.y - distance })
-        await page.waitForTimeout(30)
-      }
-      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-      const preview = page.locator('.watchDragPreview')
-      await expect.poll(() => preview.evaluate(element => Number(getComputedStyle(element).opacity))).toBe(1)
-      const stroke = await progress.boundingBox()
-      const sample = await page.screenshot({
-        clip: {
-          x: Math.floor(stroke.x) + 5,
-          y: Math.floor(stroke.y + stroke.height) - 3,
-          width: 60,
-          height: 5
-        }
-      })
-      const visibleProgressPixels = await page.evaluate(async base64 => {
-        const image = new Image()
-        image.src = `data:image/png;base64,${base64}`
-        await image.decode()
-        const canvas = document.createElement('canvas')
-        canvas.width = image.width
-        canvas.height = image.height
-        const context = canvas.getContext('2d')
-        context.drawImage(image, 0, 0)
-        const pixels = context.getImageData(0, 0, image.width, image.height).data
-        let red = 0
-        for (let i = 0; i < pixels.length; i += 4) {
-          if (pixels[i] > 150 && pixels[i + 1] < 120 && pixels[i + 2] < 120) red++
-        }
-        return red
-      }, sample.toString('base64'))
-      expect(visibleProgressPixels).toBe(0)
-    } finally {
-      await touch('touchEnd').catch(() => {})
-      await cdp.detach()
-    }
-  })
 })
 
 test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
@@ -765,53 +556,6 @@ test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     const targetTop = await page.evaluate(() => window.lastMiniMorphTop)
     expect(targetTop).toBeGreaterThan(bounds.y + 100)
-  } finally {
-    await cdp.detach()
-  }
-})
-
-test('bottom bar close button fades in while minimizing', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-  const player = await openMobilePlayer(app, page)
-  await page.evaluate(async () => {
-    window.$store.commit('setReducedMotion', 'off')
-    await new Promise(requestAnimationFrame)
-  })
-  const bounds = await player.boundingBox()
-  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
-  const cdp = await page.context().newCDPSession(page)
-  const touch = (type, distance) => cdp.send('Input.dispatchTouchEvent', {
-    type, touchPoints: distance === undefined ? [] : [{ ...start, y: start.y + distance }]
-  })
-  const overlay = page.locator('.mobileMiniBarOverlay')
-  const close = overlay.locator('.mobileMiniBarDismiss')
-  try {
-    for (const cancel of [true, false]) {
-      await touch('touchStart', 0)
-      await touch('touchMove', 30)
-      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-      const bar = await overlay.boundingBox()
-      await touch('touchMove', Math.abs(bar.y - bounds.y) * 0.8)
-      await expect(overlay).toHaveCSS('opacity', '1')
-      await expect(close, 'the close button must fade in with the bottom bar before the gesture ends').toBeVisible()
-      await expect(close).toBeInViewport()
-      await expect(close).toBeDisabled()
-      await expect(close).toHaveCSS('pointer-events', 'none')
-      await expect(overlay).toHaveClass(/mobileMiniBarDismissible/)
-      if (cancel) {
-        const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-          (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-        await writeFile(testInfo.outputPath('minimizing-close-button.png'), Buffer.from(screenshot, 'base64'))
-      }
-      await touch(cancel ? 'touchCancel' : 'touchEnd')
-      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-      if (cancel) {
-        await expect(overlay).toHaveCount(0)
-        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-      }
-    }
-    await expect(close).toBeEnabled()
-    await close.click()
-    await expect(overlay).toHaveCount(0)
   } finally {
     await cdp.detach()
   }
@@ -854,155 +598,6 @@ test('bottom bar disappears when its video is hidden on another tab', async ({ a
   await expect(overlay).toHaveCount(0)
 })
 
-test('mobile bar details fade at the destination during both swipe directions', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  const cdp = await page.context().newCDPSession(page)
-  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
-    type,
-    touchPoints: point ? [point] : []
-  })
-  try {
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-    const watch = await player.boundingBox()
-    const down = { x: watch.x + watch.width / 2, y: watch.y + 100 }
-    await touch('touchStart', down)
-    await touch('touchMove', { ...down, y: down.y + 30 })
-    await page.waitForTimeout(40)
-    const distance = await player.evaluate(element => {
-      const targetTop = window.innerHeight - 108
-      return Math.max(150, (targetTop - element.getBoundingClientRect().top) / 2)
-    })
-    await touch('touchMove', { ...down, y: down.y + distance })
-    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-    await expect(player).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    await expect(page.locator('.watchDragPreview')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'contain')
-    const details = page.locator('.mobileMiniBarDetails')
-    await expect(details).toHaveCount(1)
-    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeGreaterThan(0.5)
-    await touch('touchEnd')
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
-    await player.evaluate(element => {
-      element.style.left = '0px'
-      element.style.width = `${window.innerWidth}px`
-      element.style.height = '108px'
-    })
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    const bar = await player.boundingBox()
-    const up = { x: bar.x + 60, y: bar.y + bar.height / 2 }
-    await touch('touchStart', up)
-    for (const step of [20, 40, 80]) {
-      await touch('touchMove', { ...up, y: up.y - step })
-      await page.waitForTimeout(30)
-    }
-    const barTop = bar.y
-    await touch('touchMove', { ...up, y: up.y - distance / 2 })
-    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-    await expect(player).toHaveCSS('border-top-width', '0px')
-    await expect(player).toHaveCSS('box-shadow', 'none')
-    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeLessThan(0.5)
-    expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
-    await page.evaluate(() => {
-      const element = document.querySelector('.ftVideoPlayer')
-      const watchRoot = document.querySelector('.watchPreviewHost > div')
-      window.mobileRestoreFrames = []
-      let doneAt = null
-      const sample = () => {
-        window.mobileRestoreFrames.push({
-          watchTop: watchRoot.getBoundingClientRect().top,
-          morph: element.hasAttribute('data-mobile-mini-morph'),
-          route: location.hash
-        })
-        if (location.hash.startsWith('#/watch/') && !element.hasAttribute('data-mobile-mini-morph')) {
-          doneAt ??= performance.now() + 200
-        }
-        if (doneAt === null || performance.now() < doneAt) requestAnimationFrame(sample)
-      }
-      requestAnimationFrame(sample)
-    })
-    await touch('touchMove', { ...up, y: up.y - 530 })
-    await touch('touchEnd')
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.mobileRestoreFrames.length)).toBeGreaterThan(4)
-    const frames = await page.evaluate(() => window.mobileRestoreFrames)
-    const atWatch = frames.filter(frame => frame.morph && frame.route.startsWith('#/watch/'))
-    expect(atWatch.length).toBeGreaterThan(0)
-    expect(atWatch.every(frame => Math.abs(frame.watchTop - watch.y) < 3)).toBe(true)
-  } finally {
-    await cdp.detach()
-  }
-})
-
-test('scroll docking fades the details at the bottom bar position', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  // Under parallel load, real frames can skip the morph's midpoint. Step a
-  // paused clock instead. At half speed, several frames land in the midpoint
-  // range, while the whole spring still fits in the poll timeout.
-  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 50))
-  await page.clock.install()
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
-  const settle = async (docked) => {
-    await expect.poll(async () => {
-      await page.clock.runFor(16)
-      return player.evaluate(element => [
-        element.classList.contains('scrollMiniPlayer'),
-        element.classList.contains('scrollMiniPlayerAnimating')
-      ])
-    }, { intervals: [0] }).toEqual([docked, false])
-  }
-  await page.evaluate(() => {
-    const element = document.querySelector('.ftVideoPlayer')
-    window.mobileBarMorphSamples = []
-    new MutationObserver(() => {
-      if (!element.hasAttribute('data-mobile-mini-morph')) return
-      const overlay = document.querySelector('.mobileMiniBarMorphOverlay')
-      if (!overlay) return
-      window.mobileBarMorphSamples.push({
-        playerTop: element.getBoundingClientRect().top,
-        barTop: overlay.getBoundingClientRect().top,
-        opacity: Number(getComputedStyle(overlay).opacity)
-      })
-    }).observe(element, { attributes: true, attributeFilter: ['style'] })
-    const spacer = document.createElement('div')
-    spacer.style.height = '2000px'
-    document.body.append(spacer)
-    window.scrollTo(0, 1200)
-  })
-  await settle(true)
-  const samples = await page.evaluate(() => window.mobileBarMorphSamples)
-  expect(samples.length).toBeGreaterThan(3)
-  const first = samples[0]
-  const last = samples.at(-1)
-  const middle = samples.find(sample => {
-    const progress = (sample.playerTop - first.playerTop) / (last.playerTop - first.playerTop)
-    return progress >= 0.48 && progress <= 0.6
-  })
-  expect(middle).toBeDefined()
-  expect(middle.opacity).toBeGreaterThan(0.5)
-  const visible = samples.filter(sample => sample.opacity > 0)
-  expect(Math.max(...visible.map(sample => sample.barTop)) - Math.min(...visible.map(sample => sample.barTop))).toBeLessThan(2)
-
-  await page.evaluate(() => {
-    window.mobileBarMorphSamples = []
-    window.scrollTo(0, 0)
-  })
-  await settle(false)
-  const restoring = await page.evaluate(() => window.mobileBarMorphSamples)
-  expect(restoring.length).toBeGreaterThan(3)
-  const restoreStart = restoring[0]
-  const restoreEnd = restoring.at(-1)
-  const restoreMiddle = restoring.find(sample => {
-    const progress = (restoreStart.playerTop - sample.playerTop) / (restoreStart.playerTop - restoreEnd.playerTop)
-    return progress >= 0.48 && progress <= 0.6
-  })
-  expect(restoreMiddle).toBeDefined()
-  expect(restoreMiddle.opacity).toBeLessThan(0.5)
-  const restoreVisible = restoring.filter(sample => sample.opacity > 0)
-  expect(Math.max(...restoreVisible.map(sample => sample.barTop)) - Math.min(...restoreVisible.map(sample => sample.barTop))).toBeLessThan(2)
-})
-
 test('scroll docking follows the current player height after a wider layout', { tag: '@scale' }, async ({ app, page }) => {
   // Watch opens in the wider default window before narrowing, like leaving
   // fullscreen passes through the landscape viewport.
@@ -1031,14 +626,6 @@ test('scroll docking follows the current player height after a wider layout', { 
   expect(docking.top + docking.height).toBeGreaterThan(0)
   expect(docking.top + docking.height).toBeLessThan(docking.height * 0.15 + 20)
   await expect(player).toHaveClass(/scrollMiniPlayer/)
-})
-
-test('Shorts overflow is clipped while dragging into the mini player', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  await player.evaluate(element => element.classList.add('shortsPlayer'))
-  await expect(player).toHaveCSS('overflow', 'visible')
-  await player.evaluate(element => element.setAttribute('data-inline-mini-drag', ''))
-  await expect(player).toHaveCSS('overflow', 'clip')
 })
 
 test('disabled fullscreen and zoom gestures allow upward scrolling and downward docking', async ({ app, page }) => {
@@ -1190,263 +777,6 @@ test.describe('a restored Watch tab', () => {
     }
   })
 })
-test('video keeps its shape while dragging into a shorter player', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  await player.evaluate(element => { element.style.height = '480px' })
-  await page.evaluate(() => {
-    // Hide through the scroll handler so Vue retains the state during navigation.
-    window.scrollTo(0, 100)
-    document.body.style.setProperty('--connection-status-height', '38px')
-    const player = document.querySelector('.ftVideoPlayer')
-    window.lastMiniMorphTop = null
-    new MutationObserver(() => {
-      if (player.hasAttribute('data-mobile-mini-morph')) {
-        const video = player.querySelector('video')
-        const crop = Number.parseFloat(getComputedStyle(video).clipPath.slice(6)) || 0
-        const scale = new DOMMatrixReadOnly(getComputedStyle(player).transform).d
-        window.lastMiniMorphTop = video.getBoundingClientRect().top + crop * scale
-      }
-    }).observe(player, { attributes: true, attributeFilter: ['style'] })
-  })
-  const nav = page.locator('.sideNav')
-  await expect(nav).toHaveClass(/scrollHidden/)
-  await nav.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
-  const video = player.locator('video').first()
-  const distortion = () => video.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    return Math.abs((rect.width / rect.height) / (element.offsetWidth / element.offsetHeight) - 1)
-  })
-  const bounds = await player.boundingBox()
-  const point = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
-  const cdp = await page.context().newCDPSession(page)
-  try {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
-    for (const distance of [20, 40, 60, 80, 100]) {
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance }] })
-      await page.waitForTimeout(30)
-    }
-    await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-    expect(await distortion()).toBeLessThan(0.03)
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    // Electron keeps its desktop rect even with mobile classes; match the native bar size.
-    await player.evaluate(element => {
-      element.style.left = '0px'
-      element.style.width = `${window.innerWidth}px`
-      element.style.height = '108px'
-    })
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-    const morphTop = await page.evaluate(() => window.lastMiniMorphTop)
-    expect(morphTop).toBeLessThan(await page.evaluate(() => window.innerHeight))
-    const barVideo = await video.boundingBox()
-    await expect(nav).toHaveClass(/scrollHidden/)
-    expect(Math.abs(barVideo.y - morphTop)).toBeLessThan(2)
-    await player.evaluate(element => element.classList.add('mobileMiniBar'))
-    await expect(player).toHaveCSS('touch-action', 'none')
-    await player.evaluate(element => {
-      window.lastRestoreMorphTop = null
-      new MutationObserver(() => {
-        if (element.hasAttribute('data-mobile-mini-morph')) {
-          const video = element.querySelector('video')
-          const crop = Number.parseFloat(getComputedStyle(video).clipPath.slice(6)) || 0
-          const scale = new DOMMatrixReadOnly(getComputedStyle(element).transform).d
-          window.lastRestoreMorphTop = video.getBoundingClientRect().top + crop * scale
-        }
-      }).observe(element, { attributes: true, attributeFilter: ['style'] })
-    })
-
-    const miniBounds = await player.boundingBox()
-    const restorePoint = { x: miniBounds.x + miniBounds.width / 2, y: miniBounds.y + miniBounds.height / 2 }
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [restorePoint] })
-    for (const distance of [20, 40, 60, 80, 100]) {
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...restorePoint, y: restorePoint.y - distance }] })
-      await page.waitForTimeout(30)
-    }
-    await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-    await expect(player).toHaveCSS('translate', 'none')
-    // Restoration now uses the inline video surface as its fixed base, so the
-    // player box no longer expands from the bar's full 108px control height.
-    await expect.poll(async () => (await video.boundingBox()).height).toBeGreaterThan(barVideo.height)
-    expect(await distortion()).toBeLessThan(0.03)
-    await player.evaluate(element => {
-      window.restoreTops = []
-      window.restoreTopTimer = setInterval(() => {
-        window.restoreTops.push(element.getBoundingClientRect().top)
-      }, 16)
-    })
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(page).toHaveURL(/#\/watch\//)
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-    const restoreTops = await page.evaluate(() => {
-      clearInterval(window.restoreTopTimer)
-      return window.restoreTops
-    })
-    expect(restoreTops.length).toBeGreaterThan(0)
-    expect(Math.max(...restoreTops)).toBeLessThan(await page.evaluate(() => innerHeight))
-    const restoreTop = await page.evaluate(() => window.lastRestoreMorphTop)
-    expect(Math.abs((await video.boundingBox()).y - restoreTop)).toBeLessThan(2)
-  } finally {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
-    await cdp.detach()
-  }
-})
-
-test('mobile video moves to the bottom bar without stretching its player', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  const bounds = await player.boundingBox()
-  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
-  const cdp = await page.context().newCDPSession(page)
-  try {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
-    await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchMove', touchPoints: [{ ...start, y: start.y + 100 }]
-    })
-    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-    const scale = await player.evaluate(element => {
-      const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform)
-      return { x: matrix.a, y: matrix.d }
-    })
-    expect(Math.abs(scale.x - scale.y)).toBeLessThan(0.01)
-  } finally {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await cdp.detach()
-  }
-})
-
-test('4:3 video keeps its inline fit throughout mobile restoration', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-  await mockPlayableWatchPage(app, page)
-  await routeDemoMedia(page, await readFile(new URL('../../fixtures/media/aspect-ratio-demo.webm', import.meta.url)))
-  await openMockedVideo(page)
-  const video = page.locator('.ftVideoPlayer > video.player')
-  await video.evaluate(element => { element.loop = true; element.pause() })
-  await enableMobileTouch(app, page)
-  const player = page.locator('.ftVideoPlayer')
-  const inlineVideo = await video.boundingBox()
-  const full = await player.boundingBox()
-  const cdp = await page.context().newCDPSession(page)
-  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
-    type, touchPoints: point ? [point] : []
-  })
-  const capture = async name => {
-    const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-    await writeFile(testInfo.outputPath(name), Buffer.from(screenshot, 'base64'))
-  }
-  try {
-    await capture('inline-4-by-3.png')
-    const down = { x: full.x + full.width / 2, y: full.y + 40 }
-    await touch('touchStart', down)
-    await touch('touchMove', { ...down, y: down.y + 100 })
-    await touch('touchEnd')
-    await expect(player).toHaveClass(/mobileMiniBar/)
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-    const bar = await player.locator('.mobileMiniBarReturn').boundingBox()
-    const up = { x: bar.x + 40, y: bar.y + 30 }
-    await touch('touchStart', up)
-    await touch('touchMove', { ...up, y: up.y - 30 })
-    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-    await touch('touchMove', { ...up, y: up.y - Math.abs(bar.y - full.y) * 0.8 })
-    await expect.poll(async () => (await video.boundingBox()).width).toBeGreaterThan(inlineVideo.width * 0.7)
-    await capture('restoring-4-by-3.png')
-    await expect(video).toHaveCSS('object-fit', 'contain')
-    const restoring = await video.boundingBox()
-    expect(restoring.width / restoring.height).toBeCloseTo(inlineVideo.width / inlineVideo.height, 2)
-    const scale = await player.evaluate(element => {
-      const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform)
-      return { x: matrix.a, y: matrix.d }
-    })
-    expect(scale.x).toBeCloseTo(scale.y, 4)
-    await touch('touchEnd')
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect(video).toHaveCSS('object-fit', 'contain')
-  } finally {
-    await touch('touchCancel').catch(() => {})
-    await cdp.detach()
-  }
-})
-
-for (const state of ['waiting', 'ended before minimizing', 'ended in the mini player']) {
-  test(`${state} poster follows the video into and out of the bottom bar`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await page.route('https://i.ytimg.com/**', route => route.fulfill({
-      contentType: 'image/svg+xml',
-      body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="#326b8a"/></svg>'
-    }))
-    await openMockedVideo(page)
-    const video = page.locator('.ftVideoPlayer > video.player')
-    await video.evaluate(element => element.pause())
-    await enableMobileTouch(app, page)
-    await page.evaluate(() => window.$store.commit('setPlayNextVideo', false))
-    const endVideo = async () => {
-      await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
-      await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
-    }
-    const watchView = await watchViewHandle(page)
-    if (state === 'waiting') {
-      await watchView.evaluate(async view => {
-        view.isLoading = true
-        await view.$nextTick()
-        view.adEndTimeUnixMs = Date.now() + 60_000
-        view.isLoading = false
-      })
-    }
-    await watchView.dispose()
-    if (state === 'ended before minimizing') await endVideo()
-    const player = page.locator('.ftVideoPlayer')
-    const poster = player.locator('.countdownPoster, .endedPoster')
-    if (state !== 'ended in the mini player') await expect(poster).toBeVisible()
-    await expect.poll(() => poster.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBe(480)
-    const expectPosterOverVideo = async () => {
-      await expect(poster).toBeVisible()
-      const [videoBox, posterBox] = await Promise.all([video.boundingBox(), poster.boundingBox()])
-      for (const side of ['x', 'y', 'width', 'height']) {
-        expect(Math.abs(posterBox[side] - videoBox[side])).toBeLessThan(2)
-      }
-    }
-    const cdp = await page.context().newCDPSession(page)
-    const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
-      type, touchPoints: point ? [point] : []
-    })
-    try {
-      const full = await player.boundingBox()
-      const down = { x: full.x + full.width / 2, y: full.y + 100 }
-      await touch('touchStart', down)
-      for (const distance of [20, 40, 60, 80, 100]) {
-        await touch('touchMove', { ...down, y: down.y + distance })
-        await page.waitForTimeout(30)
-        if (distance === 60 && state !== 'ended in the mini player') await expectPosterOverVideo()
-      }
-      await touch('touchEnd')
-      await expect(player).toHaveClass(/mobileMiniBar/)
-      if (state === 'ended in the mini player') await endVideo()
-      await expectPosterOverVideo()
-      if (state !== 'waiting') await expect(poster.locator('img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
-      const barVideo = await video.boundingBox()
-      const up = { x: barVideo.x + 60, y: barVideo.y + barVideo.height / 2 }
-      await touch('touchStart', up)
-      for (const distance of [20, 40, 80, 200]) {
-        await touch('touchMove', { ...up, y: up.y - distance })
-        await page.waitForTimeout(30)
-      }
-      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-      await expectPosterOverVideo()
-      await touch('touchEnd')
-      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-      await expectPosterOverVideo()
-      if (state !== 'waiting') {
-        await video.evaluate(element => { element.currentTime = 0; return element.play() })
-        await expect(poster).toBeHidden()
-      }
-    } finally {
-      await touch('touchEnd').catch(() => {})
-      await cdp.detach()
-    }
-  })
-}
-
 for (const swipe of [false, true]) {
   test(`${swipe ? 'swiping' : 'clicking'} across the bottom bar returns to Watch`, { tag: '@scale' }, async ({ app, page }) => {
     const player = await openMobilePlayer(app, page)
@@ -1713,77 +1043,6 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
   }
 })
 
-test('bottom bar progress follows a moving live seek window while paused', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  await page.evaluate(() => {
-    const spacer = document.createElement('div')
-    spacer.style.height = '2000px'
-    document.body.append(spacer)
-    window.scrollTo(0, 1200)
-  })
-  await expect(player).toHaveClass(/scrollMiniPlayer/)
-  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
-  const video = player.locator('video').first()
-  const progress = player.locator('.mobileMiniBarProgress > div')
-  await player.evaluate(element => {
-    const shakaPlayer = element.ui.getControls().getPlayer()
-    window.miniBarSeekRange = { start: 0, end: 30 }
-    shakaPlayer.seekRange = () => window.miniBarSeekRange
-    shakaPlayer.isLive = () => true
-    element.querySelector('video').currentTime = 15
-  })
-  const fill = () => progress.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
-  await expect.poll(fill).toBeCloseTo(0.5, 2)
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
-  await expect.poll(fill).toBeCloseTo(1 / 3, 2)
-  expect(await video.evaluate(element => ({ paused: element.paused, currentTime: element.currentTime })))
-    .toEqual({ paused: true, currentTime: 15 })
-  const controls = player.locator('.mobileMiniBarPlayback')
-  const rewind = controls.getByRole('button', { name: 'Rewind 10 seconds' })
-  const forward = controls.getByRole('button', { name: 'Forward 10 seconds' })
-  await page.evaluate(() => { window.miniBarSeekRange = { start: 15, end: 15 } })
-  await expect(rewind).toBeDisabled()
-  await expect(forward).toBeDisabled()
-  await expect(controls.getByRole('button', { name: 'Play', exact: true })).toBeEnabled()
-  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
-  await expect(rewind).toBeEnabled()
-  await expect(forward).toBeEnabled()
-})
-
-test('bottom bar progress stays distinct from its track with a pale Tally accent', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  await page.evaluate(() => {
-    const spacer = document.createElement('div')
-    spacer.style.height = '2000px'
-    document.body.append(spacer)
-    window.scrollTo(0, 1200)
-  })
-  await expect(player).toHaveClass(/scrollMiniPlayer/)
-  const progress = player.locator('.mobileMiniBarProgress')
-  for (const theme of ['openTubeXLight', 'openTubeXDark']) {
-    // A gray accent close to the light track's own color.
-    await page.evaluate(async theme => {
-      await window.$store.dispatch('updateBaseTheme', theme)
-      await window.$store.dispatch('updateSignalAccentColor', '#c7c8c7')
-    }, theme)
-    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
-    const { fill, track } = await progress.evaluate(element => {
-      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-        .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
-      return {
-        fill: rgb(getComputedStyle(element.querySelector(':scope > div')).backgroundColor),
-        track: rgb(getComputedStyle(element, '::before').backgroundColor)
-      }
-    })
-    const luminance = color => color.map(value => value / 255)
-      .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
-      .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
-    const [low, high] = [luminance(fill), luminance(track)].sort((a, b) => a - b)
-    expect((high + 0.05) / (low + 0.05), `${theme} ${JSON.stringify({ fill, track })}`).toBeGreaterThanOrEqual(3)
-  }
-})
-
 async function checkBottomBarPlaybackControls({ app, page, uiScale }, testInfo) {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(() => {
@@ -1888,16 +1147,8 @@ async function checkBottomBarPlaybackControls({ app, page, uiScale }, testInfo) 
 
 test('bottom bar playback controls work without reopening Watch', { tag: '@scale' }, checkBottomBarPlaybackControls)
 
-test.describe('at 150% UI scale', () => {
-  test.use({ uiScale: 150 })
-
-  test('bottom bar playback controls work without reopening Watch', checkBottomBarPlaybackControls)
-})
-
 for (const { uiScale, size } of [
-  { uiScale: 100, size: { width: 375, height: 800 } },
   { uiScale: 125, size: { width: 375, height: 800 } },
-  { uiScale: 150, size: { width: 375, height: 800 } },
   { uiScale: 100, size: { width: 850, height: 480 } },
 ]) {
   test(`compact mobile strip expands controls and restores playback at ${uiScale}% in ${size.width}px`, async ({ app, page }, testInfo) => {

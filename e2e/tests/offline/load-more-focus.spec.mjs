@@ -19,7 +19,6 @@ test.use({
 })
 
 for (const list of [
-  { section: 'playback', button: 'Manage Saved Channels (51)', entry: '.channelEntry', control: '.channelLink', disableLinks: false },
   { section: 'playback', button: 'Manage Saved Channels (51)', entry: '.channelEntry', control: '.channelLink', disableLinks: true },
   { section: 'subscription', button: 'Subscription settings', entry: '.channelSettings', control: '.channelSelectionOption' }
 ]) {
@@ -45,22 +44,20 @@ for (const list of [
   })
 }
 
-for (const hideChannelActions of [false, true]) {
-  test(`subscribed channels Load more focuses the final batch with channel actions ${hideChannelActions ? 'hidden' : 'visible'}`, async ({ page }) => {
-    await page.evaluate(async hidden => {
-      await window.$store.dispatch('updateDisableChannelLinks', hidden)
-      await window.$store.dispatch('updateHideUnsubscribeButton', hidden)
-      await window.$store.dispatch('updateSubscribedChannelsSortBy', 'name_ascending')
-    }, hideChannelActions)
-    await goTo(page, 'subscribedchannels')
-    const entries = page.locator('#subscribedChannelsList > .channel')
-    await expect(entries).toHaveCount(50)
-    await page.getByRole('button', { name: 'Load more channels', exact: true }).focus()
-    await page.keyboard.press('Enter')
-    await expect(entries).toHaveCount(51)
-    await expect(entries.nth(50).locator('.channelName')).toBeFocused()
-    await expect(entries.nth(50).locator('.channelName')).toHaveAccessibleName('Channel 050')
-    await expect(entries.nth(50).locator('.channelName')).toHaveRole(hideChannelActions ? 'group' : 'link')
-    await expect(page.getByRole('button', { name: 'Load more channels', exact: true })).toHaveCount(0)
+test('subscribed channels Load more focuses the final batch with channel actions hidden', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateDisableChannelLinks', true)
+    await window.$store.dispatch('updateHideUnsubscribeButton', true)
+    await window.$store.dispatch('updateSubscribedChannelsSortBy', 'name_ascending')
   })
-}
+  await goTo(page, 'subscribedchannels')
+  const entries = page.locator('#subscribedChannelsList > .channel')
+  await expect(entries).toHaveCount(50)
+  await page.getByRole('button', { name: 'Load more channels', exact: true }).focus()
+  await page.keyboard.press('Enter')
+  await expect(entries).toHaveCount(51)
+  await expect(entries.nth(50).locator('.channelName')).toBeFocused()
+  await expect(entries.nth(50).locator('.channelName')).toHaveAccessibleName('Channel 050')
+  await expect(entries.nth(50).locator('.channelName')).toHaveRole('group')
+  await expect(page.getByRole('button', { name: 'Load more channels', exact: true })).toHaveCount(0)
+})

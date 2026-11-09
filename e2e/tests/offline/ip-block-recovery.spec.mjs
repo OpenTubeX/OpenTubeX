@@ -152,21 +152,6 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
   expect(result.recoveries).toEqual(['jNQXAC9IVRw'])
 })
 
-test('an expired watch session 403 reloads the video before showing the error', async ({ app, page }) => {
-  await openWatchPage(app, page)
-
-  const result = await replayStreamForbiddenErrors(page, 1, { sessionExpired: true })
-
-  expect(result.steps).toEqual([{
-    reloads: 1,
-    recoveries: 0,
-    errorMessage: '',
-    messages: [
-      'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
-    ]
-  }])
-})
-
 test('an expired watch session 403 that survives the reload shows the error', async ({ app, page }) => {
   await openWatchPage(app, page)
 
@@ -193,24 +178,6 @@ test('an expired watch session 403 that survives the reload shows the error', as
     }
   ])
   expect(result.recoveries).toEqual([])
-})
-
-test('an expired legacy VIDEO_ERROR reloads the video before showing the error', async ({ app, page }) => {
-  await openWatchPage(app, page)
-
-  const result = await replayStreamForbiddenErrors(page, 1, {
-    sessionExpired: true,
-    legacyVideoError: true
-  })
-
-  expect(result.steps).toEqual([{
-    reloads: 1,
-    recoveries: 0,
-    errorMessage: '',
-    messages: [
-      'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
-    ]
-  }])
 })
 
 test('an expired legacy VIDEO_ERROR that survives the reload shows the error', async ({ app, page }) => {

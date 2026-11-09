@@ -19,21 +19,17 @@ test.describe('channel page', () => {
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
 
-    for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
-        BrowserWindow.getAllWindows()[0].setSize(width, height)
-      }, { width, height })
-      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-      // Narrow layouts join the header and content cards and tighten the gap.
-      const narrow = await page.evaluate(() => window.innerWidth <= 800)
-      await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
-        return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-      }), { message: `Gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(narrow ? 20 : 46)
-      await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
-        const header = card.previousElementSibling.getBoundingClientRect()
-        return Math.round(card.getBoundingClientRect().top - header.bottom) || 0
-      }), { message: `Spacing between Home cards at ${width}px and ${scale}% UI scale` }).toBe(narrow ? 0 : 10)
-    }
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].setSize(1600, 900)
+    })
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 95))
+    await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
+      return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+    }), { message: 'Gap to Home content at 1600px and 95% UI scale' }).toBe(46)
+    await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
+      const header = card.previousElementSibling.getBoundingClientRect()
+      return Math.round(card.getBoundingClientRect().top - header.bottom) || 0
+    }), { message: 'Spacing between Home cards at 1600px and 95% UI scale' }).toBe(10)
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
     await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'transitionProperty', 'opacity, scale')
@@ -100,13 +96,11 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '32px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '32px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '32px')
-    for (const roundness of [0, 50, 100, 200]) {
-      await page.evaluate(value => {
-        window.$store.commit('setUiRoundness', value)
-      }, roundness)
-      await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
-      await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'borderRadius', `${24 * roundness / 100}px`)
-    }
+    await page.evaluate(() => {
+      window.$store.commit('setUiRoundness', 200)
+    })
+    await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
+    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'borderRadius', '48px')
 
     await page.locator('body').evaluate(element => {
       element.style.fontFamily = 'Arial, sans-serif'

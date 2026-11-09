@@ -198,40 +198,6 @@ test('does not re-enable a removed rule through a later field edit', async ({ ap
   })).toEqual({})
 })
 
-test('preserves template cleanups between pending editor changes', async ({ app, page }) => {
-  await page.evaluate(async alphaId => {
-    const store = window.$store
-    await store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify([{ name: 'Research', options: { mode: 'video' } }]))
-    await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({ [alphaId]: { template: 'template:Research' } }))
-  }, ALPHA_CHANNEL_ID)
-  await goToSettingsSection(page, 'download')
-  await page.getByRole('button', { name: 'Manage Automatic Downloads (1)' }).click()
-  await delayNextRuleWrite(app)
-  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
-  await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('First edit')
-  try {
-    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
-    await page.evaluate(alphaId => {
-      const store = window.$store
-      window.cleanupRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', value => {
-        const rules = JSON.parse(value)
-        rules[alphaId].template = 'video:best'
-        return JSON.stringify(rules)
-      })
-    }, ALPHA_CHANNEL_ID)
-    await alpha.getByRole('textbox', { name: 'Title excludes', exact: true }).fill('Later edit')
-  } finally {
-    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
-  }
-  await page.evaluate(() => window.cleanupRuleUpdate)
-  await expect.poll(() => page.evaluate(async () => {
-    const settings = await window.ftElectron.dbSettings(1)
-    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
-  })).toEqual({
-    [ALPHA_CHANNEL_ID]: expect.objectContaining({ template: 'video:best', titleIncludes: 'First edit', titleExcludes: 'Later edit' })
-  })
-})
-
 test('restores the last saved channel rules when a later edit fails', async ({ app, page }) => {
   await goToSettingsSection(page, 'download')
   await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()

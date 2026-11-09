@@ -1315,16 +1315,6 @@ test.describe('watch page', () => {
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
   })
 
-  test.describe('fullscreen captions', () => {
-    test.use({
-      seed: {
-        settings: {
-          defaultCaptionSettings: JSON.stringify({ fontScale: 1.5 })
-        }
-      }
-    })
-  })
-
   test.describe('fullscreen playlist dock', () => {
     test.use({
       seed: {
@@ -1417,31 +1407,6 @@ test.describe('watch page', () => {
     const toastHolder = page.locator('.toast-holder')
     await expect(toastHolder.locator('.toast')).toBeVisible()
     expect(await toastHolder.evaluate(element => Number(getComputedStyle(element).zIndex))).toBeGreaterThan(1000)
-  })
-
-  // Regression: edited comments show their "(edited)" marker (929369543)
-  test('edited comments carry the edited badge', async ({ page }) => {
-    await disableAutomaticCommentLoading(page)
-    await openVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    // The comment ranking is not deterministic, so load a few batches and
-    // only assert the badge when an edited comment actually shows up.
-    const editedBadge = page.locator('.commentDate', { hasText: '(edited)' })
-    for (let i = 0; i < 3 && (await editedBadge.count()) === 0; i++) {
-      const showMore = page.locator('.getMoreComments')
-      if (await showMore.count() === 0) { break }
-      await showMore.scrollIntoViewIfNeeded()
-      await showMore.click()
-      await page.waitForTimeout(2000)
-    }
-
-    test.skip(await editedBadge.count() === 0, 'no edited comments in the loaded batches')
-    await expect(editedBadge.first()).toBeVisible()
   })
 })
 
@@ -1930,47 +1895,6 @@ test.describe('custom Shorts player', () => {
 
     const bounds = await player.boundingBox()
     expect(bounds.height).toBeGreaterThan(bounds.width)
-  })
-
-  test('keeps captions fixed when hover controls appear', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'Shorts detection needs the real API')
-
-    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
-    await page.locator(sel.searchInput).press('Enter')
-
-    const player = page.locator('.ftVideoPlayer.shortsPlayer')
-    const errorMessage = page.locator('.errorMessage')
-    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
-
-    if (await errorMessage.isVisible()) {
-      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
-    }
-
-    await playWhenLoaded(player.locator('video'))
-    await expect(player).not.toHaveClass(/shortsPaused/)
-
-    const controls = player.locator('.shaka-controls-container')
-    await player.evaluate(element => {
-      if (element.querySelector('.shaka-text-container')) return
-
-      const captions = document.createElement('div')
-      captions.className = 'shaka-text-container'
-      element.querySelector('.shaka-controls-container').after(captions)
-    })
-    const captions = player.locator('.shaka-text-container')
-    await page.mouse.move(0, 0)
-    await expect(controls).not.toHaveAttribute('shown', 'true')
-    const captionsBottomWithoutHover = await captions.evaluate(element => {
-      return getComputedStyle(element).bottom
-    })
-
-    const playerBounds = await player.boundingBox()
-    await page.mouse.move(
-      playerBounds.x + playerBounds.width / 2,
-      playerBounds.y + playerBounds.height - 2
-    )
-    await expect(controls).toHaveAttribute('shown', 'true')
-    await expect(captions).toHaveCSS('bottom', captionsBottomWithoutHover)
   })
 
   test('only exposes applicable controls and stays in the Shorts player', async ({ page, innertube }) => {

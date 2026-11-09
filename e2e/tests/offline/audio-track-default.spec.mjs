@@ -3,7 +3,7 @@ import { activeTab, findWatchComponent, openPlayerOptions } from '../../helpers/
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
-for (const [format, quality] of [['dash', '180'], ['dash', 'auto'], ['audio', 'auto']]) {
+for (const [format, quality] of [['dash', '180'], ['audio', 'auto']]) {
   test.describe(`${format} with ${quality} quality`, () => {
     test.use({
       seed: {

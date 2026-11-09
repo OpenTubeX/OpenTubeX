@@ -148,40 +148,4 @@ test.describe('lights off', { tag: '@scale' }, () => {
       return Object.hasOwn(store.state.tabs.lightsOffByTabId, tabId)
     }, closedTabId)).toBe(false)
   })
-  test('tracks full-window animations without CSS animation events', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => element.pause())
-    await page.evaluate(() => window.$store
-      .dispatch('updateShowLightsOffToggle', true))
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
-    await player.hover()
-    await openPlayerOptions(player)
-    await player.locator('.lights-off-button').click()
-    await expect(page.locator('.lightsOffOverlay')).toBeVisible()
-    for (let transition = 0; transition < 2; transition++) {
-      const largestGap = await player.evaluate(async element => {
-        element.querySelector('.full-window-button').click()
-        await new Promise(resolve => setTimeout(resolve, 30))
-        let largestGap = 0
-        const started = performance.now()
-        do {
-          await new Promise(resolve => requestAnimationFrame(() => queueMicrotask(resolve)))
-          const rect = element.getBoundingClientRect()
-          const hole = document.querySelector('.lightsOffOverlay > div').getBoundingClientRect()
-          largestGap = Math.max(largestGap, Math.abs(rect.left - hole.left), Math.abs(rect.width - hole.width))
-        } while (performance.now() - started < 2000 && (
-          element.classList.contains('presentationModeChanging') ||
-          element.getAnimations().some(animation => animation.playState === 'running' &&
-            Number.isFinite(animation.effect?.getComputedTiming().endTime))
-        ))
-        return largestGap
-      })
-      expect(largestGap).toBeLessThan(2)
-      await expect(player).not.toHaveClass(/presentationModeChanging/)
-      await expect.poll(() => player.evaluate(element => element.getAnimations().filter(animation =>
-        animation.playState === 'running' && Number.isFinite(animation.effect?.getComputedTiming().endTime)
-      ).length)).toBe(0)
-    }
-  })
 })

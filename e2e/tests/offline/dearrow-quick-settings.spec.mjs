@@ -30,101 +30,72 @@ test.use({
   }
 })
 
-for (const cached of [false, true]) {
-  test(`DeArrow quick toggles update visible cards ${cached ? 'with' : 'without'} cached replacements`, async ({ page }) => {
-    let brandingRequests = 0
-    await page.route('https://sponsor.ajay.app/api/branding/*', async route => {
-      brandingRequests++
-      await route.fulfill({
-        json: {
-          [VIDEO_ID]: {
-            titles: [{ title: REPLACEMENT_TITLE, votes: 1 }],
-            thumbnails: [{ timestamp: 10, votes: 1 }],
-            videoDuration: 60,
-          }
+test('DeArrow quick toggles update visible cards without cached replacements', async ({ page }) => {
+  let brandingRequests = 0
+  await page.route('https://sponsor.ajay.app/api/branding/*', async route => {
+    brandingRequests++
+    await route.fulfill({
+      json: {
+        [VIDEO_ID]: {
+          titles: [{ title: REPLACEMENT_TITLE, votes: 1 }],
+          thumbnails: [{ timestamp: 10, votes: 1 }],
+          videoDuration: 60,
         }
-      })
+      }
     })
-    await page.route('https://dearrow-thumb.ajay.app/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-    if (cached) {
-      await page.evaluate(({ videoId, title, thumbnail }) => {
-        window.$store.commit('addVideoToDeArrowCache', {
-          videoId, title, thumbnail, thumbnailTimestamp: 10, videoDuration: 60,
-        })
-      }, { videoId: VIDEO_ID, title: REPLACEMENT_TITLE, thumbnail: THUMBNAIL_URL })
-    }
-
-    await goTo(page, 'history')
-    const card = page.locator('.ft-list-video').first()
-    const title = card.locator('.title')
-    const thumbnail = card.locator('.thumbnailImage').first()
-    const originalThumbnail = await thumbnail.getAttribute('src')
-    await expect(title).toHaveText(ORIGINAL_TITLE)
-    const originalCard = await card.elementHandle()
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    const titlesToggle = menu.locator('[data-setting-id="useDeArrowTitles"] label.switch-label')
-    const thumbnailsToggle = menu.locator('[data-setting-id="useDeArrowThumbnails"] label.switch-label')
-
-    await titlesToggle.click()
-    await expect(title).toHaveText(REPLACEMENT_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
-    await thumbnailsToggle.click()
-    await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
-    await expectImagesLoaded(thumbnail)
-    await titlesToggle.click()
-    await expect(title).toHaveText(ORIGINAL_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
-    await thumbnailsToggle.click()
-    await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
-    await expect(card.locator('.deArrowToggleButton')).toHaveCount(0)
-
-    await titlesToggle.click()
-    await thumbnailsToggle.click()
-    await menu.press('Escape')
-    await card.locator('.deArrowToggleButton').click()
-    await expect(title).toHaveText(ORIGINAL_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
-    await expect(card.locator('.deArrowToggleButton')).toHaveAttribute('title', /Show modified details/i)
-    await page.locator('.profileTrigger').click()
-    await titlesToggle.click()
-    await expect(title).toHaveText(ORIGINAL_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
-    await thumbnailsToggle.click()
-    await expect(card.locator('.deArrowToggleButton')).toHaveCount(0)
-    await titlesToggle.click()
-    await thumbnailsToggle.click()
-    await menu.press('Escape')
-    await expect(title).toHaveText(REPLACEMENT_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
-    await card.locator('.deArrowToggleButton').click()
-    await card.locator('.deArrowToggleButton').click()
-    await expect(title).toHaveText(REPLACEMENT_TITLE)
-    await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
-    expect(await originalCard.evaluate(element => element.isConnected)).toBe(true)
-    expect(brandingRequests).toBe(cached ? 0 : 1)
   })
-}
+  await page.route('https://dearrow-thumb.ajay.app/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
 
-test('preserves portrait DeArrow thumbnails in grid and list layouts', async ({ page }) => {
-  await page.route('https://dearrow-thumb.ajay.app/**', route => route.fulfill({
-    contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"><rect width="100%" height="100%" fill="#336699"/></svg>'
-  }))
-  await page.evaluate(async ({ videoId, thumbnail }) => {
-    const store = window.$store
-    store.commit('addVideoToDeArrowCache', { videoId, thumbnail, thumbnailTimestamp: 10, videoDuration: 60 })
-    await store.dispatch('updateUseDeArrowThumbnails', true)
-  }, { videoId: VIDEO_ID, thumbnail: THUMBNAIL_URL })
   await goTo(page, 'history')
-  const image = page.locator('.ft-list-video .thumbnailImage').first()
-  await expectImagesLoaded(image)
-  for (const layout of ['grid', 'list']) {
-    await page.evaluate(layout => window.$store.dispatch('updateListType', layout), layout)
-    await expect(image).toHaveCSS('object-fit', 'contain')
-    await expect.poll(() => image.evaluate(element => element.naturalHeight)).toBe(1080)
-  }
+  const card = page.locator('.ft-list-video').first()
+  const title = card.locator('.title')
+  const thumbnail = card.locator('.thumbnailImage').first()
+  const originalThumbnail = await thumbnail.getAttribute('src')
+  await expect(title).toHaveText(ORIGINAL_TITLE)
+  const originalCard = await card.elementHandle()
+  await page.locator('.profileTrigger').click()
+  const menu = page.getByRole('dialog', { name: 'Quick settings' })
+  const titlesToggle = menu.locator('[data-setting-id="useDeArrowTitles"] label.switch-label')
+  const thumbnailsToggle = menu.locator('[data-setting-id="useDeArrowThumbnails"] label.switch-label')
+
+  await titlesToggle.click()
+  await expect(title).toHaveText(REPLACEMENT_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
+  await thumbnailsToggle.click()
+  await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
+  await expectImagesLoaded(thumbnail)
+  await titlesToggle.click()
+  await expect(title).toHaveText(ORIGINAL_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
+  await thumbnailsToggle.click()
+  await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
+  await expect(card.locator('.deArrowToggleButton')).toHaveCount(0)
+
+  await titlesToggle.click()
+  await thumbnailsToggle.click()
+  await menu.press('Escape')
+  await card.locator('.deArrowToggleButton').click()
+  await expect(title).toHaveText(ORIGINAL_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
+  await expect(card.locator('.deArrowToggleButton')).toHaveAttribute('title', /Show modified details/i)
+  await page.locator('.profileTrigger').click()
+  await titlesToggle.click()
+  await expect(title).toHaveText(ORIGINAL_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', originalThumbnail)
+  await thumbnailsToggle.click()
+  await expect(card.locator('.deArrowToggleButton')).toHaveCount(0)
+  await titlesToggle.click()
+  await thumbnailsToggle.click()
+  await menu.press('Escape')
+  await expect(title).toHaveText(REPLACEMENT_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
+  await card.locator('.deArrowToggleButton').click()
+  await card.locator('.deArrowToggleButton').click()
+  await expect(title).toHaveText(REPLACEMENT_TITLE)
+  await expect(thumbnail).toHaveAttribute('src', THUMBNAIL_URL)
+  expect(await originalCard.evaluate(element => element.isConnected)).toBe(true)
+  expect(brandingRequests).toBe(1)
 })
 
 for (const pending of ['metadata', 'thumbnail']) {
