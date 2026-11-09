@@ -324,7 +324,7 @@ test.describe('browsing scroll during mobile minimize', () => {
     await setWindowSize(app, page, { width: 480, height: 850 })
     await page.evaluate(async () => {
       await window.$store.dispatch('updateHideRecommendedVideos', true)
-      await window.$store.dispatch('updateScrollMiniPlayerEnabled', false)
+      await window.$store.dispatch('updateScrollPlayerMode', 'off')
     })
     const history = page.locator('.tabContent > .routerView').first()
     await expect(history.locator('.ft-list-video').first()).toBeVisible()
@@ -587,8 +587,6 @@ test('bottom bar can close a video retained after leaving Watch', async ({ app, 
 test('bottom bar disappears when its video is hidden on another tab', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   await player.locator('video').first().evaluate(element => element.play())
-  await page.evaluate(() => window.$store
-    .dispatch('updateScrollMiniPlayerOnAllTabs', true))
   await page.locator('.tabBar .newTabButton').click()
   await expect(player).toHaveClass(/scrollMiniPlayer/)
   const overlay = page.locator('.mobileMiniBarOverlay')

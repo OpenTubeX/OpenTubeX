@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: 最小化窗口时
       On Window Hide: 窗口失去焦点或切换到其他窗口时
       Wayland Minimize Unsupported: Wayland 不会向应用报告窗口最小化事件，因此无法使用此触发条件。请改用“窗口失去焦点或切换到其他窗口时”，该选项也适用于最小化窗口。
+      On Tab Change Mini Player: 切换标签页时会改为显示迷你播放器。要使用此选项，请将“离开视频时”设为“停止播放”。
     Scroll Mini Player:
       Scroll Mini Player: 滚动时使用迷你播放器
-      When Scrolling Down: 向下滚动时在屏幕上保留迷你播放器
-      On All Tabs: 切换标签页时在屏幕上保留迷你播放器
-      On Navigation: 离开视频页面时继续播放
+      Scroll Player Mode: 向下滚动时
+      Scroll Player Mode Tooltip: 仅当播放器高度不超过窗口高度的一半时才会固定。否则（例如横屏手机或宽窗口），将改为显示迷你播放器。
+      Scroll Player Modes:
+        Mini: 显示迷你播放器
+        Pin: 有空间时将播放器固定在顶部
+        Off: 随页面滚动
+      Leaving Video: 离开视频时
+      Leaving Video Modes:
+        Keep Playing: 在迷你播放器中继续播放
+        Stop: 停止播放
     Multiply Seek Interval by Playback Rate: 按播放速度倍增快进快退间隔
     Show Playback Rate Adjusted Timestamp: 显示按播放速度调整后的时间戳
     Use YouTube-style Shorts: 使用 YouTube 风格的短视频

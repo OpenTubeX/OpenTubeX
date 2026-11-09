@@ -829,11 +829,19 @@ Settings:
       On Window Minimize: Pəncərə kiçildilərkən
       On Window Hide: Pəncərə fokusu itirdikdə və ya başqa pəncərəyə keçdikdə
       Wayland Minimize Unsupported: Wayland pəncərənin kiçildilməsini tətbiqlərə bildirmir, buna görə bu şərt əlçatan deyil. Əvəzində kiçildilməni də əhatə edən “Pəncərə fokusu itirdikdə və ya başqa pəncərəyə keçdikdə” seçimini istifadə edin.
+      On Tab Change Mini Player: Vərəqlər dəyişdirilərkən əvəzinə kiçik oynadıcı göstərilir. Bundan istifadə etmək üçün “Videodan çıxarkən” seçimini “Oxutmanı dayandır” olaraq təyin edin.
     Scroll Mini Player:
       Scroll Mini Player: Sürüşdürərkən kiçik oynadıcı
-      When Scrolling Down: Aşağı sürüşdürərkən kiçik oynadıcını ekranda saxla
-      On All Tabs: Vərəqləri dəyişərkən kiçik oynadıcını ekranda saxla
-      On Navigation: Video səhifəsindən çıxarkən oxutmağa davam et
+      Scroll Player Mode: Aşağı sürüşdürərkən
+      Scroll Player Mode Tooltip: Pleyer yalnız pəncərə hündürlüyünün ən çox yarısını tutduqda sabitlənir. Əks halda, məsələn, telefonlarda üfüqi rejimdə və ya geniş pəncərələrdə, əvəzinə mini pleyer göstərilir.
+      Scroll Player Modes:
+        Mini: Kiçik oynadıcı göstər
+        Pin: Yer varsa pleyeri yuxarıda sabitlə
+        Off: Səhifə ilə birlikdə sürüşdür
+      Leaving Video: Videodan çıxarkən
+      Leaving Video Modes:
+        Keep Playing: Kiçik oynadıcıda oxutmağa davam et
+        Stop: Oxutmanı dayandır
     Multiply Seek Interval by Playback Rate: Keçid intervalını oynatma sürətinə vur
     Rotate Wide Videos to Landscape in Fullscreen: Tam ekranda enli videoları üfüqi istiqamətə çevir
     Swipe Up or Down to Enter or Exit Fullscreen: Tam ekrana keçmək və ya ondan çıxmaq üçün yuxarı və ya aşağı sürüşdür

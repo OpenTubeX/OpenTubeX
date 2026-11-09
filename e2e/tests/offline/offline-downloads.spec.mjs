@@ -244,7 +244,7 @@ for (const mobile of [false, true]) {
 test.describe('mobile downloaded audio mini player', { tag: '@scale' }, () => {
   test.use({
     seed: {
-      settings: { landingPage: 'history', enableDownloads: true, scrollMiniPlayerEnabled: true, keepPlayingOnNavigation: true, enableMobileFullscreenSwipe: false },
+      settings: { landingPage: 'history', enableDownloads: true, scrollPlayerMode: 'mini', keepPlayingOnNavigation: true, enableMobileFullscreenSwipe: false },
       downloads: [{
         id: 1,
         videoId: 'offline0001',

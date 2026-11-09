@@ -865,11 +865,19 @@ Settings:
       On Window Minimize: ونڈو چھوٹی کرتے وقت
       On Window Hide: جب ونڈو فوکس کھو دے یا اس سے ہٹ جایا جائے
       Wayland Minimize Unsupported: Wayland ایپس کو ونڈو چھوٹی ہونے کی اطلاع نہیں دیتا، اس لیے یہ ٹرگر دستیاب نہیں ہے۔ اس کے بجائے "جب ونڈو فوکس کھو دے یا اس سے ہٹ جایا جائے" استعمال کریں، جو چھوٹا کرنے کو بھی شامل کرتا ہے۔
+      On Tab Change Mini Player: ٹیبز تبدیل کرنے پر اس کے بجائے منی پلیئر دکھایا جاتا ہے۔ اسے استعمال کرنے کے لیے "ویڈیو چھوڑتے وقت" کو "چلانا بند کریں" پر سیٹ کریں۔
     Scroll Mini Player:
       Scroll Mini Player: اسکرول منی پلیئر
-      When Scrolling Down: نیچے اسکرول کرتے وقت منی پلیئر اسکرین پر رکھیں
-      On All Tabs: ٹیبز تبدیل کرتے وقت منی پلیئر اسکرین پر رکھیں
-      On Navigation: ویڈیو سے ہٹ کر نیویگیٹ کرتے وقت چلانا جاری رکھیں
+      Scroll Player Mode: نیچے اسکرول کرتے وقت
+      Scroll Player Mode Tooltip: پلیئر صرف اس وقت تک پن رہتا ہے جب تک وہ ونڈو کی اونچائی کا زیادہ سے زیادہ آدھا حصہ لے۔ ورنہ، جیسے لینڈ اسکیپ میں فونز یا چوڑی ونڈوز میں، اس کے بجائے منی پلیئر دکھایا جاتا ہے۔
+      Scroll Player Modes:
+        Mini: منی پلیئر دکھائیں
+        Pin: جگہ ہو تو پلیئر کو اوپر پن کریں
+        Off: صفحے کے ساتھ اسکرول کریں
+      Leaving Video: ویڈیو چھوڑتے وقت
+      Leaving Video Modes:
+        Keep Playing: منی پلیئر میں چلانا جاری رکھیں
+        Stop: چلانا بند کریں
     Multiply Seek Interval by Playback Rate: سیک کے وقفے کو پلے بیک ریٹ سے ضرب دیں
     Rotate Wide Videos to Landscape in Fullscreen: فل اسکرین میں چوڑی ویڈیوز کو لینڈ اسکیپ میں گھمائیں
     Swipe Up or Down to Enter or Exit Fullscreen: فل اسکرین میں جانے یا باہر نکلنے کے لیے اوپر یا نیچے سوائپ کریں

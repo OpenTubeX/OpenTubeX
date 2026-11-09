@@ -14,7 +14,7 @@ async function commentsSort({ app, page }) {
 test.describe('select scroll positioning', { tag: '@scale' }, () => {
   // Scrolling the player away animates the scroll mini player across the
   // comments sort control, where it can intercept the click.
-  test.use({ seed: { settings: { alwaysShowScrollbars: true, scrollMiniPlayerEnabled: false, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+  test.use({ seed: { settings: { alwaysShowScrollbars: true, scrollPlayerMode: 'off', videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
   test('fits the comments dropdown on opening and keeps it inside the viewport when scrolling', async ({ app, page }) => {
     const select = await commentsSort({ app, page })

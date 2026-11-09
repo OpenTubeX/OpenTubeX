@@ -831,11 +831,19 @@ Settings:
       On Window Minimize: Saat meminimalkan jendela
       On Window Hide: Saat jendela kehilangan fokus atau ditinggalkan
       Wayland Minimize Unsupported: Wayland tidak melaporkan jendela yang diminimalkan kepada aplikasi, jadi pemicu ini tidak tersedia. Gunakan "Saat jendela kehilangan fokus atau ditinggalkan", yang juga mencakup tindakan meminimalkan.
+      On Tab Change Mini Player: Berganti tab akan menampilkan pemutar mini sebagai gantinya. Untuk menggunakan ini, atur “Saat meninggalkan video” ke “Hentikan pemutaran”.
     Scroll Mini Player:
       Scroll Mini Player: Pemutar mini saat menggulir
-      When Scrolling Down: Pertahankan pemutar mini di layar saat menggulir ke bawah
-      On All Tabs: Pertahankan pemutar mini di layar saat berganti tab
-      On Navigation: Terus putar saat meninggalkan halaman video
+      Scroll Player Mode: Saat menggulir ke bawah
+      Scroll Player Mode Tooltip: Pemutar hanya disematkan selama tingginya paling banyak setengah tinggi jendela. Jika tidak, misalnya di ponsel dalam mode lanskap atau di jendela lebar, pemutar mini ditampilkan sebagai gantinya.
+      Scroll Player Modes:
+        Mini: Tampilkan pemutar mini
+        Pin: Sematkan pemutar di atas jika ada ruang
+        Off: Gulir bersama halaman
+      Leaving Video: Saat meninggalkan video
+      Leaving Video Modes:
+        Keep Playing: Terus putar di pemutar mini
+        Stop: Hentikan pemutaran
     Multiply Seek Interval by Playback Rate: Kalikan Interval Pencarian dengan Kecepatan Pemutaran
     Show Playback Rate Adjusted Timestamp: Tampilkan Stempel Waktu yang Disesuaikan dengan Kecepatan Pemutaran
     Use YouTube-style Shorts: Gunakan Shorts Bergaya YouTube

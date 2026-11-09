@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: "Pa vez izekaet ar prenestr"
       On Window Hide: "Pa goll ar prenestr ar fokus pe pa vez kuzh"
       Wayland Minimize Unsupported: "Wayland ne gemenn ket izelaat ar prenestr d'an arloadoù, setu n'eo ket hegerz an deraouer-mañ. Implijit «Pa goll ar prenestr ar fokus pe pa vez kuzh» en e lec'h; talvezout a ra ivez evit an izelaat."
+      On Tab Change Mini Player: Pa vez cheñchet ivinell e vez diskouezet al lenner bihan en e lec'h. Evit implijout an dra-se, lakait “Pa guitaer ur video” war “Paouez da lenn”.
     Scroll Mini Player:
       Scroll Mini Player: "Lenner bihan e-pad an dibunañ"
-      When Scrolling Down: "Derc'hel ul lenner bihan war ar skramm pa ziskenner er bajenn"
-      On All Tabs: "Derc'hel ul lenner bihan war ar skramm pa vez cheñchet ivinell"
-      On Navigation: Kenderc'hel da lenn pa guitaer pajenn ar video
+      Scroll Player Mode: Pa ziskenner er bajenn
+      Scroll Player Mode Tooltip: "Ne vez spilhennet al lenner nemet e-pad ma ne bak ket muioc'h eget hanter uhelder ar prenestr. A-hend-all, evel war ar pellgomzerioù e mod gweledva pe er prenestroù ledan, e vez diskouezet ar mini-lenner en e lec'h."
+      Scroll Player Modes:
+        Mini: Diskouez ul lenner bihan
+        Pin: "Spilhennañ al lenner e krec'h ma'z eus lec'h"
+        Off: Dibunañ gant ar bajenn
+      Leaving Video: Pa guitaer ur video
+      Leaving Video Modes:
+        Keep Playing: Kenderc'hel da lenn en ul lenner bihan
+        Stop: Paouez da lenn
     Multiply Seek Interval by Playback Rate: "Lieskementiñ etrevez ar mont en-dro gant an tizh lenn"
     Show Playback Rate Adjusted Timestamp: "Diskouez ar mare reizhet diouzh an tizh lenn"
     Use YouTube-style Shorts: "Implijout videoioù berr (Shorts) doare YouTube"

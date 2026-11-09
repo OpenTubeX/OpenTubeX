@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Lors de la réduction de la fenêtre
       On Window Hide: Lorsque la fenêtre perd le focus ou que vous passez à une autre fenêtre
       Wayland Minimize Unsupported: Wayland ne signale pas aux applications qu’une fenêtre est réduite. Ce déclencheur est donc indisponible. Utilisez plutôt « Lorsque la fenêtre perd le focus ou que vous passez à une autre fenêtre », qui couvre aussi la réduction.
+      On Tab Change Mini Player: Le changement d’onglet affiche le mini-lecteur à la place. Pour utiliser cette option, réglez « En quittant une vidéo » sur « Arrêter la lecture ».
     Scroll Mini Player:
       Scroll Mini Player: Mini-lecteur lors du défilement
-      When Scrolling Down: Garder un mini-lecteur à l’écran lors du défilement vers le bas
-      On All Tabs: Garder un mini-lecteur à l’écran lors du changement d’onglet
-      On Navigation: Continuer la lecture en quittant la page de la vidéo
+      Scroll Player Mode: Lors du défilement vers le bas
+      Scroll Player Mode Tooltip: Le lecteur n’est épinglé que s’il occupe au plus la moitié de la hauteur de la fenêtre. Sinon, par exemple sur les téléphones en mode paysage ou dans les fenêtres larges, le mini-lecteur s’affiche à la place.
+      Scroll Player Modes:
+        Mini: Afficher un mini-lecteur
+        Pin: Épingler le lecteur en haut s’il y a la place
+        Off: Défiler avec la page
+      Leaving Video: En quittant une vidéo
+      Leaving Video Modes:
+        Keep Playing: Continuer la lecture dans un mini-lecteur
+        Stop: Arrêter la lecture
     Multiply Seek Interval by Playback Rate: Multiplier l’intervalle de déplacement par la vitesse de lecture
     Show Playback Rate Adjusted Timestamp: Afficher le temps ajusté à la vitesse de lecture
     Use YouTube-style Shorts: Utiliser des Shorts de style YouTube

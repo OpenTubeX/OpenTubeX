@@ -922,11 +922,19 @@ Settings:
       On Window Minimize: Når vindauget blir minimert
       On Window Hide: Når vindauget mistar fokus eller du byter frå det
       Wayland Minimize Unsupported: Wayland melder ikkje frå til appar når vindauge blir minimerte, så denne utløysaren er ikkje tilgjengeleg. Bruk "Når vindauget mistar fokus eller du byter frå det" i staden. Det omfattar òg minimering.
+      On Tab Change Mini Player: Når du byter fane, blir minispelaren vist i staden. For å bruke dette, set «Når du forlèt ein video» til «Stopp avspeling».
     Scroll Mini Player:
       Scroll Mini Player: Minispelar ved rulling
-      When Scrolling Down: Vis ein minispelar på skjermen når du rullar ned
-      On All Tabs: Vis ein minispelar på skjermen når du byter fane
-      On Navigation: Hald fram med avspeling når du forlèt videosida
+      Scroll Player Mode: Når du rullar ned
+      Scroll Player Mode Tooltip: Avspelaren vert berre festa så lenge han tek opp høgst halvparten av høgda til vindauget. Elles, til dømes på telefonar i liggjande modus eller i breie vindauge, vert miniavspelaren vist i staden.
+      Scroll Player Modes:
+        Mini: Vis ein minispelar
+        Pin: Fest avspelaren øvst viss det er plass
+        Off: Rull med sida
+      Leaving Video: Når du forlèt ein video
+      Leaving Video Modes:
+        Keep Playing: Hald fram med avspeling i ein minispelar
+        Stop: Stopp avspeling
     Multiply Seek Interval by Playback Rate: Gang spoleintervallet med avspelingsfarten
     Show Playback Rate Adjusted Timestamp: Vis tidsstempel justert for avspelingsfarten
     Use YouTube-style Shorts: Bruk Shorts i YouTube-stil

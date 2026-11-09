@@ -93,7 +93,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false, PlayNextVideo: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone',
+        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone',
         UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',

@@ -249,3 +249,11 @@ test('devices read the Video descriptions select from the Hide Video Description
   assert.deepEqual(migrateLegacySyncedSettings({ quickSettings: pins }).quickSettings,
     { ...pins, value: ['hideComments', key] })
 })
+
+test('devices read the scroll player select from the mini player switch of older versions', () => {
+  const legacy = { key: 'scrollMiniPlayerEnabled', value: false, updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy }).scrollPlayerMode,
+    { key: 'scrollPlayerMode', value: 'off', updatedAt: 10 })
+  const current = { key: 'scrollPlayerMode', value: 'pin', updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy, scrollPlayerMode: current }).scrollPlayerMode, current)
+})

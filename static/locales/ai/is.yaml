@@ -830,11 +830,19 @@ Settings:
       On Window Minimize: Þegar glugginn er lágmarkaður
       On Window Hide: Þegar glugginn missir fókus eða skipt er frá honum
       Wayland Minimize Unsupported: Wayland tilkynnir forritum ekki þegar gluggi er lágmarkaður, svo þessi kveikja er ekki tiltæk. Notaðu "Þegar glugginn missir fókus eða skipt er frá honum" í staðinn. Sú stilling nær einnig yfir lágmörkun.
+      On Tab Change Mini Player: Þegar skipt er um flipa birtist smáspilarinn í staðinn. Til að nota þetta skaltu stilla „Þegar farið er úr myndskeiði“ á „Stöðva spilun“.
     Scroll Mini Player:
       Scroll Mini Player: Smáspilari við skrun
-      When Scrolling Down: Halda smáspilara á skjánum þegar skrunað er niður
-      On All Tabs: Halda smáspilara á skjánum þegar skipt er um flipa
-      On Navigation: Halda spilun áfram þegar farið er af myndskeiðssíðunni
+      Scroll Player Mode: Þegar skrunað er niður
+      Scroll Player Mode Tooltip: Spilarinn er aðeins festur á meðan hann tekur að hámarki helming af hæð gluggans. Annars, t.d. í símum í láréttri stöðu eða í breiðum gluggum, birtist smáspilarinn í staðinn.
+      Scroll Player Modes:
+        Mini: Sýna smáspilara
+        Pin: Festa spilarann efst ef pláss er
+        Off: Skruna með síðunni
+      Leaving Video: Þegar farið er úr myndskeiði
+      Leaving Video Modes:
+        Keep Playing: Halda spilun áfram í smáspilara
+        Stop: Stöðva spilun
     Multiply Seek Interval by Playback Rate: Margfalda spólunarskref með spilunarhraða
     Show Playback Rate Adjusted Timestamp: Sýna tímamerki aðlagað að spilunarhraða
     Use YouTube-style Shorts: Nota Shorts að hætti YouTube

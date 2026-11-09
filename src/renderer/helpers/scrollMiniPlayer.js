@@ -9,6 +9,8 @@ export const DEFAULT_ASPECT_RATIO = 16 / 9
 
 export const ENTER_MINI_RATIO = 0.15
 export const EXIT_MINI_RATIO = 0.35
+// A pinned player taller than this share of the viewport docks instead.
+export const PINNED_PLAYER_MAX_VIEWPORT_RATIO = 0.5
 
 /** Minimum inline layout height before scroll mini player may activate. */
 export const SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT = 135

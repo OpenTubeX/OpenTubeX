@@ -91,7 +91,7 @@ for (const landscape of [false, true]) {
     await openMockedVideo(page)
     await setWindowSize(app, page, landscape ? { width: 1000, height: 480 } : { width: 480, height: 800 })
     await page.evaluate(async () => {
-      await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+      await window.$store.dispatch('updateScrollPlayerMode', 'mini')
       window.scrollTo(0, document.body.scrollHeight)
     })
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
@@ -116,7 +116,7 @@ test('opens comments from a mini player at the inline video position', { tag: '@
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.evaluate(async () => {
-    await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+    await window.$store.dispatch('updateScrollPlayerMode', 'mini')
     window.scrollTo(0, document.body.scrollHeight)
   })
   const player = page.locator('.ftVideoPlayer')

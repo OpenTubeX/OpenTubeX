@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Akna minimeerimisel
       On Window Hide: Kui aken kaotab fookuse või vahetatakse teise akna vastu
       Wayland Minimize Unsupported: Wayland ei teata rakendustele akna minimeerimisest, seega pole see käiviti saadaval. Kasuta selle asemel valikut "Kui aken kaotab fookuse või vahetatakse teise akna vastu", mis hõlmab ka minimeerimist.
+      On Tab Change Mini Player: Vahekaardi vahetamisel kuvatakse selle asemel minipleier. Selle kasutamiseks määra „Videost lahkumisel“ väärtuseks „Peata esitamine“.
     Scroll Mini Player:
       Scroll Mini Player: Minipleier kerimisel
-      When Scrolling Down: Hoia allapoole kerides minipleier ekraanil
-      On All Tabs: Hoia vahekaarte vahetades minipleier ekraanil
-      On Navigation: Jätka esitamist videolehelt lahkudes
+      Scroll Player Mode: Allapoole kerimisel
+      Scroll Player Mode Tooltip: Mängija kinnitatakse ainult siis, kui see võtab enda alla kõige rohkem poole akna kõrgusest. Muul juhul, näiteks telefonides horisontaalpaigutuses või laiades akendes, kuvatakse selle asemel minimängija.
+      Scroll Player Modes:
+        Mini: Näita minipleierit
+        Pin: Kinnita mängija üles, kui ruumi on
+        Off: Keri koos lehega
+      Leaving Video: Videost lahkumisel
+      Leaving Video Modes:
+        Keep Playing: Jätka esitamist minipleieris
+        Stop: Peata esitamine
     Multiply Seek Interval by Playback Rate: Korruta kerimissamm esituskiirusega
     Show Playback Rate Adjusted Timestamp: Kuva esituskiiruse järgi kohandatud ajatähis
     Use YouTube-style Shorts: Kasuta YouTube’i stiilis Shorts-videoid

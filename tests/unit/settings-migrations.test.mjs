@@ -463,6 +463,39 @@ test('migrates an imported Hide Video Description switch to the Video descriptio
   )
 })
 
+test('migrates the mini player switches to the scroll player select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'scrollMiniPlayerEnabled', value: false },
+        { _id: 'scrollMiniPlayerOnAllTabs', value: true },
+        { _id: 'quickSettings', value: ['scrollMiniPlayerEnabled', 'hideComments'] },
+      ],
+      { scrollPlayerMode: 'off', quickSettings: ['scrollPlayerMode', 'hideComments'] },
+    ],
+    // Startup maps the older Picture-in-Picture mode only while neither setting is saved.
+    [[{ _id: 'scrollMiniPlayerEnabled', value: true }], { scrollPlayerMode: 'mini' }],
+    [
+      [{ _id: 'scrollMiniPlayerEnabled', value: false }, { _id: 'scrollPlayerMode', value: 'pin' }],
+      { scrollPlayerMode: 'pin' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(
+    migrateLegacySettings({ scrollMiniPlayerEnabled: false, scrollMiniPlayerOnAllTabs: true }),
+    { scrollPlayerMode: 'off' }
+  )
+})
+
 const controlBarMigrationStart = settingsSource.indexOf('      // The chapters and screenshot buttons used to sit')
 const controlBarMigrationEnd = settingsSource.indexOf('      // Existing logged-in sync users', controlBarMigrationStart)
 

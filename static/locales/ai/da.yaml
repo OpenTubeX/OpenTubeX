@@ -849,11 +849,19 @@ Settings:
       On Window Minimize: Når vinduet minimeres
       On Window Hide: Når vinduet mister fokus, eller der skiftes væk fra det
       Wayland Minimize Unsupported: Wayland giver ikke apps besked, når et vindue minimeres, så denne udløser er ikke tilgængelig. Brug i stedet "Når vinduet mister fokus, eller der skiftes væk fra det", som også omfatter minimering.
+      On Tab Change Mini Player: Når der skiftes fane, vises miniafspilleren i stedet. Indstil “Når en video forlades” til “Stop afspilning” for at bruge dette.
     Scroll Mini Player:
       Scroll Mini Player: Miniafspiller ved rulning
-      When Scrolling Down: Behold en miniafspiller på skærmen, når der rulles ned
-      On All Tabs: Behold en miniafspiller på skærmen, når der skiftes fane
-      On Navigation: Fortsæt afspilning, når videosiden forlades
+      Scroll Player Mode: Ved rulning nedad
+      Scroll Player Mode Tooltip: Afspilleren fastgøres kun, så længe den fylder højst halvdelen af vinduets højde. Ellers, f.eks. på telefoner i liggende format eller i brede vinduer, vises miniafspilleren i stedet.
+      Scroll Player Modes:
+        Mini: Vis en miniafspiller
+        Pin: Fastgør afspilleren øverst, hvis der er plads
+        Off: Rul med siden
+      Leaving Video: Når en video forlades
+      Leaving Video Modes:
+        Keep Playing: Fortsæt afspilning i en miniafspiller
+        Stop: Stop afspilning
     Multiply Seek Interval by Playback Rate: Gang spoleintervallet med afspilningshastigheden
     Show Playback Rate Adjusted Timestamp: Vis tidsangivelse justeret efter afspilningshastighed
     Use YouTube-style Shorts: Brug Shorts i YouTube-stil

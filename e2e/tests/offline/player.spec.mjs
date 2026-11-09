@@ -1762,8 +1762,6 @@ test.describe('scroll mini player', () => {
       seed: {
         settings: {
           ...PLAYER_SEED,
-          keepPlayingOnNavigation: false,
-          scrollMiniPlayerOnAllTabs: true,
           uiScale: 125
         }
       }
@@ -1942,7 +1940,7 @@ test.describe('scroll mini player', () => {
       const outgoingPlayer = page.locator(`.ftVideoPlayer[data-tab-id="${secondTabId}"]`)
       const setOnAllTabs = async (value) => {
         const watch = await page.evaluateHandle(findWatchComponent)
-        await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateScrollMiniPlayerOnAllTabs', value), value)
+        await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateKeepPlayingOnNavigation', value), value)
         await watch.dispose()
       }
 
@@ -2035,28 +2033,21 @@ test.describe('scroll mini player', () => {
       await expectOverlayAbovePlayer(player, downloads)
     })
 
-    test('hides an existing mini player when automatic PiP takes over tab changes', async ({ app, page }) => {
+    test('hides an existing mini player when videos stop playing after leaving them', async ({ app, page }) => {
       await openDemoVideo({ app, page })
 
       const player = page.locator('.ftVideoPlayer')
-      const video = player.locator('video')
       await page.locator('.tabBar .newTabButton').click()
       await expect(player).toHaveClass(/scrollMiniPlayer/)
-      await video.evaluate(element => element.pause())
-      await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
 
       await page.locator('.profileTrigger').click()
       await page.getByRole('dialog', { name: 'Quick settings' })
         .getByRole('button', { name: 'All settings' }).click()
       const settings = page.getByRole('dialog', { name: 'Settings', exact: true })
       await settings.locator('.settingsMenu [data-section="playback"]').click()
-      await settings.locator('.pure-checkbox label')
-        .filter({ hasText: 'When switching tabs' }).click()
+      await settings.getByRole('combobox', { name: 'When leaving a video' }).click()
+      await page.getByRole('option', { name: 'Stop playing', exact: true }).click()
 
-      await expect(settings.getByRole('checkbox', {
-        name: 'When switching tabs',
-        exact: true
-      })).toBeChecked()
       await expect(player).toBeHidden()
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     })
@@ -2068,7 +2059,6 @@ test.describe('scroll mini player', () => {
             ...PLAYER_SEED,
             autoPictureInPictureTriggers: ['tab'],
             keepPlayingOnNavigation: false,
-            scrollMiniPlayerOnAllTabs: true,
             uiScale: 125
           }
         }
@@ -2226,6 +2216,31 @@ test.describe('scroll mini player', () => {
       })).toEqual({ top: true, bottom: true, left: true, right: true })
       await attachScreenshot('large captions in the mini player')
     })
+  })
+})
+
+test.describe('pinned player', () => {
+  test.use({ seed: { settings: { ...PLAYER_SEED, scrollPlayerMode: 'pin' } } })
+
+  test('stays below the top navigation while scrolling and docks when it is too tall', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    await setWindowSize(app, page, { width: 480, height: 860 })
+    const player = page.locator('.ftVideoPlayer')
+    const playerTop = () => player.evaluate(element => element.getBoundingClientRect().top)
+    const navigationBottom = await page.locator('.topNav').evaluate(element => element.getBoundingClientRect().bottom)
+
+    await page.evaluate(() => window.scrollTo(0, 700))
+    await expect.poll(playerTop).toBeCloseTo(navigationBottom, 0)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    // The page scrollbar starts below the pinned player instead of running behind it.
+    const scrollbarTop = () => page.locator('body > .os-scrollbar-vertical').evaluate(element => element.getBoundingClientRect().top)
+    const pinnedAreaBottom = await page.locator('.videoArea').evaluate(element => element.getBoundingClientRect().bottom)
+    await expect.poll(scrollbarTop).toBeCloseTo(pinnedAreaBottom, 0)
+
+    // Half of this window is shorter than the player, so it docks instead.
+    await setWindowSize(app, page, { width: 500, height: 420 })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(scrollbarTop).toBe(0)
   })
 })
 

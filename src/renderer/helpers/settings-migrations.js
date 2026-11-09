@@ -4,7 +4,8 @@ import { DEFAULT_QUICK_SETTINGS } from './quickSettings.js'
 import {
   FORMER_CHANNEL_SETTING_SWITCHES,
   isFormerDefaultQuickSettings,
-  migrateVideoDescriptionSettingId,
+  migrateSettingIds,
+  scrollPlayerModeFromMiniPlayerSwitch,
 } from '../../datastores/settingsMigrations.js'
 
 export function migrateSyncServerUrl(value) {
@@ -117,6 +118,14 @@ export function migrateLegacySettings(settings) {
   delete migratedSettings.autoPictureInPictureMode
   delete migratedSettings.autoPictureInPictureOnTabChange
 
+  if (Object.hasOwn(migratedSettings, 'scrollMiniPlayerEnabled')) {
+    if (!Object.hasOwn(migratedSettings, 'scrollPlayerMode')) {
+      migratedSettings.scrollPlayerMode = scrollPlayerModeFromMiniPlayerSwitch(migratedSettings.scrollMiniPlayerEnabled)
+    }
+    delete migratedSettings.scrollMiniPlayerEnabled
+  }
+  delete migratedSettings.scrollMiniPlayerOnAllTabs
+
   if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {
     if (!Object.hasOwn(migratedSettings, 'moveDownloadsToAppHeader')) {
       migratedSettings.moveDownloadsToAppHeader = migratedSettings.moveDownloadsToQuickSettings !== true
@@ -155,7 +164,7 @@ export function migrateLegacySettings(settings) {
   if (isFormerDefaultQuickSettings(migratedSettings.quickSettings)) {
     migratedSettings.quickSettings = [...DEFAULT_QUICK_SETTINGS]
   } else if (Object.hasOwn(migratedSettings, 'quickSettings')) {
-    migratedSettings.quickSettings = migrateVideoDescriptionSettingId(migratedSettings.quickSettings)
+    migratedSettings.quickSettings = migrateSettingIds(migratedSettings.quickSettings)
   }
 
   return migratedSettings
