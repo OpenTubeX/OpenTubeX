@@ -276,3 +276,15 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
         for task in tasks.values { task.cancel() }
     }
 }
+
+private let connectionFailures: Set<URLError.Code> = [
+    .timedOut, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .networkConnectionLost,
+    .notConnectedToInternet, .internationalRoamingOff, .callIsActive, .dataNotAllowed,
+]
+
+/// Whether a request failed to reach its server, so retrying after reconnecting can succeed.
+/// URLSession localizes its descriptions, so native bridges classify errors by code.
+func isConnectionFailure(_ error: Error) -> Bool {
+    guard let code = (error as? URLError)?.code else { return false }
+    return connectionFailures.contains(code)
+}

@@ -116,8 +116,8 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
         }
         session.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                // The description is localized, so mark it as a fetch failure that JavaScript can classify.
-                if let error = error { self?.respond(id, ["error": error.localizedDescription, "network": true]) }
+                // The description is localized, so mark connection failures for JavaScript by their code.
+                if let error = error { self?.respond(id, ["error": error.localizedDescription, "network": isConnectionFailure(error)]) }
                 else { self?.respond(id, ["status": (response as? HTTPURLResponse)?.statusCode ?? 502, "body": String(decoding: data ?? Data(), as: UTF8.self)]) }
             }
         }.resume()

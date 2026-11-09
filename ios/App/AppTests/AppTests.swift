@@ -929,6 +929,13 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(retained, true)
     }
 
+    func testOnlyConnectionFailuresWaitToReconnect() {
+        // URLSession localizes its descriptions, so the error code decides.
+        XCTAssertTrue(isConnectionFailure(URLError(.timedOut, userInfo: [NSLocalizedDescriptionKey: "Zeitüberschreitung bei der Anforderung."])))
+        // A certificate failure is permanent; retrying it would wait forever.
+        XCTAssertFalse(isConnectionFailure(URLError(.serverCertificateUntrusted)))
+    }
+
     func testCommandPalettePlaysNativeDownloadAndRechecksDeletedFile() async throws {
         try await openApplication()
         let fixture = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
