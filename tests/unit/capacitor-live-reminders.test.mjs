@@ -4,12 +4,41 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
-const [{ getLiveReminderNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
-  '@capacitor/local-notifications': { LocalNotifications: {} },
+const systemNotifications = { calls: [], pending: [] }
+const [{ getLiveReminderNotificationId, closeCapacitorSystemNotifications }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+  '@capacitor/local-notifications': {
+    LocalNotifications: {
+      getPending: async () => ({ notifications: systemNotifications.pending }),
+      cancel: async ({ notifications }) => { systemNotifications.calls.push(['cancel', notifications.map(({ id }) => id)]) },
+      removeDeliveredNotificationsById: async ({ ids }) => { systemNotifications.calls.push(['removeDelivered', ids]) },
+    }
+  },
   [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: { cancelAndroidUploadNotifications: async () => {} }
 })
 
 const START = Date.UTC(2026, 0, 1)
+
+test('closing a reminder entry cancels its overdue alarm but keeps one for a later premiere', async () => {
+  process.env.IS_CAPACITOR = 'true'
+  const at = offset => ({ at: new Date(Date.now() + offset).toISOString() })
+  // Android has not delivered the inexact alarm the app already moved to the history.
+  systemNotifications.pending = [
+    { id: 7, schedule: at(-60_000), extra: { videoId: 'premiere00a' } },
+    { id: 8, schedule: at(3_600_000), extra: { videoId: 'premiere00b' } },
+    { id: 9, schedule: at(-60_000), extra: { videoId: 'premiere00c' } },
+  ]
+  try {
+    await closeCapacitorSystemNotifications([
+      { kind: 'live-reminder', path: '/watch/premiere00a' },
+      { kind: 'live-reminder', path: '/watch/premiere00b' },
+    ])
+  } finally {
+    delete process.env.IS_CAPACITOR
+  }
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7]])
+  assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'),
+    ['removeDelivered', ['premiere00a', 'premiere00b'].map(getLiveReminderNotificationId)])
+})
 
 async function loadCapacitorReminder(notifications, context = {}) {
   const source = await readFile(new URL('../../src/renderer/helpers/liveReminders.js', import.meta.url), 'utf8')
