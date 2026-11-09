@@ -217,6 +217,7 @@ async function loadForegroundReminders(alarm) {
   const timers = []
   const loaded = await loadCapacitorReminder({
     checkPermissions: async () => ({ display: 'granted' }),
+    registerActionTypes: async () => {},
     addListener: async (name, listener) => { listeners[name] = listener; return { remove() {} } },
     getAll: async () => ({ notifications: alarm ? [alarm] : [] }),
     cancel: async ({ notifications }) => calls.push(['cancel', notifications[0].id]),
@@ -234,6 +235,25 @@ async function loadForegroundReminders(alarm) {
   await loaded.initializeCapacitorLiveReminderActions(() => {}, entry => shown.push(entry))
   return { ...loaded, calls, listeners, timers, shown }
 }
+
+test('dismissing a reminder notification marks its entry read without opening the video', async () => {
+  const listeners = {}
+  const read = []
+  const opened = []
+  const loaded = await loadCapacitorReminder({
+    registerActionTypes: async () => {},
+    addListener: async (name, listener) => { listeners[name] = listener; return { remove() {} } },
+  }, {
+    document: { visibilityState: 'hidden', addEventListener() {}, removeEventListener() {} },
+    capacitorNotificationHistory: { markTargetsRead: targets => read.push(...targets.map(({ path }) => path)) },
+  })
+  await loaded.initializeCapacitorLiveReminderActions(videoId => opened.push(videoId), () => {})
+
+  listeners.localNotificationActionPerformed({ actionId: 'dismiss', notification: { id: 7, extra: { videoId: 'premiere00a' } } })
+  listeners.localNotificationActionPerformed({ actionId: 'tap', notification: { id: 8, extra: { videoId: 'premiere00b' } } })
+  assert.deepEqual(read, ['/watch/premiere00a', '/watch/premiere00b'])
+  assert.deepEqual(opened, ['premiere00b'])
+})
 
 test('a reminder the app cannot record keeps its system notification', async () => {
   const alarm = { id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 1000).toISOString() }, extra: { videoId: 'premiere00a' } }
@@ -255,6 +275,7 @@ test('rescheduling a reminder keeps its old foreground timer from cancelling the
   let blocked = null
   const loaded = await loadCapacitorReminder({
     checkPermissions: async () => ({ display: 'granted' }),
+    registerActionTypes: async () => {},
     addListener: async () => ({ remove() {} }),
     getAll: async () => ({ notifications: [{ id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 60_000).toISOString() }, extra: { videoId: 'premiere00a' } }] }),
     cancel: async ({ notifications }) => { calls.push(['cancel', notifications[0].id]) },
@@ -296,6 +317,7 @@ async function loadArmedReminder(nativeCancel = async () => {}, history = {}) {
   const document = { visibilityState: 'visible', addEventListener() {}, removeEventListener() {} }
   const loaded = await loadCapacitorReminder({
     checkPermissions: async () => ({ display: 'granted' }),
+    registerActionTypes: async () => {},
     addListener: async () => ({ remove() {} }),
     getAll: async () => ({ notifications: [{ id: 7, title: 'Starting', body: 'Premiere', schedule: { at: new Date(START + 60_000).toISOString() }, extra: { videoId: 'premiere00a' } }] }),
     cancel: async ({ notifications }) => {

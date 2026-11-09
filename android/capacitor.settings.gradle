@@ -24,7 +24,7 @@ include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.6.0/node_modules/@capacitor/haptics/android')
 
 include ':capacitor-local-notifications'
-project(':capacitor-local-notifications').projectDir = new File('../node_modules/.pnpm/@capacitor+local-notifications@8.3.1_@capacitor+core@8.6.0/node_modules/@capacitor/local-notifications/android')
+project(':capacitor-local-notifications').projectDir = new File('../node_modules/.pnpm/@capacitor+local-notifications@8.3.1_patch_hash=59d1a3665fb92225eb3e377f2653c476dd7220a_6b4e6796b0c073ead53a0470f07c7b7f/node_modules/@capacitor/local-notifications/android')
 
 include ':capacitor-share'
 project(':capacitor-share').projectDir = new File('../node_modules/.pnpm/@capacitor+share@8.0.3_patch_hash=61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb_@capacitor+core@8.6.0/node_modules/@capacitor/share/android')

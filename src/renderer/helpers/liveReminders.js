@@ -6,6 +6,8 @@ const STORAGE_KEY = 'opentubex-capacitor-live-reminders'
 // Whether the system schedule is paused because notifications are off.
 const PAUSED_STORAGE_KEY = 'opentubex-capacitor-live-reminders-paused'
 const CHANNEL_ID = 'live-reminders'
+// Lets iOS report dismissed reminders, like Android does.
+const ACTION_TYPE_ID = 'live-reminder'
 const listeners = new Set()
 /** @type {import('../../main/notificationHistory').NotificationMode} */
 let notificationMode = 'both'
@@ -101,6 +103,7 @@ async function scheduleSystemReminder(record) {
       title: record.notificationTitle,
       body: record.notificationBody,
       channelId: CHANNEL_ID,
+      actionTypeId: ACTION_TYPE_ID,
       isExactNotification: false,
       foreground: true,
       schedule: {
@@ -400,15 +403,18 @@ export const liveReminder = process.env.IS_ELECTRON
 export async function initializeCapacitorLiveReminderActions(openVideo, showInApp) {
   if (!process.env.IS_CAPACITOR) return () => {}
 
+  await LocalNotifications.registerActionTypes({ types: [{ id: ACTION_TYPE_ID, actions: [], iosCustomDismissAction: true }] })
+    .catch(error => console.error('Failed to register the reminder notification type', error))
+  // Taps and dismissals, including the ones from before the app started.
   const actionHandle = await LocalNotifications.addListener(
     'localNotificationActionPerformed',
-    ({ notification }) => {
-      const videoId = notification.extra?.videoId
+    ({ actionId, notification }) => {
+      const videoId = notification?.extra?.videoId
       if (typeof videoId !== 'string') return
-      // The tap can arrive before the app moved the reminder to the history.
+      // The action can arrive before the app moved the reminder to the history.
       readCapacitorReminders()
       capacitorNotificationHistory.markTargetsRead([getLiveReminderTarget(videoId)])
-      openVideo(videoId)
+      if (actionId !== 'dismiss') openVideo(videoId)
     }
   )
   const receivedHandle = await LocalNotifications.addListener(

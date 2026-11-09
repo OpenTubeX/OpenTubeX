@@ -68,3 +68,14 @@ test('entries that make room for new ones keep their system notifications', asyn
   assert.equal((await history.list()).length, NOTIFICATION_HISTORY_LIMIT)
   assert.deepEqual(closed, [])
 })
+
+test('opening or dismissing a reminder the system showed alone still reaches other devices', async () => {
+  await history.clear()
+  const before = dismissed
+  // In the system-only mode, this device keeps no entry for the reminder.
+  history.markTargetsRead([{ kind: 'live-reminder', path: '/watch/premiere' }])
+  assert.deepEqual(await history.list(), [])
+  assert.equal(dismissed, before + 1)
+  const dismissal = (await history.getDismissals()).dismissals.find(({ key }) => key === 'live-reminder:/watch/premiere')
+  assert.ok(dismissal && dismissal.removedAt === undefined)
+})
