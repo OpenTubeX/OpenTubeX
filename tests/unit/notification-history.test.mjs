@@ -386,6 +386,16 @@ test('dismissals apply to existing entries and ones added later, but not to down
   assert.deepEqual(getDismissedNotificationEntries(applied, applied), [])
 })
 
+test('a dismissed reminder does not dismiss one for a later premiere of the same video', () => {
+  const reminder = createdAt => ({ kind: 'live-reminder', title: 'Live', body: '', path: '/watch/stream', createdAt })
+  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', removed: true, at: 100 }] }
+  // Another device removed the reminder for the original start, after it fired there.
+  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(90)]), dismissals), [])
+  // The stream moved, and its new reminder fires later.
+  const later = addNotificationHistoryEntries([], [reminder(200)])
+  assert.equal(applyNotificationDismissals(later, dismissals), later)
+})
+
 test('the desktop history keeps dismissals for other devices and applies theirs', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'notification-history-'))
   try {
@@ -470,8 +480,16 @@ test('system notifications and their entries stay in step', async () => {
   }
   const read = []
   const links = createSystemNotificationLinks(id => read.push(id), 'win32')
+  const entries = []
   const notify = createNotifier({
-    history: { add: async ({ title }) => ({ kind: 'video', path: '/watch/abc', title, body: '', id: title, createdAt: 0, read: false }) },
+    history: {
+      add: async ({ title }) => {
+        const entry = { kind: 'video', path: '/watch/abc', title, body: '', id: title, createdAt: 0, read: false }
+        entries.push(entry)
+        return entry
+      },
+      list: async () => entries
+    },
     getMode: () => 'both',
     getForegroundWindow: () => null,
     showInApp: () => {},
@@ -498,6 +516,51 @@ test('system notifications and their entries stay in step', async () => {
   // Closing it does not mark the entry read again.
   shown.get('read in the app').emit('close', { reason: 'userCanceled' })
   assert.deepEqual(read, ['clicked', 'dismissed'])
+})
+
+test('reminders keep the time they were due in the history', async () => {
+  const added = []
+  const notify = createNotifier({
+    history: { add: async entry => { added.push(entry); return null } },
+    getMode: () => 'both',
+    getForegroundWindow: () => null,
+    showInApp: () => {}
+  })
+  await notify({ title: 'Live', body: '', createdAt: 42, target: { kind: 'live-reminder', path: '/watch/stream' }, showSystemNotification: () => {} })
+  assert.equal(added[0].createdAt, 42)
+})
+
+test('a notification whose entry was read while it loaded closes instead of staying', async () => {
+  const { EventEmitter } = await import('node:events')
+  const linked = []
+  const entries = []
+  const notify = createNotifier({
+    history: {
+      add: async ({ title }) => {
+        const entry = { kind: 'video', path: `/watch/${title}`, title, body: '', id: title, createdAt: 0, read: false }
+        entries.push(entry)
+        return entry
+      },
+      list: async () => entries
+    },
+    getMode: () => 'both',
+    getForegroundWindow: () => null,
+    showInApp: () => {},
+    link: entry => linked.push(entry.id)
+  })
+  const shown = {}
+  const show = (title, whileLoading) => notify({ title, body: '', target: { kind: 'video', path: `/watch/${title}` }, showSystemNotification: async () => {
+    // Another device or the bell dismisses the entry while the thumbnail loads.
+    whileLoading()
+    shown[title] = Object.assign(new EventEmitter(), { closed: false, close() { this.closed = true } })
+    return shown[title]
+  } })
+  await show('read', () => { entries[0] = { ...entries[0], read: true } })
+  await show('removed', () => { entries.pop() })
+  await show('unread', () => {})
+  assert.deepEqual(linked, ['unread'])
+  assert.deepEqual(Object.entries(shown).map(([title, notification]) => [title, notification.closed]),
+    [['read', true], ['removed', true], ['unread', false]])
 })
 
 test('only dismissals mark entries read, which Linux cannot tell from expired notifications', async () => {

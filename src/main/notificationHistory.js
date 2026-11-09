@@ -99,7 +99,7 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
   return {
     list: () => pending.then(load).then(current => current.entries),
     /**
-     * @param {import('../notificationHistory.js').NotificationHistoryInput} entry
+     * @param {import('../notificationHistory.js').NotificationHistoryInput & { createdAt?: number }} entry
      * @returns {Promise<NotificationHistoryEntry | null | undefined>} the saved entry, already read when
      * another device read it, null when another device removed it, or undefined when it could not be saved
      */
@@ -199,9 +199,10 @@ export function createSystemNotificationLinks(markRead, platform = process.platf
  * Decides how each notification reaches the user. With both, a focused app
  * window shows it in the app instead of the system, and the bell keeps it.
  * Notifications other devices dismissed stay silent.
- * @template Window, SystemNotification
+ * @template Window
+ * @template {LinkedNotification} SystemNotification
  * @param {{
- *   history: { add: ReturnType<typeof createNotificationHistory>['add'] },
+ *   history: Pick<ReturnType<typeof createNotificationHistory>, 'add' | 'list'>,
  *   getMode: () => NotificationMode,
  *   getForegroundWindow: () => Window | null,
  *   showInApp: (window: Window, entry: NotificationHistoryEntry) => void,
@@ -210,15 +211,15 @@ export function createSystemNotificationLinks(markRead, platform = process.platf
  */
 export function createNotifier({ history, getMode, getForegroundWindow, showInApp, link }) {
   /**
-   * @param {{ title: string, body: string, thumbnail?: string, target: import('../notificationHistory.js').NotificationHistoryTarget | null, showSystemNotification: () => void | SystemNotification | Promise<void | SystemNotification> }} notification
+   * @param {{ title: string, body: string, thumbnail?: string, createdAt?: number, target: import('../notificationHistory.js').NotificationHistoryTarget | null, showSystemNotification: () => void | SystemNotification | Promise<void | SystemNotification> }} notification
    */
-  return async function notify({ title, body, thumbnail, target, showSystemNotification }) {
+  return async function notify({ title, body, thumbnail, createdAt, target, showSystemNotification }) {
     const mode = getMode()
     if (mode === 'off') return
     /** @type {NotificationHistoryEntry | null | undefined} */
     let entry
     if (mode === 'both' && target) {
-      entry = await history.add({ title, body, thumbnail, ...target })
+      entry = await history.add({ title, body, thumbnail, createdAt, ...target })
       if (entry === null || entry?.read) return
       // The mode may have changed while the entry was saved.
       const currentMode = getMode()
@@ -230,6 +231,10 @@ export function createNotifier({ history, getMode, getForegroundWindow, showInAp
       }
     }
     const notification = await showSystemNotification()
-    if (entry && notification) link?.(entry, notification)
+    if (!entry || !notification || !link) return
+    // The entry may have been read or removed while its thumbnail loaded.
+    const current = (await history.list()).find(item => item.id === entry.id)
+    if (current && !current.read) link(entry, notification)
+    else notification.close()
   }
 }

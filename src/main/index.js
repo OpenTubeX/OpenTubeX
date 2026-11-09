@@ -842,15 +842,17 @@ function runApp() {
       body: reminder.notificationBody,
       thumbnail: reminder.thumbnail,
       url: `https://www.youtube.com/watch?v=${reminder.videoId}`,
+      // Every device dates the reminder by its start, so dismissals match it even when it fires late.
+      createdAt: reminder.startTimestamp,
       target: getLiveReminderTarget(reminder.videoId)
     })
   }
 
   /**
-   * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
+   * @param {{ title: string, body: string, url: string, silent?: boolean, thumbnail?: string, createdAt?: number, target: import('../notificationHistory').NotificationHistoryTarget | null }} options
    */
-  function showUrlNotification({ title, body, url, silent = false, thumbnail, target }) {
-    return notify({ title, body, thumbnail, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
+  function showUrlNotification({ title, body, url, silent = false, thumbnail, createdAt, target }) {
+    return notify({ title, body, thumbnail, createdAt, target, showSystemNotification: () => showSystemUrlNotification({ title, body, url, silent, thumbnail }) })
       .catch(error => console.error('Failed to show a notification', error))
   }
 

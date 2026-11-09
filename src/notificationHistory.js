@@ -269,7 +269,9 @@ export function applyNotificationDismissals(entries, { readThrough, clearedThrou
   const next = entries.flatMap(entry => {
     const key = getNotificationKey(entry)
     if (!key) return [entry]
-    const dismissal = byKey.get(key)
+    let dismissal = byKey.get(key)
+    // A reminder for a later premiere of the same video is a new notification.
+    if (dismissal && entry.kind === 'live-reminder' && entry.createdAt > dismissal.at) dismissal = undefined
     if (dismissal?.removed || entry.createdAt <= clearedThrough) {
       changed = true
       return []
