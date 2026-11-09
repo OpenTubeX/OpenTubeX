@@ -100,13 +100,8 @@ public class PairingCameraTest {
 
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 WebView view = webView(scenario);
-                // .app renders once the saved settings have loaded.
-                awaitValue(view, "!!document.querySelector('.app')", "true", 60);
-                // Startup marks the tutorial 'new' before .app renders, then shows it.
-                awaitValue(view, "localStorage.getItem('opentubex.tutorial.audience') !== 'new' || " +
-                    "!!document.querySelector('.tutorialActions button')", "true");
-                evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-                awaitValue(view, "!document.querySelector('.tutorialOverlay')", "true");
+                // This also waits for .app, which renders once the saved settings have loaded.
+                TutorialTestHelper.dismissIfPending(view);
                 // Point the app at the test server in memory only, so a device
                 // signed in to another server keeps its saved account.
                 evaluate(view, "(() => {" +

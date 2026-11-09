@@ -33,10 +33,7 @@ public class SettingsSearchTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             awaitCondition(view, "!!document.querySelector('.app')");
-            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (async () => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;

@@ -31,9 +31,7 @@ public class PullToRefreshLayoutTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView web = reference.get();
             await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"]') && typeof window.__opentubexPullToRefresh === 'function'");
-            await(web, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(web, "document.querySelector('.tutorialActions button')?.click()");
-            await(web, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(web);
             evaluate(web, """
                 (() => {
                     const app = document.querySelector('#app').__vue_app__.config.globalProperties;

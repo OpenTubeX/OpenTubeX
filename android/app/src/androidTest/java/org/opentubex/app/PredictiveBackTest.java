@@ -577,10 +577,7 @@ public class PredictiveBackTest {
         scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
         WebView view = reference.get();
         await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-        await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-            "!!document.querySelector('.tutorialActions button')");
-        evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-        await(view, "!document.querySelector('.tutorialOverlay')");
+        TutorialTestHelper.dismissIfPending(view);
         evaluate(view, """
             (() => {
                 const root = document.querySelector('#app').__vue_app__._container._vnode.component;

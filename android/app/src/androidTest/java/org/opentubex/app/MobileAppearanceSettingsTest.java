@@ -429,9 +429,7 @@ public class MobileAppearanceSettingsTest {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
             // First-run tutorial makes the navigation inert and locks native scrolling.
-            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             try {
                 prepare(view);
                 evaluate(view, """
@@ -502,9 +500,7 @@ public class MobileAppearanceSettingsTest {
     public void navigationVisibilityAndCompactLabelsFollowPreferences() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
-            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             try {
                 prepare(view);
                 evaluate(view, """
@@ -616,9 +612,7 @@ public class MobileAppearanceSettingsTest {
     public void enlargedPhoneHeaderKeepsHistoryAndOverflowShortcutsAccessible() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
-            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             try {
                 prepare(view);
                 // Earlier tests can leave the restored tab on the fixture page, so open a different one.

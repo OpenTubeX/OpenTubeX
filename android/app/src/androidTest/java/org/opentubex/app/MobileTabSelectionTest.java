@@ -28,10 +28,7 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -148,10 +145,7 @@ public class MobileTabSelectionTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('.topNav') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -262,10 +256,7 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -424,10 +415,7 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, "window.loadingDotOriginalLayout = " + STORE + ".getters.getCapacitorLayoutMode");
             try {
                 for (String layout : new String[] {"phone", "tablet"}) {
@@ -478,10 +466,7 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
                 "document.querySelector('.capacitorTabletNewTab').click()");
             await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
@@ -546,10 +531,7 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
-                "!!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
                 "document.querySelector('.capacitorTabletNewTab').click()");
             await(view, STORE + ".getters.getTabs.length >= 2 && " +
@@ -669,9 +651,7 @@ public class MobileTabSelectionTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('.profileTrigger')");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             assertEquals("Run in a fresh temporary app profile", "true", evaluate(view, String.format("""
                 %s.getters.getTabs.length === 1 && !%s.getters.getTabs[0].isPinned &&
                 %s.getters.getTabs[0].route.path === '/' + %s.getters.getLandingPage &&
@@ -802,9 +782,7 @@ public class MobileTabSelectionTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
-            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(view);
             String saved = evaluate(view, """
                 JSON.stringify((() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
