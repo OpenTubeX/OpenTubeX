@@ -8,17 +8,49 @@ const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIA
 const APP_ID = 'org.opentubex.app.dev'
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
 const launch = () => adb('shell', 'am', 'start', '-n', `${APP_ID}/org.opentubex.app.MainActivity`)
+// Android 8 to 12 grant notifications at install.
+const grantNotifications = () => {
+  if (Number(adb('shell', 'getprop', 'ro.build.version.sdk')) >= 33) adb('shell', 'pm', 'grant', APP_ID, 'android.permission.POST_NOTIFICATIONS')
+}
+// Tolerates a missing forward, so cleanup does not hide the failure that skipped it.
+const removeForward = () => {
+  try { adb('forward', '--remove', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`) } catch {}
+}
+const systemNotifications = () => adb('shell', 'dumpsys', 'notification', '--noredact')
+
+/** Swipes a notification out of the shade like the user does. */
+async function swipeAway(text) {
+  adb('shell', 'cmd', 'statusbar', 'expand-notifications')
+  // Swipes again until the opening shade lets one through.
+  await expect.poll(() => {
+    let window
+    try {
+      window = adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml') && adb('shell', 'cat', '/sdcard/window.xml')
+    } catch {
+      // Dumping fails while the shade is still moving.
+      return true
+    }
+    const [left, top, right, bottom] = window
+      .match(new RegExp(`text="${text}"[^>]*bounds="\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]"`))?.slice(1).map(Number) ?? []
+    if (left === undefined) return true
+    const y = String(Math.round((top + bottom) / 2))
+    adb('shell', 'input', 'swipe', String(left + 60), y, String(right), y, '150')
+    return systemNotifications().includes(text)
+  }, { timeout: 15_000 }).toBe(false)
+  adb('shell', 'cmd', 'statusbar', 'collapse')
+}
 
 async function connect() {
   let pid
   await expect.poll(() => {
-    pid = adb('shell', 'pidof', APP_ID).trim()
+    pid = adb('shell', 'pidof', APP_ID, '||', 'true').trim()
     return Boolean(pid && adb('shell', 'cat', '/proc/net/unix').includes(`webview_devtools_remote_${pid}`))
   }, { timeout: 15000 }).toBe(true)
   adb('forward', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`, `localabstract:webview_devtools_remote_${pid}`)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
-  await page.locator('.profileTrigger').waitFor()
+  // Cold starts take over 30 seconds on Android 8 emulators.
+  await page.locator('.profileTrigger').waitFor({ timeout: 90_000 })
   const skip = page.getByRole('button', { name: 'Skip', exact: true })
   if (await skip.isVisible()) await skip.click()
   return { browser, page }
@@ -30,10 +62,9 @@ test('notifications appear in the app while it is visible and in the system othe
   // Real videos, so their thumbnails load. Disabling notifications afterwards resets the known uploads.
   const [seed, visible, hidden] = ['jNQXAC9IVRw', 'dQw4w9WgXcQ', '9bZkp7q19f0']
   const stream = `stream${run}`.slice(0, 11).padEnd(11, '0')
-  const systemNotifications = () => adb('shell', 'dumpsys', 'notification', '--noredact')
   let browser, page
   try {
-    adb('shell', 'pm', 'grant', APP_ID, 'android.permission.POST_NOTIFICATIONS')
+    grantNotifications()
     adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
     adb('shell', 'wm', 'dismiss-keyguard')
     adb('shell', 'am', 'force-stop', APP_ID)
@@ -117,16 +148,16 @@ test('notifications appear in the app while it is visible and in the system othe
       localStorage.removeItem('opentubex-notification-history')
     }).catch(() => {})
     await browser?.close()
-    adb('forward', '--remove', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`)
+    removeForward()
   }
 })
 
 test('reminders that fire while the app is visible appear in the app, and turning notifications off pauses them', { skip: !enabled }, async () => {
   const run = Date.now().toString(36)
-  const [due, read, later] = ['due', 'read', 'later'].map(name => `${name}${run}`.slice(0, 11).padEnd(11, '0'))
+  const [due, read, later, background] = ['due', 'read', 'later', 'bg'].map(name => `${name}${run}`.slice(0, 11).padEnd(11, '0'))
   let browser, page
   try {
-    adb('shell', 'pm', 'grant', APP_ID, 'android.permission.POST_NOTIFICATIONS')
+    grantNotifications()
     adb('shell', 'am', 'force-stop', APP_ID)
     launch();
     ({ browser, page } = await connect())
@@ -212,20 +243,38 @@ test('reminders that fire while the app is visible appear in the app, and turnin
           title: reminder.notificationTitle,
           body: reminder.notificationBody,
           channelId: 'live-reminders',
+          actionTypeId: 'live-reminder',
           isExactNotification: false,
           schedule: { at: new Date(reminder.startTimestamp), allowWhileIdle: true },
           extra: { videoId }
         }]
       })
-    }, `bg${run}`.slice(0, 11))
+    }, background)
     adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
-    await expect.poll(() => adb('shell', 'dumpsys', 'notification', '--noredact').includes('Background stream'), { timeout: 180_000 }).toBe(true)
+    await expect.poll(() => systemNotifications().includes('Background stream'), { timeout: 180_000 }).toBe(true)
     // The app hears about the delivery too, and leaves the system notification alone.
     await new Promise(resolve => setTimeout(resolve, 3000))
-    assert.ok(adb('shell', 'dumpsys', 'notification', '--noredact').includes('Background stream'))
+    assert.ok(systemNotifications().includes('Background stream'))
     launch()
     await expect(page.getByRole('button', { name: 'Notifications (3 unread)', exact: true })).toBeVisible()
     await expect(page.locator('.toast', { hasText: 'Background stream' })).toHaveCount(0)
+
+    // Swiping the system notification away while the app is not running marks its entry read once it starts,
+    // and records the dismissal that syncs to other devices.
+    adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
+    await browser.close()
+    // Like the system ending the app for memory; a force stop would also remove its notifications.
+    adb('shell', 'su', '0', 'kill', '-9', adb('shell', 'pidof', APP_ID).trim())
+    await expect.poll(() => adb('shell', 'pidof', APP_ID, '||', 'true').trim()).toBe('')
+    await swipeAway('Background stream')
+    launch();
+    ({ browser, page } = await connect())
+    const readState = () => page.evaluate(path => ({
+      read: JSON.parse(localStorage.getItem('opentubex-notification-history')).find(entry => entry.path === path)?.read,
+      dismissed: JSON.parse(localStorage.getItem('opentubex-notification-dismissals') ?? '{}').dismissals?.some(dismissal => dismissal.key.includes(path)),
+    }), `/watch/${background}`)
+    await expect.poll(readState).toEqual({ read: true, dismissed: true })
+    await expect(page.getByRole('button', { name: 'Notifications (2 unread)', exact: true })).toBeVisible()
   } finally {
     await page?.evaluate(async () => {
       await window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 9001 }, { id: 9002 }, { id: 9003 }, { id: 9004 }, { id: 9005 }, { id: 9006 }] })
@@ -234,6 +283,6 @@ test('reminders that fire while the app is visible appear in the app, and turnin
       localStorage.removeItem('opentubex-notification-history')
     }).catch(() => {})
     await browser?.close()
-    adb('forward', '--remove', `tcp:${new URL(process.env.ANDROID_CDP_URL).port}`)
+    removeForward()
   }
 })
