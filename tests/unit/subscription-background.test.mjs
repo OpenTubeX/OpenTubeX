@@ -499,8 +499,7 @@ for (const kind of ['channel', 'completion']) {
   test(`configuration cancellation stops remaining ${kind} writes`, async () => {
     let now = 0
     const saved = []
-    let scheduler
-    scheduler = createSubscriptionBackgroundScheduler({
+    const scheduler = createSubscriptionBackgroundScheduler({
       now: () => now,
       fetchChannel: async () => ({}),
       saveResult: async result => {

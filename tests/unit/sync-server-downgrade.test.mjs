@@ -1925,7 +1925,6 @@ test('cleared activity stays hidden after reauthentication while newer activity 
 
 test('a download already in flight cannot restore cleared activity', async () => {
   let release
-  let events
   const pending = new Promise(resolve => { release = resolve })
   const f = fixture({}, {
     respond: async url => {
@@ -1938,7 +1937,7 @@ test('a download already in flight cannot restore cleared activity', async () =>
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
-  events = ['0001', '0002'].map(id => ({
+  const events = ['0001', '0002'].map(id => ({
     id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000,
   }))
   f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
@@ -2137,7 +2136,6 @@ test('a device request replayed under new event ids opens only once', async () =
   const opened = []
   const acknowledged = []
   let ids = ['first', 'second']
-  let payload
   const f = fixture({ syncServerDeviceId: recipient }, {
     encrypted: true,
     desktopTabs: { async create({ route }) { opened.push(route); return true } },
@@ -2149,7 +2147,7 @@ test('a device request replayed under new event ids opens only once', async () =
         : undefined
     },
   })
-  payload = await privacy.encryptSyncDocument({
+  const payload = await privacy.encryptSyncDocument({
     version: 1,
     type: 'openVideo',
     recipient,
@@ -2172,7 +2170,6 @@ test('a device request opens only after its receipt is saved', async () => {
   const stored = new Map()
   let quotaExceeded = true
   let failOpen = false
-  let payload
   const f = fixture({ syncServerDeviceId: recipient }, {
     encrypted: true,
     desktopTabs: { async create({ route }) { if (failOpen) return false; opened.push(route); return true } },
@@ -2191,7 +2188,7 @@ test('a device request opens only after its receipt is saved', async () => {
         : undefined
     },
   })
-  payload = await privacy.encryptSyncDocument({
+  const payload = await privacy.encryptSyncDocument({
     version: 1,
     type: 'openVideo',
     recipient,
@@ -2460,7 +2457,6 @@ for (const rememberHistory of [false, true]) {
     test(`received video resumes at the transferred position ${position} instead of stale history (remember history: ${rememberHistory})`, async () => {
       const recipient = 'test-device'
       const opened = []
-      let payload
       const f = fixture({ syncServerDeviceId: recipient }, {
         encrypted: true,
         desktopTabs: { async create({ route }) { opened.push(route); return true } },
@@ -2468,7 +2464,7 @@ for (const rememberHistory of [false, true]) {
           ? [{ id: 'handoff', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
           : undefined,
       })
-      payload = await privacy.encryptSyncDocument({
+      const payload = await privacy.encryptSyncDocument({
         version: 1,
         type: 'openVideo',
         recipient,

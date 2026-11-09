@@ -63,9 +63,9 @@ for (const [name, historyLength, presented, selecting, visible] of [
     app.component('FtIcon', { render: () => null })
     app.component('CapacitorTabPreview', { render: () => null })
     app.component('CapacitorTabActionsMenu', {
-      props: ['showHistory'],
-      render: compile(historyButton),
+      props: { showHistory: Boolean },
       data: () => ({ t: key => key, emit() {} }),
+      render: compile(historyButton),
     })
     const html = await renderToString(app)
     assert.equal(html.includes('capacitorPhoneTabHistoryButton'), false, 'cards have no history control')

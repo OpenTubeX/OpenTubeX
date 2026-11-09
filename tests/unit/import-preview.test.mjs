@@ -281,7 +281,7 @@ test('oversized history is reported without preventing smaller subscription prev
   assert.equal(rows.find(row => row.category === 'subscriptions').added, 1)
   const imported = []
   const errors = []
-  await forEachTakeoutImportEntry(file, new Set(['history', 'subscriptions']), paths, entry => imported.push(entry.type), (error, type) => errors.push(type))
+  await forEachTakeoutImportEntry(file, new Set(['history', 'subscriptions']), paths, entry => imported.push(entry.type), (_error, type) => errors.push(type))
   assert.deepEqual(imported, ['subscriptions'])
   assert.deepEqual(errors, ['history'])
 })

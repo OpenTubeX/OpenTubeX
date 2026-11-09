@@ -454,7 +454,7 @@ export default defineConfig([
     }
   },
   {
-    files: ['e2e/**/*.mjs'],
+    files: ['e2e/**/*.mjs', 'tests/**/*.mjs'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -472,6 +472,24 @@ export default defineConfig([
     rules: {
       '@stylistic/space-before-function-paren': 'off',
       '@stylistic/comma-dangle': ['error', 'only-multiline'],
+    },
+  },
+  {
+    name: 'tests',
+    files: ['tests/**/*.mjs'],
+    rules: {
+      // Tests compile source excerpts with `new Function`
+      'no-new-func': 'off',
+      // Tests stub built-in prototype methods and restore them afterwards
+      'no-extend-native': 'off',
+      // Captured listeners and watch callbacks take data, not an error, first
+      'n/no-callback-literal': 'off',
+      // Wait loops poll variables that asynchronous callbacks assign
+      'no-unmodified-loop-condition': 'off',
+      // Mocks record writes through setter-only properties
+      'accessor-pairs': 'off',
+      // Tests register several stub components in one file
+      'vue/one-component-per-file': 'off',
     },
   },
   {

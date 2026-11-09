@@ -356,6 +356,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
             store.commit('setPresentedTab', saved.tabs.presentedTabId)
             location.hash = saved.route
           }, saved).catch(error => { errors.push(new Error('Could not restore tabs and route', { cause: error })) })
+          // eslint-disable-next-line no-unsafe-finally -- unrestored emulator state must fail the run
           if (errors.length) throw new AggregateError(errors, 'Could not fully restore Android test state')
         }
       }

@@ -5,7 +5,7 @@ import { createCapacitorPreviewCache } from '../../src/renderer/tabs/capacitorPr
 const tab = (id, fullPath = '/home') => ({ id, route: { fullPath } })
 const deferred = () => {
   let resolve
-  const promise = new Promise(done => { resolve = done })
+  const promise = new Promise(_resolve => { resolve = _resolve })
   return { promise, resolve }
 }
 

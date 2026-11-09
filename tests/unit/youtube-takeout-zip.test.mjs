@@ -541,12 +541,12 @@ test('numbers picked playlists that share a title and reports unusable files', a
     new File([videos], 'Mix-videos.csv'),
     new File([videos], 'Mix.csv'),
     new File(['not a playlist'], 'notes.csv'),
-  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  ], async playlist => playlists.push(playlist.playlistName), (_error, filename) => errors.push(filename))
   assert.deepEqual(playlists, ['Mix', 'Mix (2)'])
   assert.deepEqual(errors, ['notes.csv'])
 
   errors.length = 0
-  await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (error, filename) => errors.push(filename))
+  await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (_error, filename) => errors.push(filename))
   assert.deepEqual(errors, ['playlists.csv'])
 })
 
@@ -565,7 +565,7 @@ test('imports the readable picked playlist CSVs when another cannot be read', as
   await forEachTakeoutPlaylistFile([
     { name: 'Gone-videos.csv', text: async () => { throw new Error('NotReadableError') } },
     new File(['Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'], 'Kept-videos.csv'),
-  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  ], async playlist => playlists.push(playlist.playlistName), (_error, filename) => errors.push(filename))
   assert.deepEqual(playlists, ['Kept'])
   assert.deepEqual(errors, ['Gone-videos.csv'])
 })

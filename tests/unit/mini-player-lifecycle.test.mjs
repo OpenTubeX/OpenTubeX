@@ -35,7 +35,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     ref,
     watch,
     inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }),
-    watchNavigationKey: Symbol(),
+    watchNavigationKey: Symbol('watchNavigationKey'),
     nextTick() {},
     onMounted: callback => mounted.push(callback),
     onBeforeUnmount: callback => unmounting.push(callback),

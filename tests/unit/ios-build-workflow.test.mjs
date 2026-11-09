@@ -28,6 +28,7 @@ for (const [snapshot, ref, expected] of [
     assert.equal(JSON.parse(await readFile(join(directory, 'package.json'), 'utf8')).version, expected)
     assert.equal(await readFile(output, 'utf8'), `name=opentubex-${expected}-ios-unsigned.ipa\n`)
     const artifact = job.steps.find(step => step.uses?.startsWith('actions/upload-artifact@'))
+    // eslint-disable-next-line no-template-curly-in-string -- GitHub Actions expression
     assert.equal(artifact.with.name, '${{ steps.package.outputs.name }}')
     assert.equal(artifact.with['if-no-files-found'], 'error')
   })

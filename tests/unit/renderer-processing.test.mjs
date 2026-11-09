@@ -128,7 +128,6 @@ test('history edits during serialization prevent stale writes and retry with fre
     video: { id: 'video', title: 'Video', duration: 120, uploader: { id: 'UCtest', name: 'Channel' } },
     metadata: { added_date: 1, watched_state: 'watching', position_millis: 30_000 },
   }]
-  let store
   let edited = false
   const jobs = createJobs(message => {
     if (edited || message.type !== 'chunk' || !message.path.includes('updates')) return
@@ -144,7 +143,7 @@ test('history edits during serialization prevent stale writes and retry with fre
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
-  store = historyStore(context.history)
+  const store = historyStore(context.history)
   store.commit('upsertToHistoryCache', local)
   const uploads = []
   let downloads = 0

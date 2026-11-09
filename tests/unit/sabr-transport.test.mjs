@@ -945,7 +945,7 @@ test('SABR initialization stays cached until the native source closes', async ()
 })
 
 test('replacing a SABR source aborts its outstanding network request', async () => {
-  const { createSabrTransport } = load((_uri, options) => new Promise((_, reject) => {
+  const { createSabrTransport } = load((_uri, options) => new Promise((_resolve, reject) => {
     options.signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true })
   }))
   const transport = createSabrTransport(sabrData, () => context)

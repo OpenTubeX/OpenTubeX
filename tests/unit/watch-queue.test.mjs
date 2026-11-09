@@ -7,8 +7,7 @@ import { computed, ref } from 'vue'
 import downloads from '../../src/renderer/store/modules/downloads.js'
 import { navigationDownloadId } from '../../src/renderer/helpers/downloadPlayback.js'
 
-import {
-  default as watchQueue,
+import watchQueue, {
   createWatchQueueState,
   watchQueueGetters,
   watchQueueMutations,

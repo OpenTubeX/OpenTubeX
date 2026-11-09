@@ -188,7 +188,7 @@ test('keeps paging past a stable release listed ahead of newer nightlies', async
     ['v0.37.3-beta', 'v0.37.2-nightly-2633', 'v0.37.2-beta'],
     ['v0.37.2-nightly-2600', 'v0.37.1-beta'],
     ['v0.37.1-nightly-2559']
-  ].map(tags => tags.map(tag_name => ({ prerelease: tag_name.includes('nightly'), tag_name })))
+  ].map(tags => tags.map(tag => ({ prerelease: tag.includes('nightly'), tag_name: tag })))
   const requestedUrls = []
   const releases = await fetchReleasePages(pageUrl(1), async (url) => {
     requestedUrls.push(url)

@@ -165,14 +165,14 @@ test('released clients preserve covers through repeated syncs and title edits', 
 test('released clients preserve sort orders through repeated syncs and title edits', async () => {
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
   const upgraded = createStore([{ _id: 'mixed', playlistName: 'Mixed versions', sortOrder: 'author_ascending', videos: [] }])
-  let upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
+  const upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
   const released = createStore()
   let releasedSnapshot = await syncReleasedPlaylists(adapter, released)
   released.state.playlists.playlists[0].playlistName = 'Renamed by released client'
   releasedSnapshot = await syncReleasedPlaylists(adapter, released, releasedSnapshot)
   await syncReleasedPlaylists(adapter, released, releasedSnapshot)
   assert.equal((await adapter.getPlaylist('mixed')).playlist.sort_order, 'author_ascending')
-  upgradedSnapshot = await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
+  await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
   assert.equal(upgraded.state.playlists.playlists[0].sortOrder, 'author_ascending')
   assert.equal(upgraded.state.playlists.playlists[0].playlistName, 'Renamed by released client')
 })
@@ -196,7 +196,7 @@ test('playlist sort orders sync between devices and unknown values follow the de
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
   assert.equal(first.state.playlists.playlists[0].sortOrder, 'custom')
   second.state.playlists.playlists[0].playlistName = 'Renamed'
-  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  await context.syncPlaylists(adapter, second, secondSnapshot)
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
   assert.deepEqual(syncUpdates, [true, false], 'only a sort order change keeps the update time')
 

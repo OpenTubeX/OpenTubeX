@@ -103,7 +103,7 @@ test('activity navigation focuses its new target even when a previous highlight 
   const start = component.indexOf('provide(settingsSearchNavigationKey, {')
   const end = component.indexOf('\nconst settingsSearchResults', start)
   vm.runInNewContext(component.slice(start, end), {
-    settingsSearchNavigationKey: Symbol(),
+    settingsSearchNavigationKey: Symbol('settingsSearchNavigationKey'),
     provide(_key, value) { navigation = value },
     openSearchResult: async () => targets[nextTarget++],
     settingsWindowRef: {

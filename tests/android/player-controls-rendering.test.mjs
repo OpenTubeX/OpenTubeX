@@ -61,7 +61,6 @@ for (const [classic, scale] of [[false, 1.25], [true, 1]]) {
         const panel = document.querySelector('.shaka-controls-button-panel')
         // Exercise the component's actual layout function in this frame. The
         // frame has no OverlayScrollbars, so the speed preset scroll clamp is a no-op.
-        // eslint-disable-next-line no-new-func
         new Function(`const clampOverlayScrollLeft = () => {}\n${layoutSource}\nupdateControlPanelLayout(arguments[0])\nupdateRightControlGlass(arguments[0])`)(panel)
         const visible = selector => getComputedStyle(panel.querySelector(selector)).display !== 'none'
         const rightGlass = panel.querySelector('.ft-right-control-glass')

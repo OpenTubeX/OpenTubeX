@@ -223,6 +223,7 @@ test('KWin restore polling does not clear minimized state while hidden in the tr
 
 test('a recreated tray receives a menu even when its contents are unchanged', () => {
   const { context, Window, trays } = fixture()
+  // eslint-disable-next-line no-new -- the constructor registers the window with the fixture
   new Window()
   context.configure({})
   context.configure({ enabled: false })

@@ -84,6 +84,7 @@ test('local playlists retain order and escape literal title placeholders', () =>
 })
 
 test('local playlist titles cannot expand into home or environment paths', () => {
+  // eslint-disable-next-line no-template-curly-in-string -- a literal shell expansion in a title
   for (const [title, folder] of [['$HOME', '_HOME'], ['${HOME}', '_{HOME}'], ['~root', '_root']]) {
     const args = buildYtDlpDownloadArguments({ videoIds: [videoId], mode: 'video', isPlaylist: true, title }).args
     assert.ok(args[args.indexOf('--output') + 1].startsWith(`${folder}/`), title)
@@ -120,6 +121,7 @@ test('filename templates cannot leave the download folder', () => {
   // yt-dlp ignores --paths for absolute templates, expands ~ and environment
   // variables, and reads `TYPES:` as the files a template applies to.
   for (const filenameTemplate of ['/tmp/{title}', '\\\\server\\share\\{title}', 'C:\\Users\\{title}', 'c:{title}', '~/{title}',
+    // eslint-disable-next-line no-template-curly-in-string -- a literal shell expansion in a template
     '../{title}', 'Music/../../{title}', 'Music\\..\\{title}', ' .. /{title}', '$HOME/{title}', '${HOME}/{title}',
     '%USERPROFILE%\\{title}', '%(uploader|..)s/{title}', 'thumbnail:/tmp/x', 'Subtitle,thumbnail:x', 'pl_infojson:../x',
     // An uploader named `C` would make a Windows drive, and an empty title would leave `..`.

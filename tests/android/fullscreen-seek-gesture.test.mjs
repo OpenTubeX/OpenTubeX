@@ -246,7 +246,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       const vtt = `WEBVTT\n\n00:00.000 --> 00:15.000\n${uri}#xywh=0,0,160,90\n\n00:15.000 --> 00:30.100\n${uri}#xywh=160,0,160,90\n`
       const storyboard = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }))
       window.__fullscreenSeekUrls = [storyboard]
-      try { await element.ui.getControls().getPlayer().addThumbnailsTrack(storyboard, 'text/vtt') } catch (error) { throw Error(JSON.stringify({ code: error.code, data: error.data, message: error.message })) }
+      try { await element.ui.getControls().getPlayer().addThumbnailsTrack(storyboard, 'text/vtt') } catch (error) { throw Error(JSON.stringify({ code: error.code, data: error.data, message: error.message }), { cause: error }) }
     }, appSpritePath)
     for (const orientation of ['0', '1']) {
       adb('settings', 'put', 'system', 'user_rotation', orientation)
@@ -264,7 +264,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       })
       try { await expect(filmstrip).toBeVisible() } catch (error) {
         const state = await player.evaluate(async element => ({ tracks: element.ui.getControls().getPlayer().getImageTracks(), frame: await element.ui.getControls().getPlayer().getThumbnails(null, 21) }))
-        throw Error(JSON.stringify(state))
+        throw Error(JSON.stringify(state), { cause: error })
       }
       await expect.poll(markedFrame).toBe('-160px 0px')
       await expect(previewLabel).toHaveText('0:21')

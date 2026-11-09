@@ -12,7 +12,7 @@ const loaderEnd = source.indexOf('\n    /**', loaderStart)
 
 function deferred() {
   let resolve
-  const promise = new Promise(res => { resolve = res })
+  const promise = new Promise(_resolve => { resolve = _resolve })
   return { promise, resolve }
 }
 

@@ -22,7 +22,7 @@ async function fixture() {
     invidiousAuthorizations: new Map(),
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
-    getDlnaFfmpegExecutable: () => new Promise((_, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
+    getDlnaFfmpegExecutable: () => new Promise((_resolve, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
     createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => [{ address: '93.184.215.14', family: 4 }] }),
     session: { defaultSession: { resolveProxy: async () => 'DIRECT' } },
     startDlnaCast: async (_owner, payload, _headers, _mux, _addresses, resolveProxy) => {
