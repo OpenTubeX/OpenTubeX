@@ -2214,6 +2214,9 @@ About:
   About: About
   Beta: Beta
   Commit: Commit
+  Get OpenTubeX: Get OpenTubeX
+  Community: Community
+  Contribute: Contribute
   Source code: Source code
   Licensed under the {licenseLink}: Licensed under the {licenseLink}
   AGPLv3: AGPLv3
@@ -2225,7 +2228,6 @@ About:
   OpenTubeX Wiki: OpenTubeX Wiki
   FAQ: FAQ
   Discussions: Discussions
-  Fluxer: Join our Fluxer Community
   Matrix: Matrix
   Report a problem: Report a problem
   GitHub issues: GitHub issues
@@ -2241,7 +2243,6 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX is made possible by {creditsPageLink}
   these people and projects: these people and projects
   Donate: Donate
-  Support the development of OpenTubeX: Support the development of OpenTubeX
 
 Profile:
   Customization: Customization

@@ -1499,14 +1499,15 @@ Tutorial:
     Action: Məlumatları idxal et
     Not Now: İndi yox
 About:
+  Get OpenTubeX: OpenTubeX-i əldə edin
+  Community: İcma
+  Contribute: Töhfə verin
   Documentation: Sənədləşmə
   Downloads: Yükləmələr
   Changelog: Dəyişiklik jurnalı
   Commit: Kommit
-  Fluxer: Fluxer icmamıza qoşulun
   Matrix: Matrix
   Email: E-poçt
-  Support the development of OpenTubeX: "OpenTubeX-in inkişafını dəstəkləyin"
 Profile:
   Customization: Fərdiləşdirmə
   Manage Profile Subscriptions: Profil abunəliklərini idarə et

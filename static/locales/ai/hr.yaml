@@ -1509,14 +1509,15 @@ Tutorial:
     Action: Uvezi podatke
     Not Now: Ne sada
 About:
+  Get OpenTubeX: Preuzmi OpenTubeX
+  Community: Zajednica
+  Contribute: Doprinesi
   Documentation: Dokumentacija
   Downloads: Preuzimanja
   Changelog: Dnevnik promjena
   Commit: Commit
-  Fluxer: Pridružite se našoj zajednici na Fluxeru
   Matrix: Matrix
   Email: E-pošta
-  Support the development of OpenTubeX: "Podržite razvoj OpenTubeXa"
 Profile:
   Customization: Prilagodba
   Manage Profile Subscriptions: Upravljaj pretplatama profila

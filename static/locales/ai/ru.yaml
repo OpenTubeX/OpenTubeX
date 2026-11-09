@@ -1470,14 +1470,15 @@ Tutorial:
     Action: Импортировать данные
     Not Now: Не сейчас
 About:
+  Get OpenTubeX: Получить OpenTubeX
+  Community: Сообщество
+  Contribute: Внести вклад
   Documentation: Документация
   Downloads: Загрузки
   Changelog: Список изменений
   Commit: Коммит
-  Fluxer: Присоединиться к нашему сообществу Fluxer
   Matrix: Matrix
   Email: Электронная почта
-  Support the development of OpenTubeX: "Поддержать разработку OpenTubeX"
 Profile:
   Customization: Настройка
   Manage Profile Subscriptions: Управление подписками профиля

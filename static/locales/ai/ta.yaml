@@ -1536,14 +1536,15 @@ Tutorial:
     Action: தரவை இறக்குமதி செய்
     Not Now: இப்போது வேண்டாம்
 About:
+  Get OpenTubeX: OpenTubeX ஐப் பெறுக
+  Community: சமூகம்
+  Contribute: பங்களிக்கவும்
   Documentation: ஆவணங்கள்
   Downloads: பதிவிறக்கங்கள்
   Changelog: மாற்றப் பதிவு
   Commit: கமிட்
-  Fluxer: எங்கள் Fluxer சமூகத்தில் இணையுங்கள்
   Matrix: Matrix
   Email: மின்னஞ்சல்
-  Support the development of OpenTubeX: "OpenTubeX மேம்பாட்டை ஆதரியுங்கள்"
 Profile:
   Customization: தனிப்பயனாக்கம்
   Manage Profile Subscriptions: சுயவிவரச் சந்தாக்களை நிர்வகி

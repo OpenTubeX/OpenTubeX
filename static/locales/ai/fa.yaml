@@ -1558,17 +1558,18 @@ Tutorial:
     Action: ورود داده‌ها
     Not Now: اکنون نه
 About:
+  Get OpenTubeX: دریافت OpenTubeX
+  Community: جامعه
+  Contribute: مشارکت
   Documentation: مستندات
   Downloads: دانلودها
   Changelog: تغییرات
   Commit: کامیت
   Licensed under the {licenseLink}: دارای مجوز {licenseLink}
-  Fluxer: به انجمن Fluxer ما بپیوندید
   Matrix: Matrix
   Email: ایمیل
   Please read the {roomRulesLink}: لطفاً {roomRulesLink} را بخوانید
   OpenTubeX is made possible by {creditsPageLink}: ساخت OpenTubeX با کمک {creditsPageLink} ممکن شده است
-  Support the development of OpenTubeX: "از توسعهٔ OpenTubeX حمایت کنید"
 Profile:
   Customization: شخصی‌سازی
   Manage Profile Subscriptions: مدیریت اشتراک‌های نمایه

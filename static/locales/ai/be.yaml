@@ -1559,17 +1559,18 @@ Tutorial:
     Action: Імпартаваць даныя
     Not Now: Не цяпер
 About:
+  Get OpenTubeX: Атрымаць OpenTubeX
+  Community: Супольнасць
+  Contribute: Зрабіць унёсак
   Documentation: Дакументацыя
   Downloads: Спампоўванні
   Changelog: Журнал змяненняў
   Commit: Каміт
   Licensed under the {licenseLink}: Ліцэнзія — {licenseLink}
-  Fluxer: Далучыцца да нашай супольнасці ў Fluxer
   Matrix: Matrix
   Email: Электронная пошта
   Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
-  Support the development of OpenTubeX: "Падтрымаць распрацоўку OpenTubeX"
 Profile:
   Customization: Наладжванне
   Manage Profile Subscriptions: Кіраванне падпіскамі профілю

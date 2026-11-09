@@ -1576,17 +1576,18 @@ Tutorial:
     Action: ڈیٹا امپورٹ کریں
     Not Now: ابھی نہیں
 About:
+  Get OpenTubeX: OpenTubeX حاصل کریں
+  Community: کمیونٹی
+  Contribute: حصہ ڈالیں
   Documentation: دستاویزات
   Downloads: ڈاؤن لوڈز
   Changelog: تبدیلیوں کا ریکارڈ
   Commit: کمٹ
   Licensed under the {licenseLink}: '{licenseLink} کے تحت لائسنس یافتہ'
-  Fluxer: ہماری Fluxer کمیونٹی میں شامل ہوں
   Matrix: Matrix
   Email: ای میل
   Please read the {roomRulesLink}: براہ کرم {roomRulesLink} پڑھیں
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX کو {creditsPageLink} نے ممکن بنایا ہے
-  Support the development of OpenTubeX: "OpenTubeX کی تیاری میں تعاون کریں"
 Profile:
   Customization: حسب ضرورت
   Manage Profile Subscriptions: پروفائل سبسکرپشنز کا انتظام کریں

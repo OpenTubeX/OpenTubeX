@@ -1496,14 +1496,15 @@ Tutorial:
     Action: データをインポート
     Not Now: 後で
 About:
+  Get OpenTubeX: OpenTubeX を入手
+  Community: コミュニティ
+  Contribute: 貢献する
   Documentation: ドキュメント
   Downloads: ダウンロード
   Changelog: 変更ログ
   Commit: コミット
-  Fluxer: Fluxerコミュニティに参加
   Matrix: Matrix
   Email: メール
-  Support the development of OpenTubeX: "OpenTubeX の開発を支援する"
 Profile:
   Customization: カスタマイズ
   Manage Profile Subscriptions: プロフィールの登録チャンネルを管理

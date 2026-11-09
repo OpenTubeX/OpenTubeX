@@ -1713,17 +1713,18 @@ Tutorial:
     Action: Voer data in
     Not Now: Nie nou nie
 About:
+  Get OpenTubeX: Kry OpenTubeX
+  Community: Gemeenskap
+  Contribute: Dra by
   Documentation: Dokumentasie
   Downloads: Aflaaie
   Changelog: Veranderingslogboek
   Commit: Commit
   Licensed under the {licenseLink}: Gelisensieer onder die {licenseLink}
-  Fluxer: Sluit aan by ons Fluxer-gemeenskap
   Matrix: Matrix
   Email: E-pos
   Please read the {roomRulesLink}: Lees asseblief die {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX word moontlik gemaak deur {creditsPageLink}
-  Support the development of OpenTubeX: "Ondersteun die ontwikkeling van OpenTubeX"
 Profile:
   Customization: Aanpassing
   Manage Profile Subscriptions: Bestuur profielintekeninge

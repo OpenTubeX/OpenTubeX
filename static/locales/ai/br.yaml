@@ -1496,14 +1496,15 @@ Tutorial:
     Action: "Enporzhiañ roadennoù"
     Not Now: "Diwezhatoc'h"
 About:
+  Get OpenTubeX: Kaout OpenTubeX
+  Community: Kumuniezh
+  Contribute: Kenlabourat
   Documentation: Teuliadur
   Downloads: Pellgargañ
   Changelog: Deizlevr ar cheñchamantoù
   Commit: "Engouestl"
-  Fluxer: "Emezelañ ouzh hor c'humuniezh Fluxer"
   Matrix: Matrix
   Email: "Postel"
-  Support the development of OpenTubeX: "Skoazellañ diorren OpenTubeX"
 Profile:
   Customization: Personelaat
   Manage Profile Subscriptions: Merañ koumanantoù ar profil

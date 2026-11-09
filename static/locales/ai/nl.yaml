@@ -1530,17 +1530,18 @@ Tutorial:
     Action: Gegevens importeren
     Not Now: Niet nu
 About:
+  Get OpenTubeX: OpenTubeX downloaden
+  Community: Gemeenschap
+  Contribute: Bijdragen
   Documentation: Documentatie
   Downloads: Downloads
   Changelog: Wijzigingslogboek
   Commit: Commit
   Licensed under the {licenseLink}: Uitgebracht onder de {licenseLink}
-  Fluxer: Word lid van onze Fluxer-community
   Matrix: Matrix
   Email: E-mail
   Please read the {roomRulesLink}: Lees de {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
-  Support the development of OpenTubeX: "Steun de ontwikkeling van OpenTubeX"
 Profile:
   Customization: Aanpassen
   Manage Profile Subscriptions: Profielabonnementen beheren

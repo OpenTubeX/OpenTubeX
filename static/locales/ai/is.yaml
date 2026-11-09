@@ -1502,14 +1502,15 @@ Tutorial:
     Action: Flytja inn gögn
     Not Now: Ekki núna
 About:
+  Get OpenTubeX: Sækja OpenTubeX
+  Community: Samfélag
+  Contribute: Leggja sitt af mörkum
   Documentation: Skjöl
   Downloads: Niðurhal
   Changelog: Breytingaskrá
   Commit: Git-vistun
-  Fluxer: Vertu með í Fluxer-samfélaginu okkar
   Matrix: Matrix
   Email: Netfang
-  Support the development of OpenTubeX: "Styðja við þróun OpenTubeX"
 Profile:
   Customization: Sérsnið
   Manage Profile Subscriptions: Stjórna áskriftum prófíls

@@ -1497,14 +1497,15 @@ Tutorial:
     Action: 匯入資料
     Not Now: 暫時不要
 About:
+  Get OpenTubeX: 取得 OpenTubeX
+  Community: 社群
+  Contribute: 參與貢獻
   Documentation: 文件
   Downloads: 下載
   Changelog: 變更紀錄
   Commit: 提交版本
-  Fluxer: 加入我們的 Fluxer 社群
   Matrix: Matrix
   Email: 電子郵件
-  Support the development of OpenTubeX: "支持 OpenTubeX 的開發"
 Profile:
   Customization: 自訂
   Manage Profile Subscriptions: 管理個人資料的訂閱

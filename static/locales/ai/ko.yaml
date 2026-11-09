@@ -1752,6 +1752,9 @@ Tutorial:
     Action: 데이터 가져오기
     Not Now: 나중에
 About:
+  Get OpenTubeX: OpenTubeX 받기
+  Community: 커뮤니티
+  Contribute: 기여하기
   Documentation: 문서
   Downloads: 다운로드
   Changelog: 변경 로그
@@ -1759,12 +1762,10 @@ About:
   Licensed under the {licenseLink}: '{licenseLink} 라이선스로 배포'
   AGPLv3: AGPLv3
   Discussions: 토론
-  Fluxer: Fluxer 커뮤니티 참여
   Matrix: Matrix
   Email: 이메일
   Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
-  Support the development of OpenTubeX: "OpenTubeX 개발 후원하기"
 Profile:
   Customization: 맞춤 설정
   Manage Profile Subscriptions: 프로필 구독 관리

@@ -1496,14 +1496,15 @@ Tutorial:
     Action: Importovat data
     Not Now: Teď ne
 About:
+  Get OpenTubeX: Získat OpenTubeX
+  Community: Komunita
+  Contribute: Přispět
   Documentation: Dokumentace
   Downloads: Ke stažení
   Changelog: Seznam změn
   Commit: Commit
-  Fluxer: Připojit se k naší komunitě na Fluxeru
   Matrix: Matrix
   Email: E-mail
-  Support the development of OpenTubeX: "Podpořte vývoj OpenTubeX"
 Profile:
   Customization: Přizpůsobení
   Manage Profile Subscriptions: Spravovat odběry profilu

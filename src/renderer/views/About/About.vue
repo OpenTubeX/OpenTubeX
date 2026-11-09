@@ -50,10 +50,40 @@
           <h3 class="title">
             {{ chunk.title }}
           </h3>
-          <div
-            v-safer-html="chunk.content"
-            class="content"
-          />
+          <div class="content">
+            <div
+              v-for="(line, index) in chunk.lines"
+              :key="index"
+              class="links"
+            >
+              <span
+                v-for="item in line"
+                :key="item.href"
+              >
+                <a
+                  :href="item.href"
+                  :lang="item.lang"
+                  class="link"
+                >
+                  <FtIcon
+                    :icon="item.icon"
+                    class="linkIcon"
+                  />{{ item.label }}</a>
+                <span
+                  v-if="item.license"
+                  class="license"
+                >
+                  <a :href="item.license.href">{{ item.license.label }}</a>
+                </span>
+              </span>
+            </div>
+            <div
+              v-if="chunk.note"
+              class="note"
+            >
+              {{ chunk.note }}
+            </div>
+          </div>
         </figure>
       </section>
     </FtCard>
@@ -67,7 +97,6 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
-import { vSaferHtml } from '../../directives/vSaferHtml.js'
 import { getNightlyCommit } from '../../helpers/versionDisplay.js'
 
 import packageDetails from '../../../../package.json'
@@ -90,68 +119,56 @@ const runtimeVersions = process.env.IS_ELECTRON
 
 const chunks = computed(() => [
   {
-    icon: ['fab', 'github'],
-    title: t('About.Source code'),
-    content: [
-      '<a href="https://github.com/OpenTubeX/OpenTubeX" lang="en" dir="ltr">GitHub: OpenTubeX/OpenTubeX</a>',
-      t('About.Licensed under the {licenseLink}', {
-        licenseLink: `<a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`,
-      }),
-    ].join('<br>'),
-  },
-  {
-    icon: ['fas', 'globe'],
-    title: t('About.Website'),
-    content: '<a href="https://opentubex.org/">https://opentubex.org/</a>',
-  },
-  {
-    icon: ['fas', 'file-download'],
-    title: t('About.Downloads'),
-    content: [
-      `<a href="https://opentubex.org/downloads/">${t('About.Website')}</a>`,
-      `<a href="https://github.com/OpenTubeX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`,
-    ].join('<br>'),
-  },
-  {
-    icon: ['fas', 'file-lines'],
-    title: t('About.Changelog'),
-    content: '<a href="https://opentubex.org/changelog/">https://opentubex.org/changelog/</a>',
+    icon: ['fas', 'download'],
+    title: t('About.Get OpenTubeX'),
+    lines: [
+      [
+        { icon: ['fas', 'globe'], label: t('About.Website'), href: 'https://opentubex.org/' },
+        { icon: ['fas', 'file-download'], label: t('About.Downloads'), href: 'https://opentubex.org/downloads/' },
+        { icon: ['fas', 'file-lines'], label: t('About.Changelog'), href: 'https://opentubex.org/changelog/' },
+      ],
+      [{ icon: ['fab', 'github'], label: t('About.GitHub releases'), href: 'https://github.com/OpenTubeX/OpenTubeX/releases' }],
+    ],
   },
   {
     icon: ['fas', 'question-circle'],
     title: t('About.Help'),
-    content: [
-      `<a href="https://opentubex.org/docs/">${t('About.Documentation')}</a>`,
-      `<a href="https://github.com/OpenTubeX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`,
-    ].join(' / '),
+    lines: [
+      [
+        { icon: ['fas', 'book-open'], label: t('About.Documentation'), href: 'https://opentubex.org/docs/' },
+        { icon: ['fas', 'comment'], label: t('About.Discussions'), href: 'https://github.com/OpenTubeX/OpenTubeX/discussions/' },
+      ],
+      [{ icon: ['fas', 'exclamation-circle'], label: t('About.Report a problem'), href: 'https://github.com/OpenTubeX/OpenTubeX/issues' }],
+    ],
+    note: t('About.Please check for duplicates before posting'),
   },
   {
-    icon: ['fas', 'exclamation-circle'],
-    title: t('About.Report a problem'),
-    content: [
-      `<a href="https://github.com/OpenTubeX/OpenTubeX/issues">${t('About.GitHub issues')}</a>`,
-      t('About.Please check for duplicates before posting'),
-    ].join('<br>'),
+    icon: ['fas', 'users'],
+    title: t('About.Community'),
+    lines: [
+      [
+        { icon: ['fac', 'fluxer'], label: 'Fluxer', href: 'https://fluxer.opentubex.org', lang: 'en' },
+        { icon: ['fac', 'matrix'], label: t('About.Matrix'), href: 'https://matrix.opentubex.org' },
+      ],
+    ],
   },
   {
-    icon: ['fac', 'fluxer'],
-    title: t('About.Fluxer'),
-    content: '<a href="https://fluxer.opentubex.org">https://fluxer.opentubex.org</a>',
-  },
-  {
-    icon: ['fac', 'matrix'],
-    title: t('About.Chat on Matrix'),
-    content: '<a href="https://matrix.opentubex.org">#opentubex:matrix.org</a>',
-  },
-  {
-    icon: ['fas', 'language'],
-    title: t('About.Translate'),
-    content: '<a href="https://weblate.opentubex.org/engage/opentubex/">https://weblate.opentubex.org/engage/opentubex/</a>',
-  },
-  {
-    icon: ['fas', 'heart'],
-    title: t('About.Donate'),
-    content: `<a href="https://opentubex.org/donate/">${t('About.Support the development of OpenTubeX')}</a>`,
+    icon: ['fas', 'puzzle-piece'],
+    title: t('About.Contribute'),
+    lines: [
+      [
+        {
+          icon: ['fab', 'github'],
+          label: t('About.Source code'),
+          href: 'https://github.com/OpenTubeX/OpenTubeX',
+          license: { label: t('About.AGPLv3'), href: 'https://www.gnu.org/licenses/agpl-3.0.en.html' },
+        },
+      ],
+      [
+        { icon: ['fas', 'language'], label: t('About.Translate'), href: 'https://weblate.opentubex.org/engage/opentubex/' },
+        { icon: ['fas', 'heart'], label: t('About.Donate'), href: 'https://opentubex.org/donate/' },
+      ],
+    ],
   },
 ])
 </script>

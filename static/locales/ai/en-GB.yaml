@@ -1484,14 +1484,15 @@ Tutorial:
     Action: Import data
     Not Now: Not now
 About:
+  Get OpenTubeX: Get OpenTubeX
+  Community: Community
+  Contribute: Contribute
   Documentation: Documentation
   Downloads: Downloads
   Changelog: Changelog
   Commit: Commit
-  Fluxer: Join our Fluxer Community
   Matrix: Matrix
   Email: Email
-  Support the development of OpenTubeX: "Support the development of OpenTubeX"
 Profile:
   Customization: Customisation
   Manage Profile Subscriptions: Manage profile subscriptions
