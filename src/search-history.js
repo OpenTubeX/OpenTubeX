@@ -156,3 +156,20 @@ export function sortSearchHistoryByLastUpdatedAt(historyItems) {
 export function getSearchFilterTabId(presentedTabId) {
   return (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) ? (presentedTabId ?? 'web') : 'web'
 }
+
+/**
+ * Reads the search filters from a search route's query.
+ * @param {Record<string, string | string[] | null | undefined>} query
+ * @returns {{ prioritize: string, time: string, type: string, duration: string, features: string[] }}
+ */
+export function getSearchSettingsFromRouteQuery(query) {
+  const features = query.features
+  return {
+    prioritize: query.prioritize ?? DEFAULT_SEARCH_SETTINGS.prioritize,
+    time: query.time ?? DEFAULT_SEARCH_SETTINGS.time,
+    type: query.type ?? DEFAULT_SEARCH_SETTINGS.type,
+    duration: query.duration ?? DEFAULT_SEARCH_SETTINGS.duration,
+    // A single feature is a string after a page refresh
+    features: typeof features === 'string' ? [features] : (features ?? []),
+  }
+}
