@@ -39,9 +39,10 @@ export function createFcastPacketReader(onPacket) {
 }
 
 export class FcastConnection {
-  constructor(device, { onPacket, onClosed }, connectSocket = connect) {
+  constructor(device, { onPacket, onClosed, connectTimeoutMs = 5000 }, connectSocket = connect) {
     this.closed = false
     this.onClosed = onClosed
+    this.connectTimeoutMs = connectTimeoutMs
     this.socket = connectSocket({ host: device.address, port: device.port })
     this.socket.setNoDelay(true)
     const read = createFcastPacketReader(onPacket)
@@ -57,7 +58,7 @@ export class FcastConnection {
   open() {
     if (this.closed) return Promise.reject(castError('FCast receiver did not respond', 'CAST_TIMEOUT'))
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => this.close(), 5000)
+      const timer = setTimeout(() => this.close(), this.connectTimeoutMs)
       this.socket.once('connect', () => { clearTimeout(timer); resolve(this.socket.localAddress) })
       this.socket.once('close', () => { clearTimeout(timer); reject(castError('FCast receiver did not respond', 'CAST_TIMEOUT')) })
     })
@@ -85,8 +86,8 @@ export class FcastConnection {
 export class FcastManager extends FcastSession {
   constructor(executable, powerSaveBlocker, options = {}) {
     super({
-      discover: () => discoverCastDevices(executable, 'discover-fcast'),
-      createConnection: (device, handlers) => new FcastConnection(device, handlers),
+      discover: () => discoverCastDevices(executable, 'discover-fcast', options.discoveryTimeoutMs),
+      createConnection: (device, handlers) => new FcastConnection(device, { ...handlers, connectTimeoutMs: options.connectTimeoutMs }),
       createMedia: ({ source, deviceAddress, token, getHeaders, isAllowedUrl, fetchMedia }) =>
         createCastMediaServer(source, deviceAddress, token, getHeaders, isAllowedUrl, fetchMedia),
       randomId: () => randomBytes(24).toString('hex'),

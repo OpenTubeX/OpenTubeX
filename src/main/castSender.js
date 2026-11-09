@@ -10,8 +10,8 @@ export const CAST_RECEIVER = 'urn:x-cast:com.google.cast.receiver'
 export const CAST_MEDIA = 'urn:x-cast:com.google.cast.media'
 
 /** `command` is `discover` for Google Cast or `discover-fcast` for FCast receivers. */
-export async function discoverCastDevices(executable, command = 'discover') {
-  const { stdout } = await execFileAsync(executable, [command], { timeout: 6000, maxBuffer: 256_000, windowsHide: true })
+export async function discoverCastDevices(executable, command = 'discover', timeoutMs = 6000) {
+  const { stdout } = await execFileAsync(executable, [command], { timeout: timeoutMs, maxBuffer: 256_000, windowsHide: true })
   const devices = JSON.parse(stdout)
   if (!Array.isArray(devices)) throw Object.assign(new Error('Invalid Cast discovery response'), { code: 'CAST_DISCOVERY_FAILED' })
   return devices.filter(device => typeof device.id === 'string' && device.id.length <= 256 &&
@@ -21,8 +21,9 @@ export async function discoverCastDevices(executable, command = 'discover') {
 
 /** The helper keeps native Cast networking out of the renderer. */
 export class CastSender extends EventEmitter {
-  constructor(executable, device) {
+  constructor(executable, device, responseTimeoutMs = 8000) {
     super()
+    this.responseTimeoutMs = responseTimeoutMs
     this.nextId = 1
     this.pending = new Map()
     this.closed = false
@@ -73,7 +74,7 @@ export class CastSender extends EventEmitter {
       }
       const connected = address => { cleanup(); resolve(address) }
       const closed = error => { cleanup(); reject(error) }
-      const timer = setTimeout(() => { this.close(Object.assign(new Error('Cast device did not respond'), { code: 'CAST_TIMEOUT' })) }, 8000)
+      const timer = setTimeout(() => { this.close(Object.assign(new Error('Cast device did not respond'), { code: 'CAST_TIMEOUT' })) }, this.responseTimeoutMs)
       this.once('connected', connected)
       this.once('closed', closed)
       if (this.closed) closed(this.closeError)
@@ -88,7 +89,7 @@ export class CastSender extends EventEmitter {
         const timer = setTimeout(() => {
           this.pending.delete(id)
           reject(Object.assign(new Error('Cast device did not respond'), { code: 'CAST_TIMEOUT' }))
-        }, 8000)
+        }, this.responseTimeoutMs)
         this.pending.set(id, { resolve, reject, timer, namespace })
       }
       this.process.stdin.write(`${JSON.stringify({ id, namespace, destination, payload })}\n`, error => {

@@ -83,7 +83,9 @@ async function upstreamForTest(t) {
 }
 
 function managerForTest(t, receiver, options = {}) {
-  const manager = new FcastManager('/must-not-run', options.powerSaveBlocker, { appVersion: '1.2.3', ...options })
+  // Every fixture receiver accepts, announces its version and starts playback.
+  // A busy host can outlast the production deadlines, so these only catch hangs.
+  const manager = new FcastManager('/must-not-run', options.powerSaveBlocker, { appVersion: '1.2.3', connectTimeoutMs: 60_000, versionTimeoutMs: 60_000, loadTimeoutMs: 60_000, ...options })
   manager.devices.set(receiver.device.id, receiver.device)
   t.after(() => manager.stop())
   return manager
@@ -273,7 +275,9 @@ test('FCast discovers receivers through the packaged helper', async t => {
 printf '%s\\n' '[{"id":"TV","name":"TV","address":"127.0.0.1","port":46899},{"id":"Kitchen","name":"Kitchen","address":"::1","port":46899}]'
 `)
   await chmod(executable, 0o755)
-  const manager = new FcastManager(executable)
+  // The production deadline bounds a real network scan. Under CPU contention
+  // even this shell fixture can take longer to start, so this only catches hangs.
+  const manager = new FcastManager(executable, undefined, { discoveryTimeoutMs: 60_000 })
   assert.deepEqual(await manager.discover(), [{ id: 'TV', name: 'TV' }])
   assert.equal(manager.devices.get('TV').port, 46899)
 })

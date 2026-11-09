@@ -51,13 +51,14 @@ function mediaState(cast, connected = true) {
  * platform transport with `open()`, `send(opcode, body)` and `close()`.
  */
 export class FcastSession {
-  constructor({ discover, createConnection, createMedia, randomId, powerSaveBlocker, appVersion, loadTimeoutMs = 30_000 }) {
+  constructor({ discover, createConnection, createMedia, randomId, powerSaveBlocker, appVersion, versionTimeoutMs = 3000, loadTimeoutMs = 30_000 }) {
     this.discoverDevices = discover
     this.createConnection = createConnection
     this.createMedia = createMedia
     this.randomId = randomId
     this.powerSaveBlocker = powerSaveBlocker
     this.appVersion = appVersion
+    this.versionTimeoutMs = versionTimeoutMs
     this.loadTimeoutMs = loadTimeoutMs
     this.devices = new Map()
     this.active = null
@@ -127,7 +128,7 @@ export class FcastSession {
       const localAddress = await connection.open()
       await connection.send(FcastOpcode.VERSION, { version: PROTOCOL_VERSION })
       // Receivers announce their version on connect; early v2 receivers may not.
-      await this.waitFor(cast, () => cast.receiverVersion !== undefined, 3000)
+      await this.waitFor(cast, () => cast.receiverVersion !== undefined, this.versionTimeoutMs)
       cast.version = Math.min(PROTOCOL_VERSION, cast.receiverVersion ?? 2)
       if (cast.version >= 3) {
         await connection.send(FcastOpcode.INITIAL, { appName: 'OpenTubeX', ...(this.appVersion ? { appVersion: this.appVersion } : {}) })
