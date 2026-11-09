@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { registerHooks } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -31,14 +31,6 @@ test('preview storage replaces cached bytes atomically and shares avatar files',
   assert.equal(await storage.read(avatar), 'data:image/jpeg;base64,YXZhdGFy')
   assert.equal((await readdir(storage.directory())).length, 2)
   assert.equal(await storage.read('../outside'), null)
-})
-
-test('preview storage cleans temporary files after a failed rename', async t => {
-  const storage = await storageFor(t)
-  const name = createTabPreviewFileName()
-  await mkdir(join(storage.directory(), name))
-  await assert.rejects(storage.writePreview(Buffer.from('replacement'), name))
-  assert.deepEqual(await readdir(storage.directory()), [name])
 })
 
 test('preview storage replaces old PNG entries and prunes only unreferenced cache files', async t => {

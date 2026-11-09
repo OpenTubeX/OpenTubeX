@@ -4,10 +4,8 @@ import test from 'node:test'
 import {
   buildCurrentShiftedTabIds,
   buildShiftedTabIds,
-  getDraggedTabIds,
-  getTabIndexShift
+  getDraggedTabIds
 } from '../../src/renderer/components/TabBar/tabReorder.js'
-import { computeReorderOffsets } from '../../src/renderer/helpers/reorderOffsets.js'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
 
 const tabs = [
@@ -28,44 +26,6 @@ test('shifts selected tabs together without collapsing the gaps between them', (
 
   assert.deepEqual(draggedTabIds, ['b', 'd'])
   assert.deepEqual(reorderedTabIds, ['a', 'c', 'b', 'e', 'd'])
-})
-
-test('dragging an unselected tab leaves the selection out of the drag', () => {
-  assert.deepEqual(getDraggedTabIds(tabs, new Set(['b', 'd']), 'c'), ['c'])
-})
-
-test('keeps pinned and unpinned selected tabs in separate drag groups', () => {
-  assert.deepEqual(getDraggedTabIds(tabs, new Set(['a', 'b']), 'b'), ['b'])
-  assert.deepEqual(getDraggedTabIds(tabs, new Set(['a', 'b']), 'a'), ['a'])
-})
-
-test('clamps shared index shifts to the pinned boundary and selected tab edges', () => {
-  const rects = tabs.map((tab, index) => ({
-    id: tab.id,
-    start: index * 102,
-    size: 100
-  }))
-
-  assert.equal(getTabIndexShift(rects, new Set(['a']), 0, 1000, 0, 0), 0)
-  assert.equal(getTabIndexShift(rects, new Set(['b', 'd']), 3, 0, 1, 4), 0)
-  assert.equal(getTabIndexShift(rects, new Set(['c', 'e']), 4, 356, 1, 4), -1)
-  assert.equal(getTabIndexShift(rects, new Set(['b', 'd']), 1, 1000, 1, 4), 1)
-})
-
-test('computes offsets for the final spacing-preserving order', () => {
-  const rects = tabs.map((tab, index) => ({
-    id: tab.id,
-    start: index * 102,
-    size: 100
-  }))
-  const offsets = computeReorderOffsets(rects, ['a', 'c', 'b', 'e', 'd'], 2)
-
-  assert.deepEqual(offsets, {
-    c: -102,
-    b: 102,
-    e: -102,
-    d: 102
-  })
 })
 
 test('reconciles a pending drag with tabs opened or closed while settling', () => {

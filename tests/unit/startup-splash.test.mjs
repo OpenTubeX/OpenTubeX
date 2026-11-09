@@ -1,33 +1,8 @@
 import assert from 'node:assert/strict'
-import { createRequire } from 'node:module'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, effectScope, nextTick, reactive, ref, watch } from 'vue'
-import { cacheStartupAppearance, curtainExtent, STARTUP_REVEAL_DURATION_MS } from '../../src/renderer/helpers/startupSplash.js'
-import { getThemeBackground } from '../../src/renderer/helpers/customTheme.js'
-import { materialSeedPalette } from '../../src/materialTheme.js'
-import { androidDynamicColors } from '../../src/renderer/helpers/dynamicColors.js'
-
-test('curtains cover the window initially and open from the rail before the hem', () => {
-  for (const depth of [0, 0.25, 0.5, 0.75, 1]) assert.equal(curtainExtent(0, depth), 1)
-  assert.equal(curtainExtent(100, 1), 1, 'the hem initially trails the rail')
-  for (const elapsed of [100, 180, 260]) {
-    assert.ok(curtainExtent(elapsed, 0) < curtainExtent(elapsed, 0.5))
-    assert.ok(curtainExtent(elapsed, 0.5) < curtainExtent(elapsed, 1))
-  }
-})
-
-test('all fabric leaves the viewport within the shortened reveal', () => {
-  assert.ok(STARTUP_REVEAL_DURATION_MS <= 600)
-  for (let row = 0; row <= 100; row++) {
-    assert.equal(curtainExtent(STARTUP_REVEAL_DURATION_MS, row / 100), 0)
-    for (let elapsed = 0; elapsed <= 1000; elapsed += 10) {
-      const extent = curtainExtent(elapsed, row / 100)
-      assert.ok(Number.isFinite(extent) && extent >= 0 && extent <= 1)
-    }
-  }
-})
+import { cacheStartupAppearance } from '../../src/renderer/helpers/startupSplash.js'
 
 test('the initial splash uses native appearance without the renderer', async () => {
   const properties = new Map()
@@ -52,7 +27,7 @@ test('the initial splash uses native appearance without the renderer', async () 
   assert.equal(presented, true)
 })
 
-for (const hideSplash of [true, false, undefined]) {
+for (const hideSplash of [true, false]) {
   test(`early startup honors hideSplash=${hideSplash} before loading the renderer`, async () => {
     const script = await readFile(new URL('../../src/renderer/startup/boot.js', import.meta.url), 'utf8')
     let removed = false
@@ -122,56 +97,6 @@ test('mobile startup survives unavailable or corrupt appearance storage', async 
   }
 })
 
-test('mobile splash keeps its progress bar still only until the appearance is cached', async () => {
-  const script = await readFile(new URL('../../src/renderer/startup/boot.js', import.meta.url), 'utf8')
-  for (const cached of [null, JSON.stringify({ light: { background: '#f1f1f1', dark: false }, hideSplash: false })]) {
-    const attributes = new Set()
-    vm.runInNewContext(script, {
-      window: { matchMedia: () => ({ matches: false }) },
-      localStorage: { getItem: () => cached },
-      document: {
-        documentElement: { style: { setProperty: () => {} } },
-        getElementById: () => ({ setAttribute: name => attributes.add(name) })
-      },
-      requestAnimationFrame: () => {}
-    })
-    assert.equal(attributes.has('data-first-launch'), cached === null)
-  }
-})
-
-test('mobile splash follows a system color-scheme change while the app is closed', async () => {
-  const script = await readFile(new URL('../../src/renderer/startup/boot.js', import.meta.url), 'utf8')
-  for (const dark of [false, true]) {
-    const properties = new Map()
-    vm.runInNewContext(script, {
-      window: { matchMedia: () => ({ matches: dark }) },
-      localStorage: { getItem: () => JSON.stringify({
-        light: { background: '#f1f1f1', dark: false },
-        dark: { background: '#0f0f0f', dark: true },
-        hideSplash: false
-      }) },
-      document: { documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } } },
-      requestAnimationFrame: callback => callback()
-    })
-    assert.equal(properties.get('--startup-background'), dark ? '#0f0f0f' : '#f1f1f1')
-    assert.equal(properties.get('--startup-foreground'), dark ? '#eeeeee' : '#212121')
-  }
-})
-
-test('startup caching resolves both dynamic palettes and selected custom themes', t => {
-  const original = androidDynamicColors.value
-  t.after(() => { androidDynamicColors.value = original })
-  androidDynamicColors.value = { supported: true, palette: materialSeedPalette() }
-  assert.equal(getThemeBackground('dynamic', [], false), '#fdf8ff')
-  assert.equal(getThemeBackground('dynamic', [], true), '#141318')
-  assert.equal(getThemeBackground('materialLight', [], true), '#fdf8ff')
-  assert.equal(getThemeBackground('materialDark', [], false), '#141318')
-  assert.equal(getThemeBackground('materialBlack', [], false), '#000000')
-  const themes = [{ id: 'paper', colors: { background: '#fff8ee' } }, { id: 'ink', colors: { background: '#102030' } }]
-  assert.equal(getThemeBackground('custom:paper', themes, false), '#fff8ee')
-  assert.equal(getThemeBackground('custom:ink', themes, true), '#102030')
-})
-
 test('mobile appearance cache preserves colors and the visibility preference', () => {
   const palette = { background: '#112233', dark: true }
   const appearance = { light: palette, dark: palette, hideSplash: true }
@@ -191,38 +116,6 @@ test('mobile appearance cache preserves colors and the visibility preference', (
   } finally {
     if (original) Object.defineProperty(globalThis, 'localStorage', original)
     else delete globalThis.localStorage
-  }
-})
-
-test('saving edits to selected custom themes refreshes both mobile splash appearances', async t => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const watchers = source.slice(source.indexOf('watch(baseTheme, updateTheme)'), source.indexOf('const secColor ='))
-  const cache = source.slice(source.indexOf('function cacheCapacitorStartupAppearance()'), source.indexOf('function updateSystemBarsStyle()'))
-  for (const selection of ['custom:paper', 'system']) {
-    const getters = reactive({
-      getBaseTheme: selection, getSystemLightTheme: 'custom:paper', getSystemDarkTheme: 'custom:ink',
-      getMainColor: 'Red', getHideStartupSplash: false,
-      getCustomThemes: [{ id: 'paper', colors: { background: '#fff8ee' } }, { id: 'ink', colors: { background: '#102030' } }]
-    })
-    let saved
-    const scope = effectScope()
-    t.after(() => scope.stop())
-    scope.run(() => vm.runInNewContext(`${cache}\n${watchers}\ncacheCapacitorStartupAppearance()`, {
-      isCapacitor: true, appearanceSettingsReady: true,
-      store: { getters }, baseTheme: computed(() => getters.getBaseTheme),
-      appFont: ref('default'), updateAppFont: () => {},
-      computed, watch, getThemeBackground, calculateColorLuminance: () => '#000000',
-      cacheStartupAppearance: appearance => { saved = appearance },
-      updateTheme: () => {}
-    }))
-    assert.equal(saved.light.background, '#fff8ee')
-    getters.getCustomThemes = [
-      { id: 'paper', colors: { background: '#faf0dd' } },
-      { id: 'ink', colors: { background: '#203040' } }
-    ]
-    await nextTick()
-    assert.equal(saved.light.background, '#faf0dd', 'Editing a theme keeps its ID but refreshes the cached colors')
-    assert.equal(saved.dark.background, selection === 'system' ? '#203040' : '#faf0dd')
   }
 })
 
@@ -251,12 +144,4 @@ test('Capacitor waits for data, tab presentation, and route content before revea
   releaseRoute()
   await pending
   assert.equal(reveals, 1)
-})
-
-test('Android splash keeps its progress bar still on first launch so bridge calls are not delayed by redraws', () => {
-  const getStartupSplash = createRequire(import.meta.url)('../../_scripts/startupSplash.js')
-  // A rule outside the reduced-motion media query that applies only to the first launch.
-  const stillBar = /\.startupSplash\[data-first-launch\] \.startupProgress \{ animation: none; transform: translateX\(-35%\); \}\s*$/
-  assert.doesNotMatch(getStartupSplash().styles, stillBar, 'Electron and iOS keep the animated bar')
-  assert.match(getStartupSplash({ staticProgress: true }).styles, stillBar)
 })

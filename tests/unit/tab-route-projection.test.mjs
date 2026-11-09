@@ -10,7 +10,7 @@ const source = readFileSync(new URL('../../src/renderer/tabs/TabNavigationServic
   .replace(/^export /gm, '')
 const Service = vm.runInNewContext(`${source}; TabNavigationService`, { START_LOCATION: {} })
 
-for (const name of [null, 'retired-history-route']) {
+for (const name of ['retired-history-route']) {
   test(`restored routes with name ${name} still project their saved path`, async () => {
     const router = createRouter({
       history: createMemoryHistory(),

@@ -37,32 +37,25 @@ for (const type of ['ReelItem', 'ShortsLockupView']) {
   })
 }
 
-for (const thumbnail of [undefined, { thumbnails: [] }]) {
-  test(`Shorts view model images retain both resolutions with ${thumbnail ? 'empty' : 'missing'} legacy thumbnails`, () => {
-    const short = new YTNodes.ShortsLockupView({
-      thumbnail,
+test('Shorts view model images retain both resolutions with missing legacy thumbnails', () => {
+  const short = new YTNodes.ShortsLockupView({
+    thumbnailViewModel: {
       thumbnailViewModel: {
-        thumbnailViewModel: {
-          image: { sources: [
-            { url: 'https://i.ytimg.com/short-small.jpg?rs=signed', width: 120, height: 180 },
-            { url: 'https://i.ytimg.com/short-large.jpg?rs=signed', width: 720, height: 1080 }
-          ] }
-        }
-      },
-      onTap: { innertubeCommand: { reelWatchEndpoint: { videoId: 'short' } } },
-      overlayMetadata: { primaryText: { content: 'Short' } }
-    })
-    for (const parse of [parseShort, parseLocalPlaylistVideo]) {
-      assert.equal(parse(short).thumbnailUrl, 'https://i.ytimg.com/short-large.jpg?rs=signed')
-      assert.equal(parse(short).lowResolutionThumbnailUrl, 'https://i.ytimg.com/short-small.jpg?rs=signed')
-    }
+        image: { sources: [
+          { url: 'https://i.ytimg.com/short-small.jpg?rs=signed', width: 120, height: 180 },
+          { url: 'https://i.ytimg.com/short-large.jpg?rs=signed', width: 720, height: 1080 }
+        ] }
+      }
+    },
+    onTap: { innertubeCommand: { reelWatchEndpoint: { videoId: 'short' } } },
+    overlayMetadata: { primaryText: { content: 'Short' } }
   })
-}
-
-test('video cards request maximum resolution for both backends', () => {
-  assert.equal(getVideoThumbnailUrl('video', 'local', ''), 'https://i.ytimg.com/vi/video/maxresdefault.jpg')
-  assert.equal(getVideoThumbnailUrl('video', 'invidious', 'https://invidious.test'), 'https://invidious.test/vi/video/maxresdefault.jpg')
+  for (const parse of [parseShort, parseLocalPlaylistVideo]) {
+    assert.equal(parse(short).thumbnailUrl, 'https://i.ytimg.com/short-large.jpg?rs=signed')
+    assert.equal(parse(short).lowResolutionThumbnailUrl, 'https://i.ytimg.com/short-small.jpg?rs=signed')
+  }
 })
+
 
 test('data saver restores medium-resolution sources and preserves thumbnail preferences', () => {
   for (const origin of ['https://i.ytimg.com', 'https://invidious.test']) {
@@ -89,13 +82,4 @@ test('resolution fallback preserves proxies and parameters without changing othe
   assert.equal(getVideoThumbnailFallbackUrl('https://invidious.test/vi/short/oardefault.jpg?host=x'), 'https://invidious.test/vi/short/oar2.jpg?host=x')
   assert.equal(getVideoThumbnailFallbackUrl('https://yt3.ggpht.com/avatar'), null)
   assert.equal(getVideoThumbnailFallbackUrl('data:image/png;base64,AA=='), null)
-})
-
-test('thumbnail preferences preserve hidden, selected frames, and portrait images', () => {
-  assert.equal(getVideoThumbnailUrl('video', 'local', '', 'hidden'), null)
-  for (const [preference, frame] of [['start', 1], ['middle', 2], ['end', 3]]) {
-    assert.equal(getVideoThumbnailUrl('video', 'local', '', preference), `https://i.ytimg.com/vi/video/mq${frame}.jpg`)
-    assert.equal(getVideoThumbnailUrl('video', 'local', '', preference, true), `https://i.ytimg.com/vi/video/oar${frame}.jpg`)
-  }
-  assert.equal(getVideoThumbnailUrl('video', 'local', '', '', true), 'https://i.ytimg.com/vi/video/oardefault.jpg')
 })

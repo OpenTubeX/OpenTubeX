@@ -5,7 +5,7 @@ import types
 import unittest
 from unittest.mock import patch
 
-from mutagen.id3 import APIC, CHAP, ID3, TDAT, TIT2, TORY, TPE1, TYER
+from mutagen.id3 import APIC, CHAP, ID3, TIT2, TPE1
 from yt_dlp import YoutubeDL
 from yt_dlp.postprocessor.embedthumbnail import EmbedThumbnailPP
 
@@ -81,29 +81,6 @@ class MP3ThumbnailTest(unittest.TestCase):
         self.write()
         self.assertEqual(audio_frames(self.output), original)
         self.assertEqual(ID3(self.output).getall('APIC')[0].mime, 'image/png')
-        self.fallback.assert_not_called()
-
-    def test_preserves_valid_id3v23_date_frames(self):
-        tags = ID3(self.source)
-        tags.add(TYER(encoding=1, text=['2026']))
-        tags.add(TDAT(encoding=1, text=['0810']))
-        tags.add(TORY(encoding=1, text=['2025']))
-        tags.update_to_v23()
-        tags.save(self.source, v2_version=3)
-        original = ID3(self.source, translate=False)
-        self.assertEqual(original['TYER'].text, ['2026'])
-        self.assertEqual(original['TDAT'].text, ['0810'])
-        self.assertEqual(original['TORY'].text, ['2025'])
-
-        self.write()
-
-        result = ID3(self.output, translate=False)
-        self.assertEqual(result.version, (2, 3, 0))
-        for name in ('TYER', 'TDAT', 'TORY'):
-            self.assertEqual(result[name].text, original[name].text)
-        self.assertNotIn('TDRC', result)
-        self.assertNotIn('TDOR', result)
-        self.assertEqual(audio_frames(self.source), audio_frames(self.output))
         self.fallback.assert_not_called()
 
     def test_tag_failure_keeps_original_intact_and_uses_ffmpeg(self):

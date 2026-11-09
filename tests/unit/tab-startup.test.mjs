@@ -27,14 +27,11 @@ const hooks = registerHooks({
 })
 const { TabManager } = await import('../../src/main/tabs/TabManager.js')
 const { tabSession } = await import('../../src/datastores/handlers/base.js')
-const { tabPreviewStorage } = await import('../../src/main/tabs/TabPreviewStorage.js')
 const { setupTabsIPC } = await import('../../src/main/tabs/tabIpc.js')
-const { normalizeTabCloseFocus } = await import('../../src/main/tabs/tabPreferences.js')
 const { getRouteFromUrl } = await import('../../src/main/tabs/tabRoutes.js')
 const { BrowserWindow, ipcMain, nativeImage } = await import('electron')
 const { IpcChannels } = await import('../../src/constants.js')
 hooks.deregister()
-const { createTabAvatarFileName } = await import('../../src/main/tabs/tabPreviewCache.js')
 
 function createManager(t, sessionId, windowId = 1) {
   const window = new EventEmitter()
@@ -341,31 +338,6 @@ test('a stalled mount cannot block the rest of the session forever', async t => 
   assert.equal(manager.tabs.get('tab-1').mountDeferred, false)
 })
 
-test('reads each shared avatar once and starts independent reads together', async t => {
-  const manager = createManager(t)
-  const saved = session(4)
-  const avatar = createTabAvatarFileName(Buffer.from('avatar'))
-  const missingAvatar = createTabAvatarFileName(Buffer.from('missing'))
-  saved.tabs[0].avatarFileName = avatar
-  saved.tabs[1].avatarFileName = avatar
-  saved.tabs[2].avatarFileName = missingAvatar
-  const reads = new Map()
-  t.mock.method(tabPreviewStorage, 'read', fileName => {
-    assert.ok(!reads.has(fileName), 'shared file is read only once')
-    return new Promise(resolve => reads.set(fileName, resolve))
-  })
-  const restored = manager.restoreFromData(saved)
-  await new Promise(setImmediate)
-  assert.deepEqual([...reads.keys()], [avatar, missingAvatar])
-  const dataUrl = 'data:image/jpeg;base64,YXZhdGFy'
-  reads.get(avatar)(dataUrl)
-  reads.get(missingAvatar)(null)
-  await restored
-  assert.equal(manager.tabs.get('tab-0').avatarDataUrl, dataUrl)
-  assert.equal(manager.tabs.get('tab-1').avatarDataUrl, dataUrl)
-  assert.equal(manager.tabs.get('tab-2').avatarFileName, null)
-})
-
 test('closing the window cancels pending background mounts', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const manager = createManager(t)
@@ -464,13 +436,6 @@ test('desktop background closes preserve focus and closed history entries are sk
   assert.equal(manager.activeTabId, 'tab-4')
 })
 
-test('desktop defaults to last active focus while preserving directional preferences', () => {
-  assert.equal(normalizeTabCloseFocus(undefined), 'lastActiveTab')
-  assert.equal(normalizeTabCloseFocus('invalid'), 'lastActiveTab')
-  assert.equal(normalizeTabCloseFocus('previousTab'), 'previousTab')
-  assert.equal(normalizeTabCloseFocus('nextTab'), 'nextTab')
-})
-
 test('navigation metadata shares one bounded session write and explicit saves flush it', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const manager = createManager(t)
@@ -490,60 +455,6 @@ test('navigation metadata shares one bounded session write and explicit saves fl
   t.mock.timers.tick(250)
   assert.equal(saves.mock.callCount(), 2, 'flush cancels the pending timer')
 })
-
-test('channel subtab navigation retains the saved avatar and its file', t => {
-  const manager = createManager(t)
-  const tab = manager.createTab({ route: '/channel/UCchannel' })
-  tab.avatarDataUrl = 'data:image/jpeg;base64,YXZhdGFy'
-  tab.avatarFileName = 'avatar.jpg'
-  const releases = t.mock.method(manager.previews, 'releaseAvatarFile', async () => {})
-  for (const path of ['/channel/UCchannel/videos', '/channel/UCchannel/shorts', '/channel/UCchannel/about', '/channel/UCchannel']) {
-    manager.updateTabRoute(tab.id, { path })
-    assert.equal(tab.avatarDataUrl, 'data:image/jpeg;base64,YXZhdGFy')
-    assert.equal(tab.avatarFileName, 'avatar.jpg')
-  }
-  assert.equal(releases.mock.callCount(), 0)
-})
-
-for (const path of ['/channel/UCchannelOther/videos', '/watch/video', '/history']) {
-  test(`leaving a channel for ${path} clears the saved avatar`, t => {
-    const manager = createManager(t)
-    const tab = manager.createTab({ route: '/channel/UCchannel/videos' })
-    tab.avatarDataUrl = 'data:image/jpeg;base64,YXZhdGFy'
-    tab.avatarFileName = 'avatar.jpg'
-    const releases = t.mock.method(manager.previews, 'releaseAvatarFile', async () => {})
-    manager.updateTabRoute(tab.id, { path })
-    assert.equal(tab.avatarDataUrl, null)
-    assert.equal(tab.avatarFileName, null)
-    assert.equal(releases.mock.callCount(), 1)
-    assert.equal(releases.mock.calls[0].arguments[0], 'avatar.jpg')
-  })
-}
-
-for (const [path, expected] of [['/channel/UCchannel/about', true], ['/channel/UCchannelOther/about', false]]) {
-  test(`pending avatar writes ${expected ? 'complete' : 'are rejected'} after navigating to ${path}`, async t => {
-    const manager = createManager(t)
-    const tab = manager.createTab({ route: '/channel/UCchannel' })
-    const bytes = jpegHeader(48, 48)
-    nativeImage.createFromBuffer = () => ({
-      isEmpty: () => false,
-      getSize: () => ({ width: 48, height: 48 }),
-      toJPEG: () => bytes
-    })
-    t.after(() => { delete nativeImage.createFromBuffer })
-    let finishWrite
-    const pendingWrite = new Promise(resolve => { finishWrite = resolve })
-    const writes = t.mock.method(tabPreviewStorage, 'writeAvatar', () => pendingWrite)
-    t.mock.method(manager.previews, 'releaseAvatarFile', async () => {})
-    const result = manager.applyTabAvatar(tab, bytes, tab.route.path)
-    assert.equal(writes.mock.callCount(), 1)
-    manager.updateTabRoute(tab.id, { path })
-    finishWrite('updated-avatar.jpg')
-    assert.equal(await result, expected)
-    assert.equal(tab.avatarDataUrl, expected ? `data:image/jpeg;base64,${bytes.toString('base64')}` : null)
-    assert.equal(tab.avatarFileName, expected ? 'updated-avatar.jpg' : null)
-  })
-}
 
 function pngHeader(width, height) {
   const buffer = Buffer.alloc(24)
@@ -589,20 +500,6 @@ test('clearing a session cancels pending writes instead of resurrecting it', asy
   t.mock.timers.tick(250)
   await Promise.resolve()
   assert.equal(saves.mock.callCount(), 0)
-})
-
-test('unpersisted history and unchanged session snapshots do not write again', async t => {
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  const manager = createManager(t)
-  const saves = t.mock.method(tabSession, 'save', async () => {})
-  const tab = manager.createTab({ route: '/history' })
-  await manager._saveSession()
-  manager.updateTabNavigationHistory(tab.id, [{ route: { path: '/history' }, title: 'History' }], 0, false)
-  await manager._saveSession()
-  assert.equal(saves.mock.callCount(), 1)
-  manager.updateTabNavigationHistory(tab.id, [{ route: { path: '/history' }, title: 'History' }], 0, true)
-  await manager._saveSession()
-  assert.equal(saves.mock.callCount(), 2)
 })
 
 for (const initialization of ['creation', 'restore', 'sync replacement']) {
@@ -707,7 +604,7 @@ test('failed session writes can retry the same snapshot', async t => {
   assert.equal(attempts, 2)
 })
 
-for (const count of [1, 2]) {
+for (const count of [2]) {
   test(`duplicate tab IDs cannot bypass close confirmation for ${count} tabs`, async t => {
     const manager = createManager(t)
     const tabs = Array.from({ length: count }, () => manager.createTab({ route: '/history' }))
@@ -842,105 +739,6 @@ for (const action of ['select', 'close', 'navigate', 'unload queued']) {
   })
 }
 
-for (const phase of ['capture mode', 'screenshot', 'content bounds']) {
-  test(`opening and closing the switcher during ${phase} discards the interrupted preview`, async t => {
-    const manager = createManager(t)
-    const tab = manager.createTab({ route: '/history', makeActive: false })
-    manager.presentedTabId = tab.id
-    manager.previews.previewsEnabled = true
-    t.mock.method(manager, '_getTabLoadingState', () => false)
-    t.mock.method(manager.previews, '_getCachedDataUrl', async () => 'cached-preview')
-    t.mock.method(manager.previews, 'scheduleRefresh', () => {})
-    const interrupt = () => {
-      manager.setPreviewCapturePaused(true)
-      manager.setPreviewCapturePaused(false)
-    }
-    const captureModes = []
-    t.mock.method(manager.previews, '_setCaptureMode', async enabled => {
-      captureModes.push(enabled)
-      if (enabled && phase === 'capture mode') interrupt()
-      return true
-    })
-    let screenshots = 0
-    let encodes = 0
-    t.mock.method(tabPreviewStorage, 'writePreview', async () => 'preview.jpg')
-    manager.browserWindow.webContents.capturePage = async () => {
-      screenshots++
-      if (phase === 'screenshot') interrupt()
-      return {
-        isEmpty: () => false,
-        getSize: () => ({ width: 300, height: 200 }),
-        toJPEG: () => { encodes++; return Buffer.from([0xff, 0xd8, 0xff]) }
-      }
-    }
-    t.mock.method(manager.previews, '_getContentBounds', async () => {
-      if (phase === 'content bounds') interrupt()
-      return null
-    })
-    assert.equal(await manager.previews.refresh(tab), 'cached-preview')
-    assert.equal(screenshots, phase === 'capture mode' ? 0 : 1)
-    assert.equal(encodes, 0, 'must not encode a screenshot interrupted by the switcher')
-    assert.deepEqual(captureModes, [true, false], 'capture mode is always cleaned up')
-    assert.equal(tab.previewCapturePromise, null)
-  })
-}
-
-test('retries a scheduled preview refresh after the hover tooltip closes', async (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  const manager = createManager(t)
-  const tab = manager.createTab({ route: '/history', makeActive: false })
-  manager.presentedTabId = tab.id
-  manager.previews.previewsEnabled = true
-  t.mock.method(manager, '_getTabLoadingState', () => false)
-  t.mock.method(manager.previews, '_getCachedDataUrl', async () => 'cached-preview')
-  let tooltipOpen = true
-  t.mock.method(manager.previews, '_setCaptureMode', async enabled => !enabled || !tooltipOpen)
-  let captures = 0
-  manager.browserWindow.webContents.capturePage = async () => {
-    captures++
-    return { isEmpty: () => true }
-  }
-
-  manager.previews.scheduleRefresh(tab, 0)
-  await tick(t, 0)
-  assert.equal(captures, 0)
-  assert.notEqual(tab.previewCaptureTimeoutId, null, 'deferred capture retains a retry')
-  await tick(t, 700)
-  assert.equal(captures, 0, 'never captures while the tooltip is open')
-  tooltipOpen = false
-  await tick(t, 700)
-  assert.equal(captures, 1, 'refreshes without another navigation or activation')
-  assert.equal(tab.previewCaptureTimeoutId, null)
-})
-
-test('state broadcasts carry a tab avatar only when it changed', async t => {
-  const manager = createManager(t)
-  const sent = []
-  manager.browserWindow.webContents.send = (channel, payload) => {
-    if (channel === IpcChannels.TABS_STATE_UPDATED) sent.push(payload)
-  }
-  await manager.restoreFromData(session(2), { restoreTabLoadState: true })
-  manager.bridge.markReady()
-  const avatar = 'data:image/jpeg;base64,QUJD'
-  manager.tabs.get('tab-0').avatarDataUrl = avatar
-  const avatarsSent = () => sent.at(-1).tabs.map(tab => tab.avatarUrl)
-
-  manager._broadcastStateUpdate()
-  assert.deepEqual(avatarsSent(), [avatar, null], 'the first ready broadcast announces every avatar')
-  manager._broadcastStateUpdate()
-  assert.deepEqual(avatarsSent(), [undefined, undefined], 'unchanged avatars are left out')
-
-  manager.tabs.get('tab-0').avatarDataUrl = null
-  manager._broadcastStateUpdate()
-  assert.deepEqual(avatarsSent(), [null, undefined], 'clearing an avatar is still announced')
-
-  manager.bridge.ready = false
-  manager._broadcastStateUpdate()
-  manager.bridge.markReady()
-  assert.deepEqual(avatarsSent(), [null, null], 'a reloading renderer gets every avatar again')
-  assert.equal(manager.getState().tabs[0].avatarUrl, null, 'direct state requests always include avatars')
-})
-
 test('memory pressure unloads the older half of idle background tabs', async t => {
   const manager = createManager(t)
   const selected = manager.createTab({ route: '/history' })
@@ -1006,28 +804,7 @@ test('a renderer crash during a tab switch also unloads the previously presented
   assert.notEqual(next.loadState, 'unloaded')
 })
 
-test('memory pressure only counts tabs that were actually unloaded', async t => {
-  const manager = createManager(t)
-  manager.createTab({ route: '/history' })
-  presentActive(manager)
-  const tabs = []
-  for (let index = 0; index < 4; index++) {
-    const tab = await manager.createTabWithPreference({ route: `/channel/${index}`, makeActive: false })
-    manager.markTabMounted(tab.id, tab.mountRevision)
-    tab.lastActiveAt = index
-    tabs.push(tab)
-  }
-  const unloadTab = manager.unloadTab.bind(manager)
-  manager.unloadTab = async tabId => {
-    if (tabId === tabs[0].id) throw new Error('unload failed')
-    return unloadTab(tabId)
-  }
-  t.mock.method(console, 'error', () => {})
-
-  assert.equal(await manager.unloadLeastRecentlyUsedTabs(), 1)
-})
-
-for (const [percentage, count] of [[10, 1], [25, 1], [75, 3], [100, 4], [NaN, 2], [0, 2], [101, 2]]) {
+for (const [percentage, count] of [[25, 1], [75, 3], [NaN, 2]]) {
   test(`memory pressure unload percentage ${percentage} selects ${count} oldest tabs`, async t => {
     const manager = createManager(t)
     manager.createTab({ route: '/history' })

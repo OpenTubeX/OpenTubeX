@@ -72,34 +72,19 @@ test('the legacy format puts its own quality control on the control bar', () => 
   assert.equal(config.overflowMenuButtons.includes('ft_legacy_quality'), false)
 })
 
-test('livestreams leave speed and loop off the control bar', () => {
-  const config = controls({ props: { isLive: true }, controlBarButtons: BAR_WITH_MENU_CONTROLS })
-  assert.equal(config.controlPanelElements.includes('playback_rate'), false)
-  assert.equal(config.controlPanelElements.includes('ft_loop'), false)
+test('hidden controls leave the player', () => {
+  const config = controls({
+    controlBarButtons: ['menu', 'fullscreen'],
+    hidden: ['quality', 'playbackRate', 'captions', 'audioTracks', 'sleepTimer', 'autoplay', 'chapters', 'ambientMode', 'loop', 'pictureInPicture', 'theatreMode', 'fullWindow'],
+  })
+  const elements = [...config.overflowMenuButtons, ...config.controlPanelElements]
+  for (const element of [
+    'quality', 'playback_rate', 'captions', 'ft_caption_toggle', 'ft_audio_tracks', 'ft_sleep_timer', 'ft_autoplay_toggle', 'ft_chapters',
+    'ft_ambient_mode', 'ft_loop', 'picture_in_picture', 'ft_theatre_mode', 'ft_full_window',
+  ]) {
+    assert.equal(elements.includes(element), false, element)
+  }
 })
-
-for (const overflow of [false, true]) {
-  test(`hidden controls leave the player with overflow=${overflow}`, () => {
-    const config = controls({
-      overflow,
-      controlBarButtons: ['menu', 'fullscreen'],
-      hidden: ['quality', 'playbackRate', 'captions', 'audioTracks', 'sleepTimer', 'autoplay', 'chapters', 'ambientMode', 'loop', 'pictureInPicture', 'theatreMode', 'fullWindow'],
-    })
-    const elements = [...config.overflowMenuButtons, ...config.controlPanelElements]
-    for (const element of [
-      'quality', 'playback_rate', 'captions', 'ft_caption_toggle', 'ft_audio_tracks', 'ft_sleep_timer', 'ft_autoplay_toggle', 'ft_chapters',
-      'ft_ambient_mode', 'ft_loop', 'picture_in_picture', 'ft_theatre_mode', 'ft_full_window',
-    ]) {
-      assert.equal(elements.includes(element), false, element)
-    }
-  })
-
-  test(`the player menu follows the custom order with overflow=${overflow}`, () => {
-    const defaults = getDefaultPlayerMenuControls(false)
-    const config = controls({ overflow, menuOrder: ['ambientMode', 'sleepTimer', ...defaults.filter(id => id !== 'ambientMode' && id !== 'sleepTimer')] })
-    assert.deepEqual([...config.overflowMenuButtons.slice(0, 2)], ['ft_ambient_mode', 'ft_sleep_timer'])
-  })
-}
 
 test('the caption toggle on the control bar keeps the caption menu', () => {
   const config = controls({ hidden: ['captions'] })

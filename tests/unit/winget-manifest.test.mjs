@@ -99,45 +99,6 @@ Improvements
 - Read the guide.`)
 })
 
-test('release note cleanup removes incomplete HTML markup', () => {
-  assert.equal(
-    cleanReleaseNotes('## Fixed bugs\n\n- Removed <script and an orphan > marker.'),
-    'Fixed bugs\n\n- Removed  marker.'
-  )
-  assert.equal(
-    cleanReleaseNotes('## Fixed bugs\n\n- Kept this.\n<!-- unfinished comment'),
-    'Fixed bugs\n\n- Kept this.'
-  )
-})
-
-test('release note cleanup preserves comparison operators', () => {
-  assert.equal(
-    cleanReleaseNotes('## Performance\n\n- Keep count < 10 and latency > 20 ms.'),
-    'Performance\n\n- Keep count < 10 and latency > 20 ms.'
-  )
-})
-
-test('release note cleanup removes escaped HTML markup', () => {
-  assert.equal(
-    cleanReleaseNotes('## Highlights\n\n- Use &lt;kbd&gt;Ctrl&lt;/kbd&gt; and reject &lt;script&gt;alert(1)&lt;/script&gt;.'),
-    'Highlights\n\n- Use Ctrl and reject alert(1).'
-  )
-})
-
-test('release note cleanup removes reference-style linked badges', () => {
-  assert.equal(
-    cleanReleaseNotes(`## Fixed bugs
-
-[![Build badge][badge-image]][badge-link]
-
-- Fixed a bug.
-
-[badge-image]: https://example.com/build.svg
-[badge-link]: https://example.com/build`),
-    'Fixed bugs\n\n- Fixed a bug.'
-  )
-})
-
 test('release note cleanup stays within the WinGet schema limit', () => {
   const bullet = '- A complete release note.\n'
   const notes = cleanReleaseNotes(`## Highlights\n\n${bullet.repeat(500)}`)

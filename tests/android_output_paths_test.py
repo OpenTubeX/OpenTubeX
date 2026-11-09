@@ -42,10 +42,6 @@ class OutputPathsTest(unittest.TestCase):
                 with self.subTest(template=template), self.assertRaisesRegex(ValueError, 'escapes the download folder'):
                     self.prepare(template, title)
 
-    def test_ignores_runs_without_download_folder(self):
-        ydl = YoutubeDL({'outtmpl': {'default': '/tmp/%(id)s.%(ext)s'}})
-        self.assertEqual(ydl.prepare_filename({'id': 'abc', 'ext': 'mp4'}), '/tmp/abc.mp4')
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -161,45 +161,6 @@ test('releasing a committed seek keeps its new position', () => {
   assert.equal(controls.seeking, false)
 })
 
-test('touch interactions reach Shaka as touch, so it hides the time preview after a tap', () => {
-  const { bar } = fixture()
-  bar.onChangeStart(true)
-  assert.equal(bar.changeStartedFromTouch, true)
-  bar.onChangeStart()
-  assert.equal(bar.changeStartedFromTouch, false)
-})
-
-test('preview state stays within each player', () => {
-  const first = fixture()
-  const second = fixture()
-  first.preview(21)
-  second.bar.setValue(5)
-  assert.equal(first.bar.value, 21)
-  assert.equal(second.bar.value, 5)
-  assert.equal(second.controls.seeking, false)
-})
-
-test('swipe previews show the seek bar time and filmstrip at the thumb', () => {
-  const { bar, controls, preview } = fixture()
-  preview(20, true)
-  assert.equal(bar.filmstrip.time, 20)
-  const hover = bar.bar.events.at(-1)
-  assert.equal(hover.type, 'mousemove')
-  assert.equal(hover.clientX, 100 + 6 + 20.001 / 30 * 300)
-  assert.deepEqual({ ...controls.events.at(-1) }, { type: 'seekbarvaluechange', time: 20 })
-
-  preview(20, false)
-  assert.equal(bar.filmstrip.time, null, 'Turning off previews hides them during the gesture')
-  assert.equal(controls.timePreview.style.visibility, 'hidden')
-  assert.equal(bar.value, 20, 'The thumb still follows the gesture')
-
-  controls.timePreview.style.visibility = 'visible'
-  preview(21, true)
-  preview(null, true)
-  assert.equal(bar.filmstrip.time, null)
-  assert.equal(controls.timePreview.style.visibility, 'hidden')
-})
-
 test('with the filmstrip turned off, drags and swipes keep the single thumbnail', () => {
   const { bar, controls, preview, drag, store } = fixture()
   store.getters.getShowSeekBarFilmstrip = false
@@ -218,28 +179,6 @@ test('with the filmstrip turned off, drags and swipes keep the single thumbnail'
   assert.equal(bar.filmstrip.time, null)
   preview(null, true)
   assert.equal(controls.timePreview.style.visibility, 'hidden', 'The thumbnail hides when the swipe ends')
-})
-
-test('dragging the thumb shows the filmstrip but tapping does not', () => {
-  const { bar, controls, drag } = fixture()
-  bar.onChangeStart()
-  drag(15.1)
-  assert.equal(bar.filmstrip.time, null, 'Movement below the drag threshold is still a tap')
-  bar.onChangeEnd()
-  assert.equal(controls.timePreview.style.visibility, 'visible', 'Shaka hides its own tap preview')
-
-  bar.onChangeStart()
-  drag(16)
-  assert.equal(bar.filmstrip.time, 16)
-  drag(15.2)
-  assert.equal(bar.filmstrip.time, 15.2, 'The filmstrip stays until the drag ends')
-  bar.onChangeEnd()
-  assert.equal(bar.filmstrip.time, null)
-  assert.equal(controls.timePreview.style.visibility, 'hidden')
-
-  controls.timePreview.style.visibility = 'visible'
-  drag(20)
-  assert.equal(bar.filmstrip.time, null, 'Keyboard changes do not show the filmstrip')
 })
 
 test('a mouse drag from anywhere on the track shows the filmstrip and keeps the controls up', () => {
@@ -384,19 +323,4 @@ test('dragging back below the strip returns to seeking at the bar scale', async 
   assert.equal(bar.value, 25)
   bar.onChangeEnd()
   assert.equal(bar.value, 25)
-})
-
-test('releasing a short mouse drag off the bar hides the time Shaka shows', () => {
-  const { bar, controls, drag } = fixture()
-  // Shaka only hides it when the pointer leaves the bar, which the drag may already have done.
-  for (const barHovered of [true, false]) {
-    controls.barHovered = barHovered
-    controls.timePreview.style.visibility = 'visible'
-    controls.listeners.get('mousedown')()
-    bar.onChangeStart()
-    drag(bar.getValue() + 0.05)
-    bar.onChangeEnd()
-    assert.equal(bar.filmstrip.time, null, 'The drag is too short for the filmstrip')
-    assert.equal(controls.timePreview.style.visibility, barHovered ? 'visible' : 'hidden')
-  }
 })

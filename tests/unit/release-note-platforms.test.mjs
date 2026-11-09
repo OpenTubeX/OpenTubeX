@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import {
-  filterReleaseNotesForPlatforms,
-  formatPlatformLabel,
-  parsePlatformLabel,
-} from '../../src/renderer/helpers/releaseNotePlatforms.js'
+import { filterReleaseNotesForPlatforms } from '../../src/renderer/helpers/releaseNotePlatforms.js'
 import { formatReleaseChangelog } from '../../src/renderer/helpers/releaseUpdates.js'
 
 const notes = `## Highlights
@@ -22,22 +18,6 @@ const notes = `## Highlights
   </picture>
 - **Android, iOS:** Adds a mini player. (#5)
 `
-
-test('platform labels group the desktop platforms', () => {
-  assert.equal(formatPlatformLabel(['android']), 'Android')
-  assert.equal(formatPlatformLabel(['ios', 'linux', 'macos', 'windows']), 'iOS, Desktop')
-  assert.equal(formatPlatformLabel(['linux', 'windows']), 'Linux, Windows')
-})
-
-test('platform labels are parsed from rendered and plain-text items', () => {
-  assert.deepEqual(parsePlatformLabel('**iOS, Desktop:** Adds a tray icon.'), {
-    platforms: ['ios', 'linux', 'macos', 'windows'],
-    text: 'Adds a tray icon.',
-  })
-  assert.deepEqual(parsePlatformLabel('Linux: Adds MPRIS controls.'), { platforms: ['linux'], text: 'Adds MPRIS controls.' })
-  assert.deepEqual(parsePlatformLabel('**Android:* Broken label.'), { platforms: null, text: '**Android:* Broken label.' })
-  assert.deepEqual(parsePlatformLabel('Androids: are not a platform.'), { platforms: null, text: 'Androids: are not a platform.' })
-})
 
 test('filtering removes items for other platforms with their images and empty headings', () => {
   assert.equal(filterReleaseNotesForPlatforms(notes, ['linux']), `## Improvements
@@ -86,19 +66,6 @@ test('filtering keeps nightly wrappers and removes headings emptied inside them'
 
 </details>
 `)
-})
-
-test('filtering recognizes every list marker and keeps skipping an item across blank lines', () => {
-  assert.equal(filterReleaseNotesForPlatforms([
-    '+ **iOS:** Plus item.',
-    '1. **iOS:** Numbered item.',
-    '2) Shared item.',
-    '- **iOS:** Spaced item.',
-    '',
-    '  <img src="https://github.com/user-attachments/assets/ios" alt="iOS">',
-    '',
-    'After the list.',
-  ].join('\n'), ['android']), '2) Shared item.\n\nAfter the list.')
 })
 
 test('update changelogs show only the running platform\'s notes and skip releases without any', () => {

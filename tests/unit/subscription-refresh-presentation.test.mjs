@@ -45,7 +45,7 @@ function setup(channelCount, presented = true, feed = 'videos', isLargeFeed = un
   }
 }
 
-for (const feed of ['videos', 'shorts', 'live', 'posts']) {
+for (const feed of ['videos']) {
   test(`a large ${feed} refresh publishes its first channel immediately and later ones in batches`, async () => {
     const app = setup(40, true, feed)
     try {

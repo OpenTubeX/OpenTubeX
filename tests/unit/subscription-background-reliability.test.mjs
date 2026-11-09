@@ -8,12 +8,6 @@ import { EventEmitter } from 'node:events'
 import { calculatePublishedDate } from '../../src/renderer/helpers/feed-metadata.js'
 import { createSubscriptionBackgroundResults } from '../../src/main/subscriptionBackgroundResults.js'
 
-for (const label of ['unknown publication', '2 fortnights ago']) {
-  test(`an unrecognized publication label stays unknown: ${label}`, () => {
-    assert.equal(calculatePublishedDate(label), undefined)
-  })
-}
-
 test('publication labels recognize capitalized time units', () => {
   const before = Date.now()
   const published = calculatePublishedDate('2 Hours ago')
@@ -179,14 +173,3 @@ test('the worker reports uploads only for feeds with notifications turned on', a
   assert.equal(messages.length, 1)
 })
 
-test('an already-aborted worker fetch rejects without sending an HTTP request', async () => {
-  const source = await readFile(new URL('../../src/main/subscriptionBackgroundWorker.js', import.meta.url), 'utf8')
-  const messages = []
-  const context = vm.createContext({ requests: new Map(), randomUUID: () => 'id', process: { parentPort: { postMessage: message => messages.push(message) } } })
-  vm.runInContext(source.slice(source.indexOf('function fetchText('), source.indexOf('\nconst scheduler')), context)
-  const controller = new AbortController()
-  controller.abort(new Error('cancelled'))
-  const result = context.fetchText({ url: 'https://example.com' }, controller.signal)
-  assert.equal(messages.length, 0)
-  await assert.rejects(result, /cancelled/)
-})

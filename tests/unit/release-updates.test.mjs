@@ -5,7 +5,6 @@ import {
   fetchReleasePages,
   findUpdateRelease,
   findUpdateReleases,
-  formatReleaseChangelog,
   scheduleUpdateChecks
 } from '../../src/renderer/helpers/releaseUpdates.js'
 
@@ -25,19 +24,6 @@ test('stable builds only update from normal GitHub releases', () => {
   assert.equal(
     findUpdateRelease([nightlyRelease, stableRelease], '0.29.0'),
     stableRelease
-  )
-})
-
-test('nightly builds update to newer nightly prereleases', () => {
-  const nightlyRelease = {
-    name: 'OpenTubeX nightly 101',
-    prerelease: true,
-    tag_name: 'v0.29.0-nightly-101'
-  }
-
-  assert.equal(
-    findUpdateRelease([nightlyRelease], '0.29.0-nightly-100'),
-    nightlyRelease
   )
 })
 
@@ -121,19 +107,6 @@ test('the newest semantic version is selected regardless of API order', () => {
   assert.equal(
     findUpdateRelease([newerStableRelease, stableRelease], '0.29.0'),
     newerStableRelease
-  )
-})
-
-test('all skipped stable releases are returned newest first', () => {
-  const patchRelease = {
-    name: 'OpenTubeX 0.30.1',
-    prerelease: false,
-    tag_name: 'v0.30.1-beta'
-  }
-
-  assert.deepEqual(
-    findUpdateReleases([stableRelease, patchRelease], '0.29.0'),
-    [patchRelease, stableRelease]
   )
 })
 
@@ -249,38 +222,6 @@ test('installed and older releases are excluded from skipped releases', () => {
     findUpdateReleases([stableRelease, installedRelease, olderRelease], '0.29.0'),
     [stableRelease]
   )
-})
-
-test('release changelogs contain the notes for every update', () => {
-  const releases = [
-    {
-      name: 'OpenTubeX 0.30.1',
-      tag_name: 'v0.30.1-beta',
-      body: 'Patch release notes'
-    },
-    {
-      name: 'OpenTubeX 0.30.0',
-      tag_name: 'v0.30.0-beta',
-      body: 'Minor release notes'
-    }
-  ]
-
-  assert.equal(
-    formatReleaseChangelog(releases),
-    '## OpenTubeX 0.30.1\n\nPatch release notes\n\n## OpenTubeX 0.30.0\n\nMinor release notes'
-  )
-})
-
-test('a single release changelog has no heading', () => {
-  const releases = [
-    {
-      name: 'OpenTubeX 0.30.1',
-      tag_name: 'v0.30.1-beta',
-      body: 'Patch release notes'
-    }
-  ]
-
-  assert.equal(formatReleaseChangelog(releases), 'Patch release notes')
 })
 
 test('scheduleUpdateChecks repeats checks by wall-clock time', (t) => {

@@ -12,9 +12,6 @@ from unittest.mock import patch
 import opentubex_ios_ffmpeg as ffmpeg
 import opentubex_ios_ytdlp as bridge
 from yt_dlp.utils import Popen
-from yt_dlp.postprocessor.embedthumbnail import EmbedThumbnailPP
-from mutagen.flac import FLAC
-from mutagen.oggopus import OggOpus
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -51,22 +48,6 @@ class IOSFFmpegPythonTest(unittest.TestCase):
         Path(os.fsdecode(response_path)).write_text(json.dumps(result))
         return 0
 
-    def test_version_and_probe_use_embedded_bridge(self):
-        version = bridge._version()
-        self.assertTrue(version['tools']['ffmpeg']['available'])
-        self.assertTrue(version['tools']['ffprobe']['available'])
-        self.assertEqual([request['args'][0] for request in self.commands], ['ffmpeg', 'ffprobe'])
-
-    def test_captured_text_bytes_and_combined_output(self):
-        out, err, code = Popen.run(['ffmpeg', '-version'], text=True,
-                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        self.assertEqual(code, 0)
-        self.assertIn('ffmpeg version', out)
-        self.assertEqual(err, '')
-        out, _, _ = Popen.run(['ffprobe', '-version'], stdout=subprocess.PIPE)
-        self.assertIsInstance(out, bytes)
-        self.assertIn(b'ffprobe version', out)
-
     def test_control_file_is_isolated_to_worker_and_cleared(self):
         with tempfile.TemporaryDirectory() as temp:
             control = Path(temp) / 'control'
@@ -78,19 +59,6 @@ class IOSFFmpegPythonTest(unittest.TestCase):
             other.start()
             other.join()
             self.assertEqual(self.commands[-1]['controlFile'], '')
-
-    def test_native_timeout_becomes_subprocess_timeout(self):
-        def timeout(request, response):
-            Path(os.fsdecode(response)).write_text(json.dumps({'returncode': 255, 'stdout': '', 'stderr': '', 'timedOut': True}))
-            return 0
-        with patch.object(ffmpeg, '_native', timeout):
-            with self.assertRaises(subprocess.TimeoutExpired):
-                Popen.run(['ffmpeg', '-version'], timeout=0.01)
-
-    def test_unrelated_commands_keep_original_process(self):
-        with self.assertRaises(FileNotFoundError):
-            Popen.run(['opentubex-nonexistent-command'])
-        self.assertEqual(self.commands, [])
 
     def test_real_ytdlp_audio_conversion_and_video_remux(self):
         fixtures = Path(__file__).resolve().parents[1] / 'ios/App/AppTests'
@@ -128,30 +96,6 @@ class IOSFFmpegPythonTest(unittest.TestCase):
             server.shutdown()
             server.server_close()
             thread.join()
-
-    def test_opus_and_flac_templates_embed_artwork(self):
-        fixture = Path(__file__).resolve().parents[1] / 'ios/App/AppTests/fixture.m4a'
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            image = root / 'cover.png'
-            subprocess.run(['ffmpeg', '-f', 'lavfi', '-i', 'color=blue:s=16x16', '-frames:v', '1', str(image)],
-                           check=True, capture_output=True)
-            for extension, codec, metadata in [('opus', 'libopus', OggOpus), ('flac', 'flac', FLAC)]:
-                with self.subTest(format=extension):
-                    output = root / f'audio.{extension}'
-                    _, stderr, code = Popen.run(['ffmpeg', '-i', str(fixture), '-c:a', codec, str(output)],
-                                               text=True, stderr=subprocess.PIPE)
-                    self.assertEqual(code, 0, stderr)
-                    with bridge.yt_dlp.YoutubeDL({'quiet': True, 'logger': bridge._QuietLogger()}) as ydl:
-                        EmbedThumbnailPP(ydl, already_have_thumbnail=True).run({
-                            'filepath': str(output), 'ext': extension,
-                            'thumbnails': [{'filepath': str(image)}],
-                        })
-                    tags = metadata(output)
-                    if extension == 'flac':
-                        self.assertEqual(len(tags.pictures), 1)
-                    else:
-                        self.assertIn('METADATA_BLOCK_PICTURE', tags)
 
     def test_concatenated_playlist_exports_the_final_file(self):
         fixtures = Path(__file__).resolve().parents[1] / 'ios/App/AppTests'

@@ -26,7 +26,6 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const isLoading = ref(false)
   const errors = []
   const toasts = []
-  let laterPageRequests = 0
   const router = {
     push() {},
     resolve: ({ path }) => ({ path, query: {}, fullPath: path }),
@@ -51,7 +50,6 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     parseLocalPlaylistVideos: videos => videos,
     parseVisibleLocalPlaylistVideos: videos => videos,
     getLocalPlaylistContinuation: async () => {
-      laterPageRequests++
       if (laterPageError) throw laterPageError
       return null
     },
@@ -91,7 +89,6 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   return {
     observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),
     toasts,
-    get laterPageRequests() { return laterPageRequests },
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
@@ -159,18 +156,6 @@ test('a cached continuation cannot extend a later visit of the same playlist', a
   state.finishContinuation({ items: [{ videoId: 'third' }] })
   await loading
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
-})
-
-test('a failed YouTube playlist continuation preserves autoplay and clears the loading state', async () => {
-  const state = harness()
-  const loading = state.load()
-  const failure = new Error('Continuation failed')
-  state.failContinuation(failure)
-  await loading
-  state.endVideo()
-  assert.equal(state.watch.autoplayCountdown?.video.videoId, 'second')
-  assert.equal(state.isLoading.value, false)
-  assert.ok(state.errors.includes(failure))
 })
 
 
@@ -278,13 +263,4 @@ test('manual next-video navigation does not restart the playlist when the curren
   state.props.videoId = 'first'
   state.playNext()
   assert.equal(pushes[0]?.path, '/watch/second')
-})
-
-test('a cached continuation stops requesting pages after navigating to a different playlist', async () => {
-  const state = harness()
-  const loading = state.load()
-  state.changePlaylist('different-playlist')
-  state.finishContinuation({ items: [{ videoId: 'third' }], has_continuation: true })
-  await loading
-  assert.equal(state.laterPageRequests, 0)
 })

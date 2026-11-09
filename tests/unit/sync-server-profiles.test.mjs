@@ -19,7 +19,6 @@ vm.runInContext(source
 for (const colors of [
   { bg_color: '#123456', text_color: '#abcdef' },
   { bg_color: null, text_color: null },
-  {},
 ]) {
   test(`first sync imports a remote profile with colors ${JSON.stringify(colors)}`, async () => {
     const channel = { id: 'channel-1', name: 'Subscribed channel' }

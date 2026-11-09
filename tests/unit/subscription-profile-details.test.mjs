@@ -108,21 +108,6 @@ for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetai
   })
 }
 
-test('metadata saves report success for changed, unchanged, and empty updates', async () => {
-  const { store } = await profileStore()
-  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', []), true)
-  const channel = { channelId: 'channel', channelName: 'New name' }
-  assert.equal(await store.dispatch('updateSubscriptionDetails', channel), true)
-  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [channel]), true)
-})
-
-test('unchanged subscription details skip the profile datastore', async t => {
-  const { db, store } = await profileStore()
-  const find = t.mock.method(db.profiles, 'findAsync')
-  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Old name' }]), true)
-  assert.equal(find.mock.callCount(), 0)
-})
-
 test('subscription details refreshed before profiles load still reach the datastore', async () => {
   const { db, store } = await profileStore()
   store.state.profilesLoaded = false

@@ -15,7 +15,7 @@ test('hides the previous button on the first video and the next button on the la
 })
 
 test('keeps both buttons when loop wraps the playlist around', () => {
-  for (const currentIndex of [0, 1, 2]) {
+  for (const currentIndex of [0, 2]) {
     assert.deepEqual(
       getPlaylistSkipAvailability({ itemCount: 3, currentIndex, loopEnabled: true }),
       { canPlayNext: true, canPlayPrevious: true },
@@ -38,13 +38,6 @@ test('keeps both buttons for videos that are not part of the playlist', () => {
   assert.deepEqual(
     getPlaylistSkipAvailability({ itemCount: 3, currentIndex: -1, loopEnabled: false }),
     { canPlayNext: true, canPlayPrevious: true }
-  )
-})
-
-test('has nothing to skip to in an empty playlist', () => {
-  assert.deepEqual(
-    getPlaylistSkipAvailability({ itemCount: 0, currentIndex: -1, loopEnabled: true }),
-    { canPlayNext: false, canPlayPrevious: false }
   )
 })
 

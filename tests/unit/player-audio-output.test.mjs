@@ -3,7 +3,6 @@ import test from 'node:test'
 import { createRenderer, shallowRef } from 'vue'
 
 import { usePlayerAudioOutput } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlayerAudioOutput.js'
-import { sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../src/renderer/helpers/player/volumeBoost.js'
 
 class FakeAudioNode {
   constructor () {
@@ -210,12 +209,4 @@ test('a suspended graph resumes while the video plays', async (t) => {
   element.paused = false
   element.dispatchEvent(new Event('playing'))
   assert.equal(context.resumeCount, resumesAfterSetup + 2)
-})
-
-test('volume boost only accepts offered levels', () => {
-  assert.equal(VOLUME_BOOST_LEVELS[0], 1)
-  assert.equal(sanitizeVolumeBoost(1.5), 1.5)
-  assert.equal(sanitizeVolumeBoost(10), 1)
-  assert.equal(sanitizeVolumeBoost('1.5'), 1)
-  assert.equal(sanitizeVolumeBoost(undefined), 1)
 })

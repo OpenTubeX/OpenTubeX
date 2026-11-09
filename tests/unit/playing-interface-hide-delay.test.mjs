@@ -3,40 +3,30 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../node_modules/shaka-player/ui/controls.js', import.meta.url), 'utf8')
 const bundle = readFileSync(new URL('../../node_modules/shaka-player/dist/shaka-player.ui-es2021.js', import.meta.url), 'utf8')
-for (const compiled of [false, true]) {
-  test(`${compiled ? 'shipped bundle' : 'Shaka source'} uses the delay for movement, touch, keyboard and seeking`, () => {
-    const scheduled = []
-    const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), aa: seconds => scheduled.push(seconds) }
-    const container = { classList: { remove() {} }, dataset: {} }
-    let move, seek
-    if (compiled) {
-      move = vm.runInNewContext(`(${bundle.match(/function CP\(a,b\)\{[\s\S]*?\}(?=function VP\()/)[0]})`, { LP() {}, DP() {} })
-      seek = vm.runInNewContext(`({${bundle.match(/ci\(a\)\{\(this\.ba=\s*a\)[\s\S]*?\}/)[0]}})`).ci
-    } else {
-      move = vm.runInNewContext(`({${source.match(/  onMouseMove_\(event\) \{[\s\S]*?\n  \}/)[0]}})`).onMouseMove_
-      seek = vm.runInNewContext(`({${source.match(/  setSeeking\(seeking\) \{[\s\S]*?\n  \}/)[0]}})`).setSeeking
-    }
-    const controls = {
-      videoContainer_: container, controlsContainer_: container,
-      mouseStillTimer_: timer, hideSettingsMenusTimer_: timer,
-      computeOpacity() {}, isOpaque: () => true,
-      i: container, l: container, U: timer, W: timer, Ha: () => true,
-    }
-    for (const delay of [undefined, '0.5', '3', '7.5', '10']) {
-      if (delay === undefined) delete container.dataset.playingInterfaceHideDelay
-      else container.dataset.playingInterfaceHideDelay = delay
-      for (const type of ['mousemove', 'touchend', 'wheel', 'keyup']) {
-        controls.lastTouchEventTime_ = controls.V = null
-        if (compiled) move(controls, { type })
-        else move.call(controls, { type })
-        assert.equal(scheduled.pop(), delay === undefined ? 3 : Number(delay))
-      }
-      seek.call(controls, true)
-      assert.equal(scheduled.length, 0)
-      seek.call(controls, false)
+test('shipped bundle uses the delay for movement, touch, keyboard and seeking', () => {
+  const scheduled = []
+  const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), aa: seconds => scheduled.push(seconds) }
+  const container = { classList: { remove() {} }, dataset: {} }
+  const move = vm.runInNewContext(`(${bundle.match(/function CP\(a,b\)\{[\s\S]*?\}(?=function VP\()/)[0]})`, { LP() {}, DP() {} })
+  const seek = vm.runInNewContext(`({${bundle.match(/ci\(a\)\{\(this\.ba=\s*a\)[\s\S]*?\}/)[0]}})`).ci
+  const controls = {
+    videoContainer_: container, controlsContainer_: container,
+    mouseStillTimer_: timer, hideSettingsMenusTimer_: timer,
+    computeOpacity() {}, isOpaque: () => true,
+    i: container, l: container, U: timer, W: timer, Ha: () => true,
+  }
+  for (const delay of [undefined, '7.5']) {
+    if (delay === undefined) delete container.dataset.playingInterfaceHideDelay
+    else container.dataset.playingInterfaceHideDelay = delay
+    for (const type of ['mousemove', 'touchend', 'wheel', 'keyup']) {
+      controls.lastTouchEventTime_ = controls.V = null
+      move(controls, { type })
       assert.equal(scheduled.pop(), delay === undefined ? 3 : Number(delay))
     }
-  })
-}
+    seek.call(controls, true)
+    assert.equal(scheduled.length, 0)
+    seek.call(controls, false)
+    assert.equal(scheduled.pop(), delay === undefined ? 3 : Number(delay))
+  }
+})

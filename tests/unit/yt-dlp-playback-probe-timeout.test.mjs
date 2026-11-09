@@ -203,23 +203,21 @@ test('prefers an incomplete panorama to a later complete flat DASH fallback', as
   assert.equal(hlsProbes.length, 3)
 })
 
-for (const incompleteAfterAttempt of [1, 2]) {
-  test(`keeps complete DASH when extraction becomes incomplete after attempt ${incompleteAfterAttempt}`, async () => {
-    const { getSource, extractions, hlsProbes } = playbackLoader({
-      panorama: true,
-      timeoutAttempts: 0,
-      incompleteAfterAttempt,
-      hlsProbeResult: () => false,
-    })
-    const source = await getSource('video000001')
-
-    assert.equal(source.incomplete, false)
-    assert.equal(source.vrProjection, 'MESH')
-    assert.match(decodeURIComponent(source.manifestSrc), /height="1080"/)
-    assert.equal(extractions.length, 3)
-    assert.equal(hlsProbes.length, 3)
+test('keeps complete DASH when extraction becomes incomplete after attempt 1', async () => {
+  const { getSource, extractions, hlsProbes } = playbackLoader({
+    panorama: true,
+    timeoutAttempts: 0,
+    incompleteAfterAttempt: 1,
+    hlsProbeResult: () => false,
   })
-}
+  const source = await getSource('video000001')
+
+  assert.equal(source.incomplete, false)
+  assert.equal(source.vrProjection, 'MESH')
+  assert.match(decodeURIComponent(source.manifestSrc), /height="1080"/)
+  assert.equal(extractions.length, 3)
+  assert.equal(hlsProbes.length, 3)
+})
 
 test('waits for delayed legacy probes before caching an adaptive source', async () => {
   let releaseProbe

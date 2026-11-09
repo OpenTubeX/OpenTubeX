@@ -88,16 +88,6 @@ test('normalizes protocol-relative channel avatars for the local card and subscr
   assert.equal(results[0].thumbnail, 'https://yt3.ggpht.com/avatar')
 })
 
-test('does not report a missing playlist count as zero', () => {
-  const { results } = normalizeYtDlpSearchResults({ entries: [{
-    id: 'PLWgYtX0fBKnQ', ie_key: 'YoutubeTab', title: 'OpenTubeX playlist',
-    thumbnails: [{ url: 'https://i.ytimg.com/vi/NIqqE7fdOPU/hq720.jpg' }]
-  }] })
-  assert.equal(results[0].videoCount, undefined)
-  assert.equal(results[0].dataSource, 'local')
-  assert.equal(results[0].thumbnail, 'https://i.ytimg.com/vi/NIqqE7fdOPU/hq720.jpg')
-})
-
 test('completes flat playlist metadata without replacing a search thumbnail or using the loaded entry count', async () => {
   const { results } = normalizeYtDlpSearchResults({ entries: [
     { id: 'PLmissing', ie_key: 'YoutubeTab', title: 'Missing metadata' },

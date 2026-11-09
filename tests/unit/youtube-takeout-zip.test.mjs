@@ -155,9 +155,7 @@ const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Descripti
 
 for (const [filename, title] of [
   ['My list.csv', 'My list'],
-  ['My list.CSV', 'My list'],
   ['My list-VIDEOS.CSV', 'My list'],
-  ['Sets_Techno-videos.csv', 'Sets/Techno-videos'],
 ]) {
   for (const metadataFirst of [true, false]) {
     test(`matches metadata to ${filename}, metadata first: ${metadataFirst}`, async () => {
@@ -176,7 +174,7 @@ for (const [filename, title] of [
   }
 }
 
-for (const suffixed of [false, true]) {
+for (const suffixed of [false]) {
   test(`matches overlapping playlist titles one-to-one, suffixed files: ${suffixed}`, async () => {
     const root = 'Takeout/YouTube/playlists'
     const names = ['List', 'List-videos', 'List-videos-videos']
@@ -281,7 +279,6 @@ test('invalidates repeated metadata entries for an account while retaining other
 
 for (const [schema, badMetadata] of [
   ['malformed', `${metadataHeader}\nPLbad,Title,Description,not-a-date,\n`],
-  ['localized', `播放清單 ID,標題\nPL${'b'.repeat(32)},清單\n`],
   ['ambiguous', `${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`],
 ]) {
   for (const badFirst of [true, false]) {

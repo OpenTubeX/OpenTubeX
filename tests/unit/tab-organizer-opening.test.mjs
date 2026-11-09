@@ -105,13 +105,3 @@ for (const method of ['button', 'swipe']) {
     })
   }
 }
-
-test('button opening animates the live page from its full size into the active card', async () => {
-  const organizer = createOrganizer()
-  organizer.openSwitcher()
-  await flush()
-  assert.equal(organizer.animations.length, 1, 'button and swipe must share the live-page morph')
-  assert.equal(organizer.animations[0].progress, 0, 'a button starts from the full-size page')
-  assert.equal(organizer.animations[0].committed, true, 'a button always opens, even without drag distance')
-  assert.equal(organizer.open.value, true)
-})

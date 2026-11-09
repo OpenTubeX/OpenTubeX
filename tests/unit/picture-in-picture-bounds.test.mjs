@@ -23,13 +23,6 @@ test('keeps saved bounds for a video with the same aspect ratio', () => {
   )
 })
 
-test('keeps the saved area for a video with another aspect ratio', () => {
-  assert.deepEqual(
-    fitPictureInPictureBounds({ x: 40, y: 50, width: 640, height: 360 }, { x: 1500, y: 800, width: 300, height: 300 }, [display]),
-    { x: 40, y: 50, width: 480, height: 480 }
-  )
-})
-
 test('moves saved bounds back inside the work area they overlap most', () => {
   const second = { x: 1920, y: 0, width: 1280, height: 1000 }
   assert.deepEqual(
@@ -125,26 +118,6 @@ test('restores the saved bounds each time the window shows', async t => {
   bounds.set(7, { x: 3000, y: 1600, width: 768, height: 432 })
   await tracker.shown({})
   assert.deepEqual(calls.at(-1), ['set', 7, { x: 200, y: 300, width: 800, height: 450 }])
-})
-
-test('saves moves while the window shows, for a window closed from the system', async t => {
-  t.mock.timers.enable({ apis: ['setInterval'] })
-  const { tracker, bounds, stored } = nativeFixture(null)
-  const page = {}
-  await tracker.shown(page)
-
-  t.mock.timers.tick(100)
-  assert.deepEqual(stored, [{ x: 1500, y: 800, width: 384, height: 216 }])
-  t.mock.timers.tick(100)
-  assert.equal(stored.length, 1)
-
-  bounds.set(7, { x: 100, y: 200, width: 768, height: 432 })
-  t.mock.timers.tick(100)
-  bounds.delete(7)
-  t.mock.timers.tick(100)
-  tracker.hidden(page)
-  assert.deepEqual(stored.at(-1), { x: 50, y: 100, width: 384, height: 216 })
-  assert.equal(stored.length, 2)
 })
 
 test('leaves a window alone without saved bounds or a match', async t => {

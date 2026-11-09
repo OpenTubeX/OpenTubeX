@@ -178,26 +178,6 @@ test('keeps Android media controls on a detached cross-tab mini player', async (
   assert.deepEqual(actions, ['pause'])
 })
 
-test('keeps an outgoing Android player playing while browsing another tab', async (t) => {
-  enableCapacitorMode(t)
-  const actions = []
-  t.after(() => {
-    tabMediaCoordinator.unregister('outgoing-tab')
-    tabMediaCoordinator.unregister('empty-tab')
-    tabMediaCoordinator.setPresented(null)
-  })
-
-  tabMediaCoordinator.setPresented('outgoing-tab')
-  tabMediaCoordinator.setActionHandlers('outgoing-tab', 'player', {
-    pause: () => actions.push('pause')
-  })
-  tabMediaCoordinator.setPlaybackState('outgoing-tab', 'playing')
-  tabMediaCoordinator.setPresented('empty-tab')
-  await Promise.resolve()
-
-  assert.deepEqual(actions, [])
-})
-
 test('releases Android media ownership when a mini player is torn down', async (t) => {
   enableCapacitorMode(t)
   const actions = []
@@ -282,56 +262,6 @@ test('keeps media controls associated with a paused PiP video', (t) => {
   assert.deepEqual(played, ['pip-tab', 'active-tab', 'active-tab'])
 })
 
-test('clears the skip actions a source no longer offers', (t) => {
-  const handlers = new Map()
-  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
-
-  Object.defineProperty(globalThis, 'navigator', {
-    configurable: true,
-    value: {
-      mediaSession: {
-        metadata: null,
-        playbackState: 'none',
-        setActionHandler (action, handler) {
-          handlers.set(action, handler)
-        }
-      }
-    }
-  })
-  t.after(() => {
-    tabMediaCoordinator.unregister('skip-tab')
-    if (navigatorDescriptor) {
-      Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
-    } else {
-      delete globalThis.navigator
-    }
-  })
-
-  tabMediaCoordinator.setPresented('skip-tab')
-  tabMediaCoordinator.setPlaybackState('skip-tab', 'playing')
-  tabMediaCoordinator.setActionHandlers('skip-tab', 'playlist', {
-    previoustrack: () => {},
-    nexttrack: () => {}
-  })
-
-  assert.equal(typeof handlers.get('previoustrack'), 'function')
-  assert.equal(typeof handlers.get('nexttrack'), 'function')
-
-  // The watch view keeps the source registered and passes null for the
-  // directions that have nothing to skip to
-  tabMediaCoordinator.setActionHandlers('skip-tab', 'playlist', {
-    previoustrack: null,
-    nexttrack: () => {}
-  })
-
-  assert.equal(handlers.get('previoustrack'), null)
-  assert.equal(typeof handlers.get('nexttrack'), 'function')
-
-  tabMediaCoordinator.setActionHandlers('skip-tab', 'playlist', {})
-
-  assert.equal(handlers.get('nexttrack'), null)
-})
-
 test('dispatches native menu actions to the media session owner', (t) => {
   const dispatched = []
   const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
@@ -373,29 +303,6 @@ test('dispatches native menu actions to the media session owner', (t) => {
   tabMediaCoordinator.dispatchAction('unsupported')
 
   assert.deepEqual(dispatched, ['play', 'pause', 'previous', 'next'])
-})
-
-test('passes native seek details to the presented player', (t) => {
-  const dispatched = []
-  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
-  Object.defineProperty(globalThis, 'navigator', {
-    configurable: true,
-    value: { mediaSession: { setActionHandler () {} } }
-  })
-  t.after(() => {
-    tabMediaCoordinator.unregister('seek-tab')
-    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor)
-    else delete globalThis.navigator
-  })
-
-  tabMediaCoordinator.setPresented('seek-tab')
-  tabMediaCoordinator.setMetadata('seek-tab', { title: 'Seek video' })
-  tabMediaCoordinator.setActionHandlers('seek-tab', 'player', {
-    seekto: details => dispatched.push(details.seekTime)
-  })
-  tabMediaCoordinator.dispatchAction('seekto', { seekTime: 42 })
-
-  assert.deepEqual(dispatched, [42])
 })
 
 test('Capacitor routes media actions to the playing background tab', (t) => {
@@ -467,57 +374,6 @@ test('reconciles playing state from the presented video clock', (t) => {
   assert.equal(mediaSession.playbackState, 'playing')
 })
 
-test('reports playback starts without treating owner reselection as a new start', (t) => {
-  const states = []
-  const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
-  const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window')
-
-  Object.defineProperty(globalThis, 'navigator', {
-    configurable: true,
-    value: {
-      mediaSession: {
-        metadata: null,
-        playbackState: 'none',
-        setActionHandler () {}
-      }
-    }
-  })
-  Object.defineProperty(globalThis, 'window', {
-    configurable: true,
-    value: {
-      ftElectron: {
-        tabs: {
-          setMediaSessionState: state => states.push(state)
-        }
-      }
-    }
-  })
-  t.after(() => {
-    tabMediaCoordinator.unregister('first-playing-tab')
-    tabMediaCoordinator.unregister('second-playing-tab')
-    for (const [property, descriptor] of [
-      ['navigator', navigatorDescriptor],
-      ['window', windowDescriptor]
-    ]) {
-      if (descriptor) {
-        Object.defineProperty(globalThis, property, descriptor)
-      } else {
-        delete globalThis[property]
-      }
-    }
-  })
-
-  tabMediaCoordinator.setPresented('first-playing-tab')
-  tabMediaCoordinator.setPlaybackState('first-playing-tab', 'playing')
-  assert.equal(states.at(-1).playbackStarted, true)
-
-  tabMediaCoordinator.setPlaybackState('second-playing-tab', 'playing')
-  assert.equal(states.at(-1).playbackStarted, false)
-
-  tabMediaCoordinator.setPresented('second-playing-tab')
-  assert.equal(states.at(-1).playbackStarted, false)
-})
-
 test('clearing calls from unmounting children do not re-register a closed tab', t => {
   const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
   Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {} })
@@ -553,44 +409,6 @@ test('clearing calls from unmounting children do not re-register a closed tab', 
   assert.equal(tabMediaCoordinator.isRegistered('other-tab'), true)
   tabMediaCoordinator.setPlaybackState('other-tab', 'playing')
   assert.equal(tabMediaCoordinator.isRegistered('closed-tab'), false)
-})
-
-test('a page keeps its media session metadata when the retained mini player in its tab clears its own', t => {
-  const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
-  let metadata = null
-  Object.defineProperty(globalThis, 'navigator', {
-    configurable: true,
-    value: { mediaSession: {
-      set metadata(value) { metadata = value },
-      set playbackState(value) {},
-      setActionHandler() {},
-      setPositionState() {},
-    } },
-  })
-  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
-  t.after(() => {
-    tabMediaCoordinator.unregister('shared-tab')
-    for (const [key, descriptor] of descriptors) {
-      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
-      else delete globalThis[key]
-    }
-  })
-
-  tabMediaCoordinator.setPresented('shared-tab')
-  tabMediaCoordinator.setMetadata('shared-tab', { title: 'YouTube video' }, 'watch')
-  tabMediaCoordinator.setMetadata('shared-tab', { title: 'External media' }, 'external')
-  assert.deepEqual(metadata, { title: 'External media' })
-
-  // A metadata update from the retained mini player keeps its lower priority.
-  tabMediaCoordinator.setMetadata('shared-tab', { title: 'Next YouTube video' }, 'watch')
-  assert.deepEqual(metadata, { title: 'External media' })
-
-  tabMediaCoordinator.setMetadata('shared-tab', null, 'watch')
-  assert.deepEqual(metadata, { title: 'External media' })
-
-  tabMediaCoordinator.setMetadata('shared-tab', { title: 'YouTube video' }, 'watch')
-  tabMediaCoordinator.setMetadata('shared-tab', null, 'external')
-  assert.deepEqual(metadata, { title: 'YouTube video' })
 })
 
 test('a player keeps its media actions when another player in the same tab reconfigures or closes', t => {

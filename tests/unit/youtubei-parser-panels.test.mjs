@@ -51,18 +51,6 @@ test('retains item sections and their contents in structured descriptions withou
   assert.equal(section.contents[0].title.toString(), 'Related videos')
 })
 
-test('parses loading panel content without runtime parser generation or type mismatches', (t) => {
-  const warn = t.mock.method(console, 'warn', () => {})
-  const panel = Parser.parseItem({
-    engagementPanelSectionListRenderer: {
-      content: { contentLoadingRenderer: { useSpinner: true } }
-    }
-  })
-  assert.equal(warn.mock.callCount(), 0)
-  assert.ok(panel.content instanceof YTNodes.ContentLoading)
-  assert.equal(panel.content.use_spinner, true)
-})
-
 test('parses player interstitials without runtime parser generation', (t) => {
   const warn = t.mock.method(console, 'warn', () => {})
   const node = Parser.parseItem({

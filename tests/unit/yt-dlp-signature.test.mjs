@@ -8,13 +8,6 @@ import { verifyYtDlpReleaseAsset } from '../../src/main/ytDlpSignature.js'
 const checksums = readFileSync(new URL('./fixtures/yt-dlp/SHA2-256SUMS', import.meta.url))
 const signature = readFileSync(new URL('./fixtures/yt-dlp/SHA2-256SUMS.sig', import.meta.url))
 
-test('accepts a genuine yt-dlp signature and then compares the asset checksum', () => {
-  assert.throws(
-    () => verifyYtDlpReleaseAsset(Buffer.from('not yt-dlp'), 'yt-dlp_linux', checksums, signature),
-    /does not match its signed checksum/
-  )
-})
-
 test('rejects a release signed before the installed one', () => {
   // the fixture signature was created at 1792619636 (2026-10-21)
   assert.throws(

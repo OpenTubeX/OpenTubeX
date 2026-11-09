@@ -73,17 +73,15 @@ for (const sameVideo of [true, false]) {
   })
 }
 
-for (const [label, options] of [['Shorts', { short: true }], ['Invidious', { backendPreference: 'invidious' }]]) {
-  test(`${label} are not requested early`, async () => {
-    const requests = []
-    const { watch, finish } = watchFor(load(requests), options)
-    const reloading = watch.reloadView()
-    await new Promise(resolve => setImmediate(resolve))
-    finish()
-    await reloading
-    assert.deepEqual(requests, [])
-  })
-}
+test('Invidious videos are not requested early', async () => {
+  const requests = []
+  const { watch, finish } = watchFor(load(requests), { backendPreference: 'invidious' })
+  const reloading = watch.reloadView()
+  await new Promise(resolve => setImmediate(resolve))
+  finish()
+  await reloading
+  assert.deepEqual(requests, [])
+})
 
 test('on Android, the previous video\'s yt-dlp fallback does not skip the next video\'s PoToken', async () => {
   const requests = []

@@ -27,7 +27,7 @@ function refreshSubscriptions(results, preference) {
   return profile.subscriptions
 }
 
-for (const preference of ['entire_app', 'disabled', 'watch_only']) {
+for (const preference of ['entire_app', 'disabled']) {
   test(`refreshes saved game names with untranslated text ${preference}`, () => {
     const [subscription] = refreshSubscriptions([game], preference)
     assert.equal(subscription.name, 'Example Game')

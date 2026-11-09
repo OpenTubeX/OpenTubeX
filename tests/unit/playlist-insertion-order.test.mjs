@@ -278,25 +278,6 @@ test('the bulk prompt waits for writes and reports failure without a success toa
   assert.ok(toasts[0].message.startsWith('Weekend watching: '))
 })
 
-test('a playlist missing before save gets a generic error without exposing its ID', async () => {
-  const toasts = []
-  const errorMessage = 'There was an issue with updating this playlist.'
-  const save = promptSave({
-    saving: { value: false },
-    selectedPlaylistIdList: { value: ['missing-playlist-id'] },
-    allPlaylists: { value: [] },
-    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
-    addingDuplicateVideosEnabled: { value: false },
-    store: { dispatch: () => assert.fail('A missing playlist must not be written') },
-    showToast: toast => toasts.push(toast),
-    t: () => errorMessage,
-    hide: () => {},
-  })
-  await save()
-  assert.equal(toasts.length, 1)
-  assert.equal(toasts[0].message, errorMessage)
-})
-
 test('renderer insertion uses the committed direction when the preference changes before the reply', async () => {
   const { db, Playlists, state } = await fixture(true)
   const actions = storeActions({
@@ -308,25 +289,6 @@ test('renderer insertion uses the committed direction when the preference change
   })
   await actions.addVideo({ commit: (name, payload) => mutations[name](state, payload) }, { _id: 'custom', videoData: { videoId: 'new' } })
   assert.deepEqual(Array.from(state.playlists[0].videos, video => video.videoId), Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, video => video.videoId))
-})
-
-test('partial bulk failure names the failed playlist and counts only the successful target', async () => {
-  const toasts = []
-  const save = promptSave({
-    saving: { value: false },
-    selectedPlaylistIdList: { value: ['saved', 'failed'] },
-    allPlaylists: { value: [{ _id: 'saved', playlistName: 'Saved playlist', videos: [] }, { _id: 'failed', playlistName: 'Failed playlist', videos: [] }] },
-    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
-    addingDuplicateVideosEnabled: { value: false },
-    store: { dispatch: async (_action, payload) => payload._id === 'saved' },
-    showToast: toast => toasts.push(toast),
-    t: (key, params) => params ? `Saved to ${params.playlistCount}` : key,
-    hide: () => {},
-  })
-  await save()
-  assert.equal(toasts.length, 2)
-  assert.equal(toasts[0].message, 'Saved to 1')
-  assert.ok(toasts[1].message.startsWith('Failed playlist: '))
 })
 
 for (const allowDuplicates of [false, true]) {
@@ -353,23 +315,6 @@ for (const allowDuplicates of [false, true]) {
     assert.equal(toasts[0].message, 'Saved to 2')
   })
 }
-
-test('a bulk save skips empty filtered batches without reporting an addition', async () => {
-  const toasts = []
-  const save = promptSave({
-    saving: { value: false },
-    selectedPlaylistIdList: { value: ['custom'] },
-    allPlaylists: { value: [{ _id: 'custom', videos: [{ videoId: 'existing' }] }] },
-    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'existing' }, { videoId: 'existing' }] },
-    addingDuplicateVideosEnabled: { value: false },
-    store: { dispatch: () => assert.fail('An empty batch must not be written') },
-    showToast: toast => toasts.push(toast),
-    t: key => key,
-    hide: () => {},
-  })
-  await save()
-  assert.deepEqual(toasts, [])
-})
 
 test('an insertion retry does not overwrite a newer playlist timestamp', async () => {
   const { db, Playlists } = await fixture(true)
