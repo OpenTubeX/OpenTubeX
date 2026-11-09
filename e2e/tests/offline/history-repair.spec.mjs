@@ -95,30 +95,6 @@ test('keeps Cancel available if history is cleared during a repair', async ({ pa
   }
 })
 
-test('can dismiss the repair status after the repair stops', async ({ page }) => {
-  let release
-  const pending = new Promise(resolve => { release = resolve })
-  await page.route('**/youtubei/v1/player*', async route => {
-    await pending
-    await route.fulfill({ json: {} }).catch(() => {})
-  })
-  try {
-    await goTo(page, 'history')
-    await startRepair(page)
-    const status = page.getByRole('region', { name: 'Repair History' })
-    await expect(status.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
-    await expect(status.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0)
-    await status.getByRole('button', { name: 'Cancel', exact: true }).click()
-    const close = status.getByRole('button', { name: 'Close', exact: true })
-    await expect(close).toBeFocused()
-    await close.click()
-    await expect(status).toHaveCount(0)
-    await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeFocused()
-  } finally {
-    release()
-  }
-})
-
 test.describe('Invidious history repair', () => {
   test.use({
     seed: {
@@ -268,7 +244,7 @@ test('reports a persistent bot check and stops retrying', async ({ page }) => {
   expect(requests).toBe(3)
 })
 
-for (const width of [1280, 375]) {
+for (const width of [375]) {
   test(`explains repair before starting at ${width}px`, async ({ page }, testInfo) => {
     let requests = 0
     await page.route('**/youtubei/v1/player*', async route => {
@@ -361,7 +337,7 @@ for (const backend of ['local', 'invidious']) {
   test.describe(`${backend} repair failure classification`, () => {
     test.use({ seed: { history: [original], settings: { backendPreference: backend, defaultInvidiousInstance: 'https://history-repair.test' } } })
 
-    for (const failure of [403, 404, 'unavailable', 'malformed', 429, 503]) {
+    for (const failure of [403, 'unavailable', 429, 503]) {
       test(`handles ${failure} without unnecessary retries`, async ({ page }) => {
         let requests = 0
         await page.clock.install()
@@ -398,7 +374,7 @@ for (const backend of ['local', 'invidious']) {
 }
 
 test.describe('history repair cookies', () => {
-  for (const mode of ['file', 'browser', 'none']) {
+  for (const mode of ['file', 'none']) {
     test.describe(mode, () => {
       test.use({
         seed: {

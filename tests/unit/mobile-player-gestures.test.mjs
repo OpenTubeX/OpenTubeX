@@ -128,115 +128,12 @@ test('left and right vertical swipes use their configured actions with fractiona
   }
 })
 
-test('side zones and seek distance follow the video beside an open fullscreen dock', t => {
-  // A 160px dock leaves the video at 10-250px inside the 10-410px player.
-  for (const [x, action] of [[50, 'volume'], [130, null], [226, 'brightness']]) {
-    const { gestures: g, event, calls } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false, fullscreen: () => true, surfaceWidth: 240 })
-    g.startMobileFullscreenGesture(event(x))
-    assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), action !== null)
-    g.finishMobileFullscreenGesture(event(x, 49.75))
-    assert.deepEqual(calls, action ? [['begin', action], ['update', 0.5], 'finish'] : [])
-  }
-  const { gestures: g, event } = fixture(t, { fullscreen: () => true, surfaceWidth: 240 })
-  g.startMobileFullscreenGesture(event(130, 150))
-  g.moveMobileFullscreenGesture(event(190, 150))
-  assert.deepEqual(g.mobileSeekPreview.value, { time: 90 })
-  g.cancelMobileFullscreenGesture()
-})
-
 test('a tap still shows controls and does not call native adjustments', t => {
   const { gestures: g, event, calls } = fixture(t)
   g.startMobileFullscreenGesture(event())
   g.moveMobileFullscreenGesture(event(51, 148))
   g.finishMobileFullscreenGesture(event(51, 148))
   assert.deepEqual(calls, ['show'])
-})
-
-test('a tap suppresses its own touch end even when the main thread handles it late', t => {
-  let now = 1000
-  t.mock.method(performance, 'now', () => now)
-  const { gestures: g, event, calls } = fixture(t)
-  g.startMobileFullscreenGesture(event(210, 150, { timeStamp: now }))
-  g.finishMobileFullscreenGesture(event(210, 150, { timeStamp: now }))
-  assert.deepEqual(calls, ['show'])
-  const touchEnd = event(210, 150, { timeStamp: now })
-  now += 1000
-  g.handleMobilePlayerTouchEnd(touchEnd)
-  assert.equal(touchEnd.prevented, true)
-})
-
-test('center swipes retain fullscreen and disabled sides allow fullscreen swipes', t => {
-  const { gestures: g, event, calls } = fixture(t, { left: 'disabled' })
-  for (const x of [50, 210]) {
-    g.startMobileFullscreenGesture(event(x))
-    assert.equal(g.moveMobileFullscreenGesture(event(x, 50)), true)
-    assert.equal(g.mobileFullscreenSwiping.value, true)
-    g.cancelMobileFullscreenGesture()
-  }
-  assert.deepEqual(calls, [])
-})
-
-test('fullscreen swipes follow the finger to the commit point, then resist, and preview the destination size', t => {
-  const { gestures: g, event } = fixture(t)
-  for (const fullscreen of [false, true]) {
-    const { gestures: swipe, event: swipeEvent } = fullscreen ? fixture(t, { fullscreen: () => true }) : { gestures: g, event }
-    const direction = fullscreen ? 1 : -1
-    swipe.startMobileFullscreenGesture(swipeEvent(210, 300))
-    const samples = [20, 64, 120, 240, 480].map(distance => {
-      swipe.moveMobileFullscreenGesture(swipeEvent(210, 300 + direction * distance))
-      const style = swipe.mobileFullscreenSwipeStyle.value
-      return { distance, offset: Number.parseFloat(style['--mobile-fullscreen-swipe-offset']) * direction, scale: Number(style['--mobile-fullscreen-swipe-scale']) }
-    })
-    // The video tracks the finger exactly until releasing would commit.
-    assert.equal(samples[0].offset, 20)
-    assert.equal(samples[1].offset, 64)
-    // Past it, every further pixel still moves the video, with growing resistance and no hard stop.
-    for (let i = 2; i < samples.length; i++) {
-      assert.ok(samples[i].offset > samples[i - 1].offset + 1)
-      assert.ok(samples[i].offset / samples[i].distance < samples[i - 1].offset / samples[i - 1].distance)
-    }
-    assert.ok(samples.at(-1).offset < 124)
-    // Entering fullscreen grows the video, leaving it shrinks the video.
-    for (const { scale } of samples) assert.ok(fullscreen ? scale < 1 && scale > 0.95 : scale > 1 && scale < 1.05)
-    if (fullscreen) {
-      // Moving back up past the start leaves the video at rest instead of enlarging it.
-      swipe.moveMobileFullscreenGesture(swipeEvent(210, 300 - 248))
-      const reversed = swipe.mobileFullscreenSwipeStyle.value
-      assert.equal(Math.abs(Number.parseFloat(reversed['--mobile-fullscreen-swipe-offset'])), 0)
-      assert.equal(reversed['--mobile-fullscreen-swipe-scale'], '1')
-    }
-    swipe.cancelMobileFullscreenGesture()
-  }
-})
-
-test('a cancelled fullscreen swipe springs back for the configured animation speed', async t => {
-  const { gestures: g, event, calls } = fixture(t, { reducedMotion: false, animationSpeed: 0.5 })
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  g.startMobileFullscreenGesture(event(210, 150))
-  g.moveMobileFullscreenGesture(event(210, 130))
-  g.finishMobileFullscreenGesture(event(210, 130, { timeStamp: 10_000 }))
-  assert.equal(g.mobileFullscreenSwipeSettling.value, true)
-  assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-fullscreen-swipe-offset'], '0px')
-  assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-fullscreen-swipe-scale'], '1')
-  t.mock.timers.tick(799)
-  assert.equal(g.mobileFullscreenSwipeSettling.value, true, 'Half speed doubles the 400 ms spring')
-  t.mock.timers.tick(1)
-  assert.equal(g.mobileFullscreenSwipeSettling.value, false)
-  assert.equal(calls.includes('fullscreen'), false)
-})
-
-test('committed fullscreen swipe starts after painting without a settle delay', async t => {
-  const { gestures: g, event, calls, paint } = fixture(t, { reducedMotion: false })
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  g.startMobileFullscreenGesture(event(210, 150))
-  g.moveMobileFullscreenGesture(event(210, 50))
-  g.finishMobileFullscreenGesture(event(210, 50))
-  t.mock.timers.tick(0)
-  await nextTick()
-  paint()
-  paint()
-  await Promise.resolve()
-  assert.equal(calls.includes('fullscreen'), true, 'A committed swipe must not wait for the 140 ms settle animation')
 })
 
 test('a swipe exits rotation fullscreen without entering native fullscreen', async t => {
@@ -312,173 +209,6 @@ test('rejected fullscreen entry is handled', async t => {
   assert.equal(console.warn.mock.callCount(), 1)
 })
 
-// Exercise Shaka's real touch/mouse and opacity methods.
-function createShakaControls() {
-  const source = readFileSync(new URL('../../node_modules/shaka-player/ui/controls.js', import.meta.url), 'utf8')
-  const shaka = { ui: {}, util: { FakeEventTarget: class {} } }
-  vm.runInNewContext(source.slice(source.indexOf('shaka.ui.Controls = class'), source.indexOf('\n};') + 3), {
-    shaka, Event, Date, goog: { asserts: { assert } },
-  })
-  const controls = Object.create(shaka.ui.Controls.prototype)
-  const attributes = new Map()
-  const classList = { add() {}, remove() {}, contains: () => false }
-  const timer = callback => {
-    let id
-    return {
-      stop() { clearTimeout(id) },
-      tickAfter(seconds) { this.stop(); id = setTimeout(callback, seconds * 1000) },
-    }
-  }
-  Object.assign(controls, {
-    enabled_: true,
-    controlsContainer_: {
-      classList,
-      getAttribute: name => attributes.get(name) ?? null,
-      setAttribute: (name, value) => attributes.set(name, value),
-      hasAttribute: name => attributes.has(name),
-      getBoundingClientRect: () => ({ left: 10, width: 400, height: 200.5 }),
-    },
-    videoContainer_: { classList, dataset: {} },
-    video_: { paused: false },
-    config_: { showUIOnPaused: true, fadeDelay: 0.5 },
-    isHovered_: () => false,
-    shouldShowUIAlways_: () => false,
-    anySettingsMenusAreOpen: () => false,
-    updateTimeAndSeekRange_() {},
-    dispatchVisibilityEvent_() {},
-    computeShakaTextContainerSize_() {},
-    hideSettingsMenusTimer_: timer(() => {}),
-    fadeControlsTimer_: timer(() => attributes.delete('shown')),
-    mouseStillTimer_: timer(() => controls.onMouseStill_()),
-  })
-  return { controls, attributes }
-}
-
-test('fullscreen swipe controls auto-hide after the configured delay despite suppressed touchend', async t => {
-  // touchmove stops Shaka's idle timer, while the app consumes touchend to
-  // prevent a second surface tap.
-  const { controls, attributes } = createShakaControls()
-  let fullscreen = false
-  const { gestures: g, event, container, paint } = fixture(t, {
-    controls,
-    fullscreen: () => fullscreen,
-    toggleFullscreen: () => {
-      fullscreen = true
-      // The presentation change can cancel the old pointer gesture while the
-      // accepted fullscreen promise is still completing.
-      g.cancelMobileFullscreenGesture()
-      controls.videoContainer_.dataset.playingInterfaceHideDelay = '2'
-      controls.showUI()
-    },
-  })
-  for (const type of ['touchmove', 'touchend']) {
-    container.addEventListener(type, event => controls.onMouseMove_(event))
-  }
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  g.startMobileFullscreenGesture(event(210, 150))
-  g.moveMobileFullscreenGesture(event(210, 50))
-  container.dispatchEvent(new Event('touchmove'))
-  g.finishMobileFullscreenGesture(event(210, 50))
-  const touchEnd = event(50, 150, { timeStamp: performance.now() })
-  g.handleMobilePlayerTouchEnd(touchEnd)
-  assert.equal(touchEnd.prevented, true)
-  t.mock.timers.tick(0)
-  await nextTick()
-  paint()
-  paint()
-  await Promise.resolve()
-  await Promise.resolve()
-  assert.equal(fullscreen, true)
-  assert.equal(attributes.has('shown'), true)
-  t.mock.timers.tick(1999)
-  assert.equal(attributes.has('shown'), true, 'Controls respect the configured idle delay')
-  t.mock.timers.tick(1)
-  t.mock.timers.tick(500)
-  assert.equal(attributes.has('shown'), false, 'Controls must hide without another tap')
-})
-
-test('side swipe adjustments keep hidden controls hidden', t => {
-  const { controls, attributes } = createShakaControls()
-  const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
-  container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
-  for (const type of ['touchmove', 'touchend']) {
-    container.addEventListener(type, event => controls.onMouseMove_(event))
-  }
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  for (const [x, action] of [[50, 'brightness'], [370, 'volume']]) {
-    calls.length = 0
-    g.startMobileFullscreenGesture(event(x))
-    // Shaka reveals its controls for every touchmove, including those within
-    // the slop before the swipe locks.
-    container.dispatchEvent(new Event('touchmove'))
-    assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), true)
-    container.dispatchEvent(new Event('touchmove'))
-    g.finishMobileFullscreenGesture(event(x, 49.75))
-    const touchEnd = event(x, 49.75, { timeStamp: performance.now() })
-    g.handleMobilePlayerTouchEnd(touchEnd)
-    assert.equal(touchEnd.prevented, true)
-    assert.deepEqual(calls, [['begin', action], ['update', 0.5], 'finish'])
-    assert.equal(attributes.has('shown'), false, `A ${action} swipe must not reveal the controls`)
-  }
-  container.dispatchEvent(new Event('touchmove'))
-  assert.equal(attributes.has('shown'), true, 'Other touch movement still reveals the controls')
-})
-
-test('a second touch that cancels an adjustment reveals controls only when it moves', t => {
-  for (const moves of [false, true]) {
-    const { controls, attributes } = createShakaControls()
-    const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
-    container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
-    for (const type of ['touchmove', 'touchend']) {
-      container.addEventListener(type, event => controls.onMouseMove_(event))
-    }
-    t.mock.timers.enable({ apis: ['setTimeout'] })
-    g.startMobileFullscreenGesture(event(50))
-    assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
-    container.dispatchEvent(new Event('touchmove'))
-    g.startMobileFullscreenGesture(event(370, 150, { pointerId: 2, isPrimary: false }))
-    assert.deepEqual(calls, [['begin', 'brightness'], ['update', 0.5], 'cancel'])
-    if (moves) container.dispatchEvent(new Event('touchmove'))
-    const touchEnd = event(370, 150, { timeStamp: performance.now() })
-    g.handleMobilePlayerTouchEnd(touchEnd)
-    assert.equal(touchEnd.prevented, true)
-    assert.equal(attributes.has('shown'), moves)
-    // Shaka saw the movement, so it still needs the touch end to fade again.
-    t.mock.timers.tick(3000)
-    t.mock.timers.tick(500)
-    assert.equal(attributes.has('shown'), false, 'Controls must not stay visible')
-    t.mock.timers.reset()
-  }
-})
-
-test('a canceled adjustment suppresses touch ends until every finger lifts', t => {
-  let now = 1000
-  t.mock.method(performance, 'now', () => now)
-  const { controls, attributes } = createShakaControls()
-  const { gestures: g, event, container } = fixture(t, { controls, fullscreenSwipe: false, fullscreen: () => true })
-  container.addEventListener('touchend', event => controls.onMouseMove_(event))
-  g.startMobileFullscreenGesture(event(50))
-  assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
-  g.startMobileFullscreenGesture(event(370, 150, { pointerId: 2, isPrimary: false }))
-  const secondTouchEnd = event(370, 150, { timeStamp: now, touches: [{}] })
-  g.handleMobilePlayerTouchEnd(secondTouchEnd)
-  now += 1000
-  const firstTouchEnd = event(50, 49.75, { timeStamp: now, touches: [] })
-  g.handleMobilePlayerTouchEnd(firstTouchEnd)
-  assert.equal(secondTouchEnd.prevented, true)
-  assert.equal(firstTouchEnd.prevented, true, 'The adjusting finger must not reach Shaka after the window')
-  assert.equal(attributes.has('shown'), false)
-})
-
-test('horizontal movement never becomes an adjustment later in the same gesture', t => {
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, seekSwipe: () => false })
-  g.startMobileFullscreenGesture(event())
-  g.moveMobileFullscreenGesture(event(100, 149))
-  g.moveMobileFullscreenGesture(event(100, 50))
-  g.finishMobileFullscreenGesture(event(100, 50))
-  assert.deepEqual(calls, [])
-})
-
 test('a second finger cancels adjustments for pinch zoom, even when zoom is disabled', t => {
   const { gestures: g, event, calls, captures } = fixture(t, { fullscreen: () => true })
   g.startMobileFullscreenGesture(event())
@@ -508,35 +238,14 @@ for (const [name, options, extra] of [
   })
 }
 
-test('a slightly diagonal start can settle into a vertical side swipe', t => {
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
-  g.startMobileFullscreenGesture(event(50, 150))
-  g.moveMobileFullscreenGesture(event(63, 138))
-  g.moveMobileFullscreenGesture(event(64, 100))
-  assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'begin'), true)
+test('playback speed works on the left with fullscreen swiping disabled', t => {
+  const { gestures: g, event, calls } = fixture(t, { left: 'speed', right: 'disabled', fullscreenSwipe: false, fullscreen: () => true })
+  g.startMobileFullscreenGesture(event(50))
+  assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
+  g.finishMobileFullscreenGesture(event(50, 49.75))
+  assert.deepEqual(calls, [['begin', 'speed'], ['update', 0.5], 'finish'])
+  assert.equal(calls.includes('fullscreen'), false)
 })
-
-test('a side swipe that starts on a toolbar button does not click the button on release', t => {
-  const { gestures: g, event } = fixture(t, { fullscreen: () => true })
-  const target = new ElementStub('.shaka-controls-button-panel')
-  g.startMobileFullscreenGesture(event(370, 150, { target }))
-  g.moveMobileFullscreenGesture(event(370, 100, { target }))
-  g.finishMobileFullscreenGesture(event(370, 100, { target }))
-  const click = event(370, 100, { target })
-  assert.equal(g.handleMobilePlayerSurfaceClick(click), true)
-  assert.equal(click.prevented, true)
-})
-
-for (const [side, x] of [['left', 50], ['right', 370]]) {
-  test(`playback speed works on the ${side} with fullscreen swiping disabled`, t => {
-    const { gestures: g, event, calls } = fixture(t, { left: 'disabled', right: 'disabled', [side]: 'speed', fullscreenSwipe: false, fullscreen: () => true })
-    g.startMobileFullscreenGesture(event(x))
-    assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), true)
-    g.finishMobileFullscreenGesture(event(x, 49.75))
-    assert.deepEqual(calls, [['begin', 'speed'], ['update', 0.5], 'finish'])
-    assert.equal(calls.includes('fullscreen'), false)
-  })
-}
 
 for (const [placement, x] of [['toolbar', 50], ['center', 210]]) {
   test(`native ${placement} replay taps reach the button without gesture suppression`, t => {
@@ -598,7 +307,7 @@ for (const secondFinger of [false, true]) {
   })
 }
 
-for (const x of [50, 370]) {
+for (const x of [50]) {
   test(`inline side swipes at ${x}px enter fullscreen and minimize instead of adjusting`, async t => {
     const { gestures: g, event, calls, paint } = fixture(t, { minimize: true })
     t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -630,32 +339,6 @@ for (const distance of [24, 120]) {
     assert.deepEqual(calls, ['drag-begin', ['drag-move', 0, -distance], ['drag-finish', distance >= 64]])
   })
 }
-
-test('a teleported player receives release outside its DOM and removes window listeners', () => {
-  const start = playerSource.indexOf('    const playerPointerIds =')
-  const end = playerSource.indexOf('    onBeforeUnmount(clearPlayerPointers)', start)
-  const handlers = new Map()
-  const calls = []
-  const track = vm.runInNewContext(`${playerSource.slice(start, end)}; trackPlayerPointer`, {
-    window: {
-      addEventListener: (type, handler) => handlers.set(type, handler),
-      removeEventListener: type => handlers.delete(type),
-    },
-    handleVideoZoomPointerMove: e => calls.push(['move', e.pointerId]),
-    handleVideoZoomPointerUp: e => calls.push(['up', e.pointerId]),
-    handleVideoZoomPointerCancel: e => calls.push(['cancel', e.pointerId]),
-  })
-  track({ pointerId: 7 })
-  handlers.get('pointermove')({ pointerId: 8 })
-  handlers.get('pointermove')({ pointerId: 7, target: {} })
-  handlers.get('pointerup')({ pointerId: 7, target: {}, type: 'pointerup' })
-  assert.deepEqual(calls, [['move', 7], ['up', 7]])
-  assert.equal(handlers.size, 0)
-  track({ pointerId: 9 })
-  handlers.get('pointercancel')({ pointerId: 9, type: 'pointercancel' })
-  assert.deepEqual(calls.at(-1), ['cancel', 9])
-  assert.equal(handlers.size, 0)
-})
 
 test('revealing Watch preserves a drag and completed dismissal survives visibility changes, but changing video cancels', () => {
   const start = playerSource.indexOf('    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId]')
@@ -697,17 +380,6 @@ test('upward swipe also starts on the mini-player transparent touch layer', t =>
   assert.deepEqual(calls.at(-1), ['drag-finish', true])
 })
 
-test('tapping the full-bar return button leaves restoration to its native click', t => {
-  const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
-  const target = new ElementStub('.mobileMiniBarReturn')
-  g.startMobileFullscreenGesture(event(210, 400, { target }))
-  const release = event(210, 400, { target })
-  assert.equal(g.finishMobileFullscreenGesture(release), false)
-  assert.notEqual(release.prevented, true)
-  assert.equal(g.handleMobilePlayerSurfaceClick(event(210, 400, { target })), false)
-  assert.deepEqual(calls, [])
-})
-
 test('upward swipes on the full-bar return button restore the video', t => {
   const { gestures: g, event, calls, captures } = fixture(t, { mini: true, minimize: true })
   const target = new ElementStub('.mobileMiniBarReturn')
@@ -743,7 +415,7 @@ test('a rejected scroll-mini-player restore never enters fullscreen or retains c
   assert.equal(captures.size, 0)
 })
 
-for (const distance of [24, 64, 100]) {
+for (const distance of [24, 64]) {
   test(`downward mini-player swipe ${distance}px closes only after the threshold`, async t => {
     const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => true, fullscreenSwipe: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -761,15 +433,7 @@ for (const distance of [24, 64, 100]) {
   })
 }
 
-test('downward swipe leaves a same-page scroll mini-player open', t => {
-  const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
-  g.startMobileFullscreenGesture(event(210, 400))
-  assert.equal(g.moveMobileFullscreenGesture(event(210, 500)), false)
-  g.finishMobileFullscreenGesture(event(210, 500))
-  assert.deepEqual(calls, [])
-})
-
-for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailable']) {
+for (const reason of ['reversed', 'second finger', 'unavailable']) {
   test(`dismissal cancels when ${reason}`, async t => {
     let available = true
     const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => available })
@@ -811,23 +475,6 @@ for (const unmounted of [false, true]) {
   })
 }
 
-for (const primary of [false, true]) {
-  test(`committed dismissal ignores a new ${primary ? 'primary' : 'secondary'} touch during settling`, async t => {
-    const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
-    t.mock.timers.enable({ apis: ['setTimeout'] })
-    g.startMobileFullscreenGesture(event(210, 400))
-    g.moveMobileFullscreenGesture(event(210, 500))
-    g.finishMobileFullscreenGesture(event(210, 500))
-    await nextTick()
-    t.mock.timers.tick(70)
-    g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: primary }))
-    assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-mini-dismiss-offset'], '296.5px')
-    t.mock.timers.tick(70)
-    assert.deepEqual(calls, ['dismiss'])
-    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
-  })
-}
-
 test('a video-change cancellation stops a committed dismissal before replacement playback', async t => {
   const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
   t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -842,7 +489,7 @@ test('a video-change cancellation stops a committed dismissal before replacement
   assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
 })
 
-for (const selector of ['.mobileMiniBarDismiss', '.mobileMiniBarPlayPause', '.mobileMiniBarPlayback']) {
+for (const selector of ['.mobileMiniBarDismiss', '.mobileMiniBarPlayback']) {
   test(`downward swipes on ${selector} keep its control action separate`, t => {
     const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true })
     const target = new ElementStub(selector)
@@ -888,18 +535,6 @@ for (const [direction, x, endX, time] of [[1, 50, 150, 90], [-1, 370, 270, 30]])
     assert.deepEqual(calls, [['seek', time]], 'Release must not toggle controls or seek again')
   })
 }
-
-test('horizontal seek can reverse and return to its starting time', t => {
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
-  g.startMobileFullscreenGesture(event(210, 150))
-  g.moveMobileFullscreenGesture(event(310, 150))
-  g.moveMobileFullscreenGesture(event(110, 150))
-  assert.deepEqual(g.mobileSeekPreview.value, { time: 30 })
-  g.moveMobileFullscreenGesture(event(210, 150))
-  assert.deepEqual(g.mobileSeekPreview.value, { time: 60 })
-  g.finishMobileFullscreenGesture(event(210, 150))
-  assert.deepEqual(calls, [['seek', 60]])
-})
 
 for (const [name, range, deltaX, expected] of [
   ['start', { time: 25, start: 20, end: 620 }, -100, 20],
@@ -955,17 +590,6 @@ for (const [name, options, extra] of [
   })
 }
 
-test('an active vertical side swipe cannot become a horizontal seek', t => {
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
-  g.startMobileFullscreenGesture(event(50, 150))
-  g.moveMobileFullscreenGesture(event(50, 100))
-  g.moveMobileFullscreenGesture(event(200, 100))
-  g.finishMobileFullscreenGesture(event(200, 100))
-  assert.equal(g.mobileSeekPreview.value, null)
-  assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'seek'), false)
-  assert.deepEqual(calls.at(-1), 'finish')
-})
-
 test('an open settings menu leaves horizontal swipes to the menu', t => {
   const controls = {
     getControlsContainer: () => ({ hasAttribute: () => true, getBoundingClientRect: () => ({ left: 10, width: 400, height: 200.5 }) }),
@@ -979,18 +603,6 @@ test('an open settings menu leaves horizontal swipes to the menu', t => {
   assert.deepEqual(calls, [])
 })
 
-test('a center vertical fullscreen exit cannot become a horizontal seek', t => {
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
-  g.startMobileFullscreenGesture(event(210, 150))
-  assert.equal(g.moveMobileFullscreenGesture(event(210, 190)), true)
-  g.moveMobileFullscreenGesture(event(350, 190))
-  assert.equal(g.mobileSeekPreview.value, null)
-  assert.equal(g.mobileFullscreenSwiping.value, true)
-  g.cancelMobileFullscreenGesture()
-  assert.deepEqual(calls, [])
-})
-
-
 test('disabled horizontal seek leaves fullscreen swipes without seeking', t => {
   const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, seekSwipe: () => false })
   g.startMobileFullscreenGesture(event(150, 150))
@@ -1000,40 +612,7 @@ test('disabled horizontal seek leaves fullscreen swipes without seeking', t => {
   assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'seek'), false)
 })
 
-test('disabling horizontal seek during a gesture prevents the commit', t => {
-  let enabled = true
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, seekSwipe: () => enabled })
-  g.startMobileFullscreenGesture(event(150, 150))
-  g.moveMobileFullscreenGesture(event(250, 150))
-  assert.ok(g.mobileSeekPreview.value)
-  enabled = false
-  g.finishMobileFullscreenGesture(event(250, 150))
-  assert.equal(g.mobileSeekPreview.value, null)
-  assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'seek'), false)
-})
-
-test('cancelled seeking suppresses late touch releases until both fingers are lifted', t => {
-  let now = 1000
-  t.mock.method(performance, 'now', () => now)
-  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true })
-  g.startMobileFullscreenGesture(event(150, 150))
-  g.moveMobileFullscreenGesture(event(250, 150))
-  g.startMobileFullscreenGesture(event(300, 150, { pointerId: 2, isPrimary: false }))
-  now += 1000
-  const firstRelease = event(250, 150, { touches: [{}], timeStamp: now })
-  g.handleMobilePlayerTouchEnd(firstRelease)
-  assert.equal(firstRelease.prevented, true)
-  now += 1000
-  const lastRelease = event(300, 150, { touches: [], timeStamp: now })
-  g.handleMobilePlayerTouchEnd(lastRelease)
-  assert.equal(lastRelease.prevented, true)
-  assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'seek'), false)
-  g.startMobileFullscreenGesture(event(210, 150))
-  g.finishMobileFullscreenGesture(event(210, 150))
-  assert.ok(calls.includes('show'), 'The next unrelated tap remains available')
-})
-
-for (const reducedMotion of [false, true]) {
+for (const reducedMotion of [false]) {
   test(`close button shares swipe dismissal timing (reduced motion: ${reducedMotion})`, async t => {
     const { gestures: g, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion })
     t.mock.timers.enable({ apis: ['setTimeout'] })

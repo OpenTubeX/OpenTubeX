@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Rediger"
   Pin to Navigation: "Fest til navigasjonen"
   Unpin from Navigation: "Løsne fra navigasjonen"
+  Pin to Top: "Fest øverst"
+  Unpin from Top: "Løsne fra toppen"
+  Pinned to Top: "Festet øverst"
   Reorder Hint: Dra eller bruk piltastene for å endre rekkefølgen
   Add new videos to the top (custom order): "Legg til nye videoer øverst (egendefinert rekkefølge)"
   Shuffle videos by default: "Spill av videoer i tilfeldig rekkefølge som standard"
@@ -1496,14 +1499,15 @@ Tutorial:
     Action: Importer data
     Not Now: Ikke nå
 About:
+  Get OpenTubeX: Skaff OpenTubeX
+  Community: Fellesskap
+  Contribute: Bidra
   Documentation: Dokumentasjon
   Downloads: Nedlastinger
   Changelog: Endringslogg
   Commit: Revisjon
-  Fluxer: Bli med i Fluxer-fellesskapet vårt
   Matrix: Matrix
   Email: E-post
-  Support the development of OpenTubeX: "Støtt utviklingen av OpenTubeX"
 Profile:
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer

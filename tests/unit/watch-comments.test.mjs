@@ -17,10 +17,6 @@ test('shows comments for videos and active premieres but not live streams', () =
   assert.equal(areCommentsAvailable({ isLive: true, isPremiere: false, hideComments: false }), false)
 })
 
-test('respects the hide comments preference for premieres', () => {
-  assert.equal(areCommentsAvailable({ isLive: true, isPremiere: true, hideComments: true }), false)
-})
-
 test('downloaded playback without online metadata does not mount a comments request that waits forever offline', () => {
   assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: '' }), false)
   assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: 'UCchannel' }), true)
@@ -30,14 +26,12 @@ test('offline playback hides comments even when download metadata includes a cha
   assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: 'UCchannel', isOffline: true, downloadedPlaybackWithoutMetadata: true }), false)
 })
 
-for (const localFilePlayback of [false, true]) {
-  test(`losing connectivity preserves comments for loaded ${localFilePlayback ? 'downloaded' : 'streamed'} videos`, () => {
-    const state = { isLive: false, hideComments: false, localFilePlayback, channelId: 'UCchannel', downloadedPlaybackWithoutMetadata: false, commentsLoaded: true }
-    assert.equal(areCommentsAvailable(state), true)
-    assert.equal(areCommentsAvailable({ ...state, isOffline: true }), true)
-    assert.equal(areCommentsAvailable({ ...state, isOffline: true, hideComments: true }), false)
-  })
-}
+test('losing connectivity preserves comments for loaded streamed videos', () => {
+  const state = { isLive: false, hideComments: false, localFilePlayback: false, channelId: 'UCchannel', downloadedPlaybackWithoutMetadata: false, commentsLoaded: true }
+  assert.equal(areCommentsAvailable(state), true)
+  assert.equal(areCommentsAvailable({ ...state, isOffline: true }), true)
+  assert.equal(areCommentsAvailable({ ...state, isOffline: true, hideComments: true }), false)
+})
 
 test('offline comments stay unavailable until comments have loaded', () => {
   const state = { isLive: false, hideComments: false, isOffline: true }

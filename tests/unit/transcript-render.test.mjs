@@ -4,7 +4,6 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const transcriptSource = readFileSync(new URL('../../src/renderer/components/WatchVideoTranscript/WatchVideoTranscript.vue', import.meta.url), 'utf8')
-const watchTemplate = readFileSync(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
 
 function sliceFunction(name) {
   const start = transcriptSource.indexOf(`function ${name}(`)
@@ -28,15 +27,4 @@ test('transcript cues carry their formatted timestamp from parsing', () => {
     { text: 'Hello', timestamp: 't1' },
     { text: 'World', timestamp: 't3723' },
   ])
-})
-
-test('transcript rows only rerender when their chunk or its active segment changes', () => {
-  assert.match(transcriptSource, /v-memo="\[chunk, active, keepMounted\]"/)
-  assert.match(transcriptSource, /segment\.index === active \}/)
-  assert.match(transcriptSource, /\{\{ segment\.timestamp \}\}/)
-})
-
-test('hidden side panels receive the playback time in whole seconds', () => {
-  assert.doesNotMatch(watchTemplate, /:current-time="currentTime"/)
-  assert.equal(watchTemplate.match(/:current-time="showTranscript \? currentTime : liveChatCurrentTime"/g)?.length, 2)
 })

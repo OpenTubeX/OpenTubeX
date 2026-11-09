@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Editatu"
   Pin to Navigation: "Ainguratu nabigazioan"
   Unpin from Navigation: "Desainguratu nabigaziotik"
+  Pin to Top: "Ainguratu goian"
+  Unpin from Top: "Desainguratu goitik"
+  Pinned to Top: "Goian ainguratuta"
   Reorder Hint: Arrastatu edo erabili gezi-teklak berrordenatzeko
   Add new videos to the top (custom order): "Gehitu bideo berriak hasieran (ordena pertsonalizatua)"
   Shuffle videos by default: "Erreproduzitu bideoak ausazko ordenan modu lehenetsian"
@@ -1496,14 +1499,15 @@ Tutorial:
     Action: Inportatu datuak
     Not Now: Orain ez
 About:
+  Get OpenTubeX: Lortu OpenTubeX
+  Community: Komunitatea
+  Contribute: Lagundu
   Documentation: Dokumentazioa
   Downloads: Deskargak
   Changelog: Aldaketen erregistroa
   Commit: Commit-a
-  Fluxer: Egin bat gure Fluxer komunitatearekin
   Matrix: Matrix
   Email: Helbide elektronikoa
-  Support the development of OpenTubeX: "Lagundu OpenTubeX-en garapena"
 Profile:
   Customization: Pertsonalizazioa
   Manage Profile Subscriptions: Kudeatu profileko harpidetzak

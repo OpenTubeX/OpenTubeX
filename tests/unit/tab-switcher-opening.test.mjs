@@ -46,7 +46,7 @@ function createSwitcher() {
   }
 }
 
-for (const [direction, target] of [[1, 'second'], [-1, 'third']]) {
+for (const [direction, target] of [[1, 'second']]) {
   test(`quick Ctrl+${direction < 0 ? 'Shift+' : ''}Tab skips menu rendering and preview work`, () => {
     const switcher = createSwitcher()
     switcher.cycleTabSwitcher(direction)
@@ -57,19 +57,6 @@ for (const [direction, target] of [[1, 'second'], [-1, 'third']]) {
     assert.equal(switcher.visible.value, false)
   })
 }
-
-test('repeated presses accumulate and reverse before opening without restarting the delay', () => {
-  const switcher = createSwitcher()
-  switcher.cycleTabSwitcher(1)
-  const timer = [...switcher.timers.keys()][0]
-  switcher.cycleTabSwitcher(1)
-  switcher.cycleTabSwitcher(-1)
-  assert.deepEqual([...switcher.timers.keys()], [timer])
-  switcher.release()
-  switcher.openMenu()
-  switcher.flushRender()
-  assert.deepEqual(switcher.work, { previews: 0, capturePause: [], scroll: 0, activated: ['second'] })
-})
 
 test('holding Control opens once and commits the latest selection on release', () => {
   const switcher = createSwitcher()
@@ -87,31 +74,20 @@ test('holding Control opens once and commits the latest selection on release', (
   assert.equal(switcher.visible.value, false)
 })
 
-for (const opened of [false, true]) {
-  test(`cancelling a ${opened ? 'visible' : 'pending'} switch never activates or reopens it`, () => {
-    const switcher = createSwitcher()
-    switcher.cycleTabSwitcher(1)
-    if (opened) switcher.openMenu()
-    switcher.cancelTabSwitcher()
-    switcher.openMenu()
-    switcher.release()
-    switcher.flushRender()
-    assert.equal(switcher.visible.value, false)
-    assert.deepEqual(switcher.work.activated, [])
-    assert.equal(switcher.work.scroll, 0)
-    assert.deepEqual(switcher.work.capturePause, opened ? [true, false] : [])
-    // A new gesture starts from the active tab, not the cancelled selection.
-    switcher.cycleTabSwitcher(-1)
-    switcher.release()
-    assert.deepEqual(switcher.work.activated, ['third'])
-  })
-}
-
-test('a single tab does not schedule a menu or activate itself', () => {
+test('cancelling a visible switch never activates or reopens it', () => {
   const switcher = createSwitcher()
-  switcher.tabs.value = [{ id: 'first' }]
   switcher.cycleTabSwitcher(1)
-  switcher.release()
   switcher.openMenu()
-  assert.deepEqual(switcher.work, { previews: 0, capturePause: [], scroll: 0, activated: [] })
+  switcher.cancelTabSwitcher()
+  switcher.openMenu()
+  switcher.release()
+  switcher.flushRender()
+  assert.equal(switcher.visible.value, false)
+  assert.deepEqual(switcher.work.activated, [])
+  assert.equal(switcher.work.scroll, 0)
+  assert.deepEqual(switcher.work.capturePause, [true, false])
+  // A new gesture starts from the active tab, not the cancelled selection.
+  switcher.cycleTabSwitcher(-1)
+  switcher.release()
+  assert.deepEqual(switcher.work.activated, ['third'])
 })

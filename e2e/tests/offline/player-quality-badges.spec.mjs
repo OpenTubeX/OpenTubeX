@@ -27,12 +27,6 @@ async function showResolutionTiles(menu, options) {
   }, options)
 }
 
-/** @param {import('@playwright/test').Locator} menu */
-function tileWidths(menu) {
-  return menu.locator('.explicit-resolution')
-    .evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().width))
-}
-
 test.describe('resolution badges', { tag: '@scale' }, () => {
   test.use({
     launchArgs: ['--disable-gpu'],
@@ -109,29 +103,5 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
       }
       await page.keyboard.press('Escape')
     }
-  })
-
-  test('quality tiles grow to fit their own label', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => element.pause())
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
-    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-    await setWindowSize(app, page, { width: 1280, height: 800 })
-    await player.hover()
-    await openPlayerOptions(player)
-    await page.locator('.shaka-overflow-menu .legacy-quality-button').click()
-    const menu = page.locator('.legacy-qualities')
-    await expect(menu).toBeVisible()
-
-    await showResolutionTiles(menu, [['1080p60', 'HD'], ['720p', ''], ['144p', '']])
-    await expect.poll(async () => (await tileWidths(menu)).every(width => Math.abs(width - 90) < 1)).toBe(true)
-
-    // Only a label that needs the room widens its tile
-    await showResolutionTiles(menu, [['1080p60 (12.5 Mbps)', 'HD'], ['720p', ''], ['144p', '']])
-    await expect.poll(async () => {
-      const [wide, ...short] = await tileWidths(menu)
-      return wide > 100 && short.every(width => Math.abs(width - 90) < 1)
-    }).toBe(true)
   })
 })

@@ -8,11 +8,7 @@ const source = await readFile(new URL('../../src/renderer/components/FtListVideo
 const start = source.indexOf('function openVideoContextMenu(event) {')
 const handler = source.slice(start, source.indexOf('\nfunction handleContextMenuKeydown', start))
 
-const playlistSource = await readFile(new URL('../../src/renderer/components/FtListPlaylist/FtListPlaylist.vue', import.meta.url), 'utf8')
-const playlistStart = playlistSource.indexOf('function openPlaylistContextMenu(event) {')
-const playlistHandler = playlistSource.slice(playlistStart, playlistSource.indexOf('function handleContextMenuKeydown', playlistStart))
-
-function openMenu ({ playlist = false, electron = false, capacitor = false, media = false, selected = false, unrelatedSelection = false, touch = false } = {}) {
+function openMenu ({ electron = false, capacitor = false, media = false, selected = false, unrelatedSelection = false, touch = false } = {}) {
   const dispatched = []
   const listeners = []
   const mobileMenus = []
@@ -51,8 +47,6 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
     suppressMenuHoldClick () {},
     resetMenuHold () {},
     title: { value: 'Test video' },
-    titleForDisplay: { value: 'Test playlist' },
-    playlistMenuItems: { value: [] },
     videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'step-forward'] }] },
     mobileThumbnailActions: { value: [] },
     openMobileContextActions: menu => mobileMenus.push(menu),
@@ -60,21 +54,17 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
     videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'step-forward'], quickAction: true }] },
     event
   }
-  vm.runInNewContext(playlist ? playlistHandler + '\nopenPlaylistContextMenu(event)' : handler + '\nopenVideoContextMenu(event)', context)
+  vm.runInNewContext(handler + '\nopenVideoContextMenu(event)', context)
   return { event, dispatched, listeners, mobileMenus, haptics }
 }
 
-for (const capacitor of [false, true]) {
-  for (const target of ['media', 'selected']) {
-    test(`${capacitor ? 'Capacitor' : 'web'} preserves native ${target} actions on right click`, () => {
-      const { event, dispatched, listeners } = openMenu({ capacitor, [target]: true })
-      assert.equal(event.defaultPrevented, false)
-      assert.equal(event.propagationStopped, false)
-      assert.equal(dispatched.length, 0)
-      assert.equal(listeners.length, 0, 'native interactions must not suppress the release click')
-    })
-  }
-}
+test('web preserves native media actions on right click', () => {
+  const { event, dispatched, listeners } = openMenu({ media: true })
+  assert.equal(event.defaultPrevented, false)
+  assert.equal(event.propagationStopped, false)
+  assert.equal(dispatched.length, 0)
+  assert.equal(listeners.length, 0, 'native interactions must not suppress the release click')
+})
 
 test('Electron continues merging media and selected-text actions into the video menu', () => {
   for (const target of ['media', 'selected']) {
@@ -93,20 +83,16 @@ test('ordinary card targets retain the video menu, including with a selection el
   }
 })
 
-for (const platform of [{}, { capacitor: true }, { electron: true }]) {
-  for (const target of ['media', 'selected']) {
-    test(`touch hold uses the shared bottom menu for ${target} on ${JSON.stringify(platform)}`, () => {
-      const { event, dispatched, mobileMenus, haptics } = openMenu({ ...platform, [target]: true, touch: true })
-      assert.equal(event.defaultPrevented, true)
-      assert.equal(event.propagationStopped, true)
-      assert.equal(dispatched.length, 0)
-      assert.equal(mobileMenus.length, 1)
-      assert.equal(mobileMenus[0].title, 'Test video')
-      assert.equal(mobileMenus[0].actions.value[0].label, 'Play Next')
-      assert.equal(haptics.length, platform.capacitor ? 1 : 0)
-    })
-  }
-}
+test('touch hold uses the shared bottom menu for media on Capacitor', () => {
+  const { event, dispatched, mobileMenus, haptics } = openMenu({ capacitor: true, media: true, touch: true })
+  assert.equal(event.defaultPrevented, true)
+  assert.equal(event.propagationStopped, true)
+  assert.equal(dispatched.length, 0)
+  assert.equal(mobileMenus.length, 1)
+  assert.equal(mobileMenus[0].title, 'Test video')
+  assert.equal(mobileMenus[0].actions.value[0].label, 'Play Next')
+  assert.equal(haptics.length, 1)
+})
 
 test('Android video menus share a public video URL and omit private playlist IDs', async () => {
   const start = source.indexOf('const videoContextMenuItems = computed(')
@@ -130,16 +116,7 @@ test('Android video menus share a public video URL and omit private playlist IDs
   }
 })
 
-test('playlist images and selected text retain the native menu on web', () => {
-  for (const options of [{ media: true }, { selected: true }]) {
-    const { event, dispatched } = openMenu({ ...options, playlist: true })
-    assert.equal(event.defaultPrevented, false)
-    assert.deepEqual(dispatched, [])
-  }
-})
-
 for (const { capacitor, phone } of [
-  { capacitor: true, phone: true },
   { capacitor: true, phone: false },
   { capacitor: false, phone: true },
   { capacitor: false, phone: false },

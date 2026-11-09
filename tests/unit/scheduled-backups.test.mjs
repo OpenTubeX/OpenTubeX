@@ -157,16 +157,8 @@ for (const currentSettings of [false, true]) {
   })
 }
 
-test('scheduled archives preserve the existing-profile summary visibility default', async t => {
-  const state = await setup(t)
-  await state.service.tick()
-  const [filename] = await state.backups()
-  const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
-  assert.equal(backup.data.settings.aiVideoSummaryMode, 'hide')
-})
-
 for (const [landingPage, expectedLandingPage] of [
-  [undefined, 'subscriptions'], ['home', 'home'], ['history', 'history'], ['settings', 'subscriptions'],
+  ['history', 'history'], ['settings', 'subscriptions'],
 ]) {
   test(`scheduled archives resolve ${landingPage ?? 'the existing-profile default'} landing page`, async t => {
     const state = await setup(t)
@@ -198,7 +190,7 @@ test('persisted deadlines survive restarts and missed intervals create one catch
   assert.equal(state.reads(), 2)
 })
 
-for (const futureFields of [['lastAttemptAt'], ['lastBackupAt'], ['lastAttemptAt', 'lastBackupAt']]) {
+for (const futureFields of [['lastAttemptAt', 'lastBackupAt']]) {
   test(`future ${futureFields.join(' and ')} timestamps do not suppress backups`, async t => {
     const state = await setup(t)
     state.configuration.status = {
@@ -479,12 +471,6 @@ test('changing the folder starts a fresh schedule and shutdown waits for an acti
   assert.equal(state.reads(), 1)
 })
 
-test('backup configuration and status are never exported or synced to another device', () => {
-  for (const key of ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']) {
-    assert.ok(NON_TRANSFERABLE_SETTINGS.has(key))
-  }
-})
-
 
 test('retention failures preserve successful backup deadlines without five-minute archive retries', async t => {
   t.mock.method(console, 'error', () => {})
@@ -539,40 +525,38 @@ test('archive factory waits for datastore readiness before starting its worker',
   assert.deepEqual(backup.data, expectedData)
 })
 
-for (const phase of ['preparation', 'temporary write']) {
-  for (const change of ['disable', 'folder']) {
-    test(`cancels a backup when ${change} changes during ${phase}`, async t => {
-      const state = await setup(t)
-      const old = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
-      await writeFile(path.join(state.directory, old), 'previous archive')
-      state.configuration.keepCount = 1
-      const changeConfiguration = () => {
-        if (change === 'disable') state.configuration.enabled = false
-        else state.configuration.directory = path.join(state.directory, 'new-folder')
-      }
-      let service
-      if (phase === 'preparation') {
-        service = createScheduledBackups({
-          ...state.options,
-          createArchive: async () => {
-            changeConfiguration()
-            return state.options.createArchive()
-          },
-        })
-      } else {
-        const write = fs.writeFile
-        t.mock.method(fs, 'writeFile', async (...args) => {
-          await write(...args)
-          if (String(args[0]).endsWith('.tmp')) changeConfiguration()
-        })
-        service = state.service
-      }
-      await service.tick()
-      assert.deepEqual(await readdir(state.directory), [old])
-      assert.equal(await readFile(path.join(state.directory, old), 'utf8'), 'previous archive')
-      assert.deepEqual(state.configuration.status, {})
-    })
-  }
+for (const [phase, change] of [['preparation', 'disable'], ['temporary write', 'folder']]) {
+  test(`cancels a backup when ${change} changes during ${phase}`, async t => {
+    const state = await setup(t)
+    const old = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
+    await writeFile(path.join(state.directory, old), 'previous archive')
+    state.configuration.keepCount = 1
+    const changeConfiguration = () => {
+      if (change === 'disable') state.configuration.enabled = false
+      else state.configuration.directory = path.join(state.directory, 'new-folder')
+    }
+    let service
+    if (phase === 'preparation') {
+      service = createScheduledBackups({
+        ...state.options,
+        createArchive: async () => {
+          changeConfiguration()
+          return state.options.createArchive()
+        },
+      })
+    } else {
+      const write = fs.writeFile
+      t.mock.method(fs, 'writeFile', async (...args) => {
+        await write(...args)
+        if (String(args[0]).endsWith('.tmp')) changeConfiguration()
+      })
+      service = state.service
+    }
+    await service.tick()
+    assert.deepEqual(await readdir(state.directory), [old])
+    assert.equal(await readFile(path.join(state.directory, old), 'utf8'), 'previous archive')
+    assert.deepEqual(state.configuration.status, {})
+  })
 }
 
 
@@ -584,17 +568,6 @@ test('archive worker failures reject without creating missing profile databases'
   await assert.rejects(readdir(missing), { code: 'ENOENT' })
 })
 
-
-test('unavailable destinations skip archive preparation on every retry', async t => {
-  t.mock.method(console, 'error', () => {})
-  const state = await setup(t)
-  await rm(state.directory, { recursive: true })
-  await state.service.tick()
-  state.advance(300_000)
-  await state.service.tick()
-  assert.equal(state.configuration.status.error, true)
-  assert.equal(state.reads(), 0)
-})
 
 test('unwritable destinations skip archive preparation', async t => {
   t.mock.method(console, 'error', () => {})

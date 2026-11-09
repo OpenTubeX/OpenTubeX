@@ -191,20 +191,15 @@ for (const mobile of [false, true]) {
       await expect(queue).toBeHidden()
     })
 
-    for (const sameDownload of [false, true]) {
-      test(`starts a queued ${sameDownload ? 'duplicate' : 'copy'} of the current video from the beginning`, async ({ app, page }) => {
-        if (mobile) await setWindowSize(app, page, { width: 480, height: 850 })
+    // Queue advancement does not depend on the layout; cover it at one width.
+    for (const sameDownload of mobile ? [] : [false, true]) {
+      test(`starts a queued ${sameDownload ? 'duplicate' : 'copy'} of the current video from the beginning`, async ({ page }) => {
         await page.context().route(/^https?:/, route => route.abort('internetdisconnected'))
         await page.evaluate(() => {
           Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
           window.dispatchEvent(new Event('offline'))
         })
-        if (mobile) {
-          await page.getByRole('button', { name: 'Quick settings', exact: true }).click()
-          await page.getByRole('button', { name: 'Downloads', exact: true }).click()
-        } else {
-          await goTo(page, 'downloads')
-        }
+        await goTo(page, 'downloads')
         const row = title => page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
         await row(sameDownload ? 'Downloaded audio' : 'Second audio download').getByRole('button', { name: 'Add to Queue', exact: true }).click()
         await row('Downloaded audio').getByRole('button', { name: 'Play download', exact: true }).click()

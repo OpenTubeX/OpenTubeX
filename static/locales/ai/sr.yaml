@@ -233,6 +233,9 @@ User Playlists:
   This playlist is private or does not exist.: "Ова плејлиста је приватна или не постоји."
   Pin to Navigation: "Закачи у навигацију"
   Unpin from Navigation: "Откачи из навигације"
+  Pin to Top: "Закачи на врх"
+  Unpin from Top: "Откачи са врха"
+  Pinned to Top: "Закачено на врх"
   Reorder Hint: Превуците или користите тастере са стрелицама да бисте променили редослед
   Add new videos to the top (custom order): "Додај нове видео-снимке на врх (прилагођени редослед)"
   Shuffle videos by default: "Подразумевано пуштај видео-снимке насумично"
@@ -1546,17 +1549,18 @@ Tutorial:
     Action: Увези податке
     Not Now: Не сада
 About:
+  Get OpenTubeX: Преузми OpenTubeX
+  Community: Заједница
+  Contribute: Допринеси
   Documentation: Документација
   Downloads: Преузимања
   Changelog: Евиденција промена
   Commit: Ревизија
   Licensed under the {licenseLink}: Лиценцирано под условима лиценце {licenseLink}
-  Fluxer: Придружите се нашој Fluxer заједници
   Matrix: Matrix
   Email: Е-пошта
   Please read the {roomRulesLink}: Прочитајте {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX постоји захваљујући {creditsPageLink}
-  Support the development of OpenTubeX: "Подржите развој OpenTubeX-а"
 Profile:
   Customization: Прилагођавање
   Manage Profile Subscriptions: Управљај претплатама профила

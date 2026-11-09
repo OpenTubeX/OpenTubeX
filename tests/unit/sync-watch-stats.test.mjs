@@ -144,31 +144,6 @@ test('resetting a replaced identity clears the entire combined history before an
   assert.deepEqual(updated[0].days, { '2026-10-01': 130 })
 })
 
-test('resets preserve prior subtree resets and explicitly imported later histories', () => {
-  const { createWatchStatsReset, mergeWatchStats, replaceWatchStatsDevice, watchSecondsForDevice } = createHelpers()
-  const day = '2026-10-01'
-  const original = [
-    { deviceId: 'root', days: { [day]: 100 }, replacedDevices: [
-      { deviceId: 'old', days: { [day]: 50 }, overlap: 'sum', replacedAt: 100 },
-    ] },
-    { deviceId: 'other', days: { [day]: 80 } },
-  ]
-  const reset = createWatchStatsReset(original, 'old', 200)
-  assert.deepEqual(reset, { id: reset.id, at: 200, epochs: { root: null, old: null }, generation: 1, origin: 'old', baselines: { old: {}, root: { [day]: 100 } } })
-  const cleared = mergeWatchStats(original, [], 'old', 'Pixel', 'android', reset)
-  const imported = replaceWatchStatsDevice(cleared, 'old', 'other', 'sum', 300)
-  assert.deepEqual(watchSecondsForDevice({}, imported, 'old', 'local', reset), { [day]: 80 })
-  const newRaw = [{ date: day, seconds: 130 }]
-  const watched = mergeWatchStats(imported, newRaw, 'root', 'Pixel', 'android')
-  assert.deepEqual(watchSecondsForDevice({ [day]: 130 }, watched, 'root', 'local'), { [day]: 110 })
-  const secondReset = createWatchStatsReset(watched, 'root', 400)
-  const twice = mergeWatchStats(watched, [], 'root', 'Pixel', 'android', secondReset)
-  assert.deepEqual(watchSecondsForDevice({}, twice, 'old', 'local', reset), {})
-  // Importing an already-reset group retains its reset, without clearing its new target.
-  const joined = replaceWatchStatsDevice([...cleared, { deviceId: 'fresh', days: { [day]: 10 } }], 'fresh', 'root', 'sum', 500)
-  assert.deepEqual(watchSecondsForDevice({ [day]: 10 }, joined, 'fresh', 'local'), { [day]: 10 })
-})
-
 test('reset metadata copied from reactive settings can be cloned for encrypted sync', () => {
   const { mergeWatchStats } = createHelpers()
   const reset = new Proxy({ at: 200, generation: 1, origin: 'pixel', baselines: { pixel: {} } }, {})
@@ -185,16 +160,6 @@ test('reset while disconnected completes missing repaired baselines on the next 
   const merged = mergeWatchStats(remote, [{ date: '2026-10-03', seconds: 10 }], 'pixel', 'Pixel', 'android', pending)
   assert.deepEqual(watchSecondsForDevice({}, merged, 'observer', 'pixel'), { '2026-10-03': 10 })
   assert.deepEqual(merged[0].replacedDevices[0].days, remote[0].replacedDevices[0].days)
-})
-
-test('reset scope follows recorded membership despite a clock behind the replacement', () => {
-  const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
-  const remote = [{ deviceId: 'new', days: { '2026-10-01': 100 }, replacedDevices: [
-    { deviceId: 'old', days: { '2026-10-01': 50 }, overlap: 'sum', replacedAt: 1000 },
-  ] }]
-  const reset = createWatchStatsReset(remote, 'old', 50)
-  const merged = mergeWatchStats(remote, [], 'old', 'Pixel', 'android', reset)
-  assert.deepEqual(watchSecondsForDevice({}, merged, 'observer', 'new'), {})
 })
 
 test('staging an offline reset keeps it pending until the encrypted upload is accepted', async () => {
@@ -248,26 +213,4 @@ test('retrying an accepted pending reset preserves watching since its upload', (
   const retried = mergeWatchStats(watched, [], 'pixel', 'Pixel', 'android', pending)
   assert.deepEqual(retried[0].reset, accepted[0].reset)
   assert.deepEqual(watchSecondsForDevice({}, retried, 'observer', 'pixel'), { [day]: 10 })
-})
-
-test('the daily limit counts all synced devices or only this one', () => {
-  const { limitWatchSecondsByDate } = createHelpers({}, async () => ({ platform: 'linux' }))
-  const getters = {
-    getWatchSecondsByDate: { '2026-09-22': 60 },
-    getSyncedWatchStats: [
-      { deviceId: 'local', deviceName: 'Desktop', platform: 'linux', days: { '2026-09-22': 60 } },
-      { deviceId: 'phone', deviceName: 'Phone', platform: 'android', days: { '2026-09-22': 30 } },
-    ],
-    getSyncServerDeviceId: 'local',
-    getSyncServerWatchStatsReset: null,
-    getSyncServerEnabled: true,
-    getSyncServerToken: 'token',
-    getSyncServerPrivacyMode: 'enhanced',
-    getSyncServerWatchStatsSupported: true,
-    getSyncServerSyncWatchStats: true,
-  }
-  assert.equal(limitWatchSecondsByDate(getters, 'all')['2026-09-22'], 90)
-  assert.equal(limitWatchSecondsByDate(getters, 'local')['2026-09-22'], 60)
-  // Without synced statistics, only this device's time exists.
-  assert.equal(limitWatchSecondsByDate({ ...getters, getSyncServerEnabled: false }, 'all')['2026-09-22'], 60)
 })

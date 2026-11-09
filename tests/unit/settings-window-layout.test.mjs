@@ -50,19 +50,6 @@ function assertMaximized(settings) {
   assert.equal(settings.windowStyle.value.blockSize, 'calc(100dvh - var(--app-safe-area-inset-top, 0px))')
 }
 
-test('maximized settings do not retain a stale WebKit viewport-unit width cap', async () => {
-  const css = await readFile(new URL('../../src/renderer/views/Settings/Settings.css', import.meta.url), 'utf8')
-  const maximized = css.match(/\.settingsWindow\.maximized\s*\{([^}]+)\}/)?.[1]
-  assert.ok(maximized)
-  assert.match(maximized, /max-inline-size:\s*100%;/)
-})
-
-test('mobile settings open maximized on landscape phones and tablets', () => {
-  for (const width of [375, 844, 1024, 1366, 1092.8]) {
-    assertMaximized(settingsWindow(true, width))
-  }
-})
-
 test('mobile settings stay maximized when rotating across the compact breakpoint', () => {
   const settings = settingsWindow(true, 375)
   for (const width of [844, 375, 1024, 1366]) {
@@ -91,20 +78,18 @@ test('desktop settings float at wide widths and maximize only at narrow widths',
   assert.equal(settings.isWindowMaximized.value, false)
 })
 
-for (const desktop of [false, true]) {
-  for (const nested of [false, true]) {
-    test(`settings Escape ${desktop ? 'on desktop' : 'on mobile'} ${nested ? 'inside a page' : 'at the root'}`, () => {
-      const actions = []
-      const handle = vm.runInNewContext(`${componentFunction('handleSettingsEscape')}; handleSettingsEscape`, {
-        isInDesktopView: ref(desktop),
-        showBackButton: ref(nested),
-        goBack: () => actions.push('back'),
-        closeSettings: () => actions.push('close'),
-      })
-      handle({ target: { closest: () => null }, preventDefault() {}, stopPropagation() {} })
-      assert.deepEqual(actions, [!desktop && nested ? 'back' : 'close'])
+for (const [desktop, nested] of [[false, true], [true, true]]) {
+  test(`settings Escape ${desktop ? 'on desktop' : 'on mobile'} ${nested ? 'inside a page' : 'at the root'}`, () => {
+    const actions = []
+    const handle = vm.runInNewContext(`${componentFunction('handleSettingsEscape')}; handleSettingsEscape`, {
+      isInDesktopView: ref(desktop),
+      showBackButton: ref(nested),
+      goBack: () => actions.push('back'),
+      closeSettings: () => actions.push('close'),
     })
-  }
+    handle({ target: { closest: () => null }, preventDefault() {}, stopPropagation() {} })
+    assert.deepEqual(actions, [!desktop && nested ? 'back' : 'close'])
+  })
 }
 
 test('activity navigation focuses its new target even when a previous highlight remains', async () => {

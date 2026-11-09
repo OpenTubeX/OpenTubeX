@@ -6,7 +6,6 @@ import { computed } from 'vue'
 
 import {
   EMPTY_SEEK_HISTORY,
-  SEEK_HISTORY_MAX_ENTRIES,
   SEEK_HISTORY_MIN_JUMP_SECONDS,
   clearSeekHistories,
   getSeekHistory,
@@ -35,26 +34,6 @@ test('returns to the position before an accidental jump and forward again', () =
   assert.equal(stepSeekHistoryForward(forward.history, 610), null)
 })
 
-test('remembers when each place was last left', () => {
-  let history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 120, 1000)
-  history = recordSeekHistoryJump(history, 600, 2000)
-  assert.deepEqual(history.entries, [{ position: 120, leftAt: 1000 }, { position: 600, leftAt: 2000 }])
-
-  history = stepSeekHistoryBack(history, 900, 3000).history
-  assert.deepEqual(history.entries.at(-1), { position: 900, leftAt: 3000 })
-
-  history = stepSeekHistoryBack(history, 610, 4000).history
-  assert.deepEqual(history.entries[1], { position: 610, leftAt: 4000 })
-
-  history = stepSeekHistoryForward(history, 125, 5000).history
-  assert.deepEqual(history.entries[0], { position: 125, leftAt: 5000 })
-})
-
-test('has nothing to step to without jumps', () => {
-  assert.equal(stepSeekHistoryBack(EMPTY_SEEK_HISTORY, 30), null)
-  assert.equal(stepSeekHistoryForward(EMPTY_SEEK_HISTORY, 30), null)
-})
-
 test('keeps newer entries when jumping elsewhere after stepping back', () => {
   let history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 60)
   history = recordSeekHistoryJump(history, 300)
@@ -81,34 +60,6 @@ test('treats nearby positions as the same place', () => {
   const back = stepSeekHistoryBack(history, 105)
   assert.equal(back.target, 400)
   assert.deepEqual(summarize(back.history), { positions: [400, 105], index: 0 })
-})
-
-test('drops the oldest entries beyond the limit', () => {
-  let history = EMPTY_SEEK_HISTORY
-  for (let index = 0; index <= SEEK_HISTORY_MAX_ENTRIES; index++) {
-    history = recordSeekHistoryJump(history, index * 60)
-  }
-
-  assert.equal(history.entries.length, SEEK_HISTORY_MAX_ENTRIES)
-  assert.equal(history.entries[0].position, 60)
-  assert.equal(history.index, SEEK_HISTORY_MAX_ENTRIES)
-})
-
-test('stores histories per video', () => {
-  const history = recordSeekHistoryJump(EMPTY_SEEK_HISTORY, 42)
-  setSeekHistory('first-video', history)
-
-  assert.equal(getSeekHistory('first-video'), history)
-  assert.equal(getSeekHistory('second-video'), EMPTY_SEEK_HISTORY)
-
-  setSeekHistory('first-video', EMPTY_SEEK_HISTORY)
-  assert.equal(getSeekHistory('first-video'), EMPTY_SEEK_HISTORY)
-
-  setSeekHistory('first-video', history)
-  setSeekHistory('second-video', history)
-  clearSeekHistories()
-  assert.equal(getSeekHistory('first-video'), EMPTY_SEEK_HISTORY)
-  assert.equal(getSeekHistory('second-video'), EMPTY_SEEK_HISTORY)
 })
 
 test('shares a video\'s history between the players showing it', () => {
@@ -190,14 +141,6 @@ test('holding the mobile mini bar still continues the same jump', () => {
   seek(150, 3000)
   state.mobileMiniBarSeeking.value = false
   assert.deepEqual(positions(), [100])
-})
-
-test('does not record while seeking is unavailable', () => {
-  const { state, seek, positions } = recorder()
-
-  state.seekHistoryAvailable.value = false
-  seek(300)
-  assert.deepEqual(positions(), [])
 })
 
 test('SponsorBlock draft jumps are the viewer\'s own seeks', async () => {

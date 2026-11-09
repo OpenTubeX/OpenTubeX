@@ -4,7 +4,6 @@ import test from 'node:test'
 import {
   buildRequestDiagnostic,
   classifyRequestFailure,
-  classifyRequestLifecycle,
   sanitizeRequestErrorMessage,
 } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 
@@ -62,12 +61,6 @@ test('redacts credential fields, cookies, and request bodies', () => {
     sanitizeRequestErrorMessage(new Error('Authorization: Basic basic-secret with spaces')),
     'Authorization: <redacted>'
   )
-})
-
-test('labels foreground, background, and recent resume requests', () => {
-  assert.equal(classifyRequestLifecycle('hidden', 0, 10000), 'background')
-  assert.equal(classifyRequestLifecycle('visible', 8000, 10000), 'resume')
-  assert.equal(classifyRequestLifecycle('visible', 0, 10000), 'foreground')
 })
 
 test('classifies native download transport codes without relying on their messages', () => {

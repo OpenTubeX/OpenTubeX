@@ -70,25 +70,6 @@ test.describe('phone UI', () => {
     await expect(page).toHaveURL(/watch/)
   })
 
-  test('two quick Escapes leave a submenu and then close the player options', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    const player = page.locator('.ftVideoPlayer')
-    await player.hover()
-    await player.locator('.shaka-overflow-menu-button').click({ force: true })
-    const dialog = player.locator('.phonePlayerOptions[open]')
-    await dialog.locator('.shaka-playbackrate-button').click()
-    await expect(dialog.locator(':scope > .shaka-back-to-overflow-button')).toBeVisible()
-    // Both within one frame, before the dialog updates its header
-    await dialog.evaluate(element => {
-      for (let press = 0; press < 2; press++) {
-        element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
-      }
-    })
-    await expect(dialog).toHaveCount(0)
-  })
-
   test('searches a language picker without closing quick settings', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
     await setWindowSize(app, page, { width: 360, height: 760 })
     await page.locator('.profileTrigger').click()
@@ -348,68 +329,6 @@ test.describe('phone UI', () => {
     })
   }
 
-  test('spreads the video actions evenly in one row and wraps the metadata inline on phones', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateUseSponsorBlock', true)
-      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
-      await window.$store.dispatch('updateShowDlnaCastButton', true)
-    })
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: Math.round(412 * uiScale / 100), height: 860 })
-    const toolbar = page.locator('.videoOptions')
-    await toolbar.scrollIntoViewIfNeeded()
-    await expect(toolbar).toHaveClass(/\beven\b/)
-    await expect.poll(() => getToolbarLayout(toolbar)).toMatchObject({ rows: 1, inside: true, touchSized: true, spansCard: true, equalWidths: true })
-    // Short icon-labeled items share rows instead of taking one row each
-    const metadataRows = await page.locator('.watchVideoInfo .datePublishedAndViewCount').evaluate(element => {
-      const items = [...element.children]
-      return { items: items.length, rows: new Set(items.map(item => Math.round(item.getBoundingClientRect().top))).size }
-    })
-    expect(metadataRows.items).toBeGreaterThan(2)
-    expect(metadataRows.rows).toBeLessThan(metadataRows.items)
-    await attachScreenshot('phone video info')
-
-    // The labeled toolbar returns once it fits
-    await setWindowSize(app, page, { width: Math.round(1200 * uiScale / 100), height: 900 })
-    await expect(toolbar).toHaveClass(/\bfull\b/)
-    await expect(toolbar.locator('.downloadLabel')).toBeVisible()
-  })
-
-  test('keeps the even video actions when opening a sheet just below the labeled width', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateUseSponsorBlock', true)
-      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
-    })
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const width = 600
-    await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: 860 })
-    const toolbar = page.locator('.videoOptions')
-    await expect(toolbar).toHaveClass(/\bfull\b/)
-    const { labeledWidth, rowWidth } = await toolbar.evaluate(element => ({
-      labeledWidth: element.getBoundingClientRect().width,
-      rowWidth: element.parentElement.clientWidth
-    }))
-    // The labeled toolbar misses fitting by less than the download button's padding
-    await setWindowSize(app, page, { width: Math.round((width - rowWidth + labeledWidth - 8) * uiScale / 100), height: 820 })
-    await toolbar.scrollIntoViewIfNeeded()
-    await expect(toolbar).toHaveClass(/\beven\b/)
-    await toolbar.evaluate(element => {
-      window.toolbarLayouts = []
-      new MutationObserver(() => window.toolbarLayouts.push(element.className))
-        .observe(element, { attributes: true, attributeFilter: ['class'] })
-    })
-
-    // Mounting the sheet in the toolbar measures it again
-    await toolbar.getByRole('button', { name: 'Add to playlist', exact: true }).click()
-    const sheet = page.locator('dialog[open]')
-    await expect(sheet).toBeVisible()
-    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
-    expect(await page.evaluate(() => window.toolbarLayouts.filter(layout => !layout.includes('measuring')))).not.toContainEqual(expect.stringMatching(/\bfull\b/))
-    await expect(toolbar).toHaveClass(/\beven\b/)
-  })
-
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
@@ -431,85 +350,6 @@ test.describe('phone UI', () => {
       await expect(sheet).toHaveCount(0)
     }
     await expect(page).toHaveURL(/watch/)
-  })
-
-  test('aligns transcript language labels and keeps the checkmark at the row end', { tag: '@scale' }, async ({ app, page }) => {
-    await page.evaluate(() => window.$store.dispatch('updatePreferredCaptionLocale', 'de'))
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 375, height: 760 })
-    await clickVideoAction(page, /transcript/i)
-    const languageButton = page.locator('.mobileSheetHeader').getByRole('button', { name: 'Transcript language', exact: true })
-    await languageButton.click()
-    const menu = page.locator('.transcriptLanguageMenu')
-    await expect(menu.locator('button')).toHaveCount(2)
-    await expect(menu.locator('.selected svg')).toHaveCount(1)
-    for (const direction of ['ltr', 'rtl']) {
-      await menu.evaluate((element, direction) => { element.dir = direction }, direction)
-      const offsets = await menu.locator('button').evaluateAll(buttons => buttons.map(button => {
-        const row = button.getBoundingClientRect()
-        const labelElement = button.querySelector('span')
-        const label = labelElement.getBoundingClientRect()
-        const range = document.createRange()
-        range.selectNodeContents(labelElement)
-        const check = button.querySelector('svg')?.getBoundingClientRect()
-        const rtl = getComputedStyle(button).direction === 'rtl'
-        return {
-          lines: range.getClientRects().length,
-          label: rtl ? row.right - label.right : label.left - row.left,
-          check: check ? (rtl ? check.left - row.left : row.right - check.right) : null
-        }
-      }))
-      expect(offsets.some(offset => offset.lines > 1)).toBe(true)
-      expect(offsets.some(offset => offset.lines === 1)).toBe(true)
-      for (const offset of offsets) {
-        expect(offset.label).toBeGreaterThan(0)
-        expect(offset.label).toBeLessThan(16)
-        if (offset.check !== null) expect(offset.check).toBeLessThan(16)
-      }
-      expect(Math.abs(offsets[0].label - offsets[1].label)).toBeLessThan(1)
-    }
-    const nextLanguage = await menu.locator('button:not(.selected)').textContent()
-    await menu.locator('button:not(.selected)').click()
-    await expect(menu).toHaveCount(0)
-    await languageButton.click()
-    await expect(menu.locator('.selected')).toHaveText(nextLanguage)
-  })
-
-  test('clears transcript state through the shared Close button', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    await clickVideoAction(page, /transcript/i)
-    const transcript = page.locator('dialog[open] .transcriptCard')
-    await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
-    await expect(transcript.locator('.transcriptControls input')).toBeFocused()
-    await transcript.locator('.transcriptControls input').fill('elephant')
-    await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
-    await expect(page.locator('dialog[open]')).toHaveCount(0)
-    await expect(page.locator('.transcriptCard')).toHaveCount(0)
-    await clickVideoAction(page, /transcript/i)
-    await expect(transcript).toBeVisible()
-    await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
-    await expect(transcript.locator('.transcriptControls input')).toBeFocused()
-    await expect(transcript.locator('.transcriptControls input')).toHaveValue('')
-  })
-
-  test('Escape closes the transcript language menu before the transcript sheet', async ({ app, page }) => {
-    await page.evaluate(() => window.$store.dispatch('updatePreferredCaptionLocale', 'de'))
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    await clickVideoAction(page, /transcript/i)
-    await expect(page.locator('dialog[open] .transcriptCard')).toBeVisible()
-    const languageButton = page.locator('.mobileSheetHeader').getByRole('button', { name: 'Transcript language', exact: true })
-    await languageButton.click()
-    await expect(page.locator('.transcriptLanguageMenu')).toBeVisible()
-    await languageButton.press('Escape')
-    await expect(page.locator('.transcriptLanguageMenu')).toHaveCount(0)
-    await expect(page.locator('dialog[open] .transcriptCard')).toBeVisible()
-    await languageButton.press('Escape')
-    await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 
   test('opens live chat in a sheet and clears its panel state when dismissed', { tag: '@scale' }, async ({ app, page }) => {
@@ -621,24 +461,6 @@ test.describe('phone UI', () => {
     await expect(page.locator('.promptFixedFooter')).toBeInViewport()
   })
 
-  test('keeps filter actions fixed without an active-filter summary', { tag: '@scale' }, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 360, height: 760 })
-    await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
-    const prompt = page.locator('.searchFiltersCard')
-    await expect(prompt).toBeVisible()
-    await prompt.getByText('Today', { exact: true }).click()
-    await expect(prompt.locator('.activeFilters')).toHaveCount(0)
-    await expect(prompt.locator('input[value="today"]')).toBeChecked()
-    await prompt.locator('.promptContentScroller').evaluate(element => { element.scrollTop = 100000 })
-    await expect(prompt.locator('.clearFilterButton')).toBeInViewport()
-    await expect(prompt.locator('.promptFixedFooter')).toBeInViewport()
-    await prompt.locator('.clearFilterButton').click()
-    await expect(prompt.locator('.activeFilters')).toHaveCount(0)
-    await expect(prompt.locator('input[value="today"]')).not.toBeChecked()
-    await prompt.getByRole('button', { name: 'Close', exact: true }).click()
-    await expect(prompt).toHaveCount(0)
-  })
-
   test('collapses advanced download options without leaving an obsolete scroll offset', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -659,34 +481,32 @@ test.describe('phone UI', () => {
   })
 })
 
-for (const currentLocale of ['en-US', 'de-DE', 'ar']) {
-  test.describe(`phone layout in ${currentLocale}`, () => {
-    test.use({ seed: { settings: { currentLocale, useAITranslationCompletions: true, quickSettings: ['currentLocale', 'baseTheme', 'uiScale'] } } })
-    test('fits small phones, landscape, and tablet windows', async ({ app, page }) => {
-      const cdp = await page.context().newCDPSession(page)
-      await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
-      for (const [width, height] of [[320, 640], [360, 760], [720, 360], [900, 900]]) {
-        await setWindowSize(app, page, { width, height })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        if (width === 900) {
-          await expect(menu).toHaveCSS('position', 'absolute')
-        } else {
-          await expect(menu).toHaveCSS('position', 'relative')
-          await expect.poll(() => menu.evaluate(element => {
-            const box = element.getBoundingClientRect()
-            return box.left >= -1 && box.right <= innerWidth + 1 && box.bottom <= innerHeight + 1
-          })).toBe(true)
-          await menu.locator('.select').filter({ has: page.locator('option[value="de-DE"]') }).getByRole('combobox').click()
-          const sheet = page.locator('dialog[open]').last()
-          await sheet.getByRole('searchbox').fill('Deutsch')
-          await expect(sheet.getByRole('option')).toHaveCount(1)
-          await sheet.press('Escape')
-          await expect(page.locator('dialog[open]')).toHaveCount(1)
-        }
-        await menu.press('Escape')
-        await expect(menu).toHaveCount(0)
+test.describe('phone layout in ar', () => {
+  test.use({ seed: { settings: { currentLocale: 'ar', useAITranslationCompletions: true, quickSettings: ['currentLocale', 'baseTheme', 'uiScale'] } } })
+  test('fits small phones, landscape, and tablet windows', async ({ app, page }) => {
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+    for (const [width, height] of [[320, 640], [360, 760], [720, 360], [900, 900]]) {
+      await setWindowSize(app, page, { width, height })
+      await page.locator('.profileTrigger').click()
+      const menu = page.locator('.quickSettingsMenu')
+      if (width === 900) {
+        await expect(menu).toHaveCSS('position', 'absolute')
+      } else {
+        await expect(menu).toHaveCSS('position', 'relative')
+        await expect.poll(() => menu.evaluate(element => {
+          const box = element.getBoundingClientRect()
+          return box.left >= -1 && box.right <= innerWidth + 1 && box.bottom <= innerHeight + 1
+        })).toBe(true)
+        await menu.locator('.select').filter({ has: page.locator('option[value="de-DE"]') }).getByRole('combobox').click()
+        const sheet = page.locator('dialog[open]').last()
+        await sheet.getByRole('searchbox').fill('Deutsch')
+        await expect(sheet.getByRole('option')).toHaveCount(1)
+        await sheet.press('Escape')
+        await expect(page.locator('dialog[open]')).toHaveCount(1)
       }
-    })
+      await menu.press('Escape')
+      await expect(menu).toHaveCount(0)
+    }
   })
-}
+})

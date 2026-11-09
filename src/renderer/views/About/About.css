@@ -91,6 +91,41 @@
 
 .content {
   grid-area: content;
+  line-height: 1.5;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.linkIcon {
+  flex-shrink: 0;
+  font-size: 0.95em;
+}
+
+.license {
+  margin-inline-start: 0.3em;
+}
+
+.license::before {
+  content: '(';
+}
+
+.license::after {
+  content: ')';
+}
+
+.note {
+  color: var(--tertiary-text-color);
+  font-size: 0.9em;
 }
 
 .headingIcon {

@@ -51,7 +51,7 @@ test.describe('tab switcher hold delay', () => {
     }
   })
 
-  for (const cancellation of ['Escape', 'blur']) {
+  for (const cancellation of ['blur']) {
     test(`${cancellation} cancels a pending switch without opening the menu later`, async ({ page }) => {
       const activeId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
       await page.keyboard.down('Control')

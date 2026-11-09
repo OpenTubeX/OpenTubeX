@@ -244,6 +244,9 @@ User Playlists:
   This playlist is private or does not exist.: "Гэты плэй-ліст прыватны або не існуе."
   Pin to Navigation: "Замацаваць у навігацыі"
   Unpin from Navigation: "Адмацаваць ад навігацыі"
+  Pin to Top: "Замацаваць уверсе"
+  Unpin from Top: "Адмацаваць зверху"
+  Pinned to Top: "Замацавана ўверсе"
   Reorder Hint: Перацягніце або выкарыстоўвайце клавішы са стрэлкамі, каб змяніць парадак
   Add new videos to the top (custom order): "Дадаваць новыя відэа ў пачатак (уласны парадак)"
   Shuffle videos by default: "Перамешваць відэа па змаўчанні"
@@ -1559,17 +1562,18 @@ Tutorial:
     Action: Імпартаваць даныя
     Not Now: Не цяпер
 About:
+  Get OpenTubeX: Атрымаць OpenTubeX
+  Community: Супольнасць
+  Contribute: Зрабіць унёсак
   Documentation: Дакументацыя
   Downloads: Спампоўванні
   Changelog: Журнал змяненняў
   Commit: Каміт
   Licensed under the {licenseLink}: Ліцэнзія — {licenseLink}
-  Fluxer: Далучыцца да нашай супольнасці ў Fluxer
   Matrix: Matrix
   Email: Электронная пошта
   Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
-  Support the development of OpenTubeX: "Падтрымаць распрацоўку OpenTubeX"
 Profile:
   Customization: Наладжванне
   Manage Profile Subscriptions: Кіраванне падпіскамі профілю

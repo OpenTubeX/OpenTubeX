@@ -228,6 +228,9 @@ User Playlists:
   Edit: "編輯"
   Pin to Navigation: "釘選到導覽列"
   Unpin from Navigation: "從導覽列取消釘選"
+  Pin to Top: "置頂"
+  Unpin from Top: "取消置頂"
+  Pinned to Top: "已置頂"
   Reorder Hint: 拖曳或使用方向鍵重新排序
   Add new videos to the top (custom order): "將新影片加入頂端（自訂順序）"
   Shuffle videos by default: "預設隨機播放影片"
@@ -1497,14 +1500,15 @@ Tutorial:
     Action: 匯入資料
     Not Now: 暫時不要
 About:
+  Get OpenTubeX: 取得 OpenTubeX
+  Community: 社群
+  Contribute: 參與貢獻
   Documentation: 文件
   Downloads: 下載
   Changelog: 變更紀錄
   Commit: 提交版本
-  Fluxer: 加入我們的 Fluxer 社群
   Matrix: Matrix
   Email: 電子郵件
-  Support the development of OpenTubeX: "支持 OpenTubeX 的開發"
 Profile:
   Customization: 自訂
   Manage Profile Subscriptions: 管理個人資料的訂閱

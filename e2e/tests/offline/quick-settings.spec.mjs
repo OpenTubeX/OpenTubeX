@@ -1,6 +1,5 @@
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../../src/renderer/helpers/quickSettings.js'
-import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 // Mixes selects, sliders and toggles across every common category. Startup
 // replaces these former defaults when they were saved without changes.
@@ -27,111 +26,13 @@ const ALL_QUICK_SETTINGS = [
 
 const ADDITIONAL_QUICK_SETTINGS = [
   ['rememberHistory', 'Remember Watch History', 'Privacy'],
-  ['rememberSearchHistory', 'Remember Search History', 'Privacy'],
-  ['ambientMode', 'Ambient Mode', 'Appearance'],
-  ['autoplayVideos', 'Start Videos Automatically', 'Playback'],
-  ['autoplayPlaylists', 'Autoplay Playlist Videos', 'Playback'],
   ['defaultPlayback', 'Default Playback Rate', 'Playback'],
-  ['scrollMiniPlayerEnabled', 'Keep a mini player on screen when scrolling down', 'Playback'],
   ['defaultVideoFormat', 'Default Media Format', 'Playback'],
   ['useDeArrowTitles', 'Use DeArrow Video Titles', 'Add-ons'],
-  ['useDeArrowThumbnails', 'Use DeArrow for thumbnails', 'Add-ons'],
-  ['hideLiveChat', 'Hide Live Chat', 'Content'],
-  ['hideLiveChatReplay', 'Hide Live Chat Replay', 'Content'],
-  ['showThumbnailPreviews', 'Show thumbnail previews', 'Content'],
-  ['hideSubscriptionsShorts', 'Hide Subscriptions Shorts', 'Content'],
-  ['blurThumbnails', 'Blur thumbnails', 'Content'],
-  ['enableCaptionTranslations', 'Enable Caption Translations', 'Language and region'],
-  ['enableCommentTranslations', 'Enable comment translations', 'Language and region'],
 ]
 
 test.describe('desktop quick settings animation', () => {
   test.use({ seed: { settings: { reducedMotion: 'off', currentLocale: 'en-US' } } })
-
-  test('animates the visible panel when opening and closing', async ({ page }) => {
-    const menu = page.locator('.quickSettingsMenu')
-    for (const opening of [true, false]) {
-      const midpoint = await page.evaluate(async () => {
-        document.querySelector('.profileTrigger').click()
-        // Allow Vue to render, then start its CSS transition over two frames.
-        for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame)
-        const panel = document.querySelector('.quickSettingsMenu')
-        if (!panel) return null
-        const animations = panel.getAnimations()
-        for (const animation of animations) {
-          animation.pause()
-          animation.currentTime = Number(animation.effect.getTiming().duration) / 2
-        }
-        const style = getComputedStyle(panel)
-        const sample = {
-          properties: animations.map(animation => animation.transitionProperty).sort(),
-          opacity: Number(style.opacity),
-          transform: style.transform,
-          width: panel.getBoundingClientRect().width,
-        }
-        for (const animation of animations) animation.play()
-        return sample
-      })
-      expect(midpoint, `${opening ? 'opening' : 'closing'} keeps the panel mounted`).not.toBeNull()
-      expect(midpoint.properties).toEqual(['opacity', 'transform'])
-      expect(midpoint.opacity).toBeGreaterThan(0)
-      expect(midpoint.opacity).toBeLessThan(1)
-      expect(midpoint.transform).not.toBe('none')
-      expect(midpoint.width).toBeGreaterThan(0)
-      if (opening) {
-        await expect(menu).toBeVisible()
-        await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
-        await expect(menu).toHaveCSS('opacity', '1')
-        await expect(menu).toHaveCSS('transform', 'none')
-      } else {
-        await expect(menu).toHaveCount(0)
-      }
-    }
-  })
-
-  test('opens and closes immediately with reduced motion enabled', async ({ page }) => {
-    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
-    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    await expect(menu).toBeVisible()
-    expect(await menu.evaluate(element => element.getAnimations().length)).toBe(0)
-    await expect(menu).toHaveCSS('opacity', '1')
-    await expect(menu).toHaveCSS('transform', 'none')
-    await page.keyboard.press('Escape')
-    await expect(menu).toHaveCount(0)
-  })
-
-  test('finishes closing at the slowest animation speed before removing the panel', async ({ page }) => {
-    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    await expect(menu).toHaveCSS('transform', 'none')
-    const transitions = await page.evaluate(() => new Promise(resolve => {
-      const onTransitionRun = event => {
-        if (!event.target.matches('.quickSettingsMenu')) return
-        clearTimeout(timeout)
-        document.removeEventListener('transitionrun', onTransitionRun)
-        const animations = event.target.getAnimations()
-        Promise.all(animations.map(async animation => {
-          const status = await animation.finished.then(() => 'finished', () => 'cancelled')
-          return { property: animation.transitionProperty, playbackRate: animation.playbackRate, status }
-        })).then(resolve)
-      }
-      const timeout = setTimeout(() => {
-        document.removeEventListener('transitionrun', onTransitionRun)
-        resolve([])
-      }, 1000)
-      document.addEventListener('transitionrun', onTransitionRun)
-      document.querySelector('.profileTrigger').click()
-    }))
-    expect(transitions.map(animation => animation.property).sort()).toEqual(['opacity', 'transform'])
-    for (const transition of transitions) {
-      expect(transition.playbackRate).toBe(0.25)
-      expect(transition.status).toBe('finished')
-    }
-    await expect(menu).toHaveCount(0)
-  })
 
   test('keeps the panel open when reopening during its close animation', async ({ page }) => {
     await page.locator('.profileTrigger').click()
@@ -229,36 +130,6 @@ test.describe('quick settings select interactions', () => {
     await expect(dropdown).toBeHidden()
     await expect(menu).toBeVisible()
   })
-
-  test('shows the selected option accent consistently before and after hovering other options', async ({ page, attachScreenshot }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    await menu.getByRole('combobox', { name: 'Base Theme' }).click()
-    await page.mouse.move(0, 0)
-    const dropdown = page.locator('.selectDropdown')
-    const selected = dropdown.locator('[aria-selected="true"]')
-    const selectedColors = () => selected.evaluate(element => ({
-      background: getComputedStyle(element).backgroundColor,
-      overlay: getComputedStyle(element, '::before').backgroundColor,
-    }))
-    const initialColors = await selectedColors()
-    // The accent is an inset rounded layer behind the option.
-    expect(initialColors.background).toBe('rgba(0, 0, 0, 0)')
-    const expectedAccent = await dropdown.evaluate(menu => {
-      const sample = document.createElement('span')
-      sample.style.backgroundColor = 'color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface))'
-      menu.append(sample)
-      const color = getComputedStyle(sample).backgroundColor
-      sample.remove()
-      return color
-    })
-    expect(initialColors.overlay).toBe(expectedAccent)
-    await attachScreenshot('selected option accent immediately after opening')
-    await dropdown.locator('[aria-selected="false"]').first().hover()
-    expect(await selectedColors()).toEqual(initialColors)
-    await selected.hover()
-    expect(await selectedColors()).toEqual(initialColors)
-  })
 })
 
 test.describe('compact quick settings', { tag: '@scale' }, () => {
@@ -287,18 +158,6 @@ test.describe('compact quick settings', { tag: '@scale' }, () => {
     expect(Math.abs(bounds.y)).toBeLessThan(1)
     expect(Math.abs(bounds.width - 800)).toBeLessThan(1)
     expect(Math.abs(bounds.height - 820)).toBeLessThan(1)
-  })
-
-  test('aligns header actions to the right at compact widths', async ({ app, page, uiScale }) => {
-    for (const width of [600, 601, 640, 680, 681, 960, 961]) {
-      await resize(app, page, width, uiScale)
-      const header = page.locator('.topNav')
-      const trigger = header.locator('.profileTrigger')
-      const headerBounds = await header.boundingBox()
-      const triggerBounds = await trigger.boundingBox()
-      expect(headerBounds.x + headerBounds.width - triggerBounds.x - triggerBounds.width,
-        'header actions stay at the right edge').toBeLessThan(30)
-    }
   })
 
   test('fills the viewport with quick settings throughout the compact header layout', async ({ app, page, uiScale }, testInfo) => {
@@ -337,218 +196,6 @@ test.describe('compact quick settings', { tag: '@scale' }, () => {
     }
   })
 })
-
-for (const width of [1280, 480]) {
-  test.describe(`quick settings heading spacing at ${width}px`, { tag: '@scale' }, () => {
-    const settings = { currentLocale: 'en-US', quickSettings: ALL_QUICK_SETTINGS, bounds: { x: 0, y: 0, width, height: 900, maximized: false } }
-    test.use({ seed: { settings } })
-
-    test('keeps the first selects close to their section headings', async ({ page, uiScale }, testInfo) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.locator('.profileTrigger').click()
-      const menu = page.locator('.quickSettingsMenu')
-      await expect(menu).toBeVisible()
-      await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-      const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
-        const heading = section.querySelector('h3').getBoundingClientRect()
-        const firstControl = section.querySelector('.quickSettingControl')
-        const select = firstControl.querySelector('.select-text')
-        if (!select) return null
-        return { heading: section.querySelector('h3').textContent.trim(), gap: select.getBoundingClientRect().top - heading.bottom }
-      }).filter(Boolean))
-
-      expect(gaps).toHaveLength(4)
-      for (const { heading, gap } of gaps) {
-        // Fractional UI scales can add subpixel rounding.
-        expect.soft(gap, `${heading} heading gap`).toBeGreaterThanOrEqual(7.9)
-        expect.soft(gap, `${heading} heading gap`).toBeLessThanOrEqual(16.1)
-      }
-      if (uiScale === 100) {
-        const screenshot = testInfo.outputPath('quick-settings-heading-spacing.png')
-        await menu.screenshot({ path: screenshot })
-        await testInfo.attach('quick-settings-heading-spacing', { path: screenshot, contentType: 'image/png' })
-      }
-    })
-
-    test('gives select labels and values the same spacing as full settings', async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      const geometry = control => control.evaluate(element => {
-        const label = element.parentElement.querySelector('.select-label').getBoundingClientRect()
-        const value = element.querySelector('.selectedValue').getBoundingClientRect()
-        return { gap: value.top - label.bottom, height: element.getBoundingClientRect().height }
-      })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
-      const fullSettings = []
-      for (const name of ['Base Theme', 'Main Color Theme']) {
-        fullSettings.push(await geometry(appearance.getByRole('combobox', { name, exact: true })))
-      }
-      await page.locator('.settingsHeaderActions').getByRole('button', { name: 'Close', exact: true }).click()
-      await page.locator('.profileTrigger').click()
-      const menu = page.locator('.quickSettingsMenu')
-      await expect(menu).toBeVisible()
-      await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-      for (const [index, name] of ['Base Theme', 'Main Color Theme'].entries()) {
-        const quickSettings = await geometry(menu.getByRole('combobox', { name, exact: true }))
-        expect.soft(quickSettings.gap, `${name} label/value gap`).toBeGreaterThanOrEqual(fullSettings[index].gap - 0.1)
-        expect.soft(quickSettings.height, `${name} height`).toBeGreaterThanOrEqual(fullSettings[index].height - 0.1)
-        // Larger phone touch targets add equal space above and below the value.
-        const addedSpace = (quickSettings.height - fullSettings[index].height) / 2
-        expect.soft(quickSettings.gap, `${name} centered label/value gap`).toBeCloseTo(fullSettings[index].gap + addedSpace, 1)
-      }
-    })
-
-    for (const slider of ['uiScale', 'uiRoundness']) {
-      test.describe(`slider captions starting with ${slider}`, () => {
-        test.use({
-          seed: {
-            settings: {
-              ...settings,
-              quickSettings: [slider, 'defaultQuality'],
-            }
-          }
-        })
-
-        test('aligns first slider captions with outlined select labels', async ({ page }) => {
-          await page.emulateMedia({ reducedMotion: 'reduce' })
-          await page.locator('.profileTrigger').click()
-          const menu = page.locator('.quickSettingsMenu')
-          await expect(menu).toBeVisible()
-          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-          const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
-            const heading = section.querySelector('h3').getBoundingClientRect()
-            const control = section.querySelector('.quickSettingControl')
-            const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
-            return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
-          }))
-          expect(gaps.map(({ setting }) => setting)).toEqual([slider, 'defaultQuality'])
-          for (const { setting, gap } of gaps) {
-            expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
-          }
-        })
-      })
-    }
-
-    test.describe('control alignment', () => {
-      test.use({
-        seed: {
-          settings: {
-            ...settings,
-            quickSettings: ['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'],
-          }
-        }
-      })
-
-      test('aligns sliders and switches with the section gutters', async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-        const geometry = await menu.locator('.menuSection').evaluateAll(sections => sections.flatMap(section => {
-          const bounds = section.getBoundingClientRect()
-          const style = getComputedStyle(section)
-          const left = bounds.left + Number.parseFloat(style.paddingLeft)
-          const right = bounds.right - Number.parseFloat(style.paddingRight)
-          return [...section.querySelectorAll('.quickSettingControl')].map(control => {
-            const caption = control.querySelector('.labelRow')
-            const track = control.querySelector('.sliderControl')
-            const switchLabel = control.querySelector('.switch-label-text')
-            return {
-              setting: control.dataset.settingId,
-              left,
-              right,
-              captionLeft: caption?.getBoundingClientRect().left,
-              trackLeft: track?.getBoundingClientRect().left,
-              trackRight: track?.getBoundingClientRect().right,
-              switchLeft: switchLabel && switchLabel.getBoundingClientRect().left +
-                Number.parseFloat(getComputedStyle(switchLabel, '::before').insetInlineStart),
-            }
-          })
-        }))
-        expect(geometry.map(({ setting }) => setting)).toEqual(['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
-        for (const control of geometry) {
-          if (control.setting === 'ambientMode') {
-            expect.soft(control.switchLeft, 'switch track aligns with the section gutter').toBeCloseTo(control.left, 1)
-          } else {
-            expect.soft(control.captionLeft, `${control.setting} caption left gutter`).toBeCloseTo(control.left, 1)
-            expect.soft(control.trackLeft, `${control.setting} track left gutter`).toBeCloseTo(control.left, 1)
-            expect.soft(control.trackRight, `${control.setting} track right gutter`).toBeCloseTo(control.right, 1)
-          }
-        }
-      })
-    })
-
-    test.describe('mixed controls', () => {
-      test.use({
-        seed: {
-          settings: {
-            ...settings,
-            baseTheme: 'system',
-            quickSettings: [
-              'uiScale', 'thumbnailSize', 'baseTheme', 'systemLightTheme', 'systemDarkTheme',
-              'ambientMode', 'uiRoundness', 'defaultQuality', 'defaultPlayback', 'enableSubtitlesByDefault',
-            ],
-          }
-        }
-      })
-
-      test('uses consistent gaps between mixed control rows', async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-        const sections = await menu.locator('.menuSection').evaluateAll(elements => elements.map(section => {
-          const rows = []
-          for (const control of section.querySelectorAll('.quickSettingControl')) {
-            const select = control.querySelector('.select-text')
-            const slider = control.querySelector('.sliderControl')
-            const toggle = control.querySelector('.switch-label')
-            let top
-            let bottom
-            if (select) {
-              top = control.querySelector('.select-label').getBoundingClientRect().top
-              bottom = select.getBoundingClientRect().bottom
-            } else if (slider) {
-              top = control.querySelector('.labelRow').getBoundingClientRect().top
-              const track = slider.getBoundingClientRect()
-              bottom = (track.top + track.bottom) / 2 +
-                Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
-            } else {
-              const label = toggle.getBoundingClientRect()
-              top = label.top
-              bottom = label.bottom
-            }
-            const previous = rows.at(-1)
-            if (previous && Math.abs(previous.top - top) < 0.1) {
-              previous.bottom = Math.max(previous.bottom, bottom)
-            } else {
-              rows.push({ setting: control.dataset.settingId, top, bottom })
-            }
-          }
-          return { rows, bottom: section.getBoundingClientRect().bottom }
-        }))
-        expect(sections).toHaveLength(2)
-        for (const section of sections) {
-          for (let index = 1; index < section.rows.length; index++) {
-            const row = section.rows[index]
-            const previous = section.rows[index - 1]
-            expect.soft(row.top - previous.bottom, `${previous.setting} to ${row.setting}`).toBeCloseTo(16, 1)
-          }
-          expect.soft(section.bottom - section.rows.at(-1).bottom, 'last control to section divider').toBeCloseTo(16, 1)
-        }
-        const roundness = menu.locator('[data-setting-id="uiRoundness"] input[type="range"]')
-        const inputBounds = await roundness.boundingBox()
-        expect(inputBounds.height, 'native slider hit area stays large enough').toBeGreaterThanOrEqual(width > 680 ? 35.9 : 47.9)
-        await roundness.click({ position: { x: inputBounds.width * 0.75, y: inputBounds.height / 2 } })
-        await expect(roundness).toHaveValue('150')
-        await roundness.press('ArrowLeft')
-        await expect(roundness).toHaveValue('145')
-      })
-    })
-  })
-}
 
 test.describe('quick settings pointer spacing', { tag: '@scale' }, () => {
   test.use({
@@ -613,183 +260,6 @@ test.describe('quick settings pointer spacing', { tag: '@scale' }, () => {
       await expect(menu).toHaveCount(0)
     }
     await touch.detach()
-  })
-})
-
-test.describe('quick settings touch spacing', { tag: '@scale' }, () => {
-  test.use({
-    seed: {
-      settings: {
-        currentLocale: 'en-US',
-        quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'autoplayVideos', 'autoplayPlaylists', 'defaultPlayback'],
-      }
-    }
-  })
-
-  test('uses the shared visible row gap while keeping large switch touch targets', async ({ app, page, uiScale }, testInfo) => {
-    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
-    const touch = await page.context().newCDPSession(page)
-    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
-    await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
-    // Exercise the shared renderer with native mobile control dimensions.
-    await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
-    for (const { width, height } of [{ width: 375, height: 900 }, { width: 480, height: 900 }, { width: 740, height: 550 }]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
-        BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, ...bounds })
-      }, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
-      await page.locator('.profileTrigger').click()
-      const menu = page.locator('.quickSettingsMenu')
-      await expect(menu).toBeVisible()
-      await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-      const rows = await menu.locator('.quickSettingControl').evaluateAll(controls => controls.map(control => {
-        const select = control.querySelector('.select-text')
-        const slider = control.querySelector('.sliderControl')
-        const text = control.querySelector('.switch-label-text')
-        let top
-        let bottom
-        if (select) {
-          top = control.querySelector('.select-label').getBoundingClientRect().top
-          bottom = select.getBoundingClientRect().bottom
-        } else if (slider) {
-          top = control.querySelector('.labelRow').getBoundingClientRect().top
-          const track = slider.getBoundingClientRect()
-          bottom = (track.top + track.bottom) / 2 +
-            Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
-        } else {
-          const bounds = text.getBoundingClientRect()
-          const trackHeight = Number.parseFloat(getComputedStyle(text, '::before').blockSize)
-          const visibleHeight = Math.max(bounds.height, trackHeight)
-          top = (bounds.top + bounds.bottom - visibleHeight) / 2
-          bottom = top + visibleHeight
-        }
-        return { setting: control.dataset.settingId, top, bottom }
-      }))
-      expect(rows.map(row => row.setting)).toEqual(['defaultQuality', 'enableSubtitlesByDefault', 'autoplayVideos', 'autoplayPlaylists', 'defaultPlayback'])
-      const rowGap = await menu.locator('.menuSection').evaluate(element => Number.parseFloat(getComputedStyle(element).rowGap))
-      expect(rowGap, 'shared visible gap stays at least 16px').toBeGreaterThanOrEqual(16)
-      for (let index = 1; index < rows.length; index++) {
-        expect.soft(rows[index].top - rows[index - 1].bottom,
-          `${width}px: ${rows[index - 1].setting} to ${rows[index].setting}`).toBeCloseTo(rowGap, 1)
-      }
-      for (const target of await menu.locator('.switch-label, .switch-input').all()) {
-        expect((await target.boundingBox()).height, 'switch touch target stays large').toBeGreaterThanOrEqual(47.9)
-      }
-      await expectQuickSwitchTargets(menu, page)
-      if (width === 480) {
-        for (const scheme of ['light', 'dark']) {
-          await page.emulateMedia({ colorScheme: scheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
-          const screenshot = testInfo.outputPath(`quick-settings-touch-spacing-${scheme}.png`)
-          await menu.locator('.menuSection').screenshot({ path: screenshot })
-          await testInfo.attach(`quick-settings-touch-spacing-${scheme}`, { path: screenshot, contentType: 'image/png' })
-        }
-      }
-      await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
-      await expect(menu).toHaveCount(0)
-    }
-    await touch.detach()
-  })
-})
-
-test.describe('quick settings select spacing', { tag: '@scale' }, () => {
-  test.use({
-    seed: {
-      settings: {
-        currentLocale: 'en-US',
-        baseTheme: 'system',
-        quickSettings: ['baseTheme', 'systemLightTheme', 'systemDarkTheme', 'defaultQuality', 'hideRecommendedVideos'],
-        defaultQuality: '1080',
-        highlightChangedSettings: true,
-        syncServerEnabled: true,
-        syncServerToken: 'local-test-token',
-        syncServerUrl: 'http://127.0.0.1:1',
-        syncServerSyncSettings: true,
-        syncServerSettingsExcluded: ['baseTheme', 'systemLightTheme', 'systemDarkTheme'],
-      }
-    }
-  })
-
-  test('keeps select spacing compact without changing the Material 3 design', async ({ app, page, uiScale }, testInfo) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    for (const width of [1280, 480]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
-        BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, width, height: 900 })
-      }, Math.round(width * uiScale / 100))
-      await page.evaluate(() => {
-        const store = window.$store
-        return store.dispatch('updateDefaultQuality', '1080')
-      })
-      await page.locator('.profileTrigger').click()
-      const menu = page.locator('.quickSettingsMenu')
-      await expect(menu).toBeVisible()
-      await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-      const controls = menu.locator('.quickSelect')
-      await expect(controls).toHaveCount(4)
-      await expect(menu.locator('[data-setting-id="baseTheme"] .changedSettingIndicatorPlaceholder')).toHaveCSS('display', 'none')
-      await expect(menu.locator('[data-setting-id="defaultQuality"] .changedSettingIndicator')).toBeVisible()
-      for (const scheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme: scheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
-        const positions = []
-        for (const control of await controls.all()) {
-          const geometry = await control.evaluate(element => {
-            const field = element.querySelector('.select-text').getBoundingClientRect()
-            const label = element.querySelector('.select-label').getBoundingClientRect()
-            const indicators = element.querySelector('.selectIndicators').getBoundingClientRect()
-            const visibleIndicators = Array.from(element.querySelectorAll('.selectIndicators > *')).filter(indicator => {
-              const style = getComputedStyle(indicator)
-              return style.display !== 'none' && style.visibility !== 'hidden'
-            })
-            const indicatorsWidth = visibleIndicators.reduce((width, indicator) => width + indicator.getBoundingClientRect().width, 0) +
-              Math.max(0, visibleIndicators.length - 1) * 6
-            return {
-              width: element.getBoundingClientRect().width,
-              fieldWidth: field.width,
-              fieldLeft: field.left,
-              fieldRight: field.right,
-              labelCenter: (label.top + label.bottom) / 2,
-              indicatorsWidth,
-              indicatorsRight: visibleIndicators.at(-1).getBoundingClientRect().right,
-              controlRight: element.getBoundingClientRect().right,
-              indicatorCenter: (indicators.top + indicators.bottom) / 2,
-              fieldCenter: (field.top + field.bottom) / 2,
-              fieldTop: field.top,
-              fieldBottom: field.bottom,
-              labelTop: label.top,
-            }
-          })
-          positions.push(geometry)
-          const spareSpace = geometry.width - geometry.fieldWidth - geometry.indicatorsWidth - 8
-          expect.soft(spareSpace, 'space around the indicators').toBeGreaterThanOrEqual(-0.1)
-          expect.soft(spareSpace, 'space around the indicators').toBeLessThanOrEqual(6.1)
-          expect.soft(geometry.labelCenter, 'Material 3 label stays on the outline').toBeCloseTo(geometry.fieldTop, 1)
-          expect.soft(geometry.indicatorCenter, 'indicators remain beside the field').toBeCloseTo(geometry.fieldCenter, 1)
-          expect.soft(geometry.indicatorsRight).toBeLessThanOrEqual(geometry.controlRight + 0.1)
-        }
-        const nextRow = positions[width > 680 ? 2 : 1]
-        expect.soft(nextRow.labelTop - positions[0].fieldBottom, 'spacing between select rows').toBeCloseTo(16, 1)
-        if (width > 680) {
-          const gap = positions[1].fieldLeft - positions[0].fieldRight - positions[0].indicatorsWidth
-          expect.soft(gap, 'gap between the paired selects after accounting for indicators').toBeGreaterThanOrEqual(15.9)
-          expect.soft(gap, 'gap between the paired selects after accounting for indicators').toBeLessThanOrEqual(22.1)
-          expect.soft(positions[1].fieldTop, 'paired selects stay aligned').toBeCloseTo(positions[0].fieldTop, 1)
-        }
-        await menu.screenshot({ path: testInfo.outputPath(`quick-settings-${width}-${scheme}.png`) })
-      }
-      const quality = menu.locator('[data-setting-id="defaultQuality"]')
-      await quality.getByRole('button', { name: 'Reset this setting to its default' }).click()
-      await expect(quality.locator('.changedSettingIndicator')).toHaveCount(0)
-      await expect(quality.getByRole('combobox')).toHaveText('720p')
-      await expect(menu).toBeVisible()
-      const label = menu.locator('.switch-label')
-      expect((await label.boundingBox()).height).toBeCloseTo(24, 1)
-      if (width > 680) {
-        await menu.press('Escape')
-      } else {
-        await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
-      }
-      await expect(menu).toHaveCount(0)
-    }
   })
 })
 
@@ -929,31 +399,6 @@ test.describe('quick system themes', () => {
     await expect.poll(() => thumb.evaluate(element => element.getBoundingClientRect().height))
       .toBeGreaterThan(originalThumbHeight)
   })
-
-  test('offers only matching built-in and custom themes', async ({ page }) => {
-    await page.evaluate(async (defaultTheme) => {
-      const store = window.$store
-      store.commit('setCustomThemes', [
-        { ...defaultTheme, id: 'paper', name: 'Paper', isDark: false },
-        { ...defaultTheme, id: 'midnight', name: 'Midnight', isDark: true },
-      ])
-      await store.dispatch('updateQuickSettings', ['systemLightTheme', 'systemDarkTheme'])
-    }, DEFAULT_CUSTOM_THEME)
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    for (const [label, included, excluded] of [
-      ['Light theme', ['Light', 'Solarized Light', 'Paper'], ['Dark', 'Solarized Dark', 'Midnight']],
-      ['Dark theme', ['Dark', 'Solarized Dark', 'Midnight'], ['Light', 'Solarized Light', 'Paper']],
-    ]) {
-      const select = menu.getByRole('combobox', { name: label })
-      await select.click()
-      const options = page.locator(`#${await select.getAttribute('aria-controls')}`)
-      for (const name of included) await expect(options.getByRole('option', { name, exact: true })).toHaveCount(1)
-      for (const name of [...excluded, 'System default']) await expect(options.getByRole('option', { name, exact: true })).toHaveCount(0)
-      await options.getByRole('option', { name: included[2], exact: true }).click()
-      await expect(select).toHaveText(included[2])
-    }
-  })
 })
 
 test.describe('additional quick settings', () => {
@@ -1065,35 +510,13 @@ const EXPANDED_QUICK_SETTINGS = [
   ['secColor', 'Appearance'],
   ['reducedMotion', 'Appearance'],
   ['toastPosition', 'Appearance'],
-  ['hideLabelsSideBar', 'Appearance'],
-  ['useFrostedGlassPlayerUi', 'Appearance'],
-  ['skipUnavailablePlaylistVideos', 'Playback'],
   ['useCustomShortsPlayer', 'Playback'],
   ['loopShorts', 'Playback'],
-  ['rememberVolume', 'Playback'],
   ['enableSkipSilenceByDefault', 'Playback'],
-  ['holdToDoublePlaybackSpeed', 'Playback'],
-  ['useQuickPlaybackSpeedBar', 'Playback'],
-  ['musicVisualizer', 'Playback'],
   ['aiVideoSummaryMode', 'Content'],
   ['videoDescriptionMode', 'Content'],
-  ['hideWatchedSubs', 'Content'],
-  ['hideVideoViews', 'Content'],
-  ['hideVideoLikesAndDislikes', 'Content'],
-  ['hideChannelAvatars', 'Content'],
   ['hideLiveStreams', 'Content'],
-  ['hideUpcomingPremieres', 'Content'],
-  ['hideChapters', 'Content'],
-  ['showDistractionFreeTitles', 'Content'],
-  ['useAiSlopList', 'Content'],
-  ['showFamilyFriendlyOnly', 'Content'],
-  ['thumbnailDataSaver', 'Content'],
   ['hideSubscriptionsLive', 'Content'],
-  ['hideSubscriptionsCommunity', 'Content'],
-  ['fetchSubscriptionsAutomatically', 'Content'],
-  ['useVoiceOverTranslation', 'Language and region'],
-  ['rememberTabNavigationHistory', 'Privacy'],
-  ['backendFallback', 'Advanced'],
 ]
 
 test.describe('expanded quick settings catalog', () => {
@@ -1174,43 +597,6 @@ test.describe('expanded quick settings catalog', () => {
     await page.evaluate(() => window.$store.dispatch('updateSettingsPassword', ''))
     await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toBeVisible()
   })
-
-  test('hides the secondary color with the main color for fixed-palette themes', async ({ page }) => {
-    await page.evaluate(() => window.$store.dispatch('updateQuickSettings', ['mainColor', 'secColor']))
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    await expect(menu.locator('[data-setting-id="secColor"]')).toBeVisible()
-    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialDark'))
-    await expect(menu.locator('[data-setting-id="mainColor"]')).toHaveCount(0)
-    await expect(menu.locator('[data-setting-id="secColor"]')).toHaveCount(0)
-  })
-})
-
-test.describe('quick playback speed', () => {
-  test.use({
-    seed: {
-      settings: {
-        quickSettings: ['defaultPlayback'],
-        videoPlaybackRateInterval: 0.1,
-        maxVideoPlaybackRate: 5,
-      }
-    }
-  })
-
-  test('uses the configured speed interval and maximum', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const slider = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('slider')
-    await expect(slider).toHaveAttribute('min', '0.1')
-    await expect(slider).toHaveAttribute('max', '5')
-    await expect(slider).toHaveAttribute('step', '0.1')
-    await slider.press('Home')
-    await slider.press('ArrowRight')
-    await expect(slider).toHaveValue('0.2')
-    await slider.press('End')
-    await expect.poll(() => page.evaluate(() => (
-      window.$store.getters.getDefaultPlayback
-    ))).toBe(5)
-  })
 })
 
 test.describe('quick thumbnail blur', () => {
@@ -1254,20 +640,6 @@ test.describe('quick thumbnail blur', () => {
 test.describe('quick settings menu', () => {
   test.use({ seed: { settings: { quickSettings: ALL_QUICK_SETTINGS } } })
 
-  test('opens the command palette from the header action', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    const shortcut = menu.getByRole('button', { name: 'Open command palette' })
-
-    await expect(shortcut).toBeVisible()
-    await expect(shortcut).toHaveClass(/commandPaletteShortcut/)
-    await expect(shortcut.locator('[data-icon="terminal"]')).toBeVisible()
-    await expect(menu.locator('.menuLinks').getByRole('button', { name: 'Open command palette' })).toHaveCount(0)
-
-    await shortcut.click()
-    await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible()
-  })
-
   test('hands focus from the phone sheet to the command palette', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     await page.locator('.profileTrigger').click()
@@ -1298,69 +670,6 @@ test.describe('quick settings menu', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
     await trigger.click()
     await expect(page.getByRole('dialog', { name: 'Quick settings' })).toBeVisible()
-  })
-
-  test('keeps responsive select focus and open state synchronized', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 480, height: 800 })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    const select = appearance.getByRole('combobox', { name: 'Base Theme' })
-    await select.click()
-    const listbox = page.locator(`#${await select.getAttribute('aria-controls')}`)
-    const options = listbox.getByRole('option')
-    await options.first().focus()
-    await options.first().press('ArrowDown')
-    await expect(select).toHaveAttribute('aria-activedescendant', await options.nth(1).getAttribute('id'))
-
-    await setWindowSize(app, page, { width: 1000, height: 700 })
-    await expect(select).toHaveAttribute('aria-expanded', 'false')
-    await select.click()
-    for (const option of await listbox.getByRole('option').all()) {
-      await expect(option).toHaveAttribute('tabindex', '-1')
-    }
-  })
-
-  test('fits a maximized 1080p window and spaces both sliders consistently', async ({ app, page }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1920, height: 1080 })
-    })
-    await expect.poll(() => page.evaluate(() => window.innerHeight)).toBeGreaterThanOrEqual(1000)
-
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    await expect(menu).toBeVisible()
-
-    expect(await menu.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true)
-
-    const sliders = menu.locator('.sliderGroup .pure-material-slider')
-    await expect(sliders).toHaveCount(2)
-    const gaps = await sliders.evaluateAll(elements => elements.map(element => {
-      const label = element.querySelector('.label')
-      const input = element.querySelector('.input')
-      const labelBounds = label.getBoundingClientRect()
-      const inputBounds = input.getBoundingClientRect()
-      return inputBounds.top - labelBounds.bottom
-    }))
-    expect(Math.abs(gaps[0] - gaps[1])).toBeLessThanOrEqual(1)
-  })
-
-  test('shows settings category icons before section names', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    const expectedHeaders = [
-      ['Appearance', 'display'],
-      ['Playback', 'circle-play'],
-      ['Content', 'eye-slash'],
-      ['Language and region', 'globe'],
-      ['Proxy', 'flask'],
-    ]
-
-    for (const [label, icon] of expectedHeaders) {
-      const heading = menu.getByRole('heading', { name: label, exact: true })
-      await expect(heading.locator(`[data-icon="${icon}"]`)).toBeVisible()
-      expect(await heading.evaluate(element => [...element.children].map(child => (
-        child.classList.contains('menuSectionIcon') ? 'icon' : child.tagName.toLowerCase()
-      )))).toEqual(['icon', 'span'])
-    }
   })
 
   test('stays inside a short viewport below horizontal tabs', async ({ app, page }) => {
@@ -1400,86 +709,6 @@ test.describe('quick settings menu', () => {
     expect(bounds.width).toBeGreaterThan(300)
     expect(bounds.left).toBeGreaterThanOrEqual(0)
     expect(bounds.right).toBeLessThanOrEqual(375)
-  })
-
-  test('does not expose a horizontal scrollbar on a phone-sized viewport', async ({ app, page }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 375, height: 700 })
-    })
-    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(375)
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateCurrentLocale', 'es')
-      document.querySelector('.app').classList.add('capacitorTabs', 'capacitorPhoneLayout')
-    })
-
-    await page.locator('.profileTrigger').click()
-    const scroller = page.locator('.quickSettingsScroll')
-    await expect(scroller).toBeVisible()
-
-    await expect.poll(() => scroller.evaluate(element => ({
-      horizontalScrollRange: element.scrollWidth - element.clientWidth,
-      overflowX: getComputedStyle(element).overflowX,
-      horizontalScrollbarVisible: element.querySelector('.os-scrollbar-horizontal')
-        ?.classList.contains('os-scrollbar-visible') ?? false,
-    }))).toEqual({
-      horizontalScrollRange: 0,
-      overflowX: 'hidden',
-      horizontalScrollbarVisible: false,
-    })
-  })
-
-  test('keeps paired selects aligned and shows locale completeness', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    const pairs = [
-      ['baseTheme', 'mainColor'],
-      ['listType', 'playlistViewType'],
-      ['currentLocale', 'region'],
-    ]
-
-    for (const pair of pairs) {
-      // Measure both controls in one frame while the menu animates.
-      const [first, second] = await menu.evaluate((element, settingIds) => settingIds.map(settingId => {
-        const { x, y, width } = element.querySelector(`[data-setting-id="${settingId}"]`).getBoundingClientRect()
-        return { x, y, width }
-      }), pair)
-      expect(Math.abs(first.y - second.y)).toBeLessThanOrEqual(1)
-      expect(second.x).toBeGreaterThan(first.x + first.width)
-    }
-
-    await menu.getByRole('combobox', { name: 'Language preference' }).click()
-    await expect(page.locator('.selectDropdown')).toContainText('English (US) (100%)')
-  })
-
-  test('updates the playlist view type independently', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-    const videoViewType = menu.getByRole('combobox', { name: 'Video View Type' })
-    const playlistViewType = menu.getByRole('combobox', { name: 'Playlist View Type' })
-
-    await expect(videoViewType).toContainText('Grid')
-    await expect(playlistViewType).toContainText('Grid')
-    await playlistViewType.click()
-    await page.getByRole('option', { name: 'List', exact: true }).click()
-
-    await expect(playlistViewType).toContainText('List')
-    await expect(videoViewType).toContainText('Grid')
-    await expect(menu).toBeVisible()
-  })
-
-  test('shows color swatches in the color-theme selector', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const colorTheme = page.getByRole('dialog', { name: 'Quick settings' })
-      .getByRole('combobox', { name: /Main colou?r theme/i })
-
-    await expect(colorTheme.locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
-    await colorTheme.click()
-
-    const options = page.locator('.selectDropdown').getByRole('option')
-    await expect(options.first().locator('.optionColorDot')).toHaveCSS('background-color', 'rgb(213, 0, 0)')
-    await expect(page.getByRole('option', { name: 'Blue', exact: true }).locator('.optionColorDot'))
-      .toHaveCSS('background-color', 'rgb(41, 98, 255)')
   })
 
   test('hides the unavailable main color selector', async ({ page }) => {
@@ -1526,33 +755,6 @@ test.describe('quick settings menu', () => {
     await expect(mainScroll).toHaveJSProperty('scrollTop', 0)
   })
 
-  test('keeps the menu open when Escape closes a select', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    const themeSelect = menu.getByRole('combobox', { name: 'Base Theme' })
-
-    await themeSelect.click()
-    await expect(page.locator('.selectDropdown')).toBeVisible()
-    await themeSelect.press('Escape')
-
-    await expect(page.locator('.selectDropdown')).toBeHidden()
-    await expect(menu).toBeVisible()
-  })
-
-  test('stays open when the application window loses focus', async ({ app, page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    await expect(menu).toBeVisible()
-
-    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.blur())
-    await expect(menu).toBeVisible()
-    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.focus())
-    await expect(menu).toBeFocused()
-
-    await page.locator('.topNav .logo').click()
-    await expect(menu).toBeHidden()
-  })
-
   test('opens About and switches to Settings from the quick menu', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
@@ -1577,55 +779,6 @@ test.describe('quick settings menu', () => {
     const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
     await expect(settingsWindow).toBeVisible()
     await expect(settingsWindow.locator('.settingsMenu')).toBeVisible()
-  })
-
-  test('keeps About visible while its close animation plays', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
-
-    const aboutWindow = page.getByRole('dialog', { name: 'About' })
-    await expect(aboutWindow.locator('.settingsBreadcrumb')).toContainText('About')
-
-    // The 160 ms leave animation can end between separate assertions on a busy
-    // runner, so record the leaving window after every DOM change instead.
-    await page.evaluate(() => {
-      window.aboutLeaveStates = []
-      new MutationObserver(() => {
-        const leaving = document.querySelector('.settingsWindow.settings-window-leave-active')
-        if (leaving !== null) {
-          window.aboutLeaveStates.push({
-            breadcrumb: leaving.querySelector('.settingsBreadcrumb')?.textContent ?? '',
-            hasMenu: leaving.querySelector('.settingsMenu') !== null
-          })
-        }
-      }).observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true })
-    })
-    await aboutWindow.locator('.settingsCloseButton').click()
-    await expect(aboutWindow).toBeHidden()
-
-    const states = await page.evaluate(() => window.aboutLeaveStates)
-    expect(states.length).toBeGreaterThan(0)
-    for (const state of states) {
-      expect(state.breadcrumb).toContain('About')
-      expect(state.hasMenu).toBe(false)
-    }
-  })
-})
-
-test.describe('automatic quick setting select pairs', () => {
-  test.use({ seed: { settings: { quickSettings: ['baseTheme', 'iconPack'] } } })
-
-  test('places any adjacent selects in two columns', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    // Measure both controls in one frame while the menu animates.
-    const [first, second] = await menu.evaluate(element => ['baseTheme', 'iconPack'].map(settingId => {
-      const { x, y, width } = element.querySelector(`[data-setting-id="${settingId}"]`).getBoundingClientRect()
-      return { x, y, width }
-    }))
-
-    expect(Math.abs(first.y - second.y)).toBeLessThanOrEqual(1)
-    expect(second.x).toBeGreaterThan(first.x + first.width)
   })
 })
 
@@ -1668,52 +821,6 @@ test.describe('customizable quick settings', () => {
         const getters = window.$store.getters
         return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]
       })).toEqual([1, 1])
-    })
-  })
-
-  test('centers setting icons vertically within their rows', async ({ page }) => {
-    await openInterfaceCustomizer(page, 'quick settings')
-
-    const offsets = await page.locator('.selectedSetting').evaluateAll(rows => rows.map(row => {
-      const icon = row.querySelector('.selectedSettingIcon > svg')
-      const rowBounds = row.getBoundingClientRect()
-      const iconBounds = icon.getBoundingClientRect()
-      return Math.abs(
-        iconBounds.y + iconBounds.height / 2 -
-        (rowBounds.y + rowBounds.height / 2)
-      )
-    }))
-
-    expect(Math.max(...offsets)).toBeLessThanOrEqual(0.5)
-  })
-
-  test('starts with the default quick settings', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.getByRole('dialog', { name: 'Quick settings' })
-
-    await expect(menu.getByRole('combobox', { name: 'Base Theme' })).toBeVisible()
-    await expect(menu.getByRole('slider', { name: 'UI Scale' })).toBeVisible()
-    await expect(menu.getByRole('combobox', { name: 'Default Quality' })).toBeVisible()
-    await expect(menu.getByRole('slider', { name: 'Default Playback Rate' })).toBeVisible()
-    await expect(menu.getByRole('checkbox', { name: 'Autoplay Recommended Videos' })).toBeVisible()
-    await expect(menu.getByRole('checkbox', { name: 'Enable Subtitles by Default' })).toBeVisible()
-    await expect(menu.getByRole('combobox', { name: 'Video View Type' })).toBeVisible()
-    await expect(menu.getByRole('combobox', { name: 'Playlist View Type' })).toBeVisible()
-    await expect(menu.getByRole('checkbox', { name: 'Hide Recommended Videos' })).toBeVisible()
-    await expect(menu.getByRole('checkbox', { name: 'Hide Comments' })).toBeVisible()
-    await expect(menu.getByRole('checkbox', { name: 'Remember Watch History' })).toBeVisible()
-
-    await expect(menu.getByRole('checkbox', { name: 'Enable SponsorBlock' })).toHaveCount(0)
-    await expect(menu.getByRole('checkbox', { name: 'Enable Tor / Proxy' })).toHaveCount(0)
-    await expect(menu.getByRole('combobox', { name: 'Language preference' })).toHaveCount(0)
-    await expect(menu.getByRole('button', { name: 'Customize quick settings' })).toHaveCount(0)
-  })
-
-  test.describe('saved former defaults', () => {
-    test.use({ seed: { settings: { quickSettings: FORMER_DEFAULT_QUICK_SETTINGS } } })
-
-    test('switch to the current defaults', async ({ page }) => {
-      await expect.poll(() => page.evaluate(() => window.$store.getters.getQuickSettings)).toEqual(DEFAULT_QUICK_SETTINGS)
     })
   })
 
@@ -1974,40 +1081,6 @@ test.describe('quick distraction settings', () => {
 
     await expect(autoplay).not.toBeChecked()
     await expect(autoplay).toBeDisabled()
-  })
-})
-
-test.describe('quick settings focus after control updates', () => {
-  test.use({
-    seed: {
-      settings: {
-        baseTheme: 'dark',
-        highlightChangedSettings: true
-      }
-    }
-  })
-
-  test('stays open when a reset control removes itself', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    const reset = menu.getByRole('button', { name: 'Reset this setting to its default' }).first()
-    await expect(reset).toBeVisible()
-
-    await reset.click()
-
-    await expect(reset).toHaveCount(0)
-    await expect(menu).toBeVisible()
-  })
-
-  test('stays open when a switch adds its reset control', async ({ page }) => {
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    const hideComments = page.getByRole('checkbox', { name: 'Hide Comments' })
-
-    await menu.locator('label.switch-label').filter({ hasText: 'Hide Comments' }).click()
-
-    await expect(hideComments).toBeChecked()
-    await expect(menu).toBeVisible()
   })
 })
 

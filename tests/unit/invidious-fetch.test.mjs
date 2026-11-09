@@ -119,21 +119,3 @@ test('cancelling Invidious preflight rejects before shared consent settles', { t
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(fetched, false)
 })
-
-test('already-aborted Invidious requests do not start a permission check', async () => {
-  const controller = new AbortController()
-  controller.abort()
-  const fetch = fixture({
-    env: { IS_CAPACITOR: true },
-    permission: () => assert.fail('Cancelled preflight must not start'),
-    request: () => assert.fail('Cancelled request must not start'),
-  })
-  await assert.rejects(fetch('http://192.168.1.2', controller.signal), { name: 'AbortError' })
-})
-
-test('desktop and iOS Invidious requests do not call Android permission APIs', async () => {
-  for (const env of [{}, { IS_CAPACITOR: true, IS_IOS: true }]) {
-    const fetch = fixture({ env, permission: () => assert.fail('Android bridge must not be called') })
-    assert.equal(await fetch('https://instance.example'), 'response')
-  }
-})

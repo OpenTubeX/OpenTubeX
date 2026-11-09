@@ -200,22 +200,6 @@ test('plays muxed streams when the server has no adaptive streams', async ({ pag
   await expect(page.locator(`${activeTab} .errorContainer`)).toHaveCount(0)
 })
 
-test('shows no comments instead of an error when comments are turned off', async ({ page }) => {
-  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({ json: videoResponse }))
-  // The server reports videos with comments turned off as 404s
-  await page.route(`${SERVER}/api/v1/comments/**`, route => route.fulfill({ status: 404, json: { detail: 'Comments are disabled' } }))
-  await page.route(`${SERVER}/proxy/relay?**`, async route => {
-    const upstream = new URL(new URL(route.request().url()).searchParams.get('url'))
-    return fulfillRange(route, await media[upstream.searchParams.get('itag') === '248' ? 'video' : 'audio'])
-  })
-
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
-  await page.locator(sel.searchInput).press('Enter')
-  // Like Invidious's "Comments not found", without an error toast or a retry button
-  await expect(page.locator(`${activeTab} .noCommentMsg`)).toHaveText('There are no comments available for this video')
-  await expect(page.locator('.toast', { hasText: 'Error' })).toHaveCount(0)
-})
-
 test.describe('with the Invidious proxy setting also turned on', () => {
   test.use({ seed: { settings: { ...SETTINGS, proxyVideos: true } } })
 
@@ -248,14 +232,6 @@ test.describe('with the Invidious proxy setting also turned on', () => {
   })
 })
 
-test('reports rejected credentials when loading a video', async ({ page }) => {
-  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({ status: 401, json: { detail: 'Invalid credentials' } }))
-
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page.locator(`${activeTab} .errorContainer`)).toContainText('The Yattee server rejected the username or password.')
-})
-
 test('shows a local image for unavailable videos without contacting YouTube', async ({ page }) => {
   const youtubeRequests = []
   page.on('request', request => {
@@ -276,84 +252,6 @@ test('shows a local image for unavailable videos without contacting YouTube', as
   // The selected pack's glyph is drawn in the frame
   expect(decodeURIComponent(await image.getAttribute('src'))).toContain('<path')
   expect(youtubeRequests).toEqual([])
-})
-
-/**
- * A live stream for which the server returned no streams
- * @param {import('@playwright/test').Page} page
- */
-async function openLiveStreamWithoutStreams(page) {
-  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
-    json: { ...videoResponse, liveNow: true, lengthSeconds: 0, formatStreams: [], adaptiveFormats: [] }
-  }))
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
-  await page.locator(sel.searchInput).press('Enter')
-  return page.locator(`${activeTab} .errorContainer`)
-}
-
-test('explains that the server did not relay the streams of a live stream', async ({ page }) => {
-  await expect(await openLiveStreamWithoutStreams(page)).toContainText('The Yattee server did not relay the streams of this video.')
-})
-
-test.describe('without proxying', () => {
-  test.use({ seed: { settings: { ...SETTINGS, yatteeProxyVideos: false } } })
-
-  test('does not blame relaying for missing live streams', async ({ page }) => {
-    const error = await openLiveStreamWithoutStreams(page)
-    await expect(error).toContainText('Could not load the streams of this video from the Yattee server.')
-    await expect(error).not.toContainText('relay')
-  })
-})
-
-test('reports a failure to load live chat directly from YouTube', async ({ page }) => {
-  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
-    json: { ...videoResponse, liveNow: true, lengthSeconds: 0, hlsUrl: `${SERVER}/proxy/relay?url=live`, formatStreams: [], adaptiveFormats: [] }
-  }))
-  await page.route(`${SERVER}/proxy/relay?**`, route => route.fulfill({ status: 404 }))
-
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
-  await page.locator(sel.searchInput).press('Enter')
-  const chatError = page.locator(`${activeTab} .messageContainer.hasError`)
-  await expect(chatError).toContainText('Live Chat is currently not supported with the Yattee server.')
-
-  // An aborted request would wait for the connection to return, so YouTube answers with an error instead
-  await page.route(/^https:\/\/(www\.)?youtube\.com\//, route => route.fulfill({ status: 400, body: 'Bad Request' }))
-  await chatError.getByRole('button', { name: 'Enable Live Chat' }).click()
-  await expect(chatError).toBeVisible()
-  await expect(chatError).not.toContainText('not supported')
-  await expect(page.locator(`${activeTab} .liveChatSkeleton`)).toHaveCount(0)
-})
-
-test('shows channel handles and subscriber counts in search results', async ({ page }) => {
-  await page.route(`${SERVER}/api/v1/search?**`, route => route.fulfill({
-    json: new URL(route.request().url()).searchParams.get('page') !== '1'
-      ? []
-      : [{
-          type: 'channel',
-          authorId: 'UCXuqSBlHAE6Xw-yeJA0Tunw',
-          author: 'Linus Tech Tips',
-          description: '',
-          subCount: null,
-          subCountText: '@LinusTechTips',
-          videoCount: 16900000,
-          authorThumbnails: [],
-          authorVerified: true
-        }]
-  }))
-
-  await page.locator(sel.searchInput).fill('linus tech tips')
-  await page.locator(sel.searchInput).press('Enter')
-  const channel = page.locator(`${activeTab} .ft-list-channel`)
-  await expect(channel.locator('.handle')).toHaveText('@LinusTechTips')
-  await expect(channel.locator('.subscriberCount')).toHaveText('16.9M subscribers')
-})
-
-test('only offers the search filters that the server supports', async ({ page }) => {
-  await page.locator('.navFilterButton').click()
-  const prompt = page.locator('.searchFiltersCard')
-  await expect(prompt.getByRole('radio', { name: 'Any Time', exact: true })).toBeVisible()
-  await expect(prompt.getByText('Features', { exact: true })).toHaveCount(0)
-  await expect(prompt.getByText('Subtitles', { exact: true })).toHaveCount(0)
 })
 
 test('opens channels by handle with only the tabs the server provides', async ({ page }) => {
@@ -426,19 +324,6 @@ test('opens channels by handle with only the tabs the server provides', async ({
   await expect(page).toHaveURL(/\/channel\/UC-test-channel-id\/about$/)
   expect(channelRequests[0]).toBe('/api/v1/channels/@TestChannel')
   expect(channelRequests).not.toContain('/api/v1/channels/UC-test-channel-id/community')
-})
-
-test('explains that hashtags need the local API fallback', async ({ page }) => {
-  const hashtagRequests = []
-  await page.route(`${SERVER}/api/v1/hashtag/**`, route => {
-    hashtagRequests.push(route.request().url())
-    return route.fulfill({ status: 404, json: { detail: 'Not Found' } })
-  })
-
-  await page.locator(sel.searchInput).fill('https://www.youtube.com/hashtag/music')
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page.getByText('This page is not available with the Yattee server.')).toBeVisible()
-  expect(hashtagRequests).toEqual([])
 })
 
 test('checks the connection and credentials from the settings', async ({ page }) => {

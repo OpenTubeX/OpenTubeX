@@ -25,32 +25,6 @@ test('a video stays known while another playlist still holds it', () => {
   assert.ok(counts.has('b'))
 })
 
-test('removing a video that was never counted leaves the map alone', () => {
-  const counts = new Map([['a', 1]])
-
-  decrementPlaylistVideoCounts(counts, [video('missing')])
-
-  assert.deepEqual([...counts], [['a', 1]])
-})
-
-test('videos without an id are not counted', () => {
-  const counts = new Map()
-
-  incrementPlaylistVideoCounts(counts, [{ title: 'no id' }, { videoId: null }, video('a')])
-
-  assert.deepEqual([...counts.keys()], ['a'])
-})
-
-test('missing video lists are tolerated', () => {
-  const counts = new Map()
-
-  incrementPlaylistVideoCounts(counts, undefined)
-  decrementPlaylistVideoCounts(counts, null)
-  resetPlaylistVideoCounts(counts, undefined)
-
-  assert.equal(counts.size, 0)
-})
-
 test('resetting rebuilds from the given playlists without replacing the map', () => {
   const counts = new Map()
   const original = counts

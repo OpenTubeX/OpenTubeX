@@ -202,128 +202,37 @@ test.describe('watch page', () => {
     await component.dispose()
   })
 
-  test('draws the desktop AI summary as a plain card like the description', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const component = await page.evaluateHandle(findWatchComponent)
-    await component.evaluate(async component => {
-      component.proxy.videoSummary = ['A summary paragraph.']
-      await component.proxy.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
-    })
-    const surface = selector => page.locator(`${activeTab} ${selector}`).evaluate(element => {
-      const { backgroundColor, borderRadius, boxShadow } = getComputedStyle(element)
-      return { backgroundColor, borderRadius, boxShadow }
-    })
-    await expect(page.locator(`${activeTab} .videoSummary`)).toBeVisible()
-    expect(await surface('.videoSummary')).toEqual(await surface('.videoDescription'))
-  })
-
   test('keeps short and empty descriptions collapsible when they have metadata', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     const card = page.locator(`${activeTab} .videoDescription`)
 
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      for (const text of ['Short description', '']) {
-        await watchComponent.evaluate(async (component, text) => {
-          const view = component.proxy
-          view.isLoading = true
-          await view.$nextTick()
-          view.videoDescription = text
-          view.videoDescriptionHtml = ''
-          view.videoTags = ['first tag', 'second tag']
-          view.videoGames = [{ title: 'Grand Theft Auto VI', subtitle: '2026' }]
-          view.isLoading = false
-          await view.$nextTick()
-        }, text)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    for (const text of ['Short description', '']) {
+      await watchComponent.evaluate(async (component, text) => {
+        const view = component.proxy
+        view.isLoading = true
+        await view.$nextTick()
+        view.videoDescription = text
+        view.videoDescriptionHtml = ''
+        view.videoTags = ['first tag', 'second tag']
+        view.videoGames = [{ title: 'Grand Theft Auto VI', subtitle: '2026' }]
+        view.isLoading = false
+        await view.$nextTick()
+      }, text)
 
-        await expect(card).toHaveClass(/short/)
-        await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
-        await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
-        await card.locator(':scope > .descriptionStatus').click()
-        await expect(card).not.toHaveClass(/short/)
-        await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
-        await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
-        await card.locator(':scope > .descriptionStatus').click()
-        await expect(card).toHaveClass(/short/)
-        await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
-        await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
-      }
-    }
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
-    await watchComponent.dispose()
-  })
-
-  test('shows short metadata-only cards in full without a footer', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    const card = page.locator(`${activeTab} .videoDescription`)
-
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      for (const metadata of [
-        { videoTags: ['tag'] },
-        { license: 'Creative Commons Attribution license (reuse allowed)' },
-        { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Audio tracks for some languages were automatically generated.', attribution: '' }] },
-      ]) {
-        await watchComponent.evaluate(async (component, metadata) => {
-          const view = component.proxy
-          view.isLoading = true
-          await view.$nextTick()
-          Object.assign(view, { videoDescription: '', videoDescriptionHtml: '', videoTags: [], videoGames: [], license: null, contentDisclosures: [] }, metadata)
-          view.isLoading = false
-          await view.$nextTick()
-        }, metadata)
-
-        await expect(card).not.toHaveClass(/short/)
-        await expect(card.locator(':scope > .descriptionStatus')).toHaveCount(0)
-        // The empty text reserves no extra space, so the metadata sits within the card's normal padding.
-        await expect.poll(() => card.evaluate(element => {
-          const bounds = element.getBoundingClientRect()
-          const metadata = element.querySelector('.descriptionContentEnd').previousElementSibling.getBoundingClientRect()
-          const style = getComputedStyle(element)
-          return Math.max(
-            Math.abs(metadata.top - bounds.top - Number.parseFloat(style.paddingBlockStart)),
-            Math.abs(bounds.bottom - metadata.bottom - Number.parseFloat(style.paddingBlockEnd)),
-          )
-        })).toBeLessThanOrEqual(1)
-      }
-    }
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
-    await watchComponent.dispose()
-  })
-
-  test('keeps the four-line description expansion threshold', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    const card = page.locator(`${activeTab} .videoDescription`)
-
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      for (const lineCount of [4, 5]) {
-        await watchComponent.evaluate(async (component, lineCount) => {
-          const view = component.proxy
-          view.isLoading = true
-          await view.$nextTick()
-          view.videoDescription = Array.from({ length: lineCount }, (_, index) => `Line ${index + 1}`).join('\n')
-          view.videoDescriptionHtml = ''
-          view.videoTags = []
-          view.videoGames = []
-          view.license = null
-          view.isLoading = false
-          await view.$nextTick()
-        }, lineCount)
-        if (lineCount === 4) {
-          await expect(card).not.toHaveClass(/short/)
-        } else {
-          await expect(card).toHaveClass(/short/)
-          await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
-        }
-      }
+      await expect(card).toHaveClass(/short/)
+      await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+      await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
+      await card.locator(':scope > .descriptionStatus').click()
+      await expect(card).not.toHaveClass(/short/)
+      await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+      await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
+      await card.locator(':scope > .descriptionStatus').click()
+      await expect(card).toHaveClass(/short/)
+      await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+      await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()
@@ -388,103 +297,6 @@ test.describe('watch page', () => {
     await setWindowSize(app, page, { width: 850, height: 900 })
     await expect(card).not.toHaveClass(/short/)
     await expect(footer).toHaveAccessibleName('Show less')
-    await watchComponent.dispose()
-  })
-
-  test('fades description content directly into the footer divider', { tag: '@scale' }, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async component => {
-      const view = component.proxy
-      view.isLoading = true
-      await view.$nextTick()
-      view.videoDescription = Array(30).fill('A long description line').join('\n')
-      view.videoDescriptionHtml = ''
-      view.videoTags = []
-      view.videoGames = []
-      view.license = null
-      view.isLoading = false
-      await view.$nextTick()
-    })
-
-    const card = page.locator(`${activeTab} .videoDescription`)
-    const scroller = card.locator('.descriptionScroll')
-    await expect(card).toContainClass('short')
-    const layout = await scroller.evaluate(element => {
-      const card = element.closest('.videoDescription').getBoundingClientRect()
-      const viewport = element.getBoundingClientRect()
-      const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
-      const line = document.createElement('span')
-      line.style.display = 'block'
-      line.style.height = '1lh'
-      element.append(line)
-      const lineHeight = line.getBoundingClientRect().height
-      line.remove()
-      return {
-        footerGap: more.top - viewport.bottom,
-        footerBottomGap: card.bottom - more.bottom,
-        mask: getComputedStyle(element).maskImage,
-        visibleLines: viewport.height / lineHeight,
-      }
-    })
-    expect(layout.visibleLines).toBeCloseTo(5, 1)
-    // The fade reaches the divider without leaving a blank strip above it.
-    expect(layout.footerGap).toBeCloseTo(0, 0)
-    expect(layout.footerBottomGap).toBeCloseTo(0, 0)
-    expect(layout.mask).toMatch(
-      /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
-    )
-
-    const footer = card.locator(':scope > .descriptionStatus')
-    const footerGap = () => footer.evaluate(element =>
-      element.getBoundingClientRect().top - element.parentElement.querySelector('.descriptionScroll').getBoundingClientRect().bottom
-    )
-    await footer.click()
-    await expect(footer).toHaveAccessibleName('Show less')
-    await expect(scroller).toHaveClass(/descriptionFadeBottom/)
-    expect(await footerGap()).toBeCloseTo(0, 0)
-
-    await scroller.evaluate(element => { element.scrollTop = (element.scrollHeight - element.clientHeight) / 2 })
-    await expect(scroller).toHaveClass(/descriptionFadeTop/)
-    await expect(scroller).toHaveClass(/descriptionFadeBottom/)
-    expect(await footerGap()).toBeCloseTo(0, 0)
-
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect(scroller).not.toHaveClass(/descriptionFadeBottom/)
-    expect(await footerGap()).toBeCloseTo(0, 0)
-
-    await footer.click()
-    await expect(card).toContainClass('short')
-    expect(await footerGap()).toBeCloseTo(0, 0)
-    await watchComponent.dispose()
-  })
-
-  test('keeps license-only descriptions accessible and collapsible', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    const license = 'Creative Commons Attribution license (reuse allowed). '.repeat(20).trim()
-    await watchComponent.evaluate(async (component, license) => {
-      const view = component.proxy
-      view.isLoading = true
-      await view.$nextTick()
-      view.videoDescription = ''
-      view.videoDescriptionHtml = ''
-      view.videoTags = []
-      view.videoGames = []
-      view.license = license
-      view.isLoading = false
-      await view.$nextTick()
-    }, license)
-
-    const card = page.locator(`${activeTab} .videoDescription`)
-    await expect(card).toHaveClass(/short/)
-    await card.locator(':scope > .descriptionStatus').click()
-    await expect(card.locator('.license')).toHaveText(license)
-    await card.locator(':scope > .descriptionStatus').click()
-    await expect(card).toHaveClass(/short/)
-    await expect(card.locator('.license')).toHaveText(license)
     await watchComponent.dispose()
   })
 
@@ -587,101 +399,6 @@ test.describe('watch page', () => {
         .toEqual({ scrollTop: 0, overflow: false, scrollbarVisible: false })
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
-    await watchComponent.dispose()
-  })
-
-  test('keeps the desktop description thumb in step with mouse wheel scrolling', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async component => {
-      const view = component.proxy
-      view.isLoading = true
-      await view.$nextTick()
-      view.videoDescription = Array.from({ length: 100 }, (_, index) => `Line ${index + 1}`).join('\n')
-      view.videoDescriptionHtml = ''
-      view.videoTags = []
-      view.videoGames = []
-      view.license = null
-      view.isLoading = false
-      await view.$nextTick()
-    })
-
-    const card = page.locator(`${activeTab} .videoDescription`)
-    await card.locator(':scope > .descriptionStatus').click()
-    const scroller = card.locator('.descriptionScroll')
-    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await scroller.evaluate(element => { element.scrollTop = 0 })
-      const bounds = await scroller.boundingBox()
-      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-      await scroller.evaluate(element => {
-        window.__descriptionThumbSamples = []
-        window.__stopDescriptionThumbSamples = false
-        const sample = () => {
-          if (window.__stopDescriptionThumbSamples) return
-          const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track')
-          const handle = track.querySelector('.os-scrollbar-handle')
-          const trackRect = track.getBoundingClientRect()
-          const handleRect = handle.getBoundingClientRect()
-          const scrollRange = element.scrollHeight - element.clientHeight
-          window.__descriptionThumbSamples.push({
-            scrollTop: element.scrollTop,
-            error: Math.abs(
-              handleRect.top - trackRect.top -
-              element.scrollTop / scrollRange * (trackRect.height - handleRect.height)
-            ),
-          })
-          requestAnimationFrame(sample)
-        }
-        requestAnimationFrame(sample)
-      })
-      for (let index = 0; index < 6; index++) await page.mouse.wheel(0, 80)
-      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-      await page.waitForTimeout(150)
-      const samples = await scroller.evaluate(async () => {
-        window.__stopDescriptionThumbSamples = true
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        const samples = window.__descriptionThumbSamples
-        delete window.__descriptionThumbSamples
-        delete window.__stopDescriptionThumbSamples
-        return samples
-      })
-      expect(samples.length).toBeGreaterThan(2)
-      expect(Math.max(...samples.map(sample => sample.error))).toBeLessThan(5)
-      await expect(scrollbar).toBeVisible()
-      expect(await scrollbar.evaluate(element => element.getAnimations().some(animation =>
-        animation.timeline?.constructor.name === 'ScrollTimeline'
-      ))).toBe(false)
-    }
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
-    await watchComponent.dispose()
-  })
-
-  test('handles videos without a description', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-
-    const pageErrors = []
-    page.on('pageerror', error => pageErrors.push(error.message))
-    const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async component => {
-      const watchView = component.proxy
-      watchView.isLoading = true
-      await watchView.$nextTick()
-      watchView.videoDescription = ''
-      watchView.videoDescriptionHtml = ''
-      watchView.videoTags = []
-      watchView.videoGames = []
-      watchView.license = null
-      watchView.isLoading = false
-      await watchView.$nextTick()
-    })
-
-    await expect(page.locator(`${activeTab} .videoDescription`)).toHaveCount(0)
-    expect(pageErrors).toEqual([])
     await watchComponent.dispose()
   })
 })

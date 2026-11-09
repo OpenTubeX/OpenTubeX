@@ -322,7 +322,8 @@ const pinnedPlaylists = computed(() => {
     store.getters.getAllPlaylists.filter(playlist => pinnedIds.has(playlist._id)),
     store.getters.getUserPlaylistsSortBy,
     store.getters.getUserPlaylistsCustomOrder,
-    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
+    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }),
+    store.getters.getUserPlaylistsPinnedIds
   )
 })
 

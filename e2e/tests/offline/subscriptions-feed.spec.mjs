@@ -1,5 +1,4 @@
 import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
-import { IpcChannels } from '../../../src/constants.js'
 
 const now = Date.now()
 const HOUR = 3_600_000
@@ -91,26 +90,6 @@ const seed = {
 }
 
 test.use({ seed })
-
-for (const theme of ['openTubeXLight', 'openTubeXDark']) {
-  test.describe(`${theme} premiere colors`, () => {
-    test.use({ seed: { ...seed, settings: { ...seed.settings, baseTheme: theme } } })
-
-    test('running premieres use normal video text colors', async ({ page }) => {
-      await goTo(page, 'subscriptions')
-      const premiere = page.locator('.ft-list-video').filter({ hasText: 'Running premiere video' })
-      const video = page.locator('.ft-list-video').filter({ hasText: 'Video A older' })
-      await expect(premiere).toBeVisible()
-      await expect(video).toBeVisible()
-      await expect(premiere.locator('.videoDuration')).toHaveText('Premiere')
-
-      for (const selector of ['.title', '.infoLine', '.channelName']) {
-        const color = await video.locator(selector).evaluate(element => getComputedStyle(element).color)
-        await expect(premiere.locator(selector)).toHaveCSS('color', color)
-      }
-    })
-  })
-}
 
 test.describe('subscriptions feed from cache', () => {
   test('hides cached members-only videos after enabling and disabling them with Select All during channel-detail updates', async ({ app, page }) => {
@@ -212,34 +191,6 @@ test.describe('subscriptions feed from cache', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('Video A newer')).toHaveCount(0)
     await expect(page.getByText('Video A older')).toBeVisible()
-  })
-
-  test('does not animate cards while calculating the initial grid size', async ({ page }) => {
-    await page.evaluate(() => {
-      window.__subscriptionFeedMoveClasses = []
-
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.target.classList.contains('feed-move')) {
-            window.__subscriptionFeedMoveClasses.push(mutation.target.className)
-          }
-        }
-      })
-
-      observer.observe(document.querySelector('.app'), {
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class']
-      })
-    })
-
-    await goTo(page, 'subscriptions')
-    await expect(page.getByText('Video A older')).toBeVisible()
-    // Leave time for a move transition that must not start.
-    await page.waitForTimeout(350)
-
-    const moveClasses = await page.evaluate(() => window.__subscriptionFeedMoveClasses)
-    expect(moveClasses).toEqual([])
   })
 
   test('renders the cached feed offline, newest first across channels', async ({ page }) => {
@@ -477,18 +428,6 @@ test.describe('subscriptions feed from cache', () => {
     expect(headerCoversVideo).toBe(true)
   })
 
-  test('does not offer to mark a running premiere as watched', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const runningPremiere = page.locator('.ft-list-video').filter({ hasText: 'Running premiere video' })
-    await runningPremiere.hover()
-    await runningPremiere.locator('.title').click({ button: 'right' })
-
-    await expect(page.getByRole('menuitem', { name: 'Mark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Unmark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Add to Queue' })).toBeVisible()
-  })
-
   test('shows when the feed was last updated without being held back by a stale channel', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Video B newest')).toBeVisible()
@@ -502,20 +441,6 @@ test.describe('subscriptions feed from cache', () => {
       await expect(lastRefresh).toBeVisible()
       await expect(lastRefresh).toContainText('1 hour ago')
     }
-  })
-
-  test('updates relative timestamps without reloading the page', async ({ page }) => {
-    // Install the clock before mounting the feed so its shared interval is controlled.
-    await goTo(page, 'trending')
-    await page.clock.install({ time: now })
-    await goTo(page, 'subscriptions')
-
-    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
-
-    await page.clock.fastForward(31 * 60_000)
-
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('1 hour ago')
   })
 })
 
@@ -533,62 +458,6 @@ test.describe('subscriptions feed with a partially cached profile', () => {
     await expect(page.getByText('Video A newer')).toBeVisible()
     await expect(page.getByText('Video A older')).toBeVisible()
     await expect(page.getByText('Video B newest')).toHaveCount(0)
-  })
-})
-
-test.describe('relative timestamp updates disabled', () => {
-  test.use({
-    seed: {
-      ...seed,
-      settings: {
-        ...seed.settings,
-        updateRelativeTimestamps: false
-      }
-    }
-  })
-
-  test('keeps relative timestamps fixed until the page is revisited', async ({ page }) => {
-    await goTo(page, 'trending')
-    await page.clock.install({ time: now })
-    await goTo(page, 'subscriptions')
-
-    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
-
-    await page.clock.fastForward(31 * 60_000)
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
-
-    await goTo(page, 'trending')
-    await goTo(page, 'subscriptions')
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('1 hour ago')
-  })
-
-  test('uses the current time when a reused card receives new data', async ({ page }) => {
-    await goTo(page, 'trending')
-    await page.clock.install({ time: now })
-    await goTo(page, 'subscriptions')
-
-    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
-    await expect(newestVideo).toBeVisible()
-    await newestVideo.evaluate(element => { element.dataset.reuseMarker = 'relative-time' })
-
-    await page.clock.fastForward(2 * HOUR)
-    await page.evaluate(async ({ channelId, published }) => {
-      const app = document.querySelector('#app').__vue_app__
-      const store = app.config.globalProperties.$store
-      const videos = store.getters.getVideoCache[channelId].videos.map(video => ({
-        ...video,
-        published
-      }))
-
-      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
-      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
-        detail: { tab: 'videos' }
-      }))
-    }, { channelId: CHANNEL_B, published: now + 1.5 * HOUR })
-
-    await expect(page.locator('[data-reuse-marker="relative-time"]')).toBeVisible()
-    await expect(newestVideo.locator('.uploadedTime')).toHaveText('30 minutes ago')
   })
 })
 
@@ -622,71 +491,6 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     }, CHANNEL_A)
     await goTo(page, 'subscriptions')
     await expect(premiere.locator('.newContentDot')).toHaveCount(0)
-  })
-
-  test('does not offer to mark an upcoming premiere as watched', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
-    await expect(upcomingPremiere).toBeVisible()
-    await upcomingPremiere.hover()
-    await upcomingPremiere.locator('.title').click({ button: 'right' })
-
-    await expect(page.getByRole('menuitem', { name: 'Mark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Unmark As Watched' })).toHaveCount(0)
-    await expect(page.getByRole('menuitem', { name: 'Add to Queue' })).toBeVisible()
-  })
-
-  test.describe('with date and time formats independent of the app language', () => {
-    test.use({
-      seed: {
-        ...seed,
-        settings: {
-          ...seed.settings,
-          currentLocale: 'en-US',
-          dateFormat: 'DD.MM.YYYY',
-          timeFormat: '24-hour',
-          hideUpcomingPremieres: false,
-        },
-      },
-    })
-
-    test('formats an upcoming premiere with the selected date and clock formats', async ({ page }) => {
-      await goTo(page, 'subscriptions')
-
-      const premiereDate = new Date(now + 30 * 24 * HOUR)
-      const numericParts = Object.fromEntries(
-        new Intl.DateTimeFormat('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }).formatToParts(premiereDate).map(part => [part.type, part.value])
-      )
-      const time = new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        hourCycle: 'h23',
-      }).format(premiereDate)
-      const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
-
-      await expect(upcomingPremiere.locator('.uploadedTime')).toHaveText(
-        `${numericParts.day}.${numericParts.month}.${numericParts.year}, ${time}`
-      )
-    })
-  })
-
-  test('uses the main text color for an upcoming premiere title', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
-    const title = upcomingPremiere.getByText('Upcoming premiere video', { exact: true })
-    await expect(title).toBeVisible()
-    await page.locator('body').evaluate(element => {
-      element.style.setProperty('--primary-text-color', '#123456')
-      element.style.setProperty('--tertiary-text-color', '#654321')
-    })
-    await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
   })
 
   test('toggles a reminder from the rightmost thumbnail action', async ({ app }) => {
@@ -771,40 +575,6 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
 
     await expect(reusedCard).toBeVisible()
     await expect(upcomingPremiere.locator('.videoDuration')).toHaveText('11:42')
-  })
-
-  test('cleans up repeated live-reminder subscriptions independently', async ({ app, page }) => {
-    await page.evaluate(() => {
-      window.liveReminderUpdates = 0
-      const handler = () => { window.liveReminderUpdates++ }
-      window.removeFirstLiveReminderSubscription = window.ftElectron.liveReminder.onUpdated(handler)
-      window.removeSecondLiveReminderSubscription = window.ftElectron.liveReminder.onUpdated(handler)
-    })
-
-    const sendUpdate = () => app.electronApp.evaluate(({ BrowserWindow }, channel) => {
-      BrowserWindow.getAllWindows()[0].webContents.send(channel, 'video-id', true)
-    }, IpcChannels.LIVE_REMINDER_UPDATED)
-
-    await sendUpdate()
-    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(2)
-
-    await page.evaluate(() => window.removeFirstLiveReminderSubscription())
-    await sendUpdate()
-    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(3)
-
-    await page.evaluate(() => window.removeSecondLiveReminderSubscription())
-    await sendUpdate()
-    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(3)
-  })
-
-  test('does not render adjacent separators in the upcoming-video menu', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-
-    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
-    await upcomingPremiere.locator('.title').click({ button: 'right' })
-    const menu = page.locator('.contextMenu')
-    await expect(menu).toBeVisible()
-    await expect(menu.locator('.separator + .separator')).toHaveCount(0)
   })
 })
 

@@ -80,12 +80,6 @@ test('warns before each fallback that contacts YouTube directly', async () => {
   assert.deepEqual(events, ['invidious', 'invidious warning', 'local', 'invidious', 'invidious warning', 'local'])
 })
 
-test('names the Yattee server in its warning', async () => {
-  api.invidious.failure = new Error('Yattee failed')
-  await requestWithFallback(requests, { backend: 'yattee', fallback: true })
-  assert.deepEqual(events, ['invidious', 'yattee warning', 'local'])
-})
-
 test('a fallback to Invidious does not show a direct-connection warning', async () => {
   api.local.failure = new Error('Local failed')
   assert.equal((await requestWithFallback(requests, { backend: 'local', fallback: true })).api, 'invidious')

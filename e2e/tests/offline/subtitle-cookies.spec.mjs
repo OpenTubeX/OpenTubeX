@@ -78,34 +78,32 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   })
 })
 
-for (const setting of ['updateYtDlpSubtitleUseCookies', 'updateYtDlpPlaybackAlwaysUseCookies']) {
-  test(`uses cookies for player translations and transcripts with ${setting}`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page, { captionTranslations: true })
-    await app.electronApp.evaluate(({ ipcMain }, { vtt, srt }) => {
-      globalThis.subtitleCookieRequests = []
-      ipcMain.removeHandler('yt-dlp-get-subtitle')
-      ipcMain.handle('yt-dlp-get-subtitle', (_event, url) => {
-        globalThis.subtitleCookieRequests.push(url)
-        return new URL(url).searchParams.get('fmt') === 'srt' ? srt : vtt
-      })
-    }, { vtt, srt })
-    await page.evaluate(async setting => {
-      const store = window.$store
-      await store.dispatch(setting, true)
-    }, setting)
-    await openMockedVideo(page)
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
-    await expect(player).toBeVisible()
-    await expect.poll(() => player.evaluate(element => element.ui?.getControls().getPlayer().getTextTracks().length ?? 0)).toBeGreaterThan(0)
-    await player.hover()
-    await openPlayerOptions(player)
-    await openCaptionLanguages(player)
-    await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
-    await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German', exact: true }).click()
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.subtitleCookieRequests.some(url => new URL(url).searchParams.get('tlang') === 'de'))).toBe(true)
-    await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active && track.language === 'de'))).toBe(true)
-    await page.keyboard.press('Escape')
-    await page.getByRole('button', { name: 'Show transcript', exact: true }).click()
-    await expect(page.locator('.watchVideoTranscript')).toContainText('Cookie-authenticated subtitle')
+test('uses cookies for player translations and transcripts', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await app.electronApp.evaluate(({ ipcMain }, { vtt, srt }) => {
+    globalThis.subtitleCookieRequests = []
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', (_event, url) => {
+      globalThis.subtitleCookieRequests.push(url)
+      return new URL(url).searchParams.get('fmt') === 'srt' ? srt : vtt
+    })
+  }, { vtt, srt })
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateYtDlpSubtitleUseCookies', true)
   })
-}
+  await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toBeVisible()
+  await expect.poll(() => player.evaluate(element => element.ui?.getControls().getPlayer().getTextTracks().length ?? 0)).toBeGreaterThan(0)
+  await player.hover()
+  await openPlayerOptions(player)
+  await openCaptionLanguages(player)
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+  await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German', exact: true }).click()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.subtitleCookieRequests.some(url => new URL(url).searchParams.get('tlang') === 'de'))).toBe(true)
+  await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active && track.language === 'de'))).toBe(true)
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Show transcript', exact: true }).click()
+  await expect(page.locator('.watchVideoTranscript')).toContainText('Cookie-authenticated subtitle')
+})

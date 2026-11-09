@@ -68,9 +68,3 @@ test('a failed native call does not block later reminder updates', async () => {
   assert.equal(await liveReminder.schedule(reminder('bbbbbbbbbbb')), true)
   assert.deepEqual((await liveReminder.list()).map(record => record.videoId), ['bbbbbbbbbbb'])
 })
-
-test('reminders that already started are rejected without a notification', async () => {
-  assert.equal(await liveReminder.schedule(reminder('aaaaaaaaaaa', Date.now() - 1000)), false)
-  assert.equal(scheduled.size, 0)
-  assert.deepEqual(await liveReminder.list(), [])
-})

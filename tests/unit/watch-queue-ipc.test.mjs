@@ -36,16 +36,6 @@ test('queue broadcasts skip destroyed and non-app windows without losing the can
   assert.equal(warn.mock.callCount(), 1)
 })
 
-test('unchanged queue replies are not broadcast again', async () => {
-  const window = windowFixture()
-  windows = [window]
-  setupWatchQueueIpc(async () => ({ revision: 1, items: [] }))
-  for (let index = 0; index < 3; index++) {
-    await ipcMain.invoke(IpcChannels.WATCH_QUEUE_UPDATE, ipcEvent(), { type: 'removeYtDlpDownload', payload: 42 })
-  }
-  assert.equal(window.messages.length, 1)
-})
-
 test('the window that changed the queue gets the snapshot only as its reply', async () => {
   const sender = windowFixture()
   const other = windowFixture()

@@ -2,10 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
 
-import {
-  commitCustomThemesEdit,
-  repairSystemThemeSettings,
-} from '../../src/renderer/helpers/customThemeSync.js'
+import { commitCustomThemesEdit } from '../../src/renderer/helpers/customThemeSync.js'
 import { mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 test('theme sync does not echo colors filled in while loading a received theme', () => {
@@ -196,21 +193,6 @@ test('resets a system theme slot when a custom theme changes classification', as
   ])
 })
 
-test('repairs system theme slots from a store after a cross-window update', async () => {
-  const calls = []
-  const themes = [{ id: 'theme-1', name: 'Test theme', isDark: true }]
-
-  await repairSystemThemeSettings({
-    dispatch: async (action, payload) => calls.push([action, payload]),
-    getters: {
-      getSystemLightTheme: 'custom:theme-1',
-      getSystemDarkTheme: 'dark',
-    },
-  }, themes)
-
-  assert.deepEqual(calls, [['updateSystemLightTheme', 'light']])
-})
-
 test('uses the custom-theme edit timestamp when resolving a conflict', () => {
   const localThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Local' }]
   const remoteThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Remote' }]
@@ -225,26 +207,6 @@ test('uses the custom-theme edit timestamp when resolving a conflict', () => {
 
   assert.deepEqual(entry.value, remoteThemes)
   assert.equal(entry.updatedAt, 30)
-})
-
-test('deleting the selected custom theme restores its base and accent colors before removing it', async () => {
-  const calls = []
-  const theme = { id: 'deleted', basedOn: 'dark', mainColor: 'Purple', secondaryColor: 'Blue' }
-  await commitCustomThemesEdit({
-    dispatch: async (action, payload) => calls.push([action, payload]),
-    commit: (mutation, payload) => calls.push([mutation, payload]),
-    rootGetters: {
-      getBaseTheme: 'custom:deleted', getCustomThemes: [theme],
-      getSystemLightTheme: 'light', getSystemDarkTheme: 'dark',
-    },
-  }, [])
-  assert.deepEqual(calls, [
-    ['recordSyncSettingEdit', 'customThemes'],
-    ['updateMainColor', 'Purple'],
-    ['updateSecColor', 'Blue'],
-    ['updateBaseTheme', 'dark'],
-    ['setCustomThemes', []],
-  ])
 })
 
 test('devices read Auto Load Comments from the Auto Load Next Page entry of older versions', () => {

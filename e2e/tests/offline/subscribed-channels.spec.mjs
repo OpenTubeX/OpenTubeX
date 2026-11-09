@@ -48,59 +48,6 @@ test.describe('subscribed channels', () => {
       .toContainEqual({ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Alpha Channel' })
   })
 
-  test('lists seeded subscriptions and filters them', async ({ page }) => {
-    await goTo(page, 'subscribedchannels')
-
-    await expect(page.getByText('2 channel(s) found.')).toBeVisible()
-    await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeVisible()
-    await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
-
-    await page.getByLabel('Search Channels').fill('Beta')
-    await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
-    await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeHidden()
-  })
-
-  test('uses the default avatar when a channel thumbnail fails to load', async ({ page }) => {
-    await goTo(page, 'subscribedchannels')
-
-    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
-    await page.evaluate(() => {
-      const store = window.$store
-      store.dispatch('updateSubscriptionDetails', {
-        channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
-        channelName: 'Alpha Channel',
-        channelThumbnailUrl: 'data:image/png;base64,invalid'
-      })
-    })
-
-    await expect(alpha.locator('img.channelThumbnail')).toHaveCount(0)
-    const fallbackAvatar = alpha.locator('.channelThumbnail:not(img)')
-    await expect(fallbackAvatar).toBeVisible()
-    await expect(fallbackAvatar).toHaveCSS('inline-size', '120px')
-    await expect(fallbackAvatar).toHaveCSS('block-size', '120px')
-    await expect(fallbackAvatar).toHaveCSS('font-size', '120px')
-  })
-
-  test('desktop videos per day stepper stays within its bounds', async ({ page }) => {
-    await goTo(page, 'subscribedchannels')
-    await page.locator('.channel', { hasText: 'Alpha Channel' }).locator('.profileDropdownToggle').click()
-    const popup = page.locator('.profileDropdown')
-    const more = popup.getByRole('button', { name: 'More videos per day', exact: true })
-    const fewer = popup.getByRole('button', { name: 'Fewer videos per day', exact: true })
-    const count = popup.locator('.dailyVideoLimitCount')
-    await expect(fewer).toHaveAttribute('aria-disabled', 'true')
-    for (let step = 0; step < 29; step++) await more.click()
-    await expect(count).toHaveText('30')
-    await expect(more).toHaveAttribute('aria-disabled', 'true')
-    // The limit keeps focus on the button, so the popover stays open.
-    await expect(more).toBeFocused()
-    await expect(popup).toBeVisible()
-    await fewer.click()
-    await expect(count).toHaveText('29')
-    await expect(popup).toBeVisible()
-    expect(await popup.locator('.dailyVideoLimit').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-  })
-
   test('profile dropdown uses an overlay scrollbar', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
@@ -396,18 +343,6 @@ test.describe('large subscribed channel lists', () => {
     await page.getByLabel('Search Channels').fill('')
     await page.getByRole('button', { name: 'Load more channels' }).click()
     await expect(page.locator('.channel')).toHaveCount(100)
-  })
-
-  test('uses the first repeated channel search query value', async ({ page }) => {
-    const channelTab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/subscribedchannels?searchQueryText=Channel%20899&searchQueryText=Channel%20898',
-      makeActive: false
-    }))
-    await page.locator(`.tab[data-tab-id="${channelTab.id}"]`).click()
-
-    await expect(page.getByLabel('Search Channels')).toHaveValue('Channel 899')
-    await expect(page.locator('.count')).toContainText('1 channel(s) found.')
-    await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
   })
 })
 

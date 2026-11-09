@@ -231,6 +231,9 @@ User Playlists:
   This playlist is private or does not exist.: "Esta lista de reprodução é privada ou não existe."
   Pin to Navigation: "Afixar na navegação"
   Unpin from Navigation: "Desafixar da navegação"
+  Pin to Top: "Fixar no topo"
+  Unpin from Top: "Desafixar do topo"
+  Pinned to Top: "Fixada no topo"
   Reorder Hint: Arraste ou utilize as teclas de seta para reordenar
   Add new videos to the top (custom order): "Adicionar novos vídeos no início (ordem personalizada)"
   Shuffle videos by default: "Reproduzir vídeos por ordem aleatória por predefinição"
@@ -1524,13 +1527,14 @@ Tutorial:
     Action: Importar dados
     Not Now: Agora não
 About:
+  Get OpenTubeX: Obter o OpenTubeX
+  Community: Comunidade
+  Contribute: Contribuir
   Documentation: Documentação
   Downloads: Transferências
   Changelog: Registo de alterações
   Commit: Commit
-  Fluxer: Junte-se à nossa comunidade no Fluxer
   Matrix: Matrix
-  Support the development of OpenTubeX: "Apoie o desenvolvimento do OpenTubeX"
 Profile:
   Customization: Personalização
   Manage Profile Subscriptions: Gerir subscrições do perfil

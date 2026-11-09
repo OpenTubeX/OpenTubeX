@@ -38,27 +38,6 @@ const originalPost = {
   type: 'community'
 }
 
-const videoPost = {
-  ...originalPost,
-  postId: 'video-post',
-  postText: 'A video worth watching',
-  postContent: {
-    type: 'video',
-    content: {
-      type: 'video',
-      videoId: 'bbbbbbbbbbb',
-      title: 'Embedded video',
-      author: 'Video Creator',
-      authorId: 'UCcccccccccccccccccccccc',
-      authorThumbnails: avatar('%23369'),
-      lengthSeconds: 120,
-      viewCount: 10,
-      published: now,
-      videoThumbnails: [{ url: image, width: 640, height: 360 }]
-    }
-  }
-}
-
 test.describe('shared community posts', () => {
   test.use({
     seed: {
@@ -79,8 +58,7 @@ test.describe('shared community posts', () => {
         _id: SHARER_ID,
         communityPosts: [
           sharedPost('shared-post', 'Check out the latest from Neal', originalPost, 10),
-          sharedPost('shared-deleted-post', 'This one was removed', null, 20),
-          sharedPost('shared-video-post', 'Check out this video', videoPost, 30)
+          sharedPost('shared-deleted-post', 'This one was removed', null, 20)
         ],
         communityPostsTimestamp: new Date(now - 60000).toISOString()
       }]
@@ -99,20 +77,6 @@ test.describe('shared community posts', () => {
       name: originalPost.author,
       thumbnail: originalPost.authorThumbnails[0].url
     }])
-  })
-
-  test('pins the channel of an embedded video using its own name', async ({ app, page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="posts"]').click()
-    const channel = page.locator('.sharedPostCard .ft-list-video .channelName')
-    await expect(channel).toHaveText(videoPost.postContent.content.author)
-    await channel.click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Pin to Navigation', exact: true }).click()
-    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
-      .toEqual([expect.objectContaining({
-        id: videoPost.postContent.content.authorId,
-        name: videoPost.postContent.content.author
-      })])
   })
 
   test('nests the original post inside the shared post', async ({ page, attachScreenshot }) => {

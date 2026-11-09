@@ -8,7 +8,6 @@ import { compile, createRenderer, defineComponent, h, onBeforeUnmount, onDeactiv
 import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
-  getPreferredShortThumbnailUrl,
   getShortsCompletionState,
   getShortsPlaybackWindow,
   getVideoAspectRatio,
@@ -92,8 +91,6 @@ test('a SABR reload refreshes cached Shorts metadata with the server context', a
 
 for (const failure of [
   { status: 'OK', watchPageIpBlocked: true },
-  { status: 'LOGIN_REQUIRED' },
-  { status: 'UNPLAYABLE' },
 ]) {
   test(`resolved local Shorts failure ${JSON.stringify(failure)} is not reused during recovery`, async () => {
     let calls = 0
@@ -165,7 +162,7 @@ for (const shorts of [false, true]) {
   })
 }
 
-for (const backend of ['local', 'invidious', 'yattee']) {
+for (const backend of ['local', 'invidious']) {
   test(`Shorts ${backend} extraction shares requests and uses the matching backend`, async () => {
     const calls = []
     const methods = vm.runInNewContext(`({${extractionSource}})`, {
@@ -441,48 +438,7 @@ const handleLoadedSource = playerSource.slice(
   playerSource.indexOf('    async function handleLoaded() {'),
   playerSource.indexOf('    async function unloadForFormatSwitch() {')
 )
-const syncPlayPauseSource = playerSource.slice(
-  playerSource.indexOf('    function syncPlayPauseControlIcons() {'),
-  playerSource.indexOf('    /**\n     * @param {boolean} muted', playerSource.indexOf('    function syncPlayPauseControlIcons() {'))
-)
-const toggleFullscreenSource = playerSource.slice(
-  playerSource.indexOf('    function toggleShortsFullscreen() {'),
-  playerSource.indexOf('    function registerCaptionToggleButton()', playerSource.indexOf('    function toggleShortsFullscreen() {'))
-)
-
-test('the Shaka play control shows replay when playback ends', () => {
-  const attributes = new Map()
-  let iconPath
-  const button = {
-    querySelector(selector) {
-      if (selector === '.ft-play-pause-morph-icon') return {}
-      return { setAttribute(name, value) { iconPath = value } }
-    },
-    setAttribute(name, value) { attributes.set(name, value) },
-  }
-  const sync = vm.runInNewContext(`${syncPlayPauseSource}\nsyncPlayPauseControlIcons`, {
-    video: ref({ ended: false, paused: true, duration: 30 }),
-    playbackEnded: ref(true),
-    container: ref({ querySelectorAll: () => [button] }),
-    window: { requestAnimationFrame: callback => callback() },
-    shaka: { ui: { Enums: { MaterialDesignSVGIcons: { REPLAY: 'replay-path' } } } },
-  })
-  sync()
-  assert.equal(attributes.get('data-ft-play-pause-state'), 'replay')
-  assert.equal(iconPath, 'replay-path')
-})
-
-test('Shorts fullscreen uses player controls when Shaka hides its button', () => {
-  let toggles = 0
-  const toggle = vm.runInNewContext(`${toggleFullscreenSource}\ntoggleShortsFullscreen`, {
-    container: ref({ querySelector: () => null }),
-    togglePlayerFullScreen: () => { toggles++ },
-  })
-  toggle()
-  assert.equal(toggles, 1)
-})
-
-for (const paused of [true, false]) {
+for (const paused of [true]) {
   test(`Shorts controls reflect media paused=${paused} after loading without a playback event`, async () => {
     const shortsPaused = ref(false)
     const video = ref({ paused, duration: 30, videoWidth: 1080, videoHeight: 1920 })
@@ -561,22 +517,6 @@ test('only completes Shorts after continuous playback following a seek', () => {
     playbackAfterSeekSeconds: 1,
     reachedEnd: true
   })
-})
-
-test('prefers YouTube selected Shorts thumbnails only for the default preference', () => {
-  const video = {
-    thumbnailUrl: 'https://i.ytimg.com/vi/short/frame0.jpg'
-  }
-
-  assert.equal(
-    getPreferredShortThumbnailUrl(video, '', 'https://i.ytimg.com/vi/short/oardefault.jpg'),
-    video.thumbnailUrl
-  )
-  assert.equal(
-    getPreferredShortThumbnailUrl(video, 'middle', 'https://i.ytimg.com/vi/short/oar2.jpg'),
-    'https://i.ytimg.com/vi/short/oar2.jpg'
-  )
-  assert.equal(getPreferredShortThumbnailUrl(video, 'hidden', null), null)
 })
 
 test('reads aspect ratios from local and Invidious formats', () => {

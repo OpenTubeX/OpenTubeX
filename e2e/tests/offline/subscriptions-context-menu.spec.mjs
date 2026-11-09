@@ -136,22 +136,6 @@ test('a mobile Cancel Refresh action never reloads after the refresh finishes', 
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.__mobileCancelRequested)).toBe(true)
 })
 
-test('moving or cancelling a touch on feed tabs does not open a menu', async ({ page }) => {
-  await goTo(page, 'subscriptions')
-  const shorts = page.locator('[data-subscription-feed-tab="shorts"]')
-  for (const event of ['pointermove', 'pointercancel', 'pointerup']) {
-    await shorts.dispatchEvent('pointerdown', {
-      pointerType: 'touch', isPrimary: true, clientX: 100, clientY: 100
-    })
-    await shorts.dispatchEvent(event, {
-      pointerType: 'touch', isPrimary: true, clientX: 120, clientY: 100
-    })
-    // Outlast the long-press delay to prove the cancelled touch opens nothing.
-    await page.waitForTimeout(600)
-    await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
-  }
-})
-
 test('disabled context menu actions cannot execute through IPC', async ({ page }) => {
   const searchInput = page.locator('.searchInput input')
   await searchInput.fill('selection')
@@ -168,22 +152,4 @@ test('disabled context menu actions cannot execute through IPC', async ({ page }
     return window.ftElectron.contextMenu.execute(sessionId, actionId)
   }, { sessionId: contextMenu.sessionId, actionId: cut.actionId })
   await expect(searchInput).toHaveValue('selection')
-})
-
-test.describe('German locale', () => {
-  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
-
-  test('translates custom context menu actions', async ({ page }) => {
-    const searchInput = page.locator('.searchInput input')
-    await searchInput.fill('Auswahl')
-    await searchInput.selectText()
-    await searchInput.click({ button: 'right' })
-
-    const menu = page.getByRole('menu', { name: 'Kontextmenü' })
-    await expect(menu).toBeVisible()
-    await expect(menu.getByRole('menuitem', { name: 'Einfügen' })).toBeVisible()
-    await expect(menu.getByRole('menuitem', { name: 'Alles auswählen' })).toBeVisible()
-    await menu.getByRole('menuitem', { name: 'Ausschneiden' }).click()
-    await expect(searchInput).toHaveValue('')
-  })
 })

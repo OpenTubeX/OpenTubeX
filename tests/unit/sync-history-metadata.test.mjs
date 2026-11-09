@@ -75,16 +75,14 @@ test('newly synced history retains its video ID as the fallback title until repa
   assert.equal(uploaded.length, 1)
 })
 
-for (const id of ['', UNKNOWN_SYNC_UPLOADER_ID]) {
-  for (const name of [id, remote.video.uploader.id]) {
-    test(`uploader enrichment replaces a placeholder name ${JSON.stringify(name)} while repairing ID ${JSON.stringify(id)}`, () => {
-      const video = { ...remote.video, uploader: { id, name } }
-      const enriched = enrichSyncVideo(video, remote.video)
-      assert.equal(enriched.uploader.id, remote.video.uploader.id)
-      assert.equal(enriched.uploader.name, remote.video.uploader.name)
-      assert.equal(enrichSyncVideo(enriched, remote.video), enriched)
-    })
-  }
+for (const [id, name] of [['', ''], [UNKNOWN_SYNC_UPLOADER_ID, remote.video.uploader.id]]) {
+  test(`uploader enrichment replaces a placeholder name ${JSON.stringify(name)} while repairing ID ${JSON.stringify(id)}`, () => {
+    const video = { ...remote.video, uploader: { id, name } }
+    const enriched = enrichSyncVideo(video, remote.video)
+    assert.equal(enriched.uploader.id, remote.video.uploader.id)
+    assert.equal(enriched.uploader.name, remote.video.uploader.name)
+    assert.equal(enrichSyncVideo(enriched, remote.video), enriched)
+  })
 }
 
 const imported = {

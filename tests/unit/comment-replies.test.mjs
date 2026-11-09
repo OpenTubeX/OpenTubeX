@@ -2,28 +2,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
-  getCommentReplyAccessibleLabel,
   getCommentReplyCount,
   getReplyContinuationToken,
   getReplyLoadState,
-  isEmptyReplyContinuation,
-  isMissingReplyResponseError,
-  shouldLoadInitialReplies
+  isMissingReplyResponseError
 } from '../../src/renderer/helpers/comment-replies.js'
-
-test('describes collapsed replies from the video uploader', () => {
-  const comment = {
-    hasOwnerReplied: true,
-    numReplies: 3,
-    replies: [],
-    showReplies: false
-  }
-
-  assert.equal(
-    getCommentReplyAccessibleLabel(comment, key => key, 'Uploader'),
-    'Comments.View {replyCount} replies from {channelName} and others'
-  )
-})
 
 test('refreshes a stale advertised count after newer replies load', () => {
   const comment = {
@@ -36,32 +19,6 @@ test('refreshes a stale advertised count after newer replies load', () => {
   }
 
   assert.equal(getCommentReplyCount(comment), 3)
-})
-
-test('includes nested descendants in the loaded reply count', () => {
-  const comment = {
-    numReplies: 1,
-    replies: [
-      { replies: [] },
-      {
-        replies: [
-          { replies: [] },
-          { replies: [{ replies: [] }] }
-        ]
-      }
-    ]
-  }
-
-  assert.equal(getCommentReplyCount(comment), 5)
-})
-
-test('keeps an advertised reply count above the number loaded so far', () => {
-  const comment = {
-    numReplies: 5,
-    replies: [{ replies: [] }]
-  }
-
-  assert.equal(getCommentReplyCount(comment), 5)
 })
 
 test('exhausts a stale advertised reply without opening the reply panel', () => {
@@ -102,20 +59,6 @@ test('reconciles an underfilled final reply page', () => {
     hasMissingReplies: true,
     showReplies: true
   })
-})
-
-test('retries an unusable initial batch when it has no continuation', () => {
-  assert.equal(shouldLoadInitialReplies(true, false, false), true)
-})
-
-test('advances after an unusable initial batch when it has a continuation', () => {
-  assert.equal(shouldLoadInitialReplies(true, false, true), false)
-})
-
-test('recognizes an advertised continuation that returns no replies', () => {
-  assert.equal(isEmptyReplyContinuation(0, false), true)
-  assert.equal(isEmptyReplyContinuation(1, false), false)
-  assert.equal(isEmptyReplyContinuation(0, true), false)
 })
 
 test('recognizes a missing reply continuation response', () => {

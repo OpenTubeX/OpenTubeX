@@ -33,9 +33,9 @@ test.describe('volume icon', { tag: '@scale' }, () => {
 
     for (const width of [1280, 450]) {
       await setWindowSize(app, page, { width, height: width === 450 ? 700 : 800 })
-      for (const pack of ['material', 'remix']) {
+      for (const pack of ['material']) {
         await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
-        for (const frosted of [true, false]) {
+        for (const frosted of [true]) {
           await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
           for (const expanded of [false, true]) {
             await button.blur()

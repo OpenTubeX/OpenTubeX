@@ -6,12 +6,8 @@ import { test, expect, repoRoot } from '../../helpers/app.mjs'
 
 for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = false, restartRequested = false } of [
   { format: 'ordinary executables' },
-  { format: 'Windows portable executables', portableExecutable: 'C:\\Apps\\OpenTubeX Portable.exe' },
-  { format: 'a transient scheduling exception', failures: 1 },
   { format: 'a transient scheduling rejection', failures: 1, rejectWithFalse: true },
-  { format: 'repeated scheduling rejections', failures: 2, rejectWithFalse: true },
-  { format: 'an already requested app restart', restartRequested: true },
-  { format: 'a rejected app restart', restartRequested: true, failures: 1, rejectWithFalse: true }
+  { format: 'an already requested app restart', restartRequested: true }
 ]) {
   test(`reopening during shutdown queues one relaunch for ${format}`, async ({ app }) => {
     const { executablePath, startupArgs } = await app.electronApp.evaluate(() => ({

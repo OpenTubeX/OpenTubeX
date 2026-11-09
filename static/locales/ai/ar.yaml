@@ -231,6 +231,9 @@ User Playlists:
   This playlist is private or does not exist.: "قائمة التشغيل هذه خاصة أو غير موجودة."
   Pin to Navigation: "تثبيت في شريط التنقل"
   Unpin from Navigation: "إلغاء التثبيت من شريط التنقل"
+  Pin to Top: "تثبيت في الأعلى"
+  Unpin from Top: "إلغاء التثبيت من الأعلى"
+  Pinned to Top: "مثبتة في الأعلى"
   Reorder Hint: اسحب أو استخدم مفاتيح الأسهم لإعادة الترتيب
   Add new videos to the top (custom order): "إضافة الفيديوهات الجديدة في الأعلى (ترتيب مخصص)"
   Shuffle videos by default: "تشغيل الفيديوهات بترتيب عشوائي افتراضيًا"
@@ -1526,14 +1529,15 @@ Tutorial:
     Action: استيراد البيانات
     Not Now: ليس الآن
 About:
+  Get OpenTubeX: احصل على OpenTubeX
+  Community: المجتمع
+  Contribute: ساهم
   Documentation: التوثيق
   Downloads: التنزيلات
   Changelog: سجل التغييرات
   Commit: يقترف
-  Fluxer: انضم إلى مجتمع Fluxer الخاص بنا
-  Matrix: مصفوفة
+  Matrix: Matrix
   Email: بريد إلكتروني
-  Support the development of OpenTubeX: "ادعم تطوير OpenTubeX"
 Profile:
   Customization: التخصيص
   Manage Profile Subscriptions: إدارة اشتراكات الملف الشخصي

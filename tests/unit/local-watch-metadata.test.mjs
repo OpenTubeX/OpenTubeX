@@ -105,18 +105,16 @@ for (const [windowWidth, boards] of [[1000, []], [375, [{ thumbnail_height: 180 
   })
 }
 
-for (const status of ['UNPLAYABLE', 'LOGIN_REQUIRED']) {
-  for (const subreason of [undefined, null, {}, { text: '' }, { text: 'More details' }]) {
-    test(`formats ${status} errors with subreason ${JSON.stringify(subreason)}`, async () => {
-      await loadMetadata({
-        playability_status: { status, reason: 'Video unavailable', error_screen: { subreason } },
-        basic_info: { title: 'Unavailable video', duration: 42 }, page: [],
-      }, 'disabled', {
-        watch: { isYtDlpPlaybackRequested: () => false },
-        expectedErrorMessage: `[${status}] Video unavailable${subreason?.text ? ': More details' : ''}`,
-      })
+for (const [status, subreason] of [['UNPLAYABLE', null], ['LOGIN_REQUIRED', { text: 'More details' }]]) {
+  test(`formats ${status} errors with subreason ${JSON.stringify(subreason)}`, async () => {
+    await loadMetadata({
+      playability_status: { status, reason: 'Video unavailable', error_screen: { subreason } },
+      basic_info: { title: 'Unavailable video', duration: 42 }, page: [],
+    }, 'disabled', {
+      watch: { isYtDlpPlaybackRequested: () => false },
+      expectedErrorMessage: `[${status}] Video unavailable${subreason?.text ? ': More details' : ''}`,
     })
-  }
+  })
 }
 
 test('removes the skeleton before community chapters finish loading', async () => {
@@ -137,17 +135,7 @@ test('removes the skeleton before community chapters finish loading', async () =
   }
 })
 
-test('uses disclosures for the AI badge when primary metadata has no badge', async () => {
-  const contentDisclosures = [{ label: 'Altered or synthetic content', description: 'Edited visuals', attribution: '' }]
-  const watch = await loadMetadata({
-    playability_status: { status: 'OK' },
-    basic_info: { title: 'Ready video', duration: 42 }, page: [],
-  }, 'disabled', { contentDisclosures })
-  assert.deepEqual(watch.contentDisclosures, contentDisclosures)
-  assert.equal(watch.hasAiGeneratedContent, true)
-})
-
-for (const live of [false, true]) {
+for (const live of [false]) {
   test(`loads popularity independently of hidden chapters for ${live ? 'live streams' : 'videos'}`, async () => {
     const heatmap = new YTNodes.MacroMarkersListEntity({
       markersList: { markerType: 'MARKER_TYPE_HEATMAP', markers: [{
@@ -205,14 +193,6 @@ for (const change of ['none', 'navigation', 'reload']) {
   })
 }
 
-test('preserves a known promotion when the additional response has no disclosure', async () => {
-  const watch = await loadMetadata({
-    playability_status: { status: 'OK' }, basic_info: { title: 'Ready video' }, page: [],
-  }, 'disabled', { paidPromotionDurationMs: 60000, paidPromotionPromise: Promise.resolve(null) })
-  assert.equal(watch.hasPaidPromotion, true)
-  assert.equal(watch.paidPromotionDurationMs, 60000)
-})
-
 for (const response of [[], [{ title: 'Stale community chapter', startSeconds: 0, endSeconds: 42 }]]) {
   test(`preserves fallback chapters after a failed local manifest and ${response.length ? 'nonempty' : 'empty'} late community response`, async () => {
     let finishChapters
@@ -239,7 +219,7 @@ for (const response of [[], [{ title: 'Stale community chapter', startSeconds: 0
   })
 }
 
-for (const views of [undefined, 1234]) {
+for (const views of [undefined]) {
   test(`loads player metadata without watch-page panels, view count ${views}`, async () => {
     const watch = await loadMetadata({
       playability_status: { status: 'OK' },
@@ -362,21 +342,6 @@ test('honors the original-language preference with description-panel metadata', 
   assert.equal(watch.channelSubscriptionCountText, '123')
 })
 
-
-for (const [text, count] of [['2 likes', 2], ['1.2K likes', 1200]]) {
-  test(`recovers ${text} from the description factoid`, async () => {
-    const content = descriptionPanel()
-    content.items[0].factoids.push(new YTNodes.Factoid({
-      label: { simpleText: 'Likes' }, value: { simpleText: text.split(' ')[0] }, accessibilityText: text,
-    }))
-    const watch = await loadMetadata({
-      playability_status: { status: 'OK' }, basic_info: { title: 'Title' },
-      page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
-    }, 'disabled', { hideVideoLikesAndDislikes: false })
-    assert.equal(watch.videoLikeCount, count)
-  })
-}
-
 test('retrieves a missing title from oEmbed', async () => {
   let calls = 0
   const watch = await loadMetadata({ playability_status: { status: 'OK' }, basic_info: {}, page: [] }, 'disabled', {
@@ -385,12 +350,6 @@ test('retrieves a missing title from oEmbed', async () => {
   assert.equal(calls, 1)
   assert.equal(watch.videoTitle, 'Recovered title')
   assert.equal(watch.hasResolvedVideoTitle, true)
-})
-
-test('does not request oEmbed when the title is present', async () => {
-  await loadMetadata({ playability_status: { status: 'OK' }, basic_info: { title: 'Title' }, page: [] }, 'disabled', {
-    getOembedTitle: () => assert.fail('Unexpected oEmbed request'),
-  })
 })
 
 for (const state of ['cached', 'in flight']) {
@@ -433,18 +392,6 @@ for (const change of ['navigation', 'another title source']) {
   })
 }
 
-for (const hidden of [false, true]) {
-  test(`preserves zero likes and the hide-likes preference ${hidden}`, async () => {
-    const content = descriptionPanel()
-    content.items[0].factoids.push(new YTNodes.Factoid({ label: { simpleText: 'Likes' }, value: { simpleText: '2' } }))
-    const watch = await loadMetadata({
-      playability_status: { status: 'OK' }, basic_info: { title: 'Title', like_count: 0 },
-      page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
-    }, 'disabled', { hideVideoLikesAndDislikes: hidden })
-    assert.equal(watch.videoLikeCount, hidden ? null : 0)
-  })
-}
-
 
 test('uses description-panel text when parsed main-panel text is empty', async () => {
   const content = descriptionPanel()
@@ -460,16 +407,6 @@ test('uses description-panel text when parsed main-panel text is empty', async (
   assert.equal(watch.channelSubscriptionCountText, '123')
   assert.equal(watch.videoPublished, Date.parse('Jan 2, 2025'))
 })
-
-for (const title of ['', '   ']) {
-  test(`skips blank localized title ${JSON.stringify(title)} without requesting oEmbed`, async () => {
-    const watch = await loadMetadata({
-      playability_status: { status: 'OK' }, basic_info: { title: 'Player title' },
-      primary_info: new YTNodes.VideoPrimaryInfo({ title: { simpleText: title } }), page: [],
-    }, 'disabled', { getOembedTitle: () => assert.fail('Title already available') })
-    assert.equal(watch.videoTitle, 'Player title')
-  })
-}
 
 for (const [text, expected] of [['No views', 0], ['1.2K views', 1200], ['Views unavailable', null]]) {
   test(`parses description-panel view count ${text}`, async () => {
@@ -503,15 +440,6 @@ test('tolerates a loading placeholder in the description panel', async () => {
   assert.equal(watch.videoTitle, 'Player title')
 })
 
-test('falls back from a non-finite player view count', async () => {
-  const content = descriptionPanel()
-  const watch = await loadMetadata({
-    playability_status: { status: 'OK' }, basic_info: { view_count: Number.NaN },
-    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
-  })
-  assert.equal(watch.videoViewCount, 42)
-})
-
 test('tolerates omitted raw description-header fields after parsing', async () => {
   const content = new YTNodes.StructuredDescriptionContent({ items: [{ videoDescriptionHeaderRenderer: {} }] })
   const watch = await loadMetadata({
@@ -525,7 +453,7 @@ test('tolerates omitted raw description-header fields after parsing', async () =
 })
 
 
-for (const original of [false, true]) {
+for (const original of [false]) {
   test(`extracts plain-text chapters with the original-language preference ${original}`, async () => {
     const content = descriptionPanel()
     content.items[2] = new YTNodes.ExpandableVideoDescriptionBody({

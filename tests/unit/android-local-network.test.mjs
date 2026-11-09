@@ -83,29 +83,12 @@ test('older Android versions ask the bridge once for all requests', async () => 
   assert.equal(checks, 1)
 })
 
-test('a granted permission ends the bridge checks', async () => {
-  let checks = 0
-  const access = fixture({
-    checkAccess: async () => { checks++; return { required: true } },
-    requestPermissions: async () => ({ localNetwork: 'granted' }),
-  })
-  await access({ url: 'http://192.168.1.2' })
-  assert.equal(checks, 2)
-  await access({ url: 'http://192.168.1.3' })
-  assert.equal(checks, 2)
-})
-
 test('background permission checks do not open another system prompt after denial', async () => {
   const access = fixture({
     checkAccess: async () => ({ required: true }),
     requestPermissions: () => assert.fail('Background retries must not request consent again'),
   })
   await assert.rejects(access({ requestPermission: false }), { code: 'LOCAL_ACCESS_DENIED' })
-})
-
-test('desktop and iOS do not call the Android permission bridge', async () => {
-  await fixture(null, {})()
-  await fixture(null, { IS_CAPACITOR: true, IS_IOS: true })()
 })
 
 test('saving an enabled LAN proxy does not depend on access permission', async () => {

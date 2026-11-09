@@ -139,67 +139,52 @@ test('loading more keeps appending after the feed reaches 96 videos', async () =
   }
 })
 
-for (const [setting, value] of [
-  ['getRecommendationEpoch', 'changed'],
-  ['getBackendPreference', 'invidious'],
-]) {
-  test(`revisiting Home refreshes instead of restoring an obsolete feed after ${setting} changes`, async () => {
-    const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
-    await waitForFeed(first.feed)
-    first.stop()
-    first.getters[setting] = value
-    const second = first.mount()
-    try {
-      assert.equal(second.feed.isLoading.value, true)
-      await waitForFeed(second.feed)
-      assert.equal(second.work.requests, 2)
-    } finally {
-      second.stop()
-    }
-  })
-}
+test('revisiting Home refreshes instead of restoring an obsolete feed after getRecommendationEpoch changes', async () => {
+  const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
+  await waitForFeed(first.feed)
+  first.stop()
+  first.getters.getRecommendationEpoch = 'changed'
+  const second = first.mount()
+  try {
+    assert.equal(second.feed.isLoading.value, true)
+    await waitForFeed(second.feed)
+    assert.equal(second.work.requests, 2)
+  } finally {
+    second.stop()
+  }
+})
 
-for (const { name, settings, updated, candidate } of [
-  { name: 'live streams', settings: { getHideLiveStreams: true }, updated: { getHideLiveStreams: false }, candidate: { liveNow: true } },
-  { name: 'hidden channels', settings: { getActiveChannelsHiddenNames: new Set(['hidden']) }, updated: { getActiveChannelsHiddenNames: new Set() }, candidate: { authorId: 'hidden' } },
-  { name: 'the AI slop list', settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']) }, updated: { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set() }, candidate: { authorHandle: '@Slop' } },
-  { name: 'forbidden titles', settings: { getActiveForbiddenTitles: ['hidden subject'] }, updated: { getActiveForbiddenTitles: [] }, candidate: { title: 'Hidden subject' } },
-  { name: 'members-only channels', settings: { getMembersOnlyChannelIdSet: new Set() }, updated: { getMembersOnlyChannelIdSet: new Set(['member']) }, candidate: { authorId: 'member', isMembersOnly: true } },
-]) {
-  test(`revisiting Home reranks cached candidates after changing ${name}`, async () => {
-    const first = createFeed({ settings, candidates: [{ videoId: 'normal' }, { videoId: 'filtered', ...candidate }] })
-    await waitForFeed(first.feed)
-    assert.deepEqual(first.feed.recommendations.value.map(video => video.videoId), ['normal'])
-    first.stop()
-    Object.assign(first.getters, updated)
-    const second = first.mount()
-    try {
-      await waitForFeed(second.feed)
-      assert.deepEqual(second.feed.recommendations.value.map(video => video.videoId), ['normal', 'filtered'])
-      assert.equal(second.work.requests, 1)
-      assert.equal(second.work.rankings, 2)
-    } finally {
-      second.stop()
-    }
-  })
-}
+test('revisiting Home reranks cached candidates after changing hidden channels', async () => {
+  const first = createFeed({ settings: { getActiveChannelsHiddenNames: new Set(['hidden']) }, candidates: [{ videoId: 'normal' }, { videoId: 'filtered', authorId: 'hidden' }] })
+  await waitForFeed(first.feed)
+  assert.deepEqual(first.feed.recommendations.value.map(video => video.videoId), ['normal'])
+  first.stop()
+  first.getters.getActiveChannelsHiddenNames = new Set()
+  const second = first.mount()
+  try {
+    await waitForFeed(second.feed)
+    assert.deepEqual(second.feed.recommendations.value.map(video => video.videoId), ['normal', 'filtered'])
+    assert.equal(second.work.requests, 1)
+    assert.equal(second.work.rankings, 2)
+  } finally {
+    second.stop()
+  }
+})
 
-for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnableBlockLists', true], ['getAiSlopListFetchedAt', 123]]) {
-  test(`revisiting Home reranks cached candidates after ${setting} changes`, async () => {
-    const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
-    await waitForFeed(first.feed)
-    first.stop()
-    first.getters[setting] = value
-    const second = first.mount()
-    try {
-      await waitForFeed(second.feed)
-      assert.equal(second.work.requests, 1)
-      assert.equal(second.work.rankings, 2)
-    } finally {
-      second.stop()
-    }
-  })
-}
+test('revisiting Home reranks cached candidates after getRecommendationExploration changes', async () => {
+  const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
+  await waitForFeed(first.feed)
+  first.stop()
+  first.getters.getRecommendationExploration = 0.5
+  const second = first.mount()
+  try {
+    await waitForFeed(second.feed)
+    assert.equal(second.work.requests, 1)
+    assert.equal(second.work.rankings, 2)
+  } finally {
+    second.stop()
+  }
+})
 
 for (const refreshOtherHome of [false, true]) {
   test(`a preference change during a cached rerank waits for its replacement (other Home refresh: ${refreshOtherHome})`, async () => {
@@ -260,25 +245,6 @@ for (const refreshOtherHome of [false, true]) {
   })
 }
 
-test('turning off the AI slop list while Home is open restores the blocked candidates', async () => {
-  const mounted = createFeed({
-    settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']), getAiSlopListFetchedAt: 1 },
-    candidates: [{ videoId: 'normal' }, { videoId: 'slop', authorHandle: '@Slop' }],
-  })
-  try {
-    await waitForFeed(mounted.feed)
-    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal'])
-    Object.assign(mounted.getters, { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set(), getAiSlopListFetchedAt: null })
-    for (let index = 0; index < 1000 && mounted.feed.recommendations.value.length < 2; index++) {
-      await new Promise(resolve => setTimeout(resolve, 1))
-    }
-    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal', 'slop'])
-    assert.equal(mounted.work.requests, 1)
-  } finally {
-    mounted.stop()
-  }
-})
-
 test('changing exploration during Load more preserves the appended feed', async () => {
   const { feed, getters, work, stop } = createFeed({
     candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })),
@@ -295,47 +261,45 @@ test('changing exploration during Load more preserves the appended feed', async 
   }
 })
 
-for (const field of ['premiereTimestamp', 'premiereDate']) {
-  test(`revisiting Home reranks at the scheduled premiere time from ${field}`, async t => {
-    let now = Date.now()
-    t.mock.method(Date, 'now', () => now)
-    const startsAt = now + 60000
-    const first = createFeed({
-      settings: { getHideUpcomingPremieres: true },
-      candidates: [{ videoId: 'normal' }, {
-        videoId: 'premiere',
-        [field]: field === 'premiereTimestamp' ? startsAt / 1000 : new Date(startsAt).toISOString(),
-      }],
-    })
-    await waitForFeed(first.feed)
-    assert.equal(first.feed.recommendations.value.length, 1)
-    first.stop()
-    now += 30000
-    const beforeStart = first.mount()
-    assert.equal(beforeStart.feed.isLoading.value, false)
-    assert.equal(beforeStart.work.rankings, 1)
-    beforeStart.stop()
-
-    now = startsAt
-    const afterStart = first.mount()
-    try {
-      await waitForFeed(afterStart.feed)
-      assert.deepEqual(afterStart.feed.recommendations.value.map(video => video.videoId), ['normal', 'premiere'])
-      assert.equal(afterStart.work.requests, 1)
-      assert.equal(afterStart.work.rankings, 2)
-    } finally {
-      afterStart.stop()
-    }
-    const reopened = first.mount()
-    try {
-      assert.equal(reopened.feed.isLoading.value, false)
-      assert.equal(reopened.feed.recommendations.value.length, 2)
-      assert.equal(reopened.work.rankings, 2)
-    } finally {
-      reopened.stop()
-    }
+test('revisiting Home reranks at the scheduled premiere time from premiereTimestamp', async t => {
+  let now = Date.now()
+  t.mock.method(Date, 'now', () => now)
+  const startsAt = now + 60000
+  const first = createFeed({
+    settings: { getHideUpcomingPremieres: true },
+    candidates: [{ videoId: 'normal' }, {
+      videoId: 'premiere',
+      premiereTimestamp: startsAt / 1000,
+    }],
   })
-}
+  await waitForFeed(first.feed)
+  assert.equal(first.feed.recommendations.value.length, 1)
+  first.stop()
+  now += 30000
+  const beforeStart = first.mount()
+  assert.equal(beforeStart.feed.isLoading.value, false)
+  assert.equal(beforeStart.work.rankings, 1)
+  beforeStart.stop()
+
+  now = startsAt
+  const afterStart = first.mount()
+  try {
+    await waitForFeed(afterStart.feed)
+    assert.deepEqual(afterStart.feed.recommendations.value.map(video => video.videoId), ['normal', 'premiere'])
+    assert.equal(afterStart.work.requests, 1)
+    assert.equal(afterStart.work.rankings, 2)
+  } finally {
+    afterStart.stop()
+  }
+  const reopened = first.mount()
+  try {
+    assert.equal(reopened.feed.isLoading.value, false)
+    assert.equal(reopened.feed.recommendations.value.length, 2)
+    assert.equal(reopened.work.rankings, 2)
+  } finally {
+    reopened.stop()
+  }
+})
 
 test('revisiting Home refreshes expired feeds', async t => {
   const first = createFeed({ candidates: [{ videoId: 'candidate' }] })

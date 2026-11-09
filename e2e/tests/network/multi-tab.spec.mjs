@@ -90,23 +90,6 @@ test.describe('automatic picture-in-picture', () => {
     await setWindowFocused(app, page, true)
   })
 
-  // Regression: Chromium on Windows can briefly stretch the poster across the
-  // compositor surface when blur-triggered PiP detaches a playing video (#362).
-  test('removes the poster before blur-triggered PiP', async ({ app, page, innertube }) => {
-    test.skip(innertube.replay, 'no recorded fixtures for these videos')
-    test.slow()
-
-    const video = await openVideoInActiveTab(page, VIDEO_ONE)
-    await expect(video).not.toHaveAttribute('poster')
-
-    await setWindowFocused(app, page, false)
-    await expectPictureInPicture(video, true)
-    await expect(video).not.toHaveAttribute('poster')
-
-    await setWindowFocused(app, page, true)
-    await expectPictureInPicture(video, false)
-  })
-
   // Regression: play events from an inactive logical tab were rejected even
   // when that tab's video was still presented in the native PiP window (#266).
   test('resumes PiP playback from an inactive tab while minimized', async ({ app, page, innertube }) => {

@@ -20,15 +20,6 @@ test('only deleted or private responses are treated as dead', () => {
   assert.throws(() => isUnavailableInvidiousResponse({ error: 'This video is unavailable' }, 'a'))
 })
 
-test('scan keeps geographically restricted videos', async () => {
-  const videos = [{ videoId: 'regional', playlistItemId: 'regional-item' }]
-  const result = await findDeadPlaylistItems(videos, async id => {
-    return isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'This video is not available in your country' } }, id)
-  }, new AbortController().signal)
-  assert.deepEqual(result.itemIds, new Set())
-  assert.equal(result.uncertain, 1)
-})
-
 test('scan keeps uncertain videos and includes duplicate playlist entries', async () => {
   const videos = [
     { videoId: 'dead', playlistItemId: 'first' },

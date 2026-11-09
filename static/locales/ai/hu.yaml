@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Szerkesztés"
   Pin to Navigation: "Rögzítés a navigációban"
   Unpin from Navigation: "Rögzítés feloldása a navigációban"
+  Pin to Top: "Rögzítés felülre"
+  Unpin from Top: "Rögzítés feloldása felülről"
+  Pinned to Top: "Felülre rögzítve"
   Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"
@@ -1496,14 +1499,15 @@ Tutorial:
     Action: Adatok importálása
     Not Now: Most nem
 About:
+  Get OpenTubeX: OpenTubeX beszerzése
+  Community: Közösség
+  Contribute: Közreműködés
   Documentation: Dokumentáció
   Downloads: Letöltések
   Changelog: Változáslista
   Commit: Commit
-  Fluxer: Csatlakozás a Fluxer-közösségünkhöz
   Matrix: Matrix
   Email: E-mail
-  Support the development of OpenTubeX: "Támogasd az OpenTubeX fejlesztését"
 Profile:
   Customization: Testreszabás
   Manage Profile Subscriptions: Profil feliratkozásainak kezelése

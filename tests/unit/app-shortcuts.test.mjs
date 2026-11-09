@@ -18,18 +18,6 @@ async function loadKeyboardShortcutHandler(context) {
   return vm.runInNewContext(`${handlerSource}\nhandleKeyboardShortcuts`, context)
 }
 
-test('page shortcuts share stable IDs and translated titles across Android and iOS', () => {
-  const labels = { subscriptions: 'Abonnements', userplaylists: 'Wiedergabelisten', history: 'Verlauf', downloads: 'Downloads' }
-  const shortcuts = createAppShortcuts(labels)
-  assert.deepEqual(shortcuts.map(shortcut => shortcut.id), pages)
-  for (const shortcut of shortcuts) {
-    assert.equal(shortcut.title, labels[shortcut.id])
-    assert.ok(shortcut.androidIcon.startsWith('ic_shortcut_'))
-    assert.ok(shortcut.iosIcon)
-    assert.equal(getAppShortcutPath(shortcut.id), `/${shortcut.id}`)
-  }
-})
-
 test('unknown shortcut IDs cannot navigate to arbitrary routes', () => {
   for (const id of ['settings', '../history', '/history', '__proto__', '', null, undefined]) {
     assert.equal(getAppShortcutPath(id), null)

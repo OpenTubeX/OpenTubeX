@@ -241,6 +241,9 @@ User Playlists:
   This playlist is private or does not exist.: "இந்தப் பிளேலிஸ்ட் தனிப்பட்டது அல்லது இல்லை."
   Pin to Navigation: "வழிசெலுத்தலில் பொருத்து"
   Unpin from Navigation: "வழிசெலுத்தலிலிருந்து விடுவி"
+  Pin to Top: "மேலே பொருத்து"
+  Unpin from Top: "மேலிருந்து பொருத்தத்தை நீக்கு"
+  Pinned to Top: "மேலே பொருத்தப்பட்டது"
   Reorder Hint: மறுவரிசைப்படுத்த இழுக்கவும் அல்லது அம்புக்குறி விசைகளைப் பயன்படுத்தவும்
   Add new videos to the top (custom order): "புதிய காணொளிகளை மேலே சேர் (தனிப்பயன் வரிசை)"
   Shuffle videos by default: "இயல்பாகக் காணொளிகளைக் கலந்து இயக்கு"
@@ -1536,14 +1539,15 @@ Tutorial:
     Action: தரவை இறக்குமதி செய்
     Not Now: இப்போது வேண்டாம்
 About:
+  Get OpenTubeX: OpenTubeX ஐப் பெறுக
+  Community: சமூகம்
+  Contribute: பங்களிக்கவும்
   Documentation: ஆவணங்கள்
   Downloads: பதிவிறக்கங்கள்
   Changelog: மாற்றப் பதிவு
   Commit: கமிட்
-  Fluxer: எங்கள் Fluxer சமூகத்தில் இணையுங்கள்
   Matrix: Matrix
   Email: மின்னஞ்சல்
-  Support the development of OpenTubeX: "OpenTubeX மேம்பாட்டை ஆதரியுங்கள்"
 Profile:
   Customization: தனிப்பயனாக்கம்
   Manage Profile Subscriptions: சுயவிவரச் சந்தாக்களை நிர்வகி

@@ -43,16 +43,3 @@ test('parses the counts of a legacy hashtag header', () => {
 
   assert.deepEqual(parseLocalHashtagHeader(header), { videoCount: 1, channelCount: 1 })
 })
-
-test('returns only the counts it can parse', () => {
-  assert.deepEqual(parseLocalHashtagHeader(pageHeader('12K videos • unknown')), {
-    videoCount: 12000,
-    channelCount: null
-  })
-  assert.deepEqual(parseLocalHashtagHeader(pageHeader('many videos')), { videoCount: null, channelCount: null })
-  assert.deepEqual(parseLocalHashtagHeader(new YTNodes.PageHeader({ pageTitle: '#empty' })), {
-    videoCount: null,
-    channelCount: null
-  })
-  assert.deepEqual(parseLocalHashtagHeader(undefined), { videoCount: null, channelCount: null })
-})

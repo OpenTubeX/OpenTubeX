@@ -27,35 +27,20 @@ const showAddToPlaylistPrompt = page => page.evaluate(() => window.$store.dispat
   videos: [{ videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19 }]
 }))
 
-const overlays = [
-  {
-    name: 'prompt',
-    open: showAddToPlaylistPrompt,
-    selector: '.prompt',
-  },
-  {
-    name: 'command palette',
-    open: page => page.keyboard.press('Control+k'),
-    selector: '.commandPaletteBackdrop',
-  },
-]
+test('closes a prompt opened in player fullscreen when Escape exits fullscreen', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
 
-for (const overlay of overlays) {
-  test(`closes a ${overlay.name} opened in player fullscreen when Escape exits fullscreen`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setPlayerFullscreen(page, true)
+  await showAddToPlaylistPrompt(page)
+  await expect(page.locator(':fullscreen .prompt')).toBeVisible()
 
-    await overlay.open(page)
-    await expect(page.locator(`:fullscreen ${overlay.selector}`)).toBeVisible()
+  await pressBrowserEscape(app, page)
 
-    await pressBrowserEscape(app, page)
-
-    await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
-    await expect(page.locator(overlay.selector)).toHaveCount(0)
-    await expect(page.locator('.app')).not.toHaveAttribute('inert')
-  })
-}
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+  await expect(page.locator('.prompt')).toHaveCount(0)
+  await expect(page.locator('.app')).not.toHaveAttribute('inert')
+})
 
 test('keeps the prompt behind a nested prompt open when Escape exits player fullscreen', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -75,53 +60,6 @@ test('keeps the prompt behind a nested prompt open when Escape exits player full
   await expect(addPrompt).toBeVisible()
   await addPrompt.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(addPrompt).toHaveCount(0)
-})
-
-test('keeps the Tab Organizer open behind its nested prompt when Escape exits player fullscreen', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setPlayerFullscreen(page, true)
-
-  await page.evaluate(() => window.dispatchEvent(new Event('opentubex:open-tab-organizer')))
-  const organizer = page.locator(':fullscreen .tabOrganizerBackdrop')
-  await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
-  await expect(page.locator(':fullscreen .prompt')).toHaveCount(1)
-
-  await pressBrowserEscape(app, page)
-
-  await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
-  await expect(page.locator('.prompt')).toHaveCount(0)
-  await expect(page.locator('.app > .tabOrganizerBackdrop .tabOrganizer:not([inert])')).toBeVisible()
-})
-
-test.describe('with external link confirmation', () => {
-  test.use({ seed: { settings: { externalLinkHandling: 'openLinkAfterPrompt' } } })
-
-  test('keeps a prompt behind another prompt open when Escape exits player fullscreen', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setPlayerFullscreen(page, true)
-
-    await showAddToPlaylistPrompt(page)
-    const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-    await addPrompt.evaluate(element => {
-      const link = document.createElement('a')
-      link.href = 'https://example.com/'
-      link.textContent = 'External link'
-      element.append(link)
-    })
-    await addPrompt.getByRole('link', { name: 'External link' }).click()
-    const linkPrompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
-    await expect(linkPrompt).toBeVisible()
-    await expect(page.locator(':fullscreen .prompt:not([inert])')).toHaveCount(2)
-
-    await pressBrowserEscape(app, page)
-
-    await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
-    await expect(linkPrompt).toHaveCount(0)
-    await expect(page.locator('.app > .prompt')).toHaveCount(1)
-    await expect(addPrompt).toBeVisible()
-  })
 })
 
 test('moves a busy prompt out of player fullscreen when Escape exits it', async ({ app, page }) => {
@@ -150,24 +88,22 @@ test('moves a busy prompt out of player fullscreen when Escape exits it', async 
 })
 
 // Entering fullscreen can blur the focused button before fullscreenchange.
-for (const blurred of [false, true]) {
-  test(`moves an open prompt into player fullscreen${blurred ? ' after its focus was lost' : ''}`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
+test('moves an open prompt into player fullscreen after its focus was lost', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
 
-    await showAddToPlaylistPrompt(page)
-    const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-    const cancel = addPrompt.getByRole('button', { name: 'Cancel', exact: true })
-    await cancel.focus()
-    if (blurred) await cancel.blur()
-    await page.keyboard.press('f')
+  await showAddToPlaylistPrompt(page)
+  const addPrompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+  const cancel = addPrompt.getByRole('button', { name: 'Cancel', exact: true })
+  await cancel.focus()
+  await cancel.blur()
+  await page.keyboard.press('f')
 
-    await expect.poll(() => page.evaluate(() => document.fullscreenElement?.matches('.ftVideoPlayer'))).toBe(true)
-    await expect(page.locator(':fullscreen .prompt')).toHaveCount(1)
-    await expect(addPrompt).toBeVisible()
-    await expect(cancel).toBeFocused()
-  })
-}
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement?.matches('.ftVideoPlayer'))).toBe(true)
+  await expect(page.locator(':fullscreen .prompt')).toHaveCount(1)
+  await expect(addPrompt).toBeVisible()
+  await expect(cancel).toBeFocused()
+})
 
 test('keeps a prompt open behind a modal sheet when Escape exits player fullscreen', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

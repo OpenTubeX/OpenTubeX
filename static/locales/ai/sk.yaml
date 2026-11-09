@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Upraviť"
   Pin to Navigation: "Pripnúť do navigácie"
   Unpin from Navigation: "Odopnúť z navigácie"
+  Pin to Top: "Pripnúť navrch"
+  Unpin from Top: "Odopnúť zhora"
+  Pinned to Top: "Pripnuté navrchu"
   Reorder Hint: Presuňte alebo použite klávesy so šípkami na zmenu poradia
   Add new videos to the top (custom order): "Pridávať nové videá na začiatok (vlastné poradie)"
   Shuffle videos by default: "Predvolene prehrávať videá náhodne"
@@ -1497,14 +1500,15 @@ Tutorial:
     Action: Importovať údaje
     Not Now: Teraz nie
 About:
+  Get OpenTubeX: Získať OpenTubeX
+  Community: Komunita
+  Contribute: Prispieť
   Documentation: Dokumentácia
   Downloads: Na stiahnutie
   Changelog: Zoznam zmien
   Commit: Revízia
-  Fluxer: Pridať sa ku komunite na Fluxeri
   Matrix: Matrix
   Email: E-mail
-  Support the development of OpenTubeX: "Podporte vývoj OpenTubeX"
 Profile:
   Customization: Prispôsobenie
   Manage Profile Subscriptions: Spravovať odbery profilu

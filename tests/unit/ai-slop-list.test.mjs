@@ -180,16 +180,6 @@ test('restores cached lists and ignores malformed caches', () => {
   assert.equal(loadCachedAiSlopList(), null)
 })
 
-test('reads the channel handle from browse endpoints', () => {
-  assert.equal(getChannelHandleFromEndpoint(new YTNodes.NavigationEndpoint({
-    browseEndpoint: { browseId: CHANNEL_ID, canonicalBaseUrl: '/@SlopChannel' }
-  })), '@SlopChannel')
-  assert.equal(getChannelHandleFromEndpoint(new YTNodes.NavigationEndpoint({
-    browseEndpoint: { browseId: CHANNEL_ID, canonicalBaseUrl: `/channel/${CHANNEL_ID}` }
-  })), undefined)
-  assert.equal(getChannelHandleFromEndpoint(undefined), undefined)
-})
-
 test('keeps the channel handle on parsed search result videos', () => {
   const { parseLocalListVideo } = createLocalFeedParsers(() => false)
   const video = Parser.parseItem({

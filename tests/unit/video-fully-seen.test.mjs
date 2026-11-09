@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { load as loadYaml } from 'js-yaml'
 
 const source = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
 const handler = source.slice(source.indexOf('function markAsWatched('), source.indexOf('\nasync function unmarkAsWatched'))
@@ -53,67 +52,6 @@ test('fully seen requires a watchable video with a finite positive duration', ()
         lengthSeconds: { value: length }
       })
       assert.equal(actual, allowed && length === 120)
-    }
-  }
-})
-
-test('fully seen thumbnail action shows only for eligible videos and invokes completion', () => {
-  const button = source.slice(source.indexOf('const extraThumbnailActionButton ='), source.indexOf('\nconst inHistory ='))
-  const click = source.slice(source.indexOf('function handleExtraThumbnailAction()'), source.indexOf('\nfunction updateUploadedTime()'))
-  const options = source.slice(source.indexOf('function handleOptionsClick(option)'), source.indexOf('\nfunction addToWatchQueue('))
-  for (const allowed of [true, false]) {
-    const calls = []
-    const context = {
-      computed: fn => ({ value: fn() }),
-      extraThumbnailAction: { value: 'markAsFullySeen' },
-      canMarkAsFullySeen: { value: allowed },
-      markAsWatched: fullySeen => calls.push(fullySeen),
-      t: key => key
-    }
-    const result = vm.runInNewContext(button + '\nextraThumbnailActionButton.value', context)
-    assert.equal(result?.title ?? null, allowed ? 'Video.Mark As Fully Watched' : null)
-    vm.runInNewContext(options + '\n' + click + '\nhandleExtraThumbnailAction()', context)
-    assert.deepEqual(calls, allowed ? [true] : [])
-  }
-})
-
-test('fully watched label is consistent across the menu and thumbnail action setting', async () => {
-  const settings = await readFile(new URL('../../src/renderer/components/Settings/General/GeneralSettings.vue', import.meta.url), 'utf8')
-  const messages = loadYaml(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8'))
-  assert.equal(messages.Video['Mark As Fully Watched'], 'Mark As Fully Watched')
-  const choices = settings.slice(settings.indexOf('const extraThumbnailActionValues ='), settings.indexOf('\n/**', settings.indexOf('const extraThumbnailActionNames =')))
-  for (const downloads of [true, false]) {
-    const result = vm.runInNewContext(choices + '\n;({ values: extraThumbnailActionValues.value, names: extraThumbnailActionNames.value })', {
-      computed: fn => ({ value: fn() }),
-      supportsYtDlp: downloads,
-      enableDownloads: { value: downloads },
-      t: key => key
-    })
-    assert.equal(result.values.length, result.names.length)
-    assert.equal(result.names[result.values.indexOf('markAsFullySeen')], 'Video.Mark As Fully Watched')
-  }
-})
-
-test('subscription seen and unseen menu actions are exclusive', () => {
-  const seen = source.slice(source.indexOf('const showMarkAsSeen ='), source.indexOf('\n/**', source.indexOf('const showMarkAsSeen =')))
-  const menu = source.slice(source.indexOf('const videoMenuOptions ='), source.indexOf('\n  if (hideSubscriptionFeedTypeOption.value)')) + '\nreturn options\n})'
-  for (const state of [true, false, undefined]) {
-    for (const inSubscriptions of [true, false]) {
-      const context = {
-        computed: fn => ({ value: fn() }),
-        store: { getters: { getTabsEnabled: true } },
-        props: { data: { isNewInSubscriptionFeed: state, isInNewSubscriptionFeed: inSubscriptions } },
-        process: { env: {} },
-        t: key => key,
-        supportsYtDlp: false
-      }
-      for (const [key, value] of Object.entries({
-        inSubscriptions, showNewSubscriptionFeedIndicator: false,
-        canMarkAsWatched: false, canMarkAsFullySeen: false, historyEntryExists: false
-      })) context[key] = { value }
-      const actions = vm.runInNewContext(seen + '\n' + menu + '\nvideoMenuOptions.value.map(option => option.value)', context)
-      assert.equal(actions.includes('markAsSeen'), inSubscriptions && state === true)
-      assert.equal(actions.includes('markAsUnseen'), inSubscriptions && state === false)
     }
   }
 })

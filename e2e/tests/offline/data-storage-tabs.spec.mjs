@@ -2,7 +2,7 @@ import { expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindow
 
 test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
-test('focuses the selected tab when opening Data and Storage with the keyboard in compact mode', async ({ app, page }, testInfo) => {
+test('focuses the selected tab when opening Data and Storage with the keyboard in compact mode', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await setWindowSize(app, page, { width: 400, height: 800 })
   await goTo(page, 'settings')
@@ -31,13 +31,6 @@ test('focuses the selected tab when opening Data and Storage with the keyboard i
   await storage.press('ArrowLeft')
   await expect(data).toBeFocused()
   await expect(data).toHaveAttribute('aria-selected', 'true')
-  const header = await page.locator('.settingsContentHeader').boundingBox()
-  expect(header).not.toBeNull()
-  for (const colorScheme of ['dark', 'light']) {
-    await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toContainClass(colorScheme)
-    await page.screenshot({ clip: { ...header, height: header.height + 8 }, path: testInfo.outputPath(`compact-tab-focus-${colorScheme}.png`) })
-  }
   await data.press('Tab')
   await expect.poll(() => content.evaluate(element => element.contains(document.activeElement))).toBe(true)
 

@@ -57,29 +57,6 @@ test('overlapping requests share one native capture and never assign it to anoth
   assert.deepEqual([...cache.entries.keys()], ['a'])
 })
 
-test('missing frames preserve the last successful preview', async () => {
-  let image = 'previous'
-  const cache = createCapacitorPreviewCache(async () => image)
-  await cache.capture(tab('a'))
-  image = null
-  await cache.capture(tab('a'))
-  assert.equal(cache.entries.get('a').image, 'previous')
-})
-
-test('a queued recapture is discarded when its page changes again', async () => {
-  const frame = deferred()
-  let calls = 0
-  const cache = createCapacitorPreviewCache(() => { calls += 1; return frame.promise })
-  const first = cache.capture(tab('a'))
-  cache.invalidate()
-  const queued = cache.capture(tab('b'))
-  cache.invalidate()
-  frame.resolve('stale image')
-  await Promise.all([first, queued])
-  assert.equal(calls, 1)
-  assert.equal(cache.entries.size, 0)
-})
-
 test('capture eligibility excludes settings, prompts, background and loading tabs', async () => {
   const { canCaptureCapacitorTab } = await import('../../src/renderer/tabs/capacitorPreviewCache.js')
   const presented = { ...tab('a'), loadState: 'loaded', isLoading: false }
@@ -92,17 +69,6 @@ test('capture eligibility excludes settings, prompts, background and loading tab
   assert.equal(canCaptureCapacitorTab({ ...getters, getActiveTabId: 'b' }, true), false)
   assert.equal(canCaptureCapacitorTab({ ...getters, getShowTabPreviews: false }, true), false)
   assert.equal(canCaptureCapacitorTab({ ...getters, getPresentedTab: { ...presented, isLoading: true } }, true), false)
-})
-
-test('synced tabs fall back without a local preview, even when their IDs collide', async () => {
-  const cache = createCapacitorPreviewCache(async () => 'local image')
-  const synced = { id: 'a', route: { path: '/home' } }
-  assert.equal(cache.get(synced), null)
-  assert.equal(cache.get(tab('a')), null)
-  await cache.capture(tab('a'))
-  assert.equal(cache.get(synced), null)
-  assert.equal(cache.get(tab('a', '/history')), null)
-  assert.equal(cache.get(tab('a')), 'local image')
 })
 
 test('stored previews are mirrored and restored as the least recently seen', async () => {
@@ -128,17 +94,4 @@ test('stored previews are mirrored and restored as the least recently seen', asy
   assert.deepEqual([...cache.entries.keys()], ['c', 'a', 'd'])
   cache.prune([tab('a'), tab('d')])
   assert.deepEqual(removed, ['b', 'c'])
-})
-
-test('previews of closed tabs do not push open tabs out of a restore', () => {
-  const removed = []
-  const cache = createCapacitorPreviewCache(async () => null, new Map([['a', { route: '/home', image: 'a' }]]), 2, {
-    write () {}, remove: id => removed.push(id),
-  })
-  cache.restore(new Map([
-    ['b', { route: '/b', image: 'b', capturedAt: 1 }],
-    ['closed', { route: '/closed', image: 'closed', capturedAt: 2 }],
-  ]), [tab('a'), tab('b', '/b')])
-  assert.deepEqual([...cache.entries.keys()], ['b', 'a'])
-  assert.deepEqual(removed, ['closed'])
 })

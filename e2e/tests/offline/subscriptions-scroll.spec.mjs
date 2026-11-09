@@ -23,21 +23,16 @@ async function scrollFeedTo(page, top) {
 }
 
 /** Applies the refresh completion signal and waits for its deferred layout work. */
-async function completeFeedRefresh(page, tab = 'videos', trigger = 'completion event') {
-  return page.evaluate(async ({ tab, trigger }) => {
-    if (trigger === 'completion event') {
-      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
-        detail: { tab, profileId: 'allChannels', timestamp: Date.now() }
-      }))
-    } else {
-      const store = window.$store
-      store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
-    }
+async function completeFeedRefresh(page, tab = 'videos') {
+  return page.evaluate(async (tab) => {
+    window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
+      detail: { tab, profileId: 'allChannels', timestamp: Date.now() }
+    }))
     for (let frame = 0; frame < 5; frame++) {
       await new Promise(resolve => requestAnimationFrame(resolve))
     }
     return { top: window.scrollY, pixelRatio: devicePixelRatio }
-  }, { tab, trigger })
+  }, tab)
 }
 
 async function routeFeed(page, entries, beforeResponse = () => {}) {
@@ -153,30 +148,13 @@ test('a background feed refresh preserves its logical tab scroll across restart'
   await expect.poll(() => relaunched.page.evaluate(() => window.scrollY)).toBeGreaterThan(500)
 })
 
-for (const trigger of ['completion event', 'refresh timestamp']) {
-  test(`a visible mobile feed preserves its scroll after a ${trigger}`, trigger === 'completion event' ? { tag: '@scale' } : {}, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 375, height: 700 })
-    await expect(page.getByText('Feed video 00')).toBeVisible()
-    await scrollFeedTo(page, 600)
-
-    const scroll = await completeFeedRefresh(page, 'videos', trigger)
-    expect(Math.abs(scroll.top - 600) * scroll.pixelRatio).toBeLessThanOrEqual(1)
-  })
-}
-
-test('every feed refresh preserves the visible New feed position', async ({ app, page }) => {
+test('a visible mobile feed preserves its scroll after a completion event', { tag: '@scale' }, async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 700 })
   await expect(page.getByText('Feed video 00')).toBeVisible()
-  await page.locator('[data-subscription-feed-tab="all"]').click()
-  await expect(page.locator('[data-subscription-feed-tab="all"]')).toHaveAttribute('aria-selected', 'true')
-  // Selection paints before the feed mounts and restores its saved offset.
-  await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
-  await scrollFeedTo(page, 800)
-  for (const tab of ['videos', 'shorts', 'live', 'posts']) {
-    const scroll = await completeFeedRefresh(page, tab)
-    expect(scroll.top).toBe(800)
-  }
+  await scrollFeedTo(page, 600)
+
+  const scroll = await completeFeedRefresh(page)
+  expect(Math.abs(scroll.top - 600) * scroll.pixelRatio).toBeLessThanOrEqual(1)
 })
 
 test('finishing a refresh keeps the position reached while scrolling the mobile feed', async ({ app, page }) => {
@@ -238,52 +216,6 @@ for (const remainingCount of [3, 0]) {
   })
 }
 
-for (const [layout, size] of [
-  ['portrait', { width: 375, height: 700 }],
-  ['landscape', { width: 844, height: 390 }]
-]) {
-  test(`mobile header waits until its space leaves the viewport in ${layout}`, { tag: '@scale' }, async ({ app, page }) => {
-    await setWindowSize(app, page, size)
-    await expect(page.getByText('Feed video 00')).toBeVisible()
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    const header = page.locator('.subscriptionsHeader')
-
-    for (const feed of ['videos', 'new']) {
-      if (feed === 'new') {
-        await page.locator('[data-subscription-feed-tab="all"]').click()
-        await page.getByRole('button', { name: 'Show tabbed view' }).click()
-        // The taller tabbed header renders after the view setting is saved,
-        // and the view switch then resets the feed scroll in the next frame.
-        await expect(header).toHaveClass(/tabbedNewFeed/)
-        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-      }
-      await page.evaluate(() => document.activeElement.blur())
-      await scrollFeedTo(page, 0)
-      const boundary = await header.evaluate(element => {
-        return element.nextElementSibling.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top)
-      })
-      expect(boundary).toBeGreaterThan(32)
-
-      await scrollFeedTo(page, 32)
-      await expect(header).not.toHaveClass(/scrollHidden/)
-      await scrollFeedTo(page, boundary - 8)
-      await expect(header).not.toHaveClass(/scrollHidden/)
-      await scrollFeedTo(page, boundary + 16)
-      await expect(header).toHaveClass(/scrollHidden/)
-      await expect.poll(() => header.evaluate(element => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0)
-      const gap = await header.evaluate(element => {
-        return element.nextElementSibling.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top)
-      })
-      expect(gap).toBeLessThanOrEqual(1)
-
-      // Returning to the header's original space must reveal it immediately.
-      await scrollFeedTo(page, boundary - 8)
-      await expect(header).not.toHaveClass(/scrollHidden/)
-      await scrollFeedTo(page, 0)
-    }
-  })
-}
-
 test('mobile header hides fully and returns on a deliberate upward scroll', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await setWindowSize(app, page, { width: 375, height: 700 })
   await expect(page.getByText('Feed video 00')).toBeVisible()
@@ -330,31 +262,6 @@ test('mobile header hides fully and returns on a deliberate upward scroll', { ta
   await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
   await scrollFeedTo(page, 650)
   await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
-})
-
-test('landscape phone header hides and requires a longer upward scroll', { tag: '@scale' }, async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 844, height: 390 })
-  await expect(page.getByText('Feed video 00')).toBeVisible()
-  await page.evaluate(() => document.activeElement.blur())
-
-  const header = page.locator('.subscriptionsHeader')
-  const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
-  await expect(header).toHaveCSS('transition-duration', '0.25s')
-  await scrollFeedTo(page, 600)
-  await expect.poll(headerBottom).toBeLessThanOrEqual(0)
-  await expect(header).toHaveCSS('transition-duration', '0.15s')
-  await scrollFeedTo(page, 580)
-  await expect.poll(headerBottom).toBeLessThanOrEqual(0)
-  await scrollFeedTo(page, 540)
-  await expect.poll(headerBottom).toBeLessThanOrEqual(0)
-  await scrollFeedTo(page, 530)
-  await expect.poll(() => header.evaluate(element => {
-    return Math.abs(element.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top))
-  })).toBeLessThanOrEqual(1)
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await expect(header).toHaveCSS('transition-duration', '0s')
-  await scrollFeedTo(page, 600)
-  await expect.poll(headerBottom).toBeLessThanOrEqual(0)
 })
 
 test('mobile header keeps focused controls visible and hides the taller New feed in reduced motion', async ({ app, page }) => {

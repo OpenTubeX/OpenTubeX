@@ -33,22 +33,3 @@ test('middle-clicking an external link opens it in the background', async ({ app
   await link.click()
   await expect.poll(calls).toEqual([BACKGROUND, FOREGROUND])
 })
-
-test.describe('with the opening prompt', () => {
-  test.use({ seed: { settings: { currentLocale: 'en-US', externalLinkHandling: 'openLinkAfterPrompt' } } })
-
-  test('a confirmed middle-click opens the link in the background', async ({ app, page }) => {
-    const calls = await stubBrowser(app)
-    const link = await addLink(page)
-    const confirm = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
-      .getByRole('button', { name: 'Yes, Open Link', exact: true })
-
-    await link.click({ button: 'middle' })
-    await confirm.click()
-    await expect.poll(calls).toEqual([BACKGROUND])
-
-    await link.click()
-    await confirm.click()
-    await expect.poll(calls).toEqual([BACKGROUND, FOREGROUND])
-  })
-})

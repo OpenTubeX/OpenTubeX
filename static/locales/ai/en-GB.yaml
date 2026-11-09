@@ -230,6 +230,9 @@ User Playlists:
   This playlist is private or does not exist.: "This playlist is private or does not exist."
   Pin to Navigation: "Pin to Navigation"
   Unpin from Navigation: "Unpin from Navigation"
+  Pin to Top: "Pin to Top"
+  Unpin from Top: "Unpin from Top"
+  Pinned to Top: "Pinned to Top"
   Reorder Hint: Drag or use the arrow keys to reorder
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Shuffle videos by default: "Shuffle videos by default"
@@ -1484,14 +1487,15 @@ Tutorial:
     Action: Import data
     Not Now: Not now
 About:
+  Get OpenTubeX: Get OpenTubeX
+  Community: Community
+  Contribute: Contribute
   Documentation: Documentation
   Downloads: Downloads
   Changelog: Changelog
   Commit: Commit
-  Fluxer: Join our Fluxer Community
   Matrix: Matrix
   Email: Email
-  Support the development of OpenTubeX: "Support the development of OpenTubeX"
 Profile:
   Customization: Customisation
   Manage Profile Subscriptions: Manage profile subscriptions

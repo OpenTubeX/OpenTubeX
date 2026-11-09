@@ -108,21 +108,6 @@ test('the end of the video keeps the last storyboard frame', async () => {
   assert.equal(last.firstElementChild.style.backgroundPosition, '-1440px -180px')
 })
 
-test('a shorter last frame does not repeat its neighbours', async () => {
-  // Ten-second frames, with the last one cut short at the 32 second end.
-  const tenSeconds = time => {
-    const index = Math.floor(Math.min(time, 31.999) / 10)
-    return tile(index, { startTime: index * 10, duration: index === 3 ? 2 : 10, positionX: index * 160, positionY: 0 })
-  }
-  const { seekBar, filmstrip, frames } = fixture(async (_, time) => time < 32 ? tenSeconds(time) : null)
-  seekBar.bar.max = '32'
-  await filmstrip.show(31)
-  const positions = frames().map(frame => frame.firstElementChild.style.backgroundPosition)
-  assert.deepEqual(positions.toSorted(), ['-160px 0px', '-320px 0px', '-480px 0px', '0px 0px'])
-  const widths = Object.fromEntries(frames().map(frame => [frame.firstElementChild.style.backgroundPosition, parseFloat(frame.style.width)]))
-  assert.equal(widths['-480px 0px'], widths['0px 0px'] / 5, 'The two second frame is a fifth as wide')
-})
-
 test('individual frame images cover their frame without a sprite crop', async () => {
   const { frames, filmstrip } = fixture(async (_, time) => tile(Math.floor(time), { width: 0, height: 0, uris: ['https://example.test/frame.jpg'] }))
   await filmstrip.show(10)

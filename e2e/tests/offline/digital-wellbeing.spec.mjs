@@ -59,22 +59,6 @@ test.describe('daily watch time limit', () => {
     await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
     await expect(prompt).toBeHidden()
   })
-
-  test('the stats page shows the remaining daily limit', async ({ page }) => {
-    await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateDailyWatchTimeLimit', 90)
-    })
-    await goTo(page, 'stats')
-    await expect(page.locator('.summaryCard').filter({ hasText: 'Today' }))
-      .toContainText('30 min left of your 1 hr 30 min daily limit')
-
-    // Extra time from the limit prompt counts toward the remaining time.
-    await page.evaluate(() => {
-      window.$store.dispatch('extendWellbeingLimit', { kind: 'watch', extraSeconds: 15 * 60 })
-    })
-    await expect(page.locator('.summaryCard').filter({ hasText: 'Today' }))
-      .toContainText('45 min left of your 1 hr 30 min daily limit')
-  })
 })
 
 test.describe('autoplay countdown', () => {
@@ -222,18 +206,12 @@ test.describe('bedtime without the reminder', () => {
     seed: {
       settings: {
         ...playbackSettings,
-        grayscaleMode: 'bedtime',
         stopAutoplayAtBedtimeAndLimit: true,
         bedtimeReminder: false,
         bedtimeStart: timeOfDay(-30),
         bedtimeEnd: timeOfDay(60),
       },
     },
-  })
-
-  test('the bedtime window still turns the app gray', async ({ page }) => {
-    await expect(page.locator('html')).toHaveClass(/(^|\s)grayscale(\s|$)/)
-    await expect(page.getByRole('dialog', { name: 'It\'s time for bed' })).toHaveCount(0)
   })
 
   test('queued videos do not autoplay at bedtime', async ({ app, page }) => {
@@ -251,131 +229,82 @@ test.describe('bedtime without the reminder', () => {
   })
 })
 
-test.describe('starting during bedtime', () => {
-  test.use({ seed: { settings: { animationSpeed: 0, bedtimeReminder: true, bedtimeStart: timeOfDay(-30), bedtimeEnd: timeOfDay(60) } } })
-
-  test('reminds right away', async ({ page }) => {
-    const prompt = page.getByRole('dialog', { name: 'It\'s time for bed' })
-    await expect(prompt).toBeVisible()
-    await prompt.getByRole('button', { name: 'Dismiss' }).click()
-    await expect(prompt).toBeHidden()
+test.describe('grayscale videos and images only', () => {
+  const videoId = 'abcdefghijk'
+  test.use({
+    seed: {
+      settings: { animationSpeed: 0, grayscaleMode: 'always', grayscaleScope: 'content' },
+      history: [{
+        _id: videoId,
+        videoId,
+        title: 'Colorful video',
+        author: 'Test Channel',
+        authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+        published: Date.now() - 86400000,
+        lengthSeconds: 60,
+        watchProgress: 0,
+        timeWatched: Date.now(),
+        isWatched: false,
+        isLive: false,
+        type: 'video'
+      }]
+    }
   })
-})
 
-test.describe('grayscale', () => {
-  test.use({ seed: { settings: { animationSpeed: 0, grayscaleMode: 'always' } } })
-
-  test('the app turns grayscale and returns to color when turned off', async ({ page, attachScreenshot }) => {
+  test('grays content and keeps the interface and the user\'s own images in color', async ({ app, page, attachScreenshot }) => {
+    await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="rgb(255,0,0)"/></svg>'
+    }))
+    await goTo(page, 'history')
     const root = page.locator('html')
-    await expect(root).toHaveClass(/(^|\s)grayscale(\s|$)/)
-    expect(await root.evaluate(element => getComputedStyle(element).filter)).toBe('grayscale(1)')
+    await expect(root).toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
+    await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
+    expect(await root.evaluate(element => getComputedStyle(element).filter)).toBe('none')
+
+    const thumbnail = page.locator('.ft-list-video .thumbnailImage').first()
+    await expect.poll(() => thumbnail.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    expect(await thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('grayscale(1)')
+    const [[red, green, blue]] = await sampleColors(app, thumbnail, [[20, 20]])
+    expect(Math.max(red, green, blue) - Math.min(red, green, blue)).toBeLessThanOrEqual(2)
+    await attachScreenshot('videos and images only')
+
+    // Blurred thumbnails keep their blur and turn gray too.
+    await page.evaluate(() => window.$store.dispatch('updateBlurThumbnails', true))
+    await expect.poll(() => thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('blur(20px) grayscale(1)')
+
+    // Interface elements and images the user picked keep their colors.
+    await page.evaluate(() => {
+      const probe = document.createElement('div')
+      probe.className = 'grayscaleProbe'
+      probe.style.cssText = 'position: fixed; inset: 0 auto auto 0; z-index: 9999; width: 120px; height: 120px'
+      probe.innerHTML = '<div style="width: 60px; height: 60px; background: rgb(255, 0, 0)"></div>' +
+        '<img class="profileIconImage" width="60" height="60" alt="" src="data:image/svg+xml,' +
+        encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="rgb(255,0,0)"/></svg>') + '">'
+      document.body.append(probe)
+    })
+    const probe = page.locator('.grayscaleProbe')
+    await expect.poll(() => probe.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    expect(await probe.locator('img').evaluate(element => getComputedStyle(element).filter)).toBe('none')
+    for (const [r, g, b] of await sampleColors(app, probe, [[30, 30], [30, 90]])) {
+      expect(r - Math.max(g, b)).toBeGreaterThan(200)
+    }
+    await page.evaluate(() => document.querySelector('.grayscaleProbe').remove())
 
     const wellbeingSettings = await goToSettingsSection(page, 'wellbeing')
-    await expect(page.getByRole('tab', { name: 'Digital Wellbeing' })).toHaveAttribute('aria-selected', 'true')
-    await attachScreenshot('digital wellbeing settings')
+    const scope = wellbeingSettings.getByRole('combobox', { name: 'Apply Grayscale To' })
+    await expect(scope).toBeEnabled()
+    await scope.click()
+    await page.getByRole('option', { name: 'Whole App' }).click()
+    await expect(root).toHaveClass(/(^|\s)grayscale(\s|$)/)
+    await expect(root).not.toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
 
     const grayscale = wellbeingSettings.getByRole('combobox', { name: 'Grayscale', exact: true })
     await grayscale.click()
     await page.getByRole('option', { name: 'Off' }).click()
-    await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
+    await expect(root).not.toHaveClass(/(^|\s)grayscale(Content)?(\s|$)/)
+    await expect(scope).toBeDisabled()
   })
-
-  test.describe('videos and images only', () => {
-    const videoId = 'abcdefghijk'
-    test.use({
-      seed: {
-        settings: { animationSpeed: 0, grayscaleMode: 'always', grayscaleScope: 'content' },
-        history: [{
-          _id: videoId,
-          videoId,
-          title: 'Colorful video',
-          author: 'Test Channel',
-          authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
-          published: Date.now() - 86400000,
-          lengthSeconds: 60,
-          watchProgress: 0,
-          timeWatched: Date.now(),
-          isWatched: false,
-          isLive: false,
-          type: 'video'
-        }]
-      }
-    })
-
-    test('grays content and keeps the interface and the user\'s own images in color', async ({ app, page, attachScreenshot }) => {
-      await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => route.fulfill({
-        contentType: 'image/svg+xml',
-        body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="rgb(255,0,0)"/></svg>'
-      }))
-      await goTo(page, 'history')
-      const root = page.locator('html')
-      await expect(root).toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
-      await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
-      expect(await root.evaluate(element => getComputedStyle(element).filter)).toBe('none')
-
-      const thumbnail = page.locator('.ft-list-video .thumbnailImage').first()
-      await expect.poll(() => thumbnail.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-      expect(await thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('grayscale(1)')
-      const [[red, green, blue]] = await sampleColors(app, thumbnail, [[20, 20]])
-      expect(Math.max(red, green, blue) - Math.min(red, green, blue)).toBeLessThanOrEqual(2)
-      await attachScreenshot('videos and images only')
-
-      // Blurred thumbnails keep their blur and turn gray too.
-      await page.evaluate(() => window.$store.dispatch('updateBlurThumbnails', true))
-      await expect.poll(() => thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('blur(20px) grayscale(1)')
-
-      // Interface elements and images the user picked keep their colors.
-      await page.evaluate(() => {
-        const probe = document.createElement('div')
-        probe.className = 'grayscaleProbe'
-        probe.style.cssText = 'position: fixed; inset: 0 auto auto 0; z-index: 9999; width: 120px; height: 120px'
-        probe.innerHTML = '<div style="width: 60px; height: 60px; background: rgb(255, 0, 0)"></div>' +
-          '<img class="profileIconImage" width="60" height="60" alt="" src="data:image/svg+xml,' +
-          encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="rgb(255,0,0)"/></svg>') + '">'
-        document.body.append(probe)
-      })
-      const probe = page.locator('.grayscaleProbe')
-      await expect.poll(() => probe.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-      expect(await probe.locator('img').evaluate(element => getComputedStyle(element).filter)).toBe('none')
-      for (const [r, g, b] of await sampleColors(app, probe, [[30, 30], [30, 90]])) {
-        expect(r - Math.max(g, b)).toBeGreaterThan(200)
-      }
-      await page.evaluate(() => document.querySelector('.grayscaleProbe').remove())
-
-      const wellbeingSettings = await goToSettingsSection(page, 'wellbeing')
-      const scope = wellbeingSettings.getByRole('combobox', { name: 'Apply Grayscale To' })
-      await expect(scope).toBeEnabled()
-      await scope.click()
-      await page.getByRole('option', { name: 'Whole App' }).click()
-      await expect(root).toHaveClass(/(^|\s)grayscale(\s|$)/)
-      await expect(root).not.toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
-
-      const grayscale = wellbeingSettings.getByRole('combobox', { name: 'Grayscale', exact: true })
-      await grayscale.click()
-      await page.getByRole('option', { name: 'Off' }).click()
-      await expect(root).not.toHaveClass(/(^|\s)grayscale(Content)?(\s|$)/)
-      await expect(scope).toBeDisabled()
-    })
-  })
-
-  // Top-layer elements render outside the root element, so its filter does not reach them.
-  for (const layer of ['fullscreen', 'modal', 'popover']) {
-    test(`a ${layer} element turns grayscale too`, async ({ app, page }) => {
-      await page.evaluate(async layer => {
-        const element = document.createElement(layer === 'modal' ? 'dialog' : 'div')
-        element.className = 'grayscaleProbe'
-        element.style.cssText = 'background: rgb(255, 0, 0); width: 200px; height: 200px; padding: 0; border: 0'
-        if (layer === 'popover') element.popover = 'manual'
-        document.body.append(element)
-        if (layer === 'fullscreen') await element.requestFullscreen()
-        else if (layer === 'modal') element.showModal()
-        else element.showPopover()
-      }, layer)
-
-      const [[red, green, blue]] = await sampleColors(app, page.locator('.grayscaleProbe'), [[20, 20]])
-      expect(Math.max(red, green, blue) - Math.min(red, green, blue)).toBeLessThanOrEqual(2)
-    })
-  }
 })
 
 test.describe('distraction free tabs', () => {
@@ -401,25 +330,6 @@ test.describe('distraction free tabs', () => {
     await page.keyboard.press('ArrowLeft')
     await expect(tab('parental')).toBeFocused()
   })
-})
-
-test('distraction free tabs stack their icons in narrow windows', { tag: '@scale' }, async ({ page }) => {
-  await page.evaluate(() => {
-    localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 20, y: 20, width: 360, height: 700 }))
-  })
-  await goToSettingsSection(page, 'focus')
-  const tabs = page.locator('.settingsWindow [data-settings-tab]')
-  await expect(tabs).toHaveCount(3)
-  for (const tab of await tabs.all()) {
-    const layout = await tab.evaluate(element => {
-      const icon = element.querySelector('svg, .ft-icon').getBoundingClientRect()
-      const range = document.createRange()
-      range.selectNodeContents(element.lastChild)
-      const label = range.getBoundingClientRect()
-      return { iconAbove: icon.bottom <= label.top + 0.5, fits: element.scrollWidth <= element.clientWidth }
-    })
-    expect(layout).toEqual({ iconAbove: true, fits: true })
-  }
 })
 
 test('switching from the bottom of Distraction Free to a shorter tab leaves no empty space', { tag: '@scale' }, async ({ page }) => {

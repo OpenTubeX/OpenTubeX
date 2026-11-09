@@ -283,6 +283,9 @@ User Playlists:
   This playlist is private or does not exist.: "Aquesta llista de reproducció és privada o no existeix."
   Pin to Navigation: "Fixa a la navegació"
   Unpin from Navigation: "Deixa de fixar a la navegació"
+  Pin to Top: "Fixa a dalt"
+  Unpin from Top: "Deixa de fixar a dalt"
+  Pinned to Top: "Fixada a dalt"
   Reorder Hint: Arrossegueu o utilitzeu les tecles de fletxa per reordenar
   Add new videos to the top (custom order): "Afegeix els vídeos nous al principi (ordre personalitzat)"
   Shuffle videos by default: "Reprodueix els vídeos en ordre aleatori per defecte"
@@ -1858,6 +1861,9 @@ Tutorial:
     Action: Importa dades
     Not Now: Ara no
 About:
+  Get OpenTubeX: Obteniu OpenTubeX
+  Community: Comunitat
+  Contribute: Contribuïu
   Documentation: Documentació
   Downloads: Descàrregues
   Changelog: Registre de canvis
@@ -1865,12 +1871,10 @@ About:
   Licensed under the {licenseLink}: Amb llicència {licenseLink}
   AGPLv3: AGPLv3
   Discussions: Debats
-  Fluxer: Uniu-vos a la comunitat de Fluxer
   Matrix: Matrix
   Email: Correu electrònic
   Please read the {roomRulesLink}: Llegiu les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: L'OpenTubeX és possible gràcies a {creditsPageLink}
-  Support the development of OpenTubeX: "Doneu suport al desenvolupament d'OpenTubeX"
 Profile:
   Customization: Personalització
   Manage Profile Subscriptions: Gestiona les subscripcions del perfil

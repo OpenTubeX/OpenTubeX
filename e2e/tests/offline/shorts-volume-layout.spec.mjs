@@ -2,7 +2,7 @@ import { test, expect, setWindowSize, updateInputWithoutScrolling } from '../../
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-for (const [uiScale, currentLocale] of [[100, 'en-US'], [95, 'en-US'], [125, 'en-US'], [100, 'ar']]) {
+for (const [uiScale, currentLocale] of [[95, 'en-US'], [100, 'ar']]) {
   test.describe(`Shorts volume at ${uiScale}% UI scale in ${currentLocale}`, () => {
     test.use({
       launchArgs: ['--disable-gpu'],

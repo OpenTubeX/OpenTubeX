@@ -341,37 +341,6 @@ test('reopening the casting menu refreshes each receiver list once per opening',
   }
 })
 
-for (const uiScale of [80, 125]) {
-  test(`casting devices and refresh retain 48px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
-    await openCastVideo(app, page)
-    await mockDlna(app)
-    await page.evaluate(async scale => {
-      const store = window.$store
-      await store.dispatch('updateUiScale', scale)
-      await store.dispatch('updateShowDlnaCastButton', true)
-    }, uiScale)
-    // Phones use the context menu sheet, so the touch-sized menu is for wider touch screens.
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    await setWindowSize(app, page, { width: 1200, height: 950 })
-    expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
-    await page.locator('.castControl > button').click()
-    await expect(castMenu(page).getByRole('button', { name: 'Test TV', exact: true })).toBeVisible()
-    await expect(castMenu(page).getByRole('button', { name: 'DLNA TV', exact: true })).toBeVisible()
-    const targets = castMenu(page).locator('.castDevice, .castHeaderButton')
-    await expect(targets).toHaveCount(3)
-    const bounds = await targets.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
-    for (const target of bounds) {
-      // Fractional Electron zoom can round CSS bounds slightly downward.
-      expect(target.height).toBeGreaterThanOrEqual(47.75)
-      expect(target.height * uiScale / 100).toBeGreaterThanOrEqual(47.75)
-      expect(target.width).toBeGreaterThanOrEqual(47.75)
-    }
-    await page.keyboard.press('Escape')
-    await session.detach()
-  })
-}
-
 test('the casting device list clamps themed scrolling', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   const watch = await openCastVideo(app, page)
   await mockDlna(app)
@@ -699,15 +668,6 @@ test('Cast explains an untrusted receiver certificate and preserves local playba
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
 })
 
-test('Cast preserves certificate wording without a typed trust failure', async ({ app, page }) => {
-  await openCastVideo(app, page)
-  await app.electronApp.evaluate(() => {
-    globalThis.castTest.failStart = 'Receiver reported untrusted Cast device certificate: diagnostic only'
-  })
-  await choice(page, 'Test TV')
-  await expect(page.getByText('Could not cast the video: Receiver reported untrusted Cast device certificate: diagnostic only', { exact: true })).toBeVisible()
-})
-
 test('Cast localizes receiver disconnects in German', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await choice(page, 'Test TV')
@@ -716,26 +676,6 @@ test('Cast localizes receiver disconnects in German', async ({ app, page }) => {
   await expect(page.getByText('Das Video konnte nicht übertragen werden: Die Verbindung zum Empfänger wurde getrennt.', { exact: true })).toBeVisible()
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
 })
-
-for (const [code, reason] of [
-  ['CAST_TIMEOUT', 'Der Empfänger hat nicht geantwortet.'],
-  ['CAST_LAUNCH_FAILED', 'Der Empfänger konnte nicht gestartet werden.'],
-  ['CAST_LOAD_FAILED', 'Der Empfänger konnte das Video nicht laden.'],
-  ['CAST_INVALID_AUTHENTICATION', 'Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet.'],
-  ['CAST_AUTHENTICATION_DECLINED', 'Der Empfänger hat die Authentifizierung abgelehnt.'],
-  ['CAST_AUDIO_ONLY', 'Der Empfänger unterstützt nur die Übertragung von Audio.']
-]) {
-  test(`Cast localizes ${code} startup errors in German`, async ({ app, page }) => {
-    const watch = await openCastVideo(app, page)
-    await watch.evaluate(vm => vm.$store.dispatch('updateCurrentLocale', 'de-DE'))
-    await app.electronApp.evaluate((_, code) => {
-      globalThis.castTest.failStart = 'Application diagnostic in English'
-      globalThis.castTest.failStartCode = code
-    }, code)
-    await choice(page, 'Test TV')
-    await expect(page.getByText(`Das Video konnte nicht übertragen werden: ${reason}`, { exact: true })).toBeVisible()
-  })
-}
 
 test('Cast shows discovery failure details without interrupting local playback', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)

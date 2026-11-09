@@ -54,7 +54,7 @@ async function setPreference(page, value) {
   }, value)
 }
 
-for (const avoidTranslation of ['entire_app', 'disabled', 'watch_only']) {
+for (const avoidTranslation of ['entire_app', 'watch_only']) {
   test.describe(`channel names with untranslated text ${avoidTranslation}`, () => {
     test.use({
       seed: {

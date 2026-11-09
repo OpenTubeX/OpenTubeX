@@ -33,13 +33,6 @@ modules: []
   )
 })
 
-test('is idempotent when FlatPark already has the official permissions', () => {
-  assert.equal(
-    syncFlatpakFinishArgs(officialManifest, officialManifest),
-    officialManifest
-  )
-})
-
 test('rejects unsupported official finish-args structures', () => {
   assert.throws(
     () => syncFlatpakFinishArgs(

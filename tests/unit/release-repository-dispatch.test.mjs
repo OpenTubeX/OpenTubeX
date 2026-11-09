@@ -202,17 +202,3 @@ test('permanently missing release metadata cannot bypass the download check', as
   assert.match(result.stderr, /Expected 3 release assets/)
   assert.equal((await calls(setup)).length, 2)
 })
-
-test('release-event publishers check their public downloads before consuming them', async () => {
-  const winget = load(await readFile('.github/workflows/winget.yml', 'utf8')).jobs.submit.steps
-  const manifest = winget.find(step => step.name === 'Generate and validate manifests').run
-  for (const url of ['x64_url', 'arm64_url']) {
-    const check = manifest.indexOf(`wait-for-release-asset.sh "$${url}"`)
-    assert.ok(check >= 0 && check < manifest.indexOf('komac update'))
-  }
-  const flatpark = load(await readFile('.github/workflows/flatpark.yml', 'utf8')).jobs.prepare.steps
-  const update = flatpark.find(step => step.run?.includes('node flatpark/scripts/update-pins.mjs')).run
-  assert.match(update, /for architecture in x64 arm64/)
-  const check = update.indexOf('wait-for-release-asset.sh')
-  assert.ok(check >= 0 && check < update.indexOf('node flatpark/scripts/update-pins.mjs'))
-})

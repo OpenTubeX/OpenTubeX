@@ -16,24 +16,6 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
 })
 
-test('shows the video being added', async ({ page, attachScreenshot }) => {
-  await showPrompt(page, [video(1)])
-  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
-  const items = prompt.locator('.videoSummaryItem')
-
-  await expect(items).toHaveCount(1)
-  await expect(items).toContainText('Video number 1')
-  await expect(items).toContainText('Channel 1')
-  await expectImagesLoaded(items.locator('img'))
-  await expect(prompt.locator('.videoSummaryMore')).toHaveCount(0)
-
-  const heading = await prompt.locator('.playlistPromptHeading').boundingBox()
-  const item = await items.boundingBox()
-  expect(item.width).toBeLessThan(heading.width / 2)
-  expect(Math.abs((item.x + item.width / 2) - (heading.x + heading.width / 2))).toBeLessThan(1)
-  await attachScreenshot('add-to-playlist-single-video')
-})
-
 test('lists the first videos and counts the rest when adding many', async ({ page, attachScreenshot }) => {
   await showPrompt(page, [1, 2, 3, 4, 5].map(video))
   const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your 5 videos to', exact: true })

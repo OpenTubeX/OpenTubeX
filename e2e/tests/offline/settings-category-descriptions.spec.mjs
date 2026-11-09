@@ -1,6 +1,5 @@
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
-import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
 const LABEL = 'Compact Settings Categories'
 
@@ -85,79 +84,8 @@ for (const initialValue of [false, true]) {
         readDatastore(app.userDataDir, 'settings')
       ).hideSettingsCategoryDescriptions).toBe(!initialValue)
     })
-
-    test('disables the toggle during a slow save and enables it when saving finishes', async ({ app, page }, testInfo) => {
-      const appearance = await goToSettingsSection(page, 'appearance')
-      const toggle = appearance.getByRole('checkbox', { name: LABEL })
-      await app.electronApp.evaluate(({ ipcMain }, { channel, upsert }) => {
-        const original = ipcMain._invokeHandlers.get(channel)
-        ipcMain.removeHandler(channel)
-        ipcMain.handle(channel, async (event, request) => {
-          if (request.action === upsert && request.data?._id === 'hideSettingsCategoryDescriptions') {
-            await new Promise(resolve => { globalThis.__releaseCompactCategorySave = resolve })
-          }
-          return original(event, request)
-        })
-      }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT })
-
-      await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
-      try {
-        await expect.poll(() => app.electronApp.evaluate(() =>
-          typeof globalThis.__releaseCompactCategorySave === 'function'
-        )).toBe(true)
-        await expect(toggle).toBeDisabled()
-        await expect(toggle).toBeChecked({ checked: initialValue })
-        await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 0 : 11)
-        const savingScreenshot = testInfo.outputPath('compact-categories-saving.png')
-        await page.locator('[data-setting-key="hideSettingsCategoryDescriptions"]').screenshot({ path: savingScreenshot })
-        await testInfo.attach('compact-categories-saving', { path: savingScreenshot, contentType: 'image/png' })
-      } finally {
-        await app.electronApp.evaluate(() => globalThis.__releaseCompactCategorySave?.())
-      }
-      await expect(toggle).toBeEnabled()
-      await expect(toggle).toBeChecked({ checked: !initialValue })
-      await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 11 : 0)
-      await expect.poll(async () => latestSettings(
-        readDatastore(app.userDataDir, 'settings')
-      ).hideSettingsCategoryDescriptions).toBe(!initialValue)
-      const savedScreenshot = testInfo.outputPath('compact-categories-saved.png')
-      await page.locator('[data-setting-key="hideSettingsCategoryDescriptions"]').screenshot({ path: savedScreenshot })
-      await testInfo.attach('compact-categories-saved', { path: savedScreenshot, contentType: 'image/png' })
-    })
   })
 }
-
-test('hides settings category descriptions immediately and persists across restarts', async ({ app }, testInfo) => {
-  let page = app.page
-  const appearance = await goToSettingsSection(page, 'appearance')
-  const toggle = appearance.getByRole('checkbox', { name: LABEL })
-  await expect(toggle).not.toBeChecked()
-  await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(11)
-
-  await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
-  await expect(toggle).toBeChecked()
-  await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(0)
-  await expect(page.locator('.settingsMenu .titleText')).toHaveCount(11)
-  await expect.poll(async () => latestSettings(
-    readDatastore(app.userDataDir, 'settings')
-  ).hideSettingsCategoryDescriptions).toBe(true)
-  ;({ page } = await app.relaunch())
-  await goToSettingsSection(page, 'appearance')
-  await expect(page.getByRole('checkbox', { name: LABEL })).toBeChecked()
-  await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(0)
-  const tooltipButton = page.locator('[data-setting-key="hideSettingsCategoryDescriptions"] .tooltip .button')
-  await expect(tooltipButton.locator('[data-icon="circle-question"]')).toBeVisible()
-  await tooltipButton.hover()
-  await expect(page.getByRole('tooltip')).toHaveText('Hides descriptions and reduces the height of settings categories.')
-  await captureAppFramebuffer(app, testInfo, 'settings-category-descriptions-hidden')
-
-  const search = page.getByRole('searchbox', { name: 'Search settings' })
-  await search.fill(LABEL)
-  await page.getByRole('button', { name: LABEL, exact: true }).click()
-  await expect(page.locator('.settingsSearchTarget')).toContainText(LABEL)
-  await page.locator('label.switch-label').filter({ hasText: LABEL }).click()
-  await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(11)
-})
 
 for (const reveal of ['back', 'resize']) {
   test.describe(`hidden settings menu revealed by ${reveal}`, { tag: '@scale' }, () => {

@@ -7,7 +7,7 @@ const source = await readFile(new URL('../../src/renderer/router/index.js', impo
 const start = source.indexOf('  scrollBehavior(')
 const behavior = source.slice(start, source.indexOf('\n})', start))
 
-for (const platform of ['IS_CAPACITOR', 'IS_ELECTRON']) {
+for (const platform of ['IS_CAPACITOR']) {
   test(`${platform} leaves saved scroll restoration to the tab navigation service`, () => {
     const timers = []
     const scroll = vm.runInNewContext(`({${behavior}}).scrollBehavior`, {

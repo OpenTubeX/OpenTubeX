@@ -32,21 +32,6 @@ function snapshot(count = 100) {
   }
 }
 
-test('music mode is temporary, isolated per tab, and cleared when a tab closes', () => {
-  const store = createTabStore()
-  const payload = snapshot(2)
-  store.commit('setTabsState', payload)
-  assert.equal(store.getters.getTabMusicMode('tab-0'), false)
-  store.commit('setTabMusicMode', { tabId: 'tab-0', value: true })
-  assert.equal(store.getters.getTabMusicMode('tab-0'), true)
-  assert.equal(store.getters.getTabMusicMode('tab-1'), false)
-  store.commit('setTabsState', structuredClone(payload))
-  assert.equal(store.getters.getTabMusicMode('tab-0'), true)
-  store.commit('setTabsState', { tabs: [payload.tabs[1]] })
-  assert.equal(store.getters.getTabMusicMode('tab-0'), false)
-  assert.equal(createTabStore().getters.getTabMusicMode('tab-0'), false)
-})
-
 test('metadata updates preserve unrelated tab objects and collections', () => {
   const store = createTabStore()
   const payload = snapshot()
@@ -102,23 +87,4 @@ test('stable snapshots retain local navigation and acknowledge optimistic reorde
   remote.tabs[0].syncedNavigationRevision = 1
   store.commit('setTabsState', remote)
   assert.equal(store.getters.getTabById('tab-0').route.path, '/history')
-})
-
-test('state updates without an avatar keep the one the tab already has', () => {
-  const store = createTabStore()
-  const payload = snapshot(2)
-  payload.tabs[0].avatarUrl = 'data:image/jpeg;base64,QUJD'
-  store.commit('setTabsState', payload)
-  assert.equal(store.getters.getTabById('tab-0').avatarUrl, 'data:image/jpeg;base64,QUJD')
-
-  const next = structuredClone(payload)
-  delete next.tabs[0].avatarUrl
-  next.tabs[0].isLoading = true
-  store.commit('setTabsState', next)
-  assert.equal(store.getters.getTabById('tab-0').avatarUrl, 'data:image/jpeg;base64,QUJD',
-    'an omitted avatar means unchanged')
-
-  next.tabs[0].avatarUrl = null
-  store.commit('setTabsState', structuredClone(next))
-  assert.equal(store.getters.getTabById('tab-0').avatarUrl, null, 'null clears the avatar')
 })

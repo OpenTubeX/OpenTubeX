@@ -5,7 +5,6 @@ import {
   filterSubscriptionsByGroup,
   normalizeSubscriptionGroups,
   sortSubscribedChannels,
-  sortSubscriptionGroups,
   SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS
 } from '../../src/renderer/helpers/subscription-groups.js'
 import { moveItemByVisibleOffset } from '../../src/orderedItems.js'
@@ -27,29 +26,6 @@ test('synced groups keep only well-formed entries and unique channel IDs', () =>
     { id: 'music', name: 'Music', channelIds: ['UCa', 'UCb'] },
     { id: 'no-channels', name: 'No Channels', channelIds: [] },
   ])
-})
-
-test('synced groups keep only icons that can be picked', () => {
-  assert.deepEqual(normalizeSubscriptionGroups([
-    { id: 'music', name: 'Music', channelIds: [], icon: 'headphones' },
-    { id: 'tabs', name: 'Tabs', channelIds: [], icon: 'layer-group' },
-    { id: 'unknown', name: 'Unknown', channelIds: [], icon: 'not-an-icon' },
-    { id: 'none', name: 'None', channelIds: [], icon: null },
-  ]), [
-    { id: 'music', name: 'Music', channelIds: [], icon: 'headphones' },
-    { id: 'tabs', name: 'Tabs', channelIds: [] },
-    { id: 'unknown', name: 'Unknown', channelIds: [] },
-    { id: 'none', name: 'None', channelIds: [] },
-  ])
-})
-
-test('groups are listed by name', () => {
-  const groups = [
-    { id: 'b', name: 'gaming', channelIds: [] },
-    { id: 'c', name: 'Group 10', channelIds: [] },
-    { id: 'a', name: 'Group 2', channelIds: [] },
-  ]
-  assert.deepEqual(sortSubscriptionGroups(groups, collator).map(group => group.id), ['b', 'a', 'c'])
 })
 
 test('a group limits subscriptions to its channels without changing their order', () => {

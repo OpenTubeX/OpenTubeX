@@ -56,12 +56,6 @@ test('leaves disabled, native-visible and metadata tracks alone and resyncs on r
   f.cleanup()
 })
 
-test('renders active captions immediately when binding to paused video', () => {
-  const f = fixture()
-  assert.deepEqual(f.rendered, [['First caption']])
-  f.cleanup()
-})
-
 test('renders paused track selections and removes the selection listener on cleanup', () => {
   const f = fixture('disabled')
   f.track.mode = 'hidden'

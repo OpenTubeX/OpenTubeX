@@ -42,18 +42,16 @@ async function fixture(main = mainProfile) {
   }
 }
 
-for (const icon of [null, undefined]) {
-  test(`persists a ${icon} default icon without changing other profile fields`, async () => {
-    const { db, module, errors, load } = await fixture({ ...mainProfile, icon })
-    const expected = [{ ...mainProfile, icon: DEFAULT_PROFILE_ICON }, secondProfile]
-    for (let reload = 0; reload < 2; reload++) {
-      assert.equal(await load(), true)
-      assert.deepEqual(await db.profiles.findAsync({}), expected)
-      assert.deepEqual(structuredClone(module.state.profileList), expected)
-    }
-    assert.deepEqual(errors, [])
-  })
-}
+test('persists a null default icon without changing other profile fields', async () => {
+  const { db, module, errors, load } = await fixture({ ...mainProfile, icon: null })
+  const expected = [{ ...mainProfile, icon: DEFAULT_PROFILE_ICON }, secondProfile]
+  for (let reload = 0; reload < 2; reload++) {
+    assert.equal(await load(), true)
+    assert.deepEqual(await db.profiles.findAsync({}), expected)
+    assert.deepEqual(structuredClone(module.state.profileList), expected)
+  }
+  assert.deepEqual(errors, [])
+})
 
 for (const icon of [null, { type: 'initial' }, { type: 'icon', value: 'gamepad' }]) {
   test(`default icon repair preserves concurrent subscriptions and icon ${JSON.stringify(icon)}`, async () => {

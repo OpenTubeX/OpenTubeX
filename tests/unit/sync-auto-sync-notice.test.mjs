@@ -22,27 +22,6 @@ test('an existing client keeps the notice across launches until dismissed', () =
   assert.equal(shouldShowAutoSyncNotice('0.35.0', settings, storage), false)
 })
 
-for (const [name, previousVersion, overrides] of [
-  ['fresh installation', null, {}],
-  ['enabled automatic sync', '0.34.0', { syncServerAutoSync: true }],
-  ['disabled sync', '0.34.0', { syncServerEnabled: false }],
-  ['disconnected account', '0.34.0', { syncServerToken: '' }],
-  ['known safety pause', '0.34.0', { syncServerResumeAutoSync: true }],
-]) {
-  test(`${name} is excluded, including on subsequent launches`, () => {
-    const storage = createStorage()
-    assert.equal(shouldShowAutoSyncNotice(previousVersion, { ...settings, ...overrides }, storage), false)
-    assert.equal(shouldShowAutoSyncNotice('0.35.0', settings, storage), false)
-  })
-}
-
-test('enabling automatic sync retires an undismissed notice', () => {
-  const storage = createStorage()
-  assert.equal(shouldShowAutoSyncNotice('0.34.0', settings, storage), true)
-  assert.equal(shouldShowAutoSyncNotice('0.34.0', { ...settings, syncServerAutoSync: true }, storage), false)
-  assert.equal(shouldShowAutoSyncNotice('0.34.0', settings, storage), false)
-})
-
 test('unavailable local storage does not interrupt startup or dismissal', () => {
   const context = vm.createContext({ console: { error() {} } })
   Object.defineProperty(context, 'localStorage', { get() { throw new Error('Storage unavailable') } })

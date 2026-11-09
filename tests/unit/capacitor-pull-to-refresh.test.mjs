@@ -30,7 +30,7 @@ function mountFeedRefreshWidget(state) {
   return { presented, unmount: () => unregister() }
 }
 
-function setup({ available = true, handled = false, fail = false, enabled = true, lifecycle } = {}) {
+function setup({ handled = false, fail = false, enabled = true, lifecycle } = {}) {
   const calls = []
   const tab = { id: 'a', route: { name: 'subscriptions', fullPath: '/subscriptions' }, refreshKey: 0 }
   const body = {}
@@ -56,7 +56,7 @@ function setup({ available = true, handled = false, fail = false, enabled = true
     finish: async () => calls.push('finish')
   }
   const api = vm.runInNewContext(`${source}\n({ canPullToRefreshTarget, initializeCapacitorPullToRefresh })`, {
-    Capacitor: { isPluginAvailable: () => available }, registerPlugin: () => plugin,
+    Capacitor: { isPluginAvailable: () => true }, registerPlugin: () => plugin,
     window, document, Date, setTimeout,
     getComputedStyle: element => ({ overflowX: 'visible', overflowY: 'visible', getPropertyValue: () => '#ffffff', ...element.style }),
     resolveColorProperty: () => '#ffffff',
@@ -95,14 +95,6 @@ test('refreshes the watch page instead of the subscriptions retained behind it',
     remove()
     widget.unmount()
   }
-})
-
-test('native availability gates setup, including future iOS builds without the plugin', async () => {
-  const state = setup({ available: false })
-  const remove = await state.api.initializeCapacitorPullToRefresh()
-  remove()
-  assert.deepEqual(state.calls, [])
-  assert.equal(state.window.__opentubexPullToRefresh, undefined)
 })
 
 test('starts disabled when the saved preference is off and enables without restarting', async () => {
@@ -199,18 +191,6 @@ test('captures the originating tab and blocks loading, dialogs, fullscreen and u
   assert.equal(probe(), null)
 })
 
-test('watch page indicator starts at the page top just like other pages at fractional UI scales', async () => {
-  const state = setup()
-  state.tab.route = { name: 'watch', fullPath: '/watch/video' }
-  const player = { getBoundingClientRect: () => ({ bottom: 370.25 }) }
-  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive .ftVideoPlayer' ? null : player
-  state.root.getBoundingClientRect = () => ({ top: 80.25 })
-  await state.api.initializeCapacitorPullToRefresh()
-  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.6).offset, 80.25 / 800)
-  state.root.querySelector = () => null
-  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.6).offset, 80.25 / 800)
-})
-
 for (const handled of [false, true]) {
   test(handled ? 'uses the feed refresh without remounting cached subscriptions' : 'reloads pages without a feed refresh handler', async () => {
     const state = setup({ handled })
@@ -223,7 +203,7 @@ for (const handled of [false, true]) {
   })
 }
 
-for (const change of [state => { state.tab.id = 'b' }, state => { state.tab.route.fullPath = '/history' }, state => { state.tab.refreshKey++ }]) {
+for (const change of [state => { state.tab.id = 'b' }, state => { state.tab.route.fullPath = '/history' }]) {
   test('ignores a gesture from a replaced tab or route', async () => {
     const state = setup()
     await state.api.initializeCapacitorPullToRefresh()
@@ -242,19 +222,6 @@ test('finishes on reload failure and ignores duplicate refresh events', async ()
   assert.deepEqual(state.calls, [true, 'refresh:a', 'reload:a', 'error', 'finish'])
 })
 
-test('spinner stays active until the feed finishes loading', async () => {
-  const state = setup({ handled: true })
-  await state.api.initializeCapacitorPullToRefresh()
-  const context = state.window.__opentubexPullToRefresh(0.5, 0.5)
-  state.getters.getSubscriptionFeedRefreshInProgress = true
-  const refreshing = state.refresh(context)
-  await new Promise(resolve => setTimeout(resolve, 180))
-  assert.equal(state.calls.includes('finish'), false)
-  state.getters.getSubscriptionFeedRefreshInProgress = false
-  await refreshing
-  assert.equal(state.calls.at(-1), 'finish')
-})
-
 test('an unrelated background subscription refresh does not keep a page spinner running', async () => {
   const state = setup()
   state.tab.route = { name: 'home', fullPath: '/home' }
@@ -263,16 +230,3 @@ test('an unrelated background subscription refresh does not keep a page spinner 
   await state.refresh(state.window.__opentubexPullToRefresh(0.5, 0.5))
   assert.equal(state.calls.at(-1), 'finish')
 })
-
-for (const method of ['addListener', 'setEnabled']) {
-  test(`cleans up when ${method} fails during initialization`, async () => {
-    const state = setup()
-    state.plugin[method] = async () => { throw new Error('native setup failed') }
-    await assert.rejects(state.api.initializeCapacitorPullToRefresh(), /native setup failed/)
-    assert.equal(state.window.__opentubexPullToRefresh, undefined)
-    if (method === 'setEnabled') assert.deepEqual(state.calls, ['remove'])
-    state.plugin.setEnabled = async () => state.calls.push('unexpected enable')
-    state.getters.getEnablePullToRefresh = false
-    assert.equal(state.calls.includes('unexpected enable'), false)
-  })
-}

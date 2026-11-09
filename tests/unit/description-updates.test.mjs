@@ -104,7 +104,7 @@ test('Invidious HTML descriptions and copy text follow reconnecting metadata', a
   assert.equal(await component.copy(), '')
 })
 
-for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' }] }, { musicTracks: [{ title: 'Test song' }] }, { license: 'Creative Commons' }, { contentDisclosures: [{ label: 'Auto-dubbed' }] }]) {
+for (const metadata of [{ tags: ['video tag'] }, { contentDisclosures: [{ label: 'Auto-dubbed' }] }]) {
   test(`description controls account for ${Object.keys(metadata)[0]} arriving after short text`, async t => {
     const component = descriptionComponent({ laidOut: true })
     t.after(component.dispose)

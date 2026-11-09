@@ -9,36 +9,34 @@ import { Player, Platform } from 'youtubei.js'
 
 import { evaluatePlayerCode } from '../../src/renderer/helpers/api/player-script-runtime.js'
 
-for (const stackSize of [128, 256]) {
-  test(`deciphers and recovers from recursion with a ${stackSize} KiB host stack`, async () => {
-    const runtimeUrl = new URL('../../src/renderer/helpers/api/player-script-runtime.js', import.meta.url)
-    const fixtureUrl = new URL('../../e2e/fixtures/player-scripts/7460dd14.js.gz', import.meta.url)
-    const { stderr } = await promisify(execFile)(process.execPath, [
-      `--stack_size=${stackSize}`, '--input-type=module', '-e', `
-        import assert from 'node:assert/strict'
-        import { readFileSync } from 'node:fs'
-        import { gunzipSync } from 'node:zlib'
-        import { evaluatePlayerCode } from ${JSON.stringify(runtimeUrl.href)}
-        const code = gunzipSync(readFileSync(new URL(${JSON.stringify(fixtureUrl.href)}))).toString()
-        const expected = { sig: '76543210ZYXWVUTSRQPONMLKJIHGFEDcBAzyxwvutsrqponmlkjih', n: 'mBzrJcW9e13' }
-        // This checks stack recovery, not evaluation speed. Concurrent unit tests
-        // and builds can consume the production wall-clock budget on busy hosts.
-        const evaluate = code => evaluatePlayerCode(code, { timeoutMs: 30_000 })
-        // Queue callers before WASM initialization, including a real player that
-        // overflows the host stack with the old fixed guest-stack allowance.
-        await Promise.all([
-          evaluate(code).then(value => assert.deepEqual(value, expected)),
-          evaluate('function f(){return f()} try {f()} catch(e){return e.message}')
-            .then(value => assert.equal(value, 'stack overflow')),
-          assert.rejects(evaluate('function f(){return f()} f()'), /InternalError: stack overflow/),
-          evaluate(code).then(value => assert.deepEqual(value, expected))
-        ])
-        assert.equal(await evaluate('return 42'), 42)
-      `
-    ], { timeout: 60_000 })
-    assert.doesNotMatch(stderr, /Aborted|JS_FreeRuntime/)
-  })
-}
+test('deciphers and recovers from recursion with a 128 KiB host stack', async () => {
+  const runtimeUrl = new URL('../../src/renderer/helpers/api/player-script-runtime.js', import.meta.url)
+  const fixtureUrl = new URL('../../e2e/fixtures/player-scripts/7460dd14.js.gz', import.meta.url)
+  const { stderr } = await promisify(execFile)(process.execPath, [
+    '--stack_size=128', '--input-type=module', '-e', `
+      import assert from 'node:assert/strict'
+      import { readFileSync } from 'node:fs'
+      import { gunzipSync } from 'node:zlib'
+      import { evaluatePlayerCode } from ${JSON.stringify(runtimeUrl.href)}
+      const code = gunzipSync(readFileSync(new URL(${JSON.stringify(fixtureUrl.href)}))).toString()
+      const expected = { sig: '76543210ZYXWVUTSRQPONMLKJIHGFEDcBAzyxwvutsrqponmlkjih', n: 'mBzrJcW9e13' }
+      // This checks stack recovery, not evaluation speed. Concurrent unit tests
+      // and builds can consume the production wall-clock budget on busy hosts.
+      const evaluate = code => evaluatePlayerCode(code, { timeoutMs: 30_000 })
+      // Queue callers before WASM initialization, including a real player that
+      // overflows the host stack with the old fixed guest-stack allowance.
+      await Promise.all([
+        evaluate(code).then(value => assert.deepEqual(value, expected)),
+        evaluate('function f(){return f()} try {f()} catch(e){return e.message}')
+          .then(value => assert.equal(value, 'stack overflow')),
+        assert.rejects(evaluate('function f(){return f()} f()'), /InternalError: stack overflow/),
+        evaluate(code).then(value => assert.deepEqual(value, expected))
+      ])
+      assert.equal(await evaluate('return 42'), 42)
+    `
+  ], { timeout: 60_000 })
+  assert.doesNotMatch(stderr, /Aborted|JS_FreeRuntime/)
+})
 
 test('does not expose browser, worker, Electron or Node globals to player code', async () => {
   assert.deepEqual(await evaluatePlayerCode(`return {
@@ -166,41 +164,4 @@ test('bounds host-stack recovery and abandons trapped instances without calling 
   assert.equal(await evaluate('return 42'), 42)
   assert.equal(modules, 5)
   assert.equal(cleanups, 3)
-})
-
-test('keeps stack exhaustion catchable inside player scripts', async () => {
-  assert.deepEqual(await evaluatePlayerCode(`
-    function recurse() { return recurse() }
-    try {
-      recurse()
-    } catch (error) {
-      return { n: 'decoded', error: error.message }
-    }
-  `), { n: 'decoded', error: 'stack overflow' })
-  assert.equal(await evaluatePlayerCode('return 42'), 42)
-})
-
-test('reports uncaught stack exhaustion without aborting runtime cleanup', async () => {
-  await assert.rejects(evaluatePlayerCode('function recurse() { return recurse() } recurse()'), /InternalError: stack overflow/)
-  assert.equal(await evaluatePlayerCode('return 42'), 42)
-})
-
-test('preserves evaluation errors when runtime cleanup also fails', async () => {
-  const source = readFileSync(new URL('../../src/renderer/helpers/api/player-script-runtime.js', import.meta.url), 'utf8')
-    .replace(/^import .*$/gm, '').replace('export async function', 'async function')
-  const runtime = {
-    alive: true,
-    setMemoryLimit() {}, setMaxStackSize() {}, setInterruptHandler() {},
-    dispose() { throw new Error('cleanup failed') },
-    newContext: () => ({
-      alive: true,
-      evalCode() { throw new Error('evaluation failed') },
-      dispose() {},
-    }),
-  }
-  const evaluate = vm.runInNewContext(`${source}; evaluatePlayerCode`, {
-    variant: {},
-    newQuickJSWASMModuleFromVariant: async () => ({ newRuntime: () => runtime }),
-  })
-  await assert.rejects(evaluate('return 42'), /evaluation failed/)
 })

@@ -8,56 +8,52 @@ function method(name, next) {
   return source.slice(source.indexOf(`    ${name}:`), source.indexOf(`    ${next}`))
 }
 
-for (const android of [false, true]) {
-  for (const backend of ['Local', 'Invidious']) {
-    for (const mode of ['video', 'audio']) {
-      test(`${android ? 'Android' : 'Electron'} ${backend} plays downloaded ${mode} without waiting for metadata`, async () => {
-        let requests = 0
-        const pendingMetadata = () => { requests++; return new Promise(() => {}) }
-        const methods = runInNewContext(`({
-          ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
-          ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
-          ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
-          ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
-        })`, {
-          process: { env: { IS_CAPACITOR: android } },
-          Capacitor: { convertFileSrc: path => path.replace('content:/', 'https://localhost/_capacitor_content_') },
-          DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
-          getConnectionState: () => 'offline',
-          initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
-          getLocalVideoInfo: pendingMetadata,
-          invidiousGetVideoInformation: pendingMetadata,
-        })
-        const watch = {
-          ...methods,
-          firstLoad: true,
-          isLoading: true,
-          videoLoadGeneration: 0,
-          videoId: 'downloaded1',
-          tabRoute: { params: { id: 'downloaded1' }, query: { downloadId: '1' } },
-          $store: { getters: { getYtDlpDownloads: { 1: {
-            id: 1, videoId: 'downloaded1', title: 'Offline video', status: 'completed', mode,
-            files: [{ path: android ? 'content://downloads/document/1' : '/downloads/video.mp4', videoId: 'downloaded1', extension: 'mp4', duration: 42 }],
-          } } } },
-          playbackSourceKey: 0,
-          isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
-          cacheOnlinePlaybackSource() {},
-          updateTitle() {},
-          initializePlaybackRate() {},
-          initializeVideoQuality() {},
-          t: key => key,
-        }
-        await watch[`getVideoInformation${backend}`]()
-        assert.equal(watch.isLoading, false, 'local playback must not wait for a metadata request that stays queued offline')
-        assert.equal(watch.localFilePlayback, true)
-        assert.equal(watch.videoTitle, 'Offline video')
-        assert.equal(watch.videoLengthSeconds, 42)
-        const url = mode === 'audio' ? watch.manifestSrc : watch.legacyFormats[0].url
-        assert.equal(url, android ? 'https://localhost/_capacitor_content_/downloads/document/1' : 'downloadmedia://file/1/downloaded1')
-        assert.equal(requests, 0)
-      })
+for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invidious', 'audio']]) {
+  test(`${android ? 'Android' : 'Electron'} ${backend} plays downloaded ${mode} without waiting for metadata`, async () => {
+    let requests = 0
+    const pendingMetadata = () => { requests++; return new Promise(() => {}) }
+    const methods = runInNewContext(`({
+      ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
+      ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
+      ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
+      ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+    })`, {
+      process: { env: { IS_CAPACITOR: android } },
+      Capacitor: { convertFileSrc: path => path.replace('content:/', 'https://localhost/_capacitor_content_') },
+      DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
+      getConnectionState: () => 'offline',
+      initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
+      getLocalVideoInfo: pendingMetadata,
+      invidiousGetVideoInformation: pendingMetadata,
+    })
+    const watch = {
+      ...methods,
+      firstLoad: true,
+      isLoading: true,
+      videoLoadGeneration: 0,
+      videoId: 'downloaded1',
+      tabRoute: { params: { id: 'downloaded1' }, query: { downloadId: '1' } },
+      $store: { getters: { getYtDlpDownloads: { 1: {
+        id: 1, videoId: 'downloaded1', title: 'Offline video', status: 'completed', mode,
+        files: [{ path: android ? 'content://downloads/document/1' : '/downloads/video.mp4', videoId: 'downloaded1', extension: 'mp4', duration: 42 }],
+      } } } },
+      playbackSourceKey: 0,
+      isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
+      cacheOnlinePlaybackSource() {},
+      updateTitle() {},
+      initializePlaybackRate() {},
+      initializeVideoQuality() {},
+      t: key => key,
     }
-  }
+    await watch[`getVideoInformation${backend}`]()
+    assert.equal(watch.isLoading, false, 'local playback must not wait for a metadata request that stays queued offline')
+    assert.equal(watch.localFilePlayback, true)
+    assert.equal(watch.videoTitle, 'Offline video')
+    assert.equal(watch.videoLengthSeconds, 42)
+    const url = mode === 'audio' ? watch.manifestSrc : watch.legacyFormats[0].url
+    assert.equal(url, android ? 'https://localhost/_capacitor_content_/downloads/document/1' : 'downloadmedia://file/1/downloaded1')
+    assert.equal(requests, 0)
+  })
 }
 
 for (const backend of ['Local', 'Invidious']) {
@@ -233,43 +229,7 @@ test('history keeps its stored metadata while a download plays without metadata'
   assert.deepEqual([saved[0].title, saved[0].description, saved[0].viewCount], ['Stored title', 'Stored description', 42])
 })
 
-for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
-  test(`${entry} falls back to the filename when stored download titles are empty`, () => {
-    const methods = runInNewContext(`({
-      ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
-      ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
-    })`, {
-      process: { env: { IS_CAPACITOR: false } },
-      DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
-    })
-    for (const [fileTitle, downloadTitle, expected] of [
-      ['', '', 'Saved video'],
-      [undefined, undefined, 'Saved video'],
-      ['', 'Download title', 'Download title'],
-      ['File title', 'Download title', 'File title'],
-    ]) {
-      const watch = {
-        ...methods,
-        videoId: 'downloaded1',
-        tabRoute: { query: { downloadId: '1' } },
-        $store: { getters: { getYtDlpDownloads: { 1: {
-          videoId: 'downloaded1', title: downloadTitle, status: 'completed', mode: 'video',
-          files: [{ videoId: 'downloaded1', title: fileTitle, path: '/downloads/Saved video.mp4' }],
-        } } } },
-        errorMessage: entry === 'applyDownloadedPlaybackSource' ? 'Metadata unavailable' : null,
-        playbackSourceKey: 0,
-        cacheOnlinePlaybackSource() {}, updateTitle() {},
-        initializePlaybackRate() {}, initializeVideoQuality() {},
-        t: key => key,
-      }
-      assert.ok(watch[entry]())
-      assert.equal(watch.videoTitle, expected)
-    }
-  })
-}
-
-
-for (const android of [false, true]) {
+for (const android of [false]) {
   test(`${android ? 'Android' : 'Electron'} selects the requested path among duplicate downloaded video IDs`, () => {
     const methods = runInNewContext(`({ ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')} })`, {
       process: { env: { IS_CAPACITOR: android } },

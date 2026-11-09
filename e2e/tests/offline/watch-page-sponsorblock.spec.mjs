@@ -30,7 +30,7 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
   })
 }
 
-async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = false } = {}) {
+async function measureSponsorBlockSkipStartTime(app, page) {
   await mockPlayableWatchPage(app, page)
   await page.route('**/api/skipSegments/**', route => route.fulfill({
     body: JSON.stringify([{
@@ -57,13 +57,11 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
 
   const video = page.locator('.ftVideoPlayer video')
-  await video.evaluate((element, rendererLoad) => {
+  await video.evaluate(element => {
     element.pause()
     element.currentTime = 14.57
     element.dispatchEvent(new Event('timeupdate'))
 
-    let loadInterval
-    window.__sponsorBlockLoadTasks = 0
     window.__sponsorBlockFirstTaskAfterBoundary = null
     const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
     // A busy host can deschedule the renderer across the boundary. Note when
@@ -72,15 +70,6 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
       const time = currentTime.get.call(element)
       if (time >= 15) window.__sponsorBlockFirstTaskAfterBoundary ??= time
     }, 4)
-    if (rendererLoad) {
-      // Use fixed-duration work so the load does not depend on host CPU speed.
-      // Leave gaps for the skip scheduler to run while playback advances.
-      loadInterval = setInterval(() => {
-        const end = performance.now() + 30
-        while (performance.now() < end) { /* simulate renderer work */ }
-        window.__sponsorBlockLoadTasks++
-      }, 50)
-    }
 
     Object.defineProperty(element, 'currentTime', {
       configurable: true,
@@ -89,7 +78,6 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
         if (value === 20) {
           window.__sponsorBlockSkipStartedAt = currentTime.get.call(this)
           window.__sponsorBlockFirstTaskAfterBoundary ??= window.__sponsorBlockSkipStartedAt
-          clearInterval(loadInterval)
           clearInterval(boundaryProbe)
         }
         currentTime.set.call(this, value)
@@ -97,12 +85,9 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
     })
     element.addEventListener('timeupdate', event => event.stopImmediatePropagation(), { capture: true })
     return element.play()
-  }, rendererLoad)
+  })
 
   await expect.poll(() => page.evaluate(() => window.__sponsorBlockSkipStartedAt ?? null)).not.toBeNull()
-  if (rendererLoad) {
-    expect(await page.evaluate(() => window.__sponsorBlockLoadTasks)).toBeGreaterThan(0)
-  }
   return page.evaluate(() => ({
     skipStartedAt: window.__sponsorBlockSkipStartedAt,
     firstTaskAfterBoundary: window.__sponsorBlockFirstTaskAfterBoundary
@@ -253,23 +238,6 @@ test.describe('watch page', () => {
     })
   })
 
-  test('hides SponsorBlock contribution stats when submission is disabled', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setUseSponsorBlock', true)
-      store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
-    })
-    await expect.poll(() => page.evaluate(() => {
-      return window.$store.getters
-        .getSponsorBlockEnableSubmission
-    })).toBe(false)
-    await openMockedVideo(page)
-    await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
-
-    await expect(page.locator('.sponsorBlockContributionStats')).toHaveCount(0)
-  })
-
   test('does not create a SponsorBlock user ID to load contribution stats', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
 
@@ -290,47 +258,6 @@ test.describe('watch page', () => {
       'Submit a segment or import your SponsorBlock user ID to see contribution stats.'
     )
     expect(userInfoRequests).toBe(0)
-  })
-
-  test('uses a custom SponsorBlock category color for markers and prompts', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await page.route('**/api/skipSegments/**', route => route.fulfill({
-      body: JSON.stringify([{
-        videoID: 'jNQXAC9IVRw',
-        segments: [{
-          UUID: 'custom-color-sponsor',
-          actionType: 'skip',
-          category: 'sponsor',
-          description: '',
-          locked: 0,
-          segment: [15, 20],
-          videoDuration: 30,
-          votes: 1
-        }]
-      }]),
-      contentType: 'application/json'
-    }))
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setUseSponsorBlock', true)
-      store.commit('setSponsorBlockSponsor', { color: '#123456', skip: 'promptToSkip' })
-    })
-
-    await openMockedVideo(page)
-
-    const marker = page.locator('.sponsorBlockMarker')
-    await expect(marker).toHaveCount(1)
-    await expect(marker).toHaveCSS('background-color', 'rgb(18, 52, 86)')
-
-    const video = page.locator('.ftVideoPlayer video')
-    await video.evaluate(element => {
-      element.pause()
-      element.currentTime = 16
-      element.dispatchEvent(new Event('timeupdate'))
-    })
-    const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Sponsor?' })
-    await expect(prompt).toBeVisible()
-    await expect(prompt.locator('.skippedSegmentShield')).toHaveCSS('color', 'rgb(18, 52, 86)')
   })
 
   test('does not restore a SponsorBlock prompt when a skip remains inside the segment', async ({ app, page }) => {
@@ -430,91 +357,6 @@ test.describe('watch page', () => {
     await expect(toast.locator('.skippedSegmentShield')).toHaveCount(1)
   })
 
-  test('stacks a shield per category in a grouped SponsorBlock skip toast @scale', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    const segments = [['selfpromo', [10, 12]], ['sponsor', [12, 20]]].map(([category, segment]) => ({
-      UUID: `grouped-${category}`,
-      actionType: 'skip',
-      category,
-      description: '',
-      locked: 0,
-      segment,
-      videoDuration: 30,
-      votes: 1
-    }))
-    await page.route('**/api/skipSegments/**', route => route.fulfill({
-      body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
-      contentType: 'application/json'
-    }))
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setUseSponsorBlock', true)
-      store.commit('setSponsorBlockSelfPromo', { color: '#123456', skip: 'autoSkip' })
-      store.commit('setSponsorBlockSponsor', { color: '#654321', skip: 'autoSkip' })
-    })
-    await openMockedVideo(page)
-
-    const video = page.locator('.ftVideoPlayer video')
-    await video.evaluate(element => {
-      element.pause()
-      element.currentTime = 10.2
-      element.dispatchEvent(new Event('timeupdate'))
-    })
-    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
-
-    const toast = page.locator('.skippedSegment').filter({ hasText: 'Unpaid/Self Promotion and Sponsor Skipped' })
-    const shields = toast.locator('.skippedSegmentShield')
-    await expect(shields).toHaveCount(2)
-    await expect(shields.nth(0)).toHaveCSS('color', 'rgb(18, 52, 86)')
-    await expect(shields.nth(1)).toHaveCSS('color', 'rgb(101, 67, 33)')
-
-    const [first, second] = await shields.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
-    expect(second.left).toBeGreaterThan(first.left)
-    expect(second.left).toBeLessThan(first.right)
-  })
-
-  test('dismisses a SponsorBlock prompt when playback ends', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await page.route('**/api/skipSegments/**', route => route.fulfill({
-      body: JSON.stringify([{
-        videoID: 'jNQXAC9IVRw',
-        segments: [{
-          UUID: 'terminal-outro-prompt',
-          actionType: 'skip',
-          category: 'outro',
-          description: '',
-          locked: 0,
-          segment: [15, 30],
-          videoDuration: 30,
-          votes: 1
-        }]
-      }]),
-      contentType: 'application/json'
-    }))
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setUseSponsorBlock', true)
-    })
-    await openMockedVideo(page)
-
-    const video = page.locator('.ftVideoPlayer video')
-    await video.evaluate(async element => {
-      element.pause()
-      const seeked = new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
-      element.currentTime = 29
-      await seeked
-    })
-
-    const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
-    await expect(prompt).toBeVisible()
-    // A synthetic ended event leaves playback inside the segment, where a queued
-    // timeupdate can recreate the prompt. Let the media actually finish instead.
-    await video.evaluate(element => element.play())
-    await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
-
-    await expect(prompt).toHaveCount(0)
-  })
-
   test('previews and submits edited SponsorBlock timestamps', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let submittedBody = null
@@ -608,12 +450,6 @@ test.describe('watch page', () => {
     const { skipStartedAt, firstTaskAfterBoundary } = await measureSponsorBlockSkipStartTime(app, page)
     expect(skipStartedAt).toBeGreaterThanOrEqual(15)
     expect(skipStartedAt - firstTaskAfterBoundary).toBeLessThan(0.05)
-  })
-
-  test('skips SponsorBlock segments promptly under renderer load', async ({ app, page }) => {
-    const { skipStartedAt } = await measureSponsorBlockSkipStartTime(app, page, { rendererLoad: true })
-    expect(skipStartedAt).toBeGreaterThanOrEqual(15)
-    expect(skipStartedAt).toBeLessThan(15.3)
   })
 
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {

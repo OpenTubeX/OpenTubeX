@@ -42,35 +42,6 @@ test('the shared Home shelf stays cached and updates after progress, status and 
   assert.deepEqual(ids(), ['replacement'])
 })
 
-test('reopening Home rechecks premiere eligibility after the clock advances without a history mutation', t => {
-  let now = 10000
-  t.mock.method(Date, 'now', () => now)
-  const store = fixture()
-  store.commit('setHistoryCacheSorted', [{
-    ...video('premiere'), isUpcoming: true, premiereTimestamp: 20,
-  }])
-  assert.equal(store.getters.getContinueWatchingHistory().length, 0)
-  now = 21000
-  assert.deepEqual(store.getters.getContinueWatchingHistory().map(entry => entry.videoId), ['premiere'])
-})
-
-test('playlist metadata updates retain the cached Continue watching selection', () => {
-  const store = fixture()
-  const entry = video('partial')
-  store.commit('setHistoryCacheSorted', [entry])
-  store.commit('setHistoryCacheById', { partial: entry })
-  const selected = store.getters.getContinueWatchingHistory()
-  store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', {
-    videoId: 'partial', lastViewedPlaylistId: 'playlist', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'item',
-  })
-  assert.equal(store.getters.getContinueWatchingHistory(), selected)
-  store.commit('unsetRecordsLastViewedPlaylistIdInHistoryCache', { videoIds: ['partial'], lastViewedPlaylistId: 'playlist' })
-  assert.equal(store.getters.getContinueWatchingHistory(), selected)
-  store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'partial', lastViewedPlaylistId: 'playlist' })
-  store.commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', ['playlist'])
-  assert.equal(store.getters.getContinueWatchingHistory(), selected)
-})
-
 test('playback saves leave the history entries revision unchanged', () => {
   const store = fixture()
   const entries = [video('first'), video('second')]

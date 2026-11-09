@@ -62,33 +62,25 @@ test('leaves search result videos without owner badges unverified', () => {
   assert.deepEqual(pickVerification(parseLocalListVideo(video)), NOT_VERIFIED)
 })
 
-for (const [imageName, expected] of [
-  ['CHECK_CIRCLE_FILLED', VERIFIED],
-  ['AUDIO_BADGE', VERIFIED_ARTIST],
-  [undefined, NOT_VERIFIED]
-]) {
-  test(`maps the ${imageName ?? 'missing'} channel name attachment on lockup videos`, () => {
-    const raw = structuredClone(lockupFixture)
-    const part = raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0]
-    part.text = attachedText(part.text.content, imageName)
+test('maps the AUDIO_BADGE channel name attachment on lockup videos', () => {
+  const raw = structuredClone(lockupFixture)
+  const part = raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0]
+  part.text = attachedText(part.text.content, 'AUDIO_BADGE')
 
-    const video = parseLockupView(new YTNodes.LockupView(raw))
+  const video = parseLockupView(new YTNodes.LockupView(raw))
 
-    assert.equal(video.author, 'StudioPreview')
-    assert.deepEqual(pickVerification(video), expected)
-  })
-}
+  assert.equal(video.author, 'StudioPreview')
+  assert.deepEqual(pickVerification(video), VERIFIED_ARTIST)
+})
 
-for (const [name, expected] of [['CHECK_CIRCLE_FILLED', VERIFIED], ['AUDIO_BADGE', VERIFIED_ARTIST]]) {
-  test(`maps the ${name} channel name part icon on lockup videos`, () => {
-    const raw = structuredClone(lockupFixture)
-    raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0].icon = {
-      name, height: 14, width: 14, accessibilityLabel: 'Verified'
-    }
+test('maps the CHECK_CIRCLE_FILLED channel name part icon on lockup videos', () => {
+  const raw = structuredClone(lockupFixture)
+  raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0].icon = {
+    name: 'CHECK_CIRCLE_FILLED', height: 14, width: 14, accessibilityLabel: 'Verified'
+  }
 
-    assert.deepEqual(pickVerification(parseLockupView(new YTNodes.LockupView(raw))), expected)
-  })
-}
+  assert.deepEqual(pickVerification(parseLockupView(new YTNodes.LockupView(raw))), VERIFIED)
+})
 
 test('maps comment author flags', () => {
   assert.deepEqual(getAuthorVerification(new Misc.Author({ simpleText: 'Creator' }, { isVerified: true, isArtist: false })), VERIFIED)

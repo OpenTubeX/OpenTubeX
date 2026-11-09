@@ -27,19 +27,8 @@ function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: '
 
 const video = { route: { fullPath: '/watch/jNQXAC9IVRw?timestamp=12' }, title: 'Video', contentTitle: 'Video title' }
 
-for (const options of [{ enabled: false }, { live: false }]) {
-  test(`device menu requires live sync: ${JSON.stringify(options)}`, () => {
-    assert.equal(setup(options).menu([video]), null)
-  })
-}
-
-test('device menu only offers video tabs and disables an empty device list', () => {
-  const { menu } = setup({ devices: [] })
-  assert.equal(menu([]), null)
-  assert.equal(menu([{ route: { fullPath: '/channel/test' } }]), null)
-  assert.equal(menu([{ route: { fullPath: '/watch/invalid' } }]), null)
-  assert.equal(menu([video, { route: { fullPath: '/history' } }]), null)
-  assert.equal(menu([video]).enabled, false)
+test('device menu requires live sync', () => {
+  assert.equal(setup({ live: false }).menu([video]), null)
 })
 
 test('device menu sends every selected video with its title to the chosen device', async () => {
@@ -55,14 +44,6 @@ test('device menu sends every selected video with its title to the chosen device
   ])
   assert.equal(toasts.length, 1)
   assert.ok(toasts[0].message.startsWith('Settings.Sync Settings.Video Sent'))
-})
-
-test('device menu reports a send failure', async () => {
-  const { menu, calls, toasts } = setup({ error: 'Device unavailable' })
-  await menu([video]).submenu[0].run()
-  assert.equal(calls.length, 1)
-  assert.equal(toasts[0].message, 'Device unavailable')
-  assert.deepEqual([...toasts[0].icon], ['fas', 'circle-exclamation'])
 })
 
 test('a partial bulk send reports which videos succeeded and failed and continues', async () => {

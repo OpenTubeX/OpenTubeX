@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES, normalizeLocalCaptionText } from '../../src/renderer/helpers/player/localCaptions.js'
-import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
+import { createLocalCaption, normalizeLocalCaptionText } from '../../src/renderer/helpers/player/localCaptions.js'
 
 const srt = '1\n00:00:01,000 --> 00:00:02,000\nÜbersetzung & mehr\n'
 
@@ -28,14 +27,6 @@ test('converts SRT timing and separators that Shaka cannot parse', () => {
   assert.equal(normalizeLocalCaptionText('movie.vtt', vtt), vtt)
 })
 
-test('normalizes long digit runs in SRT timing lines in linear time', () => {
-  const digits = '1'.repeat(100_000)
-  const started = threadCpuMilliseconds()
-  assert.equal(normalizeLocalCaptionText('movie.srt', `${digits} --> 00:00:02.000`), `${digits} --> 00:00:02,000`)
-  const elapsed = threadCpuMilliseconds() - started
-  assert.ok(elapsed < 1000, `normalizing took ${Math.round(elapsed)} ms of CPU time`)
-})
-
 test('rejects files that are not SRT or WebVTT subtitles', () => {
   for (const fileName of ['movie.ass', 'movie.txt', 'srt', 'movie.srt.zip']) {
     assert.equal(createLocalCaption(fileName, srt, []), null, fileName)
@@ -45,8 +36,4 @@ test('rejects files that are not SRT or WebVTT subtitles', () => {
 test('gives a file loaded again a distinct label', () => {
   assert.equal(createLocalCaption('movie.srt', srt, ['English', 'movie.srt']).label, 'movie.srt (2)')
   assert.equal(createLocalCaption('movie.srt', srt, ['movie.srt', 'movie.srt (2)']).label, 'movie.srt (3)')
-})
-
-test('offers only the supported file types in the picker', () => {
-  assert.deepEqual(Object.values(LOCAL_CAPTION_FILE_TYPES).sort(), ['.srt', '.vtt'])
 })

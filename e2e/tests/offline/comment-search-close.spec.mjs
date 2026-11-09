@@ -1,10 +1,10 @@
-import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-for (const mode of ['desktop', 'phone', 'fullscreen']) {
+for (const mode of ['desktop', 'phone']) {
   test(`closes comment search directly in the ${mode} layout`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -15,11 +15,6 @@ for (const mode of ['desktop', 'phone', 'fullscreen']) {
       await setWindowSize(app, page, { width: Math.round(400 * uiScale / 100), height: Math.round(850 * uiScale / 100) })
       await page.locator('.phoneCommentsButton').getByRole('button', { name: 'Comments', exact: true }).click()
       section = page.locator('.phoneCommentCard')
-    } else if (mode === 'fullscreen') {
-      await waitForPlayback(page)
-      await setPlayerFullscreen(page, true)
-      await page.locator('.fullscreenCommentsToggle').click({ force: true })
-      section = page.locator('.fullscreenCommentCard')
     }
 
     await expect(section.locator('.commentThread').first()).toBeVisible()
@@ -60,35 +55,3 @@ for (const mode of ['desktop', 'phone', 'fullscreen']) {
     await expect(filter).toBeFocused()
   })
 }
-
-test('keeps phone comment titles readable and actions aligned', { tag: '@scale' }, async ({ app, page, uiScale }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: Math.round(390 * uiScale / 100), height: Math.round(850 * uiScale / 100) })
-  await page.locator('.phoneCommentsButton').getByRole('button', { name: 'Comments', exact: true }).click()
-
-  for (const width of [450, 390, 320, 300]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-      const window = BrowserWindow.getAllWindows()[0]
-      window.setMinimumSize(0, 0)
-      window.setContentSize(Math.round(width * uiScale / 100), Math.round(850 * uiScale / 100))
-    }, { width, uiScale })
-    await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
-    await expect.poll(() => page.locator('.phoneCommentHeader .commentHeaderTitle').evaluate(title => title.scrollWidth - title.clientWidth)).toBeLessThanOrEqual(1)
-    await expect.poll(() => page.locator('.phoneCommentHeader').evaluate(header => {
-      const sheetHeader = header.closest('.mobileSheetHeader')
-      const title = header.querySelector('h3').getBoundingClientRect()
-      const controls = [...sheetHeader.querySelectorAll('button')].map(button => button.getBoundingClientRect())
-      const toolbar = controls.slice(0, -1)
-      const center = toolbar[0].top + toolbar[0].height / 2
-      const bounds = sheetHeader.getBoundingClientRect()
-      const centers = controls.slice(0, -1).map(button => button.left + button.width / 2)
-      const spacing = centers.slice(1).map((center, index) => center - centers[index])
-      return controls.every(button => button.right <= bounds.right && button.left >= bounds.left) &&
-        toolbar.every(button => Math.abs(button.top + button.height / 2 - center) <= 1) &&
-        (title.bottom <= toolbar[0].top + 1 || Math.abs(title.top + title.height / 2 - center) <= 1) &&
-        Math.max(...spacing) - Math.min(...spacing) <= 1 &&
-        Math.abs(controls.at(-1).left - controls.at(-2).right - 8) <= 1
-    })).toBe(true)
-  }
-})

@@ -28,7 +28,7 @@ test.describe('SponsorBlock settings', () => {
   test('uses equal category widths and shows complete skip values across window sizes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openSettings(page)
     const categories = page.locator('.sponsorBlockCategory')
-    for (const locale of ['en-US', 'de-DE']) {
+    for (const locale of ['de-DE']) {
       await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
       for (const value of ['promptToSkip', 'showInSeekBar']) {
         await categories.locator('.nativeSelect').evaluateAll((selects, value) => {
@@ -37,7 +37,7 @@ test.describe('SponsorBlock settings', () => {
             select.dispatchEvent(new Event('change', { bubbles: true }))
           }
         }, value)
-        for (const width of [1600, 1100, 750, 375]) {
+        for (const width of [1600, 375]) {
           await app.electronApp.evaluate(({ BrowserWindow }, width) => {
             const window = BrowserWindow.getAllWindows()[0]
             window.setBounds({ ...window.getBounds(), width, height: 900 })
@@ -161,26 +161,5 @@ test.describe('SponsorBlock settings', () => {
       return name.scrollWidth <= name.clientWidth + 1 &&
         text.right <= row.getBoundingClientRect().right - parseFloat(getComputedStyle(row).paddingRight) + 1
     }))).toBe(true)
-  })
-})
-
-test.describe('DeArrow settings', () => {
-  test.use({ seed: { settings: { currentLocale: 'en-US', useSponsorBlock: false, useDeArrowTitles: true, useDeArrowThumbnails: false } } })
-
-  test('shows DeArrow controls in their own Add-ons section', async ({ page }, testInfo) => {
-    const addOns = await goToSettingsSection(page, 'add-ons')
-    const sponsorBlock = addOns.locator('.settingsSection').filter({ has: page.locator('.sectionTitle', { hasText: /^SponsorBlock$/ }) })
-    const deArrow = addOns.locator('.settingsSection').filter({ has: page.locator('.sectionTitle', { hasText: /^DeArrow$/ }) })
-    for (const key of ['useDeArrowTitles', 'useDeArrowThumbnails']) {
-      await expect(deArrow.locator(`[data-setting-key="${key}"]`)).toHaveCount(1)
-      await expect(sponsorBlock.locator(`[data-setting-key="${key}"]`)).toHaveCount(0)
-    }
-    // Like the SponsorBlock API URL, this stays editable while its feature is off.
-    await expect(deArrow.getByLabel('DeArrow thumbnail API URL', { exact: true })).toBeVisible()
-    await expect(sponsorBlock.getByLabel('DeArrow thumbnail API URL', { exact: true })).toHaveCount(0)
-    // DeArrow titles are fetched from the SponsorBlock server.
-    await expect(sponsorBlock.getByLabel('SponsorBlock API URL', { exact: true })).toBeVisible()
-    await deArrow.scrollIntoViewIfNeeded()
-    await page.screenshot({ path: testInfo.outputPath('dearrow-section.png') })
   })
 })

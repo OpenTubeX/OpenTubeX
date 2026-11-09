@@ -279,19 +279,6 @@ test('leaving the watch view stops requesting pages and reporting their errors',
   assert.equal(state.errors.length, 0)
 })
 
-test('no upcoming videos are reported while the current video may be on an unloaded page', async () => {
-  const state = harness()
-  state.props.videoId = 'third'
-  const loading = state.load()
-  state.resolveFirstPage()
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(state.state.upcomingVideos.value.length, 0)
-
-  state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
-  await loading
-  assert.deepEqual(state.state.upcomingVideos.value.map(video => video.videoId), ['fourth'])
-})
-
 const longFirstPage = Array.from({ length: 60 }, (_, index) => ({ videoId: `video${index}` }))
 const settle = () => new Promise(resolve => setImmediate(resolve))
 

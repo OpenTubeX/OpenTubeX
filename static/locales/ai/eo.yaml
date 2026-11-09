@@ -281,6 +281,9 @@ User Playlists:
   Remove Unavailable Videos Confirmation: 'Ĉu forigi nedisponeblajn videaĵojn? Trovitaj: {count}. Ne kontroleblaj: {uncertain}. Nekontrolitaj videaĵoj estos konservitaj.'
   Pin to Navigation: Alpingli al navigado
   Unpin from Navigation: Malalpingli el navigado
+  Pin to Top: "Fiksi supre"
+  Unpin from Top: "Malfiksi de supre"
+  Pinned to Top: "Fiksita supre"
   Reorder Hint: Trenu aŭ uzu la sagoklavojn por reordigi
   SinglePlaylistView:
     Retry: Reprovi
@@ -1533,14 +1536,15 @@ Tutorial:
     Action: Enporti datumojn
     Not Now: Ne nun
 About:
+  Get OpenTubeX: Akiri OpenTubeX
+  Community: Komunumo
+  Contribute: Kontribui
   Documentation: Dokumentaro
   Downloads: Elŝutoj
   Changelog: Ŝanĝoprotokolo
   Commit: Enmeto
-  Fluxer: Aliĝu al nia Fluxer-komunumo
   Matrix: Matrix
   Email: Retpoŝto
-  Support the development of OpenTubeX: "Subtenu la disvolviĝon de OpenTubeX"
 Profile:
   Customization: Personecigo
   Manage Profile Subscriptions: Administri profilajn abonojn

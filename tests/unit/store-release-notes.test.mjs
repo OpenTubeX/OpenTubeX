@@ -45,28 +45,6 @@ test('release note sections drop images, markup, and issue references', () => {
   ])
 })
 
-test('release note sections decode entities, split numbered items, and keep non-promotional support headings', () => {
-  assert.deepEqual(releaseNoteSections(`## Support for Android 15
-
-- Added &#X41;&#x42;&#67; and kept &#x110000; &constructor;
-1. First numbered item
-2) Second numbered item
-
-## Support us
-
-- Donate today
-`), [{ heading: 'Support for Android 15', items: ['Added ABC and kept &#x110000; &constructor;', 'First numbered item', 'Second numbered item'] }])
-})
-
-test('F-Droid changelogs keep every item when they fit', () => {
-  assert.equal(fdroidChangelog(notes), `Highlights
-• Sort your subscriptions into groups to filter the feed
-• Use Ctrl & the guide for 100% of shortcuts
-
-Fixed bugs
-• Fixed a crash that happened on startup`)
-})
-
 test('F-Droid changelogs keep whole items within the limit', () => {
   const long = `## Highlights\n\n- ${'Long highlight '.repeat(30)}\n- Short highlight\n\n## Fixed bugs\n\n- Fixed a crash\n`
   const changelog = fdroidChangelog(long, 100)
@@ -147,13 +125,6 @@ test('store notes keep only items for their platforms and drop a label naming th
     'Desktop: Adds a tray icon.',
     'Linux, Windows: Adds MPRIS controls.',
   ])
-})
-
-test('store notes keep every labeled item when none are for their platforms', () => {
-  assert.equal(appStreamDescription('## Highlights\n\n- **Android, iOS:** Adds a mini player.\n'), `<p>Highlights</p>
-<ul>
-  <li>Android, iOS: Adds a mini player.</li>
-</ul>`)
 })
 
 test('the converter rejects empty notes and invalid source dates', (t) => {

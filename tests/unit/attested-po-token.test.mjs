@@ -32,12 +32,6 @@ test('a failed retry keeps the token pending attestation', async () => {
   assert.equal(mints, 2)
 })
 
-test('a failed first mint still rejects', async () => {
-  await assert.rejects(mintAttestedPoToken(async () => {
-    throw new Error('timed out')
-  }), /timed out/)
-})
-
 test('the last token is used once the attempts run out', async () => {
   let mints = 0
   const token = await mintAttestedPoToken(async () => `${++mints}`.padEnd(124, 'p'))

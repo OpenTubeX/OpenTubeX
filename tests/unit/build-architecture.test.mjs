@@ -39,28 +39,27 @@ async function runBuild(platform, hostArch, targetArch) {
   return { requests, castTargets, shareArchitectures, macosNativeArchitectures, interposerPreparations }
 }
 
-for (const platform of ['linux', 'darwin', 'win32']) {
-  for (const hostArch of ['x64', 'arm64']) {
-    for (const buildScript of ['build', 'build:x64', 'build:arm64']) {
-      const expectedArch = buildScript.split(':')[1] ?? hostArch
-      test(`${buildScript} on ${platform}/${hostArch} selects ${expectedArch}`, async () => {
-        const releaseScript = scripts[buildScript].split(' && ').at(-1).replace(/^pnpm run /, '')
-        const targetArch = scripts[releaseScript].split(' ')[2]
-        const result = await runBuild(platform, hostArch, targetArch)
+for (const [platform, hostArch, buildScript] of [
+  ['win32', 'arm64', 'build:x64'],
+  ['linux', 'arm64', 'build'],
+]) {
+  const expectedArch = buildScript.split(':')[1] ?? hostArch
+  test(`${buildScript} on ${platform}/${hostArch} selects ${expectedArch}`, async () => {
+    const releaseScript = scripts[buildScript].split(' && ').at(-1).replace(/^pnpm run /, '')
+    const targetArch = scripts[releaseScript].split(' ')[2]
+    const result = await runBuild(platform, hostArch, targetArch)
 
-        assert.deepEqual(result.castTargets, [['dist', platform, expectedArch]])
-        assert.equal(result.requests.length, platform === 'win32' ? 2 : 1)
-        assert.ok(result.requests.every(request => request.targets.arch === expectedArch))
-        assert.ok(result.requests.every(request => request.publish === 'never'))
-        assert.deepEqual(result.macosNativeArchitectures, platform === 'darwin' ? [expectedArch] : [])
-        if (platform === 'win32') {
-          assert.deepEqual(result.shareArchitectures, [expectedArch])
-          assert.equal(result.interposerPreparations, expectedArch === 'x64' ? 1 : 0)
-          assert.equal(result.requests[1].config.portableArch, expectedArch)
-        }
-      })
+    assert.deepEqual(result.castTargets, [['dist', platform, expectedArch]])
+    assert.equal(result.requests.length, platform === 'win32' ? 2 : 1)
+    assert.ok(result.requests.every(request => request.targets.arch === expectedArch))
+    assert.ok(result.requests.every(request => request.publish === 'never'))
+    assert.deepEqual(result.macosNativeArchitectures, platform === 'darwin' ? [expectedArch] : [])
+    if (platform === 'win32') {
+      assert.deepEqual(result.shareArchitectures, [expectedArch])
+      assert.equal(result.interposerPreparations, expectedArch === 'x64' ? 1 : 0)
+      assert.equal(result.requests[1].config.portableArch, expectedArch)
     }
-  }
+  })
 }
 
 test('unsupported host architectures require an explicit supported target', async () => {

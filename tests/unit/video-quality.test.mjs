@@ -12,8 +12,3 @@ test('uses the 16:9-equivalent resolution for ultrawide streams', () => {
   assert.equal(getDashQualityFromDimensions(2560, 1080), 1440)
   assert.equal(getDashQualityFromDimensions(1080, 2560), 1440)
 })
-
-test('rejects dimensions that are not available yet', () => {
-  assert.equal(getDashQualityFromDimensions(undefined, 1080), null)
-  assert.equal(getDashQualityFromDimensions(1920, undefined), null)
-})

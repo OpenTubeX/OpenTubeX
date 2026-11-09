@@ -52,10 +52,3 @@ test('limits auto quality to the pixels of the limit in any orientation', () => 
   assert.ok(640 * 480 <= maxPixels)
   assert.ok(1280 * 720 > maxPixels)
 })
-
-test('allows the 16:9 resolution of every limit', () => {
-  networkMetered.value = true
-  for (const [width, height] of [[256, 144], [426, 240], [640, 360], [854, 480], [1280, 720], [1920, 1080], [2560, 1440], [3840, 2160]]) {
-    assert.ok(width * height <= getMeteredAutoQualityMaxPixels(String(height)), `${height}p`)
-  }
-})

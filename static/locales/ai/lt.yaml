@@ -265,6 +265,9 @@ User Playlists:
   This playlist is private or does not exist.: "Šis grojaraštis yra privatus arba neegzistuoja."
   Pin to Navigation: "Prisegti prie naršymo"
   Unpin from Navigation: "Atsegti nuo naršymo"
+  Pin to Top: "Prisegti viršuje"
+  Unpin from Top: "Atsegti nuo viršaus"
+  Pinned to Top: "Prisegta viršuje"
   Reorder Hint: Vilkite arba naudokite rodyklių klavišus, kad pakeistumėte tvarką
   Add new videos to the top (custom order): "Pridėti naujus vaizdo įrašus viršuje (pasirinktinė tvarka)"
   Shuffle videos by default: "Pagal numatytuosius nustatymus maišyti vaizdo įrašus"
@@ -1773,6 +1776,9 @@ Tutorial:
     Action: Importuoti duomenis
     Not Now: Ne dabar
 About:
+  Get OpenTubeX: Gauti OpenTubeX
+  Community: Bendruomenė
+  Contribute: Prisidėti
   Documentation: Dokumentacija
   Downloads: Atsisiuntimai
   Changelog: Pakeitimų žurnalas
@@ -1780,12 +1786,10 @@ About:
   Licensed under the {licenseLink}: Platinama pagal {licenseLink} licenciją
   AGPLv3: AGPLv3
   Discussions: Diskusijos
-  Fluxer: Prisijunkite prie mūsų „Fluxer“ bendruomenės
   Matrix: Matrix
   Email: El. paštas
   Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
-  Support the development of OpenTubeX: "Paremkite OpenTubeX kūrimą"
 Profile:
   Customization: Tinkinimas
   Manage Profile Subscriptions: Tvarkyti profilio prenumeratas

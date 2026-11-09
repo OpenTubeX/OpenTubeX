@@ -69,8 +69,18 @@ export function playlistKey(playlist) {
  * @param {string} sortBy a USER_PLAYLISTS_SORT_BY_OPTIONS value
  * @param {string[]} customOrder playlist keys in the custom order
  * @param {Intl.Collator} collator
+ * @param {string[]} [pinnedIds] playlist keys shown above the others, each group in the chosen order
  */
-export function sortUserPlaylists(playlists, sortBy, customOrder, collator) {
+export function sortUserPlaylists(playlists, sortBy, customOrder, collator, pinnedIds = []) {
+  if (pinnedIds.length > 0) {
+    const pinned = new Set(pinnedIds)
+    const sorted = sortUserPlaylists(playlists, sortBy, customOrder, collator)
+    return [
+      ...sorted.filter(playlist => pinned.has(playlistKey(playlist))),
+      ...sorted.filter(playlist => !pinned.has(playlistKey(playlist))),
+    ]
+  }
+
   if (!Object.values(USER_PLAYLISTS_SORT_BY_OPTIONS).includes(sortBy)) {
     console.error(`Unknown sortBy: ${sortBy}`)
     return playlists

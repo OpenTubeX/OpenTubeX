@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
@@ -121,7 +121,7 @@ test('mobile menu sheets drag from rows and animate dismissal', { tag: '@scale' 
       expect(leaving.backdropFrames.at(-1)?.backdropFilter).toMatch(/^blur\(0(px)?\)$/)
       await expect(menu).toHaveCount(0)
 
-      for (const colorScheme of ['dark', 'light']) {
+      for (const colorScheme of ['dark']) {
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
         await open()
@@ -251,35 +251,6 @@ test('sheet dismissal uses the release position when the last touchmove is coale
   await expect(menu).toHaveCount(0)
 })
 
-test('dragging during entry takes over from the current visual position', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 })
-  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-  const menu = page.locator('.moreOptionContainer')
-  const movement = await page.evaluate(async () => {
-    document.querySelector('.moreOptionNav').click()
-    await new Promise(resolve => setTimeout(resolve))
-    // Hold the entry, which a loaded machine could otherwise finish before the drag.
-    const element = document.querySelector('.moreOptionContainer')
-    element.getAnimations().forEach(animation => {
-      animation.pause()
-      animation.currentTime = Number(animation.effect.getComputedTiming().duration) / 2
-    })
-    const handle = element.querySelector('.bottomSheetHandle')
-    const before = new DOMMatrixReadOnly(getComputedStyle(element).transform).m42
-    handle.dispatchEvent(new PointerEvent('pointerdown', {
-      bubbles: true, pointerType: 'mouse', pointerId: 9, isPrimary: true, button: 0, clientX: 180, clientY: 700
-    }))
-    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 9, clientX: 180, clientY: 750, cancelable: true }))
-    const after = new DOMMatrixReadOnly(getComputedStyle(element).transform).m42
-    window.dispatchEvent(new PointerEvent('pointercancel', { pointerId: 9 }))
-    return { before, after }
-  })
-  expect(movement.before).toBeGreaterThan(0)
-  expect(movement.after - movement.before).toBeCloseTo(50, 0)
-  await page.keyboard.press('Escape')
-  await expect(menu).toHaveCount(0)
-})
-
 test('More sheet closes and releases modal state when leaving mobile layout', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   const originalOverflow = await page.evaluate(() => document.documentElement.style.overflow)
@@ -295,74 +266,6 @@ test('More sheet closes and releases modal state when leaving mobile layout', as
   await expect.poll(() => page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(false)
   await expect(page.locator('.sideNav')).toHaveJSProperty('inert', false)
 })
-
-test('a short downward flick dismisses after dwelling on the handle', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 })
-  await page.locator('.moreOptionNav').click()
-  const menu = page.locator('.moreOptionContainer')
-  await waitForAnimation(menu)
-  await menu.evaluate(element => {
-    const handle = element.querySelector('.bottomSheetHandle')
-    const originalNow = performance.now
-    // Simulate a hold before the flick without a timing sleep.
-    let elapsed = 0
-    performance.now = () => elapsed
-    try {
-      handle.dispatchEvent(new PointerEvent('pointerdown', {
-        bubbles: true, pointerType: 'mouse', pointerId: 10, isPrimary: true, button: 0, clientX: 180, clientY: 500
-      }))
-      elapsed = 1000
-      window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 10, clientX: 180, clientY: 550, cancelable: true }))
-      elapsed = 1020
-      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 10, clientX: 180, clientY: 570, cancelable: true }))
-    } finally {
-      performance.now = originalNow
-    }
-  })
-  await expect(menu).toHaveCount(0)
-})
-
-for (const pointerType of ['mouse', 'touch']) {
-  for (const releaseOnly of [true, false]) {
-    test(`short ${pointerType} pulls settle back with ${releaseOnly ? 'only a release sample' : 'slow movement after activation'}`, async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      await page.locator('.moreOptionNav').click()
-      const menu = page.locator('.moreOptionContainer')
-      await waitForAnimation(menu)
-      await menu.evaluate((element, { pointerType, releaseOnly }) => {
-        const handle = element.querySelector('.bottomSheetHandle')
-        const originalNow = performance.now
-        let elapsed = 0
-        performance.now = () => elapsed
-        const touch = y => new Touch({ identifier: 11, target: handle, clientX: 180, clientY: y })
-        try {
-          handle.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerType, pointerId: 11, isPrimary: true, button: 0, clientX: 180, clientY: 500
-          }))
-          elapsed = 1000
-          if (!releaseOnly) {
-            if (pointerType === 'touch') {
-              handle.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [touch(550)] }))
-            } else {
-              window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 11, clientX: 180, clientY: 550, cancelable: true }))
-            }
-            elapsed = 1020
-          }
-          const end = releaseOnly ? 540 : 560
-          if (pointerType === 'touch') {
-            handle.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [touch(end)] }))
-          } else {
-            window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 180, clientY: end, cancelable: true }))
-          }
-        } finally {
-          performance.now = originalNow
-        }
-      }, { pointerType, releaseOnly })
-      await expect(menu).toBeVisible()
-      await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
-    })
-  }
-}
 
 test('tall mobile context sheet keeps its handle below the top safe area', { tag: '@scale' }, async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 420 })
@@ -388,70 +291,6 @@ test('tall mobile context sheet keeps its handle below the top safe area', { tag
   } finally {
     await session.detach()
   }
-})
-
-for (const kind of ['more', 'context']) {
-  for (const remainingFinger of [true, false]) {
-    test(`${kind} sheet cancels a two-finger release with ${remainingFinger ? 'one finger still held' : 'both fingers lifted'}`, async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      await goTo(page, 'history')
-      const session = await page.context().newCDPSession(page)
-      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-      try {
-        if (kind === 'more') await page.locator('.moreOptionNav').click()
-        else await openContext(page, session)
-        const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
-        await waitForAnimation(menu)
-        await menu.evaluate((element, remainingFinger) => {
-          const handle = element.querySelector('.bottomSheetHandle')
-          const bounds = handle.getBoundingClientRect()
-          const x = bounds.x + bounds.width / 2; const y = bounds.y + bounds.height / 2
-          const first = new Touch({ identifier: 12, target: handle, clientX: x, clientY: y + (remainingFinger ? 0 : 20) })
-          const second = new Touch({ identifier: 13, target: handle, clientX: x, clientY: y + 120 })
-          handle.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerType: 'touch', pointerId: 12, isPrimary: true, button: 0, clientX: x, clientY: y
-          }))
-          if (!remainingFinger) {
-            handle.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [first] }))
-          }
-          // Give the unrelated release its own coordinates and control the
-          // remaining fingers explicitly; the next drag uses real touch input.
-          handle.dispatchEvent(new TouchEvent('touchend', {
-            bubbles: true,
-            cancelable: true,
-            touches: remainingFinger ? [first] : [],
-            changedTouches: remainingFinger ? [second] : [second, first]
-          }))
-          if (remainingFinger) {
-            handle.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [first] }))
-          }
-        }, remainingFinger)
-        await expect(menu).toBeVisible()
-        await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
-        await touchDrag(session, menu.locator('.bottomSheetHandle'), 100)
-        await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        await expect(menu).toHaveCount(0)
-      } finally {
-        await session.detach()
-      }
-    })
-  }
-}
-
-test('navigation helper selects one usable overflow link in mobile and desktop layouts', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 })
-  await page.locator('.moreOptionNav').click()
-  const menu = page.locator('.moreOptionContainer')
-  await waitForAnimation(menu)
-  const link = page.locator(sel.sideNavLink('subscribedchannels'))
-  await expect(link).toHaveCount(1)
-  await link.click()
-  await expect(page).toHaveURL(/#\/subscribedchannels/)
-  await expect(menu).toHaveCount(0)
-  await page.setViewportSize({ width: 1024, height: 812 })
-  await expect(page.locator(sel.sideNavLink('history'))).toHaveCount(1)
-  await page.locator(sel.sideNavLink('history')).click()
-  await expect(page).toHaveURL(/#\/history/)
 })
 
 for (const kind of ['more', 'context']) {

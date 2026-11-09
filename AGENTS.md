@@ -47,15 +47,30 @@ Record a follow-up instead only when it lies in an unrelated area, is larger or 
   3. Land the fix as described above, then delete the entry's line from the issue. It comes back if the test flakes again.
 - On PRs, the `repeat` E2E shards run changed offline tests five times without retries. If one fails, the PR's own test is flaky. Fix it in the PR; do not rerun the job until it passes.
 - PRs do not run the full offline E2E suite; it runs after each push to `development`. Run the affected offline tests locally before merging. After merging a PR, watch the E2E Tests run that covers its merge commit (`gh run list --workflow e2e.yml --event push`). Newer pushes cancel older runs, so whenever the run you follow is cancelled, switch to the newest run whose head contains your merge (`git merge-base --is-ancestor <merge-sha> <head-sha>`). Stop at the first one that finishes without being cancelled; it covers every merge before its head. When it fails, find the merge that broke it and fix it on `development` as described above.
-- For bugfixes, demonstrate the failure first, add a regression test where practical, and verify the fix. Verify new features with checks appropriate to the affected code. If automated verification is impractical, explain why and report the evidence used, unless the user waived verification.
+- For bugfixes, demonstrate the failure first and verify the fix. Add a regression test only when it meets the test bar below; otherwise report the evidence (reproduction, screenshot, recording) in the PR. Verify new features with checks appropriate to the affected code. If automated verification is impractical, explain why and report the evidence used, unless the user waived verification.
 - When changing sync-server collections or capabilities, follow `e2e/sync-server/README.md`.
+
+### Test bar
+
+Each test costs CI time and flake risk on every run, so add one only when its failure would mean:
+
+- lost or corrupted user data (databases, migrations, sync protocol and conflicts, backups, history, playlists, subscriptions, profiles, persisted settings)
+- a security or privacy problem (URL and protocol allowlists, IPC guards, paths, CSP, credentials, permissions, requests to unexpected hosts)
+- a broken core flow (playback, quality, audio and caption selection, search, feeds, channel and playlist pages, navigation and tabs, mini player, downloads, casting, sync, app launch), including one that becomes unusable on phones or at narrow widths
+- wrong parsing of external formats (YouTube, Innertube, Invidious, RSS and SABR responses, subtitles, imports, takeout files)
+- a race, cancellation, or recovery bug that leaves the app stuck, duplicated, or showing stale data
+- lost keyboard or focus access to a core control, or content in a core flow that becomes clipped, hidden, or unreachable
+- a broken release, installer, portable mode, or update metadata
+
+Do not add tests that assert exact cosmetic styling (colors, spacing, alignment, radii, icon glyphs, font weights, hover styles, label wording), restate constants, defaults, configuration, or source text, mirror mocks, or assert wall-clock durations. Show cosmetic fixes with a screenshot in the PR instead. Prefer a unit test over an E2E test when the logic can be tested on its own, extending an existing test over adding a new one, and one representative case over looping across icon packs, themes, locales, widths, or near-identical inputs unless another case takes a different code path.
 
 ### E2E
 
 - Before running E2E tests, `dist-e2e` must reflect the current sources, assets, and build configuration. Run `pnpm run test:e2e:pack` if it is missing, any of those changed, or its freshness is uncertain, including when running unchanged tests against application changes.
 - For filtered runs, invoke Playwright directly, for example `pnpm exec playwright test -c e2e/playwright.config.mjs e2e/tests/network/channel.spec.mjs --project=network --grep "test name"`. Never use `pnpm run test:e2e -- ...`; the extra `--` breaks argument parsing and can launch the full suite.
+- Never run a whole E2E project locally; it takes one to two hours and loads a machine other sessions share. This includes changes to shared components, theme tokens, or fixtures, dependency and Playwright upgrades, and audits. Pick specs by grepping for the changed component, class, token, or helper and for assertions on the changed behavior; for changes that affect every test, start with one spec per area. If a change still needs the full suite, push the branch and run `gh workflow run e2e.yml --ref <branch> -f project=offline`, or ask the user.
 - On a user's graphical desktop, keep test windows out of their session. On Linux with Xvfb installed, each worker starts a private display automatically; do not set `E2E_XVFB=0`. Otherwise install Xvfb or use another private X server. Not needed in CI or headless environments.
-- Tag offline tests that assert geometry, scrolling, measurements, positioning, reflow, or animation boundaries with `@scale` instead of looping over scales; the `offline-95` and `offline-125` projects rerun them, and the `uiScale` fixture holds the current value.
+- Tag an offline test with `@scale` only when fractional UI Scale can break what it measures (scroll-range clamping, virtualized lists, drag and position math, measured overflow), instead of looping over scales; the `offline-95` and `offline-125` projects rerun them, so each tag triples the test's cost, and the `uiScale` fixture holds the current value.
 - Put performance checks in `*-performance.spec.mjs` files or tag them `@performance`. Prefer deterministic work counts over wall-clock budgets. The performance project runs nightly, not on PRs; compare timings between builds with `pnpm run test:performance` when a change targets performance.
 
 ### Android
@@ -82,7 +97,7 @@ Record a follow-up instead only when it lies in an unrelated area, is larger or 
 - Overlay scrollbars are positioned against their scroll container, so never make one `position: static`; use `position: relative` to keep it in normal flow. The app logs an error for static containers and E2E tests fail on it.
 - Keep headers outside the scroll viewport so content and scrollbars cannot pass behind them; prefer a fixed header with a separate inner scroller.
 - When switching menu views, restore the viewport position of elements with overlay scrollbars with `restoreOverlayScrollTop`. After DOM updates that reduce the scroll range, call `clampOverlayScrollTop` with the rendered content end, observing a stable content wrapper when practical. Do not rely on focus, DOM replacement, or a possibly stale `scrollHeight`.
-- Cover every relevant range-reducing trigger (resize, responsive layout changes, searching, filtering, collapsing, removing, replacing content) with regression tests: scroll to the bottom first, then verify valid offsets, no empty space, and scrollbar thumb/overflow state matching the new range.
+- Cover the range-reducing triggers a surface supports (resize, responsive layout changes, searching, filtering, collapsing, removing, replacing content) with regression tests, extending the surface's existing scroll-range test when there is one: scroll to the bottom first, then verify valid offsets, no empty space, and scrollbar thumb/overflow state matching the new range.
 
 ## Dependencies and data formats
 

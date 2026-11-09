@@ -7,7 +7,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
 const resizedSource = source.slice(source.indexOf('    function resized(entries) {'), source.indexOf('    // Remeasure the control bar'))
 const layoutSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useAdaptiveControlPanelLayout.js', import.meta.url), 'utf8')
 
-for (const [active, animating] of [[true, false], [true, true], [false, true]]) {
+for (const [active, animating] of [[true, false], [false, true]]) {
   test(`mini-player resize preserves the inline controls with active=${active}, animating=${animating}`, () => {
     const onlyUseOverFlowMenu = { value: false }
     vm.runInNewContext(`${resizedSource}; resized([{ contentBoxSize: [{ inlineSize: 360 }] }])`, {

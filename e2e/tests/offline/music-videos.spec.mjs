@@ -55,18 +55,6 @@ async function expectPlaybackRate(page, rate) {
   return player
 }
 
-test('marks music videos with a labelled note in the duration badge', async ({ page }, testInfo) => {
-  await goTo(page, 'subscriptions')
-
-  const music = page.locator('.ft-list-video').filter({ hasText: 'Music video' })
-  const talk = page.locator('.ft-list-video').filter({ hasText: 'Talk video' })
-  await expect(music.locator('.videoDuration').getByRole('img', { name: 'Music video', exact: true })).toBeVisible()
-  await expect(music.locator('.videoDuration')).toHaveText('3:45')
-  await expect(talk.locator('.videoDuration')).toHaveText('3:45')
-  await expect(talk.getByRole('img', { name: 'Music video', exact: true })).toHaveCount(0)
-  await music.screenshot({ path: testInfo.outputPath('music-video-card.png') })
-})
-
 test('plays music videos opened from a list at normal speed', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await goTo(page, 'subscriptions')

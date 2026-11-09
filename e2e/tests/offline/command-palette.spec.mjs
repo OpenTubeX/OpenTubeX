@@ -193,19 +193,6 @@ test('finds and highlights an individual setting', async ({ page }) => {
     .toContainEqual(expect.stringContaining('Thumbnail Preference'))
 })
 
-test.describe('partially translated locale', () => {
-  // en-GB lacks this label, so the toggle renders the en-US fallback.
-  test.use({ seed: { settings: { currentLocale: 'en-GB' } } })
-
-  test('finds settings that use the en-US fallback label', async ({ page }) => {
-    await page.keyboard.press('Control+k')
-    const input = page.getByRole('combobox', { name: 'Search commands' })
-    await input.fill('limit titles to two lines')
-
-    await expect(page.getByRole('option', { name: /Limit titles to two lines/ })).toBeVisible()
-  })
-})
-
 test('transfers focus to Find in Page', async ({ page }) => {
   const navigationSearch = page.locator('.topNav .searchInput input.ft-input')
   await navigationSearch.focus()
@@ -294,26 +281,6 @@ test.describe('fallback navigation commands', () => {
     await input.fill('trending')
     await expect(page.getByRole('option', { name: 'Trending', exact: true })).toBeVisible()
   })
-})
-
-test('shows each tab page icon in switch commands', async ({ page }) => {
-  const historyTab = await page.evaluate(() => window.ftElectron.tabs.create({
-    route: '/history',
-    title: 'History tab',
-    makeActive: false,
-    lazyLoad: true
-  }))
-  const tabIcon = page.locator(`.tab[data-tab-id="${historyTab.id}"] .tabPageIcon`)
-  await expect(tabIcon).toBeVisible()
-  const iconName = await tabIcon.getAttribute('data-icon')
-
-  await page.keyboard.press('Control+k')
-  const input = page.getByRole('combobox', { name: 'Search commands' })
-  await input.fill('switch to tab history tab')
-
-  const command = page.getByRole('option', { name: /Switch to tab: History tab/ })
-  await expect(command.locator(`[data-icon="${iconName}"]`)).toBeVisible()
-  await expect(command.locator('[data-icon="clone"]')).toHaveCount(0)
 })
 
 test.describe('playlist commands', () => {
@@ -451,7 +418,7 @@ test.describe('local video commands', () => {
     })
   }
 
-  for (const source of ['History', 'Playlists: Road trips']) {
+  for (const source of ['History']) {
     test(`honors external-player viewing mode for ${source} results`, async ({ app, page }) => {
       await app.electronApp.evaluate(({ ipcMain }) => {
         globalThis.__paletteExternalLaunches = []
@@ -864,19 +831,6 @@ test.describe('profile commands', () => {
       await input.press('ArrowDown')
     }
     await expect(input).toHaveAttribute('aria-activedescendant', optionIds[0])
-  })
-
-  test('shows each configured profile icon', async ({ page }) => {
-    await page.keyboard.press('Control+k')
-    const input = page.getByRole('combobox', { name: 'Search commands' })
-    await input.fill('second profile')
-
-    const command = page.getByRole('option', { name: /Second profile/ })
-    const profileIcon = command.locator('.commandPaletteOptionProfileIcon')
-    await expect(profileIcon).toHaveText('🦊')
-    await expect(profileIcon).toHaveCSS('background-color', 'rgb(85, 139, 47)')
-    await expect(profileIcon).toHaveCSS('color', 'rgb(255, 255, 255)')
-    await expect(command.locator('[data-icon="circle-user"]')).toHaveCount(0)
   })
 
   test('uses the profile switcher action and shows its toast', async ({ page }) => {

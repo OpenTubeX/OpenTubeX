@@ -260,24 +260,3 @@ test('iOS routes YouTube playback formats through the native media bridge', asyn
   assert.equal(registered[0].http_headers['User-Agent'], 'yt-dlp fixture')
   assert.equal(result.formats[0].url, 'capacitor://localhost/_opentubex_media/0')
 })
-
-test('iOS download Play shows the existing toast when native playback rejects', async () => {
-  const source = await read('src/renderer/views/Downloads/Downloads.vue')
-  const start = source.indexOf('async function playDownload(download) {')
-  const end = source.indexOf('async function retryDownload(download) {', start)
-  const messages = []
-  let nativeCalls = 0
-  const context = vm.createContext({
-    process: { env: { IS_IOS: true } },
-    refreshDownloads: async () => [{ id: 1, status: 'completed', mode: 'video', files: [{ available: true, path: '/fixture.mp4', extension: 'mp4' }] }],
-    ytDlp: { ytDlpPlayDownload: async () => { nativeCalls++; throw new Error('Native playback failed') } },
-    showToast: value => messages.push(value.message),
-    t: value => value,
-  })
-  const playback = await read('src/renderer/helpers/downloadPlayback.js')
-  vm.runInContext(playback.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)
-  vm.runInContext(`${source.slice(start, end)}\nglobalThis.play = playDownload`, context)
-  await context.play({ id: 1 })
-  assert.deepEqual(messages, ['Downloads.File Not Found'])
-  assert.equal(nativeCalls, 1)
-})

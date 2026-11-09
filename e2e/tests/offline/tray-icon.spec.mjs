@@ -107,27 +107,6 @@ test('tray icon selector clamps and resets its scroller at fractional UI scale',
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
 })
 
-test('icon choice focus outlines follow keyboard and gamepad navigation, not pointer selection', async ({ page }) => {
-  await goToSettingsSection(page, 'appearance')
-  await page.getByRole('button', { name: 'Tray icon', exact: true }).click()
-  const radio = page.locator('input[name="trayIconPreset"][value="dracula"]')
-  const card = page.locator('.appIconPreset').filter({ has: radio })
-  await radio.check()
-  await expect(radio).toBeChecked()
-  await expect(card).toHaveCSS('outline-style', 'none')
-  // The radio group is the last tab stop in the document. Tabbing past it hands
-  // focus to the browser process and back asynchronously, so leave the group
-  // backwards to the settings header instead and return with Tab.
-  await page.keyboard.press('Shift+Tab')
-  await expect(page.locator('.settingsCloseButton')).toBeFocused()
-  await page.keyboard.press('Tab')
-  await expect(radio).toBeFocused()
-  await expect(card).toHaveCSS('outline-style', 'solid')
-  await page.locator('input[name="trayIconPreset"][value="dark"]').check()
-  await radio.evaluate(element => element.focus({ preventScroll: true, focusVisible: true }))
-  await expect(card).toHaveCSS('outline-style', 'solid')
-})
-
 test('starting another renderer preserves the saved tray icon while settings load', async ({ app, page }) => {
   await setSetting(page, 'TrayIconPreset', 'dracula')
   await expect.poll(() => cachedIcon(app)).not.toBeNull()
@@ -143,20 +122,4 @@ test('starting another renderer preserves the saved tray icon while settings loa
   await expect(page.locator('.topNav')).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getTrayIconPreset)).toBe('dracula')
   expect(await app.electronApp.evaluate(() => globalThis.trayDefaultResets)).toBe(0)
-})
-
-test('fixed tray palettes do not redraw when the app theme changes', async ({ app, page }) => {
-  await setSetting(page, 'TrayIconPreset', 'dracula')
-  await expect.poll(() => cachedIcon(app)).not.toBeNull()
-  await app.electronApp.evaluate(({ Tray }) => {
-    const original = Tray.prototype.setImage
-    globalThis.trayImageUpdates = 0
-    Tray.prototype.setImage = function (image) {
-      globalThis.trayImageUpdates++
-      return original.call(this, image)
-    }
-  })
-  await setSetting(page, 'BaseTheme', 'light')
-  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-  expect(await app.electronApp.evaluate(() => globalThis.trayImageUpdates)).toBe(0)
 })

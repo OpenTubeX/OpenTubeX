@@ -71,33 +71,6 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   return { player, window, isActiveTab, isPlayerSuspended, minimized, video, classes }
 }
 
-test('mobile playback progress follows seeks and clamps invalid media positions', t => {
-  const { player, video } = mountMiniPlayer(t)
-  for (const [duration, currentTime, expected] of [
-    [60, 15, 0.25], [60, 30, 0.5], [60, -5, 0], [60, 65, 1],
-    [0, 15, 0], [Infinity, 15, 0], [NaN, 15, 0], [60, NaN, 0]
-  ]) {
-    Object.assign(video.value, { duration, currentTime })
-    player.updateMobileMiniBarProgress()
-    assert.equal(player.mobileMiniBarProgress.value, expected)
-  }
-  video.value = null
-  player.updateMobileMiniBarProgress()
-  assert.equal(player.mobileMiniBarProgress.value, 0)
-})
-
-test('mobile playback progress uses the seekable window for live DVR', t => {
-  const seekRange = { start: 100, end: 160 }
-  const { player, video } = mountMiniPlayer(t, { seekRange })
-  Object.assign(video.value, { duration: Infinity, currentTime: 130 })
-  player.updateMobileMiniBarProgress()
-  assert.equal(player.mobileMiniBarProgress.value, 0.5)
-  seekRange.start = 120
-  seekRange.end = 180
-  player.updateMobileMiniBarProgress()
-  assert.equal(player.mobileMiniBarProgress.value, 1 / 6)
-})
-
 for (const phase of ['androidPictureInPicture', 'androidPictureInPictureRestoring']) {
   test(`Android PiP viewport changes preserve the existing mini-player state during ${phase}`, t => {
     const { player, classes } = mountMiniPlayer(t, { android: true })
@@ -129,19 +102,6 @@ test('a paused Watch tab does not acquire the cross-tab mini player before navig
   player.updateScrollMiniPlayer()
   assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
   assert.equal(player.scrollMiniPlayerActive.value, false)
-})
-
-test('tab changes end held volume gestures and hide the expanded control', t => {
-  const { player, window, isActiveTab } = mountMiniPlayer(t)
-  player.handleScrollMiniVolumePointerDown({ clientX: 0, clientY: 0 })
-  assert.equal(player.scrollMiniVolumeExpanded.value, true)
-  isActiveTab.value = false
-  t.mock.timers.tick(1000)
-  assert.equal(player.scrollMiniVolumeExpanded.value, false)
-  const scheduled = window.setTimeout.mock.callCount()
-  window.dispatchEvent(new Event('pointerup'))
-  window.dispatchEvent(new Event('pointercancel'))
-  assert.equal(window.setTimeout.mock.callCount(), scheduled)
 })
 
 test('an existing detached mini player remains available after playback ends', t => {

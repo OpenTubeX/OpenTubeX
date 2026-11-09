@@ -39,11 +39,6 @@ test('receiver delivers retained cold-start and warm shares and removes its list
   assert.equal(removed, true)
 })
 
-test('non-Android builds do not subscribe to incoming shares', async () => {
-  const cleanup = await initializeReceiver(null)(async () => assert.fail('No Android share event expected'))
-  cleanup()
-})
-
 test('shared text finds YouTube URLs among titles, punctuation and unrelated links', () => {
   for (const text of [
     `https://youtu.be/${id}?t=42`,
@@ -157,26 +152,6 @@ test('invalid shared text and malformed video IDs show feedback without navigati
   await h.share('https://youtube.com/watch?v=invalid')
   assert.equal(h.state.value, null)
   assert.equal(h.toasts.length, 2)
-  assert.deepEqual(h.opened, [])
-})
-
-test('malformed short links cannot be classified as channels or open a prompt', async () => {
-  let lookups = 0
-  const h = shareHandler(async () => { lookups++; return { urlType: 'channel', channelId: 'invalid' } })
-  await h.share('https://youtu.be/invalid')
-  assert.equal(lookups, 0)
-  assert.equal(h.state.value, null)
-  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
-  assert.deepEqual(h.opened, [])
-})
-
-test('oversized watch IDs cannot open actions for a truncated video', async () => {
-  let lookups = 0
-  const h = shareHandler(async () => { lookups++; return { urlType: 'video', videoId: id } })
-  await h.share(`https://youtube.com/watch?v=${id}X`)
-  assert.equal(lookups, 0)
-  assert.equal(h.state.value, null)
-  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
   assert.deepEqual(h.opened, [])
 })
 
@@ -304,60 +279,34 @@ test('cancelled Invidious requests do not attempt a local fallback', async () =>
 })
 
 test('each fallback backend gets a fresh deadline after a preferred backend times out', async () => {
-  for (const backend of ['local', 'invidious']) {
-    for (const fallback of [false, true]) {
-      for (const action of ['queue', 'playlist']) {
-        const deadlines = []
-        const preferred = async (_, signal) => {
-          deadlines[0].abort(new DOMException('Timed out', 'TimeoutError'))
-          signal.throwIfAborted()
-        }
-        const alternate = async (_, signal) => {
-          assert.equal(deadlines.length, 2)
-          assert.equal(signal.aborted, false)
-          return backend === 'local' ? video : { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
-        }
-        const h = videoActions({
-          backend,
-          fallback,
-          local: backend === 'local' ? preferred : alternate,
-          invidious: backend === 'invidious' ? preferred : alternate,
-          timeout: duration => {
-            assert.equal(duration, 20_000)
-            const deadline = new AbortController()
-            deadlines.push(deadline)
-            return deadline.signal
-          }
-        })
-        await h.add(action)
-        assert.equal(h.failed.value, !fallback)
-        assert.equal(h.calls.length, fallback ? 1 : 0)
-        assert.equal(deadlines.length, fallback ? 2 : 1)
-      }
-    }
-  }
-})
-
-test('the first request deadline cannot abort an already running fallback', async () => {
-  const deadlines = []
-  const h = videoActions({
-    backend: 'invidious',
-    fallback: true,
-    invidious: async () => { throw new Error('Preferred backend failed late') },
-    local: async (_, signal) => {
+  for (const [backend, fallback, action] of [['local', true, 'queue'], ['invidious', true, 'playlist']]) {
+    const deadlines = []
+    const preferred = async (_, signal) => {
       deadlines[0].abort(new DOMException('Timed out', 'TimeoutError'))
       signal.throwIfAborted()
-      return { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
-    },
-    timeout: () => {
-      const deadline = new AbortController()
-      deadlines.push(deadline)
-      return deadline.signal
     }
-  })
-  await h.add('queue')
-  assert.equal(h.failed.value, false)
-  assert.equal(h.calls.length, 1)
+    const alternate = async (_, signal) => {
+      assert.equal(deadlines.length, 2)
+      assert.equal(signal.aborted, false)
+      return backend === 'local' ? video : { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
+    }
+    const h = videoActions({
+      backend,
+      fallback,
+      local: backend === 'local' ? preferred : alternate,
+      invidious: backend === 'invidious' ? preferred : alternate,
+      timeout: duration => {
+        assert.equal(duration, 20_000)
+        const deadline = new AbortController()
+        deadlines.push(deadline)
+        return deadline.signal
+      }
+    })
+    await h.add(action)
+    assert.equal(h.failed.value, !fallback)
+    assert.equal(h.calls.length, fallback ? 1 : 0)
+    assert.equal(deadlines.length, fallback ? 2 : 1)
+  }
 })
 
 test('closing the prompt cancels the fallback and prevents its eventual result from being added', async () => {

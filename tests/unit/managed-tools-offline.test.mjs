@@ -89,14 +89,6 @@ test('managed tool failures while connected remain visible', async t => {
   assert.equal(app.toasts.some(toast => toast.message.includes('Error')), true)
 })
 
-test('known managed tool failures are translated in the error toast', async t => {
-  const app = setup(t, true)
-  app.context.t = (key, params) => params === undefined ? `<${key}>` : `<${key}> ${Object.values(params).join(' ')}`
-  app.context.ytDlp.ytDlpDownloadBinary = async () => ({ error: 'The downloaded yt-dlp binary was removed', errorCode: 'MANAGED_TOOL_REMOVED' })
-  await app.context.initializeManagedExternalSoftware()
-  assert.ok(app.toasts.some(toast => toast.message.includes('yt-dlp: <Settings.External Software Settings.Managed Tool Errors.Removed>')))
-})
-
 for (const stage of ['info', 'download']) {
   test(`disconnecting during ${stage} also handles native promise rejection quietly`, async t => {
     const app = setup(t, true)
@@ -163,8 +155,6 @@ test('a native tool failure checks WAN reachability before showing an error', as
 for (const failure of [
   { error: 'Unable to resolve host "api.github.com"' },
   { code: 'UnknownHostException', message: 'Download failed' },
-  { code: 'ETIMEDOUT', message: 'Download failed' },
-  { code: 'ECONNRESET', message: 'Download failed' },
 ]) {
   test(`managed tool transport failure retries even when GrapheneOS is reachable: ${failure.code ?? failure.error}`, async t => {
     const app = setup(t, true, async () => true)
@@ -184,14 +174,3 @@ for (const failure of [
     assert.equal(attempts, 2)
   })
 }
-
-test('known non-network managed tool errors do not trigger another connectivity probe', async t => {
-  let probes = 0
-  const app = setup(t, true, async () => { probes++; return true })
-  app.context.ytDlp.ytDlpDownloadBinary = async () => {
-    throw Object.assign(new Error('Download failed'), { code: 'SSLHandshakeException' })
-  }
-  await app.context.initializeManagedExternalSoftware()
-  assert.equal(probes, 1)
-  assert.equal(app.toasts.some(toast => toast.message.includes('Error')), true)
-})

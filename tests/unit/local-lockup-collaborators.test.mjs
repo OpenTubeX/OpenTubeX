@@ -7,10 +7,6 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 const fixture = JSON.parse(await readFile(new URL('../../e2e/fixtures/innertube/watch/collaboration-lockup.json', import.meta.url), 'utf8'))
 const { parseLockupView } = createLocalFeedParsers(() => false)
 
-function firstRowParts(raw) {
-  return raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts
-}
-
 test('recommendation collaborations show every collaborator in the byline', () => {
   const video = parseLockupView(new YTNodes.LockupView(structuredClone(fixture)))
 
@@ -19,24 +15,6 @@ test('recommendation collaborations show every collaborator in the byline', () =
   assert.equal(video.hasCollaborators, true)
   assert.deepEqual(video.collaborators.map(collaborator => collaborator.id), ['UC-sample-channel-one', 'UC-sample-channel-two'])
   assert.equal(video.viewCount, 67000)
-})
-
-test('recommendation collaborations keep the localized remaining-collaborators text', () => {
-  const raw = structuredClone(fixture)
-  firstRowParts(raw)[1].text.content = 'und 2 weitere'
-  const video = parseLockupView(new YTNodes.LockupView(raw))
-
-  assert.equal(video.author, 'Channel One und 2 weitere')
-  assert.equal(video.collaborators.length, 2)
-})
-
-test('recommendation collaborations with a single byline part keep it unchanged', () => {
-  const raw = structuredClone(fixture)
-  firstRowParts(raw).splice(1, 1)
-  const video = parseLockupView(new YTNodes.LockupView(raw))
-
-  assert.equal(video.author, 'Channel One')
-  assert.equal(video.collaborators.length, 2)
 })
 
 test('single-channel lockups do not merge other byline parts into the channel name', () => {

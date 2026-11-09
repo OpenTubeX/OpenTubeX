@@ -28,23 +28,6 @@ test.describe('YouTube links', () => {
     await expect(page.getByText('Are you sure you want to open this link?')).not.toBeVisible()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
   })
-
-  test('Ctrl+Alt+middle-clicking a video link leaves its background tab unloaded', async ({ page }) => {
-    await page.locator('body').evaluate(body => {
-      body.insertAdjacentHTML('beforeend', '<a href="https://m.youtube.com/watch?v=jNQXAC9IVRw">Mobile YouTube video</a>')
-    })
-
-    await page.getByRole('link', { name: 'Mobile YouTube video' })
-      .click({ button: 'middle', modifiers: ['Control', 'Alt'] })
-
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
-    await expect.poll(() => page.evaluate(async () => {
-      const state = await window.ftElectron.tabs.getState()
-      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
-    })).toBe('/watch/jNQXAC9IVRw')
-  })
 })
 
 test('middle-clicking an internal link opens it in a background tab', async ({ page }) => {

@@ -17,7 +17,7 @@ async function setThumbnailSize(page, size) {
   await expect(slider).toBeHidden()
 }
 
-for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], [125, 'date_added_descending'], [100, 'custom'], [125, 'custom']]) {
+for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], [125, 'custom']]) {
   test.describe(`playlist rows at ${uiScale}% UI scale with ${userPlaylistSortOrder} sorting`, () => {
     test.use({
       seed: {

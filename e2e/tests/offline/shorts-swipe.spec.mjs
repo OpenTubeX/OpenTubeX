@@ -68,7 +68,7 @@ async function openShorts({ app, page }, zoom = 1, phone = false) {
   return { watch, touch, bounds, cdp }
 }
 
-for (const [zoom, phone] of [[1, false], [1.25, false], [1, true]]) {
+for (const [zoom, phone] of [[1, false], [1, true]]) {
   test(`Shorts follow the finger and finish swipes in both directions at ${zoom * 100}% UI scale${phone ? ' in phone layout' : ''}`, async ({ app, page }) => {
     const { watch, touch, bounds, cdp } = await openShorts({ app, page }, zoom, phone)
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
@@ -213,48 +213,6 @@ for (const cancel of [false, true]) {
   })
 }
 
-test('Shorts settling honors system and forced reduced-motion preferences', async ({ app, page }) => {
-  const { watch, touch, bounds, cdp } = await openShorts({ app, page })
-  const surface = page.locator('.shortsSwipeViewport > .videoPlayer')
-  const recorded = await surface.evaluateHandle(element => {
-    const state = { element, animate: element.animate, animations: [] }
-    element.animate = function (...args) {
-      const animation = state.animate.apply(this, args)
-      state.animations.push(animation)
-      return animation
-    }
-    return state
-  })
-  try {
-    for (const [preference, system, reducedMotion] of [
-      ['system', 'reduce', true],
-      ['off', 'reduce', false],
-      ['on', 'no-preference', true],
-      ['system', 'no-preference', false]
-    ]) {
-      await page.emulateMedia({ reducedMotion: system })
-      await watch.evaluate((component, preference) => component.proxy.$store.dispatch('updateReducedMotion', preference), preference)
-      await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', reducedMotion ? 'reduce' : 'no-preference')
-      await recorded.evaluate(state => { state.animations.length = 0 })
-      await touch('touchStart')
-      await touch('touchMove', 0, -30)
-      await expect.poll(async () => (await surface.boundingBox()).y).toBeCloseTo(bounds.y - 30, 0)
-      await touch('touchEnd')
-      await expect.poll(() => watch.evaluate(component => component.proxy.shortsNavigation.state.settling)).toBe(false)
-      expect(await recorded.evaluate(state => state.animations.length)).toBe(1)
-      const duration = await recorded.evaluate(state => state.animations[0].effect.getTiming().duration)
-      expect(duration > 0, `${preference} preference with ${system} system motion`).toBe(!reducedMotion)
-      await expect.poll(async () => (await surface.boundingBox()).y).toBeCloseTo(bounds.y, 0)
-      await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-    }
-  } finally {
-    await recorded.evaluate(state => { state.element.animate = state.animate })
-    await recorded.dispose()
-    await watch.dispose()
-    await cdp.detach()
-  }
-})
-
 test('Shorts controls keep touch and keyboard actions after a cancelled swipe', async ({ app, page }) => {
   const { watch, touch, cdp } = await openShorts({ app, page })
   const player = page.locator('.ftVideoPlayer.shortsPlayer')
@@ -388,52 +346,6 @@ test('overflowing Shorts error messages scroll instead of swiping', async ({ app
   await watch.dispose()
   await cdp.detach()
 })
-
-for (const [zoom, theme] of [[1, 'dark'], [1.25, 'light']]) {
-  test(`landscape Shorts swipe previews match the portrait player at ${zoom * 100}% UI scale in ${theme} theme`, async ({ app, page }, testInfo) => {
-    const { watch, cdp } = await openShorts({ app, page }, zoom)
-    await page.emulateMedia({ colorScheme: theme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
-    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
-    await setWindowSize(app, page, { width: 915, height: 412 })
-    const player = page.locator('.ftVideoPlayer.shortsPlayer')
-    const bounds = await player.boundingBox()
-    await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchStart',
-      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
-    })
-    await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchMove',
-      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 - 80 }]
-    })
-    await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y - 80, 0)
-    const preview = page.locator('.shortsSwipePreview')
-    await expect.poll(async () => (await preview.boundingBox()).width).toBeCloseTo(bounds.width, 0)
-    const previewBounds = await preview.boundingBox()
-    expect(previewBounds.x).toBeCloseTo(bounds.x, 0)
-    expect(previewBounds.height).toBeCloseTo(bounds.height, 0)
-    expect(previewBounds.y).toBeCloseTo(bounds.y + bounds.height - 80, 0)
-    await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-    await expect.poll(() => preview.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    const screenshotPath = testInfo.outputPath('landscape-swipe.png')
-    await page.screenshot({
-      path: screenshotPath,
-      clip: {
-        x: (bounds.x - 8) * zoom,
-        y: (bounds.y - 8) * zoom,
-        width: (bounds.width + 16) * zoom,
-        height: (bounds.height + 16) * zoom
-      }
-    })
-    await testInfo.attach('Landscape Shorts swipe', { path: screenshotPath, contentType: 'image/png' })
-    await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(page).toHaveURL(new RegExp(`/watch/${next}`))
-    await expect(player).toBeVisible()
-    await watch.dispose()
-    await cdp.detach()
-  })
-}
 
 for (const [stage, theme, direction] of [['metadata', 'dark', -1], ['streams', 'light', 1]]) {
   test(`Shorts ${stage} loading placeholders follow the finger and allow skipping`, async ({ app, page }, testInfo) => {

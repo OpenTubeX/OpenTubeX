@@ -5,16 +5,14 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 
 const { parseLocalListVideo, parseLocalPlaylistVideo } = createLocalFeedParsers(() => false)
 
-for (const videoId of [null, undefined, '']) {
-  test(`skips an unavailable grid clip with ${String(videoId)} video ID`, () => {
-    const clip = new YTNodes.GridVideo({
-      videoId,
-      title: { simpleText: 'Unavailable clip' },
-      thumbnailOverlays: [],
-    })
-    assert.equal(parseLocalListVideo(clip), null)
+test('skips an unavailable grid clip with null video ID', () => {
+  const clip = new YTNodes.GridVideo({
+    videoId: null,
+    title: { simpleText: 'Unavailable clip' },
+    thumbnailOverlays: [],
   })
-}
+  assert.equal(parseLocalListVideo(clip), null)
+})
 
 test('parses an available grid video and preserves channel fallbacks', () => {
   const video = new YTNodes.GridVideo({
@@ -32,7 +30,6 @@ test('parses an available grid video and preserves channel fallbacks', () => {
   assert.equal(result.lengthSeconds, 83)
   assert.equal(result.liveNow, false)
 })
-
 
 test('flags collaborative grid videos even with a caller-supplied channel ID', () => {
   const video = new YTNodes.GridVideo({

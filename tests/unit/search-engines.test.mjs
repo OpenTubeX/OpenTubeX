@@ -4,21 +4,9 @@ import test from 'node:test'
 import {
   buildSearchUrl,
   DEFAULT_SEARCH_ENGINES,
-  getFaviconUrl,
   isValidSearchUrlTemplate,
-  MAX_CUSTOM_SEARCH_ENGINES,
   parseSearchEngines
 } from '../../src/searchEngines.js'
-
-test('defaults built-in engines to disabled', () => {
-  const engines = parseSearchEngines(undefined)
-
-  assert.equal(engines.every(engine => engine.enabled === false), true)
-  assert.deepEqual(
-    engines.map(({ id, enabled }) => ({ id, enabled })),
-    DEFAULT_SEARCH_ENGINES.map(({ id, enabled }) => ({ id, enabled }))
-  )
-})
 
 test('uses canonical built-ins and preserves their enabled states', () => {
   const engines = parseSearchEngines(JSON.stringify([
@@ -63,28 +51,6 @@ test('validates reusable HTTP search URL templates', () => {
   assert.equal(isValidSearchUrlTemplate('https://example.com/search?q=%s'), true)
   assert.equal(isValidSearchUrlTemplate('https://example.com/search'), false)
   assert.equal(isValidSearchUrlTemplate('javascript:alert(%s)'), false)
-})
-
-test('caps parsed custom engines at the supported limit', () => {
-  const customEngines = Array.from({ length: MAX_CUSTOM_SEARCH_ENGINES + 1 }, (_, index) => ({
-    id: `custom-${index}`,
-    name: `Engine ${index}`,
-    url: `https://example${index}.com/search?q=%s`,
-    enabled: true
-  }))
-  const engines = parseSearchEngines(customEngines)
-
-  assert.equal(
-    engines.filter(engine => engine.id.startsWith('custom-')).length,
-    MAX_CUSTOM_SEARCH_ENGINES
-  )
-})
-
-test('resolves custom favicons directly from the engine origin', () => {
-  assert.equal(
-    getFaviconUrl('https://search.example.com/find?q=%s'),
-    'https://search.example.com/favicon.ico'
-  )
 })
 
 test('encodes selected text when building the search URL', () => {

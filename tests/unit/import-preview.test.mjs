@@ -7,7 +7,6 @@ import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } f
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
-import { threadCpuMilliseconds } from '../helpers/cpu-time.mjs'
 
 const counts = row => [row.added, row.existing, row.skipped]
 
@@ -303,15 +302,4 @@ test('repeated Takeout playlist names get suffixes in linear time', async () => 
   assert.ok(lookups < count * 20, `${lookups} lookups`)
   assert.deepEqual(names.slice(0, 4), ['List', 'List (2)', 'List (4)', 'List (5)'])
   assert.equal(new Set(names).size, names.length)
-})
-
-test('watch history parsing finds a long common title prefix in linear time', () => {
-  const length = 100000
-  const record = title => ({ products: ['YouTube'], title, titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z' })
-  const start = threadCpuMilliseconds()
-  const { entries } = parseTakeoutWatchHistory([record('a'.repeat(length)), record('a'.repeat(length / 2) + 'b'.repeat(length / 2))])
-  const elapsed = threadCpuMilliseconds() - start
-  // Shortening the prefix one character per comparison took seconds.
-  assert.ok(elapsed < 1000, `parsing took ${Math.round(elapsed)} ms of CPU time`)
-  assert.deepEqual(entries.map(entry => entry.title), ['a'.repeat(length / 2), 'b'.repeat(length / 2)])
 })

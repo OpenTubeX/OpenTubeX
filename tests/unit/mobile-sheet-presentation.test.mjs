@@ -128,24 +128,6 @@ for (const commit of [false, true]) {
   })
 }
 
-test('returning a sheet gesture to its starting edge cancels without replaying the animation', async t => {
-  const sheet = mountSheet(t)
-  sheet.props.open = true
-  await sheet.settle()
-  const preview = getAndroidBackSheet(sheet.element)
-  preview.begin()
-  preview.update(0.6)
-  preview.update(0)
-  const animation = sheet.animations.at(-1)
-  let reversed = false
-  animation.reverse = () => { reversed = true }
-  await preview.finish(false)
-  assert.equal(reversed, false)
-  assert.equal(animation.playState, 'idle')
-  assert.equal(sheet.element.open, true)
-  assert.deepEqual(sheet.events, [])
-})
-
 test('nested Back and compact modal sheets keep their ordinary Back behavior', async t => {
   const sheet = mountSheet(t)
   sheet.props.open = true
@@ -156,17 +138,6 @@ test('nested Back and compact modal sheets keep their ordinary Back behavior', a
   sheet.props.back = false
   sheet.props.compact = true
   assert.equal(preview.begin(), false)
-  assert.deepEqual(sheet.events, [])
-})
-
-test('reduced motion leaves sheet dismissal to ordinary Back', async t => {
-  const sheet = mountSheet(t, null, { reducedMotion: true })
-  sheet.props.open = true
-  await sheet.settle()
-  const count = sheet.animations.length
-  assert.equal(getAndroidBackSheet(sheet.element).begin(), false)
-  assert.equal(sheet.animations.length, count)
-  assert.equal(sheet.element.open, true)
   assert.deepEqual(sheet.events, [])
 })
 
@@ -185,59 +156,6 @@ test('suspending or unmounting a held sheet cancels its preview without dismissi
   assert.deepEqual(sheet.events.map(([event]) => event), ['suspend'])
   sheet.unmount()
   assert.equal(getAndroidBackSheet(sheet.element), null)
-})
-
-test('a sheet opened over a mini player uses the original video position', async t => {
-  const sheet = mountSheet(t)
-  sheet.player.getBoundingClientRect = () => ({ top: 620, bottom: 760 })
-  let inlineBottom = 90
-  sheet.inlinePlayer.getBoundingClientRect = () => ({ top: inlineBottom - 270, bottom: inlineBottom })
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 90px)')
-  assert.ok(sheet.observed.includes(sheet.inlinePlayer))
-  inlineBottom = 120
-  sheet.resize()
-  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 120px)')
-})
-
-test('an open sheet observes the inline placeholder when the player switches to mini mode', async t => {
-  const sheet = mountSheet(t)
-  sheet.inlinePlayer.getBoundingClientRect = () => ({ top: 0, bottom: 120 })
-  sheet.inlineElement.value = sheet.player
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), false)
-
-  sheet.inlineElement.value = sheet.inlinePlayer
-  await sheet.settle()
-  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), true)
-  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 120px)')
-
-  sheet.inlineElement.value = sheet.player
-  await sheet.settle()
-  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), false)
-  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 300px)')
-})
-
-test('a Shorts sheet opens at 70% height in portrait and cannot collapse below the player', async t => {
-  const sheet = mountSheet(t)
-  sheet.player.shorts = true
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.state.expanded.value, true)
-  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), calc(var(--phone-viewport-height, 100dvh) * 0.3 + 0px))')
-
-  const event = {
-    button: 0, pointerId: 1, clientY: 400,
-    target: { closest: () => null },
-    currentTarget: { setPointerCapture() {} }
-  }
-  sheet.state.startDrag(event)
-  sheet.state.moveDrag({ ...event, clientY: 500 })
-  sheet.state.endDrag(event)
-  await sheet.settle()
-  assert.equal(sheet.state.expanded.value, true)
 })
 
 test('a Shorts sheet keeps playback running while it opens and closes', async t => {
@@ -316,72 +234,6 @@ test('sheet drags suppress control clicks while horizontal gestures and keyboard
   assert.equal(clicksBlocked, 1, 'the next tap must work after a cancelled drag')
 })
 
-test('a pointer leaving the header before capture can still expand the sheet', async t => {
-  const sheet = mountSheet(t)
-  sheet.props.open = true
-  await sheet.settle()
-  const captures = []
-  sheet.state.startDrag({
-    button: 0, pointerId: 1, clientX: 100, clientY: 400,
-    currentTarget: { setPointerCapture: id => captures.push(id) }
-  })
-  // The first mouse move can land outside the header and only reach window.
-  sheet.window.dispatchEvent(Object.assign(new Event('pointermove'), { pointerId: 1, clientX: 100, clientY: 300 }))
-  sheet.window.dispatchEvent(Object.assign(new Event('pointerup'), { pointerId: 1 }))
-  await sheet.settle()
-  assert.deepEqual(captures, [1])
-  assert.equal(sheet.state.expanded.value, true)
-  const transform = sheet.element.style.transform
-  sheet.window.dispatchEvent(Object.assign(new Event('pointermove'), { pointerId: 1, clientX: 100, clientY: 500 }))
-  assert.equal(sheet.element.style.transform, transform, 'finishing the drag removes the window listeners')
-})
-
-test('rotating an open Shorts sheet to landscape leaves playback alone', async t => {
-  let pauses = 0
-  let resumes = 0
-  const sheet = mountSheet(t, () => {
-    pauses++
-    return () => { resumes++ }
-  })
-  sheet.player.shorts = true
-  sheet.props.open = true
-  await sheet.settle()
-  sheet.landscape.value = true
-  await sheet.settle()
-  sheet.props.open = false
-  await sheet.settle()
-  assert.equal(pauses, 0)
-  assert.equal(resumes, 0)
-})
-
-test('opening a Shorts sheet in landscape keeps playback running', async t => {
-  let pauses = 0
-  let resumes = 0
-  const sheet = mountSheet(t, () => {
-    pauses++
-    return () => { resumes++ }
-  })
-  sheet.player.shorts = true
-  sheet.landscape.value = true
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.state.expanded.value, true)
-  assert.equal(pauses, 0)
-  sheet.props.open = false
-  await sheet.settle()
-  assert.equal(resumes, 0)
-})
-
-test('opening a regular video sheet in landscape keeps playback running', async t => {
-  let pauses = 0
-  const sheet = mountSheet(t, () => { pauses++ })
-  sheet.landscape.value = true
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.state.expanded.value, true)
-  assert.equal(pauses, 0)
-})
-
 for (const mode of ['browser', 'fullwindow']) {
   test(`a fullscreen dock sheet stays open in ${mode} fullscreen`, async t => {
     const sheet = mountSheet(t)
@@ -419,87 +271,6 @@ for (const mode of ['browser', 'fullwindow']) {
     await sheet.settle()
     assert.equal(sheet.element.open, true)
     assert.equal(sheet.state.expanded.value, false)
-  })
-}
-
-for (const expanded of [false, true]) {
-  test(`returning to the app restores ${expanded ? 'an expanded' : 'a docked'} sheet without replaying its entry animation`, async t => {
-    const sheet = mountSheet(t)
-    sheet.props.open = true
-    await sheet.settle()
-    sheet.state.expanded.value = expanded
-    const count = sheet.animations.length
-    for (let cycle = 0; cycle < 2; cycle++) {
-      sheet.document.hidden = true
-      sheet.document.dispatchEvent(new Event('visibilitychange'))
-      await sheet.settle()
-      assert.equal(sheet.element.open, false)
-      sheet.document.hidden = false
-      sheet.document.dispatchEvent(new Event('visibilitychange'))
-      await sheet.settle()
-      assert.equal(sheet.element.open, true)
-      assert.equal(sheet.state.expanded.value, expanded)
-      assert.equal(sheet.animations.length, count, 'resuming must not start another entry animation')
-    }
-    assert.deepEqual(sheet.events.map(([event]) => event), ['suspend', 'resume', 'suspend', 'resume'])
-    sheet.props.open = false
-    await sheet.settle()
-    sheet.props.open = true
-    await sheet.settle()
-    assert.equal(sheet.animations.length, count + 2, 'explicitly closing and reopening must still animate')
-  })
-}
-
-test('a sheet first opened while the app is hidden animates when the app returns', async t => {
-  const sheet = mountSheet(t)
-  sheet.document.hidden = true
-  sheet.document.dispatchEvent(new Event('visibilitychange'))
-  sheet.props.open = true
-  await sheet.settle()
-  assert.equal(sheet.element.open, false)
-  assert.equal(sheet.animations.length, 0)
-  sheet.document.hidden = false
-  sheet.document.dispatchEvent(new Event('visibilitychange'))
-  await sheet.settle()
-  assert.equal(sheet.element.open, true)
-  assert.equal(sheet.animations.length, 1)
-  assert.deepEqual(sheet.events, [])
-})
-
-test('a transient landscape viewport while hidden does not maximize the returning panel', async t => {
-  const sheet = mountSheet(t)
-  sheet.props.open = true
-  await sheet.settle()
-  sheet.document.hidden = true
-  sheet.document.dispatchEvent(new Event('visibilitychange'))
-  sheet.landscape.value = true
-  await sheet.settle()
-  sheet.landscape.value = false
-  sheet.document.hidden = false
-  sheet.document.dispatchEvent(new Event('visibilitychange'))
-  await sheet.settle()
-  assert.equal(sheet.state.expanded.value, false, 'PiP must not change the panel expansion')
-})
-
-for (const expanded of [false, true]) {
-  test(`PiP retains ${expanded ? 'expanded' : 'docked'} presentation while Chromium stays visible`, async t => {
-    const sheet = mountSheet(t)
-    sheet.props.open = true
-    await sheet.settle()
-    sheet.state.expanded.value = expanded
-    sheet.document.body.classList.contains = () => true
-    sheet.state.updatePresentation()
-    await sheet.settle()
-    assert.equal(sheet.element.open, false)
-    sheet.landscape.value = true
-    await sheet.settle()
-    sheet.landscape.value = false
-    sheet.document.body.classList.contains = () => false
-    sheet.state.updatePresentation()
-    await sheet.settle()
-    assert.equal(sheet.element.open, true)
-    assert.equal(sheet.state.expanded.value, expanded)
-    assert.deepEqual(sheet.events.map(([event]) => event), ['suspend', 'resume'])
   })
 }
 

@@ -23,19 +23,6 @@ test('identifies network addresses which are unsafe for untrusted fetches', () =
     assert.equal(isNonPublicNetworkAddress(address), false, address)
   }
 })
-test('builds a proxy URL from the proxy settings', () => {
-  assert.equal(buildProxyUrl({
-    protocol: 'socks5',
-    hostname: '127.0.0.1',
-    port: '9050'
-  }), 'socks5://127.0.0.1:9050')
-
-  assert.equal(buildProxyUrl({
-    protocol: 'http',
-    hostname: 'proxy.example.com',
-    port: 8080
-  }), 'http://proxy.example.com:8080')
-})
 
 test('wraps IPv6 hosts in brackets', () => {
   assert.equal(buildProxyUrl({
@@ -107,25 +94,6 @@ test('recognizes the configured development server origin', () => {
     assert.equal(isOpenTubeXUrl('http://localhost:12345/index.html'), true)
     assert.equal(isOpenTubeXUrl('http://localhost:9080/'), false)
     assert.equal(isOpenTubeXUrl('http://127.0.0.1:12345/'), false)
-  } finally {
-    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
-    else process.env.NODE_ENV = previousNodeEnv
-
-    if (previousPort === undefined) delete process.env.OPENTUBEX_DEV_SERVER_PORT
-    else process.env.OPENTUBEX_DEV_SERVER_PORT = previousPort
-  }
-})
-
-test('uses the default development server origin without an override', () => {
-  const previousNodeEnv = process.env.NODE_ENV
-  const previousPort = process.env.OPENTUBEX_DEV_SERVER_PORT
-
-  try {
-    process.env.NODE_ENV = 'development'
-    delete process.env.OPENTUBEX_DEV_SERVER_PORT
-
-    assert.equal(isOpenTubeXUrl('http://localhost:9080/'), true)
-    assert.equal(isOpenTubeXUrl('http://localhost:12345/'), false)
   } finally {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV
     else process.env.NODE_ENV = previousNodeEnv

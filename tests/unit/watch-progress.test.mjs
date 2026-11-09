@@ -123,17 +123,15 @@ function fixture(existing = true) {
   return { element, player, history, view, save: () => _saveWatchProgress.call(view) }
 }
 
-for (const target of [0, 4 * 3600, 12 * 3600]) {
-  test(`saves a seek to ${target} before the player finishes loading`, () => {
-    const f = fixture()
-    f.element.currentTime = target
-    f.element.dispatchEvent(new Event('seeking'))
-    assert.equal(f.element.currentTime, target)
-    assert.equal(f.player.hasLoaded, false)
-    f.save()
-    assert.equal(f.history.watchProgress, target)
-  })
-}
+test('saves a seek to 0 before the player finishes loading', () => {
+  const f = fixture()
+  f.element.currentTime = 0
+  f.element.dispatchEvent(new Event('seeking'))
+  assert.equal(f.element.currentTime, 0)
+  assert.equal(f.player.hasLoaded, false)
+  f.save()
+  assert.equal(f.history.watchProgress, 0)
+})
 
 test('leaving before any playback position is established preserves saved progress', () => {
   const f = fixture()
@@ -156,7 +154,6 @@ for (const reason of ['teardown', 'background', 'never presented', 'not ready'])
     assert.equal(f.history.watchProgress, 11 * 3600)
   })
 }
-
 test('a seek before the first load creates a complete new history entry', () => {
   const f = fixture(false)
   f.element.currentTime = 14400

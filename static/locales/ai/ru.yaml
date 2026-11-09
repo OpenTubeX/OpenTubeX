@@ -201,6 +201,9 @@ User Playlists:
   Edit: "Изменить"
   Pin to Navigation: "Закрепить в навигации"
   Unpin from Navigation: "Открепить от навигации"
+  Pin to Top: "Закрепить вверху"
+  Unpin from Top: "Открепить сверху"
+  Pinned to Top: "Закреплено вверху"
   Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
   Add new videos to the top (custom order): "Добавлять новые видео в начало (свой порядок)"
   Shuffle videos by default: "Перемешивать видео по умолчанию"
@@ -1470,14 +1473,15 @@ Tutorial:
     Action: Импортировать данные
     Not Now: Не сейчас
 About:
+  Get OpenTubeX: Получить OpenTubeX
+  Community: Сообщество
+  Contribute: Внести вклад
   Documentation: Документация
   Downloads: Загрузки
   Changelog: Список изменений
   Commit: Коммит
-  Fluxer: Присоединиться к нашему сообществу Fluxer
   Matrix: Matrix
   Email: Электронная почта
-  Support the development of OpenTubeX: "Поддержать разработку OpenTubeX"
 Profile:
   Customization: Настройка
   Manage Profile Subscriptions: Управление подписками профиля

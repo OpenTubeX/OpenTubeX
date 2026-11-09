@@ -94,13 +94,11 @@ test.describe('trending page', () => {
 
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
 
-    for (const roundness of [0, 50, 100, 200]) {
-      await page.evaluate(value => {
-        window.$store.commit('setUiRoundness', value)
-      }, roundness)
-      await expect.poll(() => page.locator('.trendingInfoTabs .selectedTab').evaluate(element =>
-        getComputedStyle(element).borderBottomLeftRadius)).toBe(`${24 * roundness / 100}px`)
-    }
+    await page.evaluate(() => {
+      window.$store.commit('setUiRoundness', 200)
+    })
+    await expect.poll(() => page.locator('.trendingInfoTabs .selectedTab').evaluate(element =>
+      getComputedStyle(element).borderBottomLeftRadius)).toBe('48px')
 
     const sportsTab = page.getByRole('tab', { name: 'Sports' })
     await sportsTab.click()

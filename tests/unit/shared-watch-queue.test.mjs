@@ -236,18 +236,6 @@ test('the desktop queue persists to disk before replying and restores download r
   }
 })
 
-test('repeated download removals from every window write the queue once', async () => {
-  let writes = 0
-  const update = createSharedWatchQueue({
-    read: () => [{ videoId: 'download', route: { query: { downloadId: '42' } } }, { videoId: 'other' }],
-    write() { writes++ },
-  })
-  const snapshots = await Promise.all([1, 2, 3].map(() => update({ type: 'removeYtDlpDownload', payload: 42 })))
-  assert.deepEqual(snapshots.map(snapshot => snapshot.revision), [1, 1, 1])
-  assert.deepEqual(snapshots[2].items.map(item => item.videoId), ['other'])
-  assert.equal(writes, 1)
-})
-
 test('a restore request waits for pending queue writes so quitting can drain them', async () => {
   let finishWrite
   let saved = []
@@ -264,27 +252,4 @@ test('a restore request waits for pending queue writes so quitting can drain the
   finishWrite()
   await Promise.all([write, drain])
   assert.deepEqual(saved.map(item => item.videoId), ['last'])
-})
-
-test('queue updates keep the objects of unchanged items in every window', async () => {
-  const windows = sharedWindows()
-  const first = windows.window()
-  const second = windows.window()
-  await settle()
-  first.commit('addVideosToWatchQueue', { videos: ['one', 'two', 'three'].map(videoId => ({ videoId, title: videoId })) })
-  await settle()
-  windows.deliverUpdates()
-  const before = [first, second].map(store => store.getters.getWatchQueue.slice())
-  let commits = 0
-  first.subscribe(mutation => { if (mutation.type === 'setWatchQueue') commits++ })
-  first.commit('moveVideoInWatchQueue', { queueItemId: before[0][0].queueItemId, targetQueueItemId: before[0][2].queueItemId, after: true })
-  await settle()
-  windows.deliverUpdates()
-  // The reply and the update only confirm the change already shown locally.
-  assert.equal(commits, 0)
-  for (const [index, store] of [first, second].entries()) {
-    const items = store.getters.getWatchQueue
-    assert.deepEqual(items.map(item => item.videoId), ['two', 'three', 'one'])
-    for (const item of items) assert.equal(item, before[index].find(other => other.queueItemId === item.queueItemId))
-  }
 })

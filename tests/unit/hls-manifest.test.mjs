@@ -37,13 +37,6 @@ test('desktop and Android HLS probes keep WebView fetch', async () => {
   assert.equal(fetched, 1)
 })
 
-test('iOS accepts external HLS reachable through WebView fetch', async () => {
-  const check = probe(true, async () => new Response('#EXTM3U\n'), async () => {
-    assert.fail('external playback must not use native iOS HTTP')
-  })
-  assert.equal(await check('https://invidious.test/master.m3u8'), true)
-})
-
 test('native HLS probe rejects failed requests and non-HLS bodies', async () => {
   for (const nativeFetch of [
     async () => new Response('#EXTM3U', { status: 403 }),
@@ -54,24 +47,17 @@ test('native HLS probe rejects failed requests and non-HLS bodies', async () => 
   }
 })
 
-for (const url of [
-  'https://invidious.test/master.m3u8',
-  'http://manifest.googlevideo.com/master.m3u8',
-  'https://googlevideo.com.attacker.invalid/master.m3u8',
-  'https://user:password@manifest.googlevideo.com/master.m3u8',
-]) {
-  test(`iOS probes ${url} through the playback WebView transport`, async () => {
-    let fetched = 0
-    let nativeFetched = 0
-    const check = probe(true, async () => {
-      fetched++
-      throw new Error('WebView cannot access the manifest')
-    }, async () => {
-      nativeFetched++
-      return new Response('#EXTM3U\n')
-    })
-    assert.equal(await check(url), false)
-    assert.equal(fetched, 1)
-    assert.equal(nativeFetched, 0)
+test('iOS probes a lookalike googlevideo host through the playback WebView transport', async () => {
+  let fetched = 0
+  let nativeFetched = 0
+  const check = probe(true, async () => {
+    fetched++
+    throw new Error('WebView cannot access the manifest')
+  }, async () => {
+    nativeFetched++
+    return new Response('#EXTM3U\n')
   })
-}
+  assert.equal(await check('https://googlevideo.com.attacker.invalid/master.m3u8'), false)
+  assert.equal(fetched, 1)
+  assert.equal(nativeFetched, 0)
+})

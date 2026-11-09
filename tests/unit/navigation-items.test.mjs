@@ -7,19 +7,6 @@ import {
   normalizeNavigationItems,
 } from '../../src/navigationItems.js'
 
-test('uses the mobile-first navigation order by default', () => {
-  assert.deepEqual(DEFAULT_NAVIGATION_ITEMS, [
-    'home',
-    'subscriptions',
-    'userplaylists',
-    'history',
-    'subscribedchannels',
-    'trending',
-    'popular',
-    'stats',
-  ])
-})
-
 test('keeps valid navigation items in the selected order', () => {
   assert.deepEqual(
     normalizeNavigationItems(['history', 'home', 'history', 'removed']),

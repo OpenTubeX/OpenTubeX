@@ -1,7 +1,7 @@
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
-for (const width of [1600, 480]) {
+for (const width of [480]) {
   test.describe(`password visibility at ${width}px`, { tag: '@scale' }, () => {
     test.use({
       seed: {

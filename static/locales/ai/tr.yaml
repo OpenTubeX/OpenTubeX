@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Düzenle"
   Pin to Navigation: "Gezinmeye sabitle"
   Unpin from Navigation: "Gezinmeden sabitlemeyi kaldır"
+  Pin to Top: "En üste sabitle"
+  Unpin from Top: "En üstten sabitlemeyi kaldır"
+  Pinned to Top: "En üste sabitlendi"
   Reorder Hint: Yeniden sıralamak için sürükleyin veya ok tuşlarını kullanın
   Add new videos to the top (custom order): "Yeni videoları en üste ekle (özel sıralama)"
   Shuffle videos by default: "Videoları varsayılan olarak karışık oynat"
@@ -1496,14 +1499,15 @@ Tutorial:
     Action: Verileri içe aktar
     Not Now: Şimdi değil
 About:
+  Get OpenTubeX: 'OpenTubeX''i edinin'
+  Community: Topluluk
+  Contribute: Katkıda bulunun
   Documentation: Belgeler
   Downloads: İndirmeler
   Changelog: Değişiklik günlüğü
   Commit: Commit
-  Fluxer: Fluxer Topluluğumuza Katılın
   Matrix: Matrix
   Email: E-posta
-  Support the development of OpenTubeX: "OpenTubeX'in geliştirilmesini destekleyin"
 Profile:
   Customization: Özelleştirme
   Manage Profile Subscriptions: Profil aboneliklerini yönet

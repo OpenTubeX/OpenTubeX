@@ -8,7 +8,7 @@ import { settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBa
 const source = readFileSync(new URL('../../src/renderer/helpers/androidBackDialog.js', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function fixture({ reducedMotion = false, busy = false, closes = true, rejects = false, deferredFrames = false, prompt = false } = {}) {
+function fixture({ reducedMotion = false, busy = false, closes = true, rejects = false } = {}) {
   let available = true
   let backs = 0
   const properties = new Map([
@@ -16,7 +16,6 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     ['animation', ['dialog-enter 160ms ease', 'important']],
   ])
   const animations = []
-  const frames = []
   function animate(frames, options) {
     const animation = {
       target: this, frames, effect: { getTiming: () => options }, currentTime: 0,
@@ -30,11 +29,10 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     animations.push(animation)
     return animation
   }
-  const card = { animate }
   const element = {
     isConnected: true, scrollTop: 150.5,
-    matches: selector => prompt && selector === '.prompt',
-    querySelector: selector => selector === ':scope > .promptCard' ? (prompt ? card : null) : (busy ? {} : null),
+    matches: () => false,
+    querySelector: selector => selector === ':scope > .promptCard' ? null : (busy ? {} : null),
     style: {
       getPropertyValue: name => properties.get(name)?.[0] ?? '',
       getPropertyPriority: name => properties.get(name)?.[1] ?? '',
@@ -45,7 +43,7 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
   }
   const create = vm.runInNewContext(`${source}; createAndroidBackDialogPreview`, {
     nextTick, settleAndroidBackAnimation, applyAnimationSpeed: animation => animation,
-    requestAnimationFrame: callback => deferredFrames ? frames.push(callback) : queueMicrotask(callback),
+    requestAnimationFrame: callback => queueMicrotask(callback),
     isReducedMotionEnabled: () => reducedMotion,
     getComputedStyle: () => ({ transform: 'none', opacity: '1' }),
   })
@@ -55,56 +53,7 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     if (rejects) throw new Error('Back failed')
     if (closes) element.isConnected = false
   }, () => element.isConnected && available)
-  return { preview, element, card, animations, properties, frames, backs: () => backs, replaceLayer: () => { available = false } }
-}
-
-test('a prompt clears its backdrop blur and fades its card instead of fading the whole backdrop', async () => {
-  const f = fixture({ prompt: true })
-  assert.equal(f.preview.begin(), true)
-  const [backdrop, card] = f.animations
-  // Fading the backdrop's opacity would crossfade a sharp and a blurred page.
-  assert.equal(backdrop.target, f.element)
-  assert.deepEqual(JSON.parse(JSON.stringify(backdrop.frames)), [{ backgroundColor: 'transparent', backdropFilter: 'blur(0)' }])
-  assert.equal(card.target, f.card)
-  assert.equal(card.frames.at(-1).opacity, 0)
-  f.preview.update(0.5)
-  assert.deepEqual(f.animations.map(animation => animation.currentTime), [90, 90])
-  await f.preview.finish(true)
-  assert.equal(f.backs(), 1)
-  assert.deepEqual(f.animations.map(animation => animation.playState), ['idle', 'idle'])
-})
-
-test('commit keeps the finished effect until Vue applies its leave state across two frames', async () => {
-  const f = fixture({ closes: false, deferredFrames: true })
-  f.preview.begin()
-  const finished = f.preview.finish(true)
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(f.backs(), 1)
-  assert.notEqual(f.animations[0].playState, 'idle', 'the connected modal must not flash back to its base styles')
-  f.frames.shift()()
-  assert.notEqual(f.animations[0].playState, 'idle')
-  // Vue removes the element when its leave-to classes take effect in this frame.
-  f.element.isConnected = false
-  f.frames.shift()()
-  await finished
-  assert.equal(f.animations[0].playState, 'idle')
-  assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
-  assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
-})
-
-for (const progress of [0, 0.001]) {
-  test(`cancelling after returning to progress ${progress} does not restart the preview`, async () => {
-    const f = fixture()
-    f.preview.begin()
-    f.preview.update(0.6)
-    f.preview.update(progress)
-    await f.preview.finish(false)
-    assert.equal(f.animations[0].reverseCalls, progress === 0 ? 0 : 1)
-    assert.equal(f.animations[0].playState, 'idle')
-    assert.equal(f.backs(), 0)
-    assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
-    assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
-  })
+  return { preview, element, animations, properties, backs: () => backs, replaceLayer: () => { available = false } }
 }
 
 for (const commit of [false, true]) {

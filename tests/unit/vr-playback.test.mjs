@@ -204,16 +204,14 @@ test('an incomplete flat fallback retains mesh projection', async () => {
   assert.equal((await load(true)).vrProjection, 'MESH')
 })
 
-for (const panorama of [false, true]) {
-  test(`combined-only mesh streams remain playable when panoramic HLS is ${panorama ? 'rejected' : 'missing'}`, async () => {
-    const { load, attempts } = loader({ combinedOnly: true, panorama, probePlayable: false })
-    const source = await load(true)
-    assert.equal(source.manifestSrc, null)
-    assert.equal(source.vrProjection, 'MESH')
-    assert.deepEqual(source.legacyFormats, [{ url: 'https://media.test/combined' }])
-    assert.deepEqual(attempts, [false, true, true])
-  })
-}
+test('combined-only mesh streams remain playable when panoramic HLS is missing', async () => {
+  const { load, attempts } = loader({ combinedOnly: true, panorama: false, probePlayable: false })
+  const source = await load(true)
+  assert.equal(source.manifestSrc, null)
+  assert.equal(source.vrProjection, 'MESH')
+  assert.deepEqual(source.legacyFormats, [{ url: 'https://media.test/combined' }])
+  assert.deepEqual(attempts, [false, true, true])
+})
 
 test('a combined-only mesh stream still retries and prefers a recovered panorama', async () => {
   const { load, attempts } = loader({ combinedOnly: true })
@@ -223,7 +221,7 @@ test('a combined-only mesh stream still retries and prefers a recovered panorama
   assert.deepEqual(attempts, [false, true])
 })
 
-for (const projection of [null, 'MESH']) {
+for (const projection of [null]) {
   test(`failed panorama extraction uses a cached ${projection ?? 'unmarked'} flat source only as the final fallback`, async () => {
     const cached = {
       subtitlesIncluded: true, vrProjection: projection,

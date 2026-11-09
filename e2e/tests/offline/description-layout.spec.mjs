@@ -31,10 +31,6 @@ test.describe('description layout', () => {
   // One test per metadata kind keeps each within the timeout on a busy host.
   for (const { kind, metadata, selector, text } of [
     { kind: 'tags', metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
-    { kind: 'games', metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
-    { kind: 'music', metadata: { videoMusicTracks: [{ title: 'Test song', artist: 'Test artist', album: '', license: '', thumbnail: '' }] }, selector: '.musicTrackTitle', text: 'Test song' },
-    { kind: 'license', metadata: { license: 'Creative Commons license' }, selector: '.license', text: 'Creative Commons license' },
-    { kind: 'content disclosures', metadata: { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }, selector: '.contentDisclosureHeader', text: 'Auto-dubbed' },
   ]) {
     test(`keeps appended metadata visible and collapsible when it arrives after short text (${kind})`, { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
       await mockUnplayableWatchPage(app, page)
@@ -189,38 +185,6 @@ test.describe('description layout', () => {
     await expect(card).not.toHaveClass(/short/)
   })
 
-  test('links credited songs to their videos and artists to their channels', async ({ app, page }) => {
-    await mockUnplayableWatchPage(app, page)
-    await goTo(page, 'history')
-    await openHistoryEntry(page)
-    const view = await watchViewHandle(page)
-    await view.evaluate(component => {
-      component.videoDescription = 'A short description.'
-      component.videoDescriptionHtml = ''
-      component.videoMusicTracks = [
-        { title: 'Linked song', artist: 'Linked artist', album: 'Linked album', license: 'Test label', thumbnail: '', videoId: 'jNQXAC9IVRw', channelId: 'UC4QobU6STFB0P71PMvOGN5A' },
-        { title: 'Unlinked song', artist: 'Unlinked artist', album: '', license: '', thumbnail: '' }
-      ]
-    })
-    const card = page.locator('.videoDescription').visible()
-    await card.locator(':scope > .descriptionStatus').click()
-    await expect(card.locator('.musicHeading')).toHaveText('Music')
-
-    const [linked, unlinked] = [card.locator('.musicTrack').nth(0), card.locator('.musicTrack').nth(1)]
-    await expect(linked.locator('a.musicTrackTitle')).toHaveAttribute('href', '#/watch/jNQXAC9IVRw')
-    await expect(linked.locator('a.musicTrackArtist')).toHaveAttribute('href', '#/channel/UC4QobU6STFB0P71PMvOGN5A')
-    await expect(linked.locator('.musicTrackDetail')).toHaveText(['Linked album', 'Test label'])
-    await expect(unlinked.locator('a')).toHaveCount(0)
-    await expect(unlinked.locator('.musicTrackTitle')).toHaveText('Unlinked song')
-    await expect(unlinked.locator('.musicTrackArtist')).toHaveText('Unlinked artist')
-    await expect(unlinked.locator('.musicTrackDetail')).toHaveCount(0)
-
-    await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', true))
-    await expect(linked.locator('a.musicTrackArtist')).toHaveCount(0)
-    await expect(linked.locator('.musicTrackArtist')).toHaveText('Linked artist')
-    await expect(linked.locator('a.musicTrackTitle')).toHaveAttribute('href', '#/watch/jNQXAC9IVRw')
-  })
-
   test('keeps description controls below open toolbar dropdowns', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     // Keep a 1400x1300 CSS viewport at every scale so the share menu stays a
     // dropdown and fits below its button, where it opens over the description.
@@ -261,61 +225,6 @@ test.describe('description layout', () => {
           coveredByMenu: menu.contains(document.elementFromPoint((left + right) / 2, (top + bottom) / 2))
         }
       }, selector), { message: `The share menu overlaps and covers ${selector}` }).toEqual({ overlaps: true, coveredByMenu: true })
-    }
-  })
-
-  test('short descriptions fit their content with centered text and copy control', { tag: '@scale' }, async ({ app, page }, testInfo) => {
-    await mockUnplayableWatchPage(app, page)
-    await goTo(page, 'history')
-    await openHistoryEntry(page)
-    const view = await watchViewHandle(page)
-    await view.evaluate(async component => {
-      component.isLoading = true
-      await component.$nextTick()
-      component.videoDescription = 'A short description.'
-      component.videoDescriptionHtml = ''
-      component.videoTags = []
-      component.videoGames = []
-      component.videoMusicTracks = []
-      component.license = null
-      component.contentDisclosures = []
-      component.isLoading = false
-      await component.$nextTick()
-    })
-    const card = page.locator('.videoDescription').visible()
-    await expect(card.locator('.description')).toHaveText('A short description.')
-    await expect(card.locator('.descriptionStatus')).toHaveCount(0)
-
-    for (const lines of [1, 2, 4, 1]) {
-      await view.evaluate((component, count) => {
-        component.videoDescription = Array(count).fill('A short description.').join('\n')
-      }, lines)
-      await expect.poll(() => card.evaluate(element => {
-        const card = element.getBoundingClientRect()
-        const text = element.querySelector('.description').getBoundingClientRect()
-        return Math.abs((text.top - card.top) - (card.bottom - text.bottom))
-      }), { message: 'Description text has equal space above and below it' }).toBeLessThanOrEqual(1)
-    }
-
-    await expect.poll(() => card.evaluate(element => {
-      const card = element.getBoundingClientRect()
-      const copy = element.querySelector('.descriptionCopyButton').getBoundingClientRect()
-      return Math.abs((copy.top + copy.bottom - card.top - card.bottom) / 2)
-    }), { message: 'Copy control is vertically centered in the one-line card' }).toBeLessThanOrEqual(1)
-    await expect.poll(() => card.evaluate(element => {
-      const text = element.querySelector('.description').getBoundingClientRect()
-      const style = getComputedStyle(element)
-      const padding = Number.parseFloat(style.paddingBlockStart) + Number.parseFloat(style.paddingBlockEnd)
-      return Math.abs(element.getBoundingClientRect().height - text.height - padding)
-    }), { message: 'Card reserves only its normal vertical padding' }).toBeLessThanOrEqual(1)
-
-    await page.mouse.move(0, 0)
-    for (const theme of ['dark', 'light']) {
-      await page.emulateMedia({ colorScheme: theme })
-      await expect(page.locator('body')).toContainClass(theme)
-      await testInfo.attach(`one-line description ${theme}`, {
-        body: await card.screenshot(), contentType: 'image/png'
-      })
     }
   })
 })

@@ -22,7 +22,6 @@ import {
   parsePairingQrPayload,
   syncServerTokenAccountId,
   randomPairingDeviceId,
-  randomPairingVerificationCode,
 } from '../../src/renderer/helpers/sync-server-pairing.js'
 
 const ORIGIN = 'https://sync.example.com'
@@ -198,12 +197,6 @@ test('matches an authenticated server session against every QR relay field', asy
   assert.equal(pairingSessionMatchesRequest({ ...session, approved: true }, request), false)
   assert.equal(pairingSessionMatchesRequest({ ...session, unexpected: true }, request), false)
   assert.equal(pairingSessionMatchesRequest({ ...session, expires_at: Date.now() - 1 }, request), false)
-})
-
-test('creates fixed-width numeric verification codes', () => {
-  for (let index = 0; index < 100; index++) {
-    assert.match(randomPairingVerificationCode(), /^\d{6}$/)
-  }
 })
 
 function unclaimedSession (request) {

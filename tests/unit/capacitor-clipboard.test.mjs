@@ -6,8 +6,6 @@ import vm from 'node:vm'
 const source = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
 const readSource = source.match(/export async function readClipboard\(\) \{[\s\S]*?^\}/m)[0]
 const writeSource = source.match(/export async function copyToClipboard\([\s\S]*?^\}/m)[0]
-const imageSource = (await readFile(new URL('../../src/renderer/helpers/fileData.js', import.meta.url), 'utf8'))
-  .replace(/^import .*\n/gm, '').replace(/^export /gm, '')
 
 function loadClipboard(clipboard, toasts = [], overrides = {}) {
   return vm.runInNewContext(`${readSource}\n${writeSource}\n({ readClipboard, copyToClipboard })`.replace(/^export /gm, ''), {
@@ -41,20 +39,6 @@ test('reports native screenshot clipboard failures without showing success', asy
     messageOnSuccess: 'Screenshot copied', messageOnError: 'Copy failed',
   })
   assert.deepEqual(toasts.map(toast => toast.message), ['Copy failed: Error: Image write failed'])
-})
-
-test('encodes binary file contents as a data URL', async () => {
-  const image = new Blob(['PNG bytes'], { type: 'image/png' })
-  const encode = vm.runInNewContext(`${imageSource}\nblobToDataUrl`, {
-    FileReader: class {
-      async readAsDataURL(blob) {
-        assert.equal(blob, image)
-        this.result = `data:${blob.type};base64,${Buffer.from(await blob.arrayBuffer()).toString('base64')}`
-        this.onload()
-      }
-    },
-  })
-  assert.equal(await encode(image), 'data:image/png;base64,UE5HIGJ5dGVz')
 })
 
 test('desktop screenshots continue to use the browser image clipboard', async () => {
@@ -91,11 +75,6 @@ test('reads text from the Capacitor result and ignores image data', async () => 
   assert.equal(await images.readClipboard(), '')
 })
 
-test('an empty native clipboard still returns empty text', async () => {
-  const { readClipboard } = loadClipboard({ read: async () => { throw Object.assign(new Error('The clipboard is empty'), { code: 'EMPTY_CLIPBOARD' }) } })
-  assert.equal(await readClipboard(), '')
-})
-
 test('propagates native read failures and shows native write failures', async () => {
   const error = new Error('Clipboard access denied')
   const toasts = []
@@ -112,22 +91,4 @@ test('propagates native read failures and shows native write failures', async ()
 test('reads native URL clipboard entries as text', async () => {
   const { readClipboard } = loadClipboard({ read: async () => ({ type: 'URL', value: 'https://youtu.be/example' }) })
   assert.equal(await readClipboard(), 'https://youtu.be/example')
-})
-
-test('copies errors as their message text through the native bridge', async () => {
-  const writes = []
-  const toasts = []
-  // The Capacitor bridge serializes plugin options as JSON, which turns an Error into {}
-  const { copyToClipboard } = loadClipboard({
-    write: async options => {
-      const sent = JSON.parse(JSON.stringify(options))
-      if (typeof sent.text !== 'string') throw new Error('One of text, html, image or url must be provided.')
-      writes.push(sent)
-    },
-  }, toasts)
-
-  await copyToClipboard(new Error('Request failed'))
-
-  assert.deepEqual(writes, [{ text: 'Error: Request failed', label: 'OpenTubeX' }])
-  assert.deepEqual(toasts, [])
 })

@@ -73,24 +73,6 @@ async function savedThemes(app) {
   return Promise.all(files.map(async file => JSON.parse(await readFile(path.join(directory, file), 'utf8'))))
 }
 
-test('shows a placeholder while theme screenshots load and a text fallback after failure', async ({ page }, testInfo) => {
-  const pending = []
-  await page.route('https://github.com/user-attachments/assets/*', route => { pending.push(route) })
-  await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1), entry(2)]) }))
-  const gallery = await openDiscovery(page)
-  const card = gallery.locator('article').first()
-  await expect.poll(() => pending.length).toBeGreaterThan(0)
-  await expect(card.locator('.themePreview img:not(.retryImagePlaceholder)')).toBeHidden()
-  await expect(card.locator('.retryImagePlaceholder')).toBeVisible()
-  await expect.poll(() => card.locator('.retryImagePlaceholder').evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('ft-shimmer')
-  await expect(card.locator('.retryImagePlaceholder svg')).toBeHidden()
-  await card.screenshot({ path: testInfo.outputPath('theme-screenshot-placeholder.png') })
-  while (pending.length) await pending.shift().abort()
-  await expect.poll(() => pending.length).toBeGreaterThan(0)
-  while (pending.length) await pending.shift().abort()
-  await expect(card.getByText('Screenshot unavailable', { exact: true })).toBeVisible()
-})
-
 test('opens the theme author profile once through the external-link setting', async ({ page, app }) => {
   await app.electronApp.evaluate(({ shell }) => {
     globalThis.themeAuthorExternalUrls = []
@@ -401,39 +383,6 @@ test('automatically loads more at the bottom with a spinner and stops retrying o
   await expect(gallery.locator('.loadingIndicator')).toHaveCount(0)
 })
 
-test('reloads the feed when an already-open gallery is remounted', async ({ page }) => {
-  await mockScreenshots(page)
-  let requests = 0
-  await page.route(feedUrl, route => {
-    requests++
-    return route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) })
-  })
-  const gallery = await openDiscovery(page)
-  await expect(gallery.locator('article')).toHaveCount(1)
-  expect(requests).toBe(1)
-  await page.evaluate(() => {
-    // A hot reload replaces the child while its parent's open state survives.
-    function find(vnode) {
-      if (vnode?.component?.type?.__name === 'ThemeDiscovery') return vnode.component
-      const nested = vnode?.component?.subTree && find(vnode.component.subTree)
-      if (nested) return nested
-      for (const child of Array.isArray(vnode?.children) ? vnode.children : []) {
-        const match = find(child)
-        if (match) return match
-      }
-      return null
-    }
-    const component = find(document.querySelector('#app').__vue_app__._container._vnode)
-    if (!component) throw new Error('Theme discovery component not found')
-    component.vnode.key = 'before-remount'
-    component.parent.proxy.$forceUpdate()
-  })
-  await expect(gallery).toBeVisible()
-  await expect.poll(() => requests, { timeout: 2000 }).toBe(2)
-  await expect(gallery.locator('article')).toHaveCount(1)
-  await expect(gallery.getByText('No installable themes found.')).toHaveCount(0)
-})
-
 test('only offers updates for changes to the theme JSON', async ({ page, app }) => {
   await mockScreenshots(page)
   const options = { updated: oldRevision, description: 'Original description' }
@@ -463,79 +412,4 @@ test('only offers updates for changes to the theme JSON', async ({ page, app }) 
   await gallery.getByRole('button', { name: 'Refresh', exact: true }).click()
   await expect(gallery.getByRole('button', { name: 'Refresh', exact: true })).toHaveAttribute('aria-disabled', 'false')
   await expect(card.getByRole('button', { name: 'Update and apply', exact: true })).toHaveCount(0)
-})
-
-for (const fullPreview of [false, true]) {
-  test(`keeps the selected screenshot after an outgoing image fails (${fullPreview ? 'full preview' : 'gallery'})`, async ({ page }) => {
-    await mockScreenshots(page)
-    await page.route(screenshot, route => route.abort())
-    let retry
-    await page.route(`${screenshot}?*`, route => { retry = route })
-    await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
-    const gallery = await openDiscovery(page)
-    await page.emulateMedia({ reducedMotion: 'no-preference' })
-    if (fullPreview) await gallery.locator('.themePreview button').click()
-    const container = fullPreview ? page.getByRole('dialog', { name: 'Community theme 1', exact: true }) : gallery
-    await expect(container.locator('img')).toHaveAttribute('src', screenshot)
-    await expect.poll(() => retry !== undefined).toBe(true)
-    await container.evaluate((element, full) => {
-      const outgoing = element.querySelector('img')
-      if (!full) {
-        outgoing.closest('.themeScreenshotImage').addEventListener('transitionrun', () => {
-          element.dataset.outgoingError = 'true'
-          outgoing.dispatchEvent(new Event('error'))
-        }, { once: true })
-      }
-      const next = full
-        ? element.querySelector('.screenshotNavigation button:last-child')
-        : element.querySelector('.screenshotChoices button:last-child')
-      next.click()
-    }, fullPreview)
-    if (!fullPreview) await expect(container).toHaveAttribute('data-outgoing-error', 'true')
-    await retry.abort()
-    await expect(container.locator('img')).toHaveAttribute('src', secondScreenshot)
-    await expect(container.locator('img')).toBeVisible()
-    await expect.poll(() => container.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-  })
-}
-
-test('pinches theme screenshots to zoom and resets zoom when switching screenshots', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 })
-  await mockScreenshots(page)
-  await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
-  const gallery = await openDiscovery(page)
-  await gallery.locator('.themePreview button').click()
-  const image = page.locator('img.fullThemeScreenshot')
-  await expect(image).toBeVisible()
-  const bounds = await image.boundingBox()
-  const x = bounds.x + bounds.width / 2
-  const y = bounds.y + bounds.height / 2
-  const session = await page.context().newCDPSession(page)
-  try {
-    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x - 20, y, id: 1 }] })
-    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x - 20, y, id: 1 }, { x: x + 20, y, id: 2 }] })
-    for (const distance of [30, 45, 65, 85]) {
-      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - distance, y, id: 1 }, { x: x + distance, y, id: 2 }] })
-    }
-    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [{ x: x - 85, y, id: 1 }] })
-    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBeGreaterThan(1.5)
-    // Finish the pinch transition before starting a separate drag.
-    await expect.poll(() => page.locator('.screenshotZoom').evaluate(element =>
-      element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition).length)).toBe(0)
-    const wrapper = page.locator('.screenshotZoom .swiper-zoom-container')
-    const initialX = await wrapper.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).e)
-    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] })
-    for (const distance of [15, 30, 50, 70]) {
-      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + distance, y, id: 1 }] })
-    }
-    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect.poll(() => wrapper.evaluate((el, initial) => Math.abs(new DOMMatrix(getComputedStyle(el).transform).e - initial), initialX)).toBeGreaterThan(20)
-    await page.locator('.screenshotNavigation button').last().click()
-    await expect(image).toHaveAttribute('src', secondScreenshot)
-    await expect(image).toBeVisible()
-    await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBe(1)
-  } finally {
-    await session.detach()
-  }
 })

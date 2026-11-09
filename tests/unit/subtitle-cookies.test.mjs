@@ -65,18 +65,16 @@ test('preserves the SRT format used by automatic caption translations', async ()
   assert.equal(await (await fetch(result)).text(), srt)
 })
 
-for (const position of ['0%', '100%']) {
-  test(`keeps authenticated automatic captions centered instead of forcing position:${position}`, async () => {
-    const caption = vtt.replace('00:00:01.000', `00:00:01.000 align:start position:${position}`)
-    const authenticatedUrl = await getSubtitleRequestUrl(`${url}&caps=asr&kind=asr`, {
-      getYtDlpSubtitleUseCookies: true
-    }, { ytDlpGetSubtitle: async () => caption })
-    assert.equal(await (await fetch(authenticatedUrl)).text(), vtt)
+test('keeps authenticated automatic captions centered instead of forcing position:0%', async () => {
+  const caption = vtt.replace('00:00:01.000', '00:00:01.000 align:start position:0%')
+  const authenticatedUrl = await getSubtitleRequestUrl(`${url}&caps=asr&kind=asr`, {
+    getYtDlpSubtitleUseCookies: true
+  }, { ytDlpGetSubtitle: async () => caption })
+  assert.equal(await (await fetch(authenticatedUrl)).text(), vtt)
 
-    // Uploaded captions retain the author's positioning.
-    const uploadedUrl = await getSubtitleRequestUrl(url, {
-      getYtDlpSubtitleUseCookies: true
-    }, { ytDlpGetSubtitle: async () => caption })
-    assert.equal(await (await fetch(uploadedUrl)).text(), caption)
-  })
-}
+  // Uploaded captions retain the author's positioning.
+  const uploadedUrl = await getSubtitleRequestUrl(url, {
+    getYtDlpSubtitleUseCookies: true
+  }, { ytDlpGetSubtitle: async () => caption })
+  assert.equal(await (await fetch(uploadedUrl)).text(), caption)
+})

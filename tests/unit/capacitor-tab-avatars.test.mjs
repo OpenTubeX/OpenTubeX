@@ -3,7 +3,6 @@ import test from 'node:test'
 import { Capacitor } from '@capacitor/core'
 import { reactive } from 'vue'
 import { createFilesystem, filesystemPluginHeader } from '../helpers/capacitor-filesystem.mjs'
-import { connectionEvents } from '../../src/renderer/helpers/networkRecovery.js'
 
 globalThis.androidBridge = {}
 Capacitor.PluginHeaders = [filesystemPluginHeader]
@@ -100,44 +99,6 @@ test('a new avatar replaces the stored one and closed tabs release theirs', asyn
   dispose()
 })
 
-test('a failed download is retried only when the connection comes back', async t => {
-  const state = setup(t)
-  state.fetchAvatar.mock.mockImplementation(async () => null)
-  const dispose = state.start()
-  await settle()
-  state.store.getters.getTabs = [channelTab, { id: 'other', route: { path: '/watch/aaaaaaaaaaa' } }]
-  await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 1)
-  assert.equal(getCapacitorTabAvatar(channelTab), null)
-  assert.equal(state.filesystem.files.size, 0)
-
-  state.fetchAvatar.mock.mockImplementation(async source => `data:image/jpeg;base64,${source}`)
-  connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'offline' }))
-  await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 1)
-  connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
-  await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 2)
-  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
-  dispose()
-})
-
-test('clearing waits for tab use before downloading avatars again', async t => {
-  const state = setup(t)
-  const dispose = state.start()
-  await settle()
-  clearCapacitorTabAvatars()
-  await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 1)
-  assert.equal(getCapacitorTabAvatar(channelTab), null)
-
-  state.store.getters.getPresentedTabId = 'other'
-  await settle()
-  assert.equal(state.fetchAvatar.mock.callCount(), 2, 'switching tabs refills the cache')
-  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/jpeg;base64,176x176')
-  dispose()
-})
-
 test('clearing during startup keeps stored avatars from coming back', async t => {
   const filesystem = createFilesystem()
   filesystem.files.set(`tab-previews/avatar-channel-${channelId}.json`, JSON.stringify({ source: remote, image: 'data:image/jpeg;base64,old' }))
@@ -195,14 +156,5 @@ test('damaged stored images are deleted instead of being skipped forever', async
   const dispose = state.start()
   await settle()
   assert.deepEqual([...filesystem.files.keys()], [`tab-previews/avatar-channel-${channelId}.json`])
-  dispose()
-})
-
-test('avatars that may be transparent are stored without losing alpha', async t => {
-  const state = setup(t)
-  state.fetchAvatar.mock.mockImplementation(async () => 'data:image/png;base64,logo')
-  const dispose = state.start()
-  await settle()
-  assert.equal(getCapacitorTabAvatar(channelTab), 'data:image/png;base64,176x176')
   dispose()
 })

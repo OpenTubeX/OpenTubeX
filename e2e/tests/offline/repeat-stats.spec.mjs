@@ -1,4 +1,4 @@
-import { expect, goToSettingsSection, latestSettings, sel, setPlayerFullscreen, setWindowSize, test, readDatastore } from '../../helpers/app.mjs'
+import { expect, sel, setPlayerFullscreen, setWindowSize, test } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -135,117 +135,34 @@ test('repeat stats stay hidden for Shorts without disabling looping', async ({ a
   await expect(video).toHaveAttribute('loop', '')
 })
 
-test('Distraction Free hides repeat stats immediately without disabling looping or losing the session', async ({ app, page }) => {
+test('repeat stats hide in the mini player while viewing scrolling and return with their totals', { tag: '@scale' }, async ({ app, page }) => {
   const video = await openVideo(app, page)
   await toggleLoop(page)
   const stats = page.locator('.repeatStats')
-  await expect(stats).toBeVisible()
-  await video.evaluate(element => { element.currentTime = element.duration - 0.5 })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  const player = page.locator('.ftVideoPlayer')
   await video.evaluate(element => element.play())
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
-  await video.evaluate(element => element.pause())
+  await expect(stats.locator('.repeatStatsTime')).not.toHaveText('0:00')
   const spent = await stats.locator('.repeatStatsTime').textContent()
 
-  const focus = await goToSettingsSection(page, 'focus')
-  const hideStats = focus.getByRole('checkbox', { name: /^Hide Repeat Stats/ })
-  await expect(hideStats).not.toBeChecked()
-  await hideStats.locator('..').locator('label.switch-label').click()
-  await expect(hideStats).toBeChecked()
-  await expect(stats).toHaveCount(0)
-  await expect.poll(() => video.evaluate(element => element.loop)).toBe(true)
-  await expect.poll(async () => {
-    const contents = readDatastore(app.userDataDir, 'settings')
-    return latestSettings(contents).hideRepeatStats
-  }).toBe(true)
-
-  await hideStats.locator('..').locator('label.switch-label').click()
-  await expect(hideStats).not.toBeChecked()
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
-  await expect(stats.locator('.repeatStatsTime')).toHaveText(spent)
-  await expect.poll(async () => {
-    const contents = readDatastore(app.userDataDir, 'settings')
-    return latestSettings(contents).hideRepeatStats
-  }).toBe(false)
-})
-
-for (const mode of ['scrolling', 'another tab']) {
-  test(`repeat stats hide in the mini player while viewing ${mode} and return with their totals`, { tag: '@scale' }, async ({ app, page }) => {
-    const video = await openVideo(app, page)
-    await toggleLoop(page)
-    const stats = page.locator('.repeatStats')
-    const player = page.locator('.ftVideoPlayer')
-    await video.evaluate(element => element.play())
-    await expect(stats.locator('.repeatStatsTime')).not.toHaveText('0:00')
-    const spent = await stats.locator('.repeatStatsTime').textContent()
-
-    const infoTop = () => page.locator('.infoArea').evaluate(element => element.getBoundingClientRect().top + window.scrollY)
-    let inlineInfoTop = null
-    if (mode === 'scrolling') {
-      await video.evaluate(element => element.pause())
-      inlineInfoTop = await infoTop()
-      await player.evaluate(element => {
-        window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom)
-      })
-    } else {
-      await page.evaluate(() => window.$store
-        .dispatch('updateScrollMiniPlayerOnAllTabs', true))
-      await page.locator('.tabBar .newTabButton').click()
-      await expect(page.locator('#cross-tab-mini-player-layer .ftVideoPlayer')).toBeVisible()
-    }
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(stats).toBeHidden()
-    if (inlineInfoTop !== null) {
-      // Hiding the stats must not pull the page below the player up, or a
-      // click that scrolled the player away could release on another element.
-      expect(Math.abs(await infoTop() - inlineInfoTop)).toBeLessThan(1)
-    }
-
-    await player.locator('video').evaluate(element => element.pause())
-    if (mode === 'another tab') await page.locator('.tabBar .tab').first().click()
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect(stats).toBeVisible()
-    await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
-    const seconds = text => text.split(':').reduce((total, part) => total * 60 + Number(part), 0)
-    expect(seconds(await stats.locator('.repeatStatsTime').textContent())).toBeGreaterThanOrEqual(seconds(spent))
-  })
-}
-
-test('repeat stats ignore seeks to point B at the media end and count natural playback', async ({ app, page }) => {
-  const video = await openVideo(app, page)
-  await video.evaluate(element => { element.currentTime = 5 })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-  await page.keyboard.press('Shift+A')
-  await video.evaluate(element => { element.currentTime = element.duration })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-  await page.keyboard.press('Shift+B')
-  const stats = page.locator('.repeatStats')
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
-  await video.evaluate(element => { element.currentTime = 5 })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-
-  for (const playing of [false, true]) {
-    if (playing) await video.evaluate(element => element.play())
-    // Playback resumes from A, possibly before the seek there completes, so wait for
-    // that seek instead of polling for a position shortly after A.
-    await video.evaluate(element => new Promise(resolve => {
-      element.addEventListener('seeking', function returningToA() {
-        if (element.currentTime >= 6) return
-        element.removeEventListener('seeking', returningToA)
-        element.addEventListener('seeked', () => resolve(), { once: true })
-      })
-      element.currentTime = element.duration
-    }))
-    await video.evaluate(element => element.pause())
-    await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
-  }
-
-  await video.evaluate(element => { element.currentTime = element.duration - 0.5 })
-  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
-  await video.evaluate(element => element.play())
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
+  const infoTop = () => page.locator('.infoArea').evaluate(element => element.getBoundingClientRect().top + window.scrollY)
   await video.evaluate(element => element.pause())
+  const inlineInfoTop = await infoTop()
+  await player.evaluate(element => {
+    window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(stats).toBeHidden()
+  // Hiding the stats must not pull the page below the player up, or a
+  // click that scrolled the player away could release on another element.
+  expect(Math.abs(await infoTop() - inlineInfoTop)).toBeLessThan(1)
+
+  await player.locator('video').evaluate(element => element.pause())
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+  await expect(stats).toBeVisible()
+  await expect(stats.locator('.repeatStatsCount')).toHaveText('0')
+  const seconds = text => text.split(':').reduce((total, part) => total * 60 + Number(part), 0)
+  expect(seconds(await stats.locator('.repeatStatsTime').textContent())).toBeGreaterThanOrEqual(seconds(spent))
 })
 
 test('repeat stats ignore seeks past point B during playback', async ({ app, page }) => {

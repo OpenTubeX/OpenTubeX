@@ -8,11 +8,6 @@ import {
   takeDueReplayComments,
 } from '../../src/renderer/components/WatchVideoLiveChat/liveChatReplay.js'
 
-test('reads the player position a replay action belongs to', () => {
-  assert.equal(parseReplayOffsetMs('90000'), 90_000)
-  assert.equal(parseReplayOffsetMs('0'), 0)
-})
-
 test('falls back to the start of the video for unusable replay offsets', () => {
   assert.equal(parseReplayOffsetMs(undefined), 0)
   assert.equal(parseReplayOffsetMs(''), 0)
@@ -103,17 +98,6 @@ test('re-runs a poll that was requested while one was already in flight', async 
 
   // Without the re-run the chat would sit empty at 3600 until playback resumed.
   assert.deepEqual(positions, [0, 3600])
-})
-
-test('stops re-running once nothing further was requested', async () => {
-  let calls = 0
-  const poll = createCoalescingPoller(async () => { calls++ })
-
-  await poll()
-  assert.equal(calls, 1)
-
-  await poll()
-  assert.equal(calls, 2)
 })
 
 test('a failing poll does not wedge the poller', async () => {

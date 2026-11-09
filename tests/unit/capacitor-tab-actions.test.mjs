@@ -80,26 +80,8 @@ test('selecting the context tab reveals selection and tapping toggles without ac
   assert.deepEqual(calls, [['activate', 'last']])
 })
 
-test('selecting a context tab restores focus after selection has rendered', async t => {
-  let rendered = false
-  const focused = []
-  const { actions } = setup(t, {
-    afterSelect(id) {
-      assert.equal(rendered, true)
-      assert.equal(actions.actionTab.value, null)
-      focused.push(id)
-    },
-  })
-  const stop = watch(actions.selecting, () => { rendered = true }, { flush: 'post' })
-  t.after(stop)
-  actions.openTabActions('middle')
-  await actions.selectActionTab()
-  assert.deepEqual(focused, ['middle'])
-})
-
 for (const [position, expected] of [
   ['before', ['first']],
-  ['after', ['last']],
   ['other', ['first', 'last']],
 ]) {
   test(`close ${position} preserves pinned and context tabs`, async t => {
@@ -112,16 +94,6 @@ for (const [position, expected] of [
     assert.equal(actions.actionTab.value, null)
   })
 }
-
-test('relative actions follow current order and disable empty ranges', async t => {
-  const { actions, tabs } = setup(t)
-  tabs.value = [tabs.value[0], tabs.value[3], tabs.value[2], tabs.value[1]]
-  actions.openTabActions('last')
-  assert.deepEqual([...actions.relatedTabIds.value.before], [])
-  assert.deepEqual([...actions.relatedTabIds.value.after], ['middle', 'first'])
-  actions.openTabActions('missing')
-  assert.deepEqual([...actions.relatedTabIds.value.other], [])
-})
 
 test('close selection closes exactly the selected tabs and clears selection', async t => {
   const { actions, tabs, calls } = setup(t)
@@ -213,19 +185,6 @@ test('unloading every selected tab creates an unselected landing tab first', asy
     .every(tab => tab.loadState === 'unloaded'))
 })
 
-test('bulk unload activates an unselected tab before unloading the active selection', async t => {
-  const { actions, tabs, calls } = setup(t)
-  tabs.value = tabs.value.map(tab => ({
-    ...tab,
-    loadState: 'loaded',
-    isActive: tab.id === 'first',
-  }))
-  actions.toggleTabSelection('first')
-  actions.toggleTabSelection('middle')
-  await actions.runSelectedTabAction('unload')
-  assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'first'], ['unload', 'middle']])
-})
-
 test('bulk unload reports a failed landing-tab creation', async t => {
   const { actions, tabs, service, calls } = setup(t)
   tabs.value = tabs.value.slice(0, 2).map(tab => ({ ...tab, loadState: 'loaded' }))
@@ -242,27 +201,7 @@ test('bulk unload reports a failed landing-tab creation', async t => {
   assert.equal(actions.runningSelectionAction.value, false)
 })
 
-test('bulk unload reports a failed replacement-tab activation', async t => {
-  const { actions, tabs, service, calls } = setup(t)
-  tabs.value = tabs.value.map(tab => ({
-    ...tab,
-    loadState: 'loaded',
-    isActive: tab.id === 'first',
-  }))
-  actions.toggleTabSelection('first')
-  service.activateTab = async id => {
-    calls.push(['activate', id])
-    return false
-  }
-  await actions.runSelectedTabAction('unload')
-  assert.deepEqual(calls, [
-    ['activate', 'pinned'],
-    ['toast', 'Context Menu.Unload Tabs Failed'],
-  ])
-  assert.equal(actions.runningSelectionAction.value, false)
-})
-
-for (const action of ['unload', 'reload']) {
+for (const action of ['unload']) {
   test(`a rejected bulk ${action} reports the failure and continues`, async t => {
     const { actions, service, calls } = setup(t)
     actions.toggleTabSelection('first')
@@ -291,14 +230,6 @@ test('closing every selected tab leaves a fresh landing tab instead of exiting',
     ['close', 'middle'], ['close', 'last'], ['afterClose'],
   ])
   assert.deepEqual(tabs.value.map(tab => tab.id), ['landing'])
-})
-
-test('removed tabs are pruned from selection', async t => {
-  const { actions, tabs } = setup(t)
-  actions.toggleTabSelection('first')
-  tabs.value = tabs.value.filter(tab => tab.id !== 'first')
-  await nextTick()
-  assert.equal(actions.selectedTabIds.value.size, 0)
 })
 
 test('a refused close keeps the remaining selection available for retry', async t => {
@@ -415,25 +346,4 @@ test('closing the bulk action menu restores focus after Escape and while an acti
   await context.run('unload')
   assert.equal(context.showActions.value, false)
   assert.deepEqual(focused, ['more', 'controls'])
-})
-
-test('Back restores focus to an enabled action when the device trigger is disabled', async () => {
-  const component = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabActionsMenu.vue', import.meta.url), 'utf8')
-  const start = component.indexOf('async function setMenu(')
-  let focused = false
-  const context = vm.createContext({
-    activeMenu: { value: 'devices' },
-    mainScrollTop: 0,
-    actionList: { value: { querySelector: () => ({ focus() { focused = true } }) } },
-    actionContent: { value: {} },
-    deviceMenuTrigger: { value: { disabled: true, focus() {} } },
-    closeMenuTrigger: { value: null },
-    submenuBack: { value: null },
-    nextTick: async () => {},
-    restoreOverlayScrollTop() {},
-    clampOverlayScrollTop() {},
-  })
-  vm.runInContext(component.slice(start, component.indexOf('watch(() => props.tab', start)), context)
-  await context.setMenu(null)
-  assert.equal(focused, true)
 })

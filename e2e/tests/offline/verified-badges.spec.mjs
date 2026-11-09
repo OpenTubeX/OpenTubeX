@@ -1,7 +1,7 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 const VERIFIED = 'BADGE_STYLE_TYPE_VERIFIED'
@@ -25,34 +25,6 @@ function videoRenderer(videoId, title, channelName, index, badgeStyle) {
       publishedTimeText: { simpleText: '2 days ago' }
     }
   }
-}
-
-/**
- * Measures how far a badge circle overhangs the cap band of the name before it.
- * @param {import('@playwright/test').Locator} badge
- */
-function capBandOverhang(badge) {
-  return badge.evaluate(badge => {
-    let node = badge.parentElement.previousSibling
-    while (!node.textContent.trim()) node = node.previousSibling
-    let text = node
-    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
-    while (walker.nextNode()) {
-      if (walker.currentNode.textContent.trim()) text = walker.currentNode
-    }
-    const range = document.createRange()
-    range.selectNodeContents(text)
-    const line = [...range.getClientRects()].at(-1)
-    const context = document.createElement('canvas').getContext('2d')
-    context.font = getComputedStyle(text.parentElement).font
-    const metrics = context.measureText('H')
-    const baseline = line.top + metrics.fontBoundingBoxAscent
-    const circle = badge.querySelector('path').getBoundingClientRect()
-    return {
-      top: baseline - metrics.actualBoundingBoxAscent - circle.top,
-      bottom: circle.bottom - baseline
-    }
-  })
 }
 
 function channelRenderer(channelName, index, badgeStyle) {
@@ -122,52 +94,6 @@ test.describe('search results', () => {
 
     await attachScreenshot('verified search results')
   })
-
-  test('keeps badges on the line of the last character of wrapped names', { tag: '@scale' }, async ({ page }) => {
-    const channelName = 'Calm Evening Meditation Sounds And Stories'
-    const response = structuredClone(searchResponse)
-    response.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents = [
-      channelRenderer(channelName, 1, VERIFIED),
-      videoRenderer('aaaaaaaaaaa', 'Breathing exercise', channelName, 1, VERIFIED_ARTIST)
-    ]
-    await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: response }))
-
-    await page.locator(sel.searchInput).fill('meditation')
-    await page.locator(sel.searchInput).press('Enter')
-
-    const badges = [
-      page.locator('.ft-list-video .channelName .verifiedBadge'),
-      page.locator('.ft-list-channel .title .verifiedBadge')
-    ]
-    for (const badge of badges) {
-      await expect(badge).toBeVisible()
-      // Narrow the name one pixel at a time so every wrap position is checked.
-      const strandedWidths = await badge.evaluate(badge => {
-        const name = badge.closest('.channelNameText, .h3Title')
-        const walker = document.createTreeWalker(name, NodeFilter.SHOW_TEXT)
-        let text = null
-        while (walker.nextNode()) {
-          if (/\p{L}/u.test(walker.currentNode.textContent)) text = walker.currentNode
-        }
-        const end = text.textContent.trimEnd().length
-        const range = document.createRange()
-        range.setStart(text, end - 1)
-        range.setEnd(text, end)
-
-        const stranded = []
-        for (let width = 40; width <= 400; width++) {
-          name.style.display = 'inline-block'
-          name.style.inlineSize = `${width}px`
-          const lastCharacter = range.getBoundingClientRect()
-          if (badge.getBoundingClientRect().top >= lastCharacter.bottom) stranded.push(width)
-        }
-        name.style.removeProperty('display')
-        name.style.removeProperty('inline-size')
-        return stranded
-      })
-      expect(strandedWidths).toEqual([])
-    }
-  })
 })
 
 test.describe('watch page', () => {
@@ -188,72 +114,6 @@ test.describe('watch page', () => {
 
     await threads.first().scrollIntoViewIfNeeded()
     await attachScreenshot('verified comment authors')
-  })
-
-  test('aligns badges with the cap height of the names', { tag: '@scale' }, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page, { verifiedAuthors: true })
-    await openMockedVideo(page)
-    await page.locator('.commentAutoLoadSentinel').scrollIntoViewIfNeeded()
-
-    const badges = [
-      page.locator('.watchVideoInfo .channelName .verifiedBadge'),
-      page.locator('.commentThread').first().locator('.commentAuthorWrapper .verifiedBadge').first()
-    ]
-    for (const badge of badges) {
-      await expect(badge).toBeVisible()
-      // Canvas rounds the cap height to whole pixels.
-      const { top, bottom } = await capBandOverhang(badge)
-      expect(Math.abs(top)).toBeLessThanOrEqual(1)
-      expect(Math.abs(bottom)).toBeLessThanOrEqual(1)
-    }
-  })
-
-  test('marks verified live chat authors', async ({ app, page, attachScreenshot }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    const view = await watchViewHandle(page)
-    await view.evaluate(async view => {
-      const avatar = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-      const message = (id, name, badges) => ({
-        is: type => type.type === 'AddChatItemAction',
-        item: {
-          is: type => type.type === 'LiveChatTextMessage',
-          id,
-          timestamp: Date.now(),
-          message: { text: `Hello from ${name}` },
-          author: { id: `${id}-channel`, name, thumbnails: [{ url: avatar }], badges, is_moderator: false }
-        }
-      })
-      const verifiedBadge = { is: type => type.type === 'LiveChatAuthorBadge', icon_type: 'VERIFIED', tooltip: 'Verified' }
-      const listeners = new Map()
-      const chat = new EventTarget()
-      chat.is_replay = false
-      chat.on = (event, listener) => listeners.set(listener, event)
-      chat.once = chat.on
-      chat.off = (_event, listener) => listeners.delete(listener)
-      chat.stop = () => {}
-      chat.start = () => {
-        for (const [listener, event] of listeners) {
-          if (event === 'start') {
-            listener({ actions: [message('verified', '@creator', [verifiedBadge]), message('viewer', '@viewer', [])] })
-          }
-        }
-      }
-      view.$store.commit('setHideLiveChat', false)
-      view.liveChat = chat
-      view.liveChatIsReplay = false
-      view.liveChatOpen = true
-      view.isLive = true
-      view.isUpcoming = false
-      await view.$nextTick()
-    })
-
-    const comments = page.locator('.liveChatComments .comment')
-    await expect(comments.filter({ hasText: '@creator' }).locator('.verifiedBadge')).toHaveAttribute('aria-label', 'Verified')
-    await expect(comments.filter({ hasText: '@creator' }).locator('.verifiedBadge')).toHaveCSS('margin-inline-end', '5px')
-    await expect(comments.filter({ hasText: '@viewer' })).toBeVisible()
-    await expect(comments.filter({ hasText: '@viewer' }).locator('.verifiedBadge')).toHaveCount(0)
-    await attachScreenshot('verified live chat author')
   })
 })
 

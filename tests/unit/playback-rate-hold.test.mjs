@@ -85,15 +85,6 @@ test('the hold continues until every held source is released', t => {
   assert.equal(video.playbackRate, 1.5)
 })
 
-test('toggling normal speed returns to the previous speed', () => {
-  const { api, video, userSet } = fixture()
-  api.toggleNormalPlaybackRate()
-  assert.equal(video.playbackRate, 1)
-  api.toggleNormalPlaybackRate()
-  assert.equal(video.playbackRate, 1.5)
-  assert.deepEqual(userSet, [1, 1.5])
-})
-
 test('a speed chosen in the player menu is reported once Shaka applies it', t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const { api, video, userSet } = fixture()

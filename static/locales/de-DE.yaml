@@ -328,6 +328,9 @@ User Playlists:
   Quick Bookmark Enabled: Schnelle Lesezeichen aktiviert
   Pin to Navigation: An Navigation anheften
   Unpin from Navigation: Von Navigation lösen
+  Pin to Top: "Oben anheften"
+  Unpin from Top: "Oben lösen"
+  Pinned to Top: "Oben angeheftet"
   Cannot delete the quick bookmark target playlist.: Die Playlist, die für die Funktion „Schnelle Lesezeichen“ genutzt wird, kann nicht gelöscht werden.
   Remove Duplicate Videos: Doppelte Videos entfernen
   Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Bist du sicher, dass du ein doppeltes Video aus dieser Playlist entfernen möchtest? Dies kann nicht rückgängig gemacht werden. | Bist du sicher, dass du {playlistItemCount} doppelte Videos aus dieser Playlist entfernen möchtest? Dies kann nicht rückgängig gemacht werden.
@@ -2039,7 +2042,6 @@ About:
   Email: E-Mail
   Beta: Beta
   Donate: Spenden
-  Support the development of OpenTubeX: Die Entwicklung von OpenTubeX unterstützen
   Help: Hilfe
   Documentation: Dokumentation
   these people and projects: diesen Menschen und Projekten
@@ -2061,7 +2063,9 @@ About:
   Please read the {roomRulesLink}: Bitte lies die {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wird ermöglicht durch {creditsPageLink}
   Commit: Commit
-  Fluxer: Tritt unserer Fluxer-Community bei
+  Get OpenTubeX: OpenTubeX herunterladen
+  Community: Community
+  Contribute: Mitwirken
   Matrix: Matrix
 Channel:
   Subscription settings: Abo-Einstellungen

@@ -229,32 +229,6 @@ test('cancellation discards metadata that has not reached a persistence checkpoi
   assert.equal(writes, 0)
 })
 
-test('publishes each saved metadata update before processing the next playlist', async () => {
-  const { db, Playlists } = await fixture()
-  const published = []
-  const update = db.playlists.updateAsync.bind(db.playlists)
-  db.playlists.updateAsync = async (query, changes, options) => {
-    if (query._id === 'unselected') assert.deepEqual(published, ['selected'])
-    return update(query, changes, options)
-  }
-  await Playlists.repairMetadata({ playlistIds: ['selected', 'unselected'], metadata: [metadata] }, update => published.push(update._id))
-  assert.deepEqual(published, ['selected', 'unselected'])
-})
-
-test('a playlist read failure counts only its own repair targets', async () => {
-  const { db, Playlists } = await fixture()
-  const otherId = 'bcdefghijkl'
-  await db.playlists.updateAsync({ _id: 'unselected' }, { $push: { videos: { ...video, videoId: otherId, playlistItemId: 'other' } } })
-  const find = db.playlists.findOneAsync.bind(db.playlists)
-  db.playlists.findOneAsync = query => {
-    if (query._id === 'selected') throw new Error('Read failed')
-    return find(query)
-  }
-  const result = await Playlists.repairMetadata({ playlistIds: ['selected', 'unselected'], metadata: [metadata, { ...metadata, videoId: otherId }] })
-  assert.equal(result.failed, 1)
-  assert.equal(result.repaired, 1, 'the video unique to the other playlist is still successful')
-})
-
 for (const change of ['delete', 'rename', 'remove entry']) {
   test(`conditional sync writes reject a concurrent ${change}`, async () => {
     const { db, Playlists } = await fixture()

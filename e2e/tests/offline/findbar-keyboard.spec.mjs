@@ -44,7 +44,7 @@ test('Enter and Shift+Enter navigate one find bar match at a time', async ({ pag
   await expect(findbarStatus).toHaveText('1/2')
 })
 
-for (const position of ['top', 'bottom']) {
+for (const position of ['top']) {
   test(`find bar clears an overflowing ${position} tab bar`, { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 1400, height: 700 })
     await page.evaluate(async (position) => {

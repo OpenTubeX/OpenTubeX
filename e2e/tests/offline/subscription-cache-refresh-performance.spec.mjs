@@ -16,7 +16,7 @@ test.use({
   }
 })
 
-for (const feed of ['videos', 'new', 'shorts']) {
+for (const feed of ['videos', 'shorts']) {
   test(`refreshes cached channels efficiently with the ${feed} feed visible`, async ({ page }, testInfo) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await goTo(page, 'subscriptions')

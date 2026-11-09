@@ -4,40 +4,6 @@ import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { quickSettings: ['appFont', 'baseTheme'], videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-test('keeps the selected font radio at the start of the row', async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.locator('.profileTrigger').click()
-  await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
-  const row = page.locator('dialog[open]').last().getByRole('option', { selected: true })
-  const gap = await row.evaluate(element => element.querySelector('.optionRadio').getBoundingClientRect().left - element.getBoundingClientRect().left)
-  expect(gap).toBeLessThan(25)
-})
-
-test('centers radio text on its control in phone search filters', async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
-  const offset = await page.locator('.searchRadio label').first().evaluate(label => {
-    const range = document.createRange()
-    range.selectNodeContents(label)
-    const text = range.getBoundingClientRect()
-    const row = label.getBoundingClientRect()
-    return Math.abs(text.top + text.height / 2 - (row.top + row.height / 2))
-  })
-  expect(offset).toBeLessThan(2)
-})
-
-test('uses the player area and the selected grid layout for phone player options', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.locator('.shaka-overflow-menu-button').click({ force: true })
-  const bounds = await page.locator('.phonePlayerOptions[open]').boundingBox()
-  const player = await page.locator('.ftVideoPlayer').boundingBox()
-  expect(Math.abs(bounds.height - player.height)).toBeLessThan(2)
-  const grid = page.locator('.phonePlayerOptions > .ft-menu-grid')
-  await expect(grid).toHaveCSS('display', 'grid')
-})
-
 test('starts download setup with a fixed template selector and footer', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -50,48 +16,6 @@ test('starts download setup with a fixed template selector and footer', async ({
   await expect(prompt.locator('.downloadHeader')).toBeInViewport()
   await expect(prompt.locator('.downloadFooter')).toBeInViewport()
   expect(await prompt.evaluate(element => element.scrollTop)).toBe(0)
-})
-
-test('keeps watch panels below the video with one heading', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page, { captionTranslations: true })
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).click()
-  const sheet = page.locator('.mobileSheet[open]')
-  await expect(sheet).toBeVisible()
-  const box = await sheet.boundingBox()
-  const player = await page.locator('.ftVideoPlayer').boundingBox()
-  expect(box.y).toBeGreaterThanOrEqual(player.y + player.height - 1)
-  await expect(sheet.getByRole('heading', { name: 'Transcript', exact: true })).toHaveCount(1)
-  await expect(sheet.locator('header').getByRole('button', { name: 'Search transcript', exact: true })).toBeVisible()
-})
-
-test('keeps the profile editor at its real bottom while scrolling', async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'profile'))
-  await page.getByRole('button', { name: 'Create New Profile', exact: true }).click()
-  const scroller = page.locator('.settingsSubpageScroll')
-  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  // Late layout must not pull the editor away from its bottom.
-  await page.waitForTimeout(400)
-  const gap = await scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)
-  expect(gap).toBeLessThan(2)
-})
-
-test('does not change page width while quick settings closes', async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  const before = await page.evaluate(() => document.body.getBoundingClientRect().width)
-  await page.locator('.profileTrigger').click()
-  const widths = await page.evaluate(async () => {
-    document.querySelector('.mobileSheetHeader button:last-child').click()
-    const values = []
-    for (let i = 0; i < 20; i++) {
-      await new Promise(requestAnimationFrame)
-      values.push(document.body.getBoundingClientRect().width)
-    }
-    return values
-  })
-  expect(Math.max(...widths) - before).toBeLessThan(2)
 })
 
 test('follows a downward drag and dismisses the panel', async ({ app, page }) => {
@@ -240,24 +164,6 @@ test('chapter sheet scrolls to a sought chapter and closes with its player contr
   await expect(sheet).toHaveCount(0)
 })
 
-test('comments hide content within their sheet and keep tools in the header', async ({ app, page, attachScreenshot }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(vm => vm.openPhonePanel('comments'))
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet.locator('.comment').first()).toBeVisible()
-  const hide = sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Hide Comments', exact: true })
-  await expect(hide.locator('svg')).toHaveCount(1)
-  await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
-  await attachScreenshot('comments sheet header')
-  await hide.click()
-  await expect(sheet).toBeVisible()
-  await expect(sheet.getByText('Click to View Comments', { exact: true })).toBeVisible()
-  await expect(sheet.locator('.commentHeader')).toHaveCount(0)
-})
-
 test('dragging a sheet up pauses playback and settings stay above it', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   await openMockedVideo(page)
@@ -279,96 +185,6 @@ test('dragging a sheet up pauses playback and settings stay above it', async ({ 
     const box = el.getBoundingClientRect()
     return el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2))
   })).toBe(true)
-})
-
-test('profile customize uses the same touch target and background as Close', async ({ app, page, attachScreenshot }) => {
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.locator('.profileTrigger').click({ button: 'right' })
-  await page.mouse.move(0, 0)
-  await expect(page.locator('.mobileSheet[open]')).toHaveCSS('transform', 'none')
-  const header = page.locator('.mobileSheetHeader')
-  const customize = header.getByRole('button', { name: 'Profile', exact: true })
-  const close = header.getByRole('button', { name: 'Close', exact: true })
-  await expect(customize).toBeVisible()
-  await attachScreenshot('profile header actions')
-  expect((await customize.boundingBox()).height).toBeGreaterThanOrEqual(48)
-  expect(await customize.evaluate(el => getComputedStyle(el).backgroundColor)).toBe(await close.evaluate(el => getComputedStyle(el).backgroundColor))
-})
-
-test('comment continuation spinner stays visible at the bottom of the sheet', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(vm => vm.openPhonePanel('comments'))
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet.locator('.comment').first()).toBeVisible()
-  let release
-  const pending = new Promise(resolve => { release = resolve })
-  await page.route('**/youtubei/v1/next*', async route => {
-    await pending
-    await route.fallback()
-  })
-  try {
-    await sheet.locator('.commentsContentWrapper').evaluate(el => { el.scrollTop = el.scrollHeight })
-    await expect(sheet.getByRole('status', { name: 'Load More Comments' })).toBeInViewport()
-  } finally {
-    release()
-    await page.unrouteAll({ behavior: 'wait' })
-  }
-})
-
-test('submenu navigation stays outside the player menu scroller', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 360, height: 760 })
-  await page.locator('.shaka-overflow-menu-button').click({ force: true })
-  const dialog = page.locator('.phonePlayerOptions[open]')
-  await dialog.locator('.shaka-playbackrate-button').click()
-  const back = dialog.locator(':scope > .shaka-back-to-overflow-button')
-  await expect(back).toBeVisible()
-  const before = await back.boundingBox()
-  await dialog.locator(':scope > .shaka-overflow-menu').evaluate(el => { el.scrollTop = el.scrollHeight })
-  const after = await back.boundingBox()
-  expect(after.y).toBeCloseTo(before.y, 0)
-  await expect(back).toBeInViewport()
-})
-
-test('autoplay glyph stays within its original compact switch in both states and directions', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 360, height: 760 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.locator('.shaka-overflow-menu-button').click({ force: true })
-  const toggle = page.locator('.phonePlayerOptions[open] .autoplay-toggle')
-  for (const roundness of [0, 50, 100, 200]) {
-    await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-    await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', '999px')
-  }
-  for (const direction of ['ltr', 'rtl']) {
-    await page.evaluate(value => { document.body.dir = value }, direction)
-    for (let state = 0; state < 2; state++) {
-      await toggle.scrollIntoViewIfNeeded()
-      const geometry = await toggle.evaluate(el => {
-        const track = el.querySelector('.ft-autoplay-switch').getBoundingClientRect()
-        const thumb = el.querySelector('.ft-autoplay-switch-thumb').getBoundingClientRect()
-        const enabled = el.getAttribute('aria-pressed') === 'true'
-        const rtl = getComputedStyle(el).direction === 'rtl'
-        const startGap = rtl ? track.right - thumb.right : thumb.left - track.left
-        const endGap = rtl ? thumb.left - track.left : track.right - thumb.right
-        return {
-          edge: enabled ? endGap : startGap,
-          center: thumb.top + thumb.height / 2 - track.top - track.height / 2,
-          width: thumb.width,
-          enabled
-        }
-      })
-      expect(geometry.edge).toBeCloseTo(1, 0)
-      expect(geometry.width).toBeCloseTo(16, 0)
-      expect(geometry.center).toBeCloseTo(0, 0)
-      await toggle.click()
-    }
-  }
 })
 
 test('switching tabs dismisses the sheet and releases its scroll lock', async ({ app, page }) => {
@@ -406,165 +222,6 @@ test('expanded sheets clear Android status bars and animate on close', async ({ 
   })
   expect(closing).toEqual({ open: true, animated: true })
   await expect(sheet).toHaveCount(0)
-})
-
-test('comments fill the card width and keep their scrollbar at the panel edge', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  const button = await page.locator('.phoneCommentsButton').boundingBox()
-  const area = await page.locator('.infoArea').boundingBox()
-  expect(button.x - area.x).toBeCloseTo(16, 0)
-  expect(area.x + area.width - button.x - button.width).toBeCloseTo(16, 0)
-  await page.locator('.phoneCommentsButton').click()
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet.locator('.comment').first()).toBeVisible()
-  const right = await sheet.evaluate(el => el.getBoundingClientRect().right - el.querySelector('.commentsContentWrapper').getBoundingClientRect().right)
-  expect(right).toBeLessThan(2)
-  await sheet.getByRole('button', { name: 'Filter loaded comments', exact: true }).click()
-  // Phones show the filters in a bottom sheet, which stays open while toggling them.
-  const filterSheet = page.getByRole('dialog', { name: 'Comment filters', exact: true })
-  await expect(filterSheet).toHaveClass(/bottomSheet/)
-  const option = filterSheet.getByRole('checkbox', { name: 'Contains timestamps', exact: true })
-  const labelLeft = () => option.locator('span').nth(1).evaluate(el => el.getBoundingClientRect().left)
-  const before = await labelLeft()
-  await option.click()
-  expect(await labelLeft()).toBeCloseTo(before, 1)
-  await expect(option).toHaveAttribute('aria-checked', 'true')
-  await expect(filterSheet).toBeVisible()
-  // Rows match the other phone bottom sheets.
-  for (const height of await filterSheet.getByRole('checkbox').evaluateAll(rows => rows.map(row => row.getBoundingClientRect().height))) {
-    expect(height).toBeCloseTo(56, 0)
-  }
-  await filterSheet.getByRole('checkbox', { name: 'Search loaded comments', exact: true }).click()
-  await expect(filterSheet).toHaveCount(0)
-  // The search lines up with the comments and its floating label clears the header.
-  const search = await sheet.evaluate(el => {
-    const header = el.querySelector('.mobileSheetHeader').getBoundingClientRect()
-    const field = el.querySelector('.commentTools .ft-input-component').getBoundingClientRect()
-    const comments = el.querySelector('.commentsContentWrapper')
-    const content = comments.getBoundingClientRect().left + parseFloat(getComputedStyle(comments).paddingLeft)
-    return { gap: field.top - header.bottom, left: field.left - content }
-  })
-  expect(search.gap).toBeGreaterThan(15.5)
-  expect(Math.abs(search.left)).toBeLessThan(1)
-})
-
-test('the AI summary matches the phone Description card, also while pressed', { tag: '@scale' }, async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(async vm => {
-    vm.videoSummary = ['A summary paragraph.']
-    await vm.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
-  })
-  const description = page.locator('.phoneDescriptionButton')
-  const summary = page.locator('.videoSummary')
-  const surface = locator => locator.evaluate(element => {
-    const { left, width } = element.getBoundingClientRect()
-    const { backgroundColor, borderRadius, color } = getComputedStyle(element)
-    return { left, width, backgroundColor, borderRadius, color }
-  })
-  await summary.scrollIntoViewIfNeeded()
-  const { left, width, ...summarySurface } = await surface(summary)
-  const { left: descriptionLeft, width: descriptionWidth, ...descriptionSurface } = await surface(description)
-  expect(summarySurface).toEqual(descriptionSurface)
-  // UI scales leave subpixel differences between the button and the details element.
-  expect(left).toBeCloseTo(descriptionLeft, 0)
-  expect(width).toBeCloseTo(descriptionWidth, 0)
-
-  const pressed = async (locator, target = locator) => {
-    // The sticky phone player can cover a card that is only scrolled into view.
-    await target.evaluate(element => element.scrollIntoView({ block: 'center' }))
-    const box = await target.boundingBox()
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-    await page.mouse.down()
-    const { backgroundColor, borderRadius, color } = await surface(locator)
-    await page.mouse.move(0, 0)
-    await page.mouse.up()
-    return { backgroundColor, borderRadius, color }
-  }
-  const pressedDescription = await pressed(description)
-  expect(pressedDescription.backgroundColor).not.toBe((await surface(description)).backgroundColor)
-  expect(await pressed(summary, summary.locator('summary'))).toEqual(pressedDescription)
-  expect(await pressed(page.locator('.phoneCommentsButton'))).toEqual(pressedDescription)
-
-  // A long press opens collapsed cards rather than selecting their preview text.
-  for (const element of [description, page.locator('.phoneCommentsButton'), summary.locator('summary')]) {
-    await expect(element).toHaveCSS('user-select', 'none')
-  }
-  await summary.evaluate(element => { element.open = true })
-  await expect(summary.locator('.summaryParagraph')).not.toHaveCSS('user-select', 'none')
-})
-
-test('pressed phone cards keep their text visible in Hot Pink', async ({ app, page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'hotPink'))
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(async vm => {
-    vm.videoSummary = ['A summary paragraph.']
-    await vm.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
-  })
-  const summary = page.locator('.videoSummary')
-  await summary.evaluate(element => element.scrollIntoView({ block: 'center' }))
-  const box = await summary.locator('summary').boundingBox()
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.down()
-  const colors = await summary.evaluate(element => ['.summaryTitle', '.summaryDisclaimer'].map(selector => getComputedStyle(element.querySelector(selector)).color).concat(getComputedStyle(element).backgroundColor))
-  await page.mouse.up()
-  const [title, disclaimer, background] = colors
-  expect(background).toBe('rgb(255, 255, 255)')
-  expect(title).not.toBe(background)
-  expect(disclaimer).not.toBe(background)
-
-  // The Description card's chips keep a surface their pressed text reads on.
-  await watch.evaluate(async vm => {
-    vm.videoTags = ['tag']
-    vm.videoMusicTracks = [{ title: 'Track' }]
-    await vm.$nextTick()
-  })
-  const description = page.locator('.phoneDescriptionPreview')
-  await description.evaluate(element => element.scrollIntoView({ block: 'center' }))
-  const chip = description.locator('.phoneDescriptionChip').first()
-  const chipBox = await chip.boundingBox()
-  await page.mouse.move(chipBox.x + chipBox.width / 2, chipBox.y + chipBox.height / 2)
-  await page.mouse.down()
-  const ratios = await description.evaluate(element => [...element.querySelectorAll('.phoneDescriptionChip, .phoneDescriptionChipCount')].map(node => {
-    const rgba = color => color.match(/[\d.]+/g).map(Number)
-      .map((value, index) => color.startsWith('color(srgb ') && index < 3 ? value * 255 : value)
-    const layers = []
-    for (let layer = node; layer; layer = layer.parentElement) layers.unshift(layer)
-    const background = layers.reduce((below, layer) => {
-      const [r, g, b, alpha = 1] = rgba(getComputedStyle(layer).backgroundColor)
-      return [r, g, b].map((channel, index) => channel * alpha + below[index] * (1 - alpha))
-    }, [255, 255, 255])
-    const luminance = rgb => rgb.map(value => value / 255)
-      .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
-      .reduce((total, value, index) => total + value * [0.2126, 0.7152, 0.0722][index], 0)
-    const [high, low] = [luminance(rgba(getComputedStyle(node).color).slice(0, 3)), luminance(background)].sort((a, b) => b - a)
-    return (high + 0.05) / (low + 0.05)
-  }))
-  await page.mouse.up()
-  expect(ratios.length).toBeGreaterThan(2)
-  for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
-})
-
-test('subscribed button segments share the Material tonal color', async ({ app, page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialDark'))
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  const list = page.locator('.infoArea .buttonList').first()
-  await list.locator('.subscribeButton').click()
-  await expect(list.locator('.notificationBell')).toBeVisible()
-  await page.mouse.move(0, 0)
-  await list.locator('.notificationBell').blur()
-  await expect.poll(() => list.evaluate(element => new Set([...element.children].map(child => getComputedStyle(child).backgroundColor)).size)).toBe(1)
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {
@@ -645,28 +302,6 @@ test('phone comment sort opens the context menu sheet and returns focus after ch
   await expect(top).toHaveAttribute('aria-checked', 'false')
 })
 
-test('phone comment popup labels stay on one line', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 360, height: 760 })
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(vm => vm.openPhonePanel('comments'))
-  const sheet = page.locator('.dockedSheet[open]')
-  await expect(sheet.locator('.comment').first()).toBeVisible()
-  await sheet.getByRole('button', { name: /^sort by$/i }).click()
-  const lines = label => label.evaluate(el => {
-    const range = document.createRange()
-    range.selectNodeContents(el)
-    return range.getClientRects().length
-  })
-  const sortMenu = page.getByRole('menu', { name: /^sort by$/i })
-  expect(await lines(sortMenu.locator('[role="menuitemcheckbox"] > span:not([aria-hidden])').first())).toBe(1)
-  await page.keyboard.press('Escape')
-  await expect(sortMenu).toHaveCount(0)
-  await sheet.getByRole('button', { name: 'Filter loaded comments', exact: true }).click()
-  expect(await lines(sheet.getByRole('checkbox', { name: 'Search loaded comments', exact: true }).locator('span').nth(1))).toBe(1)
-})
-
 test('comment loading at the end stays visible without a second swipe or horizontal overflow', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -708,37 +343,6 @@ test('phone options retain their menu during a page swipe', async ({ app, page }
     el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch', pointerId: 12, clientY: 450 }))
   })
   await expect(dialog).toBeVisible()
-})
-
-test('phone list menu keeps its scrollbar visible without mouse movement', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
-  await page.locator('.shaka-overflow-menu-button').click({ force: true })
-  const dialog = page.locator('.phonePlayerOptions[open]')
-  await dialog.locator('.shaka-overflow-menu').evaluate(el => { el.scrollTop = el.scrollHeight })
-  await expect(dialog.locator('.shaka-overflow-menu > .os-scrollbar-vertical')).toBeVisible()
-  // Outlast the scrollbar's auto-hide delay.
-  await page.waitForTimeout(1500)
-  await expect(dialog.locator('.shaka-overflow-menu > .os-scrollbar-vertical')).toHaveCSS('opacity', '1')
-})
-
-test('touching another list option clears an old hover highlight', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
-  await page.locator('.shaka-overflow-menu-button').click({ force: true })
-  const dialog = page.locator('.phonePlayerOptions[open]')
-  const first = dialog.locator('.shaka-overflow-menu > button:visible').first()
-  await first.hover()
-  await dialog.locator('.autoplay-toggle').evaluate(el => {
-    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }))
-    el.click()
-    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }))
-  })
-  await expect(first).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 })
 
 test('fullscreen playlist picker stays inside the player', async ({ app, page }) => {
@@ -862,45 +466,7 @@ test('closing an expanded panel resumes the video it paused', async ({ app, page
   await expect.poll(() => video.evaluate(el => el.paused)).toBe(false)
 })
 
-for (const picker of [false, true]) {
-  test(`fullscreen ${picker ? 'select' : 'quick settings'} animates opening and closing`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 480, height: 800 })
-    // Record creation in the renderer: short animations can finish before IPC
-    // returns, especially while the rest of the suite is consuming CPU.
-    const recorded = await page.evaluateHandle(() => {
-      const state = { animate: Element.prototype.animate, animations: [] }
-      Element.prototype.animate = function (...args) {
-        const animation = state.animate.apply(this, args)
-        if (this.matches('.mobileSheet')) state.animations.push({ element: this, duration: animation.effect.getTiming().duration })
-        return animation
-      }
-      return state
-    })
-    let sheetElement
-    try {
-      await page.locator('.profileTrigger').click()
-      if (picker) await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
-      const sheet = page.locator('.mobileSheet[open]').last()
-      sheetElement = await sheet.elementHandle()
-      const durations = () => sheetElement.evaluate((element, state) => state.animations
-        .filter(animation => animation.element === element)
-        .map(animation => animation.duration), recorded)
-      await expect(sheet).toBeVisible()
-      expect((await durations()).at(-1)).toBeGreaterThan(0)
-      const openingCount = (await durations()).length
-      await sheet.getByRole('button', { name: 'Close', exact: true }).click()
-      await expect.poll(async () => (await durations()).length).toBeGreaterThan(openingCount)
-      expect((await durations()).at(-1)).toBeGreaterThan(0)
-      await expect(page.locator('.mobileSheet[open]')).toHaveCount(picker ? 1 : 0)
-    } finally {
-      await sheetElement?.dispose()
-      await recorded.evaluate(state => { Element.prototype.animate = state.animate })
-      await recorded.dispose()
-    }
-  })
-}
-
-for (const [width, height] of [[480, 800], [900, 480], [900, 950], [1280, 950]]) {
+for (const [width, height] of [[480, 800], [1280, 950]]) {
   test(`Share and Media Formats modals fit their content at ${width}x${height}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

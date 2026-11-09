@@ -169,6 +169,7 @@ import {
 import { applyPublicationDates } from '../../helpers/api/missing-publication'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
+import { getSearchSettingsFromRouteQuery } from '../../../search-history'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -248,19 +249,7 @@ function restoreActiveSearchFilters(settings) {
 }
 
 function getRouteSearchSettings() {
-  let features = route.query.features
-  // if page gets refreshed and there's only one feature then it will be a string
-  if (typeof features === 'string') {
-    features = [features]
-  }
-
-  return {
-    prioritize: route.query.prioritize ?? 'relevance',
-    time: route.query.time ?? '',
-    type: route.query.type ?? 'all',
-    duration: route.query.duration ?? '',
-    features: features ?? [],
-  }
+  return getSearchSettingsFromRouteQuery(route.query)
 }
 
 /**

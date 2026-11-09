@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Modifier"
   Pin to Navigation: "Épingler à la navigation"
   Unpin from Navigation: "Retirer de la navigation"
+  Pin to Top: "Épingler en haut"
+  Unpin from Top: "Désépingler du haut"
+  Pinned to Top: "Épinglée en haut"
   Reorder Hint: Faites glisser ou utilisez les touches fléchées pour réorganiser
   Add new videos to the top (custom order): "Ajouter les nouvelles vidéos en haut (ordre personnalisé)"
   Shuffle videos by default: "Lire les vidéos en ordre aléatoire par défaut"
@@ -1496,13 +1499,14 @@ Tutorial:
     Action: Importer des données
     Not Now: Pas maintenant
 About:
+  Get OpenTubeX: Obtenir OpenTubeX
+  Community: Communauté
+  Contribute: Contribuer
   Documentation: Documentation
   Downloads: Téléchargements
   Changelog: Journal des modifications
   Commit: Commit
-  Fluxer: Rejoindre notre communauté Fluxer
   Matrix: Matrix
-  Support the development of OpenTubeX: "Soutenir le développement d'OpenTubeX"
 Profile:
   Customization: Personnalisation
   Manage Profile Subscriptions: Gérer les abonnements du profil

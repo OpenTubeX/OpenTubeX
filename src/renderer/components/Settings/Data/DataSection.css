@@ -1,9 +1,0 @@
-.dataStorageTabs {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.dataStoragePanel {
-  min-inline-size: 0;
-}

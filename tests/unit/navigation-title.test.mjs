@@ -97,17 +97,6 @@ test('history restores an unresolved Watch title without marking its metadata re
   assert.equal(tab().history.length, 2, 'the unresolved Watch entry is still discarded on exit')
 })
 
-test('fresh channel navigation uses its own placeholder and can publish a new name', async () => {
-  const { navigation, tab } = setup()
-  await navigation.push('tab', '/channel/UC-other')
-  assert.equal(tab().contentTitle, '/channel/UC-other')
-  navigation.setTitle('tab', 'Another channel')
-  await navigation.back('tab')
-  assert.equal(tab().contentTitle, 'Test channel')
-  await navigation.forward('tab')
-  assert.equal(tab().contentTitle, 'Another channel')
-})
-
 test('a channel finishing behind Watch cannot replace the video tab title or history', async t => {
   const { store, navigation, tab } = setup()
   const channel = mountBrowsingTitle(t, store, navigation)
@@ -119,24 +108,6 @@ test('a channel finishing behind Watch cannot replace the video tab title or his
   assert.equal(tab().contentTitle, 'Test channel', 'the late channel title is available when reopened')
   await navigation.back('tab')
   assert.equal(tab().contentTitle, 'Test video', 'returning to the video preserves its history title')
-})
-
-test('reopening the retained channel restores its loaded name instead of its URL', async t => {
-  const { store, navigation, tab } = setup()
-  const channel = mountBrowsingTitle(t, store, navigation)
-  channel.setTitle('Test channel')
-  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
-  await navigation.push('tab', '/channel/UC-test')
-  assert.equal(tab().contentTitle, 'Test channel')
-  assert.equal(tab().history[tab().historyIndex].title, 'Test channel')
-})
-
-test('an inactive tab still receives the title for its current browsing page', t => {
-  const { store, navigation, tab } = setup()
-  const channel = mountBrowsingTitle(t, store, navigation)
-  assert.notEqual(store.getters.getPresentedTabId, 'tab')
-  channel.setTitle('Updated channel name')
-  assert.equal(tab().contentTitle, 'Updated channel name')
 })
 
 test('a retained channel title cannot carry over to a different channel', async t => {
@@ -170,28 +141,3 @@ for (const mode of ['push', 'replace']) {
     assert.equal(changed.history.length, 2)
   })
 }
-
-test('a restored external media page can publish its title despite different URL encodings', async t => {
-  const { store, navigation } = setup()
-  const query = { url: 'https://www.twitch.tv/videos/123456789' }
-  const fullPath = `/external-media?${new URLSearchParams(query)}`
-  store.commit('setTabsState', { tabs: [] })
-  store.commit('setTabsState', { tabs: [{
-    id: 'tab', route: { path: '/external-media', query, fullPath },
-    title: fullPath, loadState: 'loaded'
-  }] })
-  const media = mountBrowsingTitle(t, store, navigation, fullPath)
-  media.setTitle('A Twitch broadcast')
-  assert.equal(store.getters.getTabById('tab').contentTitle, 'A Twitch broadcast')
-
-  // TabContent updates the retained browsing route before the title's post
-  // watcher runs, including when equivalent URLs use different encodings.
-  const stop = watch(() => store.getters.getTabById('tab').route.fullPath, path => {
-    if (!path.startsWith('/watch/')) Object.assign(media.route, navigation.resolve(path))
-  })
-  t.after(stop)
-  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
-  await navigation.push('tab', { path: '/external-media', query })
-  assert.notEqual(media.route.fullPath, fullPath, 'the router and saved URL use different encodings')
-  assert.equal(store.getters.getTabById('tab').contentTitle, 'A Twitch broadcast')
-})

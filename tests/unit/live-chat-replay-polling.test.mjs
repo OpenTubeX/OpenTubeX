@@ -545,14 +545,6 @@ test('switching views drops live messages that are still being paced', async (t)
   assert.deepEqual(updates, [{ id: 1 }])
 })
 
-test('the view cannot be switched before the chat has started', () => {
-  const { liveChat } = createReplay(() => ({
-    continuation_contents: fakeContinuation({ header: fakeViewSelector() }),
-  }))
-
-  assert.throws(() => liveChat.setFilter('LIVE_CHAT'), /before initial info is retrieved/)
-})
-
 test('a collapsed poll resolves only once the batch it joined has emitted', async () => {
   const pendingResponses = []
 

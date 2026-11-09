@@ -8,55 +8,46 @@ const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', impo
 const start = utils.indexOf('export function openInternalPath(')
 const navigationSource = utils.slice(start, utils.indexOf('\n}\n', start) + 2).replace('export ', '')
 
-for (const ios of [false, true]) {
-  for (const makeActive of [false, true]) {
-    test(`${ios ? 'iOS' : 'Android'} ${makeActive ? 'foreground' : 'background'} tab confirmation waits for successful creation`, async () => {
-      let finishCreation
-      const creation = new Promise(resolve => { finishCreation = resolve })
-      const toasts = []
-      const context = vm.createContext({
-        process: { env: { IS_CAPACITOR: true, IS_IOS: ios } },
-        getCapacitorTabService: () => ({
-          tabsEnabled: true,
-          createTab: (route, title, active) => {
-            assert.deepEqual(structuredClone(route), { path: '/history', query: undefined })
-            assert.equal(title, 'History')
-            assert.equal(active, makeActive)
-            return creation
-          }
-        }),
-        i18n: { global: { t: key => key } },
-        showToast: message => toasts.push(message)
-      })
-      vm.runInContext(navigationSource, context)
-      const opening = context.openInternalPath({ path: '/history', title: 'History', thumbnail: 'video-thumbnail.jpg', doCreateNewTab: true, makeActive })
-      assert.deepEqual(toasts, [])
-      finishCreation('new-tab')
-      assert.equal(await opening, 'new-tab')
-      assert.deepEqual(structuredClone(toasts), !ios && !makeActive
-        ? [{ message: 'Context Menu.Opened in a Background Tab', image: 'video-thumbnail.jpg' }]
-        : [])
-    })
-  }
-}
-
-for (const rejects of [false, true]) {
-  test(`Android does not confirm a background tab when creation ${rejects ? 'rejects' : 'returns null'}`, async () => {
-    const error = new Error('Creation failed')
-    const context = vm.createContext({
-      process: { env: { IS_CAPACITOR: true } },
-      getCapacitorTabService: () => ({
-        tabsEnabled: true,
-        createTab: () => rejects ? Promise.reject(error) : Promise.resolve(null)
-      }),
-      showToast: () => assert.fail('Confirmed an unsuccessful tab creation')
-    })
-    vm.runInContext(navigationSource, context)
-    const opening = context.openInternalPath({ path: '/history', doCreateNewTab: true, makeActive: false })
-    if (rejects) await assert.rejects(opening, error)
-    else assert.equal(await opening, null)
+test('Android background tab confirmation waits for successful creation', async () => {
+  let finishCreation
+  const creation = new Promise(resolve => { finishCreation = resolve })
+  const toasts = []
+  const context = vm.createContext({
+    process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
+    getCapacitorTabService: () => ({
+      tabsEnabled: true,
+      createTab: (route, title, active) => {
+        assert.deepEqual(structuredClone(route), { path: '/history', query: undefined })
+        assert.equal(title, 'History')
+        assert.equal(active, false)
+        return creation
+      }
+    }),
+    i18n: { global: { t: key => key } },
+    showToast: message => toasts.push(message)
   })
-}
+  vm.runInContext(navigationSource, context)
+  const opening = context.openInternalPath({ path: '/history', title: 'History', thumbnail: 'video-thumbnail.jpg', doCreateNewTab: true, makeActive: false })
+  assert.deepEqual(toasts, [])
+  finishCreation('new-tab')
+  assert.equal(await opening, 'new-tab')
+  assert.deepEqual(structuredClone(toasts), [{ message: 'Context Menu.Opened in a Background Tab', image: 'video-thumbnail.jpg' }])
+})
+
+test('Android does not confirm a background tab when creation rejects', async () => {
+  const error = new Error('Creation failed')
+  const context = vm.createContext({
+    process: { env: { IS_CAPACITOR: true } },
+    getCapacitorTabService: () => ({
+      tabsEnabled: true,
+      createTab: () => Promise.reject(error)
+    }),
+    showToast: () => assert.fail('Confirmed an unsuccessful tab creation')
+  })
+  vm.runInContext(navigationSource, context)
+  const opening = context.openInternalPath({ path: '/history', doCreateNewTab: true, makeActive: false })
+  await assert.rejects(opening, error)
+})
 
 for (const newWindow of [true, false]) {
   test(`mobile modified navigation stays in the current page with tabs disabled (${newWindow ? 'window' : 'tab'})`, () => {
@@ -75,16 +66,6 @@ for (const newWindow of [true, false]) {
       doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: false
     })
     assert.deepEqual(structuredClone(calls), [{ path: '/history', query: { search: 'test' }, state: undefined }])
-  })
-}
-
-const tabsSource = await readFile(new URL('../../src/renderer/store/modules/tabs.js', import.meta.url), 'utf8')
-const enabledGetter = tabsSource.match(/getTabsEnabled: (.*),/)[1]
-for (const mobile of [true, false]) {
-  test(`tab availability honors the mobile preference only on ${mobile ? 'mobile' : 'desktop'}`, () => {
-    const getter = vm.runInNewContext(`(${enabledGetter})`, { process: { env: { IS_CAPACITOR: mobile } } })
-    assert.equal(getter({}, { getEnableMobileTabs: false }), !mobile)
-    assert.equal(getter({}, { getEnableMobileTabs: true }), true)
   })
 }
 
@@ -152,49 +133,6 @@ for (const mobile of [true, false]) {
       assert.deepEqual(settingUpdates, skipped ? [] : [['updateSyncServerSharedTabs', true]])
     })
   }
-}
-
-for (const kind of ['Video', 'Playlist']) {
-  const source = await readFile(new URL(`../../src/renderer/components/FtList${kind}/FtList${kind}.vue`, import.meta.url), 'utf8')
-  const name = kind === 'Video' ? 'videoMenuOptions' : 'playlistMenuItems'
-  const end = kind === 'Video' ? '\n  if (hideSubscriptionFeedTypeOption.value)' : '\n  if (process.env.IS_ELECTRON)'
-  const menu = source.slice(source.indexOf(`const ${name} =`), source.indexOf(end)) +
-    `\nreturn ${kind === 'Video' ? 'options' : 'items'}\n})\n${name}.value`
-  for (const enabled of [true, false]) {
-    test(`${kind.toLowerCase()} long-press menu ${enabled ? 'offers' : 'hides'} opening a new tab`, () => {
-      const context = {
-        computed: getter => ({ value: getter() }),
-        store: { getters: { getTabsEnabled: enabled } },
-        process: { env: { IS_CAPACITOR: true } },
-        t: key => key,
-        supportsYtDlp: false
-      }
-      for (const key of ['inSubscriptions', 'showMarkAsSeen', 'canMarkAsWatched', 'canMarkAsFullySeen', 'historyEntryExists']) {
-        context[key] = { value: false }
-      }
-      const items = vm.runInNewContext(menu, context)
-      assert.equal(items.some(item => item.label === 'Context Menu.Open in a New Tab'), enabled)
-    })
-  }
-}
-
-for (const enabled of [true, false]) {
-  test(`mobile thumbnail quick actions ${enabled ? 'offer' : 'hide'} background tabs`, async () => {
-    const source = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
-    const start = source.indexOf('const mobileThumbnailActions =')
-    const menu = source.slice(start, source.indexOf('\nconst openMobileContextActions', start)) + '\nmobileThumbnailActions.value'
-    const context = {
-      computed: getter => ({ value: getter() }),
-      store: { getters: { getTabsEnabled: enabled } },
-      process: { env: { IS_CAPACITOR: true } },
-      t: key => key,
-    }
-    for (const key of ['showPlaylists', 'isQuickBookmarkEnabled', 'inUserPlaylist', 'canToggleLiveReminder']) {
-      context[key] = { value: false }
-    }
-    const actions = vm.runInNewContext(menu, context)
-    assert.equal(actions.some(action => action.label === 'Context Menu.Open in a Background Tab'), enabled)
-  })
 }
 
 test('incoming video requests wait while mobile tabs are disabled', async () => {

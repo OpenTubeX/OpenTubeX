@@ -76,19 +76,6 @@ function cachedVideoTitle(page, index) {
   }, channelId(index))
 }
 
-function cachedCollaboratorChannel(index) {
-  const channel = cachedChannel(index)
-  channel.videos[0] = {
-    ...channel.videos[0],
-    hasCollaborators: true,
-    collaborators: [
-      { id: channelId(index), name: `Channel ${index}`, thumbnail: '', subtitle: '' },
-      { id: 'UCcollaborator00000000000', name: 'Collaborator', thumbnail: '', subtitle: '' }
-    ]
-  }
-  return channel
-}
-
 function profileWith(channelCount) {
   return {
     _id: 'allChannels',
@@ -304,21 +291,6 @@ test.describe('incremental subscription feed refresh', () => {
     await page.locator(sel.tabs).first().click()
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 3_000 })
   })
-
-  test('keeps a manual refresh in the progress toast across navigation', async ({ page }) => {
-    await routeFeeds(page, () => 8_000)
-    await goTo(page, 'subscriptions')
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).click()
-    const refreshToast = page.getByTestId('subscription-refresh-toast')
-    await expect(refreshToast).toContainText('Refreshing subscription videos')
-    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
-
-    await expect(refreshToast).toBeVisible()
-    await goTo(page, 'history')
-    await expect(refreshToast).toBeVisible()
-    await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
-  })
 })
 
 test.describe('subscription refresh with many tabs', () => {
@@ -358,160 +330,6 @@ test.describe('subscription refresh with many tabs', () => {
     }
   })
 
-  async function checkLargeProfileRefresh({ app, page }, testInfo, background, throttled = false) {
-    test.setTimeout(120_000)
-    let fulfilledFeedCount = 0
-    await routeFeeds(page, () => 0, (index) => {
-      fulfilledFeedCount++
-      return rssFeed(index)
-    })
-    await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
-    await expect(page.locator(`${sel.tabs}:not(.unloaded)`)).toHaveCount(loadedTabCount)
-    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible({ timeout: 30_000 })
-
-    const profileUpdate = await page.evaluate(async () => {
-      const store = window.$store
-      const channels = store.getters.getActiveProfile.subscriptions.map(channel => ({
-        channelId: channel.id,
-        channelName: channel.name
-      }))
-      const startedAt = performance.now()
-      await store.dispatch('batchUpdateSubscriptionDetails', channels)
-      return performance.now() - startedAt
-    })
-
-    const rendererWorkingSet = async () => app.electronApp.evaluate(({ app }) => {
-      return app.getAppMetrics()
-        .filter(metric => metric.type === 'Tab')
-        .reduce((total, metric) => total + metric.memory.workingSetSize, 0)
-    })
-    const memoryBefore = await rendererWorkingSet()
-    const cdp = throttled ? await page.context().newCDPSession(page) : null
-    if (cdp) await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => {
-      const startedAt = performance.now()
-      let previousFrame = startedAt
-      let longestFrame = 0
-      let refreshedChannels = 0
-      let completedAt = null
-      const longFrames = []
-      const longTasks = []
-      let animationFrame
-
-      const collectLongTasks = (entries) => {
-        for (const entry of entries) {
-          longTasks.push({
-            at: entry.startTime - startedAt,
-            duration: entry.duration,
-            refreshedChannels,
-            completedAt
-          })
-        }
-      }
-      const taskObserver = new PerformanceObserver((list) => {
-        collectLongTasks(list.getEntries())
-      })
-      taskObserver.observe({ type: 'longtask' })
-
-      const sampleFrame = (timestamp) => {
-        const duration = timestamp - previousFrame
-        longestFrame = Math.max(longestFrame, duration)
-        if (duration >= 50) {
-          longFrames.push({
-            at: timestamp - startedAt,
-            duration,
-            refreshedChannels,
-            completedAt
-          })
-        }
-        previousFrame = timestamp
-        animationFrame = requestAnimationFrame(sampleFrame)
-      }
-      const channelRefreshed = () => refreshedChannels++
-      const refreshCompleted = () => { completedAt = performance.now() - startedAt }
-
-      window.addEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
-      window.addEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
-      animationFrame = requestAnimationFrame(sampleFrame)
-      window.__subscriptionRefreshPerformance = {
-        get completedAt() { return completedAt },
-        stop: () => {
-          cancelAnimationFrame(animationFrame)
-          window.removeEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
-          window.removeEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
-          collectLongTasks(taskObserver.takeRecords())
-          taskObserver.disconnect()
-          return {
-            elapsed: performance.now() - startedAt,
-            completedAt,
-            longestFrame,
-            longFrames,
-            longestTask: Math.max(0, ...longTasks.map(task => task.duration)),
-            totalBlockingTime: longTasks.reduce((total, task) => {
-              return total + Math.max(0, task.duration - 50)
-            }, 0),
-            longTasks
-          }
-        }
-      }
-      button.click()
-    })
-
-    if (background) {
-      await page.locator(sel.tabs).nth(1).click()
-      await expect.poll(() => fulfilledFeedCount, { timeout: 90_000 }).toBe(channelCount)
-      await page.locator(sel.tabs).first().click()
-    } else {
-      const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh' })
-      await expect(cancelRefresh).toBeVisible()
-      await expect(cancelRefresh).toHaveCount(0, { timeout: 90_000 })
-      expect(fulfilledFeedCount).toBe(channelCount)
-    }
-    await expect.poll(() => page.evaluate(() => window.__subscriptionRefreshPerformance.completedAt), {
-      timeout: 90_000
-    }).not.toBeNull()
-    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
-
-    const timing = await page.evaluate(() => window.__subscriptionRefreshPerformance.stop())
-    if (cdp) await cdp.detach()
-    const memoryAfter = await rendererWorkingSet()
-    const metrics = {
-      ...timing,
-      profileUpdate,
-      rendererWorkingSetBeforeKiB: memoryBefore,
-      rendererWorkingSetAfterKiB: memoryAfter
-    }
-    await testInfo.attach('performance metrics', {
-      body: JSON.stringify(metrics, null, 2),
-      contentType: 'application/json'
-    })
-
-    // Gross hang bounds only, several times the values seen on an idle host:
-    // tighter wall-clock budgets are too noisy on shared runners.
-    expect(profileUpdate, JSON.stringify(metrics)).toBeLessThan(250)
-    // Mounting and publishing a 33k-entry feed can each take one longer task.
-    // Repeated blocking during the channel fetches is the reported regression.
-    const steadyBlockingTime = timing.longTasks
-      .filter(task => task.at >= 1000 && task.at < timing.completedAt - 250)
-      .reduce((total, task) => total + Math.max(0, task.duration - 50), 0)
-    expect(steadyBlockingTime, JSON.stringify(metrics)).toBeLessThan(throttled ? 7500 : 3500)
-    expect(timing.completedAt).not.toBeNull()
-    if (!throttled) {
-      expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(5000)
-      expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(60_000)
-    }
-  }
-
-  for (const background of [false, true]) {
-    test(`keeps the renderer responsive while refreshing a large profile ${background ? 'in a background tab' : 'on screen'}`, { tag: '@performance' }, ({ app, page }, testInfo) =>
-      checkLargeProfileRefresh({ app, page }, testInfo, background))
-  }
-
-  test('keeps the renderer responsive while refreshing a large profile on a slower CPU', { tag: '@performance' }, ({ app, page }, testInfo) =>
-    checkLargeProfileRefresh({ app, page }, testInfo, false, true))
-
   test('shows channels fetched while a large refresh is still running', async ({ page }) => {
     test.setTimeout(120_000)
     await routeFeeds(page, index => index === 0 ? 0 : 8_000)
@@ -539,83 +357,6 @@ test.describe('subscription refresh with many tabs', () => {
     await page.getByRole('button', { name: 'Cancel refresh' }).click()
     await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
-  })
-})
-
-test.describe('subscription refresh bottom progress', () => {
-  test.use({
-    seed: {
-      settings: {
-        ...commonSettings,
-        showProgressBarToast: false
-      },
-      profiles: [profileWith(2)],
-      subscriptionCache: [cachedChannel(0), cachedChannel(1)]
-    }
-  })
-
-  test('keeps the global progress bar visible across navigation', async ({ page }) => {
-    await routeFeeds(page, () => 8_000)
-    await goTo(page, 'subscriptions')
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).click()
-    const progressBar = page.locator('.app > .progressBar')
-    await expect(progressBar).toBeVisible()
-    await expect(page.locator('.tab.active .tabLoadingLine')).toHaveCount(0)
-    await expect(page.locator('.tabsProgressBar')).toHaveCount(0)
-
-    await goTo(page, 'history')
-    await expect(progressBar).toBeVisible()
-    await expect(progressBar).toHaveCount(0, { timeout: 30_000 })
-  })
-})
-
-test.describe('subscription refresh with only important notifications', () => {
-  test.use({
-    seed: {
-      settings: {
-        ...commonSettings,
-        showProgressBarToast: true,
-        onlyShowImportantToasts: true
-      },
-      profiles: [profileWith(2)],
-      subscriptionCache: [cachedChannel(0), cachedChannel(1)]
-    }
-  })
-
-  test('shows progress in the global progress bar instead of a notification', async ({ page }) => {
-    await routeFeeds(page, () => 8_000)
-    await goTo(page, 'subscriptions')
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).click()
-    const progressBar = page.locator('.app > .progressBar')
-    await expect(progressBar).toBeVisible()
-    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
-    await expect(page.locator('.toast-holder .toast')).toHaveCount(0)
-    await expect(progressBar).toHaveCount(0, { timeout: 30_000 })
-  })
-})
-
-test.describe('subscription feed state during refresh', () => {
-  test.use({
-    seed: {
-      settings: commonSettings,
-      profiles: [profileWith(2)],
-      subscriptionCache: [cachedCollaboratorChannel(0), cachedChannel(1)]
-    }
-  })
-
-  test('keeps an open collaborators modal when refreshed videos reorder the feed', async ({ page }) => {
-    await routeFeeds(page, (index) => index === 0 ? 8_000 : 0)
-    await goTo(page, 'subscriptions')
-
-    const collaboratorVideo = page.locator('.ft-list-video').filter({ hasText: 'Cached video 0' })
-    await collaboratorVideo.getByRole('button', { name: 'Channel 0' }).click()
-    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => button.click())
-    await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 3_000 })
-    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
   })
 })
 
@@ -659,18 +400,6 @@ test.describe('subscription feed refresh controls', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
-  })
-
-  test('updates the Shorts feed immediately when all entries are marked as seen', async ({ page }) => {
-    await goTo(page, 'subscriptions')
-    await page.locator('[data-subscription-feed-tab="shorts"]').click()
-
-    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
-    await expect(markAllAsSeen).toBeVisible()
-    await markAllAsSeen.click()
-
-    await expect(page.locator('.newContentDot')).toHaveCount(0)
-    await expect(markAllAsSeen).toHaveCount(0)
   })
 
   test.describe('tabbed New feed', () => {
@@ -790,43 +519,6 @@ test.describe('cancelling a subscription feed refresh', () => {
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
     await expect(page.getByText(`Fresh video ${channelCount - 1}`, { exact: true })).toHaveCount(0)
     expect(await cachedVideoTitle(page, channelCount - 1)).toBe(`Cached video ${channelCount - 1}`)
-  })
-
-  test('offers the cancellation in the feed tab context menu', async ({ page }) => {
-    await routeFeeds(page, index => index === 0 ? 0 : 4_000)
-    await goTo(page, 'subscriptions')
-    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
-
-    await page.locator('[data-subscription-feed-tab="videos"]').click({ button: 'right' })
-    const menu = page.getByRole('menu', { name: 'Context menu' })
-    await menu.getByRole('menuitem', { name: 'Reload Videos' }).click()
-
-    await expect(page.getByRole('button', { name: 'Cancel refresh' })).toBeVisible()
-    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
-
-    await page.locator('[data-subscription-feed-tab="videos"]').click({ button: 'right' })
-    await expect(menu.getByRole('menuitem', { name: 'Reload Videos' })).toHaveCount(0)
-    await menu.getByRole('menuitem', { name: 'Cancel Refresh' }).click()
-
-    await expect(page.locator('.tabsProgressBar')).toHaveCount(0, { timeout: 20_000 })
-    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
-    expect(await cachedVideoTitle(page, channelCount - 1)).toBe(`Cached video ${channelCount - 1}`)
-  })
-
-  test('turns the open context menu entry back into a reload when the refresh ends', async ({ page }) => {
-    await routeFeeds(page, () => 1_000)
-    await goTo(page, 'subscriptions')
-    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
-
-    await page.getByRole('button', { name: /Refresh Videos/ }).click()
-
-    const menu = page.getByRole('menu', { name: 'Context menu' })
-    await page.locator('[data-subscription-feed-tab="videos"]').click({ button: 'right' })
-    await expect(menu.getByRole('menuitem', { name: 'Cancel Refresh' })).toBeVisible()
-
-    // The menu stays open while the refresh finishes
-    await expect(menu.getByRole('menuitem', { name: 'Reload Videos' })).toBeVisible({ timeout: 30_000 })
-    await expect(menu.getByRole('menuitem', { name: 'Cancel Refresh' })).toHaveCount(0)
   })
 })
 

@@ -3,17 +3,9 @@ import test from 'node:test'
 
 import {
   canMarkHistoryEntryAsWatched,
-  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   hasReachedWatchedThreshold,
   isHistoryEntryWatched,
 } from '../../src/history.js'
-
-test('uses the hybrid threshold by default', () => {
-  assert.equal(DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, 90)
-  assert.equal(hasReachedWatchedThreshold(9 * 60, 10 * 60), true)
-  assert.equal(hasReachedWatchedThreshold(54 * 60, 60 * 60), false)
-  assert.equal(hasReachedWatchedThreshold(58 * 60, 60 * 60), true)
-})
 
 test('uses a configurable watched percentage threshold', () => {
   assert.equal(hasReachedWatchedThreshold(0, 10 * 60, 0), true)

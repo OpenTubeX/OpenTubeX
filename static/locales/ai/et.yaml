@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Muuda"
   Pin to Navigation: "Kinnita navigeerimisribale"
   Unpin from Navigation: "Eemalda navigeerimisribalt"
+  Pin to Top: "Kinnita üles"
+  Unpin from Top: "Vabasta ülevalt"
+  Pinned to Top: "Üles kinnitatud"
   Reorder Hint: Järjestuse muutmiseks lohista või kasuta nooleklahve
   Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
   Shuffle videos by default: "Esita videod vaikimisi juhuslikus järjekorras"
@@ -1496,14 +1499,15 @@ Tutorial:
     Action: Impordi andmed
     Not Now: Mitte praegu
 About:
+  Get OpenTubeX: Hangi OpenTubeX
+  Community: Kogukond
+  Contribute: Panusta
   Documentation: Dokumentatsioon
   Downloads: Allalaadimised
   Changelog: Muudatuste logi
   Commit: Commit
-  Fluxer: Liitu meie Fluxeri kogukonnaga
   Matrix: Matrix
   Email: E-post
-  Support the development of OpenTubeX: "Toeta OpenTubeXi arendust"
 Profile:
   Customization: Kohandamine
   Manage Profile Subscriptions: Halda profiili tellimusi

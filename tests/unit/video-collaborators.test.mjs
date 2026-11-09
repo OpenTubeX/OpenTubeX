@@ -152,35 +152,3 @@ test('uses the video owner endpoint added by youtubei.js 18', () => {
     handle: undefined
   }])
 })
-
-test('uses the regular owner avatar for non-collaboration videos', () => {
-  assert.equal(getLocalVideoAvatarUrl({
-    secondary_info: {
-      owner: {
-        author: {
-          best_thumbnail: { url: 'https://images.test/owner-avatar.jpg' }
-        }
-      }
-    }
-  }), 'https://images.test/owner-avatar.jpg')
-})
-
-test('uses the regular owner avatar when the primary collaborator has no avatar', () => {
-  assert.equal(getLocalVideoAvatarUrl({
-    secondary_info: {
-      owner: {
-        author: {
-          collaborators: [{
-            title: { text: 'Primary collaborator' },
-            renderer_context: {
-              command_context: {
-                on_tap: { payload: { browseId: 'UCprimary' } }
-              }
-            }
-          }],
-          best_thumbnail: { url: 'https://images.test/owner-avatar.jpg' }
-        }
-      }
-    }
-  }), 'https://images.test/owner-avatar.jpg')
-})

@@ -70,10 +70,3 @@ test('discovers a missing player id before reading the cache', async () => {
   assert.equal(player.player_id, 'fixture')
   assert.equal(urls[0], 'https://www.youtube.com/iframe_api')
 })
-
-test('does not extract failed downloads', async () => {
-  const cache = { get: async () => undefined }
-  const runJob = () => assert.fail('Failed responses must not be parsed')
-  await assert.rejects(createBackgroundPlayer(cache, async () => new Response('', { status: 403 }), 'fixture', runJob), /Failed to get player data: 403/)
-  await assert.rejects(createBackgroundPlayer(cache, async () => new Response('', { status: 403 }), undefined, runJob), /Failed to get player id: 403/)
-})

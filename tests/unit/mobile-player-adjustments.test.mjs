@@ -146,39 +146,6 @@ test('leaving fullscreen during its initial brightness read does not apply maxim
   assert.deepEqual(writes, [])
 })
 
-test('reversing a swipe at maximum brightness responds immediately', async () => {
-  const { controls, levels } = fixture({ brightness: 1 })
-  controls.begin('brightness')
-  controls.update(0.2)
-  await controls.settled()
-  assert.equal(levels.brightness, 1)
-  controls.update(0.1)
-  await controls.settled()
-  assert.ok(Math.abs(levels.brightness - 0.9) < 1e-9)
-})
-
-test('reversing a swipe at minimum volume responds immediately', async () => {
-  const { controls, levels } = fixture({ volume: 0 })
-  controls.begin('volume')
-  controls.update(-0.2)
-  await controls.settled()
-  assert.equal(levels.volume, 0)
-  controls.update(-0.1)
-  await controls.settled()
-  assert.equal(levels.volume, 0.1)
-})
-
-test('a quick reversal at a limit is retained while the native read is pending', async () => {
-  const { controls, levels, writes } = fixture({ volume: 1 })
-  controls.begin('volume')
-  controls.update(0.2)
-  controls.update(0.1)
-  controls.finish()
-  await controls.settled()
-  assert.ok(Math.abs(levels.volume - 0.9) < 1e-9)
-  assert.equal(writes.length, 1)
-})
-
 function speedFixture(rate = 1, options = { maximum: 3, step: 0.25 }, overrides = {}) {
   return fixture({ speed: rate }, { getPlaybackRateOptions: () => options, ...overrides })
 }

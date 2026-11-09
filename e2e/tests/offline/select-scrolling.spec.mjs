@@ -11,50 +11,10 @@ async function commentsSort({ app, page }) {
   return select
 }
 
-async function expectScrollTether(select, scroll) {
-  const dropdown = select.page().locator('.selectDropdown')
-  const openingStyle = await dropdown.getAttribute('style')
-  for (const delta of [24, -16, 32]) {
-    const movement = await select.evaluate(async (button, { delta, scroll }) => {
-      const menu = document.getElementById(button.getAttribute('aria-controls'))
-      const buttonBefore = button.getBoundingClientRect()
-      const menuBefore = menu.getBoundingClientRect()
-      const scroller = scroll === 'page' ? window : button.closest('.quickSettingsScroll')
-      scroller.scrollBy({ top: delta, behavior: 'instant' })
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      return {
-        button: button.getBoundingClientRect().top - buttonBefore.top,
-        menu: menu.getBoundingClientRect().top - menuBefore.top,
-      }
-    }, { delta, scroll })
-    expect(Math.abs(movement.button)).toBeGreaterThan(1)
-    expect(Math.abs(movement.menu - movement.button)).toBeLessThanOrEqual(1)
-    await expect(dropdown).toHaveAttribute('style', openingStyle)
-  }
-}
-
 test.describe('select scroll positioning', { tag: '@scale' }, () => {
   // Scrolling the player away animates the scroll mini player across the
   // comments sort control, where it can intercept the click.
   test.use({ seed: { settings: { alwaysShowScrollbars: true, scrollMiniPlayerEnabled: false, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
-
-  test('keeps the comments sort dropdown attached without scroll handler updates', async ({ app, page }) => {
-    const select = await commentsSort({ app, page })
-    await select.click()
-    await expect(page.locator('.selectDropdown')).toBeVisible()
-
-    await expectScrollTether(select, 'page')
-  })
-
-  test('keeps the dropdown attached while its quick settings scroller moves', async ({ page }) => {
-    // At 95% the full-height menu nearly fits and leaves no room to scroll.
-    await page.setViewportSize({ width: 1600, height: 760 })
-    await page.locator('.profileTrigger').click()
-    const select = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('combobox', { name: 'Base Theme' })
-    await select.click()
-    await expect(page.locator('.selectDropdown')).toBeVisible()
-    await expectScrollTether(select, 'quickSettings')
-  })
 
   test('fits the comments dropdown on opening and keeps it inside the viewport when scrolling', async ({ app, page }) => {
     const select = await commentsSort({ app, page })

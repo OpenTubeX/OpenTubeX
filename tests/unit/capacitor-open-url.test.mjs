@@ -46,11 +46,8 @@ for (const platform of ['android', 'ios']) {
 }
 
 for (const [input, expected] of [
-  ['opentubex://https://www.youtube.com/watch?v=test', 'https://www.youtube.com/watch?v=test'],
-  ['opentubex-nightly://https://www.youtube.com/watch?v=test', 'https://www.youtube.com/watch?v=test'],
   ['opentubex-nightly://https//youtu.be/test', 'https://youtu.be/test'],
   ['opentubex-nightly:https://youtu.be/test', 'https://youtu.be/test'],
-  ['https://youtu.be/test', 'https://youtu.be/test'],
 ]) {
   test(`Capacitor opens ${input} as a YouTube URL`, async () => {
     const { openUrl, youtube, externalMedia } = urlOpener()

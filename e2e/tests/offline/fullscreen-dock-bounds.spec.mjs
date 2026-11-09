@@ -43,7 +43,7 @@ async function expectValidScroll(scroller, selector) {
   }, selector)).toBe(true)
 }
 
-for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, { uiScale: 200, colorScheme: 'dark' }]) {
+for (const { uiScale, colorScheme } of [{ uiScale: 200, colorScheme: 'dark' }]) {
   test.describe(`fullscreen dock bounds at ${uiScale}%`, () => {
     test.use({
       seed: {

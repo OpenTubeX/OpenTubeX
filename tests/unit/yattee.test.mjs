@@ -4,10 +4,8 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 
 import {
-  YATTEE_CHANNEL_TABS,
   checkYatteeServer,
   createYatteeAuthorization,
-  createYatteeResponseError,
   fillYatteeShortDates,
   fillYatteeVideoAuthors,
   getYatteeStoryboard,
@@ -16,9 +14,7 @@ import {
   isYatteeServerPlayableOnAndroid,
   normalizeYatteeChannel,
   normalizeYatteeComments,
-  normalizeYatteePlaylist,
   normalizeYatteeSearchItem,
-  normalizeYatteeSuggestions,
   normalizeYatteeVideo,
   resolveYatteeUrl
 } from '../../src/renderer/helpers/api/yattee.js'
@@ -224,26 +220,6 @@ test('channel avatars and banners point at the configured server', () => {
   assert.equal(channel.authorBanners[0].url, 'https://yt3.googleusercontent.com/banner')
 })
 
-test('channels list only the tabs the server implements', () => {
-  const channel = normalizeYatteeChannel({ authorId: 'UC123', author: 'Channel', description: 'a\nb' })
-
-  assert.deepEqual(channel.tabs, YATTEE_CHANNEL_TABS)
-  assert.deepEqual(channel.relatedChannels, [])
-  assert.equal(channel.descriptionHtml, 'a<br>b')
-  assert.deepEqual(
-    fillYatteeVideoAuthors([{ author: '', authorId: '', authorUrl: '' }], 'UC123'),
-    [{ author: '', authorId: 'UC123', authorUrl: '/channel/UC123' }]
-  )
-})
-
-test('playlists get the details that Invidious includes', () => {
-  const playlist = normalizeYatteePlaylist({ playlistId: 'PL1', title: 'Playlist', videoCount: 3, videos: [{ videoId: 'a' }, { videoId: 'b' }] })
-
-  assert.deepEqual(playlist.authorThumbnails, [])
-  assert.equal(playlist.updated, null)
-  assert.deepEqual(playlist.videos.map(entry => entry.index), [0, 1])
-})
-
 test('comments get publication timestamps and hearts', () => {
   const before = Date.now() / 1000
   const response = normalizeYatteeComments({
@@ -264,11 +240,6 @@ test('comments get publication timestamps and hearts', () => {
   assert.equal(second.creatorHeart, undefined)
   assert.equal(third.contentHtml, '1 &lt; 2 &lt;i&gt;x&lt;/i&gt;')
   assert.equal(fourth.contentHtml, '<b>kept</b>')
-})
-
-test('search suggestions are wrapped like Invidious does', () => {
-  assert.deepEqual(normalizeYatteeSuggestions(['a', 'b'], 'q'), { query: 'q', suggestions: ['a', 'b'] })
-  assert.deepEqual(normalizeYatteeSuggestions({ query: 'q', suggestions: [] }, 'q'), { query: 'q', suggestions: [] })
 })
 
 test('connection checks report actionable failures', async () => {
@@ -379,12 +350,3 @@ test('Shorts dates come from earlier refreshes and lookups of new Shorts only', 
   assert.deepEqual(lookups, ['new'])
 })
 
-test('response errors keep the details of validation errors', () => {
-  // FastAPI reports validation errors as a list
-  const detail = [{ loc: ['query', 'page'], msg: 'Input should be a valid integer', type: 'int_parsing' }]
-  const error = createYatteeResponseError({ status: 422 }, { detail })
-  assert.equal(error.message, JSON.stringify(detail))
-  assert.equal(error.status, 422)
-  assert.equal(createYatteeResponseError({ status: 404 }, { detail: 'Video not found' }).message, 'Video not found')
-  assert.equal(createYatteeResponseError({ status: 502 }, null).message, 'HTTP 502')
-})

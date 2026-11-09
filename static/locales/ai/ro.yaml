@@ -229,6 +229,9 @@ User Playlists:
   This playlist is private or does not exist.: "Această listă de redare este privată sau nu există."
   Pin to Navigation: "Fixează în navigare"
   Unpin from Navigation: "Anulează fixarea din navigare"
+  Pin to Top: "Fixează sus"
+  Unpin from Top: "Anulează fixarea sus"
+  Pinned to Top: "Fixată sus"
   Reorder Hint: Trageți sau folosiți tastele săgeți pentru a reordona
   Add new videos to the top (custom order): "Adaugă videoclipurile noi la început (ordine personalizată)"
   Shuffle videos by default: "Redă videoclipurile în ordine aleatorie în mod implicit"
@@ -1520,17 +1523,18 @@ Tutorial:
     Action: Importă datele
     Not Now: Nu acum
 About:
+  Get OpenTubeX: Obține OpenTubeX
+  Community: Comunitate
+  Contribute: Contribuie
   Documentation: Documentație
   Downloads: Descărcări
   Changelog: Jurnal de modificări
   Commit: Commit
   Licensed under the {licenseLink}: Licențiat conform {licenseLink}
-  Fluxer: Alăturați-vă comunității noastre Fluxer
   Matrix: Matrix
   Email: E-mail
   Please read the {roomRulesLink}: Citiți {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
-  Support the development of OpenTubeX: "Susține dezvoltarea OpenTubeX"
 Profile:
   Customization: Personalizare
   Manage Profile Subscriptions: Gestionează abonamentele profilului

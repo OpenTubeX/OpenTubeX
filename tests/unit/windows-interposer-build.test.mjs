@@ -1,46 +1,12 @@
 import assert from 'node:assert/strict'
-import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import { parse } from 'yaml'
 
-import {
-  getWindowsPortableExtraFiles,
-  verifyWindowsX64Dll,
-  WINDOWS_INTERPOSER_COMMIT,
-  WINDOWS_INTERPOSER_PATCH_SHA256,
-  WINDOWS_INTERPOSER_VERSION
-} from '../../_scripts/windowsInterposer.mjs'
+import { verifyWindowsX64Dll } from '../../_scripts/windowsInterposer.mjs'
 
 const repositoryRoot = path.resolve()
-
-test('limits the interposer to Windows x64', () => {
-  assert.deepEqual(getWindowsPortableExtraFiles('linux'), [])
-  assert.throws(() => getWindowsPortableExtraFiles('win32', 'arm64'), /does not support Windows arm64/)
-})
-
-test('pins the interposer source and patch', async () => {
-  const license = await readFile(path.join(
-    repositoryRoot,
-    '_scripts',
-    'windows-interposer',
-    'LICENSE.txt'
-  ), 'utf8')
-  const patch = (await readFile(path.join(
-    repositoryRoot,
-    '_scripts',
-    'windows-interposer',
-    'native-registry.patch'
-  ), 'utf8')).replaceAll('\r\n', '\n')
-
-  assert.match(license, new RegExp(`Interposer ${WINDOWS_INTERPOSER_VERSION}`))
-  assert.equal(WINDOWS_INTERPOSER_COMMIT.length, 40)
-  assert.equal(
-    createHash('sha256').update(patch).digest('hex'),
-    WINDOWS_INTERPOSER_PATCH_SHA256
-  )
-})
 
 test('redirects fallback application paths into the portable data directory', async () => {
   const config = parse(await readFile(path.join(

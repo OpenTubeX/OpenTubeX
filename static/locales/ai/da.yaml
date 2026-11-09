@@ -233,6 +233,9 @@ User Playlists:
   This playlist is private or does not exist.: "Denne playliste er privat eller findes ikke."
   Pin to Navigation: "Fastgør til navigation"
   Unpin from Navigation: "Frigør fra navigation"
+  Pin to Top: "Fastgør øverst"
+  Unpin from Top: "Frigør fra toppen"
+  Pinned to Top: "Fastgjort øverst"
   Reorder Hint: Træk eller brug piletasterne for at ændre rækkefølgen
   Add new videos to the top (custom order): "Tilføj nye videoer øverst (brugerdefineret rækkefølge)"
   Shuffle videos by default: "Bland videoer som standard"
@@ -1550,17 +1553,18 @@ Tutorial:
     Action: Importér data
     Not Now: Ikke nu
 About:
+  Get OpenTubeX: Hent OpenTubeX
+  Community: Fællesskab
+  Contribute: Bidrag
   Documentation: Dokumentation
   Downloads: Downloads
   Changelog: Ændringslog
   Commit: Commit
   Licensed under the {licenseLink}: Licenseret under {licenseLink}
-  Fluxer: Deltag i vores Fluxer-fællesskab
   Matrix: Matrix
   Email: E-mail
   Please read the {roomRulesLink}: Læs venligst {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort muligt af {creditsPageLink}
-  Support the development of OpenTubeX: "Støt udviklingen af OpenTubeX"
 Profile:
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer

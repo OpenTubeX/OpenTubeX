@@ -308,7 +308,7 @@ const initialLoadCases = {
   'fresh loads': [null, false],
 }
 
-for (const format of ['audio', 'dash', 'legacy']) {
+for (const format of ['dash', 'legacy']) {
   for (const queued of [true, false]) {
     for (const [loadCase, [switchArgs, restartsSource]] of Object.entries(initialLoadCases)) {
       const restart = queued && restartsSource

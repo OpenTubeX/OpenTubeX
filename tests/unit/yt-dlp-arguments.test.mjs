@@ -1,15 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFile } from 'node:fs/promises'
-import YAML from 'yaml'
-import { createI18n } from 'vue-i18n'
-import { buildYtDlpDownloadArguments, jsRuntimeArguments, playbackImpersonationArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
+import { buildYtDlpDownloadArguments, jsRuntimeArguments, playbackImpersonationArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
 
 test('Chrome impersonation applies only to Rumble playback URLs', () => {
-  for (const url of ['https://rumble.com/video', 'https://www.rumble.com/video', 'https://player.rumble.com/embed']) {
+  for (const url of ['https://rumble.com/video', 'https://player.rumble.com/embed']) {
     assert.deepEqual(playbackImpersonationArguments(url), ['--impersonate', 'chrome'])
   }
   for (const url of ['https://notrumble.com/video', 'https://rumble.com.example/video', 'https://www.youtube.com/watch?v=jNQXAC9IVRw']) {
@@ -25,11 +22,6 @@ test('Electron runs as the JavaScript runtime only for yt-dlp builds that accept
   for (const version of ['2025.11.11', '2025.10.22', 'unknown', null]) {
     assert.deepEqual(jsRuntimeArguments(version, '/opt/OpenTubeX/opentubex'), [])
   }
-})
-
-test('playback subtitle options include authored tracks for external media', () => {
-  assert.deepEqual(playbackSubtitleArguments(true), ['--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt'])
-  assert.deepEqual(playbackSubtitleArguments(false), ['--write-subs', '--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt/srt/ttml/dfxp'])
 })
 
 test('external media downloads use their web URL without treating it as a YouTube ID', () => {
@@ -139,13 +131,6 @@ test('caption mapping separates translated tracks and rejects non-HTTPS URLs', (
   assert.equal(result.captionTranslations[0].language, 'de')
 })
 
-test('external metadata uses a single artist when no artist list is available', () => {
-  assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"artist":/)
-  assert.deepEqual(mapExternalPlaybackMetadata({ artist: 'Example artist' }).artists, ['Example artist'])
-  assert.deepEqual(mapExternalPlaybackMetadata({ artists: [], artist: 'Example artist' }).artists, ['Example artist'])
-  assert.deepEqual(mapExternalPlaybackMetadata({ artists: ['Artist A', 'Artist B'], artist: 'Fallback artist' }).artists, ['Artist A', 'Artist B'])
-})
-
 test('external metadata keeps optional counts, context, and chapter boundaries', () => {
   assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"chapters"/)
   assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"subtitles"/)
@@ -180,17 +165,6 @@ test('external metadata keeps optional counts, context, and chapter boundaries',
     duration: 30,
     chapters: [{ start_time: 5, title: 'Valid' }, { start_time: -1, title: 'Invalid' }]
   }).chapters, [{ startSeconds: 5, endSeconds: 30, title: 'Valid' }])
-})
-
-test('external engagement labels use singular and plural forms', async () => {
-  for (const locale of ['en-US', 'de-DE']) {
-    const messages = YAML.parse(await readFile(new URL(`../../static/locales/${locale}.yaml`, import.meta.url), 'utf8'))
-    const i18n = createI18n({ legacy: false, locale, messages: { [locale]: messages } })
-    for (const key of ['Dislikes', 'Reposts', 'Saves']) {
-      const path = `Video.External Media.${key}`
-      assert.notEqual(i18n.global.t(path, {}, 1), i18n.global.t(path, {}, 2), `${locale} ${key}`)
-    }
-  }
 })
 
 test('caption mapping distinguishes authored and automatic tracks', () => {

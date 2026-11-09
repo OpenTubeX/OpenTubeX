@@ -341,6 +341,9 @@ User Playlists:
   Quick Bookmark Enabled: Vinnige boekmerk geaktiveer
   Pin to Navigation: Speld aan navigasie vas
   Unpin from Navigation: Maak los van navigasie
+  Pin to Top: "Bo-aan vaspen"
+  Unpin from Top: "Van bo-aan losmaak"
+  Pinned to Top: "Bo-aan vasgepen"
   Export Playlist: Stuur hierdie afspeellys uit
   Export list of URLs: Stuur lys van URL’s uit
   The playlist has been successfully exported: Die afspeellys is suksesvol uitgestuur
@@ -1713,17 +1716,18 @@ Tutorial:
     Action: Voer data in
     Not Now: Nie nou nie
 About:
+  Get OpenTubeX: Kry OpenTubeX
+  Community: Gemeenskap
+  Contribute: Dra by
   Documentation: Dokumentasie
   Downloads: Aflaaie
   Changelog: Veranderingslogboek
   Commit: Commit
   Licensed under the {licenseLink}: Gelisensieer onder die {licenseLink}
-  Fluxer: Sluit aan by ons Fluxer-gemeenskap
   Matrix: Matrix
   Email: E-pos
   Please read the {roomRulesLink}: Lees asseblief die {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX word moontlik gemaak deur {creditsPageLink}
-  Support the development of OpenTubeX: "Ondersteun die ontwikkeling van OpenTubeX"
 Profile:
   Customization: Aanpassing
   Manage Profile Subscriptions: Bestuur profielintekeninge

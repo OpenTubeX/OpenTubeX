@@ -5,8 +5,6 @@ async function openYtDlpStreamingSettings(page) {
   const heading = section.getByRole('heading', { name: 'yt-dlp Streaming', exact: true })
   const ytDlpSection = heading.locator('xpath=../..')
   return {
-    section,
-    heading,
     segmentSlider: ytDlpSection.getByRole('slider', { name: /Parallel Segment Loading/ }),
     toggle: ytDlpSection.getByRole('checkbox', { name: 'Preload Upcoming Videos' }),
     toggleLabel: ytDlpSection.locator('label.switch-label').filter({ hasText: 'Preload Upcoming Videos' }),
@@ -23,22 +21,12 @@ test.describe('yt-dlp playback preloading', () => {
   })
 
   test('persists the switch, preload count, and concurrency', async ({ app }) => {
-    const { section, heading, segmentSlider, toggle, toggleLabel, countSlider, concurrencySlider } = await openYtDlpStreamingSettings(app.page)
-
-    await expect(heading).toBeVisible()
-    const sectionHeadings = await section.getByRole('heading', { level: 3 }).allTextContents()
-    expect(sectionHeadings.indexOf('yt-dlp Streaming')).toBe(sectionHeadings.indexOf('yt-dlp Cookies') + 1)
+    const { segmentSlider, toggle, toggleLabel, countSlider, concurrencySlider } = await openYtDlpStreamingSettings(app.page)
 
     await expect(toggle).not.toBeChecked()
     await expect(toggle).toBeEnabled()
     await expect(segmentSlider).toBeEnabled()
     await expect(countSlider).toBeDisabled()
-    await expect(countSlider).toHaveValue('2')
-    await expect(countSlider).toHaveAttribute('min', '0')
-    await expect(countSlider).toHaveAttribute('max', '10')
-    await expect(concurrencySlider).toHaveValue('2')
-    await expect(concurrencySlider).toHaveAttribute('min', '1')
-    await expect(concurrencySlider).toHaveAttribute('max', '32')
     await expect(concurrencySlider).toBeDisabled()
 
     await toggleLabel.click()

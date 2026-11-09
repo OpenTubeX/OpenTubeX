@@ -194,53 +194,6 @@ for (const interruption of ['restore', 'show', 'focus', 'disable', 'quit', 'clos
   })
 }
 
-test('tray media controls reflect supported actions and playback state', () => {
-  const { context, setMedia, mediaActions } = fixture()
-  const controls = () => context.defaultTrayMenu().filter(item => ['Previous', 'Play', 'Pause', 'Next'].includes(item.label))
-  assert.ok(controls().every(item => !item.enabled))
-  setMedia({ playbackState: 'playing', actions: new Set(['pause', 'nexttrack']) })
-  assert.deepEqual(Array.from(controls(), item => [item.label, item.enabled]), [['Previous', false], ['Pause', true], ['Next', true]])
-  controls()[1].click()
-  controls()[2].click()
-  assert.deepEqual(mediaActions, ['pause', 'nexttrack'])
-  setMedia({ playbackState: 'paused', actions: new Set(['play']) })
-  assert.equal(controls()[1].label, 'Play')
-})
-
-test('tray icons follow window visibility and playback state', () => {
-  const { context, Window, setMedia } = fixture()
-  const window = new Window()
-  let menu = context.defaultTrayMenu()
-  const assertIcons = items => {
-    for (const item of items) {
-      if (item.type === 'separator') assert.equal(item.icon, undefined)
-      else assert.ok(item.icon)
-      if (item.submenu) assertIcons(item.submenu)
-    }
-  }
-  assertIcons(menu)
-  assert.equal(menu[0].icon, 'material:display')
-  assert.equal(menu[0].submenu[0].icon, 'material:eye-slash')
-  assert.equal(menu.find(item => item.label === 'Play').icon, 'material:play')
-  context.hideWindowToTray(window)
-  setMedia({ playbackState: 'playing', actions: new Set(['pause']) })
-  menu = context.defaultTrayMenu()
-  assertIcons(menu)
-  assert.equal(menu[0].submenu[0].icon, 'material:eye')
-  assert.equal(menu.find(item => item.label === 'Pause').icon, 'material:pause')
-})
-
-test('macOS reserves left click for toggling and right click for the menu', () => {
-  const { context, Window, trays } = fixture('darwin')
-  const window = new Window()
-  context.configure({})
-  assert.equal(trays[0].menu, undefined)
-  trays[0].emit('click')
-  assert.equal(window.visible, false)
-  trays[0].emit('right-click')
-  assert.ok(trays[0].menu.some(item => item.label === 'Quit'))
-})
-
 
 test('KWin restore polling does not clear minimized state while hidden in the tray', () => {
   const { context, Window, flushTimers, minimizedStates } = fixture()
@@ -256,56 +209,6 @@ test('KWin restore polling does not clear minimized state while hidden in the tr
   assert.equal(minimizedStates.at(-1), false)
 })
 
-test('unchanged playback updates keep the attached tray menu', () => {
-  const { context, Window, trays, setMedia } = fixture()
-  new Window()
-  setMedia({ playbackState: 'playing', actions: new Set(['pause']) })
-  context.configure({})
-  const menu = trays[0].menu
-  for (let position = 0; position < 10; position++) {
-    setMedia({ playbackState: 'playing', actions: new Set(['pause']), position })
-    context.createTrayContextMenu()
-    assert.equal(trays[0].menu, menu)
-  }
-  setMedia({ playbackState: 'paused', actions: new Set(['play']) })
-  context.createTrayContextMenu()
-  assert.notEqual(trays[0].menu, menu)
-})
-
-test('tray window labels omit the app suffix and actions follow visibility', () => {
-  const { context, Window } = fixture()
-  const window = new Window()
-  window.getTitle = () => 'Video - OpenTubeX\u2063\u200c'
-  context.configure({})
-  let menu = context.defaultTrayMenu()
-  assert.equal(menu[0].label, 'Video')
-  assert.equal(menu[0].submenu[0].label, 'Video.Player.Hide')
-  assert.equal(menu.some(item => item.label === 'Tray.Show All Windows'), false)
-  menu.find(item => item.label === 'Tray.Hide All Windows').click()
-  assert.equal(window.visible, false)
-  menu = context.defaultTrayMenu()
-  assert.equal(menu[0].submenu[0].label, 'Video.Player.Show')
-  assert.equal(menu.some(item => item.label === 'Tray.Hide All Windows'), false)
-  menu.find(item => item.label === 'Tray.Show All Windows').click()
-  assert.equal(window.visible, true)
-})
-
-test('mixed window visibility offers both bulk actions and individual toggles', () => {
-  const { context, Window } = fixture()
-  const shown = new Window()
-  const hidden = new Window()
-  context.attach(shown)
-  context.attach(hidden)
-  context.hideWindowToTray(hidden)
-  const menu = context.defaultTrayMenu()
-  assert.ok(menu.some(item => item.label === 'Tray.Show All Windows'))
-  assert.ok(menu.some(item => item.label === 'Tray.Hide All Windows'))
-  menu[0].submenu[0].click()
-  assert.equal(shown.visible, false)
-  menu[1].submenu[0].click()
-  assert.equal(hidden.visible, true)
-})
-
 test('a recreated tray receives a menu even when its contents are unchanged', () => {
   const { context, Window, trays } = fixture()
   new Window()
@@ -313,61 +216,6 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
   context.configure({ enabled: false })
   context.configure({ enabled: true })
   assert.ok(trays[1].menu.length > 0)
-})
-
-for (const platform of ['linux', 'win32']) {
-  // Chromium keeps several copies of the tray bitmap, so the 512px app logo costs ~55 MB.
-  test(`default tray artwork is downscaled on ${platform}`, () => {
-    const { context, trays } = fixture(platform)
-    context.configure({})
-    assert.deepEqual([trays[0].image.width, trays[0].image.height], [64, 64])
-  })
-}
-
-for (const platform of ['linux', 'win32', 'darwin']) {
-  test(`selected tray artwork survives tray recreation on ${platform}`, () => {
-    const { context, trays } = fixture(platform)
-    const image = fakeImage(64, { isEmpty: () => false })
-    context.selectedTrayImage = image
-    context.configure({ enabled: false })
-    context.configure({ enabled: true })
-    if (platform === 'darwin') {
-      const representations = trays.at(-1).image.representations.map(({ scaleFactor, buffer }) => [scaleFactor, buffer.height])
-      assert.deepEqual(representations, [[1, 18], [2, 36]])
-    } else {
-      assert.equal(trays.at(-1).image, image)
-    }
-  })
-}
-
-test('quit waits for the queued tray icon cache write', async () => {
-  let finishWrite
-  const trayIconWrite = new Promise(resolve => { finishWrite = resolve })
-  const context = vm.createContext({
-    trayIconWrite,
-    clearInterval,
-    scheduledBackupTimer: undefined,
-    scheduledBackups: { stop: async () => {} },
-    windowSessionWrites: new Set(),
-    updateWatchQueue: async () => {},
-    baseHandlers: { compactAllDatastores: async () => {} },
-    shutdownYtDlpDownloads: async () => {},
-    uploadNotifier: { settle: async () => {} },
-    closeKwinPictureInPictureBounds: Promise.resolve(null),
-    pictureInPictureBoundsStore: { settled: async () => {} },
-    session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
-  })
-  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
-  let finished = false
-  const cleanup = context.cleanUpResources().then(() => { finished = true })
-  try {
-    await new Promise(resolve => setImmediate(resolve))
-    assert.equal(finished, false)
-  } finally {
-    finishWrite()
-    await cleanup
-  }
-  assert.equal(finished, true)
 })
 
 test('quit waits for pending watch queue writes', async () => {

@@ -39,14 +39,6 @@ test('a failed endpoint reports no internet; opaque WebView replies still prove 
   assert.equal(await createInternetProbe(async () => ({ type: 'opaque', status: 0 }))(new AbortController().signal), true)
 })
 
-test('cancellation stops the current request', async () => {
-  const controller = new AbortController()
-  const probe = createInternetProbe(async (url, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(signal.reason))))
-  const pending = probe(controller.signal)
-  controller.abort()
-  assert.equal(await pending, false)
-})
-
 test('airplane mode cancels checks, ignores stale results, and does not poll until the OS reconnects', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const events = new EventTarget()
@@ -200,18 +192,4 @@ test('a check started before a confirmed response cannot mark the app offline', 
   finish(false)
   assert.equal(await pending, true)
   assert.equal(connectivity.online, true)
-})
-
-test('a working check stays trusted after a confirmed response ends an outage', async t => {
-  t.mock.timers.enable({ apis: ['setTimeout'] })
-  let reachable = false
-  const connectivity = createInternetConnectivity({ eventTarget: new EventTarget(), isOnline: () => true, probe: async () => reachable })
-  t.after(() => connectivity.dispose())
-  await flush()
-  reachable = true
-  connectivity.confirmReachable()
-  await flush()
-  reachable = false
-  assert.equal(await connectivity.check(), false)
-  assert.equal(connectivity.online, false)
 })

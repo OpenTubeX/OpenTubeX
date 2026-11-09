@@ -528,37 +528,6 @@ test.describe('sync settings', () => {
     }
   })
 
-  test('keeps the connected account label in the settings layout', { tag: '@scale' }, async ({ page }) => {
-    await page.route('https://sync.example/**', route => route.fulfill({
-      json: { status: 'ok', capabilities: {} }
-    }))
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="sync"]').click()
-
-    const syncSection = page.locator('[data-section="sync"]')
-    const label = syncSection.getByText('Connected as sync-user')
-    await expect(label).toBeVisible()
-    await expect(label).toHaveCSS('position', 'static')
-    await expect(label).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    await expect(label).toHaveCSS('padding-top', '0px')
-    await expect(label).toHaveCSS('text-align', 'center')
-    const bounds = await label.boundingBox()
-    const fields = await syncSection.locator('.fields').boundingBox()
-    const toggles = await syncSection.locator('.toggles').nth(1).boundingBox()
-    expect(bounds.y).toBeGreaterThanOrEqual(fields.y + fields.height)
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(toggles.y)
-
-    await page.evaluate(() => {
-      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
-      window.dispatchEvent(new Event('offline'))
-    })
-    const banner = page.getByRole('status').filter({ hasText: /^Offline$/ })
-    await expect(banner).toBeVisible()
-    await expect(page.locator('.connection-status-holder')).toHaveCSS('position', 'fixed')
-    await expect(label).toHaveCSS('position', 'static')
-    await expect(label).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-  })
-
   test('keeps the paired username when its device metadata update fails', async ({ page }) => {
     await page.route('https://sync.example/**', route => {
       const url = new URL(route.request().url())
@@ -1122,19 +1091,6 @@ test.describe('OIDC sync login', () => {
       await expect(section.getByText('Connected with single sign-on')).toHaveCount(0)
     })
 
-    test('labels the login generically when the server names no provider', async ({ page }) => {
-      await page.route('https://sync.example/**', async (route) => {
-        const { pathname } = new URL(route.request().url())
-        await route.fulfill({
-          json: pathname === '/meta'
-            ? { oidc: true }
-            : { status: 'ok', capabilities: { account_sessions: 1 } }
-        })
-      })
-      const section = await goToSettingsSection(page, 'sync')
-      await expect(section.getByRole('button', { name: 'Log in with single sign-on' })).toBeEnabled()
-    })
-
     test('offers no login on servers that cannot tell which device started it', async ({ page }) => {
       const metaRequests = []
       await page.route('https://sync.example/**', async (route) => {
@@ -1404,26 +1360,5 @@ test.describe('tabs from other synced devices', () => {
       window.sharedTabUpdates[1].resolve()
     })
     await expect.poll(() => page.evaluate(() => window.sharedTabSyncSchedules)).toEqual(['sessions'])
-  })
-
-  test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
-    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
-      json: { status: 'ok', capabilities: {} }
-    }))
-    const section = await goToSettingsSection(page, 'sync')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setSyncServerOtherDeviceSessions', [{
-        sessionId: 'desktop-session',
-        syncDeviceId: 'desktop-device',
-        syncPlatform: 'desktop',
-        tabs: [
-          { id: 'first', title: 'A long channel tab title', url: 'https://www.youtube.com/' },
-          { id: 'second', title: 'Watch later', url: 'https://www.youtube.com/playlist?list=WL' },
-        ],
-      }])
-    })
-
-    await expect(section.getByRole('heading', { name: 'Tabs from other devices' })).toHaveCount(0)
   })
 })

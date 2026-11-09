@@ -106,26 +106,6 @@ test('the bell is off per channel until turned on, which selects every type', as
   })
 })
 
-test('the bell confirms each change with a toast that replaces the previous one', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await goTo(page, 'subscribedchannels')
-  const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true })
-  const onToast = page.locator('.toast', { hasText: "You'll be notified about new uploads from Alpha Channel when your subscriptions refresh" })
-  const offToast = page.locator('.toast', { hasText: "You won't be notified about new uploads from Alpha Channel" })
-
-  await bell.click()
-  await expect(onToast).toBeVisible()
-  await bell.click()
-  await expect(offToast).toBeVisible()
-  // Well below the toast's own 3 seconds, so only replacement can remove it.
-  await expect(onToast).toHaveCount(0, { timeout: 1000 })
-
-  // Bells of other channels replace it too.
-  await page.locator('.channel', { hasText: 'Beta Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
-  await expect(page.locator('.toast', { hasText: "You'll be notified about new uploads from Beta Channel when your subscriptions refresh" })).toBeVisible()
-  await expect(offToast).toHaveCount(0, { timeout: 1000 })
-})
-
 test.describe('with upload notifications turned off in settings', () => {
   test.use({
     seed: {

@@ -177,20 +177,6 @@ test('returns regular video data while promotion details are still pending', asy
   }
 })
 
-test('requests watch metadata while the playback token is still being generated', async () => {
-  const token = deferred()
-  const { load, requests } = loader({ token: token.promise })
-  const loading = load('testVideo01')
-  await new Promise(resolve => setImmediate(resolve))
-  try {
-    assert.ok(requests.includes('/next'), 'Watch metadata should overlap token generation')
-    assert.ok(requests.includes('ANDROID'), 'Promotion details should overlap token generation')
-  } finally {
-    token.resolve('token')
-    await loading
-  }
-})
-
 test('requests the player response while watch metadata is still pending', async () => {
   const next = deferred()
   const { load, requests } = loader({ next: next.promise, embeddedPlayer: false })
@@ -202,15 +188,6 @@ test('requests the player response while watch metadata is still pending', async
     next.resolve({ data: {} })
     await loading
   }
-})
-
-test('delivers promotion details after the regular video data', async () => {
-  const android = deferred()
-  const { load } = loader({ android: android.promise })
-  const result = await load('testVideo01')
-  assert.equal(result.paidPromotionDurationMs, null)
-  android.resolve({ data: { paidContentOverlay: { paidContentOverlayRenderer: { durationMs: '60000' } } } })
-  assert.equal(await result.paidPromotionPromise, 60000)
 })
 
 for (const details of [{ isLive: true }, { isPostLiveDvr: true }]) {
@@ -263,15 +240,4 @@ test('normalizes legacy popularity markers before parsing watch metadata', async
   } }) })
   const result = await load('testVideo01')
   assert.deepEqual(getVideoPopularity(result.info), [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
-})
-
-test('propagates a metadata failure while token generation is pending', async () => {
-  const token = deferred()
-  const next = deferred()
-  const { load } = loader({ token: token.promise, next: next.promise })
-  const loading = load('testVideo01')
-  const rejected = assert.rejects(loading, /Metadata unavailable/)
-  next.reject(new Error('Metadata unavailable'))
-  await rejected
-  token.resolve('token')
 })

@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Breyta"
   Pin to Navigation: "Festa við valmynd"
   Unpin from Navigation: "Losa úr valmynd"
+  Pin to Top: "Festa efst"
+  Unpin from Top: "Losa efst"
+  Pinned to Top: "Fest efst"
   Reorder Hint: Dragðu eða notaðu örvalyklana til að endurraða
   Add new videos to the top (custom order): "Bæta nýjum myndskeiðum efst (sérsniðin röð)"
   Shuffle videos by default: "Spila myndskeið í slembiröð sjálfgefið"
@@ -1502,14 +1505,15 @@ Tutorial:
     Action: Flytja inn gögn
     Not Now: Ekki núna
 About:
+  Get OpenTubeX: Sækja OpenTubeX
+  Community: Samfélag
+  Contribute: Leggja sitt af mörkum
   Documentation: Skjöl
   Downloads: Niðurhal
   Changelog: Breytingaskrá
   Commit: Git-vistun
-  Fluxer: Vertu með í Fluxer-samfélaginu okkar
   Matrix: Matrix
   Email: Netfang
-  Support the development of OpenTubeX: "Styðja við þróun OpenTubeX"
 Profile:
   Customization: Sérsnið
   Manage Profile Subscriptions: Stjórna áskriftum prófíls

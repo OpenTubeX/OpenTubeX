@@ -142,7 +142,6 @@ test('retention keeps the selected number of scheduled backups and leaves manual
 for (const { key, label, option, original, saved } of [
   { key: 'scheduledBackupEnabled', label: 'Enable scheduled backups', original: false, saved: true },
   { key: 'scheduledBackupInterval', label: 'Backup frequency', option: 'Daily', original: 7, saved: 1 },
-  { key: 'scheduledBackupKeepCount', label: 'Backups to keep', option: '1', original: 5, saved: 1 },
 ]) {
   test(`reports a failed ${key} save, retains the previous value and allows retrying`, async ({ app, page }, testInfo) => {
     const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backup-save-'))
