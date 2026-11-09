@@ -155,6 +155,45 @@ test.describe('subscriptions header layout', () => {
     }
   })
 
+  test('stacks the last update and next auto refresh beside the desktop feed tabs', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await goTo(page, 'subscriptions')
+    await setWindowWidth(app, page, Math.round(1500 * uiScale / 100))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
+      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
+    })
+    await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
+    await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
+    await expect(page.locator('.markAllSeenButton')).toBeVisible()
+    await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
+
+    const layout = await page.evaluate(() => {
+      const box = selector => document.querySelector(selector).getBoundingClientRect()
+      return {
+        tabs: box('.tabs'),
+        updated: box('.headerRefreshWidget > .lastRefreshTimestamp'),
+        next: box('.headerRefreshWidget .nextAutoRefreshTimestamp .lastRefreshTimestamp'),
+        countdown: box('.headerRefreshWidget .nextAutoRefreshCountdown'),
+        refresh: box('.headerRefreshWidget .refreshButton')
+      }
+    })
+    const center = rect => (rect.top + rect.bottom) / 2
+    const linesCenter = (layout.updated.top + layout.next.bottom) / 2
+
+    expect(layout.next.top).toBeGreaterThanOrEqual(layout.updated.bottom - 1)
+    expect(Math.abs(layout.next.left - layout.updated.left)).toBeLessThanOrEqual(1)
+    expect(layout.countdown.right).toBeLessThanOrEqual(layout.updated.left)
+    expect(Math.abs(center(layout.countdown) - linesCenter)).toBeLessThanOrEqual(2)
+    expect(layout.refresh.left).toBeGreaterThanOrEqual(Math.max(layout.updated.right, layout.next.right))
+    expect(Math.abs(center(layout.refresh) - linesCenter)).toBeLessThanOrEqual(2)
+    expect(Math.abs(center(layout.refresh) - center(layout.tabs))).toBeLessThanOrEqual(2)
+    await attachScreenshot('desktop stacked refresh status')
+  })
+
   test('shows the New feed action and regular feed refresh status on mobile', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()

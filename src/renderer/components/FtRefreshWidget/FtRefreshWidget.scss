@@ -130,6 +130,43 @@
   }
 }
 
+/* Stacking the last update and next auto refresh keeps the subscriptions
+   header actions narrow enough to stay beside the tabs */
+@media only screen and (width > 680px) {
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:has(> .lastRefreshTimestamp):has(.nextAutoRefreshTimestamp) {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    place-items: center start;
+    gap: 0 8px;
+
+    .refreshActions,
+    .nextAutoRefreshTimestamp {
+      display: contents;
+    }
+
+    /* The countdown sits beside both lines instead of indenting the second */
+    .nextAutoRefreshCountdown {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .lastRefreshTimestamp {
+      grid-column: 2;
+      grid-row: 2;
+      text-align: start;
+    }
+
+    > .lastRefreshTimestamp {
+      grid-row: 1;
+    }
+
+    .refreshButton {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+  }
+}
+
 @media only screen and (width <= 680px) {
   .floatingRefreshSection,
   .floatingRefreshSection.sideNavOpen,
