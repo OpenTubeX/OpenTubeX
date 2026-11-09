@@ -809,6 +809,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Rewind on Resume: "Spol tilbake ved gjenopptak"
+    Minimum Pause Before Rewinding: "Minste pause før tilbakespoling"
     Mono Audio: 'Monolyd'
     Show Mono Audio Toggle: 'Vis brytar for monolyd'
     Default Media Format:
@@ -2462,6 +2464,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Filstien til skriptet som skal køyrast når ei IP-sperre vert oppdaga. OpenTubeX ventar til det er ferdig og lastar deretter inn videoen på nytt. Dersom reserveløysinga er slått på, køyrer skriptet berre når ho òg slår feil.
   Player Settings:
+    Rewind on Resume: "Hoppar så mange sekund tilbake når du held fram med ein video på pause, slik at du kan sjå dei siste augneblinka igjen. Set til 0 for å slå det av."
+    Minimum Pause Before Rewinding: "Spolar berre tilbake når videoen har vore på pause minst så lenge. Set til 0 for å spole tilbake etter kvar pause."
     Mono Audio: 'Spelar av venstre og høgre lydkanal i begge øyra. Bruk dette når lyden i ein video berre kjem ut av den eine sida av hovudtelefonane.'
     Pause on Stream Recovery: "Når videostraumen feilar og spelaren lastar han inn på nytt eller byter til eit anna format eller ein annan motor, vert avspelinga sett på pause, og feilen vert ståande øvst i spelaren til du lukkar han. Når dette er slått av, held avspelinga fram, og feilen vert vist kort som eit varsel."
     Continue Playback When Screen Is Locked: 'Held fram med lydavspeling i bakgrunnen og viser Android-mediekontrollar. Slå av dette for å setje på pause når appen ikkje lenger er synleg.'

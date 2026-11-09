@@ -727,6 +727,8 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    Rewind on Resume: "Ailddirwyn wrth ailddechrau"
+    Minimum Pause Before Rewinding: "Saib lleiaf cyn ailddirwyn"
     Mono Audio: 'Sain mono'
     Show Mono Audio Toggle: 'Dangos y togl sain mono'
     Default Media Format:
@@ -2186,6 +2188,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:
+    Rewind on Resume: "Neidio’n ôl hyn o eiliadau pan fyddwch yn ailddechrau fideo sydd wedi’i oedi, fel y gallwch weld yr eiliadau olaf eto. Gosodwch i 0 i’w ddiffodd."
+    Minimum Pause Before Rewinding: "Dim ond yn ailddirwyn pan fu’r fideo wedi’i oedi am o leiaf mor hir â hyn. Gosodwch i 0 i ailddirwyn ar ôl pob saib."
     Mono Audio: 'Yn chwarae''r sianeli sain chwith a de yn y ddwy glust. Defnyddiwch hwn pan fydd sain fideo ond yn dod o un ochr i''ch clustffonau.'
     Pause on Stream Recovery: "Pan fydd y ffrwd fideo yn methu a'r chwaraewr yn ei hail-lwytho neu'n newid i fformat neu beiriant arall, mae chwarae'n cael ei seibio ac mae'r gwall yn aros ar frig y chwaraewr nes i chi ei wrthod. Pan fydd wedi'i analluogi, mae chwarae'n parhau ac mae'r gwall yn ymddangos yn fyr fel hysbysiad."
     Continue Playback When Screen Is Locked: 'Yn cadw sain yn chwarae yn y cefndir ac yn darparu rheolyddion cyfryngau Android. Diffoddwch hyn i oedi pan nad yw’r ap yn weladwy mwyach.'

@@ -731,6 +731,8 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Rewind on Resume: "Terugspoelen bij hervatten"
+    Minimum Pause Before Rewinding: "Minimale pauze voor terugspoelen"
     Mono Audio: 'Mono-audio'
     Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
     Default Media Format:
@@ -2216,6 +2218,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
   Player Settings:
+    Rewind on Resume: "Springt dit aantal seconden terug wanneer je een gepauzeerde video hervat, zodat je de laatste momenten opnieuw kunt zien. Stel in op 0 om dit uit te schakelen."
+    Minimum Pause Before Rewinding: "Spoelt alleen terug als de video minstens zo lang gepauzeerd was. Stel in op 0 om na elke pauze terug te spoelen."
     Mono Audio: 'Speelt het linker- en rechteraudiokanaal in beide oren af. Gebruik dit als het geluid van een video maar uit één kant van je koptelefoon komt.'
     Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'

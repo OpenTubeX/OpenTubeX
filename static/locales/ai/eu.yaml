@@ -726,6 +726,8 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Rewind on Resume: "Atzera egin berrekitean"
+    Minimum Pause Before Rewinding: "Atzera egin aurreko gutxieneko pausa"
     Mono Audio: 'Audio monoa'
     Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
     Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
@@ -2160,6 +2162,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
+    Rewind on Resume: "Pausatutako bideo bat berrekitean, segundo kopuru hori atzera egiten du azken uneak berriro ikus ditzazun. Ezarri 0 desaktibatzeko."
+    Minimum Pause Before Rewinding: "Bideoa gutxienez denbora horretan pausatuta egon bada bakarrik egiten du atzera. Ezarri 0 pausa bakoitzaren ondoren atzera egiteko."
     Mono Audio: 'Ezkerreko eta eskuineko audio-kanalak bi belarrietan erreproduzitzen ditu. Erabili bideo baten soinua entzungailuen alde batetik bakarrik ateratzen denean.'
     Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'

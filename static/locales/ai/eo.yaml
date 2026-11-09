@@ -762,6 +762,8 @@ Settings:
       Catppuccin Macchiato Blue: Catppuccin Macchiato bluo
       Catppuccin Macchiato Lavender: Catppuccin Macchiato lavendo
   Player Settings:
+    Rewind on Resume: "Malantaŭeniri je daŭrigo"
+    Minimum Pause Before Rewinding: "Minimuma paŭzo antaŭ malantaŭeniro"
     Sections:
       Playback: Ludado
       Autoplay: Aŭtomata ludado
@@ -2197,6 +2199,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Vojo al skriptodosiero rulota kiam IP-bloko estas detektita. OpenTubeX atendas ĝis ĝi finiĝas, poste reŝargas la videaĵon. Se retropaŝo estas ŝaltita, ĝi ruliĝas nur kiam ankaŭ la retropaŝo malsukcesas.
   Player Settings:
+    Rewind on Resume: "Saltas tiom da sekundoj malantaŭen kiam vi daŭrigas paŭzitan videon, por ke vi revidu la lastajn momentojn. Agordu al 0 por malŝalti."
+    Minimum Pause Before Rewinding: "Malantaŭeniras nur kiam la video estis paŭzita almenaŭ tiom longe. Agordu al 0 por malantaŭeniri post ĉiu paŭzo."
     Enable Caption Translations: Kiam ŝaltita, la apudskriba butono kaj la fulmoklavo C preferas aŭtomate tradukitan trakon en la preferata apudskriba lingvo, kiam la videaĵo ne provizas kongruan originalan trakon.
     Use Quick Playback Speed Bar: Montras breton de rapidaj ludrapidoj en la ludilaj regiloj dekstre. Se permana konservado de ludrapido po kanalo estas ŝaltita, la breto ankaŭ enhavas la butonon por konservi la rapidon por la aktuala kanalo.
     Multiply Seek Interval by Playback Rate: Kiam ŝaltita, saltintervaloj (sagoklavoj kaj J/L) estas multobligitaj per la aktuala ludrapido. Kiam malŝaltita, saltintervaloj restas konstantaj sendepende de la ludrapido.

@@ -1156,6 +1156,11 @@ export default defineComponent({
     let seekBarMouseDown = false
     let resumeAutoplayAfterSeek = false
     let initialAutoplayCanceled = false
+    // When the viewer paused playback, consumed by the next play.
+    /** @type {number|null} */
+    let rewindOnResumePausedAt = null
+    // Pausing to save a screenshot resumes where it paused.
+    let screenshotPausePending = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -1617,6 +1622,14 @@ export default defineComponent({
     })
     const seekIntervalMultiplyByPlaybackRate = computed(() => {
       return store.getters.getSeekIntervalMultiplyByPlaybackRate
+    })
+    /** @type {import('vue').ComputedRef<number>} */
+    const rewindOnResume = computed(() => {
+      return store.getters.getRewindOnResume
+    })
+    /** @type {import('vue').ComputedRef<number>} */
+    const rewindOnResumeMinimumPause = computed(() => {
+      return store.getters.getRewindOnResumeMinimumPause
     })
     const showPlaybackRateAdjustedTimestamp = computed(() => {
       return store.getters.getShowPlaybackRateAdjustedTimestamp
@@ -4925,6 +4938,15 @@ export default defineComponent({
         return
       }
 
+      if (rewindOnResumePausedAt !== null) {
+        const pausedSeconds = (performance.now() - rewindOnResumePausedAt) / 1000
+        rewindOnResumePausedAt = null
+        if (rewindOnResume.value > 0 && pausedSeconds >= rewindOnResumeMinimumPause.value && canSeek()) {
+          // Not the viewer's own seek, so it stays out of the seek history.
+          setCurrentTime(Math.max(player.seekRange().start, video.value.currentTime - rewindOnResume.value))
+        }
+      }
+
       mediaSessionStopped = false
 
       flushPendingMusicPlaybackRateToast()
@@ -4975,7 +4997,17 @@ export default defineComponent({
       if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
         initialAutoplayCanceled = true
       }
-      if (!consumeTemporaryPlaybackRatePause()) setShowUiOnPaused(true)
+      const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
+      if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
+      // Only a pause during playback rewinds on resume. Ending, scrubbing,
+      // format switches, screenshots and releasing a hold that started paused don't.
+      const video_ = video.value
+      const rewindOnResumeApplies = !!video_ && video_.played.length > 0 && !video_.ended &&
+        !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause &&
+        !screenshotPausePending
+      screenshotPausePending = false
+      // Keep the earlier time when a play in a background tab is paused again.
+      rewindOnResumePausedAt = rewindOnResumeApplies ? (rewindOnResumePausedAt ?? performance.now()) : null
       playerPaused.value = true
       clearPausedInterfaceReveal()
       shortsPaused.value = true
@@ -5076,6 +5108,8 @@ export default defineComponent({
       if (shortsNavigationSuspended.value) return
       seekRevealsFrame = mediaFrameLoaded
       hasPlaybackPosition.value = true
+      // A position chosen while paused is where playback should resume.
+      if (video.value?.paused) rewindOnResumePausedAt = null
       if (!isEndSeekPosition()) endSeekTarget = null
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
@@ -6469,6 +6503,7 @@ export default defineComponent({
         (process.env.IS_CAPACITOR && screenshotMode.value === 'default_folder' && !store.getters.getScreenshotFolderPath)
       const pauseForScreenshot = needsFilePicker || (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR)
       if (pauseForScreenshot && wasPlaying) {
+        screenshotPausePending = true
         video_.pause()
       }
 
@@ -9911,6 +9946,7 @@ export default defineComponent({
         silenceSkipping.reset()
         hasLoaded.value = false
         hasPlaybackPosition.value = false
+        rewindOnResumePausedAt = null
         videoLayoutReady.value = false
         annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
@@ -10788,7 +10824,10 @@ export default defineComponent({
         height: video.value.videoHeight
       })
       handleTimeupdate()
+      // This only restores the paused interface, so keep the viewer's own pause state.
+      const pausedAt = rewindOnResumePausedAt
       handlePause()
+      rewindOnResumePausedAt = pausedAt
       if (resume && isTabPresented?.value !== false) {
         video.value?.play().catch(error => {
           console.warn('Could not resume retained Short', error)
@@ -10845,6 +10884,9 @@ export default defineComponent({
      */
     function rememberSeekPosition(time, recordSeekHistory = false) {
       if (recordSeekHistory) noteSeekHistoryJump(time)
+      // Playback should resume from the chosen position, even when it starts
+      // before the seeking event arrives.
+      rewindOnResumePausedAt = null
       // Explicit seeks supersede earlier end intent, even at its backoff position.
       endSeekTarget = null
       // Shaka temporarily pauses while scrubbing. Retain a requested end only

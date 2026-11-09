@@ -731,6 +731,8 @@ Settings:
         Destructive pressed: Acción destrutiva premida
         Text and icons on destructive actions: Texto e iconas das accións destrutivas
   Player Settings:
+    Rewind on Resume: "Retroceder ao retomar"
+    Minimum Pause Before Rewinding: "Pausa mínima antes de retroceder"
     Mono Audio: 'Audio mono'
     Show Mono Audio Toggle: 'Amosar o interruptor de audio mono'
     Default Media Format:
@@ -2210,6 +2212,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ruta do ficheiro de script que se executará ao detectar un bloqueo de IP. OpenTubeX agarda a que remate e despois recarga o vídeo. Se o servizo alternativo está activado, só se executa cando este tamén falla.
   Player Settings:
+    Rewind on Resume: "Retrocede este número de segundos ao retomar un vídeo en pausa, para que poidas volver ver os últimos momentos. Establéceo en 0 para desactivalo."
+    Minimum Pause Before Rewinding: "Só retrocede cando o vídeo estivo en pausa polo menos este tempo. Establéceo en 0 para retroceder despois de cada pausa."
     Mono Audio: 'Reproduce as canles de audio esquerda e dereita nos dous oídos. Úsao cando o son dun vídeo só saia por un lado dos teus auriculares.'
     Pause on Stream Recovery: "Cando a emisión de vídeo falla e o reprodutor a volve cargar ou cambia a outro formato ou motor, a reprodución ponse en pausa e o erro queda na parte superior do reprodutor ata que o descartes. Se está desactivado, a reprodución continúa e o erro aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantén o audio reproducíndose en segundo plano e fornece controis multimedia de Android. Desactívao para pausar cando a aplicación deixe de estar visible.'

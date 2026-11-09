@@ -911,6 +911,8 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Rewind on Resume: "Atsukti atgal tęsiant"
+    Minimum Pause Before Rewinding: "Mažiausia pauzė prieš atsukant"
     Mono Audio: 'Mono garsas'
     Show Mono Audio Toggle: 'Rodyti mono garso jungiklį'
     Default Media Format:
@@ -2574,6 +2576,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Scenarijaus failo, paleidžiamo aptikus IP blokavimą, kelias. OpenTubeX laukia, kol jis bus baigtas, tada iš naujo įkelia vaizdo įrašą. Jei įjungtas atsarginis būdas, scenarijus paleidžiamas tik tada, kai nepavyksta ir atsarginis būdas.
   Player Settings:
+    Rewind on Resume: "Tęsiant pristabdytą vaizdo įrašą grįžtama tiek sekundžių atgal, kad vėl pamatytumėte paskutines akimirkas. Nustatykite 0, kad išjungtumėte."
+    Minimum Pause Before Rewinding: "Atsuka atgal tik tada, kai vaizdo įrašas buvo pristabdytas bent tiek laiko. Nustatykite 0, kad atsuktų po kiekvienos pauzės."
     Mono Audio: 'Leidžia kairįjį ir dešinįjį garso kanalus abiem ausims. Naudokite, kai vaizdo įrašo garsas sklinda tik iš vienos ausinių pusės.'
     Pause on Stream Recovery: "Kai vaizdo srautas nepavyksta ir grotuvas jį įkelia iš naujo arba perjungia į kitą formatą ar variklį, atkūrimas pristabdomas, o klaida lieka grotuvo viršuje, kol ją uždarysite. Išjungus atkūrimas tęsiamas, o klaida trumpai parodoma kaip pranešimas."
     Continue Playback When Screen Is Locked: 'Toliau leidžia garsą fone ir pateikia „Android“ medijos valdiklius. Išjunkite, kad atkūrimas būtų pristabdytas, kai programa nebematoma.'

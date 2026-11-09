@@ -726,6 +726,8 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    Rewind on Resume: "Distreiñ en ur adkregiñ"
+    Minimum Pause Before Rewinding: "Ehan izek a-raok distreiñ"
     Mono Audio: 'Son mono'
     Show Mono Audio Toggle: 'Diskouez an afell son mono'
     Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
@@ -2159,6 +2161,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
   Player Settings:
+    Rewind on Resume: "Distreiñ a ra kement-se a eilennoù pa adkregit gant ur video ehanet, evit gwelet ar mareoù diwezhañ en-dro. Lakait 0 evit e lazhañ."
+    Minimum Pause Before Rewinding: "Distreiñ a ra hepken pa oa ehanet ar video da nebeutañ e-pad an amzer-se. Lakait 0 evit distreiñ goude pep ehan."
     Mono Audio: 'Seniñ a ra ar c''hanolioù son kleiz ha dehou en div skouarn. Implijit anezhañ pa ne zeu son ur video nemet eus un tu eus ho selaouelloù.'
     Pause on Stream Recovery: "Pa c'hwit al lanv video hag e adkarg al lenner anezhañ pe e tremen d'ur furmad pe d'ur c'heflusker all, e vez ehanet al lenn hag e chom ar fazi e krec'h al lenner betek ma vo kuzhet ganeoc'h. Diweredekaet, e kendalc'h al lenn hag e vez diskouezet ar fazi berr evel ur gemenadenn."
     Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'

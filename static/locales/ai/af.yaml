@@ -895,6 +895,8 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Malva
       Catppuccin Latte Red: Catppuccin Latte Rooi
   Player Settings:
+    Rewind on Resume: "Spoel terug wanneer hervat word"
+    Minimum Pause Before Rewinding: "Minimum pouse voor terugspoel"
     Sections:
       Playback: Afspeel
       Autoplay: Outo-afspeel
@@ -2406,6 +2408,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Pad na skriplêer wat uitgevoer word wanneer ’n IP-blokkering bespeur word. OpenTubeX wag totdat dit klaar is en herlaai dan die video. As terugval geaktiveer is, loop dit slegs wanneer terugval ook misluk.
   Player Settings:
+    Rewind on Resume: "Spring soveel sekondes terug wanneer jy ’n gepouseerde video hervat, sodat jy die laaste oomblikke weer kan sien. Stel op 0 om dit af te skakel."
+    Minimum Pause Before Rewinding: "Spoel net terug wanneer die video ten minste so lank gepouseer was. Stel op 0 om na elke pouse terug te spoel."
     Enable Caption Translations: Wanneer geaktiveer, verkies die onderskrifknoppie en C-kortpad ’n outomaties vertaalde snit in die voorkeuronderskriftaal wanneer die video nie ’n ooreenstemmende oorspronklike snit verskaf nie.
     Use Quick Playback Speed Bar: Wys ’n vinnige afspeelspoedbalk aan die regterkant van die spelerkontroles. As handmatige stoor van afspeelspoed per kanaal geaktiveer is, bevat die balk ook die knoppie om die spoed vir die huidige kanaal te stoor.
     Multiply Seek Interval by Playback Rate: Wanneer geaktiveer, word spoelintervalle (pyltjiesleutels en J/L) met die huidige afspeelspoed vermenigvuldig. Wanneer gedeaktiveer, bly spoelintervalle konstant ongeag die afspeelspoed.

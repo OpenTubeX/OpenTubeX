@@ -1305,6 +1305,8 @@ Settings:
     Enable Seek History: Enable Seek History
     Show Seek Bar Filmstrip: Show seek bar filmstrip
     Pause on Stream Recovery: Pause on Stream Recovery
+    Rewind on Resume: Rewind on Resume
+    Minimum Pause Before Rewinding: Minimum Pause Before Rewinding
     Continue Playback When Screen Is Locked: Continue playback when the screen is locked
     Voice-over Translation:
       Title: Voice-over translation
@@ -3273,6 +3275,8 @@ Tooltips:
     Show Seek Bar Filmstrip: Dragging the seek bar knob shows a strip of frames around where you'll land, and pulling up onto it seeks precisely. When disabled, dragging shows a single thumbnail, as when hovering.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.
     Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
+    Rewind on Resume: Jumps back this many seconds when you resume a paused video, so you can catch the last moments again. Set to 0 to turn it off.
+    Minimum Pause Before Rewinding: Only rewinds when the video was paused for at least this long. Set to 0 to rewind after every pause.
     Continue Playback When Screen Is Locked: Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.

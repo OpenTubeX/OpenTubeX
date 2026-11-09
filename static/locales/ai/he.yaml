@@ -731,6 +731,8 @@ Settings:
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
   Player Settings:
+    Rewind on Resume: "הרצה לאחור בעת המשך"
+    Minimum Pause Before Rewinding: "השהיה מינימלית לפני הרצה לאחור"
     Mono Audio: 'שמע מונו'
     Show Mono Audio Toggle: 'הצגת מתג שמע מונו'
     Default Media Format:
@@ -2207,6 +2209,8 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לקובץ סקריפט שיופעל כשמזוהה חסימה של כתובת IP. OpenTubeX ממתין לסיום הסקריפט ואז טוען מחדש את הסרטון. אם החלופה מופעלת, הסקריפט יופעל רק אם גם החלופה נכשלת.
   Player Settings:
+    Rewind on Resume: "חוזר אחורה במספר שניות זה כשממשיכים סרטון מושהה, כדי שתוכלו לראות שוב את הרגעים האחרונים. הגדירו ל־0 כדי לכבות."
+    Minimum Pause Before Rewinding: "חוזר אחורה רק אם הסרטון היה מושהה לפחות זמן זה. הגדירו ל־0 כדי לחזור אחורה אחרי כל השהיה."
     Mono Audio: 'מנגן את ערוצי השמע השמאלי והימני בשתי האוזניים. השתמשו בזה כשהקול של סרטון יוצא רק מצד אחד של האוזניות.'
     Pause on Stream Recovery: "כאשר זרם הווידאו נכשל והנגן טוען אותו מחדש או עובר לתבנית או למנוע אחרים, הניגון מושהה והשגיאה נשארת בראש הנגן עד שתסגור אותה. כשהאפשרות כבויה, הניגון ממשיך והשגיאה מוצגת לזמן קצר כהתראה."
     Continue Playback When Screen Is Locked: 'משאיר את השמע מתנגן ברקע ומספק פקדי מדיה של Android. יש לכבות אפשרות זו כדי להשהות כשהיישום אינו גלוי עוד.'

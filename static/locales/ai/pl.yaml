@@ -414,6 +414,8 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Rewind on Resume: "Przewiń wstecz przy wznowieniu"
+    Minimum Pause Before Rewinding: "Minimalna pauza przed przewinięciem"
     Mono Audio: 'Dźwięk mono'
     Show Mono Audio Toggle: 'Pokaż przełącznik dźwięku mono'
     Pause on Stream Recovery: "Wstrzymaj przy odzyskiwaniu strumienia"
@@ -1392,6 +1394,8 @@ Tooltips:
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
     Notifications: Wybierz, jak OpenTubeX powiadamia o transmisjach na żywo, nowych filmach i automatycznych pobraniach. Przy opcji Systemowe i w aplikacji powiadomienia pojawiają się w OpenTubeX podczas korzystania z niego, a w przeciwnym razie jako powiadomienia systemowe, a dzwonek je przechowuje. Wyłączone ukrywa też opcje powiadomień.
   Player Settings:
+    Rewind on Resume: "Cofa o tyle sekund po wznowieniu wstrzymanego filmu, aby można było ponownie zobaczyć ostatnie chwile. Ustaw 0, aby wyłączyć."
+    Minimum Pause Before Rewinding: "Przewija wstecz tylko wtedy, gdy film był wstrzymany co najmniej tak długo. Ustaw 0, aby przewijać po każdej pauzie."
     Mono Audio: 'Odtwarza lewy i prawy kanał dźwięku w obu uszach. Użyj, gdy dźwięk filmu dochodzi tylko z jednej strony słuchawek.'
     Pause on Stream Recovery: "Gdy strumień wideo zawiedzie, a odtwarzacz załaduje go ponownie lub przełączy się na inny format lub silnik, odtwarzanie zostanie wstrzymane, a błąd pozostanie u góry odtwarzacza, dopóki go nie zamkniesz. Po wyłączeniu odtwarzanie jest kontynuowane, a błąd pojawia się na chwilę jako powiadomienie."
     Continue Playback When Screen Is Locked: 'Utrzymuje odtwarzanie dźwięku w tle i udostępnia elementy sterowania multimediami Androida. Wyłącz, aby wstrzymywać odtwarzanie, gdy aplikacja nie jest już widoczna.'
