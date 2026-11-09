@@ -638,19 +638,22 @@ test('a blocked connectivity probe neither blocks reachable services nor keeps t
 
 test('a local, plain HTTP, or possibly cached response does not clear an internet outage', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
-  const app = await loadAppNetwork(t, async input => {
+  const cacheModes = []
+  const app = await loadAppNetwork(t, async (input, init) => {
     if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
+    cacheModes.push(init?.cache)
     return new Response('ok')
   }, async () => ({ status: 200, headers: {}, data: 'native', url: 'https://www.youtube.com/watch' }), { checkInternet: true, corsDisabled: true })
   for (const url of ['https://192.168.1.20:3000/api', 'https://[fd00::1]/api', 'https://[::ffff:127.0.0.1]/api', 'https://nas.local/api', 'https://localhost:8080/api', 'http://portal.example/']) {
     assert.equal(await (await app.window.fetch(url, { method: 'POST' })).text(), 'ok')
     assert.equal(app.recovery.state, 'offline', url)
   }
-  // The browser can answer the update check from its HTTP cache while offline
-  await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases')
+  // A read the caller allows from the HTTP cache can succeed without the network
   await app.withoutNetworkRecovery(() => app.window.fetch('https://i.ytimg.com/vi/a/default.jpg', { cache: 'force-cache' }))
   assert.equal(app.recovery.state, 'offline')
-  await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases', { cache: 'no-store' })
+  // A default read must reach the server during the outage, so it proves reachability
+  await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases')
+  assert.equal(cacheModes.at(-1), 'no-cache')
   assert.equal(app.recovery.state, 'restored')
 })
 
