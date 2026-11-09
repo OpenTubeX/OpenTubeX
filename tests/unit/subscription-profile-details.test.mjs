@@ -472,7 +472,8 @@ test('updates channel details without changing the source profile', () => {
     {
       channelId: 'first',
       channelName: 'New name',
-      channelThumbnailUrl: 'https://invidious.example/ggpht/avatar=s88'
+      channelThumbnailUrl: 'https://invidious.example/ggpht/avatar=s88',
+      channelHandle: '@newname'
     }
   ])
 
@@ -482,7 +483,8 @@ test('updates channel details without changing the source profile', () => {
       {
         id: 'first',
         name: 'New name',
-        thumbnail: 'https://yt3.googleusercontent.com/avatar=s176'
+        thumbnail: 'https://yt3.googleusercontent.com/avatar=s176',
+        handle: '@newname'
       },
       { id: 'second', name: 'Unchanged', thumbnail: '' }
     ]
@@ -494,17 +496,19 @@ test('updates channel details without changing the source profile', () => {
 test('preserves ordered duplicate updates and skips an unchanged profile', () => {
   const profile = {
     _id: 'allChannels',
-    subscriptions: [{ id: 'channel', name: 'Original', thumbnail: '' }]
+    subscriptions: [{ id: 'channel', name: 'Original', thumbnail: '', handle: '@channel' }]
   }
 
   const updated = getProfileWithUpdatedSubscriptionDetails(profile, [
     { channelId: 'channel', channelName: 'First' },
-    { channelId: 'channel', channelName: null, channelThumbnailUrl: '' },
+    // Server handle fields can hold other text
+    { channelId: 'channel', channelName: null, channelThumbnailUrl: '', channelHandle: '12K subscribers' },
     { channelId: 'channel', channelName: 'Final' }
   ])
 
   assert.equal(updated.subscriptions[0].name, 'Final')
   assert.equal(updated.subscriptions[0].thumbnail, '')
+  assert.equal(updated.subscriptions[0].handle, '@channel')
   assert.equal(getProfileWithUpdatedSubscriptionDetails(updated, [
     { channelId: 'channel', channelName: 'Final' }
   ]), null)

@@ -686,14 +686,16 @@ function updateSubscriptionDetails(results) {
         channelId: result.id,
         // Keep the saved name until the channel card resolves its original name.
         channelName: store.getters.getAvoidTranslation === 'entire_app' && !result.isGame ? undefined : result.name,
-        channelThumbnailUrl: result.thumbnail.replace(/^\/\//, 'https://')
+        channelThumbnailUrl: result.thumbnail.replace(/^\/\//, 'https://'),
+        channelHandle: result.handle
       })
     } else {
       channels.push({
         channelId: result.authorId,
         channelName: result.author,
         // Yattee servers can return channels without avatars
-        channelThumbnailUrl: result.authorThumbnails[0]?.url.replace(/^\/\//, 'https://')
+        channelThumbnailUrl: result.authorThumbnails[0]?.url.replace(/^\/\//, 'https://'),
+        channelHandle: result.channelHandle
       })
     }
   }

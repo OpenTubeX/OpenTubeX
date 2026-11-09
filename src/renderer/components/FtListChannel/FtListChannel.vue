@@ -95,6 +95,7 @@
         :channel-id="id"
         :channel-name="name"
         :channel-thumbnail="thumbnail"
+        :channel-handle="handle"
       />
     </div>
   </div>

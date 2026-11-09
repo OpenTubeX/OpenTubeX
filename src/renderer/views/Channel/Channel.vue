@@ -14,6 +14,7 @@
       :has-error-message="!!errorMessage"
       :can-pin="hasLoadedDetails && !errorMessage"
       :thumbnail-url="thumbnailUrl"
+      :handle="channelHandle"
       :sub-count="subCount"
       :show-share-menu="showShareMenu"
       :show-search-bar="showSearchBar"
@@ -471,6 +472,8 @@ const channelVerified = ref(false)
 const channelVerifiedArtist = ref(false)
 const bannerUrl = ref('')
 const thumbnailUrl = ref('')
+/** @type {import('vue').Ref<string | null>} Saved with new subscriptions */
+const channelHandle = ref(null)
 const subCount = ref(0)
 const description = ref('')
 const tags = shallowRef([])
@@ -577,6 +580,9 @@ const subscriptionInfo = computed(() => {
 })
 
 const isSubscribed = computed(() => subscriptionInfo.value !== null)
+
+// The main profile holds every subscription, even ones the active profile lacks.
+const savedHandle = computed(() => store.getters.getSubscribedChannelsById.get(id.value)?.handle ?? null)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSubscribedInAnyProfile = computed(() => {
@@ -871,9 +877,9 @@ async function ensureChannelInstance() {
 }
 
 // Refresh saved details only from API responses, never from retained display state.
-function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
+function updateChannelDetails({ channelId, channelName, channelThumbnailUrl, channelHandle }) {
   hasLoadedDetails.value = true
-  store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl })
+  store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl, channelHandle })
   store.dispatch('refreshPinnedChannelMetadata', {
     id: channelId,
     name: channelName,
@@ -962,6 +968,7 @@ async function getChannelLocal() {
     channelVerified.value = parsedHeader.authorVerified
     channelVerifiedArtist.value = parsedHeader.authorVerifiedArtist
     thumbnailUrl.value = channelThumbnailUrl
+    channelHandle.value = parsedHeader.handle ?? savedHandle.value
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
     isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
@@ -994,7 +1001,7 @@ async function getChannelLocal() {
       subCount.value = null
     }
 
-    updateChannelDetails({ channelThumbnailUrl, channelName: channelName_, channelId })
+    updateChannelDetails({ channelThumbnailUrl, channelName: channelName_, channelId, channelHandle: parsedHeader.handle })
 
     if (!channelInstance.has_about) {
       loadedTabs.add('about')
@@ -1246,6 +1253,8 @@ async function getChannelInfoInvidious() {
     subCount.value = response.subCount
     const thumbnail = response.authorThumbnails.at(-1)?.url ?? null
     thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail)
+    // Invidious channel responses have no handle.
+    channelHandle.value = savedHandle.value
     updateChannelDetails({ channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
     links.value = []
@@ -2787,6 +2796,7 @@ function setErrorMessage(message, responseHasNameAndThumbnail = false) {
     thumbnailUrl.value = subscriptionInfo.value?.thumbnail
   }
 
+  channelHandle.value = savedHandle.value
   bannerUrl.value = null
   subCount.value = null
   channelVerified.value = false

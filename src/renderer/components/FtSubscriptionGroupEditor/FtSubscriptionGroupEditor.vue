@@ -80,6 +80,7 @@
           :channel-id="channel.id"
           :channel-name="channel.name"
           :channel-thumbnail="channel.thumbnail"
+          :channel-handle="channel.handle"
           selectable
           :selected="selected.has(channel.id)"
           @change="toggleChannel(channel.id)"
@@ -203,9 +204,10 @@ const channels = computed(() => {
     : null
 
   // The all channels profile is always the first profile in the array
-  return store.getters.getProfileList[0].subscriptions.map(({ id, name, thumbnail }) => ({
+  return store.getters.getProfileList[0].subscriptions.map(({ id, name, thumbnail, handle }) => ({
     id,
     name: name ?? id,
+    handle: handle ?? null,
     thumbnail: instanceUrl === null ? thumbnail : youtubeImageUrlToInvidious(thumbnail, instanceUrl)
   }))
 })
@@ -222,7 +224,9 @@ const sortedChannels = computed(() => {
 const displayedChannels = computed(() => {
   const search = query.value.trim().toLowerCase()
   if (search === '') return sortedChannels.value
-  return sortedChannels.value.filter(channel => channel.name.toLowerCase().includes(search))
+  return sortedChannels.value.filter(channel => {
+    return channel.name.toLowerCase().includes(search) || !!channel.handle?.toLowerCase().includes(search)
+  })
 })
 
 const { page: channelPage, displayedItems: pagedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(displayedChannels, {
