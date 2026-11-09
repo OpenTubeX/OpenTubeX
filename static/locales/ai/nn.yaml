@@ -693,6 +693,7 @@ Settings:
       Invalid Theme File: Ugyldig fil for eige tema
       Colors:
         Watched thumbnail overlay: "Overlegg på miniatyrbilete av sette videoar"
+        Thumbnail badge background: "Bakgrunn for merke på miniatyrbilete"
         Main text: Hovudtekst
         Secondary text: Sekundærtekst
         Subtle text: Dempa tekst

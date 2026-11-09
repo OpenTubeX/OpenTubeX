@@ -669,6 +669,7 @@ Settings:
       Invalid Theme File: Неважећа датотека прилагођене теме
       Colors:
         Watched thumbnail overlay: "Прекривање сличица одгледаних видео-снимака"
+        Thumbnail badge background: "Позадина ознака на сличицама"
         Main text: Основни текст
         Secondary text: Споредни текст
         Subtle text: Ненаглашени текст

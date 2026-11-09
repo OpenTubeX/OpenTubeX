@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: 自定义主题文件无效
       Colors:
         Watched thumbnail overlay: "已观看视频缩略图遮罩"
+        Thumbnail badge background: "缩略图标签背景"
         Main text: 主要文本
         Secondary text: 次要文本
         Subtle text: 弱化文本

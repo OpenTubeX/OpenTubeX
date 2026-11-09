@@ -671,6 +671,7 @@ Settings:
       Invalid Theme File: Ugyldig fil med brugerdefineret tema
       Colors:
         Watched thumbnail overlay: "Overlejring på sete videoers miniaturebilleder"
+        Thumbnail badge background: "Baggrund for mærker på miniaturebilleder"
         Main text: Primær tekst
         Secondary text: Sekundær tekst
         Subtle text: Diskret tekst

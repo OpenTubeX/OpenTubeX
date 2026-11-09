@@ -678,6 +678,7 @@ Settings:
       Invalid Theme File: קובץ ערכת הנושא המותאמת אישית אינו תקין
       Colors:
         Watched thumbnail overlay: "שכבת כיסוי לתמונות ממוזערות של סרטונים שנצפו"
+        Thumbnail badge background: "רקע של תגיות בתמונות ממוזערות"
         Main text: טקסט ראשי
         Secondary text: טקסט משני
         Subtle text: טקסט מעודן

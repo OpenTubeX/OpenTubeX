@@ -675,6 +675,7 @@ Settings:
       Invalid Theme File: Yanlış fərdi mövzu faylı
       Colors:
         Watched thumbnail overlay: "Baxılmış video miniatürünün örtüyü"
+        Thumbnail badge background: "Miniatür nişanlarının fonu"
         Main text: Əsas mətn
         Secondary text: İkinci dərəcəli mətn
         Subtle text: Solğun mətn

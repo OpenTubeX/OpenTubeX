@@ -658,6 +658,7 @@ Settings:
       Invalid Theme File: Ficheiro de tema personalizado inválido
       Colors:
         Watched thumbnail overlay: "Sobreposição das miniaturas dos vídeos vistos"
+        Thumbnail badge background: "Fundo das etiquetas das miniaturas"
         Main text: Texto principal
         Secondary text: Texto secundário
         Subtle text: Texto discreto

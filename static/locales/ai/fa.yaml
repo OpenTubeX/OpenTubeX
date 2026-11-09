@@ -683,6 +683,7 @@ Settings:
       Invalid Theme File: پروندهٔ زمینهٔ سفارشی نامعتبر است
       Colors:
         Watched thumbnail overlay: "لایهٔ روی تصاویر بندانگشتی ویدیوهای تماشاشده"
+        Thumbnail badge background: "پس‌زمینهٔ نشان‌های روی تصاویر بندانگشتی"
         Main text: متن اصلی
         Secondary text: متن فرعی
         Subtle text: متن کم‌رنگ

@@ -678,6 +678,7 @@ Settings:
       Invalid Theme File: Virheellinen mukautettu teematiedosto
       Colors:
         Watched thumbnail overlay: "Katsottujen videoiden pikkukuvien peite"
+        Thumbnail badge background: "Pikkukuvien merkkien tausta"
         Main text: Pääteksti
         Secondary text: Toissijainen teksti
         Subtle text: Hillitty teksti

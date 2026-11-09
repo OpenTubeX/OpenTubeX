@@ -20,8 +20,11 @@ function entry(number, { updated = oldRevision, color = '#121212', legacy = fals
   theme.id = 'shared-export-id'
   theme.name = `Community theme ${number}`
   theme.colors.background = color
-  if (legacy) delete theme.colors.watchedThumbnailOverlay
-  else if (overlay) theme.colors.watchedThumbnailOverlay = overlay
+  if (legacy) {
+    delete theme.colors.watchedThumbnailOverlay
+    delete theme.colors.thumbnailBadgeBackground
+    delete theme.blurs.thumbnailBadgeBackground
+  } else if (overlay) theme.colors.watchedThumbnailOverlay = overlay
   const body = `<h2>Description</h2><p>${escape(description)}</p><h2>Screenshots</h2>
     ${images.map(src => `<img src="${src}">`).join('')}${extra}
     <details><summary>Theme JSON</summary><div class="highlight highlight-source-json"
@@ -247,6 +250,8 @@ test('preserves local edits to older community themes and detects customized ove
   // Source fingerprint generated before watched overlays existed.
   theme.discussionThemeHash = '80922530028dd73dc5bee50d1f3ed13ce92dafda0f5bc82f7d729d41affe4097'
   delete theme.colors.watchedThumbnailOverlay
+  delete theme.colors.thumbnailBadgeBackground
+  delete theme.blurs.thumbnailBadgeBackground
   theme.colors.primaryText = '#aabbcc'
   await page.evaluate(async theme => {
     const store = window.$store

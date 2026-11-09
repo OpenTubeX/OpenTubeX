@@ -65,9 +65,10 @@
 
 .sponsorBlockVideoLabel {
   align-items: center;
-  background-color: rgb(24 24 24 / 90%);
+  background-color: var(--thumbnail-badge-bg-color);
+  backdrop-filter: var(--thumbnail-badge-blur);
   border-radius: var(--shape-corner-small);
-  color: #fff;
+  color: var(--primary-text-color);
   display: flex;
   font-size: 12px;
   gap: 4px;

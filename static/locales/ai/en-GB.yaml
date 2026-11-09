@@ -661,6 +661,7 @@ Settings:
       Invalid Theme File: Invalid custom theme file
       Colors:
         Watched thumbnail overlay: "Watched thumbnail overlay"
+        Thumbnail badge background: "Thumbnail badge background"
         Main text: Main text
         Secondary text: Secondary text
         Subtle text: Subtle text

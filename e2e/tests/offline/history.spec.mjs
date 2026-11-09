@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 
+import { cloneDefaultCustomTheme } from '../../../src/customTheme.js'
+
 import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel, readDatastore, scrollPageToEnd, expectPageScrollWithinRenderedRange } from '../../helpers/app.mjs'
 import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
@@ -515,6 +517,45 @@ test.describe('watch history', () => {
     await expect(watchedIndicator).toHaveCSS('font-size', '15px')
     await expect(durationIndicator).toHaveCSS('border-radius', '16px')
     await expect(durationIndicator).toHaveCSS('font-size', '15px')
+  })
+
+  test('draws thumbnail badges with the custom theme badge background', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const watchedVideo = page.locator('.ft-list-video').filter({ hasText: 'First test video' })
+    const badges = [watchedVideo.locator('.videoWatched'), watchedVideo.locator('.videoDuration')]
+    // Built-in themes keep the card background at 85% opacity.
+    await expect(page.locator('body')).toHaveCSS('--card-bg-color', '#fff')
+    // Badges ignore the pointer, so let hit testing find them to check that
+    // they paint above the thumbnail.
+    const paintsOnTop = badge => badge.evaluate(element => {
+      element.style.pointerEvents = 'auto'
+      const { x, y, width, height } = element.getBoundingClientRect()
+      const onTop = element.contains(document.elementFromPoint(x + width / 2, y + height / 2))
+      element.style.pointerEvents = ''
+      return onTop
+    })
+    for (const badge of badges) {
+      await expect(badge).toHaveCSS('background-color', 'color(srgb 1 1 1 / 0.85)')
+      await expect(badge).toHaveCSS('opacity', '1')
+      expect(await paintsOnTop(badge)).toBe(true)
+    }
+
+    const theme = cloneDefaultCustomTheme()
+    theme.id = 'badge-theme'
+    theme.colors.thumbnailBadgeBackground = '#11223340'
+    theme.blurs.thumbnailBadgeBackground = 6
+    await page.evaluate(async theme => {
+      const store = window.$store
+      await store.dispatch('updateCustomThemes', await window.ftElectron.saveCustomTheme(theme))
+      await store.dispatch('updateBaseTheme', `custom:${theme.id}`)
+    }, theme)
+    for (const badge of badges) {
+      await expect(badge).toHaveCSS('background-color', 'rgba(17, 34, 51, 0.25)')
+      await expect(badge).toHaveCSS('backdrop-filter', 'blur(6px)')
+      await expect(badge).toHaveCSS('color', 'rgb(238, 238, 238)')
+      expect(await paintsOnTop(badge)).toBe(true)
+    }
   })
 
   test('keeps an existing entry in place when toggling watched status', async ({ page }) => {

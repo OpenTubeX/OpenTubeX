@@ -815,6 +815,7 @@ Settings:
       Invalid Theme File: El fitxer de tema personalitzat no és vàlid
       Colors:
         Watched thumbnail overlay: "Superposició de les miniatures dels vídeos vistos"
+        Thumbnail badge background: "Fons de les etiquetes de les miniatures"
         Main text: Text principal
         Secondary text: Text secundari
         Subtle text: Text discret

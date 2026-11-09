@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Gai pertsonalizatuaren fitxategia ez da baliozkoa
       Colors:
         Watched thumbnail overlay: "Ikusitako bideoen miniaturen gainjartzea"
+        Thumbnail badge background: "Miniaturetako etiketen atzeko planoa"
         Main text: Testu nagusia
         Secondary text: Bigarren mailako testua
         Subtle text: Testu lausoa

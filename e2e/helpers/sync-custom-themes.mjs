@@ -10,7 +10,11 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
     { ...DEFAULT_CUSTOM_THEME, id: 'd3sox', name: 'D3SOX' },
   ])
   const receivedThemes = structuredClone(themes)
-  for (const theme of receivedThemes) delete theme.colors.watchedThumbnailOverlay
+  for (const theme of receivedThemes) {
+    delete theme.colors.watchedThumbnailOverlay
+    delete theme.colors.thumbnailBadgeBackground
+    delete theme.blurs.thumbnailBadgeBackground
+  }
   const received = { key: 'customThemes', value: receivedThemes, updatedAt: 10 }
   let remote = [received]
   let revision = 1

@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: カスタムテーマファイルが無効です
       Colors:
         Watched thumbnail overlay: "視聴済み動画のサムネイルオーバーレイ"
+        Thumbnail badge background: "サムネイルのバッジの背景"
         Main text: メインテキスト
         Secondary text: サブテキスト
         Subtle text: 控えめなテキスト

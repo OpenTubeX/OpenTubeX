@@ -1687,7 +1687,11 @@ for (const [scenario, desktopKeys, phoneKeys] of [
         { ...DEFAULT_CUSTOM_THEME, id: 'd3sox', name: 'D3SOX' },
       ])
       const phoneThemes = structuredClone(themes)
-      for (const theme of phoneThemes) delete theme.colors.watchedThumbnailOverlay
+      for (const theme of phoneThemes) {
+        delete theme.colors.watchedThumbnailOverlay
+        delete theme.colors.thumbnailBadgeBackground
+        delete theme.blurs.thumbnailBadgeBackground
+      }
       const received = { key: CUSTOM_THEMES_SYNC_KEY, value: phoneThemes, updatedAt: 10 }
       collections.set('settings', {
         revision: 1,

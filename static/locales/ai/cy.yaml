@@ -674,6 +674,7 @@ Settings:
       Invalid Theme File: Ffeil thema bersonol annilys
       Colors:
         Watched thumbnail overlay: "Troshaen mân-luniau fideos a wyliwyd"
+        Thumbnail badge background: "Cefndir bathodynnau mân-luniau"
         Main text: Prif destun
         Secondary text: Testun eilaidd
         Subtle text: Testun cynnil

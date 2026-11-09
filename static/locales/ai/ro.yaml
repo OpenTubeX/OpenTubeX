@@ -674,6 +674,7 @@ Settings:
       Invalid Theme File: Fișier de temă personalizată nevalid
       Colors:
         Watched thumbnail overlay: "Suprapunere pe miniaturile videoclipurilor vizionate"
+        Thumbnail badge background: "Fundalul etichetelor de pe miniaturi"
         Main text: Text principal
         Secondary text: Text secundar
         Subtle text: Text discret

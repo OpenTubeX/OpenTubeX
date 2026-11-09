@@ -676,6 +676,7 @@ Settings:
       Invalid Theme File: Невалиден файл с персонализирана тема
       Colors:
         Watched thumbnail overlay: "Наслагване върху миниатюрите на гледаните видеоклипове"
+        Thumbnail badge background: "Фон на етикетите върху миниатюрите"
         Main text: Основен текст
         Secondary text: Вторичен текст
         Subtle text: Приглушен текст

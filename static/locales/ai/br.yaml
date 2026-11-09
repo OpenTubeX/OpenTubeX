@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: "Restr neuz personelaet didalvoudek"
       Colors:
         Watched thumbnail overlay: "Gwiskad ar skeudennoùigoù ar videoioù gwelet"
+        Thumbnail badge background: "Drekleur ar badjoù war ar skeudennoùigoù"
         Main text: "Testenn bennañ"
         Secondary text: "Testenn eil renk"
         Subtle text: "Testenn disked"
