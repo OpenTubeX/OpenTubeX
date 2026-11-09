@@ -55,6 +55,17 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
   await expect.poll(() => app.electronApp.evaluate(
     () => globalThis.__storageUsageReadCount
   )).toBe(1)
+
+  // Returning from the profile manager remounts the section, which must keep
+  // its tabs and the selected tab.
+  await page.locator('.settingsWindow [data-settings-tab="data"]').click()
+  await dataAndStorage.getByRole('button', { name: 'Manage Subscriptions', exact: true }).click()
+  await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
+  await page.locator('.settingsWindow .settingsBackButton').click()
+  await expect(dataAndStorage).toBeVisible()
+  await expect(storageTab).toBeVisible()
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"]'))
+    .toHaveAttribute('aria-selected', 'true')
 })
 
 test('keeps unavailable storage categories visible and marks the total as partial', async ({ app, page }) => {
