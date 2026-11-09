@@ -347,10 +347,21 @@
             @keydown.left.right="switchNewFeedTab($event, tab.id)"
             @keydown.home.end.prevent="switchNewFeedTab($event, tab.id)"
           >
-            <FtIcon
-              :icon="tab.icon"
-              class="subscriptionIcon"
-            />
+            <span
+              class="tabIcon"
+              :class="{ loading: newFeedTabRefreshing(tab.id) }"
+            >
+              <FtIcon
+                :icon="tab.icon"
+                class="subscriptionIcon"
+              />
+              <FtLoader
+                v-if="newFeedTabRefreshing(tab.id)"
+                class="tabLoadingIndicator"
+                inline
+                size="16px"
+              />
+            </span>
             <span
               class="tabLabel"
               :data-label="tab.label"
@@ -1128,6 +1139,11 @@ const feedsPanel = useTemplateRef('feedsPanel')
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
  */
+/** @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab */
+function newFeedTabRefreshing(tab) {
+  return tab === 'feeds' ? rssFeedsRefreshing.value : refreshingFeedTab.value === tab
+}
+
 function newFeedTabHasNewContent(tab) {
   return newPanel.value?.hasNewContentByCategory?.[tab] === true
 }
