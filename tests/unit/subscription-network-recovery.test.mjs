@@ -629,6 +629,28 @@ for (const type of ['ReelItem', 'ShortsLockupView']) {
   })
 }
 
+test('Shorts playlist fallback dates new Shorts so they can be marked as new', async () => {
+  const channelId = 'UCshorts-channel'
+  const lockup = videoId => ({ type: 'ShortsLockupView', on_tap_endpoint: { payload: { videoId } }, overlay_metadata: { primary_text: { text: videoId } }, thumbnail: [] })
+  const app = createRefresh({ rssStatus: 404, playlistItems: ['new-short', 'old-short', 'older-short'].map(lockup) })
+  app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]
+  app.getters.getShortsCache = { [channelId]: {
+    timestamp: new Date('2026-09-06T00:00:00Z'),
+    videos: [{ videoId: 'old-short', published: Date.parse('2026-09-01T00:00:00Z'), isNewInSubscriptionFeed: false }]
+  } }
+  app.getters.getBackendFallback = false
+  app.reconnect()
+  await app.refresh({ t: key => key, errorChannels: [] })
+  const { videos } = app.writes.find(write => write.key === 'updateSubscriptionShortsCacheByChannel').value
+  assert.deepEqual(videos.map(video => [video.videoId, video.published, video.isNewInSubscriptionFeed]), [
+    ['new-short', Date.parse('2026-09-06T12:00:00Z'), true],
+    ['old-short', Date.parse('2026-09-01T00:00:00Z'), false],
+    ['older-short', undefined, false]
+  ])
+  // Entries after the first cached one cannot be new, so they need no watch page.
+  assert.deepEqual(app.requests.filter(url => url.includes('/watch?v=')), ['https://www.youtube.com/watch?v=new-short'])
+})
+
 for (const hasByline of [false, true]) {
   test(`Shorts playlist refresh handles PlaylistVideo with byline=${hasByline}`, async () => {
     const channelId = 'UCshorts-channel'

@@ -1502,35 +1502,15 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
           }
           video.authorId ??= channel.id
         })
+        // A playlist lists up to 100 Shorts, so only date those that can be new.
+        await fillLocalShortDates(videos, channel.id, true)
         return { videos }
       } catch (error) {
         if (error.message !== 'The playlist does not exist.') throw error
         // Some channels have Shorts even though their automatic playlist is missing.
         const shortsTab = await channelPage.getShorts()
         const videos = parseLocalChannelShorts(shortsTab.videos, channel.id, channel.name)
-        const cachedVideos = store.getters.getShortsCache[channel.id]?.videos ?? []
-        // The Shorts tab omits dates, which subscriptions need for sorting and New badges.
-        await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async video => {
-          const cached = cachedVideos.find(entry => entry.videoId === video.videoId)
-          if (Number.isFinite(cached?.published)) {
-            video.published = cached.published
-            return
-          }
-          const response = await localApiFetch(`https://www.youtube.com/watch?v=${video.videoId}`, {
-            signal: AbortSignal.any([
-              activeRefresh?.controller.signal,
-              AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
-            ].filter(Boolean)),
-            nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
-          })
-          checkSubscriptionFeedResponse(response)
-          const player = JSON.parse(extractAssignedJsonObject(await response.text(), 'ytInitialPlayerResponse') ?? 'null')
-          const published = Date.parse(player?.microformat?.playerMicroformatRenderer?.publishDate)
-          if (player?.videoDetails?.videoId !== video.videoId || !Number.isFinite(published)) {
-            throw new Error(`Could not load the publication date for Short ${video.videoId}`, { cause: error })
-          }
-          video.published = published
-        })
+        await fillLocalShortDates(videos, channel.id)
         return { videos }
       }
     }
@@ -1556,6 +1536,46 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
 
     return { videos: null }
   }
+}
+
+/**
+ * Shorts playlists and tabs omit publication dates, which subscriptions need
+ * for sorting and New badges: undated entries can never be marked as new.
+ * Cached dates are reused and the rest are loaded from watch pages. With
+ * `newOnly`, only entries ahead of the first cached one are loaded, as only
+ * those can become new (see reconcileFetchedSubscriptionEntries).
+ * @param {any[]} videos
+ * @param {string} channelId
+ * @param {boolean} [newOnly]
+ */
+async function fillLocalShortDates(videos, channelId, newOnly = false) {
+  const cachedDates = new Map((store.getters.getShortsCache[channelId]?.videos ?? [])
+    .map(entry => [entry.videoId, entry.published]))
+  const firstCachedIndex = videos.findIndex(video => cachedDates.has(video.videoId))
+  const fetchLimit = !newOnly ? videos.length : Math.max(firstCachedIndex, 0)
+  await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async (video, index) => {
+    if (Number.isFinite(video.published)) return
+    const cached = cachedDates.get(video.videoId)
+    if (Number.isFinite(cached)) {
+      video.published = cached
+      return
+    }
+    if (index >= fetchLimit) return
+    const response = await localApiFetch(`https://www.youtube.com/watch?v=${video.videoId}`, {
+      signal: AbortSignal.any([
+        activeRefresh?.controller.signal,
+        AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
+      ].filter(Boolean)),
+      nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
+    })
+    checkSubscriptionFeedResponse(response)
+    const player = JSON.parse(extractAssignedJsonObject(await response.text(), 'ytInitialPlayerResponse') ?? 'null')
+    const published = Date.parse(player?.microformat?.playerMicroformatRenderer?.publishDate)
+    if (player?.videoDetails?.videoId !== video.videoId || !Number.isFinite(published)) {
+      throw new Error(`Could not load the publication date for Short ${video.videoId}`)
+    }
+    video.published = published
+  })
 }
 
 async function getLocalShortThumbnailEntries(playlistId) {
