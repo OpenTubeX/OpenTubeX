@@ -30,7 +30,7 @@
   overflow-wrap: anywhere;
 }
 
-.heading:not(:has(.optionsRow)) + .playlistList {
+.heading:not(:has(.controlsRow)) + .playlistList {
   margin-block-start: var(--playlist-control-gap);
 }
 
@@ -48,25 +48,36 @@
   flex: 0 0 auto;
 }
 
-.playlistSearch {
+/* The options sit beside the search when they fit and wrap below it otherwise */
+.controlsRow {
   --input-bottom-spacing: 0;
+  --settings-control-margin: 0;
 
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--playlist-control-gap);
   margin-block: var(--playlist-heading-gap) var(--playlist-control-gap);
 }
 
+.playlistSearch {
+  /* Take the free space, but let the options move below before it gets too narrow */
+  flex: 1000 1 320px;
+  min-inline-size: 0;
+}
+
 .playlistSearch.outlined {
-  margin-block-start: calc(var(--playlist-heading-gap) + var(--playlist-field-label-outset));
+  margin-block-start: var(--playlist-field-label-outset);
 }
 
 .optionsRow {
-  --settings-control-margin: 0;
-
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   align-items: center;
-  row-gap: var(--playlist-control-gap);
-  margin-block-end: var(--playlist-control-gap);
+  justify-content: space-between;
+  gap: var(--playlist-control-gap);
+  min-inline-size: 0;
 }
 
 .matchingVideosToggle {
@@ -93,15 +104,6 @@
 
   .matchingVideosToggle {
     --playlist-switch-hit-height: max(48px, var(--switch-touch-height));
-  }
-}
-
-@media only screen and (width <= 800px) {
-  .optionsRow {
-    /* Switch to 2 rows from 2 columns */
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
-    align-items: stretch;
   }
 }
 
