@@ -56,7 +56,6 @@ import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
-import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
@@ -1128,7 +1127,7 @@ export default defineComponent({
       const recommendedVideos = this.hideRecommendedVideos
         ? []
         : this.recommendedVideos.filter(video =>
-            !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
+            !this.isHiddenVideo(video)
           )
 
       return selectYtDlpPreloadVideoIds({
@@ -1260,9 +1259,6 @@ export default defineComponent({
     sponsorBlockAutoSkipDisabled: function () {
       return this.sponsorBlockAutoSkipTemporarilyDisabled || this.isSponsorBlockChannelWhitelisted
     },
-    channelsHidden() {
-      return this.$store.getters.getActiveChannelsHidden
-    },
     forbiddenTitles() {
       return this.$store.getters.getActiveForbiddenTitles
     },
@@ -1282,13 +1278,13 @@ export default defineComponent({
       if (this.hideRecommendedVideos || this.hideEndScreenRecommendations) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
-        !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
+        !this.isHiddenVideo(video)
       ).slice(0, 6)
     },
     nextRecommendedVideo: function () {
       if (this.isOffline) return undefined
       return this.recommendedVideos.find((video) =>
-        !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
+        !this.isHiddenVideo(video)
       )
     },
     musicMode() {
@@ -6713,13 +6709,13 @@ export default defineComponent({
       )
     },
 
-    isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {
-      return channelsHidden.some(ch => ch.name === video.authorId || ch.name === video.collaborators?.[0]?.id) ||
-        channelsHidden.some(ch => ch.name === video.author) ||
-        isOnAiSlopList(this.$store.getters.getAiSlopBlockedChannels, video) ||
-        isVideoHiddenByPreferences(video, { membersOnlyChannelIds: this.$store.getters.getMembersOnlyChannelIdSet }) ||
-        forbiddenTitles.some((text) => video.title?.toLowerCase().includes(text)) ||
-        forbiddenTitles.some((text) => video.author?.toLowerCase().includes(text))
+    isHiddenVideo: function (video) {
+      return isVideoHiddenByPreferences(video, {
+        hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
+        aiSlopChannels: this.$store.getters.getAiSlopBlockedChannels,
+        forbiddenTitles: this.forbiddenTitles,
+        membersOnlyChannelIds: this.$store.getters.getMembersOnlyChannelIdSet,
+      })
     },
 
     toggleAutoplay: function() {
