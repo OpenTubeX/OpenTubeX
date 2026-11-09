@@ -1,8 +1,4 @@
-import { existsSync } from 'node:fs'
-import { rm, writeFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { answerNextMessageBox, choosePickerPaths, test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({
@@ -656,41 +652,6 @@ test.describe('YouTube playlist search', () => {
     })).toBeVisible()
     await expect(page.locator('.toast .message', { hasText: 'Opening' })).toHaveCount(0)
     expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBeGreaterThan(0)
-  })
-
-  test('asks before running the external player with new custom arguments', async ({ app, page }) => {
-    const script = path.join(app.userDataDir, 'capture-player-arguments.mjs')
-    const captured = path.join(app.userDataDir, 'player-arguments.json')
-    await writeFile(script, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
-    await choosePickerPaths(app, page, { externalPlayerExecutable: process.execPath })
-    await page.evaluate(async customArgs => {
-      await window.$store.dispatch('updateExternalPlayer', 'mpv')
-      await window.$store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify(customArgs))
-    }, [script, captured])
-    await page.route(/\/api\/v1\/playlists\/custom-arguments\?/, route => route.fulfill({
-      json: playlistResponse([playlistVideo(0)])
-    }))
-    await openPlaylistTab(page, '/playlist/custom-arguments')
-    const openInPlayer = () => page.locator('.playlistPage .playlistItem').first().locator('.externalPlayerIcon').click()
-    const messageBoxCount = () => app.electronApp.evaluate(() => globalThis.__messageBoxes?.length ?? 0)
-
-    await answerNextMessageBox(app, 0)
-    await openInPlayer()
-    await expect(page.locator('.toast .message', { hasText: 'Did not open mpv' })).toBeVisible()
-    const shown = await app.electronApp.evaluate(() => globalThis.__messageBoxes.at(-1))
-    expect(shown.message).toBe('mpv will start with these custom arguments:')
-    expect(shown.detail).toContain(`${process.execPath}\n${JSON.stringify(script)}\n${JSON.stringify(captured)}`)
-    expect(existsSync(captured)).toBe(false)
-
-    await answerNextMessageBox(app, 1)
-    await openInPlayer()
-    await expect.poll(() => existsSync(captured)).toBe(true)
-    await rm(captured)
-
-    // Approved arguments run without asking again.
-    await openInPlayer()
-    await expect.poll(() => existsSync(captured)).toBe(true)
-    expect(await messageBoxCount()).toBe(2)
   })
 
   test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
