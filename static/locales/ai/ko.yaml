@@ -1373,6 +1373,7 @@ Settings:
     Hide Startup Splash: 시작 화면 숨기기
     Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
+    Hide Playlist Stats: 재생목록 통계 숨기기
     Sections:
       Digital Wellbeing: "디지털 웰빙"
       Side Bar: 사이드바
@@ -2581,6 +2582,7 @@ Tooltips:
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
+    Hide Playlist Stats: 재생목록 페이지에서 동영상 수, 조회수, 마지막 업데이트 날짜, 총 재생 시간을 숨깁니다.
     Count Watch Time From: "“모든 기기”는 시청 통계를 동기화하는 모든 기기를 계산합니다. “이 기기”는 여기에서 시청한 시간만 계산합니다."
     When a Limit Is Reached: "“재생 일시 정지”를 사용하면 15분을 추가하거나 오늘은 한도를 무시할 수 있습니다. 설정 비밀번호가 있으면 한도는 설정에서만 늘릴 수 있습니다."
     Grayscale: "동영상을 포함한 앱 전체를 회색조로 표시하여 주의를 덜 끌게 합니다. “취침 시간 중”은 취침 시간 알림 일정을 따릅니다."

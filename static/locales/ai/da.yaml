@@ -1200,6 +1200,7 @@ Settings:
     Hide Startup Splash: Skjul opstartsskærm
     Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i appens topbjælke
     Hide Repeat Stats: Skjul gentagelsesstatistik
+    Hide Playlist Stats: Skjul playliststatistik
     Sections:
       Digital Wellbeing: "Digital trivsel"
       Visible While Paused: Synligt ved pause i helt vindue eller fuld skærm
@@ -2279,6 +2280,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg kræves for at flette separate video- og lydstreams og konvertere lyd. OpenTubeX antager som standard, at FFmpeg kan findes via miljøvariablen PATH. Du kan om nødvendigt angive en brugerdefineret sti her.
     Use cookies for subtitles: "Brug de konfigurerede cookies til undertekster og automatiske oversættelser. Aktiveres også af \"Brug altid cookies\"."
   Distraction Free Settings:
+    Hide Playlist Stats: Skjuler antallet af videoer, antallet af visninger, datoen for seneste opdatering og den samlede varighed på playlistesider.
     Count Watch Time From: "\"Alle enheder\" tæller alle enheder, der synkroniserer visningsstatistik. \"Denne enhed\" tæller kun det, du ser her."
     When a Limit Is Reached: "\"Sæt afspilning på pause\" lader dig tilføje 15 minutter eller ignorere grænsen for i dag. Med en adgangskode til indstillingerne kan du kun hæve en grænse under Indstillinger."
     Grayscale: "Viser hele appen, også videoer, i gråtoner, så den tiltrækker mindre opmærksomhed. \"Ved sengetid\" følger tidsplanen for påmindelsen om sengetid."

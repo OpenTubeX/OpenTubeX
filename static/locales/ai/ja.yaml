@@ -1174,6 +1174,7 @@ Settings:
     Hide Startup Splash: 起動画面を非表示
     Hide Header Sync Indicator: アプリヘッダーの同期インジケーターを非表示
     Hide Repeat Stats: リピート統計を非表示
+    Hide Playlist Stats: 再生リストの統計を非表示
     Sections:
       Digital Wellbeing: "デジタル ウェルビーイング"
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示
@@ -2191,6 +2192,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
     Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:
+    Hide Playlist Stats: 再生リストのページで動画数、視聴回数、最終更新日、合計再生時間を非表示にします。
     Count Watch Time From: "「すべてのデバイス」は、視聴統計を同期しているすべてのデバイスをカウントします。「このデバイス」は、ここで視聴した分だけをカウントします。"
     When a Limit Is Reached: "「再生を一時停止」では、15分追加するか、今日は上限を無視できます。設定のパスワードを設定している場合、上限を引き上げられるのは設定画面だけです。"
     Grayscale: "動画を含むアプリ全体をグレースケールで表示し、注意を引きにくくします。「就寝時間中」は就寝時間リマインダーのスケジュールに従います。"

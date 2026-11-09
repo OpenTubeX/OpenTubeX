@@ -1179,6 +1179,7 @@ Settings:
     Hide Startup Splash: Ascunde ecranul de pornire
     Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
+    Hide Playlist Stats: Ascunde statisticile listei de redare
     Sections:
       Digital Wellbeing: "Bunăstare digitală"
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
@@ -2247,6 +2248,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
     Use cookies for subtitles: "Folosește cookie-urile configurate pentru subtitrări și traduceri automate. Se activează și prin „Folosește întotdeauna cookie-uri”."
   Distraction Free Settings:
+    Hide Playlist Stats: Ascunde numărul de videoclipuri, numărul de vizionări, data ultimei actualizări și durata totală pe paginile listelor de redare.
     Count Watch Time From: "„Toate dispozitivele” numără fiecare dispozitiv care sincronizează statisticile de vizionare. „Acest dispozitiv” numără doar ce vizionați aici."
     When a Limit Is Reached: "„Întrerupe redarea” vă permite să adăugați 15 minute sau să ignorați limita pentru azi. Cu o parolă pentru setări, puteți mări o limită doar în setări."
     Grayscale: "Afișează întreaga aplicație, inclusiv videoclipurile, în tonuri de gri, ca să atragă mai puțin atenția. „La ora de culcare” urmează programul mementoului pentru ora de culcare."

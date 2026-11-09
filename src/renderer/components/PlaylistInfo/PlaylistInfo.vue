@@ -105,7 +105,7 @@
         >
           {{ title }}
         </h2>
-        <p>
+        <p v-if="!hidePlaylistStats">
           {{ t('Global.Counts.Video Count', { count: parsedVideoCount }, videoCount) }}
           <template v-if="!hideViews && !isUserPlaylist && viewCount >= 0">
             - {{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}
@@ -582,6 +582,9 @@ const hideViews = computed(() => store.getters.getHideVideoViews)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hidePlaylistStats = computed(() => store.getters.getHidePlaylistStats)
 
 /** @type {import('vue').ComputedRef<object | undefined>} */
 const selectedUserPlaylist = computed(() => store.getters.getPlaylist(props.id))

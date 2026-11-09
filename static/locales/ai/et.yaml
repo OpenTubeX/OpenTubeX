@@ -1174,6 +1174,7 @@ Settings:
     Hide Startup Splash: Peida käivituskuva
     Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
+    Hide Playlist Stats: Peida esitusloendi statistika
     Sections:
       Digital Wellbeing: "Digitaalne heaolu"
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
@@ -2194,6 +2195,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
+    Hide Playlist Stats: Peidab esitusloendite lehtedel videote arvu, vaatamiste arvu, viimase uuendamise kuupäeva ja kogukestuse.
     Count Watch Time From: "„Kõik seadmed“ arvestab iga seadet, mis sünkroonib vaatamisstatistikat. „See seade“ arvestab ainult seda, mida sa siin vaatad."
     When a Limit Is Reached: "„Peata esitus“ võimaldab lisada 15 minutit või jätta limiidi tänaseks tähelepanuta. Seadistuste salasõna korral saad limiiti tõsta ainult seadistustes."
     Grayscale: "Kuvab kogu rakenduse koos videotega halltoonides, et see tõmbaks vähem tähelepanu. „Magamaminekuajal“ järgib magamamineku meeldetuletuse ajakava."

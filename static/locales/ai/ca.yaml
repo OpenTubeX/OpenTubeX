@@ -1444,6 +1444,7 @@ Settings:
     Hide Startup Splash: Amaga la pantalla d’inici
     Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
+    Hide Playlist Stats: Amaga les estadístiques de la llista de reproducció
     Sections:
       Digital Wellbeing: "Benestar digital"
       Side Bar: Barra lateral
@@ -2750,6 +2751,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:
+    Hide Playlist Stats: Amaga el nombre de vídeos, el nombre de visualitzacions, la data de l’última actualització i la durada total a les pàgines de llistes de reproducció.
     Count Watch Time From: "\"Tots els dispositius\" compta tots els dispositius que sincronitzen les estadístiques de visualització. \"Aquest dispositiu\" només compta el que mireu aquí."
     When a Limit Is Reached: "\"Posa en pausa la reproducció\" us permet afegir 15 minuts o ignorar el límit per avui. Amb una contrasenya de la configuració, només podeu augmentar un límit a la Configuració."
     Grayscale: "Mostra tota l'aplicació, inclosos els vídeos, en tons de gris perquè cridi menys l'atenció. \"Durant l'hora d'anar a dormir\" segueix l'horari del recordatori de l'hora d'anar a dormir."

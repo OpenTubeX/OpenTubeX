@@ -1174,6 +1174,7 @@ Settings:
     Hide Startup Splash: Indítóképernyő elrejtése
     Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
+    Hide Playlist Stats: Lejátszási lista statisztikáinak elrejtése
     Sections:
       Digital Wellbeing: "Digitális jóllét"
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
@@ -2192,6 +2193,7 @@ Tooltips:
     FFmpeg Executable Path: Az FFmpeg szükséges a különálló videó- és hangadatfolyamok egyesítéséhez, valamint a hangkonvertáláshoz. Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy az FFmpeg megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
     Use cookies for subtitles: "A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz. A „Sütik használata mindig” beállítás is engedélyezi."
   Distraction Free Settings:
+    Hide Playlist Stats: Elrejti a videók számát, a megtekintések számát, az utolsó frissítés dátumát és a teljes időtartamot a lejátszási listák oldalain.
     Count Watch Time From: "Az „Összes eszköz” minden olyan eszközt beszámít, amely szinkronizálja a nézési statisztikákat. Az „Ez az eszköz” csak az itt megnézett tartalmat számítja be."
     When a Limit Is Reached: "A „Lejátszás szüneteltetése” lehetővé teszi, hogy 15 percet hozzáadjon, vagy mára figyelmen kívül hagyja a korlátot. Ha a beállítások jelszóval védettek, korlátot csak a Beállításokban emelhet."
     Grayscale: "Az egész alkalmazást, a videókat is beleértve, szürkeárnyalatosan jeleníti meg, hogy kevésbé vonja el a figyelmet. A „Lefekvési időben” lehetőség a lefekvési emlékeztető ütemezését követi."

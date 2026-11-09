@@ -1136,6 +1136,7 @@ Settings:
     Hide Startup Splash: Ocultar pantalla de inicio
     Hide Header Sync Indicator: Ocultar el indicador de sincronización del encabezado de la aplicación
     Hide Repeat Stats: Ocultar estadísticas de repetición
+    Hide Playlist Stats: Ocultar estadísticas de la lista de reproducción
     Sections:
       Digital Wellbeing: "Bienestar digital"
       Visible While Paused: Visible al pausar en ventana completa o pantalla completa
@@ -2166,6 +2167,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg es necesario para combinar emisiones de vídeo y audio separadas y para convertir audio. De forma predeterminada, OpenTubeX presupone que FFmpeg se puede encontrar mediante la variable de entorno PATH. Si hace falta, puedes definir aquí una ruta personalizada.
     Use cookies for subtitles: "Usa las cookies configuradas para los subtítulos y las traducciones automáticas. También se activa con «Usar siempre cookies»."
   Distraction Free Settings:
+    Hide Playlist Stats: Oculta el número de vídeos, el número de visualizaciones, la fecha de la última actualización y la duración total en las páginas de listas de reproducción.
     Count Watch Time From: "«Todos los dispositivos» cuenta cada dispositivo que sincroniza las estadísticas de visualización. «Este dispositivo» solo cuenta lo que ves aquí."
     When a Limit Is Reached: "«Pausar la reproducción» te permite añadir 15 minutos o ignorar el límite por hoy. Con una contraseña de configuración, solo puedes aumentar un límite en Configuración."
     Grayscale: "Muestra toda la aplicación, incluidos los vídeos, en tonos de gris para que llame menos la atención. «Durante la hora de dormir» sigue el horario del recordatorio de la hora de dormir."

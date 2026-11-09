@@ -1189,6 +1189,7 @@ Settings:
     Hide Startup Splash: Opstartscherm verbergen
     Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
+    Hide Playlist Stats: Afspeellijststatistieken verbergen
     Sections:
       Digital Wellbeing: "Digitaal welzijn"
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
@@ -2257,6 +2258,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
     Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
   Distraction Free Settings:
+    Hide Playlist Stats: Verbergt het aantal video’s, het aantal weergaven, de datum van de laatste update en de totale duur op afspeellijstpagina’s.
     Count Watch Time From: "‘Alle apparaten’ telt elk apparaat dat kijkstatistieken synchroniseert. ‘Dit apparaat’ telt alleen wat je hier bekijkt."
     When a Limit Is Reached: "Met ‘Afspelen pauzeren’ kun je 15 minuten toevoegen of de limiet voor vandaag negeren. Met een instellingenwachtwoord kun je een limiet alleen in de instellingen verhogen."
     Grayscale: "Toont de hele app, inclusief video's, in grijstinten, zodat deze minder aandacht trekt. ‘Tijdens bedtijd’ volgt het schema van de bedtijdherinnering."

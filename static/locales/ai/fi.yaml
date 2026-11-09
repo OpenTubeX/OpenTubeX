@@ -1189,6 +1189,7 @@ Settings:
     Hide Startup Splash: Piilota käynnistysruutu
     Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin
     Hide Repeat Stats: Piilota toistotilastot
+    Hide Playlist Stats: Piilota soittolistan tilastot
     Sections:
       Digital Wellbeing: "Digitaalinen hyvinvointi"
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa
@@ -2246,6 +2247,7 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg tarvitaan erillisten video- ja äänivirtojen yhdistämiseen sekä äänen muuntamiseen. OpenTubeX olettaa oletusarvoisesti, että FFmpeg löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
     Use cookies for subtitles: "Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin. Myös ”Käytä aina evästeitä” ottaa tämän käyttöön."
   Distraction Free Settings:
+    Hide Playlist Stats: Piilottaa videoiden määrän, katselukerrat, viimeisimmän päivityksen päivämäärän ja kokonaiskeston soittolistasivuilla.
     Count Watch Time From: "”Kaikki laitteet” laskee jokaisen laitteen, joka synkronoi katselutilastot. ”Tämä laite” laskee vain sen, mitä katsot täällä."
     When a Limit Is Reached: "”Keskeytä toisto” antaa lisätä 15 minuuttia tai ohittaa rajan tältä päivältä. Kun asetuksilla on salasana, voit nostaa rajaa vain asetuksissa."
     Grayscale: "Näyttää koko sovelluksen videoineen harmaasävyinä, jotta se vie vähemmän huomiota. ”Nukkumaanmenoaikana” noudattaa nukkumaanmenomuistutuksen aikataulua."

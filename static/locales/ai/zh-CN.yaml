@@ -1174,6 +1174,7 @@ Settings:
     Hide Startup Splash: 隐藏启动画面
     Hide Header Sync Indicator: 隐藏应用标题栏中的同步指示器
     Hide Repeat Stats: 隐藏循环统计
+    Hide Playlist Stats: 隐藏播放列表统计信息
     Sections:
       Digital Wellbeing: "数字健康"
       Visible While Paused: 全窗口或全屏暂停时显示
@@ -2191,6 +2192,7 @@ Tooltips:
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
+    Hide Playlist Stats: 在播放列表页面上隐藏视频数量、观看次数、最后更新日期和总时长。
     Count Watch Time From: "“所有设备”统计每台同步观看统计的设备。“此设备”只统计你在这里观看的内容。"
     When a Limit Is Reached: "“暂停播放”可让你再看 15 分钟或今天忽略限额。如果设有设置密码，只能在设置中提高限额。"
     Grayscale: "以灰度显示整个应用（包括视频），减少对注意力的吸引。“就寝时间内”选项遵循就寝提醒的时间安排。"

@@ -190,6 +190,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideEndScreenAnnotations: false,
     hideEndScreenRecommendations: false,
     hidePaidPromotion: false,
+    hidePlaylistStats: false,
     hideFeaturedChannels: false,
     channelsHidden: '[]',
     forbiddenTitles: '[]',

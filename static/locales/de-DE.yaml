@@ -1483,6 +1483,7 @@ Settings:
     Distraction Free Settings: Ablenkungsfreier Modus
     Hide Active Subscriptions: Aktive Abos ausblenden
     Hide Playlists: Playlists ausblenden
+    Hide Playlist Stats: Playlist-Statistiken ausblenden
     Hide Comments: Kommentare ausblenden
     Hide Live Streams: Livestreams ausblenden
     Hide Sharing Actions: Aktionen zum Teilen ausblenden
@@ -3015,6 +3016,7 @@ Tooltips:
     Hide Subscriptions Live: Diese Einstellung wird durch die App-weite Einstellung „{appWideSetting}“ im Abschnitt „{subsection}“ der „{settingsSection}“ außer Kraft gesetzt
     Hide Videos, Playlists and Channels Containing Text: Gib ein Wort, einen Teil eines Wortes oder einen Satz ein (Groß-/Kleinschreibung wird ignoriert), um alle Videos und Playlists, welche es in ihren Originaltiteln enthalten, auf ganz OpenTubeX auszublenden. Dein Verlauf, deine eigenen Playlists und Videos innerhalb Playlists sind davon nicht betroffen.
     Hide Videos on Watch: Blendet bereits angesehene Videos aus den Tabs „Videos“, „Shorts“ und „Live“ der Abo- und Kanalseiten aus. Beeinflusst nicht den „Home“-Tab der Kanalseiten
+    Hide Playlist Stats: Blendet die Anzahl der Videos, die Aufrufe, das Datum der letzten Aktualisierung und die Gesamtdauer auf Playlist-Seiten aus.
     Shorten View Counts: >-
       Zeigt von YouTube bereits gerundete Aufrufzahlen, Kommentarzahlen und Like-Zahlen von Kommentaren in abgekürzter Form an,
       z. B. 14 Tsd. statt 14.000. Exakte Zahlen werden immer vollständig angezeigt.

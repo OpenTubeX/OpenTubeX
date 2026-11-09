@@ -1184,6 +1184,7 @@ Settings:
     Hide Live Chat Replay: Canlı söhbətin təkrarını gizlət
     Disable A-B Repeat: A-B təkrarını söndür
     Hide Repeat Stats: Təkrar statistikasını gizlət
+    Hide Playlist Stats: Pleylist statistikasını gizlət
     Hide End-Screen Annotations: Son ekran qeydlərini gizlət
     Hide End-Screen Recommendations: "Son ekran tövsiyələrini gizlət"
     Hide Paid Promotion Badge: Ödənişli tanıtım nişanını gizlət
@@ -2204,6 +2205,7 @@ Tooltips:
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
     Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:
+    Hide Playlist Stats: Pleylist səhifələrində video sayını, baxış sayını, son yenilənmə tarixini və ümumi müddəti gizlədir.
     Count Watch Time From: "\"Bütün cihazlar\" baxış statistikasını sinxronlaşdıran hər cihazı sayır. \"Bu cihaz\" yalnız burada baxdıqlarınızı sayır."
     When a Limit Is Reached: "\"Oxutmaya Fasilə Ver\" 15 dəqiqə əlavə etməyə və ya bu gün üçün limiti nəzərə almamağa imkan verir. Tənzimləmələr parolu ilə limiti yalnız Tənzimləmələrdə artıra bilərsiniz."
     Grayscale: "Videolar daxil olmaqla bütün tətbiqi boz tonlarda göstərir ki, daha az diqqət çəksin. \"Yatma Vaxtı Ərzində\" seçimi yatma vaxtı xatırlatmasının cədvəlinə əməl edir."
