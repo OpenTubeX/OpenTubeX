@@ -20,6 +20,7 @@ import { getNotificationThumbnailUrl } from '../helpers/notificationHistory'
 import { createUploadNotificationConfiguration } from '../../newUploadNotifications'
 import { parseTimeOfDay } from '../helpers/digitalWellbeing'
 import {
+  AndroidSubscriptionRefreshIncompleteError,
   AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartGuard,
@@ -1031,7 +1032,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       // Yattee Shorts are dated through the server like in foreground refreshes, not by YouTube
       entries = store.getters.getBackendPreference === 'yattee' && !result.payload?.backgroundFormat?.startsWith('local')
         ? await fillYatteeShortDates(entries, previousCache?.[config.entriesKey], invidiousGetVideoInformation)
-        : await enrichSubscriptionShortDates(entries, result.channelId)
+        : await enrichSubscriptionShortDates(entries, result.channelId).catch(error => {
+            throw new AndroidSubscriptionRefreshIncompleteError(error)
+          })
     }
     entries = await enrichSubscriptionRssEntries(entries)
     const reconciledEntries = reconcileFetchedSubscriptionEntries(

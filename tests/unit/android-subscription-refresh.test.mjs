@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  AndroidSubscriptionRefreshIncompleteError,
   AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartController,
@@ -138,10 +139,10 @@ test('closed-app refresh opt-out preserves selected intervals outside the native
   })
 })
 
-test('acknowledges malformed stored payloads without dropping transient cache failures', async () => {
+test('acknowledges malformed stored payloads and skips incomplete ones without dropping transient cache failures', async () => {
   const result = { id: 'result-1' }
   const acknowledged = []
-  const acknowledge = id => { acknowledged.push(id) }
+  const acknowledge = (id, forgetFingerprint = false) => { acknowledged.push([id, forgetFingerprint]) }
 
   await processAndroidSubscriptionRefreshChannelResult(
     result,
@@ -152,7 +153,7 @@ test('acknowledges malformed stored payloads without dropping transient cache fa
     },
     acknowledge
   )
-  assert.deepEqual(acknowledged, ['result-1'])
+  assert.deepEqual(acknowledged, [['result-1', false]])
 
   await assert.rejects(
     processAndroidSubscriptionRefreshChannelResult(
@@ -162,7 +163,22 @@ test('acknowledges malformed stored payloads without dropping transient cache fa
     ),
     error => !(error instanceof AndroidSubscriptionRefreshPayloadError) && error.message === 'cache write failed'
   )
-  assert.deepEqual(acknowledged, ['result-1'])
+  assert.deepEqual(acknowledged, [['result-1', false]])
+
+  // A failed Shorts date lookup must not hold up the results queued after it,
+  // and the skipped feed has to be queued again even if it is unchanged.
+  const warn = console.warn
+  console.warn = () => {}
+  try {
+    await processAndroidSubscriptionRefreshChannelResult(
+      { id: 'result-2', feedType: 'shorts', channelId: 'UC-channel' },
+      async () => { throw new AndroidSubscriptionRefreshIncompleteError(new Error('watch page unavailable')) },
+      acknowledge
+    )
+  } finally {
+    console.warn = warn
+  }
+  assert.deepEqual(acknowledged, [['result-1', false], ['result-2', true]])
 })
 
 test('closed-app refresh includes subscribed automatic-download channels filtered out of a profile', () => {

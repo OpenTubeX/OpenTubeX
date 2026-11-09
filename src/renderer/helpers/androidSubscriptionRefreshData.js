@@ -19,10 +19,25 @@ export function normalizeAndroidSubscriptionRefreshPayload(normalize, feedType, 
   }
 }
 
+/** A stored feed that needs data the app could not load now, such as Shorts dates. */
+export class AndroidSubscriptionRefreshIncompleteError extends Error {
+  constructor(cause) {
+    super('The stored Android subscription refresh payload could not be completed', { cause })
+    this.name = 'AndroidSubscriptionRefreshIncompleteError'
+  }
+}
+
 export async function processAndroidSubscriptionRefreshChannelResult(result, reconcile, acknowledge) {
   try {
     await reconcile(result)
   } catch (error) {
+    if (error instanceof AndroidSubscriptionRefreshIncompleteError) {
+      // Waiting for the data would hold up every result queued after this one.
+      // Skip it, and let the next closed-app refresh queue the feed again.
+      console.warn(`Skipped closed-app ${result.feedType} result for ${result.channelId}`, error)
+      await acknowledge(result.id, true)
+      return
+    }
     if (!(error instanceof AndroidSubscriptionRefreshPayloadError)) throw error
   }
   await acknowledge(result.id)

@@ -132,10 +132,16 @@ export async function getNextAndroidSubscriptionRefreshResult() {
   return result ?? null
 }
 
-export async function acknowledgeAndroidSubscriptionRefreshResult(id) {
+/**
+ * @param {string} id
+ * @param {boolean} [forgetFingerprint] Queue the feed again on the next closed-app
+ * refresh even if it is unchanged, because this result was skipped.
+ */
+export async function acknowledgeAndroidSubscriptionRefreshResult(id, forgetFingerprint = false) {
+  // Electron completes its results before queuing them, so it never skips one.
   if (process.env.IS_ELECTRON) return window.ftElectron.subscriptionAutoRefresh.acknowledgeBackgroundResult(id)
   if (!SubscriptionRefresh) return
-  const { removed } = await SubscriptionRefresh.acknowledgePendingResult({ id })
+  const { removed } = await SubscriptionRefresh.acknowledgePendingResult({ id, forgetFingerprint })
   if (!removed) throw new Error('Unable to acknowledge pending subscription refresh data')
 }
 

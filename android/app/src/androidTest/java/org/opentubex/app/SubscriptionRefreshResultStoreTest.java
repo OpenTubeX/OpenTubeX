@@ -67,6 +67,16 @@ public class SubscriptionRefreshResultStoreTest {
     }
 
     @Test
+    public void aSkippedResultQueuesItsUnchangedFeedAgain() throws Exception {
+        write(payload("Video", "first"), 1000);
+        assertTrue(SubscriptionRefreshResultStore.acknowledge(context, saved().getString("id"), true));
+        assertFalse(resultFile.exists());
+
+        write(payload("Video", "second"), 2000);
+        assertEquals("the app never imported the skipped feed", 2000, saved().getLong("timestamp"));
+    }
+
+    @Test
     public void clearingAChannelsCacheQueuesItsUnchangedFeedAgain() throws Exception {
         write(payload("Video", "first"), 1000);
         assertTrue(SubscriptionRefreshResultStore.acknowledge(context, saved().getString("id")));
