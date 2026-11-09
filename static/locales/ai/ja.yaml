@@ -228,6 +228,9 @@ User Playlists:
   Edit: "編集"
   Pin to Navigation: "ナビゲーションに固定"
   Unpin from Navigation: "ナビゲーションから固定解除"
+  Pin to Top: "上部に固定"
+  Unpin from Top: "上部への固定を解除"
+  Pinned to Top: "上部に固定済み"
   Reorder Hint: ドラッグするか矢印キーで並べ替え
   Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
   Shuffle videos by default: "デフォルトで動画をシャッフル再生"

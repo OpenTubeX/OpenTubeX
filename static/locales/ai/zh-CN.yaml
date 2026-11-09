@@ -228,6 +228,9 @@ User Playlists:
   Edit: "编辑"
   Pin to Navigation: "固定到导航栏"
   Unpin from Navigation: "从导航栏取消固定"
+  Pin to Top: "置顶"
+  Unpin from Top: "取消置顶"
+  Pinned to Top: "已置顶"
   Reorder Hint: 拖动或使用方向键重新排序
   Add new videos to the top (custom order): "将新视频添加到顶部（自定义顺序）"
   Shuffle videos by default: "默认随机播放视频"

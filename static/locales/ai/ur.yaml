@@ -295,6 +295,9 @@ User Playlists:
   Remove Unavailable Videos Confirmation: 'غیر دستیاب ویڈیوز ہٹائیں؟ ملیں: {count}۔ چیک نہیں ہو سکیں: {uncertain}۔ چیک نہ ہونے والی ویڈیوز برقرار رکھی جائیں گی۔'
   Pin to Navigation: نیویگیشن میں پن کریں
   Unpin from Navigation: نیویگیشن سے ان پن کریں
+  Pin to Top: "اوپر پن کریں"
+  Unpin from Top: "اوپر سے پن ہٹائیں"
+  Pinned to Top: "اوپر پن شدہ"
   Reorder Hint: ترتیب بدلنے کے لیے گھسیٹیں یا ایرو کیز استعمال کریں
   SinglePlaylistView:
     Retry: دوبارہ کوشش کریں

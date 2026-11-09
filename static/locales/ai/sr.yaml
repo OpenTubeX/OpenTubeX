@@ -233,6 +233,9 @@ User Playlists:
   This playlist is private or does not exist.: "Ова плејлиста је приватна или не постоји."
   Pin to Navigation: "Закачи у навигацију"
   Unpin from Navigation: "Откачи из навигације"
+  Pin to Top: "Закачи на врх"
+  Unpin from Top: "Откачи са врха"
+  Pinned to Top: "Закачено на врх"
   Reorder Hint: Превуците или користите тастере са стрелицама да бисте променили редослед
   Add new videos to the top (custom order): "Додај нове видео-снимке на врх (прилагођени редослед)"
   Shuffle videos by default: "Подразумевано пуштај видео-снимке насумично"

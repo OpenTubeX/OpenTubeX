@@ -412,6 +412,10 @@ export const SYNC_SETTING_LABELS = {
     'Playlists',
     'Playlist.Sort By.Custom'
   ],
+  userPlaylistsPinnedIds: [
+    'Playlists',
+    'User Playlists.Pin to Top'
+  ],
   verticalTabHeight: 'Settings.Theme Settings.Vertical Tab Height',
   videoDescriptionMode: 'Settings.Distraction Free Settings.Video Descriptions',
   videoIpBlockScriptPath: 'Settings.Proxy Settings.IP Block Recovery Script Path',

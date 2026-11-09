@@ -513,6 +513,10 @@ const actions = {
     if (pinnedIds.some(id => removedIds.has(id))) {
       await dispatch('updatePinnedPlaylistIds', pinnedIds.filter(id => !removedIds.has(id)))
     }
+    const topPinnedIds = rootGetters.getUserPlaylistsPinnedIds
+    if (topPinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updateUserPlaylistsPinnedIds', topPinnedIds.filter(id => !removedIds.has(id)))
+    }
   },
 
   async removeAllVideos({ commit, dispatch }, _id) {

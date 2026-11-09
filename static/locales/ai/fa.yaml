@@ -248,6 +248,9 @@ User Playlists:
   This playlist is private or does not exist.: "این فهرست پخش خصوصی است یا وجود ندارد."
   Pin to Navigation: "سنجاق کردن به ناوبری"
   Unpin from Navigation: "برداشتن سنجاق از ناوبری"
+  Pin to Top: "سنجاق کردن در بالا"
+  Unpin from Top: "برداشتن سنجاق از بالا"
+  Pinned to Top: "سنجاق‌شده در بالا"
   Reorder Hint: برای تغییر ترتیب، بکشید یا از کلیدهای جهت‌نما استفاده کنید
   Add new videos to the top (custom order): "افزودن ویدیوهای جدید به ابتدای فهرست (ترتیب سفارشی)"
   Shuffle videos by default: "پخش تصادفی ویدیوها به‌صورت پیش‌فرض"

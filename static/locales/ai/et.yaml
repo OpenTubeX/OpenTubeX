@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Muuda"
   Pin to Navigation: "Kinnita navigeerimisribale"
   Unpin from Navigation: "Eemalda navigeerimisribalt"
+  Pin to Top: "Kinnita üles"
+  Unpin from Top: "Vabasta ülevalt"
+  Pinned to Top: "Üles kinnitatud"
   Reorder Hint: Järjestuse muutmiseks lohista või kasuta nooleklahve
   Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
   Shuffle videos by default: "Esita videod vaikimisi juhuslikus järjekorras"

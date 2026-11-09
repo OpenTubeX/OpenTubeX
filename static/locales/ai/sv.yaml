@@ -228,6 +228,9 @@ User Playlists:
   Edit: "Redigera"
   Pin to Navigation: "Fäst i navigeringen"
   Unpin from Navigation: "Lossa från navigeringen"
+  Pin to Top: "Fäst överst"
+  Unpin from Top: "Lossa från toppen"
+  Pinned to Top: "Fäst överst"
   Reorder Hint: Dra eller använd piltangenterna för att ändra ordning
   Add new videos to the top (custom order): "Lägg till nya videor överst (anpassad ordning)"
   Shuffle videos by default: "Spela upp videor i slumpad ordning som standard"

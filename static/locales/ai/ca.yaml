@@ -283,6 +283,9 @@ User Playlists:
   This playlist is private or does not exist.: "Aquesta llista de reproducció és privada o no existeix."
   Pin to Navigation: "Fixa a la navegació"
   Unpin from Navigation: "Deixa de fixar a la navegació"
+  Pin to Top: "Fixa a dalt"
+  Unpin from Top: "Deixa de fixar a dalt"
+  Pinned to Top: "Fixada a dalt"
   Reorder Hint: Arrossegueu o utilitzeu les tecles de fletxa per reordenar
   Add new videos to the top (custom order): "Afegeix els vídeos nous al principi (ordre personalitzat)"
   Shuffle videos by default: "Reprodueix els vídeos en ordre aleatori per defecte"

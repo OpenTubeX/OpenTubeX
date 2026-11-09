@@ -188,6 +188,9 @@ User Playlists:
   This playlist is private or does not exist.: "Esta lista de reproducción es privada o no existe."
   Pin to Navigation: "Fijar en la navegación"
   Unpin from Navigation: "Dejar de fijar en la navegación"
+  Pin to Top: "Fijar arriba"
+  Unpin from Top: "Dejar de fijar arriba"
+  Pinned to Top: "Fijada arriba"
   Reorder Hint: Arrastra o usa las teclas de flecha para reordenar
   Add new videos to the top (custom order): "Añadir vídeos nuevos al principio (orden personalizado)"
   Shuffle videos by default: "Reproducir vídeos en orden aleatorio de forma predeterminada"

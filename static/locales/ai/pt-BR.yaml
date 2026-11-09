@@ -197,6 +197,9 @@ User Playlists:
   Edit: "Editar"
   Pin to Navigation: "Fixar na navegação"
   Unpin from Navigation: "Desafixar da navegação"
+  Pin to Top: "Fixar no topo"
+  Unpin from Top: "Desafixar do topo"
+  Pinned to Top: "Fixada no topo"
   Reorder Hint: Arraste ou use as teclas de seta para reordenar
   Add new videos to the top (custom order): "Adicionar novos vídeos no início (ordem personalizada)"
   Shuffle videos by default: "Reproduzir vídeos em ordem aleatória por padrão"

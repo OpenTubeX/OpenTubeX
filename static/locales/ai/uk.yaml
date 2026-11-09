@@ -231,6 +231,9 @@ User Playlists:
   This playlist is private or does not exist.: "Цей плейлист приватний або не існує."
   Pin to Navigation: "Закріпити в навігації"
   Unpin from Navigation: "Відкріпити від навігації"
+  Pin to Top: "Закріпити вгорі"
+  Unpin from Top: "Відкріпити згори"
+  Pinned to Top: "Закріплено вгорі"
   Reorder Hint: Перетягніть або скористайтеся клавішами зі стрілками, щоб змінити порядок
   Add new videos to the top (custom order): "Додавати нові відео на початок (власний порядок)"
   Shuffle videos by default: "Перемішувати відео за замовчуванням"
