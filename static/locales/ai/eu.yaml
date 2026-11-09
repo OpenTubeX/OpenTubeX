@@ -2482,6 +2482,7 @@ Tray:
 Tray Icon:
   Title: "Sistemaren erretiluko ikonoa"
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
+  Monochrome: "Monokromoa"
 
 Form Inputs:
   Browse: "Arakatu"

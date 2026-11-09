@@ -2546,6 +2546,7 @@ Tray:
 Tray Icon:
   Title: "Systeemvakpictogram"
   Follow App Theme: "Appthema volgen"
+  Monochrome: "Monochroom"
 
 Form Inputs:
   Browse: "Bladeren"

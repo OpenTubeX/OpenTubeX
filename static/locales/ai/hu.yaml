@@ -2473,6 +2473,7 @@ Tray:
 Tray Icon:
   Title: "Tálcaikon"
   Follow App Theme: "Alkalmazástéma követése"
+  Monochrome: "Egyszínű"
 
 Form Inputs:
   Browse: "Tallózás"

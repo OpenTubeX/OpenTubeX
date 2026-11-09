@@ -2471,6 +2471,7 @@ Tray:
 Tray Icon:
   Title: "Icône de la zone de notification"
   Follow App Theme: "Suivre le thème de l’application"
+  Monochrome: "Monochrome"
 
 Form Inputs:
   Browse: "Parcourir"

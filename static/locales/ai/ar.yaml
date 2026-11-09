@@ -2514,6 +2514,7 @@ Tray:
 Tray Icon:
   Title: "أيقونة علبة النظام"
   Follow App Theme: "اتباع سمة التطبيق"
+  Monochrome: "أحادي اللون"
 
 Form Inputs:
   Browse: "استعراض"

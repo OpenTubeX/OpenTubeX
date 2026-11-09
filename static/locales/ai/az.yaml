@@ -2482,6 +2482,7 @@ Tray:
 Tray Icon:
   Title: "Sistem treyi nişanı"
   Follow App Theme: "Tətbiqin mövzusunu izlə"
+  Monochrome: "Monoxrom"
 
 Form Inputs:
   Browse: "Gözdən keçir"

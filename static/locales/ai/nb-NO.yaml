@@ -2479,6 +2479,7 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemstatusfeltet"
   Follow App Theme: "Følg appens tema"
+  Monochrome: "Monokrom"
 
 Form Inputs:
   Browse: "Bla gjennom"

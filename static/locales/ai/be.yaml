@@ -2585,6 +2585,7 @@ Tray:
 Tray Icon:
   Title: "Значок у трэі"
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
+  Monochrome: "Манахромны"
 
 Form Inputs:
   Browse: "Агляд"

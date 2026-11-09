@@ -89,6 +89,7 @@ import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
+import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 import { createMainTranslator } from './mainTranslator'
 import { createConfirmations } from './confirmations'
@@ -759,21 +760,66 @@ function runApp() {
   }
 
   const trayIconCachePath = path.join(userDataPath, 'tray-icon.png')
+  // The suffix also makes macOS load the cached monochrome icon as a template image.
+  const monochromeTrayIconCachePath = path.join(userDataPath, 'tray-iconTemplate.png')
   let selectedTrayImage = nativeImage.createFromPath(trayIconCachePath)
+  let isTrayIconMonochrome = false
+  if (selectedTrayImage.isEmpty()) {
+    selectedTrayImage = nativeImage.createFromPath(monochromeTrayIconCachePath)
+    isTrayIconMonochrome = !selectedTrayImage.isEmpty()
+  }
+  let isTrayDark = true
+  /** @type {(() => void) | null} */
+  let stopWatchingTrayColorScheme = null
+  function updateTrayColorSchemeWatcher() {
+    if (isTrayIconMonochrome && process.platform !== 'darwin') {
+      stopWatchingTrayColorScheme ??= watchTrayColorScheme(dark => {
+        if (dark === isTrayDark) return
+        isTrayDark = dark
+        if (tray) tray.setImage(getTrayImage())
+      })
+    } else {
+      stopWatchingTrayColorScheme?.()
+      stopWatchingTrayColorScheme = null
+    }
+  }
+  app.whenReady().then(updateTrayColorSchemeWatcher)
   let trayIconWrite = Promise.resolve()
-  ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl) => {
+  ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
     if (dataUrl !== null && (typeof dataUrl !== 'string' || dataUrl.length > 65536 || !dataUrl.startsWith('data:image/png;base64,'))) return
+    if (typeof monochrome !== 'boolean') return
     const image = dataUrl === null ? nativeImage.createEmpty() : nativeImage.createFromDataURL(dataUrl)
     if (dataUrl !== null && (image.isEmpty() || image.getSize().width !== 64 || image.getSize().height !== 64)) return
     selectedTrayImage = image
+    isTrayIconMonochrome = dataUrl !== null && monochrome
+    updateTrayColorSchemeWatcher()
     if (tray) tray.setImage(getTrayImage())
+    const cachePath = isTrayIconMonochrome ? monochromeTrayIconCachePath : trayIconCachePath
+    const otherCachePath = isTrayIconMonochrome ? trayIconCachePath : monochromeTrayIconCachePath
     // Serialize writes so rapid palette changes also preserve the latest icon on restart.
-    trayIconWrite = trayIconWrite.catch(() => {}).then(() => dataUrl === null
-      ? asyncFs.rm(trayIconCachePath, { force: true })
-      : asyncFs.writeFile(trayIconCachePath, image.toPNG()))
+    trayIconWrite = trayIconWrite.catch(() => {}).then(async () => {
+      await asyncFs.rm(otherCachePath, { force: true })
+      await (dataUrl === null
+        ? asyncFs.rm(cachePath, { force: true })
+        : asyncFs.writeFile(cachePath, image.toPNG()))
+    })
     await trayIconWrite
   })
+
+  /**
+   * Monochrome tray icons arrive as a black glyph. Bitmaps use premultiplied
+   * alpha, so white keeps each pixel's alpha in its color channels.
+   * @param {Electron.NativeImage} image
+   * @returns {Electron.NativeImage}
+   */
+  function createWhiteTrayImage(image) {
+    const bitmap = image.toBitmap()
+    for (let i = 0; i < bitmap.length; i += 4) {
+      bitmap[i] = bitmap[i + 1] = bitmap[i + 2] = bitmap[i + 3]
+    }
+    return nativeImage.createFromBitmap(bitmap, image.getSize())
+  }
 
   const MAC_TRAY_ICON_HEIGHT = 18
 
@@ -799,7 +845,13 @@ function runApp() {
 
   function getTrayImage() {
     if (!selectedTrayImage.isEmpty()) {
-      return process.platform === 'darwin' ? createMacTrayImage(selectedTrayImage) : selectedTrayImage
+      if (process.platform === 'darwin') {
+        const image = createMacTrayImage(selectedTrayImage)
+        // macOS recolors template images to match the menu bar.
+        image.setTemplateImage(isTrayIconMonochrome)
+        return image
+      }
+      return isTrayIconMonochrome && isTrayDark ? createWhiteTrayImage(selectedTrayImage) : selectedTrayImage
     }
     const defaultTrayIconPath = process.env.NODE_ENV === 'development'
       ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')

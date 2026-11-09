@@ -2475,6 +2475,7 @@ Tray:
 Tray Icon:
   Title: "Süsteemisalve ikoon"
   Follow App Theme: "Järgi rakenduse teemat"
+  Monochrome: "Ühevärviline"
 
 Form Inputs:
   Browse: "Sirvi"

@@ -143,7 +143,7 @@ export default {
       return () => ipcRenderer.removeListener(IpcChannels.LIBRARY_NOTICES_CHANGED, listener)
     }
   },
-  setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),
+  setTrayIcon: (image, monochrome) => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image, monochrome),
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
   /** @param {string} url */
   openExternalLinkInBackground: url => ipcRenderer.invoke(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, url),

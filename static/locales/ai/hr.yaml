@@ -2514,6 +2514,7 @@ Tray:
 Tray Icon:
   Title: "Ikona u sistemskoj traci"
   Follow App Theme: "Prati temu aplikacije"
+  Monochrome: "Jednobojna"
 
 Form Inputs:
   Browse: "Pregledaj"

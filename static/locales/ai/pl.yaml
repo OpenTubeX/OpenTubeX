@@ -1693,6 +1693,7 @@ Close Confirmation:
 Tray Icon:
   Title: "Ikona w zasobniku"
   Follow App Theme: "Używaj motywu aplikacji"
+  Monochrome: "Monochromatyczna"
 
 Stats:
   Left of daily limit: "Pozostało {duration} z dziennego limitu {limit}"

@@ -23,7 +23,7 @@ function fixture () {
             if (!portal.available) throw new Error('org.freedesktop.portal.Desktop was not provided by any .service files')
             return {
               on: (name, handler) => portal.handlers.push(handler),
-              ReadOne: async () => { const layout = portal.layout; await portal.readGate; if (portal.readError) throw portal.readError; return layout }
+              Read: async () => { const layout = portal.layout; await portal.readGate; if (portal.readError) throw portal.readError; return layout }
             }
           }
         })

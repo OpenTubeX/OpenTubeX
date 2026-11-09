@@ -2478,6 +2478,7 @@ Tray:
 Tray Icon:
   Title: "Ikona v oblasti oznámení"
   Follow App Theme: "Použiť motív aplikácie"
+  Monochrome: "Jednofarebná"
 
 Form Inputs:
   Browse: "Prehľadávať"

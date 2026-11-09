@@ -2562,6 +2562,7 @@ Tray:
 Tray Icon:
   Title: "Икона у системској палети"
   Follow App Theme: "Прати тему апликације"
+  Monochrome: "Монохромна"
 
 Form Inputs:
   Browse: "Прегледај"

@@ -2512,6 +2512,7 @@ Tray:
 Tray Icon:
   Title: "Εικονίδιο περιοχής ειδοποιήσεων"
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
+  Monochrome: "Μονόχρωμο"
 
 Form Inputs:
   Browse: "Περιήγηση"

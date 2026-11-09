@@ -2442,6 +2442,7 @@ Tray:
 Tray Icon:
   Title: "Ícone da bandeja"
   Follow App Theme: "Seguir o tema do aplicativo"
+  Monochrome: "Monocromático"
 
 Form Inputs:
   Browse: "Procurar"

@@ -42,7 +42,8 @@ async function readButtonLayout() {
       changedLayout = value
       publish(value)
     })
-    const layout = await settings.ReadOne(SETTINGS_NAMESPACE, SETTINGS_KEY)
+    // Version 1 portals lack ReadOne, and dbus-native unwraps the nested variant Read returns.
+    const layout = await settings.Read(SETTINGS_NAMESPACE, SETTINGS_KEY)
     // The portal can signal a change before it answers the read, so the signal is newer
     return changedLayout ?? (typeof layout === 'string' ? layout : DEFAULT_BUTTON_LAYOUT)
   } catch {

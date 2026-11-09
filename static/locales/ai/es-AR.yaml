@@ -3050,6 +3050,7 @@ Tray:
 Tray Icon:
   Title: "Icono de la bandeja"
   Follow App Theme: "Seguir el tema de la aplicación"
+  Monochrome: "Monocromo"
 
 Form Inputs:
   Browse: "Examinar"

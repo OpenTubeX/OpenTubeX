@@ -11,6 +11,18 @@
   background-color: currentcolor;
   display: block;
   block-size: 100%;
+  mask-position: center;
+  mask-repeat: no-repeat;
   mask-size: contain;
   inline-size: 100%;
+}
+
+/* The monochrome icon has no tile and matches the taskbar or panel, like the text here. */
+.trayIconPreview.monochrome {
+  background-color: transparent;
+  color: var(--primary-text-color);
+}
+
+.trayIconPreview.monochrome > span {
+  mask-size: 140%;
 }

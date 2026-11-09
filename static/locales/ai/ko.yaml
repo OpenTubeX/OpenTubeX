@@ -2942,6 +2942,7 @@ Tray:
 Tray Icon:
   Title: "트레이 아이콘"
   Follow App Theme: "앱 테마 따르기"
+  Monochrome: "단색"
 
 Form Inputs:
   Browse: "찾아보기"

@@ -2512,6 +2512,7 @@ Tray:
 Tray Icon:
   Title: "Eicon hambwrdd"
   Follow App Theme: "Dilyn thema’r ap"
+  Monochrome: "Unlliw"
 
 Form Inputs:
   Browse: "Pori"

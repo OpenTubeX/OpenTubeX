@@ -2988,6 +2988,7 @@ Tray:
 Tray Icon:
   Title: "Sistemos dėklo piktograma"
   Follow App Theme: "Naudoti programos apipavidalinimą"
+  Monochrome: "Vienspalvė"
 
 Form Inputs:
   Browse: "Naršyti"

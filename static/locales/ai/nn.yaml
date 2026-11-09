@@ -2869,6 +2869,7 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemtrauet"
   Follow App Theme: "Følg temaet til appen"
+  Monochrome: "Monokrom"
 
 Form Inputs:
   Browse: "Bla gjennom"

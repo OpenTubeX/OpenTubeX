@@ -3083,6 +3083,7 @@ Tray:
 Tray Icon:
   Title: "Ikona v sistemski vrstici"
   Follow App Theme: "Sledi temi aplikacije"
+  Monochrome: "Enobarvna"
 
 Form Inputs:
   Browse: "Prebrskaj"
