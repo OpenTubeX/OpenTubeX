@@ -10824,9 +10824,10 @@ export default defineComponent({
         height: video.value.videoHeight
       })
       handleTimeupdate()
+      // This only restores the paused interface, so keep the viewer's own pause state.
+      const pausedAt = rewindOnResumePausedAt
       handlePause()
-      // Navigation paused this Short while it played, which isn't the viewer's pause.
-      if (resume) rewindOnResumePausedAt = null
+      rewindOnResumePausedAt = pausedAt
       if (resume && isTabPresented?.value !== false) {
         video.value?.play().catch(error => {
           console.warn('Could not resume retained Short', error)

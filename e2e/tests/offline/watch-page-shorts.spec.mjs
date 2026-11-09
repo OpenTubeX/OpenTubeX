@@ -1012,6 +1012,35 @@ test.describe('Shorts feed navigation', () => {
     expect(await page.evaluate(() => window.__retainedShortSeeks)).toEqual([])
   })
 
+  test('a Short sought while paused resumes there after returning to it', async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateRewindOnResume', 5))
+    const { player, previous, next } = await openFirstFeedShort(app, page)
+    const firstVideo = await waitForPlayback(page)
+    await firstVideo.evaluate((element) => {
+      element.pause()
+      element.currentTime = 10
+      window.__retainedShortVideo = element
+    })
+    await expect.poll(() => firstVideo.evaluate(element => element.paused && !element.seeking && element.currentTime)).toBe(10)
+
+    await waitForShortsNavigationReady(page)
+    await next.click()
+    await expect(page).toHaveURL(/#\/watch\/captioned-short-2\?/)
+    await waitForShortsNavigationReady(page)
+    await previous.click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?/)
+
+    await player.locator('video').evaluate((element) => {
+      window.__retainedShortSeeks = []
+      element.addEventListener('seeking', () => window.__retainedShortSeeks.push(element.currentTime))
+      element.play()
+    })
+    await expect.poll(() => player.locator('video').evaluate(element => (
+      element === window.__retainedShortVideo && !element.paused && element.currentTime > 10.5
+    ))).toBe(true)
+    expect(await page.evaluate(() => window.__retainedShortSeeks)).toEqual([])
+  })
+
   test('does not show a stale loading indicator after leaving a loaded Shorts tab', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('**/api/skipSegments**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }))
