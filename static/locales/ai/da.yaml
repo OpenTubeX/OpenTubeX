@@ -2288,7 +2288,7 @@ Tooltips:
     Count Watch Time From: "\"Alle enheder\" tæller alle enheder, der synkroniserer visningsstatistik. \"Denne enhed\" tæller kun det, du ser her."
     When a Limit Is Reached: "\"Sæt afspilning på pause\" lader dig tilføje 15 minutter eller ignorere grænsen for i dag. Med en adgangskode til indstillingerne kan du kun hæve en grænse under Indstillinger."
     Grayscale: "Viser appen i gråtoner, så den tiltrækker mindre opmærksomhed. \"Ved sengetid\" følger tidsplanen for påmindelsen om sengetid."
-    Apply Grayscale To: "\"Videoer og billeder\" bevarer farverne i brugerfladen og gør kun videoer, miniaturebilleder og avatarer grå."
+    Apply Grayscale To: "\"Videoer og billeder\" bevarer farverne i brugerfladen og gør indhold som videoer, miniaturebilleder og avatarer gråt."
     Daily Watch Time Limit: "Tæller det, du har set i dag på alle enheder, der synkroniserer visningsstatistik, inklusive Shorts."
     Daily Shorts Limit: "Tæller de Shorts, du har set på denne enhed i dag."
     Take a Break Reminder: "Sætter videoen på pause efter så lang tids visning. En pause på 10 minutter eller mere starter optællingen forfra."

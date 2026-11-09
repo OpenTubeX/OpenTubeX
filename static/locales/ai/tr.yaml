@@ -2201,7 +2201,7 @@ Tooltips:
     Count Watch Time From: "\"Tüm cihazlar\" seçeneği, izleme istatistiklerini eşitleyen her cihazı sayar. \"Bu cihaz\" yalnızca burada izlediklerinizi sayar."
     When a Limit Is Reached: "\"Oynatmayı Duraklat\" seçeneği, 15 dakika eklemenize veya sınırı bugünlük yok saymanıza olanak tanır. Ayarlar parolası varsa bir sınırı yalnızca Ayarlar'dan artırabilirsiniz."
     Grayscale: "Uygulamayı gri tonlarında göstererek daha az dikkat çekmesini sağlar. \"Uyku Vaktinde\" seçeneği, uyku vakti hatırlatıcısının programını izler."
-    Apply Grayscale To: "\"Videolar ve Görseller\" arayüzü renkli bırakır ve yalnızca videoları, küçük resimleri ve avatarları gri yapar."
+    Apply Grayscale To: "\"Videolar ve Görseller\" arayüzü renkli bırakır ve videolar, küçük resimler ve avatarlar gibi içerikleri gri yapar."
     Daily Watch Time Limit: "İzleme istatistiklerini eşitleyen tüm cihazlarda bugün izlediklerinizi, kısa videolar dahil, sayar."
     Daily Shorts Limit: "Bu cihazda bugün izlediğiniz kısa videoları sayar."
     Take a Break Reminder: "Bu kadar izledikten sonra videoyu duraklatır. 10 dakika veya daha uzun bir ara, sayımı yeniden başlatır."

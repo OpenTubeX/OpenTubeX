@@ -2759,7 +2759,7 @@ Tooltips:
     Count Watch Time From: "\"Tots els dispositius\" compta tots els dispositius que sincronitzen les estadístiques de visualització. \"Aquest dispositiu\" només compta el que mireu aquí."
     When a Limit Is Reached: "\"Posa en pausa la reproducció\" us permet afegir 15 minuts o ignorar el límit per avui. Amb una contrasenya de la configuració, només podeu augmentar un límit a la Configuració."
     Grayscale: "Mostra l'aplicació en tons de gris perquè cridi menys l'atenció. \"Durant l'hora d'anar a dormir\" segueix l'horari del recordatori de l'hora d'anar a dormir."
-    Apply Grayscale To: "\"Vídeos i imatges\" manté la interfície en color i només posa en gris els vídeos, les miniatures i els avatars."
+    Apply Grayscale To: "\"Vídeos i imatges\" manté la interfície en color i posa en gris el contingut, com ara vídeos, miniatures i avatars."
     Daily Watch Time Limit: "Compta el que heu mirat avui en tots els dispositius que sincronitzen les estadístiques de visualització, inclosos els vídeos curts."
     Daily Shorts Limit: "Compta els vídeos curts que heu mirat avui en aquest dispositiu."
     Take a Break Reminder: "Posa en pausa el vídeo després d'aquest temps de visualització. Una pausa de 10 minuts o més reinicia el recompte."

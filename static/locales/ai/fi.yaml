@@ -2255,7 +2255,7 @@ Tooltips:
     Count Watch Time From: "”Kaikki laitteet” laskee jokaisen laitteen, joka synkronoi katselutilastot. ”Tämä laite” laskee vain sen, mitä katsot täällä."
     When a Limit Is Reached: "”Keskeytä toisto” antaa lisätä 15 minuuttia tai ohittaa rajan tältä päivältä. Kun asetuksilla on salasana, voit nostaa rajaa vain asetuksissa."
     Grayscale: "Näyttää sovelluksen harmaasävyinä, jotta se vie vähemmän huomiota. ”Nukkumaanmenoaikana” noudattaa nukkumaanmenomuistutuksen aikataulua."
-    Apply Grayscale To: "”Videot ja kuvat” pitää käyttöliittymän värillisenä ja muuttaa harmaaksi vain videot, pikkukuvat ja avatarit."
+    Apply Grayscale To: "”Videot ja kuvat” pitää käyttöliittymän värillisenä ja muuttaa harmaaksi sisällön, kuten videot, pikkukuvat ja avatarit."
     Daily Watch Time Limit: "Laskee, mitä olet katsonut tänään kaikilla laitteilla, jotka synkronoivat katselutilastot, Shorts-videot mukaan lukien."
     Daily Shorts Limit: "Laskee Shorts-videot, jotka olet katsonut tänään tällä laitteella."
     Take a Break Reminder: "Keskeyttää videon, kun olet katsonut näin kauan. Vähintään 10 minuutin tauko aloittaa laskennan alusta."

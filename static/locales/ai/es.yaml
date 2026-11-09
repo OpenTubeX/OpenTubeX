@@ -2175,7 +2175,7 @@ Tooltips:
     Count Watch Time From: "«Todos los dispositivos» cuenta cada dispositivo que sincroniza las estadísticas de visualización. «Este dispositivo» solo cuenta lo que ves aquí."
     When a Limit Is Reached: "«Pausar la reproducción» te permite añadir 15 minutos o ignorar el límite por hoy. Con una contraseña de configuración, solo puedes aumentar un límite en Configuración."
     Grayscale: "Muestra la aplicación en tonos de gris para que llame menos la atención. «Durante la hora de dormir» sigue el horario del recordatorio de la hora de dormir."
-    Apply Grayscale To: "«Vídeos e imágenes» mantiene la interfaz en color y solo pone en gris los vídeos, las miniaturas y los avatares."
+    Apply Grayscale To: "«Vídeos e imágenes» mantiene la interfaz en color y pone en gris el contenido, como vídeos, miniaturas y avatares."
     Daily Watch Time Limit: "Cuenta lo que has visto hoy en todos los dispositivos que sincronizan las estadísticas de visualización, incluidos los Shorts."
     Daily Shorts Limit: "Cuenta los Shorts que has visto hoy en este dispositivo."
     Take a Break Reminder: "Pausa el vídeo tras este tiempo de visualización. Una pausa de 10 minutos o más reinicia el recuento."

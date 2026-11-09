@@ -1428,7 +1428,7 @@ Tooltips:
     Count Watch Time From: "„Wszystkie urządzenia” liczy każde urządzenie, które synchronizuje statystyki oglądania. „To urządzenie” liczy tylko to, co oglądasz tutaj."
     When a Limit Is Reached: "„Wstrzymaj odtwarzanie” pozwala dodać 15 minut lub zignorować limit na dzisiaj. Przy ustawionym haśle do ustawień limit można zwiększyć tylko w ustawieniach."
     Grayscale: "Wyświetla aplikację w odcieniach szarości, aby mniej przyciągała uwagę. „W porze snu” działa według harmonogramu przypomnienia o porze snu."
-    Apply Grayscale To: "„Filmów i obrazów” zachowuje kolory interfejsu i zmienia na szaro tylko filmy, miniatury i awatary."
+    Apply Grayscale To: "„Filmów i obrazów” zachowuje kolory interfejsu i zmienia na szaro treści, takie jak filmy, miniatury i awatary."
     Daily Watch Time Limit: "Liczy dzisiejszy czas oglądania na wszystkich urządzeniach, które synchronizują statystyki oglądania, łącznie z filmami Short."
     Daily Shorts Limit: "Liczy filmy Short obejrzane dzisiaj na tym urządzeniu."
     Take a Break Reminder: "Wstrzymuje film po takim czasie oglądania. Przerwa trwająca 10 minut lub dłużej rozpoczyna liczenie od nowa."

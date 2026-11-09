@@ -2203,7 +2203,7 @@ Tooltips:
     Count Watch Time From: "„Kõik seadmed“ arvestab iga seadet, mis sünkroonib vaatamisstatistikat. „See seade“ arvestab ainult seda, mida sa siin vaatad."
     When a Limit Is Reached: "„Peata esitus“ võimaldab lisada 15 minutit või jätta limiidi tänaseks tähelepanuta. Seadistuste salasõna korral saad limiiti tõsta ainult seadistustes."
     Grayscale: "Kuvab rakenduse halltoonides, et see tõmbaks vähem tähelepanu. „Magamaminekuajal“ järgib magamamineku meeldetuletuse ajakava."
-    Apply Grayscale To: "„Videotele ja piltidele“ jätab liidese värviliseks ja muudab halliks ainult videod, pisipildid ja avatarid."
+    Apply Grayscale To: "„Videotele ja piltidele“ jätab liidese värviliseks ja muudab halliks sisu, näiteks videod, pisipildid ja avatarid."
     Daily Watch Time Limit: "Loeb kokku, mida oled täna vaadanud kõigis seadmetes, mis sünkroonivad vaatamisstatistikat, sealhulgas Shorts-videod."
     Daily Shorts Limit: "Loeb kokku Shorts-videod, mida oled täna selles seadmes vaadanud."
     Take a Break Reminder: "Peatab video pärast nii pikka vaatamist. Vähemalt 10-minutiline paus alustab loendust uuesti."

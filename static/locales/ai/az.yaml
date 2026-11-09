@@ -2213,7 +2213,7 @@ Tooltips:
     Count Watch Time From: "\"Bütün cihazlar\" baxış statistikasını sinxronlaşdıran hər cihazı sayır. \"Bu cihaz\" yalnız burada baxdıqlarınızı sayır."
     When a Limit Is Reached: "\"Oxutmaya Fasilə Ver\" 15 dəqiqə əlavə etməyə və ya bu gün üçün limiti nəzərə almamağa imkan verir. Tənzimləmələr parolu ilə limiti yalnız Tənzimləmələrdə artıra bilərsiniz."
     Grayscale: "Tətbiqi boz tonlarda göstərir ki, daha az diqqət çəksin. \"Yatma Vaxtı Ərzində\" seçimi yatma vaxtı xatırlatmasının cədvəlinə əməl edir."
-    Apply Grayscale To: "\"Videolar və şəkillər\" seçimi interfeysi rəngli saxlayır və yalnız videoları, miniatürləri və avatarları boz edir."
+    Apply Grayscale To: "\"Videolar və şəkillər\" seçimi interfeysi rəngli saxlayır və videolar, miniatürlər və avatarlar kimi məzmunu boz edir."
     Daily Watch Time Limit: "Baxış statistikasını sinxronlaşdıran bütün cihazlarda bu gün baxdıqlarınızı, Shorts daxil olmaqla, sayır."
     Daily Shorts Limit: "Bu gün bu cihazda baxdığınız Shorts videolarını sayır."
     Take a Break Reminder: "Bu qədər baxışdan sonra videoya fasilə verir. 10 dəqiqə və ya daha uzun fasilə sayğacı yenidən başladır."

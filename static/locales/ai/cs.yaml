@@ -2200,7 +2200,7 @@ Tooltips:
     Count Watch Time From: "„Všechna zařízení“ započítává každé zařízení, které synchronizuje statistiky sledování. „Toto zařízení“ započítává jen to, co sledujete zde."
     When a Limit Is Reached: "„Pozastavit přehrávání“ umožňuje přidat 15 minut nebo limit pro dnešek ignorovat. S heslem nastavení lze limit zvýšit pouze v Nastavení."
     Grayscale: "Zobrazí aplikaci v odstínech šedi, aby méně přitahovala pozornost. Možnost „V době spánku“ se řídí rozvrhem připomínky času spánku."
-    Apply Grayscale To: "Možnost „Videa a obrázky“ ponechá rozhraní barevné a do šedi převede jen videa, miniatury a avatary."
+    Apply Grayscale To: "Možnost „Videa a obrázky“ ponechá rozhraní barevné a do šedi převede obsah, například videa, miniatury a avatary."
     Daily Watch Time Limit: "Započítává, co jste dnes sledovali na všech zařízeních, která synchronizují statistiky sledování, včetně Shorts."
     Daily Shorts Limit: "Započítává Shorts, které jste dnes sledovali na tomto zařízení."
     Take a Break Reminder: "Po této době sledování pozastaví video. Přestávka 10 minut nebo delší spustí počítání znovu."

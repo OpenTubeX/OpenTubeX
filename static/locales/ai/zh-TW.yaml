@@ -2207,7 +2207,7 @@ Tooltips:
     Count Watch Time From: "「所有裝置」會計算每台同步觀看統計資料的裝置。「此裝置」只計算你在這裡觀看的內容。"
     When a Limit Is Reached: "「暫停播放」可讓你再看 15 分鐘或今天忽略上限。若設有設定密碼，只能在設定中提高上限。"
     Grayscale: "以灰階顯示應用程式，減少對注意力的吸引。「就寢時間內」選項會依照就寢提醒的時間表。"
-    Apply Grayscale To: "「影片和圖片」會保留介面色彩，只將影片、縮圖和頭像顯示為灰色。"
+    Apply Grayscale To: "「影片和圖片」會保留介面色彩，並將影片、縮圖和頭像等內容顯示為灰色。"
     Daily Watch Time Limit: "計算你今天在所有同步觀看統計資料的裝置上觀看的內容，包括 Shorts。"
     Daily Shorts Limit: "計算你今天在此裝置上觀看的 Shorts。"
     Take a Break Reminder: "觀看達到這段時間後暫停影片。暫停 10 分鐘或更久會重新開始計算。"

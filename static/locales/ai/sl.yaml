@@ -2720,7 +2720,7 @@ Tooltips:
     Count Watch Time From: "Možnost »Vse naprave« šteje vse naprave, ki sinhronizirajo statistiko gledanja. »Ta naprava« šteje samo to, kar gledate tukaj."
     When a Limit Is Reached: "Možnost »Začasno ustavi predvajanje« omogoča, da dodate 15 minut ali omejitev za danes prezrete. Z geslom za nastavitve lahko omejitev povečate samo v nastavitvah."
     Grayscale: "Aplikacijo prikaže v odtenkih sive, da manj pritegne pozornost. Možnost »Med časom za spanje« sledi urniku opomnika za spanje."
-    Apply Grayscale To: "Možnost »Videoposnetke in slike« ohrani barve vmesnika in v sivo spremeni le videoposnetke, sličice in avatarje."
+    Apply Grayscale To: "Možnost »Videoposnetke in slike« ohrani barve vmesnika in v sivo spremeni vsebino, na primer videoposnetke, sličice in avatarje."
     Daily Watch Time Limit: "Šteje, kar ste danes gledali v vseh napravah, ki sinhronizirajo statistiko gledanja, vključno s kratkimi videoposnetki."
     Daily Shorts Limit: "Šteje kratke videoposnetke, ki ste jih danes gledali v tej napravi."
     Take a Break Reminder: "Po tolikšnem času gledanja začasno ustavi videoposnetek. Premor, dolg 10 minut ali več, začne štetje znova."

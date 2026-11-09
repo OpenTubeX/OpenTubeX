@@ -2201,7 +2201,7 @@ Tooltips:
     Count Watch Time From: "Az „Összes eszköz” minden olyan eszközt beszámít, amely szinkronizálja a nézési statisztikákat. Az „Ez az eszköz” csak az itt megnézett tartalmat számítja be."
     When a Limit Is Reached: "A „Lejátszás szüneteltetése” lehetővé teszi, hogy 15 percet hozzáadjon, vagy mára figyelmen kívül hagyja a korlátot. Ha a beállítások jelszóval védettek, korlátot csak a Beállításokban emelhet."
     Grayscale: "Szürkeárnyalatosan jeleníti meg az alkalmazást, hogy kevésbé vonja el a figyelmet. A „Lefekvési időben” lehetőség a lefekvési emlékeztető ütemezését követi."
-    Apply Grayscale To: "A „Videókra és képekre” lehetőség megtartja a felület színeit, és csak a videókat, a bélyegképeket és az avatarokat teszi szürkévé."
+    Apply Grayscale To: "A „Videókra és képekre” lehetőség megtartja a felület színeit, és szürkévé teszi a tartalmat, például a videókat, a bélyegképeket és az avatarokat."
     Daily Watch Time Limit: "Azt számolja, amit ma az összes, nézési statisztikákat szinkronizáló eszközön megnézett, a Shorts-videókat is beleértve."
     Daily Shorts Limit: "Azokat a Shorts-videókat számolja, amelyeket ma ezen az eszközön nézett meg."
     Take a Break Reminder: "Ennyi nézés után szünetelteti a videót. Egy legalább 10 perces szünet újraindítja a számlálást."
