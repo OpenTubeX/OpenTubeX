@@ -327,7 +327,20 @@ export function withoutNetworkRecovery(callback) {
  * @param {boolean} [options.internetChecksEnabled]
  */
 export function installNetworkFetch({ corsDisabled = false, getRequestError, checkInternet = false, internetChecksEnabled = true } = {}) {
-  const nativeFetch = window.fetch.bind(window)
+  const windowFetch = window.fetch.bind(window)
+  const pendingRequests = new Set()
+  // WebKit can collect an AbortSignal.any() result that only a pending fetch
+  // refers to, and the fetch then ignores its abort. A connectivity probe or
+  // timeout never ended, so keep each request reachable until it settles.
+  const nativeFetch = async (input, init) => {
+    const request = [input, init]
+    pendingRequests.add(request)
+    try {
+      return await windowFetch(input, init)
+    } finally {
+      pendingRequests.delete(request)
+    }
+  }
   // Fetch hides the network error behind a TypeError. A redirect loop, for
   // example, would otherwise be retried like a lost connection.
   const fetch = async (input, init) => {

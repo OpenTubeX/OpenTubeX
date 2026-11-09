@@ -123,6 +123,29 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
   return context
 }
 
+test('a pending WebView request keeps its combined abort signal alive', async t => {
+  // WebKit drops an AbortSignal.any() result that only a pending fetch refers
+  // to, and the fetch then ignores its timeout and cancellation.
+  const { setFlagsFromString } = await import('node:v8')
+  const { runInNewContext } = await import('node:vm')
+  setFlagsFromString('--expose-gc')
+  const gc = runInNewContext('gc')
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const signals = []
+  const app = await loadAppNetwork(t, (input, init) => {
+    signals.push(new WeakRef(init.signal))
+    return new Promise(() => {})
+  })
+  app.window.fetch('https://service.example/data').catch(() => {})
+  await flush()
+  for (let i = 0; i < 3; i++) {
+    gc()
+    await new Promise(resolve => setImmediate(resolve))
+  }
+  assert.equal(signals.length, 1)
+  assert.ok(signals[0].deref(), 'the request signal was collected while its fetch was pending')
+})
+
 test('an interrupted chat response body preserves the session and later permanent errors remain actionable', async () => {
   const { readFile } = await import('node:fs/promises')
   const { default: vm } = await import('node:vm')
