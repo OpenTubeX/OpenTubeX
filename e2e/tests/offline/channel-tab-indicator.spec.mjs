@@ -93,6 +93,9 @@ test('collapses channel search to an accessible icon at narrow widths', async ({
 })
 
 test('moves channel tabs that do not fit into a More menu', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  // Selects and checks every tab at four widths, about 40 tab switches, which
+  // outlasts the default timeout on a loaded machine.
+  test.slow()
   const tabs = page.locator('.channelDetails:visible .tabs')
   const more = page.locator('.channelDetails:visible #moreTab')
   await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
