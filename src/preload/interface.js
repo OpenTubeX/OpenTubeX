@@ -492,11 +492,11 @@ export default {
   },
 
   /**
-   * @param {string} currentPath
+   * Picks and saves the IP block recovery script.
    * @returns {Promise<string | undefined>}
    */
-  chooseIpBlockRecoveryScript: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, currentPath)
+  chooseIpBlockRecoveryScript: () => {
+    return ipcRenderer.invoke(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT)
   },
 
   /**
@@ -539,12 +539,13 @@ export default {
 
   /**
    * @param {import('../main/externalPlayer').ExternalPlayerPayload} payload
+   * @returns {Promise<import('../main/externalPlayer').ExternalPlayerResult | null>}
    */
   openInExternalPlayer: (payload) => {
     // require the user to have interacted with the page recently
-    if (navigator.userActivation.isActive) {
-      ipcRenderer.send(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, payload)
-    }
+    return navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, payload)
+      : Promise.resolve(null)
   },
 
   dlna: {
@@ -562,21 +563,6 @@ export default {
 
   chromecast: createCastInterface('google'),
   fcast: createCastInterface('fcast'),
-
-  /**
-   * @param {(
-   *   externalPlayer: string,
-   *   unsuportedActions: (import('../constants').UnsupportedPlayerAction)[],
-   *   isPlaylist: boolean,
-   *   launchFailed: boolean
-   * ) => void} handler
-   */
-  handleOpenInExternalPlayerResult: (handler) => {
-    ipcRenderer.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-      (event, externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
-        handler(externalPlayer, unsupportedActions, isPlaylist, launchFailed)
-      })
-  },
 
   /**
    * @param {import('../main/ytDlp').YtDlpDownloadPayload} payload
@@ -659,35 +645,43 @@ export default {
   },
 
   /**
-   * @param {string | undefined} currentPath
+   * Picks and saves the download folder.
    * @returns {Promise<string | undefined>}
    */
-  ytDlpChooseDownloadFolder: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, currentPath)
+  ytDlpChooseDownloadFolder: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER)
   },
 
   /**
-   * @param {string} currentPath
+   * Picks and saves an executable path setting.
+   * @param {'externalPlayerExecutable' | 'ytDlpFfmpegPath' | 'ytDlpPath'} settingId
    * @returns {Promise<string | undefined>}
    */
-  ytDlpChooseExecutable: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, currentPath)
-  },
-
-  ytDlpChooseCookies: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_COOKIES, currentPath)
-  },
-
-  ytDlpChooseBrowserProfile: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, currentPath)
+  chooseExecutable: (settingId) => {
+    return ipcRenderer.invoke(IpcChannels.CHOOSE_EXECUTABLE, settingId)
   },
 
   /**
+   * Picks and saves the yt-dlp cookie file.
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseCookies: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_COOKIES)
+  },
+
+  /**
+   * Picks and saves the browser profile folder for yt-dlp cookies.
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseBrowserProfile: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE)
+  },
+
+  /**
+   * System sources use the saved paths.
    * @param {{
    *   ytDlpSource: 'system' | 'managed',
-   *   ytDlpPath: string,
-   *   ffmpegSource: 'system' | 'managed',
-   *   ffmpegPath: string
+   *   ffmpegSource: 'system' | 'managed'
    * } | undefined} [options]
    * @returns {Promise<{
    *   ytDlp: import('../main/ytDlp').YtDlpInfo,

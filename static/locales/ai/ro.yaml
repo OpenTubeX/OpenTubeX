@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumente suplimentare yt-dlp
     Concurrent Downloads: Descărcări simultane
     Bandwidth Limit: Limită de lățime de bandă (KiB/s)
-    Choose Download Folder: Alege folderul pentru descărcări
     Download Templates: Șabloane de descărcare
     Manage Download Templates: Gestionează șabloanele de descărcare ({templateCount})
     New Template: Șablon nou
@@ -1027,6 +1026,7 @@ Settings:
     Browser for Cookies: Browser pentru cookie-uri
     Browser Profile: Profil de browser (opțional)
     Browser Profile Placeholder: Numele sau calea profilului
+    Browser Profile Invalid: "Introdu un nume de profil sau alege un dosar de profil cu butonul de dosar."
     Select Browser: Selectați un browser
     Always Use Cookies: Folosește întotdeauna cookie-urile
     Restricted Playback Authentication Hint: În mod implicit, OpenTubeX transmite aceste cookie-uri către yt-dlp numai după ce alegeți „Încearcă folosind cookie-urile configurate” pentru un videoclip cu restricție de vârstă sau destinat exclusiv membrilor.
@@ -1962,6 +1962,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chatul în direct nu este acceptat în prezent cu serverul Yattee. Este necesară o conexiune directă la YouTube.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} nu a putut fi pornit. Verifică dacă este instalat sau setează calea executabilului în setările playerului extern."
+    Confirm Arguments Title: "Rulezi playerul extern cu argumente personalizate?"
+    Confirm Arguments Message: "{externalPlayer} va porni cu aceste argumente personalizate:"
+    Confirm Arguments Warning: "Unele argumente pot rula programe sau suprascrie fișiere. Continuă doar dacă le-ai adăugat tu."
+    Run: "Rulează"
+    LaunchCanceledTemplate: "{externalPlayer} nu a fost deschis"
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
@@ -2377,6 +2382,7 @@ CommandPalette:
     Download Finished: Această descărcare nu mai rulează
     Video: Deschideți mai întâi un videoclip
 Downloads:
+  File Name Template Invalid: 'Folosește o cale relativă în dosarul de descărcări, fără "..", "~", "$", "%" sau un prefix precum "thumbnail:".'
   Search Completed: "Caută descărcările finalizate după titlu sau canal"
   Format: "Format"
   All Formats: "Toate formatele"
@@ -2530,6 +2536,8 @@ Tray Icon:
   Follow App Theme: "Urmează tema aplicației"
 
 Form Inputs:
+  Browse: "Răsfoiește"
+  Use Default Path: "Folosește implicit"
   Enter Password Hint: "Introdu parola ta"
   Choose Password Hint: "Alege o parolă"
   Confirm Password Hint: "Repetă noua parolă"
@@ -2549,7 +2557,6 @@ Form Inputs:
   Any Age: Orice vechime
   Included Terms Example: de ex. tutorial, recenzie
   Excluded Terms Example: de ex. trailer, previzualizare
-  Download Folder Hint: Lasă gol pentru a folosi dosarul Descărcări
   Global Arguments Hint: Argumente opționale pentru fiecare descărcare
   Unlimited Hint: 0 pentru nelimitat
   Add Argument: Adaugă un argument

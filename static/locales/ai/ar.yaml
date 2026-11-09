@@ -939,7 +939,6 @@ Settings:
     Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
     Concurrent Downloads: التنزيلات المتزامنة
     Bandwidth Limit: حد النطاق الترددي (KiB/s)
-    Choose Download Folder: اختر مجلد التنزيل
     Download Templates: قوالب التنزيل
     Manage Download Templates: إدارة تنزيل القوالب ({templateCount})
     New Template: قالب جديد
@@ -1033,6 +1032,7 @@ Settings:
     Browser for Cookies: متصفح لملفات تعريف الارتباط
     Browser Profile: ملف تعريف المتصفح (اختياري)
     Browser Profile Placeholder: اسم الملف الشخصي أو المسار
+    Browser Profile Invalid: "أدخل اسم ملف تعريف، أو اختر مجلد ملف التعريف باستخدام زر المجلد."
     Select Browser: حدد متصفحًا
     Always Use Cookies: استخدم ملفات تعريف الارتباط دائمًا
     Restricted Playback Authentication Hint: افتراضيًا، يقوم OpenTubeX بتمرير ملفات تعريف الارتباط هذه إلى yt-dlp فقط بعد اختيار "تجربة باستخدام ملفات تعريف الارتباط التي تم تكوينها" في مقطع فيديو مقيد بالفئة العمرية أو للأعضاء فقط.
@@ -1961,6 +1961,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: المحادثة المباشرة غير مدعومة حالياً مع خادم Yattee. يلزم الاتصال المباشر بـ YouTube.
   External Player:
     LaunchFailedTemplate: تعذّر تشغيل {externalPlayer}. تأكد من تثبيته، أو حدّد مسار الملف التنفيذي في إعدادات المشغّل الخارجي.
+    Confirm Arguments Title: "هل تريد تشغيل المشغل الخارجي بوسائط مخصصة؟"
+    Confirm Arguments Message: "سيبدأ {externalPlayer} بهذه الوسائط المخصصة:"
+    Confirm Arguments Warning: "يمكن لبعض الوسائط تشغيل برامج أو الكتابة فوق ملفات. لا تتابع إلا إذا أضفتها بنفسك."
+    Run: "تشغيل"
+    LaunchCanceledTemplate: "لم يُفتح {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
@@ -2355,6 +2360,7 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  File Name Template Invalid: 'استخدم مسارًا نسبيًا داخل مجلد التنزيل بدون ".." أو "~" أو "$" أو "%" أو بادئة مثل "thumbnail:".'
   Search Completed: "ابحث في التنزيلات المكتملة حسب العنوان أو القناة"
   Format: "الصيغة"
   All Formats: "كل الصيغ"
@@ -2510,6 +2516,8 @@ Tray Icon:
   Follow App Theme: "اتباع سمة التطبيق"
 
 Form Inputs:
+  Browse: "استعراض"
+  Use Default Path: "استخدام الافتراضي"
   Enter Password Hint: "أدخل كلمة مرورك"
   Choose Password Hint: "اختر كلمة مرور"
   Confirm Password Hint: "كرر كلمة مرورك الجديدة"
@@ -2529,7 +2537,6 @@ Form Inputs:
   Any Age: أي عمر
   Included Terms Example: مثلًا شرح, مراجعة
   Excluded Terms Example: مثلًا إعلان, معاينة
-  Download Folder Hint: اتركه فارغًا لاستخدام مجلد التنزيلات
   Global Arguments Hint: وسيطات اختيارية لكل تنزيل
   Unlimited Hint: 0 لعدم التقييد
   Add Argument: أضف وسيطة

@@ -3,19 +3,26 @@ import { blobToDataUrl } from './fileData'
 
 const AndroidStorage = process.env.IS_CAPACITOR ? registerPlugin(process.env.IS_IOS ? 'IOSStorage' : 'AndroidStorage') : null
 
-/** Display external-storage document IDs as paths without changing the saved URI. */
+/** Display external-storage and Downloads document IDs as paths without changing the saved URI. */
 export function displayAndroidPath(path) {
   if (process.env.IS_IOS && path) {
     try { return JSON.parse(path).name || path } catch {
       return path.startsWith('/') ? path.split('/').slice(-2).join('/') : path
     }
   }
-  if (!path?.startsWith('content://com.android.externalstorage.documents/')) return path
+  const downloadsProvider = path?.startsWith('content://com.android.providers.downloads.documents/')
+  if (!downloadsProvider && !path?.startsWith('content://com.android.externalstorage.documents/')) return path
   try {
     const url = new URL(path)
     const id = url.pathname.match(/\/(?:document|tree)\/([^/]+)$/)?.[1]
     if (!id) return path
     const documentId = decodeURIComponent(id)
+    if (downloadsProvider) {
+      // The Downloads root, or a `raw:` document ID that holds the file system path.
+      if (documentId === 'downloads') return '/sdcard/Download'
+      if (!documentId.startsWith('raw:/')) return path
+      return documentId.slice('raw:'.length).replace(/^\/storage\/emulated\/0(?=\/|$)/, '/sdcard')
+    }
     const separator = documentId.indexOf(':')
     if (separator < 0) return path
     const volume = documentId.slice(0, separator)

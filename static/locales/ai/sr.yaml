@@ -951,7 +951,6 @@ Settings:
     Global Additional yt-dlp Arguments: Додатни yt-dlp аргументи
     Concurrent Downloads: Истовремена преузимања
     Bandwidth Limit: Ограничење протока (KiB/s)
-    Choose Download Folder: Изабери фасциклу за преузимање
     Download Templates: Шаблони за преузимање
     Manage Download Templates: Управљај шаблонима за преузимање ({templateCount})
     New Template: Нови шаблон
@@ -1045,6 +1044,7 @@ Settings:
     Browser for Cookies: Прегледач за колачиће
     Browser Profile: Профил прегледача (необавезно)
     Browser Profile Placeholder: Назив профила или путања
+    Browser Profile Invalid: "Унесите име профила или изаберите фасциклу профила дугметом за фасциклу."
     Select Browser: Изабери прегледач
     Always Use Cookies: Увек користи колачиће
     Restricted Playback Authentication Hint: OpenTubeX подразумевано прослеђује ове колачиће програму yt-dlp тек када за видео-снимак са старосним ограничењем или само за чланове изаберете „Покушај са подешеним колачићима“.
@@ -1988,6 +1988,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Ћаскање уживо тренутно није подржано са Yattee сервером. Потребна је директна веза са YouTube-ом.
   External Player:
     LaunchFailedTemplate: Није могуће покренути {externalPlayer}. Проверите да ли је инсталиран или подесите путању извршне датотеке у подешавањима спољног плејера.
+    Confirm Arguments Title: "Покренути спољни плејер са прилагођеним аргументима?"
+    Confirm Arguments Message: "{externalPlayer} ће се покренути са овим прилагођеним аргументима:"
+    Confirm Arguments Warning: "Неки аргументи могу да покрећу програме или преписују датотеке. Наставите само ако сте их сами додали."
+    Run: "Покрени"
+    LaunchCanceledTemplate: "{externalPlayer} није отворен"
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
@@ -2403,6 +2408,7 @@ CommandPalette:
     Download Finished: Ово преузимање више није у току
     Video: Прво отворите видео-снимак
 Downloads:
+  File Name Template Invalid: 'Користите релативну путању унутар фасцикле за преузимања без "..", "~", "$", "%" или префикса попут "thumbnail:".'
   Search Completed: "Претражи завршена преузимања по наслову или каналу"
   Format: "Формат"
   All Formats: "Сви формати"
@@ -2558,6 +2564,8 @@ Tray Icon:
   Follow App Theme: "Прати тему апликације"
 
 Form Inputs:
+  Browse: "Прегледај"
+  Use Default Path: "Користи подразумевано"
   Enter Password Hint: "Унесите своју лозинку"
   Choose Password Hint: "Изаберите лозинку"
   Confirm Password Hint: "Поновите нову лозинку"
@@ -2577,7 +2585,6 @@ Form Inputs:
   Any Age: Било која старост
   Included Terms Example: нпр. упутство, рецензија
   Excluded Terms Example: нпр. трејлер, преглед
-  Download Folder Hint: Оставите празно да користите фасциклу Преузимања
   Global Arguments Hint: Опциони аргументи за свако преузимање
   Unlimited Hint: 0 за неограничено
   Add Argument: Додајте аргумент

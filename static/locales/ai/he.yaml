@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
     Concurrent Downloads: הורדות במקביל
     Bandwidth Limit: מגבלת רוחב פס (KiB/s)
-    Choose Download Folder: בחירת תיקיית הורדות
     Download Templates: תבניות הורדה
     Manage Download Templates: ניהול תבניות הורדה ({templateCount})
     New Template: תבנית חדשה
@@ -1037,6 +1036,7 @@ Settings:
     Browser for Cookies: דפדפן לעוגיות
     Browser Profile: פרופיל דפדפן (לא חובה)
     Browser Profile Placeholder: שם הפרופיל או הנתיב
+    Browser Profile Invalid: "יש להזין שם פרופיל, או לבחור תיקיית פרופיל באמצעות כפתור התיקייה."
     Select Browser: בחירת דפדפן
     Always Use Cookies: להשתמש תמיד בעוגיות
     Restricted Playback Authentication Hint: כברירת מחדל, OpenTubeX מעביר את העוגיות האלה ל-yt-dlp רק לאחר בחירה באפשרות "לנסות עם העוגיות שהוגדרו" בסרטון שמוגבל לפי גיל או לחברים בלבד.
@@ -1967,6 +1967,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: הצ׳אט החי כרגע לא נתמך בשרת Yattee. דרוש חיבור ישיר ל־YouTube.
   External Player:
     LaunchFailedTemplate: לא ניתן להפעיל את {externalPlayer}. יש לוודא שהוא מותקן, או להגדיר את נתיב קובץ ההפעלה בהגדרות הנגן החיצוני.
+    Confirm Arguments Title: "להפעיל את הנגן החיצוני עם ארגומנטים מותאמים?"
+    Confirm Arguments Message: "{externalPlayer} יופעל עם הארגומנטים המותאמים האלה:"
+    Confirm Arguments Warning: "ארגומנטים מסוימים יכולים להריץ תוכניות או לדרוס קבצים. יש להמשיך רק אם הוספת אותם בעצמך."
+    Run: "הפעלה"
+    LaunchCanceledTemplate: "{externalPlayer} לא נפתח"
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
@@ -2378,6 +2383,7 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  File Name Template Invalid: 'יש להשתמש בנתיב יחסי בתוך תיקיית ההורדות ללא "..", "~", "$", "%" או קידומת כמו "thumbnail:".'
   Search Completed: "חיפוש הורדות שהושלמו לפי כותרת או ערוץ"
   Format: "פורמט"
   All Formats: "כל הפורמטים"
@@ -2533,6 +2539,8 @@ Tray Icon:
   Follow App Theme: "התאמה לערכת הנושא של היישום"
 
 Form Inputs:
+  Browse: "עיון"
+  Use Default Path: "שימוש בברירת המחדל"
   Enter Password Hint: "הזן את הסיסמה שלך"
   Choose Password Hint: "בחר סיסמה"
   Confirm Password Hint: "הזן שוב את הסיסמה החדשה שלך"
@@ -2552,7 +2560,6 @@ Form Inputs:
   Any Age: כל גיל
   Included Terms Example: למשל מדריך, סקירה
   Excluded Terms Example: למשל קדימון, תצוגה מקדימה
-  Download Folder Hint: השאר ריק כדי להשתמש בתיקיית ההורדות
   Global Arguments Hint: ארגומנטים אופציונליים לכל הורדה
   Unlimited Hint: 0 ללא הגבלה
   Add Argument: הוסף ארגומנט

@@ -890,7 +890,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumentos adicionales de yt-dlp
     Concurrent Downloads: Descargas simultáneas
     Bandwidth Limit: Límite de ancho de banda (KiB/s)
-    Choose Download Folder: Elegir carpeta de descargas
     Download Templates: Plantillas de descarga
     Manage Download Templates: Gestionar plantillas de descarga ({templateCount})
     New Template: Nueva plantilla
@@ -984,6 +983,7 @@ Settings:
     Browser for Cookies: Navegador para las cookies
     Browser Profile: Perfil del navegador (opcional)
     Browser Profile Placeholder: Nombre o ruta del perfil
+    Browser Profile Invalid: "Introduce un nombre de perfil o elige una carpeta de perfil con el botón de carpeta."
     Select Browser: Seleccionar un navegador
     Always Use Cookies: Usar siempre las cookies
     Restricted Playback Authentication Hint: De forma predeterminada, OpenTubeX solo pasa estas cookies a yt-dlp después de elegir «Probar con las cookies configuradas» en un vídeo con restricción de edad o solo para miembros.
@@ -1887,6 +1887,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Actualmente el chat no funciona con el servidor de Yattee. Se requiere una conexión directa con YouTube.
   External Player:
     LaunchFailedTemplate: No se pudo iniciar {externalPlayer}. Comprueba que está instalado o establece la ruta del ejecutable en la configuración del reproductor externo.
+    Confirm Arguments Title: "¿Ejecutar el reproductor externo con argumentos personalizados?"
+    Confirm Arguments Message: "{externalPlayer} se iniciará con estos argumentos personalizados:"
+    Confirm Arguments Warning: "Algunos argumentos pueden ejecutar programas o sobrescribir archivos. Continúa solo si los has añadido tú."
+    Run: "Ejecutar"
+    LaunchCanceledTemplate: "No se abrió {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Todos los videos de la lista ya están precargados"
   Playlist Preload Progress: "Precargando videos: {completed} de {requested}"
@@ -2292,6 +2297,7 @@ CommandPalette:
     Download Finished: Esta descarga ya no está en curso
     Video: Abre primero un vídeo
 Downloads:
+  File Name Template Invalid: 'Usa una ruta relativa dentro de la carpeta de descargas sin "..", "~", "$", "%" ni un prefijo como "thumbnail:".'
   Search Completed: "Buscar descargas completadas por título o canal"
   Format: "Formato"
   All Formats: "Todos los formatos"
@@ -2443,6 +2449,8 @@ Tray Icon:
   Follow App Theme: "Seguir el tema de la aplicación"
 
 Form Inputs:
+  Browse: "Examinar"
+  Use Default Path: "Usar el predeterminado"
   Enter Password Hint: "Introduce tu contraseña"
   Choose Password Hint: "Elige una contraseña"
   Confirm Password Hint: "Repite tu nueva contraseña"
@@ -2462,7 +2470,6 @@ Form Inputs:
   Any Age: Cualquier antigüedad
   Included Terms Example: p. ej. tutorial, reseña
   Excluded Terms Example: p. ej. tráiler, avance
-  Download Folder Hint: Déjalo vacío para usar tu carpeta de descargas
   Global Arguments Hint: Argumentos opcionales para cada descarga
   Unlimited Hint: 0 para ilimitado
   Add Argument: Añade un argumento

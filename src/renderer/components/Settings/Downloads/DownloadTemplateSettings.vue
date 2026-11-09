@@ -69,10 +69,13 @@
 
       <section class="optionSection">
         <FtInput
+          :class="{ invalidTemplate: filenameTemplateInvalid }"
           :icon="['fas', 'file-lines']"
           :label="t('Downloads.File Name Template')"
           placeholder="{title}.{ext}"
           :tooltip="fileNameTemplateHelp"
+          :invalid="filenameTemplateInvalid"
+          :supporting-text="filenameTemplateInvalid ? t('Downloads.File Name Template Invalid') : ''"
           :show-action-button="false"
           :show-label="true"
           :value="options.filenameTemplate"
@@ -224,7 +227,7 @@
         <FtButton
           :label="t('Downloads.Save Template')"
           :icon="['fas', 'save']"
-          :disabled="draftName.trim() === ''"
+          :disabled="draftName.trim() === '' || filenameTemplateInvalid"
           @click="saveTemplate"
         />
         <FtButton
@@ -259,6 +262,7 @@ import {
   replaceAutomaticDownloadTemplateReferences
 } from '../../../helpers/downloadTemplates'
 import { showToast } from '../../../helpers/utils'
+import { isSafeDownloadFilenameTemplate } from '../../../../ytDlpArguments'
 
 const { locale, t } = useI18n()
 const showManager = ref(false)
@@ -358,6 +362,7 @@ const sponsorBlockCategoryLabels = computed(() => [
   t('Video.Sponsor Block category.recap'),
   t('Video.Sponsor Block category.filler')
 ])
+const filenameTemplateInvalid = computed(() => !isSafeDownloadFilenameTemplate(options.filenameTemplate))
 const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help', {
   title: '{title}',
   author: '{author}',
@@ -442,7 +447,7 @@ function updateReferences(oldValue, replacementValue) {
 
 function saveTemplate() {
   const name = draftName.value.trim()
-  if (name === '') return
+  if (name === '' || filenameTemplateInvalid.value) return
 
   const previousName = selectedTemplateName.value
   if (customTemplates.value.some(template => template.name === name && template.name !== previousName)) {
@@ -478,6 +483,11 @@ function deleteTemplate() {
 </script>
 
 <style scoped>
+.invalidTemplate {
+  --primary-color: var(--red-500);
+  --secondary-text-color: var(--red-500);
+}
+
 .templateManagerHeader,
 .templateOptions {
   --settings-control-margin: 7px 0;

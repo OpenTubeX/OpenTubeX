@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: 附加 yt-dlp 参数
     Concurrent Downloads: 并发下载数
     Bandwidth Limit: 带宽限制 (KiB/s)
-    Choose Download Folder: 选择下载文件夹
     Download Templates: 下载模板
     Manage Download Templates: 管理下载模板（{templateCount}）
     New Template: 新建模板
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookie 所在浏览器
     Browser Profile: 浏览器配置文件（可选）
     Browser Profile Placeholder: 配置文件名称或路径
+    Browser Profile Invalid: "请输入配置文件名称，或使用文件夹按钮选择配置文件文件夹。"
     Select Browser: 选择浏览器
     Always Use Cookies: 始终使用 Cookie
     Restricted Playback Authentication Hint: 默认情况下，只有在受年龄限制或仅限会员观看的视频上选择“使用已配置的 Cookie 重试”后，OpenTubeX 才会将这些 Cookie 传递给 yt-dlp。
@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 服务器时暂不支持在线聊天。需要直接连接 YouTube。
   External Player:
     LaunchFailedTemplate: 无法启动 {externalPlayer}。请确认它已安装，或在外部播放器设置中设置其可执行文件路径。
+    Confirm Arguments Title: "要使用自定义参数运行外部播放器吗？"
+    Confirm Arguments Message: "{externalPlayer} 将使用以下自定义参数启动："
+    Confirm Arguments Warning: "某些参数可以运行程序或覆盖文件。仅当这些参数是你自己添加的时才继续。"
+    Run: "运行"
+    LaunchCanceledTemplate: "未打开 {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
@@ -2317,6 +2322,7 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  File Name Template Invalid: '请使用下载文件夹内的相对路径，不能包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前缀。'
   Search Completed: "按标题或频道搜索已完成的下载"
   Format: "格式"
   All Formats: "所有格式"
@@ -2468,6 +2474,8 @@ Tray Icon:
   Follow App Theme: "跟随应用主题"
 
 Form Inputs:
+  Browse: "浏览"
+  Use Default Path: "使用默认值"
   Enter Password Hint: "输入你的密码"
   Choose Password Hint: "设置密码"
   Confirm Password Hint: "再次输入新密码"
@@ -2487,7 +2495,6 @@ Form Inputs:
   Any Age: 不限发布时间
   Included Terms Example: 例如：教程, 评测
   Excluded Terms Example: 例如：预告片, 预览
-  Download Folder Hint: 留空以使用下载文件夹
   Global Arguments Hint: 所有下载的可选参数
   Unlimited Hint: 0 表示不限速
   Add Argument: 添加参数

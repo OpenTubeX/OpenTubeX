@@ -2,7 +2,7 @@ import { chmod, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
-import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
+import { choosePickerPaths, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
@@ -48,11 +48,11 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 }
 
 test('unloaded Twitch tabs resolve their title when selected, reloaded, and reopened', async ({ app, page }, testInfo) => {
@@ -229,12 +229,12 @@ for (const seekBeforeMetadata of [false, true]) {
         })
       })
     }
-    await page.evaluate(async ytDlpPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateHideSideBarOnWatchPages', false)
-    }, executable)
+    })
     const open = async () => {
       await page.locator(sel.searchInput).fill(mediaUrl)
       await page.locator(sel.searchInput).press('Enter')
@@ -775,13 +775,12 @@ test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page
     `printf '%s\\n' "$@" > '${argsFile}'`
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async ({ ytDlpPath, folder }) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateYtDlpFfmpegSource', 'system')
-    await store.dispatch('updateYtDlpDownloadFolderPath', folder)
-  }, { ytDlpPath: executable, folder: app.userDataDir })
+  })
   await goTo(page, 'downloads')
   await page.getByRole('button', { name: 'Add download' }).click()
   const urlPrompt = page.getByRole('dialog', { name: 'Add download' })
@@ -1024,11 +1023,11 @@ test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ a
   const executable = path.join(app.userDataDir, 'twitch-subscriber-yt-dlp.sh')
   await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.09.01; exit; fi\necho "subscriber-only content" >&2\nexit 1\n')
   await chmod(executable, 0o755)
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   const variantUrl = 'https://vod.example.test/720p60/index-dvr.m3u8'
   const initUrl = 'https://vod.example.test/720p60/init.mp4'
@@ -1480,11 +1479,11 @@ test('impersonates Chrome when extracting Rumble playback', async ({ app, page }
     'esac'
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   const info = await page.evaluate(url => window.ftElectron.ytDlpGetPlaybackInfo(url), mediaUrl)
   expect(info).toMatchObject({ title: 'Rumble video' })
@@ -1511,13 +1510,12 @@ test('retries failed external playback with configured cookies', async ({ app, p
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await page.evaluate(async ({ ytDlpPath, cookies }) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
-  }, { ytDlpPath: executable, cookies: cookiePath })
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -1540,13 +1538,12 @@ test('offers cookie retry only after an unauthenticated external extraction', as
     'exit 1'
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async ({ ytDlpPath, cookies }) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
-  }, { ytDlpPath: executable, cookies: cookiePath })
+  })
 
   await page.locator(sel.searchInput).fill('https://videos.example.test/unavailable')
   await page.locator(sel.searchInput).press('Enter')
@@ -1665,13 +1662,13 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     headers: { 'access-control-allow-origin': '*' },
     body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64')
   }))
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateUseSponsorBlock', true)
     await store.dispatch('updateCurrentLocale', 'en-US')
-  }, executable)
+  })
 
   const sponsorBlockRequests = []
   page.on('request', request => {
@@ -1868,12 +1865,12 @@ test('expands a metadata-only description card', async ({ app, page }) => {
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateUiScale', 95)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -1920,11 +1917,11 @@ test('shows an upcoming external stream before formats are available', async ({ 
     `printf '%s\\n' '${response}'`
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -2009,11 +2006,11 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.emulateMedia({ colorScheme: 'dark' })
   await expect(page.locator('body')).toHaveClass(/\bdark\b/)
@@ -2068,11 +2065,11 @@ test('shows the extractor reason when external media has no formats', async ({ a
     `printf '%s\\n' '${JSON.stringify({ title: 'Example post', formats: [] })}'`
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.instagram.com/p/example/')
   await page.locator(sel.searchInput).press('Enter')
@@ -2103,11 +2100,11 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -2141,11 +2138,11 @@ for (const [name, mediaUrl, format] of [
       headers: { 'content-length': String(media.length), 'accept-ranges': 'bytes' },
       body: media
     }))
-    await page.evaluate(async ytDlpPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    })
 
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
@@ -2261,12 +2258,12 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     `printf '%s\\n' '${response}' '${storyboardResponse}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateEnableSubtitlesByDefault', true)
-    }, executable)
+    })
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
     await page.locator(sel.searchInput).press('Enter')
@@ -2328,14 +2325,13 @@ test('uses configured playback cookies for external streams', async ({ app, page
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async ({ ytDlpPath, cookiesPath }) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', cookiesPath)
       await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
-    }, { ytDlpPath: executable, cookiesPath: cookiePath })
+    })
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
     await page.locator(sel.searchInput).press('Enter')
@@ -2380,14 +2376,13 @@ test('deduplicates cookies separately for parent and subdomain streams', async (
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async ({ ytDlpPath, cookiesPath }) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', cookiesPath)
       await window.ftElectron.ytDlpGetPlaybackInfo('https://media.example.test/video', true, true)
-    }, { ytDlpPath: executable, cookiesPath: cookiePath })
+    })
 
     for (const url of streamUrls) {
       expect(await page.evaluate(async streamUrl => (await fetch(streamUrl)).status, url), url).toBe(200)
@@ -2439,14 +2434,14 @@ test('decodes and deduplicates format cookies for browser-authenticated external
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async ytDlpPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
       await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
-    }, executable)
+    })
 
     await page.evaluate(async () => {
       await window.ftElectron.ytDlpGetPlaybackInfo('https://media.example.test/video', true, true)
@@ -2489,11 +2484,11 @@ test('skips a TikTok codec unsupported by the player when a compatible stream ex
     contentType: 'video/mp4',
     body: await readFile(DEMO_MEDIA_PATH)
   }))
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
   await page.locator(sel.searchInput).press('Enter')
@@ -2528,11 +2523,11 @@ test('tries an accessible H.265 stream when another codec URL is blocked', async
     headers: { 'content-length': String(media.length), 'accept-ranges': 'bytes' },
     body: media
   }))
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
   await page.locator(sel.searchInput).press('Enter')
@@ -2562,11 +2557,11 @@ test('plays an H.264 MP4 when yt-dlp supplies short codec names', async ({ app, 
     headers: { 'content-length': String(media.length), 'accept-ranges': 'bytes' },
     body: media
   }))
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
   await page.locator(sel.searchInput).press('Enter')
@@ -2615,11 +2610,11 @@ for (const [label, creatorMetadata, artist, avatar] of [
       contentType: 'audio/mpeg',
       body: await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'demo-audio.mp3'))
     }))
-    await page.evaluate(async ytDlpPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    })
 
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
@@ -2660,11 +2655,11 @@ test('does not show an audio-only player when a video site blocks its video stre
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
   await page.route('https://blocked-video.example.test/stream.mp4', route => route.fulfill({ status: 403 }))
-  await page.evaluate(async (ytDlpPath) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
   await page.locator(sel.searchInput).press('Enter')
@@ -2711,12 +2706,12 @@ ${segmentUrl}
 `
   }))
   await page.route(segmentUrl, route => route.fulfill({ contentType: 'audio/mp4', body: media }))
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateAmbientMode', true)
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.mixcloud.com/example/show/')
   await page.locator(sel.searchInput).press('Enter')
@@ -2755,11 +2750,11 @@ test('plays both streams when an external clip has separate audio and codec-free
   const audioBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-long-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
   await page.route(videoUrl, route => route.fulfill({ contentType: 'video/mp4', body: videoBytes }))
   await page.route(audioUrl, route => route.fulfill({ contentType: 'audio/mp4', body: audioBytes }))
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/example')
   await page.locator(sel.searchInput).press('Enter')
@@ -2880,11 +2875,11 @@ test('uses companion audio only for a selected video-only legacy format', async 
   const audioBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-long-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
   await page.route(videoUrl, route => route.fulfill({ contentType: 'video/mp4', body: videoBytes }))
   await page.route(audioUrl, route => route.fulfill({ contentType: 'audio/mp4', body: audioBytes }))
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/mixed')
   await page.locator(sel.searchInput).press('Enter')
@@ -2963,11 +2958,11 @@ ${segmentUrl}
       contentType: 'video/mp4',
       body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
     }))
-    await page.evaluate(async (ytDlpPath) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    })
 
     const variantRequested = page.waitForRequest(variantUrl)
     await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
@@ -3040,11 +3035,11 @@ segment.mp4
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    })
 
     await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
     await page.locator(sel.searchInput).press('Enter')

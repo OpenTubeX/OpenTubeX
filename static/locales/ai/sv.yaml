@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ytterligare yt-dlp-argument
     Concurrent Downloads: Samtidiga nedladdningar
     Bandwidth Limit: Bandbreddsgräns (KiB/s)
-    Choose Download Folder: Välj nedladdningsmapp
     Download Templates: Nedladdningsmallar
     Manage Download Templates: Hantera nedladdningsmallar ({templateCount})
     New Template: Ny mall
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Webbläsare för kakor
     Browser Profile: Webbläsarprofil (valfritt)
     Browser Profile Placeholder: Profilnamn eller sökväg
+    Browser Profile Invalid: "Ange ett profilnamn eller välj en profilmapp med mappknappen."
     Select Browser: Välj en webbläsare
     Always Use Cookies: Använd alltid kakor
     Restricted Playback Authentication Hint: Som standard skickar OpenTubeX kakorna till yt-dlp först när du väljer "Försök med konfigurerade kakor" för en åldersbegränsad video eller en video endast för medlemmar.
@@ -1913,6 +1913,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechatt stöds för närvarande inte via Yattee-servern. En direktanslutning till YouTube krävs.
   External Player:
     LaunchFailedTemplate: Det gick inte att starta {externalPlayer}. Kontrollera att den är installerad, eller ange sökvägen till den körbara filen i inställningarna för extern spelare.
+    Confirm Arguments Title: "Köra den externa spelaren med anpassade argument?"
+    Confirm Arguments Message: "{externalPlayer} startar med dessa anpassade argument:"
+    Confirm Arguments Warning: "Vissa argument kan köra program eller skriva över filer. Fortsätt bara om du själv har lagt till dem."
+    Run: "Kör"
+    LaunchCanceledTemplate: "{externalPlayer} öppnades inte"
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
@@ -2318,6 +2323,7 @@ CommandPalette:
     Download Finished: Nedladdningen pågår inte längre
     Video: Öppna en video först
 Downloads:
+  File Name Template Invalid: 'Använd en relativ sökväg i nedladdningsmappen utan "..", "~", "$", "%" eller ett prefix som "thumbnail:".'
   Search Completed: "Sök bland slutförda nedladdningar efter titel eller kanal"
   Format: "Format"
   All Formats: "Alla format"
@@ -2471,6 +2477,8 @@ Tray Icon:
   Follow App Theme: "Följ appens tema"
 
 Form Inputs:
+  Browse: "Bläddra"
+  Use Default Path: "Använd standard"
   Enter Password Hint: "Ange ditt lösenord"
   Choose Password Hint: "Välj ett lösenord"
   Confirm Password Hint: "Upprepa ditt nya lösenord"
@@ -2490,7 +2498,6 @@ Form Inputs:
   Any Age: Valfri ålder
   Included Terms Example: t.ex. handledning, recension
   Excluded Terms Example: t.ex. trailer, förhandsvisning
-  Download Folder Hint: Lämna tomt för att använda mappen Hämtade filer
   Global Arguments Hint: Valfria argument för varje hämtning
   Unlimited Hint: 0 för obegränsat
   Add Argument: Lägg till ett argument

@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
     Concurrent Downloads: Samaaegsed allalaadimised
     Bandwidth Limit: Ribalaiuse piirang (KiB/s)
-    Choose Download Folder: Vali allalaadimiskaust
     Download Templates: Allalaadimismallid
     Manage Download Templates: Halda allalaadimismalle ({templateCount})
     New Template: Uus mall
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Küpsiste brauser
     Browser Profile: Brauseriprofiil (valikuline)
     Browser Profile Placeholder: Profiili nimi või asukoht
+    Browser Profile Invalid: "Sisesta profiili nimi või vali kaustanupuga profiilikaust."
     Select Browser: Vali brauser
     Always Use Cookies: Kasuta alati küpsiseid
     Restricted Playback Authentication Hint: Vaikimisi edastab OpenTubeX need küpsised yt-dlp-le alles siis, kui valid vanusepiiranguga või ainult liikmetele mõeldud video juures "Proovi seadistatud küpsistega".
@@ -1914,6 +1914,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Kui kasutad Yattee serverit, siis reaalajas vestlus hetkel ei ole toetatud. Selleks on vajalik otseliidestus YouTube'iga.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} käivitamine nurjus. Kontrolli, et see on paigaldatud, või määra välise mängija seadetes käivitusfaili asukoht."
+    Confirm Arguments Title: "Kas käivitada väline mängija kohandatud argumentidega?"
+    Confirm Arguments Message: "{externalPlayer} käivitub nende kohandatud argumentidega:"
+    Confirm Arguments Warning: "Mõned argumendid võivad käivitada programme või faile üle kirjutada. Jätka ainult siis, kui lisasid need ise."
+    Run: "Käivita"
+    LaunchCanceledTemplate: "{externalPlayer} ei avatud"
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
@@ -2320,6 +2325,7 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  File Name Template Invalid: 'Kasuta allalaadimiskaustas suhtelist teed ilma "..", "~", "$", "%" või eesliiteta nagu "thumbnail:".'
   Search Completed: "Otsi lõpetatud allalaadimisi pealkirja või kanali järgi"
   Format: "Vorming"
   All Formats: "Kõik vormingud"
@@ -2471,6 +2477,8 @@ Tray Icon:
   Follow App Theme: "Järgi rakenduse teemat"
 
 Form Inputs:
+  Browse: "Sirvi"
+  Use Default Path: "Kasuta vaikimisi"
   Enter Password Hint: "Sisesta oma parool"
   Choose Password Hint: "Vali parool"
   Confirm Password Hint: "Korda oma uut parooli"
@@ -2490,7 +2498,6 @@ Form Inputs:
   Any Age: Mis tahes vanus
   Included Terms Example: nt õpetus, arvustus
   Excluded Terms Example: nt treiler, eelvaade
-  Download Folder Hint: Jäta tühjaks, et kasutada allalaadimiste kausta
   Global Arguments Hint: Valikulised argumendid igale allalaadimisele
   Unlimited Hint: 0 tähendab piiramatut
   Add Argument: Lisa argument

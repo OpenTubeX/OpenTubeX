@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: További yt-dlp argumentumok
     Concurrent Downloads: Egyidejű letöltések
     Bandwidth Limit: Sávszélességkorlát (KiB/s)
-    Choose Download Folder: Letöltési mappa kiválasztása
     Download Templates: Letöltési sablonok
     Manage Download Templates: Letöltési sablonok kezelése ({templateCount})
     New Template: Új sablon
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Sütikhez használt böngésző
     Browser Profile: Böngészőprofil (nem kötelező)
     Browser Profile Placeholder: Profil neve vagy elérési útja
+    Browser Profile Invalid: "Adjon meg egy profilnevet, vagy válasszon profilmappát a mappa gombbal."
     Select Browser: Böngésző kiválasztása
     Always Use Cookies: Sütik használata mindig
     Restricted Playback Authentication Hint: Az OpenTubeX alapértelmezés szerint csak akkor adja át ezeket a sütiket az yt-dlp programnak, ha egy korhatáros vagy csak tagoknak szóló videónál a „Próbálkozás a beállított sütikkel” lehetőséget választja.
@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
   External Player:
     LaunchFailedTemplate: A(z) {externalPlayer} nem indítható el. Ellenőrizze, hogy telepítve van-e, vagy adja meg a végrehajtható fájl útvonalát a külső lejátszó beállításaiban.
+    Confirm Arguments Title: "Elindítja a külső lejátszót egyéni argumentumokkal?"
+    Confirm Arguments Message: "A(z) {externalPlayer} ezekkel az egyéni argumentumokkal indul:"
+    Confirm Arguments Warning: "Egyes argumentumok programokat futtathatnak vagy fájlokat írhatnak felül. Csak akkor folytassa, ha saját maga adta hozzá őket."
+    Run: "Futtatás"
+    LaunchCanceledTemplate: "A(z) {externalPlayer} nem nyílt meg"
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
@@ -2318,6 +2323,7 @@ CommandPalette:
     Download Finished: Ez a letöltés már nem fut
     Video: Előbb nyisson meg egy videót
 Downloads:
+  File Name Template Invalid: 'Használjon a letöltési mappán belüli relatív útvonalat "..", "~", "$", "%" vagy például "thumbnail:" előtag nélkül.'
   Search Completed: "Befejezett letöltések keresése cím vagy csatorna alapján"
   Format: "Formátum"
   All Formats: "Minden formátum"
@@ -2469,6 +2475,8 @@ Tray Icon:
   Follow App Theme: "Alkalmazástéma követése"
 
 Form Inputs:
+  Browse: "Tallózás"
+  Use Default Path: "Alapértelmezett használata"
   Enter Password Hint: "Add meg a jelszavad"
   Choose Password Hint: "Válassz jelszót"
   Confirm Password Hint: "Ismételd meg az új jelszavad"
@@ -2488,7 +2496,6 @@ Form Inputs:
   Any Age: Bármilyen korú
   Included Terms Example: pl. útmutató, értékelés
   Excluded Terms Example: pl. előzetes, bemutató
-  Download Folder Hint: Hagyja üresen a Letöltések mappa használatához
   Global Arguments Hint: Opcionális argumentumok minden letöltéshez
   Unlimited Hint: 0 a korlátlanhoz
   Add Argument: Argumentum hozzáadása

@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
     Concurrent Downloads: Ταυτόχρονες λήψεις
     Bandwidth Limit: Όριο εύρους ζώνης (KiB/s)
-    Choose Download Folder: Επιλογή φακέλου λήψεων
     Download Templates: Πρότυπα λήψεων
     Manage Download Templates: Διαχείριση προτύπων λήψεων ({templateCount})
     New Template: Νέο πρότυπο
@@ -1027,6 +1026,7 @@ Settings:
     Browser for Cookies: Πρόγραμμα περιήγησης για cookie
     Browser Profile: Προφίλ προγράμματος περιήγησης (προαιρετικό)
     Browser Profile Placeholder: Όνομα ή διαδρομή προφίλ
+    Browser Profile Invalid: "Εισαγάγετε ένα όνομα προφίλ ή επιλέξτε φάκελο προφίλ με το κουμπί φακέλου."
     Select Browser: Επιλογή προγράμματος περιήγησης
     Always Use Cookies: Μόνιμη χρήση cookie
     Restricted Playback Authentication Hint: Από προεπιλογή, το OpenTubeX διαβιβάζει αυτά τα cookie στο yt-dlp μόνο αφού επιλέξετε «Δοκιμή με τα ρυθμισμένα cookie» σε βίντεο με περιορισμό ηλικίας ή μόνο για μέλη.
@@ -1944,6 +1944,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
   External Player:
     LaunchFailedTemplate: Δεν ήταν δυνατή η εκκίνηση του {externalPlayer}. Βεβαιωθείτε ότι είναι εγκατεστημένο ή ορίστε τη διαδρομή του εκτελέσιμου αρχείου στις ρυθμίσεις εξωτερικού προγράμματος αναπαραγωγής.
+    Confirm Arguments Title: "Εκτέλεση της εξωτερικής εφαρμογής αναπαραγωγής με προσαρμοσμένα ορίσματα;"
+    Confirm Arguments Message: "Το {externalPlayer} θα ξεκινήσει με αυτά τα προσαρμοσμένα ορίσματα:"
+    Confirm Arguments Warning: "Ορισμένα ορίσματα μπορούν να εκτελέσουν προγράμματα ή να αντικαταστήσουν αρχεία. Συνεχίστε μόνο αν τα προσθέσατε εσείς."
+    Run: "Εκτέλεση"
+    LaunchCanceledTemplate: "Το {externalPlayer} δεν άνοιξε"
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
@@ -2355,6 +2360,7 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  File Name Template Invalid: 'Χρησιμοποιήστε μια σχετική διαδρομή μέσα στον φάκελο λήψεων χωρίς "..", "~", "$", "%" ή πρόθεμα όπως "thumbnail:".'
   Search Completed: "Αναζήτηση ολοκληρωμένων λήψεων κατά τίτλο ή κανάλι"
   Format: "Μορφή"
   All Formats: "Όλες οι μορφές"
@@ -2508,6 +2514,8 @@ Tray Icon:
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
 
 Form Inputs:
+  Browse: "Περιήγηση"
+  Use Default Path: "Χρήση προεπιλογής"
   Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
   Choose Password Hint: "Επιλέξτε έναν κωδικό"
   Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
@@ -2527,7 +2535,6 @@ Form Inputs:
   Any Age: Οποιαδήποτε ηλικία
   Included Terms Example: π.χ. οδηγός, κριτική
   Excluded Terms Example: π.χ. τρέιλερ, προεπισκόπηση
-  Download Folder Hint: Αφήστε κενό για χρήση του φακέλου λήψεων
   Global Arguments Hint: Προαιρετικά ορίσματα για κάθε λήψη
   Unlimited Hint: 0 για απεριόριστο
   Add Argument: Προσθέστε ένα όρισμα

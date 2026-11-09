@@ -1107,7 +1107,6 @@ Settings:
     Global Additional yt-dlp Arguments: Bykomende yt-dlp-argumente
     Concurrent Downloads: Gelyktydige aflaaie
     Bandwidth Limit: Bandwydtelimiet (KiB/s)
-    Choose Download Folder: Kies aflaaivouer
     Download Templates: Aflaaisjablone
     Manage Download Templates: Bestuur aflaaisjablone ({templateCount})
     New Template: Nuwe sjabloon
@@ -1201,6 +1200,7 @@ Settings:
     Browser for Cookies: Blaaier vir koekies
     Browser Profile: Blaaierprofiel (opsioneel)
     Browser Profile Placeholder: Profielnaam of pad
+    Browser Profile Invalid: "Voer ’n profielnaam in, of kies ’n profielgids met die gidsknoppie."
     Select Browser: Kies ’n blaaier
     Always Use Cookies: Gebruik altyd koekies
     Restricted Playback Authentication Hint: By verstek gee OpenTubeX hierdie koekies slegs aan yt-dlp deur nadat u "Probeer met opgestelde koekies" op ’n video met ouderdomsbeperking of vir slegs lede kies.
@@ -2167,6 +2167,11 @@ Video:
   Info panel source: 'Bron: {source}'
   External Player:
     LaunchFailedTemplate: Kon nie {externalPlayer} begin nie. Maak seker dat dit geïnstalleer is, of stel die pad na die uitvoerbare lêer in die instellings vir die eksterne speler.
+    Confirm Arguments Title: "Laat die eksterne speler met pasgemaakte argumente loop?"
+    Confirm Arguments Message: "{externalPlayer} sal met hierdie pasgemaakte argumente begin:"
+    Confirm Arguments Warning: "Sommige argumente kan programme laat loop of lêers oorskryf. Gaan net voort as jy dit self bygevoeg het."
+    Run: "Laat loop"
+    LaunchCanceledTemplate: "{externalPlayer} is nie oopgemaak nie"
 Playlist:
   Close Playlist: Sluit afspeellys
   Add Playlist to Queue: Voeg afspeellys by tou
@@ -2588,6 +2593,7 @@ CommandPalette:
     Download Finished: Hierdie aflaai loop nie meer nie
     Video: Maak eers ’n video oop
 Downloads:
+  File Name Template Invalid: 'Gebruik ’n relatiewe pad binne die aflaaigids sonder "..", "~", "$", "%" of ’n voorvoegsel soos "thumbnail:".'
   Add Download: Voeg aflaai by
   Search Completed: Soek voltooide aflaaie volgens titel of kanaal
   Format: Formaat
@@ -2732,6 +2738,8 @@ Tray Icon:
   Title: Stelselbakikoon
   Follow App Theme: Volg toeptema
 Form Inputs:
+  Browse: "Blaai"
+  Use Default Path: "Gebruik verstek"
   Enter Password Hint: Voer u wagwoord in
   Choose Password Hint: Kies ’n wagwoord
   Confirm Password Hint: Herhaal u nuwe wagwoord
@@ -2751,7 +2759,6 @@ Form Inputs:
   Any Age: Enige ouderdom
   Included Terms Example: bv. tutoriaal, resensie
   Excluded Terms Example: bv. lokprent, voorskou
-  Download Folder Hint: Laat leeg om u Aflaaie-vouer te gebruik
   Global Arguments Hint: Opsionele argumente vir elke aflaai
   Unlimited Hint: 0 vir onbeperk
   Add Argument: Voeg ’n argument by

@@ -95,6 +95,7 @@ import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
 import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
 import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
+import { canRendererWriteSetting } from './settingWriteGuard'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
@@ -2620,7 +2621,7 @@ function runApp() {
     return true
   })
 
-  setupIpBlockRecoveryIpc()
+  setupIpBlockRecoveryIpc({ updateSettingFromMain })
 
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
@@ -2740,8 +2741,13 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, (event, payload) => {
-    handleOpenInExternalPlayer(event, payload).catch(error => console.error('Could not open the external player', error))
+  ipcMain.handle(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, async (event, payload) => {
+    try {
+      return await handleOpenInExternalPlayer(event, payload)
+    } catch (error) {
+      console.error('Could not open the external player', error)
+      return null
+    }
   })
   /** The API server the user configured, which may run on a private network */
   async function getConfiguredApiServerUrl() {
@@ -2751,7 +2757,7 @@ function runApp() {
     return (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
   }
 
-  setupYtDlpIpc()
+  setupYtDlpIpc({ updateSettingFromMain })
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
 
@@ -2934,8 +2940,9 @@ function runApp() {
           return await baseHandlers.settings.find()
 
         case DBActions.GENERAL.UPSERT:
-          // Destinations require a native folder picker. Backup status is written by the scheduler.
-          if (['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus'].includes(data._id)) {
+          // Destinations and executables require a native picker. Backup status is written by the scheduler.
+          if (!canRendererWriteSetting(data._id, data.value)) {
+            console.warn(`Refused a renderer write to the ${String(data._id)} setting`)
             return null
           }
 

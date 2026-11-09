@@ -1,7 +1,7 @@
 import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -34,13 +34,12 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
     'fi',
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async (executable) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesBrowserProfile: '/tmp/test-profile' })
+  await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-    await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/tmp/test-profile')
-  }, executable)
+  })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBeNull()
   await expect(readFile(capturedArgs)).rejects.toThrow()
 
@@ -56,12 +55,12 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   expect(JSON.parse(await readFile(capturedInfo, 'utf8')).subtitles.caption).toEqual([{ url: subtitleUrl, ext: 'vtt' }])
   await expect(readdir(path.dirname(args[args.indexOf('--load-info-json') + 1]))).rejects.toThrow()
 
+  await choosePickerPaths(app, page, { ytDlpPlaybackCookiesPath: '/tmp/test-cookies.txt' })
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSubtitleUseCookies', false)
     await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/test-cookies.txt')
   })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBe(vtt)
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl.replace('fmt=vtt', 'fmt=srt'))).toBe(srt)

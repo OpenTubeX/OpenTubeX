@@ -573,6 +573,51 @@ export async function attachScreenshot(testInfo, page, name) {
   }
 }
 
+/**
+ * Sets paths that only the main process's native pickers may write (see
+ * src/main/settingWriteGuard.js) by answering the next picker.
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ * @param {import('@playwright/test').Page} page
+ * @param {Partial<Record<'externalPlayerExecutable' | 'videoIpBlockScriptPath' | 'ytDlpDownloadFolderPath' | 'ytDlpFfmpegPath' | 'ytDlpPath' | 'ytDlpPlaybackCookiesBrowserProfile' | 'ytDlpPlaybackCookiesPath', string>>} paths
+ */
+export async function choosePickerPaths({ electronApp }, page, paths) {
+  for (const [settingId, filePath] of Object.entries(paths)) {
+    await electronApp.evaluate(({ dialog }, filePath) => {
+      const showOpenDialog = dialog.showOpenDialog
+      dialog.showOpenDialog = async () => {
+        dialog.showOpenDialog = showOpenDialog
+        return { canceled: false, filePaths: [filePath] }
+      }
+    }, filePath)
+    const chosen = await page.evaluate(settingId => {
+      const pickers = {
+        videoIpBlockScriptPath: window.ftElectron.chooseIpBlockRecoveryScript,
+        ytDlpDownloadFolderPath: window.ftElectron.ytDlpChooseDownloadFolder,
+        ytDlpPlaybackCookiesBrowserProfile: window.ftElectron.ytDlpChooseBrowserProfile,
+        ytDlpPlaybackCookiesPath: window.ftElectron.ytDlpChooseCookies,
+      }
+      return pickers[settingId]?.() ?? window.ftElectron.chooseExecutable(settingId)
+    }, settingId)
+    expect(chosen).toBe(filePath)
+  }
+}
+
+/**
+ * Answers the next native message box, such as the external player argument
+ * confirmation, with the given button index.
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ * @param {number} response
+ */
+export async function answerNextMessageBox({ electronApp }, response) {
+  await electronApp.evaluate(({ dialog }, response) => {
+    const showMessageBox = dialog.showMessageBox
+    dialog.showMessageBox = async () => {
+      dialog.showMessageBox = showMessageBox
+      return { response, checkboxChecked: false }
+    }
+  }, response)
+}
+
 /** The renderer's current viewport size. */
 export function getViewport(page) {
   return page.evaluate(() => ({

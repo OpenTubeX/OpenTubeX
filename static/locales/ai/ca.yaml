@@ -1181,7 +1181,6 @@ Settings:
     Global Additional yt-dlp Arguments: Arguments addicionals de yt-dlp
     Concurrent Downloads: Baixades simultànies
     Bandwidth Limit: Límit d'amplada de banda (KiB/s)
-    Choose Download Folder: Tria la carpeta de baixades
     Download Templates: Plantilles de baixada
     Manage Download Templates: Gestiona les plantilles de baixada ({templateCount})
     New Template: Plantilla nova
@@ -1275,6 +1274,7 @@ Settings:
     Browser for Cookies: Navegador de les galetes
     Browser Profile: Perfil del navegador (opcional)
     Browser Profile Placeholder: Nom o camí del perfil
+    Browser Profile Invalid: "Introduïu un nom de perfil o trieu una carpeta de perfil amb el botó de carpeta."
     Select Browser: Seleccioneu un navegador
     Always Use Cookies: Utilitza sempre les galetes
     Restricted Playback Authentication Hint: De manera predeterminada, l'OpenTubeX només passa aquestes galetes a yt-dlp després que trieu "Prova-ho amb les galetes configurades" en un vídeo restringit per edat o només per a membres.
@@ -2120,6 +2120,11 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
     LaunchFailedTemplate: No s’ha pogut iniciar {externalPlayer}. Comproveu que està instal·lat o definiu el camí de l’executable a la configuració del reproductor extern.
+    Confirm Arguments Title: "Voleu executar el reproductor extern amb arguments personalitzats?"
+    Confirm Arguments Message: "{externalPlayer} s'iniciarà amb aquests arguments personalitzats:"
+    Confirm Arguments Warning: "Alguns arguments poden executar programes o sobreescriure fitxers. Continueu només si els heu afegit vosaltres."
+    Run: "Executa"
+    LaunchCanceledTemplate: "No s'ha obert {externalPlayer}"
   Player:
     Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
     Stream Recovery:
@@ -2979,6 +2984,7 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  File Name Template Invalid: 'Utilitzeu un camí relatiu dins de la carpeta de baixades sense "..", "~", "$", "%" ni un prefix com ara "thumbnail:".'
   Search Completed: "Cerca les baixades completades per títol o canal"
   Format: "Format"
   All Formats: "Tots els formats"
@@ -3128,6 +3134,8 @@ Tray Icon:
   Follow App Theme: "Segueix el tema de l’aplicació"
 
 Form Inputs:
+  Browse: "Navega"
+  Use Default Path: "Utilitza el valor per defecte"
   Enter Password Hint: "Introduïu la vostra contrasenya"
   Choose Password Hint: "Trieu una contrasenya"
   Confirm Password Hint: "Repetiu la vostra contrasenya nova"
@@ -3147,7 +3155,6 @@ Form Inputs:
   Any Age: Qualsevol antiguitat
   Included Terms Example: p. ex. tutorial, ressenya
   Excluded Terms Example: p. ex. tràiler, avanç
-  Download Folder Hint: Deixeu-ho buit per utilitzar la carpeta de baixades
   Global Arguments Hint: Arguments opcionals per a cada baixada
   Unlimited Hint: 0 per a il·limitat
   Add Argument: Afegiu un argument

@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: 追加のyt-dlp引数
     Concurrent Downloads: 同時ダウンロード数
     Bandwidth Limit: 帯域幅の上限 (KiB/s)
-    Choose Download Folder: ダウンロードフォルダーを選択
     Download Templates: ダウンロードテンプレート
     Manage Download Templates: ダウンロードテンプレートを管理（{templateCount}件）
     New Template: 新しいテンプレート
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookieを取得するブラウザー
     Browser Profile: ブラウザープロフィール（任意）
     Browser Profile Placeholder: プロフィール名またはパス
+    Browser Profile Invalid: "プロファイル名を入力するか、フォルダーボタンでプロファイルフォルダーを選択してください。"
     Select Browser: ブラウザーを選択
     Always Use Cookies: 常にCookieを使用
     Restricted Playback Authentication Hint: 既定では、年齢制限またはメンバー限定の動画で「設定済みのCookieを使用して再試行」を選んだ後にのみ、これらのCookieをyt-dlpへ渡します。
@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 現在、ライブチャットは Yattee サーバーでは未対応です。直接 YouTube への接続が必要です。
   External Player:
     LaunchFailedTemplate: "{externalPlayer} を起動できませんでした。インストールされていることを確認するか、外部プレーヤーの設定で実行ファイルのパスを指定してください。"
+    Confirm Arguments Title: "カスタム引数で外部プレーヤーを実行しますか？"
+    Confirm Arguments Message: "{externalPlayer} を次のカスタム引数で起動します:"
+    Confirm Arguments Warning: "引数によってはプログラムを実行したりファイルを上書きしたりできます。自分で追加した場合のみ続行してください。"
+    Run: "実行"
+    LaunchCanceledTemplate: "{externalPlayer} を開きませんでした"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
@@ -2317,6 +2322,7 @@ CommandPalette:
     Download Finished: このダウンロードはすでに終了しています
     Video: 先に動画を開いてください
 Downloads:
+  File Name Template Invalid: 'ダウンロードフォルダー内の相対パスを使用してください。".."、"~"、"$"、"%"、"thumbnail:" のような接頭辞は使用できません。'
   Search Completed: "完了したダウンロードをタイトルまたはチャンネルで検索"
   Format: "形式"
   All Formats: "すべての形式"
@@ -2468,6 +2474,8 @@ Tray Icon:
   Follow App Theme: "アプリのテーマに合わせる"
 
 Form Inputs:
+  Browse: "参照"
+  Use Default Path: "デフォルトを使用"
   Enter Password Hint: "パスワードを入力"
   Choose Password Hint: "パスワードを設定"
   Confirm Password Hint: "新しいパスワードをもう一度入力"
@@ -2487,7 +2495,6 @@ Form Inputs:
   Any Age: 公開時期を問わない
   Included Terms Example: "例: 解説, レビュー"
   Excluded Terms Example: "例: 予告編, プレビュー"
-  Download Folder Hint: 空欄にするとダウンロードフォルダーを使用
   Global Arguments Hint: すべてのダウンロードに追加する任意の引数
   Unlimited Hint: 0で無制限
   Add Argument: 引数を追加

@@ -123,8 +123,17 @@ const capacitor = {
   ytDlpRemoveDownload: id => native.remove({ id }).then(result => result.ok),
   handleYtDlpDownloadStatus: callback => listen('downloadStatus', callback),
   handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),
-  ytDlpChooseDownloadFolder: chooseAndroidDirectory,
-  ytDlpChooseCookies: () => native.chooseCookies().then(result => result.path),
+  // Saves the folder like the desktop picker, which writes it in the main process.
+  async ytDlpChooseDownloadFolder() {
+    const path = await chooseAndroidDirectory()
+    if (path) await store.dispatch('updateYtDlpDownloadFolderPath', path)
+    return path
+  },
+  async ytDlpChooseCookies() {
+    const { path } = await native.chooseCookies()
+    if (path) await store.dispatch('updateYtDlpPlaybackCookiesPath', path)
+    return path
+  },
   ytDlpCreateSession: labels => native.createSession(labels).then(result => result.path),
   ytDlpGetInfo: () => native.info(),
   ytDlpCheckBinaryUpdate: binary => native.checkUpdate({ binary, channel: configuration().channel }),

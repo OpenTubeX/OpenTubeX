@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Další argumenty yt-dlp
     Concurrent Downloads: Souběžná stahování
     Bandwidth Limit: Omezení přenosové rychlosti (KiB/s)
-    Choose Download Folder: Vybrat složku pro stahování
     Download Templates: Šablony stahování
     Manage Download Templates: Spravovat šablony stahování ({templateCount})
     New Template: Nová šablona
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Prohlížeč pro cookies
     Browser Profile: Profil prohlížeče (volitelné)
     Browser Profile Placeholder: Název profilu nebo cesta
+    Browser Profile Invalid: "Zadejte název profilu nebo vyberte složku profilu tlačítkem složky."
     Select Browser: Vyberte prohlížeč
     Always Use Cookies: Vždy používat cookies
     Restricted Playback Authentication Hint: OpenTubeX ve výchozím nastavení předá tyto cookies nástroji yt-dlp až poté, co u videa s věkovým omezením nebo pouze pro členy zvolíte „Zkusit s nastavenými cookies“.
@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálně není podporován se serverem Yattee. Je vyžadováno přímé připojení k YouTube.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} se nepodařilo spustit. Ověřte, že je nainstalován, nebo nastavte cestu ke spustitelnému souboru v nastavení externího přehrávače."
+    Confirm Arguments Title: "Spustit externí přehrávač s vlastními argumenty?"
+    Confirm Arguments Message: "{externalPlayer} se spustí s těmito vlastními argumenty:"
+    Confirm Arguments Warning: "Některé argumenty mohou spouštět programy nebo přepisovat soubory. Pokračujte, jen pokud jste je přidali sami."
+    Run: "Spustit"
+    LaunchCanceledTemplate: "{externalPlayer} nebyl otevřen"
 Playlist:
   Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"
@@ -2317,6 +2322,7 @@ CommandPalette:
     Download Finished: Toto stahování již neprobíhá
     Video: Nejprve otevřete video
 Downloads:
+  File Name Template Invalid: 'Použijte relativní cestu uvnitř složky stahování bez "..", "~", "$", "%" nebo předpony jako "thumbnail:".'
   Search Completed: "Hledat dokončená stahování podle názvu nebo kanálu"
   Format: "Formát"
   All Formats: "Všechny formáty"
@@ -2468,6 +2474,8 @@ Tray Icon:
   Follow App Theme: "Použít motiv aplikace"
 
 Form Inputs:
+  Browse: "Procházet"
+  Use Default Path: "Použít výchozí"
   Enter Password Hint: "Zadejte své heslo"
   Choose Password Hint: "Zvolte heslo"
   Confirm Password Hint: "Zopakujte nové heslo"
@@ -2487,7 +2495,6 @@ Form Inputs:
   Any Age: Libovolné stáří
   Included Terms Example: např. návod, recenze
   Excluded Terms Example: např. trailer, ukázka
-  Download Folder Hint: Ponechte prázdné pro použití složky Stažené soubory
   Global Arguments Hint: Volitelné argumenty pro každé stahování
   Unlimited Hint: 0 pro neomezenou rychlost
   Add Argument: Přidejte argument

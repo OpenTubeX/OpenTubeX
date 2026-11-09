@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({
@@ -612,8 +612,11 @@ test.describe('YouTube playlist search', () => {
   test('numbers search results like the playlist when a members-only video is hidden', async ({ app, page }) => {
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.__externalLaunches = []
-      ipcMain.removeAllListeners('open-in-external-player')
-      ipcMain.on('open-in-external-player', (event, payload) => globalThis.__externalLaunches.push(payload.playlistIndex))
+      ipcMain.removeHandler('open-in-external-player')
+      ipcMain.handle('open-in-external-player', (event, payload) => {
+        globalThis.__externalLaunches.push(payload.playlistIndex)
+        return null
+      })
     })
     await page.evaluate(() => window.$store.dispatch('updateExternalPlayer', 'mpv'))
     await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({
@@ -636,9 +639,9 @@ test.describe('YouTube playlist search', () => {
   })
 
   test('reports an external player that cannot be started', async ({ app, page }) => {
+    await choosePickerPaths(app, page, { externalPlayerExecutable: '/nonexistent/opentubex-external-player' })
     await page.evaluate(async () => {
       await window.$store.dispatch('updateExternalPlayer', 'mpv')
-      await window.$store.dispatch('updateExternalPlayerExecutable', '/nonexistent/opentubex-external-player')
     })
     await page.route(/\/api\/v1\/playlists\/missing-player\?/, route => route.fulfill({
       json: playlistResponse([playlistVideo(0)])

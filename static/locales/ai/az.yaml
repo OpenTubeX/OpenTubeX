@@ -930,7 +930,6 @@ Settings:
     Global Additional yt-dlp Arguments: Əlavə yt-dlp arqumentləri
     Concurrent Downloads: Eyni vaxtda endirmələr
     Bandwidth Limit: Ötürmə sürəti limiti (KiB/s)
-    Choose Download Folder: Endirmə qovluğunu seç
     Download Templates: Endirmə şablonları
     Manage Download Templates: Endirmə şablonlarını idarə et ({templateCount})
     New Template: Yeni şablon
@@ -1024,6 +1023,7 @@ Settings:
     Browser for Cookies: Kukilər üçün brauzer
     Browser Profile: Brauzer profili (istəyə bağlı)
     Browser Profile Placeholder: Profil adı və ya yolu
+    Browser Profile Invalid: "Profil adını daxil edin və ya qovluq düyməsi ilə profil qovluğunu seçin."
     Select Browser: Brauzer seçin
     Always Use Cookies: Həmişə kukilərdən istifadə et
     Restricted Playback Authentication Hint: Varsayılan olaraq, OpenTubeX bu kukiləri yalnız yaş məhdudiyyətli və ya üzvlərə məxsus videoda “Tənzimlənmiş kukilərlə sına” seçdikdən sonra yt-dlp proqramına ötürür.
@@ -1924,6 +1924,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Söhbət hazırda Yattee serveri ilə dəstəklənmir. YouTube-a birbaşa bağlantı tələb olunur.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} başladıla bilmədi. Onun quraşdırıldığını yoxlayın və ya xarici pleyer ayarlarında icra faylının yolunu təyin edin."
+    Confirm Arguments Title: "Xarici oynadıcı fərdi arqumentlərlə işə salınsın?"
+    Confirm Arguments Message: "{externalPlayer} bu fərdi arqumentlərlə başlayacaq:"
+    Confirm Arguments Warning: "Bəzi arqumentlər proqramları işə sala və ya faylların üzərinə yaza bilər. Yalnız onları özünüz əlavə etmisinizsə davam edin."
+    Run: "İşə sal"
+    LaunchCanceledTemplate: "{externalPlayer} açılmadı"
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə
@@ -2330,6 +2335,7 @@ CommandPalette:
     Download Finished: Bu endirmə artıq davam etmir
     Video: Əvvəlcə video açın
 Downloads:
+  File Name Template Invalid: 'Endirmə qovluğunun daxilində "..", "~", "$", "%" və ya "thumbnail:" kimi prefiks olmadan nisbi yol istifadə edin.'
   Search Completed: "Tamamlanmış endirmələri başlıq və ya kanala görə axtar"
   Format: "Format"
   All Formats: "Bütün formatlar"
@@ -2478,6 +2484,8 @@ Tray Icon:
   Follow App Theme: "Tətbiqin mövzusunu izlə"
 
 Form Inputs:
+  Browse: "Gözdən keçir"
+  Use Default Path: "Defoltdan istifadə et"
   Enter Password Hint: "Şifrənizi daxil edin"
   Choose Password Hint: "Şifrə seçin"
   Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
@@ -2497,7 +2505,6 @@ Form Inputs:
   Any Age: İstənilən yaş
   Included Terms Example: məs. təlimat, icmal
   Excluded Terms Example: məs. treyler, önizləmə
-  Download Folder Hint: Yükləmələr qovluğunu istifadə etmək üçün boş saxlayın
   Global Arguments Hint: Hər yükləmə üçün əlavə arqumentlər
   Unlimited Hint: Limitsiz üçün 0
   Add Argument: Arqument əlavə edin

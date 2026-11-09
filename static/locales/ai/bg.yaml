@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Допълнителни аргументи на yt-dlp
     Concurrent Downloads: Едновременни изтегляния
     Bandwidth Limit: Ограничение на пропускателната способност (KiB/s)
-    Choose Download Folder: Избор на папка за изтегляния
     Download Templates: Шаблони за изтегляне
     Manage Download Templates: Управление на шаблоните за изтегляне ({templateCount})
     New Template: Нов шаблон
@@ -1027,6 +1026,7 @@ Settings:
     Browser for Cookies: Браузър за бисквитките
     Browser Profile: Профил на браузъра (незадължително)
     Browser Profile Placeholder: Име или път до профила
+    Browser Profile Invalid: "Въведете име на профил или изберете папка на профила с бутона за папка."
     Select Browser: Избор на браузър
     Always Use Cookies: Винаги да се използват бисквитки
     Restricted Playback Authentication Hint: По подразбиране OpenTubeX предава тези бисквитки на yt-dlp едва след като изберете „Опит с настроените бисквитки“ за видеоклип с възрастово ограничение или само за членове.
@@ -1942,6 +1942,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чатът на живо засега не се поддържа от сървъра Yattee. Изисква се директна връзка с YouTube.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} не може да бъде стартиран. Уверете се, че е инсталиран, или задайте пътя до изпълнимия файл в настройките на външния плейър."
+    Confirm Arguments Title: "Да се стартира ли външният плейър с потребителски аргументи?"
+    Confirm Arguments Message: "{externalPlayer} ще стартира с тези потребителски аргументи:"
+    Confirm Arguments Warning: "Някои аргументи могат да стартират програми или да презаписват файлове. Продължете само ако сте ги добавили сами."
+    Run: "Стартиране"
+    LaunchCanceledTemplate: "{externalPlayer} не беше отворен"
 Playlist:
   Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"
@@ -2351,6 +2356,7 @@ CommandPalette:
     Download Finished: Това изтегляне вече не се изпълнява
     Video: Първо отворете видеоклип
 Downloads:
+  File Name Template Invalid: 'Използвайте относителен път в папката за изтегляне без "..", "~", "$", "%" или префикс като "thumbnail:".'
   Search Completed: "Търсене в завършените изтегляния по заглавие или канал"
   Format: "Формат"
   All Formats: "Всички формати"
@@ -2506,6 +2512,8 @@ Tray Icon:
   Follow App Theme: "Следване на темата на приложението"
 
 Form Inputs:
+  Browse: "Преглед"
+  Use Default Path: "Използване по подразбиране"
   Enter Password Hint: "Въведете паролата си"
   Choose Password Hint: "Изберете парола"
   Confirm Password Hint: "Повторете новата си парола"
@@ -2525,7 +2533,6 @@ Form Inputs:
   Any Age: Без ограничение за възрастта
   Included Terms Example: напр. урок, ревю
   Excluded Terms Example: напр. трейлър, преглед
-  Download Folder Hint: Оставете празно, за да използвате папката за изтегляния
   Global Arguments Hint: Незадължителни аргументи за всяко изтегляне
   Unlimited Hint: 0 за неограничено
   Add Argument: Добавете аргумент

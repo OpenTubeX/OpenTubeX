@@ -7,7 +7,7 @@ import router from './router/index'
 import store from './store/index'
 import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
-import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
+import { showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
 import { installTitleTooltips } from './helpers/titleTooltips'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
@@ -113,31 +113,6 @@ if (process.env.IS_ELECTRON) {
   window.ftElectron.tabs.onGoHistory(({ tabId, offset }) => {
     tabNavigation.go(tabId, offset)
   })
-
-  window.ftElectron.handleOpenInExternalPlayerResult(
-    (externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
-      if (launchFailed) {
-        showToast({
-          message: i18n.global.t('Video.External Player.LaunchFailedTemplate', { externalPlayer }),
-          icon: ['fas', 'circle-exclamation'],
-        })
-        return
-      }
-
-      for (const action of unsupportedActions) {
-        showExternalPlayerUnsupportedActionToast(externalPlayer, action)
-      }
-
-      const videoOrPlaylist = isPlaylist
-        ? i18n.global.t('Video.External Player.playlist')
-        : i18n.global.t('Video.External Player.video')
-
-      showToast({
-        message: i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }),
-        icon: ['fas', 'external-link-alt'],
-      })
-    }
-  )
 }
 
 if (supportsYtDlp) {

@@ -102,6 +102,38 @@ test.describe('settings', () => {
     await expect(externalSoftware.getByRole('combobox', { name: 'Managed Tool Updates' })).toBeVisible()
   })
 
+  test('sets executable paths only through the native picker', async ({ app, page, attachScreenshot }) => {
+    await app.electronApp.evaluate(({ dialog, ipcMain }) => {
+      dialog.showOpenDialog = async () => ({ canceled: false, filePaths: ['/opt/tools/yt-dlp'] })
+      ipcMain.removeHandler('yt-dlp-get-info')
+      ipcMain.handle('yt-dlp-get-info', (_event, options) => ({
+        ytDlp: { source: options.ytDlpSource, available: true, version: '2026.08.19', supportedBrowsers: [] },
+        ffmpeg: { source: options.ffmpegSource, available: true, version: '8.0' },
+        ffprobe: { source: options.ffmpegSource, available: true, version: '8.0' }
+      }))
+    })
+    const savedYtDlpPath = () => page.evaluate(async (findAction) => (
+      await window.ftElectron.dbSettings(findAction)).find(({ _id }) => _id === 'ytDlpPath')?.value ?? '',
+    DBActions.GENERAL.FIND)
+
+    const advanced = await goToSettingsSection(page, 'advanced')
+    const ytDlpTool = advanced.locator('.externalSoftwareTool').nth(0)
+    const path = ytDlpTool.getByLabel('yt-dlp executable')
+    await expect(path).toHaveAttribute('readonly', '')
+    await ytDlpTool.getByRole('button', { name: 'Browse' }).click()
+    await expect(path).toHaveValue('/opt/tools/yt-dlp')
+    await expect.poll(savedYtDlpPath).toBe('/opt/tools/yt-dlp')
+    await attachScreenshot('picked yt-dlp path')
+
+    // A renderer write does not reach the datastore.
+    await page.evaluate(upsertAction => window.ftElectron.dbSettings(upsertAction, { _id: 'ytDlpPath', value: '/bin/sh' }), DBActions.GENERAL.UPSERT)
+    expect(await savedYtDlpPath()).toBe('/opt/tools/yt-dlp')
+
+    await ytDlpTool.getByRole('button', { name: 'Use default' }).click()
+    await expect(path).toHaveValue('')
+    await expect.poll(savedYtDlpPath).toBe('')
+  })
+
   test('shows yt-dlp browsers dynamically and centers the optional profile field', async ({ app, page, attachScreenshot }) => {
     await app.electronApp.evaluate(({ ipcMain }) => {
       ipcMain.removeHandler('yt-dlp-get-info')
@@ -165,7 +197,11 @@ test.describe('settings', () => {
     await chooseSelectOption(browser, 'firefox')
 
     const profile = authentication.getByPlaceholder('Profile name or path')
+    // Profile folders come only from the folder picker.
     await profile.fill('/tmp/firefox-profile')
+    await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toBeVisible()
+    await profile.fill('default-release')
+    await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toHaveCount(0)
     await alwaysUseCookies.locator('..').locator('label.switch-label').click()
     await expect(alwaysUseCookies).toBeChecked()
     await expect(downloadCookies).toBeChecked()
@@ -221,7 +257,7 @@ test.describe('settings', () => {
     }).toEqual({
       mode: 'browser',
       browser: 'firefox',
-      profile: '/tmp/firefox-profile',
+      profile: 'default-release',
       alwaysUse: true
     })
     await attachScreenshot('subtitle cookie settings')

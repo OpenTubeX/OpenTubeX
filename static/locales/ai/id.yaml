@@ -931,7 +931,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumen tambahan yt-dlp
     Concurrent Downloads: Unduhan serentak
     Bandwidth Limit: Batas lebar pita (KiB/s)
-    Choose Download Folder: Pilih Folder Unduhan
     Download Templates: Templat Unduhan
     Manage Download Templates: Kelola Templat Unduhan ({templateCount})
     New Template: Templat Baru
@@ -1025,6 +1024,7 @@ Settings:
     Browser for Cookies: Peramban untuk Kuki
     Browser Profile: Profil Peramban (Opsional)
     Browser Profile Placeholder: Nama atau jalur profil
+    Browser Profile Invalid: "Masukkan nama profil, atau pilih folder profil dengan tombol folder."
     Select Browser: Pilih peramban
     Always Use Cookies: Selalu Gunakan Kuki
     Restricted Playback Authentication Hint: Secara bawaan, OpenTubeX hanya meneruskan kuki ini ke yt-dlp setelah Anda memilih "Coba dengan kuki yang telah dikonfigurasi" pada video dengan batasan usia atau khusus anggota.
@@ -1937,6 +1937,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Obrolan Langsung belum didukung dengan server Yattee. Koneksi langsung dengan YouTube dibutuhkan.
   External Player:
     LaunchFailedTemplate: Tidak dapat memulai {externalPlayer}. Pastikan aplikasi tersebut terpasang, atau atur jalur file eksekusinya di pengaturan pemutar eksternal.
+    Confirm Arguments Title: "Jalankan pemutar eksternal dengan argumen khusus?"
+    Confirm Arguments Message: "{externalPlayer} akan dimulai dengan argumen khusus berikut:"
+    Confirm Arguments Warning: "Beberapa argumen dapat menjalankan program atau menimpa file. Lanjutkan hanya jika Anda sendiri yang menambahkannya."
+    Run: "Jalankan"
+    LaunchCanceledTemplate: "{externalPlayer} tidak dibuka"
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"
@@ -2342,6 +2347,7 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  File Name Template Invalid: 'Gunakan jalur relatif di dalam folder unduhan tanpa "..", "~", "$", "%", atau awalan seperti "thumbnail:".'
   Search Completed: "Cari unduhan selesai berdasarkan judul atau kanal"
   Format: "Format"
   All Formats: "Semua format"
@@ -2493,6 +2499,8 @@ Tray Icon:
   Follow App Theme: "Ikuti tema aplikasi"
 
 Form Inputs:
+  Browse: "Telusuri"
+  Use Default Path: "Gunakan bawaan"
   Enter Password Hint: "Masukkan kata sandi Anda"
   Choose Password Hint: "Pilih kata sandi"
   Confirm Password Hint: "Ulangi kata sandi baru Anda"
@@ -2512,7 +2520,6 @@ Form Inputs:
   Any Age: Usia berapa pun
   Included Terms Example: mis. tutorial, ulasan
   Excluded Terms Example: mis. cuplikan, pratinjau
-  Download Folder Hint: Biarkan kosong untuk memakai folder Unduhan
   Global Arguments Hint: Argumen opsional untuk setiap unduhan
   Unlimited Hint: 0 untuk tanpa batas
   Add Argument: Tambahkan argumen

@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Arguments yt-dlp supplémentaires
     Concurrent Downloads: Téléchargements simultanés
     Bandwidth Limit: Limite de bande passante (KiB/s)
-    Choose Download Folder: Choisir le dossier de téléchargement
     Download Templates: Modèles de téléchargement
     Manage Download Templates: Gérer les modèles de téléchargement ({templateCount})
     New Template: Nouveau modèle
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Navigateur pour les cookies
     Browser Profile: Profil du navigateur (facultatif)
     Browser Profile Placeholder: Nom ou chemin du profil
+    Browser Profile Invalid: "Saisissez un nom de profil ou choisissez un dossier de profil avec le bouton de dossier."
     Select Browser: Sélectionner un navigateur
     Always Use Cookies: Toujours utiliser les cookies
     Restricted Playback Authentication Hint: Par défaut, OpenTubeX ne transmet ces cookies à yt-dlp qu’après que vous avez choisi « Essayer avec les cookies configurés » sur une vidéo soumise à une limite d’âge ou réservée aux membres.
@@ -1911,6 +1911,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Le chat en direct n’est actuellement pas pris en charge avec le serveur Yattee. Une connexion directe à YouTube est requise.
   External Player:
     LaunchFailedTemplate: Impossible de lancer {externalPlayer}. Vérifiez qu’il est installé ou définissez le chemin de son exécutable dans les paramètres du lecteur externe.
+    Confirm Arguments Title: "Lancer le lecteur externe avec des arguments personnalisés ?"
+    Confirm Arguments Message: "{externalPlayer} va démarrer avec ces arguments personnalisés :"
+    Confirm Arguments Warning: "Certains arguments peuvent exécuter des programmes ou écraser des fichiers. Ne continuez que si vous les avez ajoutés vous-même."
+    Run: "Lancer"
+    LaunchCanceledTemplate: "{externalPlayer} n’a pas été ouvert"
 Playlist:
   Playlist Already Preloaded: "Toutes les vidéos de la playlist sont déjà préchargées"
   Playlist Preload Progress: "Préchargement des vidéos : {completed} sur {requested}"
@@ -2316,6 +2321,7 @@ CommandPalette:
     Download Finished: Ce téléchargement n’est plus en cours
     Video: Ouvrez d’abord une vidéo
 Downloads:
+  File Name Template Invalid: 'Utilisez un chemin relatif dans le dossier de téléchargement, sans « .. », « ~ », « $ », « % » ni préfixe comme « thumbnail: ».'
   Search Completed: "Rechercher des téléchargements terminés par titre ou chaîne"
   Format: "Format"
   All Formats: "Tous les formats"
@@ -2467,6 +2473,8 @@ Tray Icon:
   Follow App Theme: "Suivre le thème de l’application"
 
 Form Inputs:
+  Browse: "Parcourir"
+  Use Default Path: "Utiliser la valeur par défaut"
   Enter Password Hint: "Saisissez votre mot de passe"
   Choose Password Hint: "Choisissez un mot de passe"
   Confirm Password Hint: "Répétez votre nouveau mot de passe"
@@ -2486,7 +2494,6 @@ Form Inputs:
   Any Age: Toute ancienneté
   Included Terms Example: p. ex. tutoriel, critique
   Excluded Terms Example: p. ex. bande-annonce, aperçu
-  Download Folder Hint: Laissez vide pour utiliser votre dossier Téléchargements
   Global Arguments Hint: Arguments facultatifs pour chaque téléchargement
   Unlimited Hint: 0 pour illimité
   Add Argument: Ajouter un argument

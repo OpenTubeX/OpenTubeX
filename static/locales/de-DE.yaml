@@ -1627,7 +1627,6 @@ Settings:
     Global Additional yt-dlp Arguments: Zusätzliche yt-dlp-Argumente
     Concurrent Downloads: Parallele Downloads
     Bandwidth Limit: Bandbreitenlimit (KiB/s)
-    Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
     External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
     Enable Downloads: Downloads aktivieren
@@ -1721,6 +1720,7 @@ Settings:
     Browser for Cookies: Browser für Cookies
     Browser Profile: Browserprofil (optional)
     Browser Profile Placeholder: Profilname oder -pfad
+    Browser Profile Invalid: "Gib einen Profilnamen ein oder wähle mit der Ordner-Schaltfläche einen Profilordner aus."
     Select Browser: Browser auswählen
     Always Use Cookies: Cookies immer verwenden
     Restricted Playback Authentication Hint: Standardmäßig übergibt OpenTubeX diese Cookies erst an yt-dlp, nachdem du bei einem altersbeschränkten oder nur für Mitglieder verfügbaren Video „Mit konfigurierten Cookies versuchen“ ausgewählt hast.
@@ -2284,6 +2284,11 @@ Video:
     LaunchFailedTemplate: '{externalPlayer} konnte nicht gestartet werden. Stelle sicher, dass er installiert ist, oder lege den Pfad zur ausführbaren Datei in den Einstellungen für externe Video-Player fest.'
     playlist: Playlist
     video: Video
+    Confirm Arguments Title: "Externen Player mit benutzerdefinierten Argumenten starten?"
+    Confirm Arguments Message: "{externalPlayer} wird mit diesen benutzerdefinierten Argumenten gestartet:"
+    Confirm Arguments Warning: "Manche Argumente können Programme ausführen oder Dateien überschreiben. Fahre nur fort, wenn du sie selbst hinzugefügt hast."
+    Run: "Starten"
+    LaunchCanceledTemplate: "{externalPlayer} wurde nicht geöffnet"
   Premiere: Premiere
   Premieres: Premiere
   Show Super Chat Comment: Super-Chat-Kommentar anzeigen
@@ -3510,6 +3515,7 @@ CommandPalette:
     Download Finished: Dieser Download läuft nicht mehr
     Video: Öffne zuerst ein Video
 Downloads:
+  File Name Template Invalid: 'Verwende einen relativen Pfad im Download-Ordner ohne „..“, „~“, „$“, „%“ oder ein Präfix wie „thumbnail:“.'
   Add Download: Download hinzufügen
   Search Completed: Abgeschlossene Downloads nach Titel oder Kanal durchsuchen
   Format: Format
@@ -3729,6 +3735,8 @@ SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
 
 Form Inputs:
+  Browse: "Durchsuchen"
+  Use Default Path: "Standard verwenden"
   Enter Password Hint: "Gib dein Passwort ein"
   Choose Password Hint: "Wähle ein Passwort"
   Confirm Password Hint: "Wiederhole dein neues Passwort"
@@ -3748,7 +3756,6 @@ Form Inputs:
   Any Age: Beliebiges Alter
   Included Terms Example: z. B. Anleitung, Rezension
   Excluded Terms Example: z. B. Trailer, Vorschau
-  Download Folder Hint: Leer lassen, um deinen Downloads-Ordner zu verwenden
   Global Arguments Hint: Optionale Argumente für jeden Download
   Unlimited Hint: 0 für unbegrenzt
   Add Argument: Argument hinzufügen

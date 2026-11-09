@@ -931,7 +931,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol
     Concurrent Downloads: Lawrlwythiadau cydamserol
     Bandwidth Limit: Terfyn lled band (KiB/s)
-    Choose Download Folder: Dewis ffolder lawrlwytho
     Download Templates: Templedi lawrlwytho
     Manage Download Templates: Rheoli templedi lawrlwytho ({templateCount})
     New Template: Templed newydd
@@ -1025,6 +1024,7 @@ Settings:
     Browser for Cookies: Porwr ar gyfer cwcis
     Browser Profile: Proffil porwr (dewisol)
     Browser Profile Placeholder: Enw neu lwybr proffil
+    Browser Profile Invalid: "Rhowch enw proffil, neu dewiswch ffolder proffil gyda’r botwm ffolder."
     Select Browser: Dewis porwr
     Always Use Cookies: Defnyddio cwcis bob amser
     Restricted Playback Authentication Hint: Yn ddiofyn, dim ond ar ôl i chi ddewis "Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu" ar fideo sydd â chyfyngiad oedran neu sydd i aelodau yn unig y bydd OpenTubeX yn trosglwyddo'r cwcis hyn i yt-dlp.
@@ -1946,6 +1946,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Nid yw Sgwrsio Byw yn cael ei gefnogi gan y gweinydd Yattee ar hyn o bryd. Mae angen cysylltiad uniongyrchol â YouTube.
   External Player:
     LaunchFailedTemplate: Methu cychwyn {externalPlayer}. Gwiriwch ei fod wedi’i osod, neu gosodwch lwybr y ffeil weithredadwy yng ngosodiadau’r chwaraewr allanol.
+    Confirm Arguments Title: "Rhedeg y chwaraewr allanol gyda dadleuon personol?"
+    Confirm Arguments Message: "Bydd {externalPlayer} yn dechrau gyda’r dadleuon personol hyn:"
+    Confirm Arguments Warning: "Gall rhai dadleuon redeg rhaglenni neu drosysgrifo ffeiliau. Dim ond parhau os gwnaethoch eu hychwanegu eich hun."
+    Run: "Rhedeg"
+    LaunchCanceledTemplate: "Heb agor {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"
@@ -2355,6 +2360,7 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  File Name Template Invalid: 'Defnyddiwch lwybr cymharol y tu mewn i’r ffolder llwytho i lawr heb "..", "~", "$", "%" na rhagddodiad fel "thumbnail:".'
   Search Completed: "Chwilio lawrlwythiadau wedi’u cwblhau yn ôl teitl neu sianel"
   Format: "Fformat"
   All Formats: "Pob fformat"
@@ -2508,6 +2514,8 @@ Tray Icon:
   Follow App Theme: "Dilyn thema’r ap"
 
 Form Inputs:
+  Browse: "Pori"
+  Use Default Path: "Defnyddio’r rhagosodiad"
   Enter Password Hint: "Rhowch eich cyfrinair"
   Choose Password Hint: "Dewiswch gyfrinair"
   Confirm Password Hint: "Ailadroddwch eich cyfrinair newydd"
@@ -2527,7 +2535,6 @@ Form Inputs:
   Any Age: Unrhyw oedran
   Included Terms Example: e.e. tiwtorial, adolygiad
   Excluded Terms Example: e.e. trelar, rhagolwg
-  Download Folder Hint: Gadewch yn wag i ddefnyddio eich ffolder Lawrlwythiadau
   Global Arguments Hint: Ymresymiadau dewisol ar gyfer pob lawrlwythiad
   Unlimited Hint: 0 am ddiderfyn
   Add Argument: Ychwanegu ymresymiad

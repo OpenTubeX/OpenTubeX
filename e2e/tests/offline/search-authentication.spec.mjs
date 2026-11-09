@@ -1,7 +1,7 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
-import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const QUERY = 'age restricted search'
@@ -79,15 +79,13 @@ function sendResponse() {
 setTimeout(sendResponse, ${responseDelay})
 `)
   await chmod(executable, 0o755)
-  await app.page.evaluate(async ({ executable, mode }) => {
+  await choosePickerPaths(app, app.page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: '/fixture/cookies.txt', ytDlpPlaybackCookiesBrowserProfile: '/fixture/profile' })
+  await app.page.evaluate(async mode => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', mode)
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', '/fixture/cookies.txt')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-    await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/fixture/profile')
-  }, { executable, mode })
+  }, mode)
   return { log, response, playlistResponse, pendingResponse }
 }
 

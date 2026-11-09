@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ek yt-dlp argümanları
     Concurrent Downloads: Eş Zamanlı İndirmeler
     Bandwidth Limit: Bant genişliği sınırı (KiB/s)
-    Choose Download Folder: İndirme Klasörü Seç
     Download Templates: İndirme Şablonları
     Manage Download Templates: 'İndirme Şablonlarını Yönet ({templateCount})'
     New Template: Yeni Şablon
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Çerezlerin Alınacağı Tarayıcı
     Browser Profile: Tarayıcı Profili (İsteğe Bağlı)
     Browser Profile Placeholder: Profil adı veya yolu
+    Browser Profile Invalid: "Bir profil adı girin veya klasör düğmesiyle bir profil klasörü seçin."
     Select Browser: Bir tarayıcı seçin
     Always Use Cookies: Çerezleri Her Zaman Kullan
     Restricted Playback Authentication Hint: OpenTubeX varsayılan olarak bu çerezleri yt-dlp'ye yalnızca yaş kısıtlamalı veya üyelere özel bir videoda "Yapılandırılmış çerezlerle dene" seçeneğini seçtikten sonra gönderir.
@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Sohbet şu anda Yattee sunucusu ile desteklenmemektedir. YouTube ile doğrudan bağlantı gerekli.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} başlatılamadı. Yüklü olduğunu kontrol edin veya harici oynatıcı ayarlarında yürütülebilir dosyanın yolunu belirtin."
+    Confirm Arguments Title: "Harici oynatıcı özel bağımsız değişkenlerle çalıştırılsın mı?"
+    Confirm Arguments Message: "{externalPlayer} şu özel bağımsız değişkenlerle başlatılacak:"
+    Confirm Arguments Warning: "Bazı bağımsız değişkenler program çalıştırabilir veya dosyaların üzerine yazabilir. Yalnızca bunları kendiniz eklediyseniz devam edin."
+    Run: "Çalıştır"
+    LaunchCanceledTemplate: "{externalPlayer} açılmadı"
 Playlist:
   Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"
@@ -2318,6 +2323,7 @@ CommandPalette:
     Download Finished: Bu indirme artık çalışmıyor
     Video: Önce bir video açın
 Downloads:
+  File Name Template Invalid: 'İndirme klasörü içinde "..", "~", "$", "%" veya "thumbnail:" gibi bir önek içermeyen göreli bir yol kullanın.'
   Search Completed: "Tamamlanan indirmeleri başlığa veya kanala göre ara"
   Format: "Biçim"
   All Formats: "Tüm biçimler"
@@ -2469,6 +2475,8 @@ Tray Icon:
   Follow App Theme: "Uygulama temasını izle"
 
 Form Inputs:
+  Browse: "Göz at"
+  Use Default Path: "Varsayılanı kullan"
   Enter Password Hint: "Parolanızı girin"
   Choose Password Hint: "Bir parola seçin"
   Confirm Password Hint: "Yeni parolanızı tekrarlayın"
@@ -2488,7 +2496,6 @@ Form Inputs:
   Any Age: Herhangi bir yaş
   Included Terms Example: örn. eğitim, inceleme
   Excluded Terms Example: örn. fragman, önizleme
-  Download Folder Hint: İndirilenler klasörünü kullanmak için boş bırakın
   Global Arguments Hint: Her indirme için isteğe bağlı argümanlar
   Unlimited Hint: Sınırsız için 0
   Add Argument: Argüman ekleyin

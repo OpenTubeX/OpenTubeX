@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Đối số yt-dlp bổ sung
     Concurrent Downloads: Số lượt tải đồng thời
     Bandwidth Limit: Giới hạn băng thông (KiB/s)
-    Choose Download Folder: Chọn thư mục tải xuống
     Download Templates: Mẫu tải xuống
     Manage Download Templates: Quản lý mẫu tải xuống ({templateCount})
     New Template: Mẫu mới
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Trình duyệt lấy cookie
     Browser Profile: Hồ sơ trình duyệt (không bắt buộc)
     Browser Profile Placeholder: Tên hoặc đường dẫn hồ sơ
+    Browser Profile Invalid: "Nhập tên hồ sơ hoặc chọn thư mục hồ sơ bằng nút thư mục."
     Select Browser: Chọn trình duyệt
     Always Use Cookies: Luôn dùng cookie
     Restricted Playback Authentication Hint: Theo mặc định, OpenTubeX chỉ chuyển các cookie này cho yt-dlp sau khi bạn chọn "Thử bằng cookie đã thiết lập" trên video giới hạn độ tuổi hoặc chỉ dành cho hội viên.
@@ -1925,6 +1925,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chat trực tiếp hiện không được hỗ trợ với máy chủ Yattee. Cần có kết nối trực tiếp đến YouTube.
   External Player:
     LaunchFailedTemplate: Không thể khởi động {externalPlayer}. Hãy kiểm tra xem ứng dụng đã được cài đặt chưa, hoặc đặt đường dẫn tệp thực thi trong cài đặt trình phát bên ngoài.
+    Confirm Arguments Title: "Chạy trình phát ngoài với đối số tùy chỉnh?"
+    Confirm Arguments Message: "{externalPlayer} sẽ khởi động với các đối số tùy chỉnh sau:"
+    Confirm Arguments Warning: "Một số đối số có thể chạy chương trình hoặc ghi đè tệp. Chỉ tiếp tục nếu bạn tự thêm chúng."
+    Run: "Chạy"
+    LaunchCanceledTemplate: "Chưa mở {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
@@ -2334,6 +2339,7 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  File Name Template Invalid: 'Hãy dùng đường dẫn tương đối bên trong thư mục tải xuống, không có "..", "~", "$", "%" hoặc tiền tố như "thumbnail:".'
   Search Completed: "Tìm tệp tải xuống đã hoàn tất theo tiêu đề hoặc kênh"
   Format: "Định dạng"
   All Formats: "Tất cả định dạng"
@@ -2487,6 +2493,8 @@ Tray Icon:
   Follow App Theme: "Theo chủ đề ứng dụng"
 
 Form Inputs:
+  Browse: "Duyệt"
+  Use Default Path: "Dùng mặc định"
   Enter Password Hint: "Nhập mật khẩu của bạn"
   Choose Password Hint: "Chọn mật khẩu"
   Confirm Password Hint: "Nhập lại mật khẩu mới"
@@ -2506,7 +2514,6 @@ Form Inputs:
   Any Age: Mọi độ tuổi
   Included Terms Example: "ví dụ: hướng dẫn, đánh giá"
   Excluded Terms Example: "ví dụ: trailer, xem trước"
-  Download Folder Hint: Để trống để dùng thư mục Tải xuống
   Global Arguments Hint: Đối số tùy chọn cho mọi lượt tải
   Unlimited Hint: 0 để không giới hạn
   Add Argument: Thêm đối số

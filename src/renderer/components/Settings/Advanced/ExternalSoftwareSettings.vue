@@ -36,20 +36,15 @@
             :icon="['fas', 'download']"
             @change="updateYtDlpChannel"
           />
-          <FtInput
+          <FtPathPicker
             v-else-if="!IS_IOS"
             class="externalSoftwarePath"
-            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.yt-dlp Executable Path')"
-            placeholder="/path/to/yt-dlp"
-            :show-action-button="true"
-            :allow-action-button-when-empty="true"
-            :force-action-button-icon-name="['fas', 'folder-open']"
-            :show-label="true"
+            placeholder="yt-dlp"
             :value="ytDlpPath"
             :tooltip="t('Tooltips.External Software Settings.yt-dlp Executable Path')"
-            @input="updateYtDlpPath"
-            @click="chooseExecutablePath('yt-dlp')"
+            @browse="ytDlp.chooseExecutable('ytDlpPath')"
+            @clear="store.dispatch('updateYtDlpPath', '')"
           />
         </div>
         <div class="externalSoftwareToolStatus">
@@ -115,20 +110,15 @@
             :tooltip="t('Tooltips.External Software Settings.FFmpeg Source')"
             @change="updateYtDlpFfmpegSource"
           />
-          <FtInput
+          <FtPathPicker
             v-if="ytDlpFfmpegSource === 'system'"
             class="externalSoftwarePath"
-            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.FFmpeg Executable Path')"
-            placeholder="/path/to/ffmpeg"
-            :show-action-button="true"
-            :allow-action-button-when-empty="true"
-            :force-action-button-icon-name="['fas', 'folder-open']"
-            :show-label="true"
+            placeholder="ffmpeg"
             :value="ytDlpFfmpegPath"
             :tooltip="t('Tooltips.External Software Settings.FFmpeg Executable Path')"
-            @input="updateYtDlpFfmpegPath"
-            @click="chooseExecutablePath('ffmpeg')"
+            @browse="ytDlp.chooseExecutable('ytDlpFfmpegPath')"
+            @clear="store.dispatch('updateYtDlpFfmpegPath', '')"
           />
         </div>
         <div class="externalSoftwareToolStatus">
@@ -271,21 +261,14 @@
         v-if="ytDlpPlaybackAuthMode !== 'none'"
         class="restrictedPlaybackAuthControl restrictedPlaybackAuthDetail"
       >
-        <FtInput
+        <FtPathPicker
           v-if="ytDlpPlaybackAuthMode === 'file'"
           :label="t('Settings.External Software Settings.Cookie File')"
-          placeholder="/path/to/cookies.txt"
-          :action-button-label="t('Settings.External Software Settings.Cookie File')"
-          :show-action-button="true"
-          :allow-action-button-when-empty="true"
-          :force-action-button-icon-name="['fas', 'folder-open']"
           :icon="['fas', 'file-lines']"
-          :show-label="true"
           :value="ytDlpPlaybackCookiesPath"
-          setting-key="ytDlpPlaybackCookiesPath"
           :tooltip="t('Tooltips.External Software Settings.Cookie File')"
-          @input="updateYtDlpPlaybackCookiesPath"
-          @click="chooseCookiesPath"
+          @browse="ytDlp.ytDlpChooseCookies()"
+          @clear="store.dispatch('updateYtDlpPlaybackCookiesPath', '')"
         />
         <FtSelect
           v-else
@@ -306,18 +289,22 @@
       class="restrictedPlaybackBrowserProfile"
     >
       <FtInput
+        :class="{ invalidBrowserProfile: browserProfileInvalid }"
         :label="t('Settings.External Software Settings.Browser Profile')"
         :placeholder="t('Settings.External Software Settings.Browser Profile Placeholder')"
         :show-action-button="true"
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'folder-open']"
+        :action-button-label="t('Form Inputs.Browse')"
         :icon="['fas', 'folder-open']"
         :show-label="true"
+        :invalid="browserProfileInvalid"
+        :supporting-text="browserProfileInvalid ? t('Settings.External Software Settings.Browser Profile Invalid') : ''"
         :value="ytDlpPlaybackCookiesBrowserProfile"
         setting-key="ytDlpPlaybackCookiesBrowserProfile"
         :tooltip="t('Tooltips.External Software Settings.Browser Profile')"
         @input="updateYtDlpPlaybackCookiesBrowserProfile"
-        @click="chooseBrowserProfilePath"
+        @click="ytDlp.ytDlpChooseBrowserProfile()"
       />
     </FtFlexBox>
     <FtFlexBox>
@@ -357,6 +344,7 @@
 <script setup>
 import { ytDlp } from '../../../helpers/ytDlp'
 import { managedToolErrorMessage } from '../../../helpers/managedToolErrors'
+import { isBrowserProfileName } from '../../../../main/settingWriteGuard'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -364,6 +352,7 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -539,12 +528,8 @@ async function refreshSystemBinariesInfo() {
   const ytDlpSystemPath = ytDlpPath.value
   const ffmpegSystemPath = ytDlpFfmpegPath.value
 
-  const info = await getBinariesInfo({
-    ytDlpSource: 'system',
-    ytDlpPath: ytDlpSystemPath,
-    ffmpegSource: 'system',
-    ffmpegPath: ffmpegSystemPath
-  })
+  // The main process probes the saved paths that these values mirror.
+  const info = await getBinariesInfo({ ytDlpSource: 'system', ffmpegSource: 'system' })
 
   if (requestId === systemInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.system = { path: ytDlpSystemPath, info: info.ytDlp }
@@ -568,12 +553,7 @@ async function refreshManagedBinariesInfo() {
     binariesInfoCache.value.ffprobe.managed = null
   }
 
-  const info = await getBinariesInfo({
-    ytDlpSource: 'managed',
-    ytDlpPath: '',
-    ffmpegSource: 'managed',
-    ffmpegPath: ''
-  })
+  const info = await getBinariesInfo({ ytDlpSource: 'managed', ffmpegSource: 'managed' })
 
   if (requestId === managedInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.managed = info.ytDlp
@@ -675,13 +655,6 @@ function updateYtDlpChannel(value) {
 }
 
 /**
- * @param {string} value
- */
-function updateYtDlpPath(value) {
-  store.dispatch('updateYtDlpPath', value)
-}
-
-/**
  * @param {'none' | 'file' | 'browser'} value
  */
 function updateYtDlpPlaybackAuthMode(value) {
@@ -691,22 +664,20 @@ function updateYtDlpPlaybackAuthMode(value) {
 /**
  * @param {string} value
  */
-function updateYtDlpPlaybackCookiesPath(value) {
-  store.dispatch('updateYtDlpPlaybackCookiesPath', value)
-}
-
-/**
- * @param {string} value
- */
 function updateYtDlpPlaybackCookiesBrowser(value) {
   store.dispatch('updateYtDlpPlaybackCookiesBrowser', value)
 }
 
+const browserProfileInvalid = ref(false)
+watch(ytDlpPlaybackCookiesBrowserProfile, () => { browserProfileInvalid.value = false })
+
 /**
+ * Paths come only from the folder picker, which saves them in the main process.
  * @param {string} value
  */
 function updateYtDlpPlaybackCookiesBrowserProfile(value) {
-  store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
+  browserProfileInvalid.value = !isBrowserProfileName(value)
+  if (!browserProfileInvalid.value) store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
 }
 
 /**
@@ -721,13 +692,6 @@ function updateYtDlpPlaybackAlwaysUseCookies(value) {
  */
 function updateYtDlpFfmpegSource(value) {
   store.dispatch('updateYtDlpFfmpegSource', value)
-}
-
-/**
- * @param {string} value
- */
-function updateYtDlpFfmpegPath(value) {
-  store.dispatch('updateYtDlpFfmpegPath', value)
 }
 
 /**
@@ -802,18 +766,6 @@ async function downloadBinary(binary) {
   }
 }
 
-/**
- * @param {'yt-dlp' | 'ffmpeg'} binary
- */
-async function chooseExecutablePath(binary) {
-  const currentPath = binary === 'yt-dlp' ? ytDlpPath.value : ytDlpFfmpegPath.value
-  const path = await ytDlp.ytDlpChooseExecutable(currentPath)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch(binary === 'yt-dlp' ? 'updateYtDlpPath' : 'updateYtDlpFfmpegPath', path)
-  }
-}
-
 async function createYouTubeSession() {
   creatingSession.value = true
   try {
@@ -831,22 +783,6 @@ async function createYouTubeSession() {
     showToast({ message: t('Settings.External Software Settings.YouTube session failed'), icon: ['fas', 'circle-exclamation'] })
   } finally {
     creatingSession.value = false
-  }
-}
-
-async function chooseCookiesPath() {
-  const path = await ytDlp.ytDlpChooseCookies(ytDlpPlaybackCookiesPath.value)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch('updateYtDlpPlaybackCookiesPath', path)
-  }
-}
-
-async function chooseBrowserProfilePath() {
-  const path = await ytDlp.ytDlpChooseBrowserProfile(ytDlpPlaybackCookiesBrowserProfile.value)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', path)
   }
 }
 </script>
@@ -971,6 +907,11 @@ async function chooseBrowserProfilePath() {
 
 .restrictedPlaybackBrowserProfile {
   margin-block-start: 14px;
+}
+
+.invalidBrowserProfile {
+  --primary-color: var(--red-500);
+  --secondary-text-color: var(--red-500);
 }
 
 .restrictedPlaybackBrowserProfile > :deep(.ft-input-component) {

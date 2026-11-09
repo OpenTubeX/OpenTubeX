@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
     Concurrent Downloads: Transferências simultâneas
     Bandwidth Limit: Limite de largura de banda (KiB/s)
-    Choose Download Folder: Escolher pasta de transferências
     Download Templates: Modelos de transferência
     Manage Download Templates: Gerir modelos de transferência ({templateCount})
     New Template: Novo modelo
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Navegador para cookies
     Browser Profile: Perfil do navegador (opcional)
     Browser Profile Placeholder: Nome ou caminho do perfil
+    Browser Profile Invalid: "Introduza um nome de perfil ou escolha uma pasta de perfil com o botão de pasta."
     Select Browser: Selecionar um navegador
     Always Use Cookies: Usar sempre cookies
     Restricted Playback Authentication Hint: Por predefinição, o OpenTubeX só transmite estes cookies ao yt-dlp depois de escolher «Tentar com os cookies configurados» num vídeo com restrição de idade ou exclusivo para membros.
@@ -1913,6 +1913,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Atualmente, a conversa em direto não é suportada pelo servidor Yattee. É necessária uma ligação direta ao YouTube.
   External Player:
     LaunchFailedTemplate: Não foi possível iniciar {externalPlayer}. Verifique se está instalado ou defina o caminho do executável nas definições do reprodutor externo.
+    Confirm Arguments Title: "Executar o leitor externo com argumentos personalizados?"
+    Confirm Arguments Message: "{externalPlayer} será iniciado com estes argumentos personalizados:"
+    Confirm Arguments Warning: "Alguns argumentos podem executar programas ou substituir ficheiros. Continue apenas se os adicionou."
+    Run: "Executar"
+    LaunchCanceledTemplate: "{externalPlayer} não foi aberto"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista já estão pré-carregados"
   Playlist Preload Progress: "A pré-carregar vídeos: {completed} de {requested}"
@@ -2318,6 +2323,7 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  File Name Template Invalid: 'Utilize um caminho relativo dentro da pasta de transferências sem "..", "~", "$", "%" nem um prefixo como "thumbnail:".'
   Search Completed: "Pesquisar transferências concluídas por título ou canal"
   Format: "Formato"
   All Formats: "Todos os formatos"
@@ -2471,6 +2477,8 @@ Tray Icon:
   Follow App Theme: "Seguir o tema da aplicação"
 
 Form Inputs:
+  Browse: "Procurar"
+  Use Default Path: "Utilizar predefinição"
   Enter Password Hint: "Introduza a sua palavra-passe"
   Choose Password Hint: "Escolha uma palavra-passe"
   Confirm Password Hint: "Repita a sua nova palavra-passe"
@@ -2490,7 +2498,6 @@ Form Inputs:
   Any Age: Qualquer antiguidade
   Included Terms Example: p. ex. tutorial, análise
   Excluded Terms Example: p. ex. trailer, pré-visualização
-  Download Folder Hint: Deixe em branco para usar a pasta Transferências
   Global Arguments Hint: Argumentos opcionais para cada transferência
   Unlimited Hint: 0 para ilimitado
   Add Argument: Adicione um argumento

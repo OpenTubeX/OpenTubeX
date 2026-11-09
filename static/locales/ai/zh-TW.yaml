@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: 附加 yt-dlp 參數
     Concurrent Downloads: 同時下載數量
     Bandwidth Limit: 頻寬限制 (KiB/s)
-    Choose Download Folder: 選擇下載資料夾
     Download Templates: 下載範本
     Manage Download Templates: 管理下載範本（{templateCount}）
     New Template: 新增範本
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookie 來源瀏覽器
     Browser Profile: 瀏覽器設定檔（選填）
     Browser Profile Placeholder: 設定檔名稱或路徑
+    Browser Profile Invalid: "請輸入設定檔名稱，或使用資料夾按鈕選擇設定檔資料夾。"
     Select Browser: 選擇瀏覽器
     Always Use Cookies: 一律使用 Cookie
     Restricted Playback Authentication Hint: 根據預設，只有在受年齡限制或會員專屬的影片上選擇「使用已設定的 Cookie 重試」後，OpenTubeX 才會將這些 Cookie 傳給 yt-dlp。
@@ -1919,6 +1919,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 伺服器時目前不支援直播聊天室。需要直接連線至 YouTube。
   External Player:
     LaunchFailedTemplate: 無法啟動 {externalPlayer}。請確認它已安裝，或在外部播放器設定中設定其執行檔路徑。
+    Confirm Arguments Title: "要使用自訂引數執行外部播放器嗎？"
+    Confirm Arguments Message: "{externalPlayer} 將使用以下自訂引數啟動："
+    Confirm Arguments Warning: "某些引數可以執行程式或覆寫檔案。只有在這些引數是你自己加入的時候才繼續。"
+    Run: "執行"
+    LaunchCanceledTemplate: "未開啟 {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
@@ -2324,6 +2329,7 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  File Name Template Invalid: '請使用下載資料夾內的相對路徑，不得包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前綴。'
   Search Completed: "依標題或頻道搜尋已完成的下載"
   Format: "格式"
   All Formats: "所有格式"
@@ -2475,6 +2481,8 @@ Tray Icon:
   Follow App Theme: "跟隨應用程式主題"
 
 Form Inputs:
+  Browse: "瀏覽"
+  Use Default Path: "使用預設值"
   Enter Password Hint: "輸入你的密碼"
   Choose Password Hint: "設定密碼"
   Confirm Password Hint: "再次輸入新密碼"
@@ -2494,7 +2502,6 @@ Form Inputs:
   Any Age: 不限發佈時間
   Included Terms Example: 例如：教學, 評測
   Excluded Terms Example: 例如：預告片, 預覽
-  Download Folder Hint: 留空以使用下載資料夾
   Global Arguments Hint: 所有下載的選用參數
   Unlimited Hint: 0 表示不限速
   Add Argument: 新增參數

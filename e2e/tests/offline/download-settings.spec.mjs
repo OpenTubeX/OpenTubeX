@@ -2,6 +2,7 @@ import { chmod, copyFile, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
+  choosePickerPaths,
   test,
   expect,
   expectOverlayScrollRange,
@@ -365,10 +366,7 @@ test.describe('automatic download authorization', () => {
       `printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t640\\t360\\t%s\\n' '${downloadedFile}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const payload = {
       videoId: 'ccccccccccc',
@@ -520,11 +518,11 @@ test.describe('automatic download authorization', () => {
       globalThis.onBatteryPower = true
       powerMonitor.isOnBatteryPower = () => globalThis.onBatteryPower
     })
-    await page.evaluate(async (ytDlpPath) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async () => {
       const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpAutomaticDownloadsRequireCharging', true)
-    }, executable)
+    })
 
     if ((await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.isInProgress())).inProgress) {
       await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.cancel())

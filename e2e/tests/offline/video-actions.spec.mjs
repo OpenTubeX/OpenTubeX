@@ -2,6 +2,7 @@ import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/pro
 import path from 'node:path'
 
 import {
+  choosePickerPaths,
   test,
   expect,
   goTo,
@@ -244,9 +245,7 @@ test.describe('video downloads', () => {
       'exit 1'
     ].join('\n'))
     await chmod(failingYtDlp, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      await window.$store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, failingYtDlp)
+    await choosePickerPaths(app, page, { ytDlpPath: failingYtDlp })
     await goTo(page, 'history')
 
     const video = page.locator('.ft-list-video').first()
@@ -306,10 +305,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -339,10 +335,7 @@ test.describe('video downloads', () => {
       'printf \'%s\\n\' \'{"title":"Playback title","requested_subtitles":{"en":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en","name":"English"},"de":{"ext":"vtt","url":"https://example.invalid/subtitles.vtt?lang=en&tlang=de","name":"German from English"}},"formats":[{"format_id":"140","available_at":123,"target_duration":5,"fragments":[{"url":"first"},{"url":"second"}]}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await page.bringToFront()
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, false, false))
@@ -420,10 +413,7 @@ test.describe('video downloads', () => {
       `printf '%s\\n' '${projectedInfo}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
 
@@ -452,13 +442,12 @@ test.describe('video downloads', () => {
       'printf \'%s\\n\' \'{"formats":[{"format_id":"140"}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesBrowserProfile: '/tmp/restricted-profile' })
+    await page.evaluate(async () => {
       const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-      await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/tmp/restricted-profile')
-    }, executable)
+    })
 
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
     let passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
@@ -475,10 +464,10 @@ test.describe('video downloads', () => {
     expect(cookiesIndex).toBeGreaterThanOrEqual(0)
     expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')
 
+    await choosePickerPaths(app, page, { ytDlpPlaybackCookiesPath: '/tmp/restricted-cookies.txt' })
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/restricted-cookies.txt')
     })
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
@@ -559,14 +548,11 @@ test.describe('video downloads', () => {
     const capturedArgs = path.join(app.userDataDir, 'captured-global-yt-dlp-args.txt')
     await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
-    await page.evaluate(async ({ ytDlpPath, globalArgs }) => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(async (globalArgs) => {
       const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpDownloadCustomArgs', globalArgs)
-    }, {
-      ytDlpPath: executable,
-      globalArgs: '--cookies-from-browser "firefox:default-release" --merge-output-format webm --format webm'
-    })
+    }, '--cookies-from-browser "firefox:default-release" --merge-output-format webm --format webm')
 
     await page.bringToFront()
     await page.evaluate(() => window.ftElectron.ytDlpDownload({
@@ -608,10 +594,7 @@ test.describe('video downloads', () => {
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
     await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await page.bringToFront()
     await page.evaluate(() => window.ftElectron.ytDlpDownload({
@@ -629,10 +612,7 @@ test.describe('video downloads', () => {
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
     await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await page.bringToFront()
     await page.evaluate(() => window.ftElectron.ytDlpDownload({
@@ -680,10 +660,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await page.bringToFront()
     await page.locator('body').click({ position: { x: 1, y: 1 } })
@@ -729,11 +706,7 @@ test.describe('video downloads', () => {
       'fi'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async ({ downloadFolder, ytDlpPath }) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-      await store.dispatch('updateYtDlpDownloadFolderPath', downloadFolder)
-    }, { downloadFolder, ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: downloadFolder })
 
     const result = await page.evaluate((thumbnail) => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -914,11 +887,7 @@ test.describe('video downloads', () => {
       'exit 1'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async ({ unavailableDownloadFolder, ytDlpPath }) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-      await store.dispatch('updateYtDlpDownloadFolderPath', unavailableDownloadFolder)
-    }, { unavailableDownloadFolder, ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: unavailableDownloadFolder })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -949,10 +918,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${duration}\\tNA\\tNA\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -988,10 +954,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedDirectory}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -1019,10 +982,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:fffffffffff\\t${missingFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       playlistId: 'PL1234567890',
@@ -1057,10 +1017,7 @@ test.describe('video downloads', () => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
@@ -1118,10 +1075,7 @@ test.describe('video downloads', () => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -1151,10 +1105,7 @@ test.describe('video downloads', () => {
       'printf "[info] Writing video subtitles to: /tmp/subtitles.de.srt\\n"'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -1209,10 +1160,7 @@ test.describe('video downloads', () => {
       'exit 1'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -1252,10 +1200,7 @@ test.describe('video downloads', () => {
       'exit 1'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async (ytDlpPath) => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', ytDlpPath)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
 
     const original = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'ffffffffffg',

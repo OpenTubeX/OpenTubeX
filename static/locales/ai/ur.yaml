@@ -988,7 +988,6 @@ Settings:
     Global Additional yt-dlp Arguments: اضافی yt-dlp آرگیومینٹس
     Concurrent Downloads: بیک وقت ڈاؤن لوڈز
     Bandwidth Limit: بینڈوڈتھ کی حد (KiB/s)
-    Choose Download Folder: ڈاؤن لوڈ فولڈر منتخب کریں
     Download Templates: ڈاؤن لوڈ ٹیمپلیٹس
     Manage Download Templates: ڈاؤن لوڈ ٹیمپلیٹس کا انتظام کریں ({templateCount})
     New Template: نیا ٹیمپلیٹ
@@ -1082,6 +1081,7 @@ Settings:
     Browser for Cookies: کوکیز کے لیے براؤزر
     Browser Profile: براؤزر پروفائل (اختیاری)
     Browser Profile Placeholder: پروفائل کا نام یا راستہ
+    Browser Profile Invalid: "پروفائل کا نام درج کریں، یا فولڈر بٹن سے پروفائل فولڈر منتخب کریں۔"
     Select Browser: براؤزر منتخب کریں
     Always Use Cookies: ہمیشہ کوکیز استعمال کریں
     Restricted Playback Authentication Hint: ڈیفالٹ کے طور پر، OpenTubeX یہ کوکیز yt-dlp کو صرف تب دیتا ہے جب آپ عمر کی پابندی والی یا صرف ممبران کے لیے ویڈیو پر "ترتیب دی گئی کوکیز کے ساتھ آزمائیں" منتخب کرتے ہیں۔
@@ -2023,6 +2023,11 @@ Video:
   Info panel source: 'ماخذ: {source}'
   External Player:
     LaunchFailedTemplate: "{externalPlayer} شروع نہیں ہو سکا۔ یقینی بنائیں کہ یہ انسٹال ہے، یا بیرونی پلیئر کی ترتیبات میں اس کی قابلِ اجرا فائل کا راستہ مقرر کریں۔"
+    Confirm Arguments Title: "کیا بیرونی پلیئر کو حسب ضرورت دلائل کے ساتھ چلایا جائے؟"
+    Confirm Arguments Message: "{externalPlayer} ان حسب ضرورت دلائل کے ساتھ شروع ہوگا:"
+    Confirm Arguments Warning: "کچھ دلائل پروگرام چلا سکتے ہیں یا فائلیں اوور رائٹ کر سکتے ہیں۔ صرف اسی صورت میں جاری رکھیں جب آپ نے انہیں خود شامل کیا ہو۔"
+    Run: "چلائیں"
+    LaunchCanceledTemplate: "{externalPlayer} نہیں کھولا گیا"
 Playlist:
   Close Playlist: پلے لسٹ بند کریں
   Add Playlist to Queue: پلے لسٹ قطار میں شامل کریں
@@ -2445,6 +2450,7 @@ CommandPalette:
     Download Finished: یہ ڈاؤن لوڈ اب نہیں چل رہا
     Video: پہلے کوئی ویڈیو کھولیں
 Downloads:
+  File Name Template Invalid: 'ڈاؤن لوڈ فولڈر کے اندر ایک نسبتی راستہ استعمال کریں، جس میں ".."، "~"، "$"، "%" یا "thumbnail:" جیسا سابقہ نہ ہو۔'
   Add Download: ڈاؤن لوڈ شامل کریں
   Search Completed: مکمل ڈاؤن لوڈز کو عنوان یا چینل کے لحاظ سے تلاش کریں
   Format: فارمیٹ
@@ -2589,6 +2595,8 @@ Tray Icon:
   Title: ٹرے آئیکن
   Follow App Theme: ایپ کی تھیم کی پیروی کریں
 Form Inputs:
+  Browse: "براؤز کریں"
+  Use Default Path: "طے شدہ استعمال کریں"
   Enter Password Hint: اپنا پاس ورڈ درج کریں
   Choose Password Hint: پاس ورڈ منتخب کریں
   Confirm Password Hint: اپنا نیا پاس ورڈ دوبارہ درج کریں
@@ -2608,7 +2616,6 @@ Form Inputs:
   Any Age: کوئی بھی عمر
   Included Terms Example: مثلاً ٹیوٹوریل، ریویو
   Excluded Terms Example: مثلاً ٹریلر، پیش نظارہ
-  Download Folder Hint: اپنا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں
   Global Arguments Hint: ہر ڈاؤن لوڈ کے لیے اختیاری آرگیومینٹس
   Unlimited Hint: لامحدود کے لیے 0
   Add Argument: آرگیومینٹ شامل کریں

@@ -916,7 +916,6 @@ Settings:
     Global Additional yt-dlp Arguments: Additional yt-dlp arguments
     Concurrent Downloads: Concurrent downloads
     Bandwidth Limit: Bandwidth limit (KiB/s)
-    Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: Manage Download Templates ({templateCount})
     New Template: New Template
@@ -1010,6 +1009,7 @@ Settings:
     Browser for Cookies: Browser for Cookies
     Browser Profile: Browser Profile (Optional)
     Browser Profile Placeholder: Profile name or path
+    Browser Profile Invalid: "Enter a profile name, or choose a profile folder with the folder button."
     Select Browser: Select a browser
     Always Use Cookies: Always Use Cookies
     Restricted Playback Authentication Hint: By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video.
@@ -1908,6 +1908,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.
   External Player:
     LaunchFailedTemplate: Could not start {externalPlayer}. Make sure it is installed, or set its executable path in the external player settings.
+    Confirm Arguments Title: "Run the external player with custom arguments?"
+    Confirm Arguments Message: "{externalPlayer} will start with these custom arguments:"
+    Confirm Arguments Warning: "Some arguments can run programs or overwrite files. Only continue if you added them yourself."
+    Run: "Run"
+    LaunchCanceledTemplate: "Did not open {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
@@ -2316,6 +2321,7 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'
   Search Completed: "Search completed downloads by title or channel"
   Format: "Format"
   All Formats: "All formats"
@@ -2469,6 +2475,8 @@ Tray Icon:
   Follow App Theme: "Follow app theme"
 
 Form Inputs:
+  Browse: "Browse"
+  Use Default Path: "Use default"
   Enter Password Hint: "Enter your password"
   Choose Password Hint: "Choose a password"
   Confirm Password Hint: "Repeat your new password"
@@ -2488,7 +2496,6 @@ Form Inputs:
   Any Age: Any age
   Included Terms Example: e.g. tutorial, review
   Excluded Terms Example: e.g. trailer, preview
-  Download Folder Hint: Leave blank to use your Downloads folder
   Global Arguments Hint: Optional arguments for every download
   Unlimited Hint: 0 for unlimited
   Add Argument: Add an argument

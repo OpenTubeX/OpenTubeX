@@ -939,7 +939,6 @@ Settings:
     Global Additional yt-dlp Arguments: Додаткові аргументи yt-dlp
     Concurrent Downloads: Одночасні завантаження
     Bandwidth Limit: Обмеження пропускної здатності (KiB/s)
-    Choose Download Folder: Вибрати папку завантажень
     Download Templates: Шаблони завантаження
     Manage Download Templates: Керувати шаблонами завантаження ({templateCount})
     New Template: Новий шаблон
@@ -1033,6 +1032,7 @@ Settings:
     Browser for Cookies: Браузер для файлів cookie
     Browser Profile: Профіль браузера (необов’язково)
     Browser Profile Placeholder: Назва профілю або шлях
+    Browser Profile Invalid: "Введіть назву профілю або виберіть теку профілю кнопкою теки."
     Select Browser: Вибрати браузер
     Always Use Cookies: Завжди використовувати файли cookie
     Restricted Playback Authentication Hint: Типово OpenTubeX передає ці файли cookie до yt-dlp лише після вибору дії «Спробувати з налаштованими файлами cookie» для відео з віковими обмеженнями або лише для учасників.
@@ -1961,6 +1961,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Чат в режимі реального часу наразі не підтримується сервером Yattee. Потрібне пряме з’єднання з YouTube.
   External Player:
     LaunchFailedTemplate: Не вдалося запустити {externalPlayer}. Переконайтеся, що його встановлено, або вкажіть шлях до виконуваного файлу в налаштуваннях зовнішнього програвача.
+    Confirm Arguments Title: "Запустити зовнішній програвач із власними аргументами?"
+    Confirm Arguments Message: "{externalPlayer} запуститься з цими власними аргументами:"
+    Confirm Arguments Warning: "Деякі аргументи можуть запускати програми або перезаписувати файли. Продовжуйте, лише якщо додали їх самостійно."
+    Run: "Запустити"
+    LaunchCanceledTemplate: "{externalPlayer} не відкрито"
 Playlist:
   Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
   Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"
@@ -2370,6 +2375,7 @@ CommandPalette:
     Download Finished: Це завантаження вже не виконується
     Video: Спочатку відкрийте відео
 Downloads:
+  File Name Template Invalid: 'Використовуйте відносний шлях у теці завантажень без "..", "~", "$", "%" або префікса на кшталт "thumbnail:".'
   Search Completed: "Пошук завершених завантажень за назвою або каналом"
   Format: "Формат"
   All Formats: "Усі формати"
@@ -2525,6 +2531,8 @@ Tray Icon:
   Follow App Theme: "Використовувати тему застосунку"
 
 Form Inputs:
+  Browse: "Огляд"
+  Use Default Path: "Використати типове"
   Enter Password Hint: "Введіть свій пароль"
   Choose Password Hint: "Виберіть пароль"
   Confirm Password Hint: "Повторіть новий пароль"
@@ -2544,7 +2552,6 @@ Form Inputs:
   Any Age: Будь-який вік
   Included Terms Example: напр. інструкція, огляд
   Excluded Terms Example: напр. трейлер, анонс
-  Download Folder Hint: Залиште порожнім, щоб використовувати теку завантажень
   Global Arguments Hint: Необов’язкові аргументи для кожного завантаження
   Unlimited Hint: 0 — без обмежень
   Add Argument: Додати аргумент

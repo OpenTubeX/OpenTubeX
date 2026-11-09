@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ylimääräiset yt-dlp-argumentit
     Concurrent Downloads: Samanaikaiset lataukset
     Bandwidth Limit: Kaistanleveysrajoitus (KiB/s)
-    Choose Download Folder: Valitse latauskansio
     Download Templates: Latausmallit
     Manage Download Templates: Hallitse latausmalleja ({templateCount})
     New Template: Uusi malli
@@ -1037,6 +1036,7 @@ Settings:
     Browser for Cookies: Selain, josta evästeet haetaan
     Browser Profile: Selainprofiili (valinnainen)
     Browser Profile Placeholder: Profiilin nimi tai polku
+    Browser Profile Invalid: "Kirjoita profiilin nimi tai valitse profiilikansio kansiopainikkeella."
     Select Browser: Valitse selain
     Always Use Cookies: Käytä evästeitä aina
     Restricted Playback Authentication Hint: OpenTubeX välittää nämä evästeet oletuksena yt-dlp:lle vasta, kun valitset ikärajoitetun tai vain jäsenille tarkoitetun videon kohdalla "Yritä määritetyillä evästeillä".
@@ -1965,6 +1965,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
   External Player:
     LaunchFailedTemplate: Kohdetta {externalPlayer} ei voitu käynnistää. Varmista, että se on asennettu, tai määritä suoritettavan tiedoston polku ulkoisen soittimen asetuksissa.
+    Confirm Arguments Title: "Suoritetaanko ulkoinen soitin mukautetuilla argumenteilla?"
+    Confirm Arguments Message: "{externalPlayer} käynnistyy näillä mukautetuilla argumenteilla:"
+    Confirm Arguments Warning: "Jotkin argumentit voivat suorittaa ohjelmia tai korvata tiedostoja. Jatka vain, jos lisäsit ne itse."
+    Run: "Suorita"
+    LaunchCanceledTemplate: "Kohdetta {externalPlayer} ei avattu"
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
@@ -2376,6 +2381,7 @@ CommandPalette:
     Download Finished: Tämä lataus ei ole enää käynnissä
     Video: Avaa ensin video
 Downloads:
+  File Name Template Invalid: 'Käytä latauskansion sisäistä suhteellista polkua ilman merkkejä "..", "~", "$", "%" tai etuliitettä kuten "thumbnail:".'
   Search Completed: "Hae valmiita latauksia otsikon tai kanavan perusteella"
   Format: "Muoto"
   All Formats: "Kaikki muodot"
@@ -2531,6 +2537,8 @@ Tray Icon:
   Follow App Theme: "Seuraa sovelluksen teemaa"
 
 Form Inputs:
+  Browse: "Selaa"
+  Use Default Path: "Käytä oletusta"
   Enter Password Hint: "Anna salasanasi"
   Choose Password Hint: "Valitse salasana"
   Confirm Password Hint: "Toista uusi salasanasi"
@@ -2550,7 +2558,6 @@ Form Inputs:
   Any Age: Mikä tahansa ikä
   Included Terms Example: esim. ohje, arvostelu
   Excluded Terms Example: esim. traileri, esikatselu
-  Download Folder Hint: Jätä tyhjäksi käyttääksesi Lataukset-kansiota
   Global Arguments Hint: Valinnaiset argumentit jokaiselle lataukselle
   Unlimited Hint: 0 tarkoittaa rajoittamatonta
   Add Argument: Lisää argumentti

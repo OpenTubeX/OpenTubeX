@@ -861,6 +861,43 @@ export async function getSystemLocale() {
 }
 
 /**
+ * Opens a video or playlist in the external player and reports the outcome.
+ * Callers mark videos as watched or consume queue items only when this
+ * resolves to true, so a canceled or failed launch leaves them untouched.
+ * @param {import('../../main/externalPlayer').ExternalPlayerPayload} payload
+ * @returns {Promise<boolean>} whether the player started
+ */
+export async function openInExternalPlayer(payload) {
+  const result = await window.ftElectron.openInExternalPlayer(payload)
+  if (result == null) return false
+  const { externalPlayer, unsupportedActions, isPlaylist, status } = result
+
+  if (status !== 'opened') {
+    showToast({
+      message: status === 'cancelled'
+        ? i18n.global.t('Video.External Player.LaunchCanceledTemplate', { externalPlayer })
+        : i18n.global.t('Video.External Player.LaunchFailedTemplate', { externalPlayer }),
+      icon: ['fas', status === 'cancelled' ? 'xmark' : 'circle-exclamation'],
+    })
+    return false
+  }
+
+  for (const action of unsupportedActions) {
+    showExternalPlayerUnsupportedActionToast(externalPlayer, action)
+  }
+
+  const videoOrPlaylist = isPlaylist
+    ? i18n.global.t('Video.External Player.playlist')
+    : i18n.global.t('Video.External Player.video')
+
+  showToast({
+    message: i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }),
+    icon: ['fas', 'external-link-alt'],
+  })
+  return true
+}
+
+/**
  * @param {string} externalPlayer
  * @param {import('../../constants').UnsupportedPlayerAction} action
  */

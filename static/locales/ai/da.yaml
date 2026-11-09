@@ -953,7 +953,6 @@ Settings:
     Global Additional yt-dlp Arguments: Yderligere yt-dlp-argumenter
     Concurrent Downloads: Samtidige downloads
     Bandwidth Limit: Båndbreddegrænse (KiB/s)
-    Choose Download Folder: Vælg downloadmappe
     Download Templates: Downloadskabeloner
     Manage Download Templates: Administrer downloadskabeloner ({templateCount})
     New Template: Ny skabelon
@@ -1047,6 +1046,7 @@ Settings:
     Browser for Cookies: Browser til cookies
     Browser Profile: Browserprofil (valgfri)
     Browser Profile Placeholder: Profilnavn eller sti
+    Browser Profile Invalid: "Angiv et profilnavn, eller vælg en profilmappe med mappeknappen."
     Select Browser: Vælg en browser
     Always Use Cookies: Brug altid cookies
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX først disse cookies til yt-dlp, når du vælger "Prøv med konfigurerede cookies" på en aldersbegrænset video eller en video kun for medlemmer.
@@ -1994,6 +1994,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live chat understøttes i øjeblikket ikke med Yattee-serveren. Direkte forbindelse til YouTube kræves.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} kunne ikke startes. Kontrollér, at den er installeret, eller angiv stien til den eksekverbare fil i indstillingerne for ekstern afspiller."
+    Confirm Arguments Title: "Vil du køre den eksterne afspiller med brugerdefinerede argumenter?"
+    Confirm Arguments Message: "{externalPlayer} starter med disse brugerdefinerede argumenter:"
+    Confirm Arguments Warning: "Nogle argumenter kan køre programmer eller overskrive filer. Fortsæt kun, hvis du selv har tilføjet dem."
+    Run: "Kør"
+    LaunchCanceledTemplate: "{externalPlayer} blev ikke åbnet"
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
@@ -2412,6 +2417,7 @@ CommandPalette:
     Download Finished: Denne download kører ikke længere
     Video: Åbn en video først
 Downloads:
+  File Name Template Invalid: 'Brug en relativ sti i downloadmappen uden "..", "~", "$", "%" eller et præfiks som "thumbnail:".'
   Search Completed: "Søg i fuldførte downloads efter titel eller kanal"
   Format: "Format"
   All Formats: "Alle formater"
@@ -2567,6 +2573,8 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
+  Browse: "Gennemse"
+  Use Default Path: "Brug standard"
   Enter Password Hint: "Indtast din adgangskode"
   Choose Password Hint: "Vælg en adgangskode"
   Confirm Password Hint: "Gentag din nye adgangskode"
@@ -2586,7 +2594,6 @@ Form Inputs:
   Any Age: Enhver alder
   Included Terms Example: f.eks. vejledning, anmeldelse
   Excluded Terms Example: f.eks. trailer, forhåndsvisning
-  Download Folder Hint: Lad stå tomt for at bruge mappen Downloads
   Global Arguments Hint: Valgfrie argumenter til hver download
   Unlimited Hint: 0 for ubegrænset
   Add Argument: Tilføj et argument

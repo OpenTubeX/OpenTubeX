@@ -27,21 +27,14 @@
       v-if="enableDownloads"
       class="downloadPathInputs settingsFlexStart460px"
     >
-      <FtInput
-        :icon="['fas', 'folder-open']"
+      <FtPathPicker
         :label="t('Settings.Download Settings.Download Folder')"
-        placeholder="/path/to/downloads"
-        :supporting-text="t('Form Inputs.Download Folder Hint')"
-        :show-action-button="true"
-        :action-button-label="t('Settings.Download Settings.Choose Download Folder')"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'folder-open']"
-        :show-label="true"
+        :placeholder="downloadFolderRequired ? '' : t('Downloads.System Downloads Folder')"
+        :supporting-text="downloadFolderRequired ? t('Downloads.Folder Required') : ''"
         :value="displayAndroidPath(ytDlpDownloadFolderPath)"
-        :readonly="isCapacitor"
         :tooltip="t('Tooltips.Download Settings.Download Folder')"
-        @input="updateYtDlpDownloadFolderPath"
-        @click="chooseDownloadFolder"
+        @browse="ytDlp.ytDlpChooseDownloadFolder()"
+        @clear="store.dispatch('updateYtDlpDownloadFolderPath', '')"
       />
       <FtInput
         :icon="['fas', 'terminal']"
@@ -90,6 +83,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -108,6 +102,7 @@ const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
+const downloadFolderRequired = computed(() => (isCapacitor || window.ftElectron?.isFlatpak) && ytDlpDownloadFolderPath.value === '')
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadCustomArgs = computed(() => store.getters.getYtDlpDownloadCustomArgs)
@@ -128,13 +123,6 @@ function openDownloads() {
 /**
  * @param {string} value
  */
-function updateYtDlpDownloadFolderPath(value) {
-  if (!isCapacitor) store.dispatch('updateYtDlpDownloadFolderPath', value)
-}
-
-/**
- * @param {string} value
- */
 function updateYtDlpDownloadCustomArgs(value) {
   store.dispatch('updateYtDlpDownloadCustomArgs', value)
 }
@@ -149,14 +137,6 @@ function updateYtDlpMaxConcurrentDownloads(value) {
 
 function updateYtDlpDownloadBandwidthLimit(value) {
   return updateQueueSetting('updateYtDlpDownloadBandwidthLimit', value)
-}
-
-async function chooseDownloadFolder() {
-  const path = await ytDlp.ytDlpChooseDownloadFolder(ytDlpDownloadFolderPath.value)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch('updateYtDlpDownloadFolderPath', path)
-  }
 }
 </script>
 

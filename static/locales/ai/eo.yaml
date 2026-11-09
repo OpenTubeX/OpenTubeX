@@ -964,7 +964,6 @@ Settings:
     Global Additional yt-dlp Arguments: Aldonaj argumentoj por yt-dlp
     Concurrent Downloads: Samtempaj elŝutoj
     Bandwidth Limit: Kapacita limo (KiB/s)
-    Choose Download Folder: Elekti elŝutan dosierujon
     Download Templates: Elŝutaj ŝablonoj
     Manage Download Templates: Administri elŝutajn ŝablonojn ({templateCount})
     New Template: Nova ŝablono
@@ -1058,6 +1057,7 @@ Settings:
     Browser for Cookies: Retumilo por kuketoj
     Browser Profile: Retumila profilo (nedeviga)
     Browser Profile Placeholder: Profilnomo aŭ vojo
+    Browser Profile Invalid: "Enigu profilan nomon, aŭ elektu profilan dosierujon per la dosieruja butono."
     Select Browser: Elektu retumilon
     Always Use Cookies: Ĉiam uzi kuketojn
     Restricted Playback Authentication Hint: Defaŭlte, OpenTubeX nur donas ĉi tiujn kuketojn al yt-dlp post kiam vi elektas "Provi kun agorditaj kuketoj" ĉe aĝolimigita aŭ nur-membra videaĵo.
@@ -1959,6 +1959,11 @@ Video:
   Info panel source: 'Fonto: {source}'
   External Player:
     LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
+    Confirm Arguments Title: "Ĉu lanĉi la eksteran ludilon kun propraj argumentoj?"
+    Confirm Arguments Message: "{externalPlayer} startos kun ĉi tiuj propraj argumentoj:"
+    Confirm Arguments Warning: "Kelkaj argumentoj povas lanĉi programojn aŭ anstataŭigi dosierojn. Daŭrigu nur se vi mem aldonis ilin."
+    Run: "Lanĉi"
+    LaunchCanceledTemplate: "{externalPlayer} ne estis malfermita"
 Playlist:
   Close Playlist: Fermi ludliston
   Add Playlist to Queue: Aldoni ludliston al la vico
@@ -2375,6 +2380,7 @@ CommandPalette:
     Download Finished: Ĉi tiu elŝuto ne plu ruliĝas
     Video: Unue malfermu videaĵon
 Downloads:
+  File Name Template Invalid: 'Uzu relativan vojon ene de la elŝuta dosierujo sen "..", "~", "$", "%" aŭ prefikso kiel "thumbnail:".'
   Add Download: Aldoni elŝuton
   Search Completed: Serĉi finitajn elŝutojn laŭ titolo aŭ kanalo
   Format: Formo
@@ -2519,6 +2525,8 @@ Tray Icon:
   Title: Taskopleta piktogramo
   Follow App Theme: Sekvi la etoson de la aplikaĵo
 Form Inputs:
+  Browse: "Foliumi"
+  Use Default Path: "Uzi la defaŭlton"
   Enter Password Hint: Enigu vian pasvorton
   Choose Password Hint: Elektu pasvorton
   Confirm Password Hint: Ripetu vian novan pasvorton
@@ -2538,7 +2546,6 @@ Form Inputs:
   Any Age: Ajna aĝo
   Included Terms Example: ekz. lernilo, recenzo
   Excluded Terms Example: ekz. antaŭfilmo, antaŭrigardo
-  Download Folder Hint: Lasu malplena por uzi vian elŝutan dosierujon
   Global Arguments Hint: Nedevigaj argumentoj por ĉiu elŝuto
   Unlimited Hint: 0 por senlima
   Add Argument: Aldoni argumenton

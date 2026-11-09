@@ -963,7 +963,6 @@ Settings:
     Global Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
     Concurrent Downloads: Адначасовыя спампоўванні
     Bandwidth Limit: Абмежаванне прапускной здольнасці (KiB/s)
-    Choose Download Folder: Выбраць папку спампоўванняў
     Download Templates: Шаблоны спампоўвання
     Manage Download Templates: Кіраванне шаблонамі спампоўвання ({templateCount})
     New Template: Новы шаблон
@@ -1057,6 +1056,7 @@ Settings:
     Browser for Cookies: Браўзер для cookie
     Browser Profile: Профіль браўзера (неабавязкова)
     Browser Profile Placeholder: Назва профілю або шлях
+    Browser Profile Invalid: "Увядзіце назву профілю або выберыце папку профілю кнопкай папкі."
     Select Browser: Выберыце браўзер
     Always Use Cookies: Заўсёды выкарыстоўваць cookie
     Restricted Playback Authentication Hint: Прадвызначана OpenTubeX перадае гэтыя cookie у yt-dlp толькі пасля таго, як вы выбераце «Паспрабаваць з наладжанымі cookie» для відэа з абмежаваннем паводле ўзросту або толькі для ўдзельнікаў.
@@ -2008,6 +2008,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Жывы чат зараз не падтрымліваецца серверам Yattee. Патрабуецца прамое падключэнне да YouTube.
   External Player:
     LaunchFailedTemplate: Не ўдалося запусціць {externalPlayer}. Пераканайцеся, што ён усталяваны, або ўкажыце шлях да выканальнага файла ў наладах вонкавага прайгравальніка.
+    Confirm Arguments Title: "Запусціць знешні прайгравальнік з карыстальніцкімі аргументамі?"
+    Confirm Arguments Message: "{externalPlayer} запусціцца з гэтымі карыстальніцкімі аргументамі:"
+    Confirm Arguments Warning: "Некаторыя аргументы могуць запускаць праграмы або перазапісваць файлы. Працягвайце, толькі калі дадалі іх самі."
+    Run: "Запусціць"
+    LaunchCanceledTemplate: "{externalPlayer} не адкрыты"
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
@@ -2426,6 +2431,7 @@ CommandPalette:
     Download Finished: Гэтае спампоўванне больш не выконваецца
     Video: Спачатку адкрыйце відэа
 Downloads:
+  File Name Template Invalid: 'Выкарыстоўвайце адносны шлях унутры папкі спампоўвання без "..", "~", "$", "%" або прэфікса, напрыклад "thumbnail:".'
   Search Completed: "Пошук завершаных спампоўванняў па назве або канале"
   Format: "Фармат"
   All Formats: "Усе фарматы"
@@ -2581,6 +2587,8 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Browse: "Агляд"
+  Use Default Path: "Выкарыстоўваць прадвызначанае"
   Enter Password Hint: "Увядзіце свой пароль"
   Choose Password Hint: "Выберыце пароль"
   Confirm Password Hint: "Паўтарыце новы пароль"
@@ -2600,7 +2608,6 @@ Form Inputs:
   Any Age: Любы ўзрост
   Included Terms Example: напр. інструкцыя, агляд
   Excluded Terms Example: напр. трэйлер, анонс
-  Download Folder Hint: Пакіньце пустым, каб выкарыстоўваць папку спамповак
   Global Arguments Hint: Неабавязковыя аргументы для кожнага спампоўвання
   Unlimited Hint: 0 — без абмежавання
   Add Argument: Дадаць аргумент

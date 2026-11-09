@@ -1131,7 +1131,6 @@ Settings:
     Global Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
     Concurrent Downloads: Vienalaikiai atsisiuntimai
     Bandwidth Limit: Pralaidumo riba (KiB/s)
-    Choose Download Folder: Pasirinkti atsisiuntimų aplanką
     Download Templates: Atsisiuntimo šablonai
     Manage Download Templates: Tvarkyti atsisiuntimo šablonus ({templateCount})
     New Template: Naujas šablonas
@@ -1225,6 +1224,7 @@ Settings:
     Browser for Cookies: Slapukų naršyklė
     Browser Profile: Naršyklės profilis (nebūtina)
     Browser Profile Placeholder: Profilio pavadinimas arba kelias
+    Browser Profile Invalid: "Įveskite profilio pavadinimą arba aplanko mygtuku pasirinkite profilio aplanką."
     Select Browser: Pasirinkti naršyklę
     Always Use Cookies: Visada naudoti slapukus
     Restricted Playback Authentication Hint: Pagal numatytuosius nustatymus OpenTubeX perduoda šiuos slapukus yt-dlp tik tada, kai ribojamo pagal amžių arba tik nariams skirto vaizdo įrašo puslapyje pasirenkate „Bandyti naudojant sukonfigūruotus slapukus“.
@@ -2309,6 +2309,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Tiesioginė diskusija šiuo metu nepalaikoma naudojant Yattee serverį. Būtinas tiesioginis ryšys su YouTube.
   External Player:
     LaunchFailedTemplate: Nepavyko paleisti {externalPlayer}. Patikrinkite, ar jis įdiegtas, arba nurodykite vykdomojo failo kelią išorinio grotuvo nustatymuose.
+    Confirm Arguments Title: "Paleisti išorinį grotuvą su pasirinktiniais argumentais?"
+    Confirm Arguments Message: "{externalPlayer} bus paleistas su šiais pasirinktiniais argumentais:"
+    Confirm Arguments Warning: "Kai kurie argumentai gali paleisti programas arba perrašyti failus. Tęskite tik jei juos pridėjote patys."
+    Run: "Paleisti"
+    LaunchCanceledTemplate: "{externalPlayer} neatidarytas"
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"
@@ -2829,6 +2834,7 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  File Name Template Invalid: 'Naudokite santykinį kelią atsisiuntimų aplanke be "..", "~", "$", "%" ar priešdėlio, pvz., "thumbnail:".'
   Search Completed: "Ieškoti baigtų atsisiuntimų pagal pavadinimą ar kanalą"
   Format: "Formatas"
   All Formats: "Visi formatai"
@@ -2984,6 +2990,8 @@ Tray Icon:
   Follow App Theme: "Naudoti programos apipavidalinimą"
 
 Form Inputs:
+  Browse: "Naršyti"
+  Use Default Path: "Naudoti numatytąjį"
   Enter Password Hint: "Įveskite savo slaptažodį"
   Choose Password Hint: "Pasirinkite slaptažodį"
   Confirm Password Hint: "Pakartokite naują slaptažodį"
@@ -3003,7 +3011,6 @@ Form Inputs:
   Any Age: Bet kokio senumo
   Included Terms Example: pvz. pamoka, apžvalga
   Excluded Terms Example: pvz. anonsas, peržiūra
-  Download Folder Hint: Palikite tuščią, kad būtų naudojamas atsisiuntimų aplankas
   Global Arguments Hint: Pasirinktiniai argumentai kiekvienam atsisiuntimui
   Unlimited Hint: 0 – neribota
   Add Argument: Pridėkite argumentą

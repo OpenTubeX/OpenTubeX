@@ -45,10 +45,15 @@ const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'inte
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500
 // Options that run programs, load configs or inputs, replace yt-dlp, or write
 // files outside the download folder (a written config can carry `--exec`).
+// Metadata options can set internal fields such as `__finaldir` and
+// `filepath`, which move or write the download anywhere, compatibility
+// options can turn off yt-dlp's file extension safety checks, and trimming
+// file names can cut a checked folder name down to `..`.
 const DENIED_CUSTOM_ARGS = [
   '--alias',
   '--batch-file',
   '--cache-dir',
+  '--compat-options',
   '--config-location',
   '--config-locations',
   '--cookies',
@@ -63,15 +68,20 @@ const DENIED_CUSTOM_ARGS = [
   '--js-runtimes',
   '--load-info-json',
   '--load-pages',
+  '--metadata-from-title',
   '--netrc-cmd',
   '--output',
   '--output-na-placeholder',
+  '--parse-metadata',
   '--paths',
   '--plugin-dirs',
   '--postprocessor-args',
   '--ppa',
   '--print-to-file',
   '--remote-components',
+  '--replace-in-metadata',
+  '--trim-file-names',
+  '--trim-filenames',
   '--update',
   '--update-to',
   '--use-postprocessor',
@@ -88,6 +98,8 @@ const SHORT_ARGS_WITH_VALUES = '2INOPRSafoprtu'
  * and combined short options, so `-xo` is `-x -o`.
  */
 export function isDeniedCustomArgument(argument) {
+  // Everything after `--` is a URL, including the options OpenTubeX adds later.
+  if (argument === '--') return true
   if (/^-[^-]/.test(argument)) {
     for (const option of argument.slice(1)) {
       if (DENIED_SHORT_ARGS.includes(option)) return true
@@ -143,6 +155,48 @@ function automaticTitleRegex(includedTerms, excludedTerms) {
   return `(?i)^${include}${exclude}.*$`
 }
 
+// yt-dlp reads `TYPES:` before an output template as the files it applies to,
+// such as `thumbnail:/absolute/path`.
+const OUTPUT_TEMPLATE_TYPES = 'chapter|subtitle|thumbnail|description|annotation|infojson|link|pl_video|pl_thumbnail|pl_description|pl_infojson'
+const OUTPUT_TEMPLATE_TYPE_PREFIX = new RegExp(`^(?:${OUTPUT_TEMPLATE_TYPES})(?:,(?:${OUTPUT_TEMPLATE_TYPES}))*:`, 'i')
+/**
+ * Whether a download filename template is a relative path that stays in the
+ * download folder. yt-dlp ignores `--paths` for absolute templates and expands
+ * `~` and environment variables, so those, drive letters and `..` segments are
+ * refused. `%` is refused as well because raw `%(...)` fields with literal
+ * defaults can expand to `..`; templates use the `{field}` placeholders.
+ * @param {unknown} template
+ */
+export function isSafeDownloadFilenameTemplate(template) {
+  // Anything else falls back to the default template.
+  if (typeof template !== 'string') return true
+  const value = template.trim()
+  // A field before a colon in the first segment can form a Windows drive, as in `{author}:/x`.
+  return !/[$%]/.test(value) && !/^[^/\\]*\}[^/\\]*:/.test(value) && !leavesDownloadFolder(value)
+}
+/** @param {string} template */
+function leavesDownloadFolder(template) {
+  return /^(?:[/\\~]|[a-z]:)/i.test(template) ||
+    OUTPUT_TEMPLATE_TYPE_PREFIX.test(template) ||
+    template.split(/[/\\]/).some((segment, index, segments) => {
+      if (/^\s*\.{2,}\s*$/.test(segment)) return true
+      if (index === segments.length - 1) return false
+      // A folder's fields can expand to nothing, so its other text must not be dots alone.
+      const literal = segment.replaceAll(/\{[^}]*\}|%\([^)]*\)[^a-zA-Z]*[a-zA-Z]/g, '')
+      return /^[\s.]*$/.test(literal) && literal.split('.').length > 2
+    })
+}
+// Characters that --restrict-filenames normalizes to dots.
+const DOT_LIKE_CHARACTERS = '.\\u2024\\u2025\\u2026\\ufe19\\ufe30\\ufe52\\uff0e'
+/**
+ * A Python pattern for --replace-in-metadata that matches field values yt-dlp
+ * may turn into `.` or `..`. yt-dlp keeps such a value as a directory name, which
+ * then leaves the download folder. Sanitizing can drop control characters and,
+ * with --restrict-filenames, non-ASCII ones, but never ASCII letters or digits.
+ * Titles are cut to 200 bytes, which keeps at least their first 50 characters,
+ * so only a letter or digit among those counts.
+ */
+export const DOT_FIELD_PATTERN = `^(?![\\s\\S]{0,49}[A-Za-z0-9])(?=[\\s\\S]*[${DOT_LIKE_CHARACTERS}])[\\s\\S]*\\Z`
 export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (!payload || !['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) throw new Error('invalid-download')
   const videoIds = payload.videoIds ?? []
@@ -159,6 +213,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   const customArgs = splitArguments(payload.customArgs || '')
   const globalCustomArgs = splitArguments(globalArguments)
   if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) throw new Error('unsupported-custom-argument')
+  if (!isSafeDownloadFilenameTemplate(payload.filenameTemplate)) throw new Error('invalid-filename-template')
   const args = [...globalCustomArgs]
   if (!isRemotePlaylist) args.push('--no-playlist')
   let outputTemplate = typeof payload.filenameTemplate === 'string' && payload.filenameTemplate.trim() !== ''
@@ -198,6 +253,11 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
       ? `%(playlist_title)s/%(playlist_index)03d - ${outputTemplate}`
       : `${localPlaylistTitle}/%(autonumber)03d - ${outputTemplate}`
   }
+  // The playlist title is inserted literally, so check the result as well.
+  if (leavesDownloadFolder(outputTemplate)) throw new Error('invalid-filename-template')
+  // Text fields that name a folder are checked for dot-only values.
+  const directoryFields = [...new Set([...outputTemplate.split(/[/\\]/).slice(0, -1).join('/').matchAll(/%\((\w+)/g)]
+    .map(match => match[1]))].filter(field => ['title', 'uploader', 'id', 'playlist_title', 'upload_date', 'ext'].includes(field))
   args.push('--output', outputTemplate)
 
   switch (payload.mode) {
@@ -312,5 +372,5 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
     args.push(`https://www.youtube.com/watch?v=${payload.videoId}`)
   }
 
-  return { args, truncatesLongTitles }
+  return { args, truncatesLongTitles, directoryFields }
 }

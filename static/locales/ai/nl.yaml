@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: Extra yt-dlp-argumenten
     Concurrent Downloads: Gelijktijdige downloads
     Bandwidth Limit: Bandbreedtelimiet (KiB/s)
-    Choose Download Folder: Downloadmap kiezen
     Download Templates: Downloadsjablonen
     Manage Download Templates: Downloadsjablonen beheren ({templateCount})
     New Template: Nieuw sjabloon
@@ -1037,6 +1036,7 @@ Settings:
     Browser for Cookies: Browser voor cookies
     Browser Profile: Browserprofiel (optioneel)
     Browser Profile Placeholder: Profielnaam of pad
+    Browser Profile Invalid: "Voer een profielnaam in of kies een profielmap met de mapknop."
     Select Browser: Selecteer een browser
     Always Use Cookies: Cookies altijd gebruiken
     Restricted Playback Authentication Hint: OpenTubeX geeft deze cookies standaard pas aan yt-dlp door nadat je bij een video met een leeftijdsbeperking of een video voor leden hebt gekozen voor "Proberen met ingestelde cookies".
@@ -1976,6 +1976,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechat wordt momenteel niet ondersteund door de Yattee-server. Een directe verbinding met YouTube is nodig.
   External Player:
     LaunchFailedTemplate: Kan {externalPlayer} niet starten. Controleer of het is geïnstalleerd, of stel het pad naar het uitvoerbare bestand in bij de instellingen voor externe spelers.
+    Confirm Arguments Title: "Externe speler uitvoeren met aangepaste argumenten?"
+    Confirm Arguments Message: "{externalPlayer} start met deze aangepaste argumenten:"
+    Confirm Arguments Warning: "Sommige argumenten kunnen programma's uitvoeren of bestanden overschrijven. Ga alleen verder als je ze zelf hebt toegevoegd."
+    Run: "Uitvoeren"
+    LaunchCanceledTemplate: "{externalPlayer} is niet geopend"
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
@@ -2387,6 +2392,7 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  File Name Template Invalid: 'Gebruik een relatief pad binnen de downloadmap zonder "..", "~", "$", "%" of een voorvoegsel zoals "thumbnail:".'
   Search Completed: "Voltooide downloads zoeken op titel of kanaal"
   Format: "Formaat"
   All Formats: "Alle formaten"
@@ -2542,6 +2548,8 @@ Tray Icon:
   Follow App Theme: "Appthema volgen"
 
 Form Inputs:
+  Browse: "Bladeren"
+  Use Default Path: "Standaard gebruiken"
   Enter Password Hint: "Voer je wachtwoord in"
   Choose Password Hint: "Kies een wachtwoord"
   Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
@@ -2561,7 +2569,6 @@ Form Inputs:
   Any Age: Elke ouderdom
   Included Terms Example: bijv. uitleg, recensie
   Excluded Terms Example: bijv. trailer, voorvertoning
-  Download Folder Hint: Laat leeg om je downloadmap te gebruiken
   Global Arguments Hint: Optionele argumenten voor elke download
   Unlimited Hint: 0 voor onbeperkt
   Add Argument: Voeg een argument toe

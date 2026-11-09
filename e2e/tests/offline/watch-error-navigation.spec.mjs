@@ -3,7 +3,7 @@ import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
-import { abortUnmockedRequest, goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
+import { choosePickerPaths, abortUnmockedRequest, goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
 import { demoPlayerResponse, routeWatchPageHtml } from '../../helpers/media.mjs'
 import { watchViewHandle } from '../../helpers/watch.mjs'
@@ -219,12 +219,12 @@ test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers 
     contentType: 'application/x-mpegURL',
     body: '#EXTM3U\n'
   }))
-  await page.evaluate(async ytDlpPath => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
-  }, executable)
+  })
 
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')

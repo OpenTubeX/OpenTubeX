@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: yt-dlp argumentu gehigarriak
     Concurrent Downloads: Aldibereko deskargak
     Bandwidth Limit: Banda-zabaleraren muga (KiB/s)
-    Choose Download Folder: Aukeratu deskargen karpeta
     Download Templates: Deskarga-txantiloiak
     Manage Download Templates: Kudeatu deskarga-txantiloiak ({templateCount})
     New Template: Txantiloi berria
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookieetarako arakatzailea
     Browser Profile: Arakatzailearen profila (aukerakoa)
     Browser Profile Placeholder: Profilaren izena edo bide-izena
+    Browser Profile Invalid: "Idatzi profil-izen bat, edo aukeratu profil-karpeta bat karpeta-botoiarekin."
     Select Browser: Hautatu arakatzailea
     Always Use Cookies: Erabili beti cookieak
     Restricted Playback Authentication Hint: Modu lehenetsian, OpenTubeX aplikazioak cookie hauek yt-dlp-ri ematen dizkio soilik adin-muga duen edo kideentzat den bideo batean "Saiatu konfiguratutako cookieekin" aukeratu ondoren.
@@ -1922,6 +1922,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
   External Player:
     LaunchFailedTemplate: Ezin izan da {externalPlayer} abiarazi. Egiaztatu instalatuta dagoela, edo ezarri exekutagarriaren bidea kanpoko erreproduzigailuaren ezarpenetan.
+    Confirm Arguments Title: "Kanpoko erreproduzigailua argumentu pertsonalizatuekin exekutatu?"
+    Confirm Arguments Message: "{externalPlayer} argumentu pertsonalizatu hauekin abiaraziko da:"
+    Confirm Arguments Warning: "Argumentu batzuek programak exekutatu edo fitxategiak gainidatz ditzakete. Jarraitu zuk zeuk gehitu badituzu soilik."
+    Run: "Exekutatu"
+    LaunchCanceledTemplate: "Ez da {externalPlayer} ireki"
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
@@ -2327,6 +2332,7 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  File Name Template Invalid: 'Erabili deskargen karpetaren barruko bide erlatibo bat, "..", "~", "$", "%" edo "thumbnail:" bezalako aurrizkirik gabe.'
   Search Completed: "Bilatu amaitutako deskargak izenburuaren edo kanalaren arabera"
   Format: "Formatua"
   All Formats: "Formatu guztiak"
@@ -2478,6 +2484,8 @@ Tray Icon:
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
 
 Form Inputs:
+  Browse: "Arakatu"
+  Use Default Path: "Erabili lehenetsia"
   Enter Password Hint: "Sartu zure pasahitza"
   Choose Password Hint: "Aukeratu pasahitz bat"
   Confirm Password Hint: "Errepikatu zure pasahitz berria"
@@ -2497,7 +2505,6 @@ Form Inputs:
   Any Age: Edozein antzinatasun
   Included Terms Example: adib. tutoriala, iritzia
   Excluded Terms Example: adib. trailerra, aurrerapena
-  Download Folder Hint: Utzi hutsik Deskargak karpeta erabiltzeko
   Global Arguments Hint: Aukerako argumentuak deskarga guztietarako
   Unlimited Hint: 0 mugarik ez izateko
   Add Argument: Gehitu argumentu bat

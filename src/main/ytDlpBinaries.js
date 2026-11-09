@@ -106,10 +106,9 @@ function getManagedBinaryPath(binaryName) {
  * @param {'ytDlpPath' | 'ytDlpFfmpegPath'} pathSettingId
  * @param {'yt-dlp' | 'ffmpeg'} binaryName
  * @param {'system' | 'managed'} [sourceOverride]
- * @param {string} [pathOverride]
  * @returns {Promise<{ source: 'system' | 'managed', executable: string }>}
  */
-export async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sourceOverride, pathOverride) {
+export async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sourceOverride) {
   /** @type {'system' | 'managed'} */
   const source = sourceOverride ?? ((await settings._findOne(sourceSettingId))?.value === 'managed' ? 'managed' : 'system')
 
@@ -118,7 +117,7 @@ export async function resolveExecutable(sourceSettingId, pathSettingId, binaryNa
   }
 
   /** @type {string} */
-  const customPath = pathOverride ?? ((await settings._findOne(pathSettingId))?.value || '')
+  const customPath = (await settings._findOne(pathSettingId))?.value || ''
 
   return { source, executable: customPath === '' ? binaryName : customPath }
 }
@@ -135,17 +134,10 @@ export async function getDlnaFfmpegExecutable() {
  * `--ffmpeg-location`. A custom FFmpeg path therefore also locates FFprobe in
  * the same directory.
  * @param {'system' | 'managed'} [sourceOverride]
- * @param {string} [ffmpegPathOverride]
  * @returns {Promise<{ source: 'system' | 'managed', executable: string }>}
  */
-export async function resolveFfprobeExecutable(sourceOverride, ffmpegPathOverride) {
-  const ffmpeg = await resolveExecutable(
-    'ytDlpFfmpegSource',
-    'ytDlpFfmpegPath',
-    'ffmpeg',
-    sourceOverride,
-    ffmpegPathOverride
-  )
+export async function resolveFfprobeExecutable(sourceOverride) {
+  const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', sourceOverride)
 
   if (ffmpeg.source === 'managed') {
     return { source: ffmpeg.source, executable: getManagedBinaryPath('ffprobe') }
@@ -1018,12 +1010,7 @@ async function getYtDlpInfo(resolved, signal) {
 }
 
 /**
- * @param {{
- *   ytDlpSource: 'system' | 'managed',
- *   ytDlpPath: string,
- *   ffmpegSource: 'system' | 'managed',
- *   ffmpegPath: string
- * } | undefined} options
+ * @param {{ ytDlpSource: 'system' | 'managed', ffmpegSource: 'system' | 'managed' } | undefined} options
  * @returns {string}
  */
 function getInfoProbeKey(options) {
@@ -1035,13 +1022,9 @@ function getInfoProbeKey(options) {
 }
 
 /**
+ * System sources probe the saved paths, never paths from the renderer.
  * @param {import('electron').IpcMainInvokeEvent} event
- * @param {{
- *   ytDlpSource: 'system' | 'managed',
- *   ytDlpPath: string,
- *   ffmpegSource: 'system' | 'managed',
- *   ffmpegPath: string
- * } | undefined} [options]
+ * @param {{ ytDlpSource: 'system' | 'managed', ffmpegSource: 'system' | 'managed' } | undefined} [options]
  * @returns {Promise<{ ytDlp: YtDlpInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
  */
 export async function handleYtDlpGetInfo(event, options) {
@@ -1060,9 +1043,7 @@ export async function handleYtDlpGetInfo(event, options) {
     options === null ||
     typeof options !== 'object' ||
     (options.ytDlpSource !== 'system' && options.ytDlpSource !== 'managed') ||
-    typeof options.ytDlpPath !== 'string' ||
-    (options.ffmpegSource !== 'system' && options.ffmpegSource !== 'managed') ||
-    typeof options.ffmpegPath !== 'string'
+    (options.ffmpegSource !== 'system' && options.ffmpegSource !== 'managed')
   )) {
     return null
   }
@@ -1071,7 +1052,7 @@ export async function handleYtDlpGetInfo(event, options) {
     return null
   }
 
-  // Abort superseded probes for this key (e.g. rapid path edits) so the longer
+  // Abort superseded probes for this key (e.g. repeated path changes) so the longer
   // PyInstaller cold-start timeout cannot accumulate children. System vs managed
   // use different keys and stay concurrent.
   const probeKey = getInfoProbeKey(options)
@@ -1080,15 +1061,15 @@ export async function handleYtDlpGetInfo(event, options) {
   try {
     const [ytDlp, ffmpeg, ffprobe] = await Promise.all([
       getYtDlpInfo(
-        await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
+        await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource),
         signal
       ),
       getBinaryInfo(
-        await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
+        await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource),
         (executable) => getFfmpegVersion(executable, signal)
       ),
       getBinaryInfo(
-        await resolveFfprobeExecutable(options?.ffmpegSource, options?.ffmpegPath),
+        await resolveFfprobeExecutable(options?.ffmpegSource),
         (executable) => getFfprobeVersion(executable, signal)
       )
     ])

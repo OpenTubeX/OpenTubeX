@@ -965,7 +965,6 @@ Settings:
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
     Concurrent Downloads: بارگیری‌های هم‌زمان
     Bandwidth Limit: محدودیت پهنای باند (KiB/s)
-    Choose Download Folder: انتخاب پوشهٔ بارگیری
     Download Templates: الگوهای بارگیری
     Manage Download Templates: مدیریت الگوهای بارگیری ({templateCount})
     New Template: الگوی جدید
@@ -1059,6 +1058,7 @@ Settings:
     Browser for Cookies: مرورگر کوکی‌ها
     Browser Profile: نمایهٔ مرورگر (اختیاری)
     Browser Profile Placeholder: نام یا مسیر نمایه
+    Browser Profile Invalid: "نام نمایه را وارد کنید یا با دکمهٔ پوشه، پوشهٔ نمایه را انتخاب کنید."
     Select Browser: انتخاب مرورگر
     Always Use Cookies: همیشه از کوکی‌ها استفاده شود
     Restricted Playback Authentication Hint: OpenTubeX به‌طور پیش‌فرض تنها پس از انتخاب «تلاش با کوکی‌های تنظیم‌شده» برای ویدیوی دارای محدودیت سنی یا ویژهٔ اعضا، این کوکی‌ها را به yt-dlp می‌فرستد.
@@ -2006,6 +2006,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
   External Player:
     LaunchFailedTemplate: اجرای {externalPlayer} ممکن نشد. مطمئن شوید نصب شده است، یا مسیر فایل اجرایی آن را در تنظیمات پخش‌کنندهٔ خارجی تعیین کنید.
+    Confirm Arguments Title: "پخش‌کنندهٔ خارجی با آرگومان‌های سفارشی اجرا شود؟"
+    Confirm Arguments Message: "{externalPlayer} با این آرگومان‌های سفارشی اجرا می‌شود:"
+    Confirm Arguments Warning: "برخی آرگومان‌ها می‌توانند برنامه اجرا کنند یا فایل‌ها را بازنویسی کنند. فقط اگر خودتان آن‌ها را افزوده‌اید ادامه دهید."
+    Run: "اجرا"
+    LaunchCanceledTemplate: "{externalPlayer} باز نشد"
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
@@ -2421,6 +2426,7 @@ CommandPalette:
     Download Finished: این بارگیری دیگر در حال اجرا نیست
     Video: ابتدا ویدیویی باز کنید
 Downloads:
+  File Name Template Invalid: 'از یک مسیر نسبی درون پوشهٔ بارگیری بدون ".."، "~"، "$"، "%" یا پیشوندی مانند "thumbnail:" استفاده کنید.'
   Search Completed: "جستجوی دانلودهای تکمیل‌شده بر اساس عنوان یا کانال"
   Format: "قالب"
   All Formats: "همهٔ قالب‌ها"
@@ -2576,6 +2582,8 @@ Tray Icon:
   Follow App Theme: "پیروی از زمینهٔ برنامه"
 
 Form Inputs:
+  Browse: "مرور"
+  Use Default Path: "استفاده از پیش‌فرض"
   Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
   Choose Password Hint: "یک گذرواژه انتخاب کنید"
   Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
@@ -2595,7 +2603,6 @@ Form Inputs:
   Any Age: هر قدمتی
   Included Terms Example: مثلاً آموزش, بررسی
   Excluded Terms Example: مثلاً تریلر, پیش‌نمایش
-  Download Folder Hint: برای استفاده از پوشهٔ بارگیری‌ها خالی بگذارید
   Global Arguments Hint: آرگومان‌های اختیاری برای هر بارگیری
   Unlimited Hint: 0 برای نامحدود
   Add Argument: افزودن آرگومان

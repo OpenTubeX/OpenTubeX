@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Arventennoù ouzhpenn yt-dlp
     Concurrent Downloads: "Pellgargadennoù war un dro"
     Bandwidth Limit: Bevenn ledander-bann (KiB/s)
-    Choose Download Folder: "Dibab un teuliad pellgargañ"
     Download Templates: "Patromoù pellgargañ"
     Manage Download Templates: "Merañ ar patromoù pellgargañ ({templateCount})"
     New Template: "Patrom nevez"
@@ -1022,6 +1021,7 @@ Settings:
     Browser for Cookies: "Merdeer evit an toupinoù"
     Browser Profile: "Profil ar merdeer (diret)"
     Browser Profile Placeholder: "Anv pe hent ar profil"
+    Browser Profile Invalid: "Enankit anv ur profil, pe dibabit un teuliad profil gant ar bouton teuliad."
     Select Browser: "Dibab ur merdeer"
     Always Use Cookies: "Implijout an toupinoù bepred"
     Restricted Playback Authentication Hint: "Dre ziouer, OpenTubeX ne dremen an toupinoù-mañ da yt-dlp nemet goude ma tibabit «Klask gant an toupinoù kefluniet» war ur video bevennet diouzh an oad pe miret d'an izili."
@@ -1921,6 +1921,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: N'eo ket skoret ar flapañ war-eeun gant ar servijer Yattee evit poent. Ret eo bezañ kennasket war-eeun ouzh YouTube.
   External Player:
     LaunchFailedTemplate: N’eus ket bet gallet loc’hañ {externalPlayer}. Gwiriit eo staliet, pe termenit hent ar restr seveniñ e arventennoù al lenner diavaez.
+    Confirm Arguments Title: "Lañsañ al lenner diavaez gant arguzennoù personelaet?"
+    Confirm Arguments Message: "{externalPlayer} a vo lañset gant an arguzennoù personelaet-mañ:"
+    Confirm Arguments Warning: "Arguzennoù zo a c’hall lañsañ programmoù pe flastrañ restroù. Kendalc’hit hepken m’ho peus o ouzhpennet hoc’h-unan."
+    Run: "Lañsañ"
+    LaunchCanceledTemplate: "N’eo ket bet digoret {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
@@ -2326,6 +2331,7 @@ CommandPalette:
     Download Finished: "N'emañ ket ar pellgargadenn-mañ war ober ken"
     Video: "Digerit ur video da gentañ"
 Downloads:
+  File Name Template Invalid: 'Implijit un hent keñverel e-barzh an teuliad pellgargañ hep "..", "~", "$", "%" pe ur rakger evel "thumbnail:".'
   Search Completed: "Klask en pellgargadennoù echuet dre ditl pe dre chadenn"
   Format: "Furmad"
   All Formats: "An holl furmadoù"
@@ -2477,6 +2483,8 @@ Tray Icon:
   Follow App Theme: "Heuliañ neuz an arload"
 
 Form Inputs:
+  Browse: "Furchal"
+  Use Default Path: "Implijout an hini dre ziouer"
   Enter Password Hint: "Enlakait ho ker-tremen"
   Choose Password Hint: "Dibabit ur ger-tremen"
   Confirm Password Hint: "Adskrivit ho ker-tremen nevez"
@@ -2496,7 +2504,6 @@ Form Inputs:
   Any Age: Oad forzh pe hini
   Included Terms Example: da skouer kentel, selladenn
   Excluded Terms Example: da skouer tañva, rakwel
-  Download Folder Hint: Lezit goullo evit implijout ho teuliad Pellgargadennoù
   Global Arguments Hint: Arventennoù diret evit pep pellgargadenn
   Unlimited Hint: 0 evit didermenet
   Add Argument: Ouzhpennañ un arventenn

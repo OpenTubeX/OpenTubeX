@@ -1,6 +1,7 @@
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, splitArguments, isYtDlpMediaUrl,
+  isSafeDownloadFilenameTemplate, DOT_FIELD_PATTERN,
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -410,6 +411,9 @@ async function startYtDlpDownload(
   if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) {
     return { error: 'unsupported-custom-argument' }
   }
+  if (!isSafeDownloadFilenameTemplate(payload.filenameTemplate)) {
+    return { error: 'invalid-filename-template' }
+  }
 
   if (payload.videoIds !== undefined && (!Array.isArray(payload.videoIds) ||
     payload.videoIds.some(videoId => typeof videoId !== 'string' || !ID_REGEX.test(videoId)))) {
@@ -450,7 +454,6 @@ async function startYtDlpDownload(
   ]
 
   await pushProxyArgument(args)
-  args.push(...globalCustomArgs)
 
   const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
 
@@ -471,8 +474,10 @@ async function startYtDlpDownload(
 
   /** @type {string} */
   const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
-  const { args: downloadArgs, truncatesLongTitles } = buildYtDlpDownloadArguments(payload)
-  args.push('--paths', downloadFolder, ...downloadArgs)
+  const { args: downloadArgs, truncatesLongTitles, directoryFields } = buildYtDlpDownloadArguments(payload)
+  // Custom arguments follow the destination, so an option missing its value
+  // cannot take `--paths` as its value.
+  args.push('--paths', downloadFolder, ...globalCustomArgs, ...downloadArgs)
 
   if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
     (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
@@ -578,6 +583,12 @@ async function startYtDlpDownload(
     }
   }
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
+  if (directoryFields.length > 0) {
+    // Restricted names apply Unicode normalization, which can join an ASCII
+    // letter with a following mark into a character that sanitizing removes.
+    // This also overrides the option from a yt-dlp configuration file.
+    args.push('--replace-in-metadata', directoryFields.join(','), DOT_FIELD_PATTERN, '_', '--no-restrict-filenames')
+  }
 
   try {
     const fileSystem = await statfs(downloadFolder)

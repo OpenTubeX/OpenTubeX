@@ -1,7 +1,7 @@
 import { chmod, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { goTo, test, expect } from '../../helpers/app.mjs'
+import { choosePickerPaths, goTo, test, expect } from '../../helpers/app.mjs'
 import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
@@ -221,10 +221,7 @@ test('subscription refresh waits for an active IP block recovery', async ({ app,
     await chmod(scriptPath, 0o700)
   }
 
-  await page.evaluate(async (recoveryScriptPath) => {
-    const store = window.$store
-    await store.dispatch('updateVideoIpBlockScriptPath', recoveryScriptPath)
-  }, scriptPath)
+  await choosePickerPaths(app, page, { videoIpBlockScriptPath: scriptPath })
 
   const result = await page.evaluate(async (recoveryScriptPath) => {
     const store = window.$store

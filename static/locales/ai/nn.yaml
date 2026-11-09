@@ -1029,7 +1029,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ekstra yt-dlp-argument
     Concurrent Downloads: Samstundes nedlastingar
     Bandwidth Limit: Bandbreiddegrense (KiB/s)
-    Choose Download Folder: Vel nedlastingsmappe
     Download Templates: Nedlastingsmalar
     Manage Download Templates: Handsam nedlastingsmalar ({templateCount})
     New Template: Ny mal
@@ -1123,6 +1122,7 @@ Settings:
     Browser for Cookies: Nettlesar for informasjonskapslar
     Browser Profile: Nettlesarprofil (valfritt)
     Browser Profile Placeholder: Profilnamn eller stig
+    Browser Profile Invalid: "Skriv inn eit profilnamn, eller vel ei profilmappe med mappeknappen."
     Select Browser: Vel ein nettlesar
     Always Use Cookies: Bruk alltid informasjonskapslar
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX berre desse informasjonskapslane til yt-dlp etter at du har valt "Prøv med dei valde informasjonskapslane" på ein aldersavgrensa video eller ein video berre for medlemer.
@@ -2199,6 +2199,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat er førebels ikkje støtta av Yattee-tenaren. Det krevst ei direkte tilkopling til YouTube.
   External Player:
     LaunchFailedTemplate: Kunne ikkje starte {externalPlayer}. Sjekk at han er installert, eller set stigen til den køyrbare fila i innstillingane for ekstern avspelar.
+    Confirm Arguments Title: "Vil du køyre den eksterne avspelaren med eigendefinerte argument?"
+    Confirm Arguments Message: "{externalPlayer} startar med desse eigendefinerte argumenta:"
+    Confirm Arguments Warning: "Nokre argument kan køyre program eller skrive over filer. Hald fram berre om du la dei til sjølv."
+    Run: "Køyr"
+    LaunchCanceledTemplate: "{externalPlayer} vart ikkje opna"
 Playlist:
   Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
   Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"
@@ -2714,6 +2719,7 @@ CommandPalette:
     Download Finished: Denne nedlastinga er ikkje lenger aktiv
     Video: Opne ein video først
 Downloads:
+  File Name Template Invalid: 'Bruk ein relativ sti i nedlastingsmappa utan "..", "~", "$", "%" eller eit prefiks som "thumbnail:".'
   Search Completed: "Søk i fullførte nedlastingar etter tittel eller kanal"
   Format: "Format"
   All Formats: "Alle format"
@@ -2865,6 +2871,8 @@ Tray Icon:
   Follow App Theme: "Følg temaet til appen"
 
 Form Inputs:
+  Browse: "Bla gjennom"
+  Use Default Path: "Bruk standard"
   Enter Password Hint: "Skriv inn passordet ditt"
   Choose Password Hint: "Vel eit passord"
   Confirm Password Hint: "Gjenta det nye passordet ditt"
@@ -2884,7 +2892,6 @@ Form Inputs:
   Any Age: Uansett alder
   Included Terms Example: t.d. rettleiing, melding
   Excluded Terms Example: t.d. trailer, førehandsvising
-  Download Folder Hint: Lat stå tomt for å bruke Nedlastingar-mappa
   Global Arguments Hint: Valfrie argument for kvar nedlasting
   Unlimited Hint: 0 for uavgrensa
   Add Argument: Legg til eit argument

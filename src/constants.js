@@ -188,6 +188,7 @@ const IpcChannels = {
   CREATE_BACKUP_ARCHIVE: 'create-backup-archive',
   CHOOSE_SCHEDULED_BACKUP_FOLDER: 'choose-scheduled-backup-folder',
   CHOOSE_DEFAULT_FOLDER: 'choose-default-folder',
+  CHOOSE_EXECUTABLE: 'choose-executable',
   CHOOSE_IP_BLOCK_RECOVERY_SCRIPT: 'choose-ip-block-recovery-script',
   WRITE_TO_DEFAULT_FOLDER: 'write-to-default-folder',
   START_IP_BLOCK_RECOVERY_SCRIPT: 'start-ip-block-recovery-script',
@@ -195,7 +196,6 @@ const IpcChannels = {
   WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT: 'wait-for-ip-block-recovery-script',
 
   OPEN_IN_EXTERNAL_PLAYER: 'open-in-external-player',
-  OPEN_IN_EXTERNAL_PLAYER_RESULT: 'open-in-external-player-result',
   DLNA_DISCOVER: 'dlna-discover',
   DLNA_START: 'dlna-start',
   DLNA_STOP: 'dlna-stop',
@@ -223,7 +223,6 @@ const IpcChannels = {
   YT_DLP_OPEN_DOWNLOAD: 'yt-dlp-open-download',
   YT_DLP_REMOVE_DOWNLOAD: 'yt-dlp-remove-download',
   YT_DLP_CHOOSE_DOWNLOAD_FOLDER: 'yt-dlp-choose-download-folder',
-  YT_DLP_CHOOSE_EXECUTABLE: 'yt-dlp-choose-executable',
   YT_DLP_GET_INFO: 'yt-dlp-get-info',
   YT_DLP_GET_SUBTITLE: 'yt-dlp-get-subtitle',
   YT_DLP_CANCEL_HISTORY_REPAIR: 'yt-dlp-cancel-history-repair',
