@@ -242,8 +242,12 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
             // Each request owns its session so completion never invalidates
             // other concurrent API requests. Keep them stateless like desktop:
             // once YouTube recognizes a visitor it serves preroll ads, which
-            // SABR enforces as long backoffs.
-            let session = URLSession(configuration: .ephemeral,
+            // SABR enforces as long backoffs. Without a cache, every response
+            // also proves to the renderer that the network is reachable.
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.urlCache = nil
+            configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+            let session = URLSession(configuration: configuration,
                                      delegate: call.getBool("disableRedirects") == true ? request : nil,
                                      delegateQueue: nil)
             let task = session.dataTask(with: request.getUrlRequest()) { [weak self] data, response, error in

@@ -378,7 +378,8 @@ test('a bypassed HTTPS response confirms reachability while the internet check i
   await flush()
   assert.equal(app.recovery.state, 'offline')
 
-  const response = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment'))
+  // A POST, like a SABR request, cannot come from the HTTP cache
+  const response = await app.withoutNetworkRecovery(() => app.window.fetch('https://media.example/segment', { method: 'POST' }))
   assert.equal(await response.text(), 'segment')
   await flush()
   assert.notEqual(app.recovery.state, 'offline')
@@ -629,22 +630,38 @@ test('a blocked connectivity probe neither blocks reachable services nor keeps t
     requests++
     return new Response('ok')
   }, undefined, { checkInternet: true, corsDisabled: true })
-  assert.equal(await (await app.window.fetch('https://www.youtube.com/feed')).text(), 'ok')
+  assert.equal(await (await app.window.fetch('https://www.youtube.com/youtubei/v1/browse', { method: 'POST' })).text(), 'ok')
   assert.equal(app.recovery.state, 'restored', 'a real response proves internet access')
   assert.equal(await (await app.window.fetch('https://invidious.example/api')).text(), 'ok')
   assert.equal(requests, 2)
 })
 
-test('a local or plain HTTP response does not clear an internet outage', async t => {
+test('a local, plain HTTP, or possibly cached response does not clear an internet outage', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const app = await loadAppNetwork(t, async input => {
     if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
     return new Response('ok')
-  }, undefined, { checkInternet: true, corsDisabled: true })
+  }, async () => ({ status: 200, headers: {}, data: 'native', url: 'https://www.youtube.com/watch' }), { checkInternet: true, corsDisabled: true })
   for (const url of ['https://192.168.1.20:3000/api', 'https://[fd00::1]/api', 'https://[::ffff:127.0.0.1]/api', 'https://nas.local/api', 'https://localhost:8080/api', 'http://portal.example/']) {
-    assert.equal(await (await app.window.fetch(url)).text(), 'ok')
+    assert.equal(await (await app.window.fetch(url, { method: 'POST' })).text(), 'ok')
     assert.equal(app.recovery.state, 'offline', url)
   }
+  // The browser can answer the update check from its HTTP cache while offline
+  await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases')
+  await app.withoutNetworkRecovery(() => app.window.fetch('https://i.ytimg.com/vi/a/default.jpg', { cache: 'force-cache' }))
+  assert.equal(app.recovery.state, 'offline')
+  await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases', { cache: 'no-store' })
+  assert.equal(app.recovery.state, 'restored')
+})
+
+test('a native response proves internet access because native HTTP keeps no cache', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const app = await loadAppNetwork(t, async () => { throw new TypeError('Failed to fetch') },
+    async () => ({ status: 200, headers: {}, data: 'native', url: 'https://www.youtube.com/watch' }), { checkInternet: true, corsDisabled: true })
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+  assert.equal(await (await app.nativeFetch('https://www.youtube.com/watch')).text(), 'native')
+  assert.equal(app.recovery.state, 'restored')
 })
 
 test('a wait-only task does not end an internet outage when the probe fails', async t => {
@@ -667,7 +684,7 @@ test('with a blocked probe, requests recover from a WAN outage on their own back
     if (input === INTERNET_CHECK_URL || !wan) throw new TypeError('Failed to fetch')
     return new Response('ok')
   }, undefined, { checkInternet: true, corsDisabled: true })
-  await app.window.fetch('https://www.youtube.com/feed')
+  await app.window.fetch('https://www.youtube.com/youtubei/v1/browse', { method: 'POST' })
   wan = false
   const pending = app.window.fetch('https://www.youtube.com/next')
   await flush()
@@ -688,13 +705,13 @@ test('with a blocked probe, healthy responses do not wake a failed service befor
     }
     return new Response('ok')
   }, undefined, { checkInternet: true, corsDisabled: true })
-  await app.window.fetch('https://www.youtube.com/feed')
+  await app.window.fetch('https://www.youtube.com/youtubei/v1/browse', { method: 'POST' })
   await flush()
   const controller = new AbortController()
   const pending = app.window.fetch('https://unavailable.example/data', { signal: controller.signal }).catch(error => error.name)
   await flush()
   const attempts = failedAttempts
-  for (let i = 0; i < 3; i++) await app.window.fetch('https://www.youtube.com/next')
+  for (let i = 0; i < 3; i++) await app.window.fetch('https://www.youtube.com/youtubei/v1/next', { method: 'POST' })
   await flush()
   assert.equal(failedAttempts, attempts)
   assert.notEqual(app.recovery.state, 'offline')
