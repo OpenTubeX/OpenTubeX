@@ -125,9 +125,10 @@ export function extractExpiryTimestamp(headers) {
  * @param {ImageCache} imageCache
  * @param {(url: string, webContentsId: number) => Record<string, string> | undefined} getAuthorizationHeaders
  * @param {typeof import('electron').net.request} request
+ * @param {number} [maxBytes] larger responses are aborted, so a huge or endless one cannot exhaust the main process's memory
  * @returns {(request: Request) => Promise<Response>}
  */
-export function createImageCacheHandler(imageCache, getAuthorizationHeaders, request) {
+export function createImageCacheHandler(imageCache, getAuthorizationHeaders, request, maxBytes = 50 * 1024 * 1024) {
   return (protocolRequest) => {
     const [requestUrl, rawWebContentsId] = protocolRequest.url.split('#')
 
@@ -157,11 +158,23 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
 
       newRequest.on('response', (response) => {
         const chunks = []
+        let receivedBytes = 0
+        let tooLarge = false
         response.on('data', (chunk) => {
+          if (tooLarge) return
+          receivedBytes += chunk.length
+          if (receivedBytes > maxBytes) {
+            tooLarge = true
+            chunks.length = 0
+            newRequest.abort()
+            reject(new Error(`Image is too large: ${url}`))
+            return
+          }
           chunks.push(chunk)
         })
 
         response.on('end', () => {
+          if (tooLarge) return
           const data = Buffer.concat(chunks)
           const mimeType = response.headers['content-type']
 
