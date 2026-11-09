@@ -262,8 +262,8 @@ importers:
         specifier: ^5.3.1
         version: 5.3.1
       '@hpke/core':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       '@iconify/vue':
         specifier: ^5.0.5
         version: 5.0.5(vue@3.5.44)
@@ -922,12 +922,12 @@ packages:
   '@fontsource-variable/source-sans-3@5.3.1':
     resolution: {integrity: sha512-u0p5Z/PM2e1uxYOMiodLM6NVzxHwULcB6Oi7QSr2WU/sdoLBFP/BeOZ3YYHeJ6rHsjPZA1nZweZVaV7sf2MAyQ==}
 
-  '@hpke/common@1.10.1':
-    resolution: {integrity: sha512-moJwhmtLtuxiUzzNp1jpfBfx8yefKoO9D/RCR9dmwrnc7qjJqId1rEtQz+lSlU5cabX8daToMSx/7HayXOiaFw==}
+  '@hpke/common@1.11.0':
+    resolution: {integrity: sha512-ZV551VgT4+pjTN1xlM1Zu9CrvLcff1sV1F2iFQJgg3gVNLy/hiOgLOjK3cz5LZYMKYkt54xe7ityu0rTYVSDGw==}
     engines: {node: '>=16.0.0'}
 
-  '@hpke/core@1.9.0':
-    resolution: {integrity: sha512-pFxWl1nNJeQCSUFs7+GAblHvXBCjn9EPN65vdKlYQil2aURaRxfGMO6vBKGqm1YHTKwiAxJQNEI70PbSowMP9Q==}
+  '@hpke/core@1.10.0':
+    resolution: {integrity: sha512-toCyUYXvU5KdDjqtWeMRRhR09R2us4OeHGo5YkdDOpo8+QJ6sIpuuOGLDu0VbNBskf5acHgsqgF53w2mU1NNYQ==}
     engines: {node: '>=16.0.0'}
 
   '@humanfs/core@0.19.2':
@@ -5958,11 +5958,11 @@ snapshots:
 
   '@fontsource-variable/source-sans-3@5.3.1': {}
 
-  '@hpke/common@1.10.1': {}
+  '@hpke/common@1.11.0': {}
 
-  '@hpke/core@1.9.0':
+  '@hpke/core@1.10.0':
     dependencies:
-      '@hpke/common': 1.10.1
+      '@hpke/common': 1.11.0
 
   '@humanfs/core@0.19.2':
     dependencies:
