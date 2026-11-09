@@ -2501,12 +2501,12 @@ test('OIDC deletion clears the account a background sync already signed out', as
 for (const supported of [true, false]) {
   test(`notification dismissals sync ${supported ? 'with' : 'only with'} the server capability`, async () => {
     const now = Date.now()
-    const remote = { readThrough: 0, clearedThrough: now - 10, dismissals: [{ key: 'video:/watch/remote', removed: true, at: now }] }
+    const remote = { readThrough: 0, clearedThrough: now - 10, dismissals: [{ key: 'video:/watch/remote', at: now, removedAt: now }] }
     const uploads = []
     const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncNotifications: true }, {
       encrypted: true,
       capacitor: true,
-      notificationDismissals: { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'post:/post/local', removed: false, at: now - 5 }] },
+      notificationDismissals: { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'post:/post/local', at: now - 5 }] },
       respond: async (url, options) => {
         if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, notification_dismissals: supported ? 1 : 0 } }
         if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'notificationDismissals', revision: 1 }], legacy_data: false }
@@ -2527,7 +2527,7 @@ for (const supported of [true, false]) {
       assert.equal(f.local.notificationDismissals.dismissals.length, 1)
       return
     }
-    const merged = { readThrough: 0, clearedThrough: now - 10, dismissals: [remote.dismissals[0], { key: 'post:/post/local', removed: false, at: now - 5 }] }
+    const merged = { readThrough: 0, clearedThrough: now - 10, dismissals: [remote.dismissals[0], { key: 'post:/post/local', at: now - 5 }] }
     assert.deepEqual(f.local.notificationDismissals, merged)
     assert.deepEqual(uploads, [merged])
 

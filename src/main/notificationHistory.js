@@ -72,20 +72,21 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
   }
 
   /**
-   * @param {(state: NotificationHistoryState) => NotificationHistoryState} update returns the same arrays and objects for unchanged parts
+   * @param {(state: NotificationHistoryState) => NotificationHistoryState & { since?: NotificationHistoryEntry[] }} update returns
+   * the same arrays and objects for unchanged parts, and with `since` the entries to find dismissed ones among
    * @param {boolean} [local] whether the change dismisses notifications here
    */
   function change(update, local = false) {
     const result = pending.then(async () => {
       const current = await load()
-      const next = update(current)
+      const { since = current.entries, ...next } = update(current)
       const entriesChanged = next.entries !== current.entries
       const dismissalsChanged = next.dismissals !== current.dismissals
       if (!entriesChanged && !dismissalsChanged) return
       state = next
       if (entriesChanged) {
         onChange(next.entries)
-        const stale = getDismissedNotificationEntries(current.entries, next.entries)
+        const stale = getDismissedNotificationEntries(since, next.entries)
         if (stale.length > 0) onStale?.(stale)
       }
       if (local && dismissalsChanged) onDismissalsChange?.()
@@ -112,7 +113,8 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
         if (!created) return current
         const entries = applyNotificationDismissals(withEntry, current.dismissals)
         added = entries.find(item => item.id === created.id) ?? null
-        return added ? { ...current, entries } : current
+        // Entries that made room for the new one were not dismissed.
+        return added ? { ...current, entries, since: withEntry } : current
       }).then(() => added)
     },
     /** @param {string} [id] Omit to mark every entry read. */

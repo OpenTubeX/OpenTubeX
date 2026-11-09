@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { NOTIFICATION_HISTORY_LIMIT } from '../../src/notificationHistory.js'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const storage = new Map()
@@ -26,7 +27,7 @@ test('the mobile history keeps dismissals for other devices and closes outdated 
   await history.remove(second.id)
   assert.deepEqual(closed, ['/watch/a', '/watch/b'])
   assert.equal(dismissed, 2)
-  assert.deepEqual((await history.getDismissals()).dismissals.map(({ key, removed }) => [key, removed]).sort(),
+  assert.deepEqual((await history.getDismissals()).dismissals.map(({ key, removedAt }) => [key, removedAt !== undefined]).sort(),
     [['video:/watch/a', false], ['video:/watch/b', true]])
 
   // Android reports a notification the user opened or dismissed.
@@ -43,7 +44,7 @@ test('dismissals from other devices apply to existing and later entries without 
   await history.mergeDismissals({
     readThrough: 0,
     clearedThrough: 0,
-    dismissals: [{ key: 'video:/watch/d', removed: true, at: now }, { key: 'video:/watch/f', removed: false, at: now }]
+    dismissals: [{ key: 'video:/watch/d', at: now, removedAt: now }, { key: 'video:/watch/f', at: now }]
   })
   assert.deepEqual(closed, ['/watch/d'])
   assert.equal(dismissed, 3)
@@ -57,4 +58,13 @@ test('dismissals from other devices apply to existing and later entries without 
   assert.deepEqual(await history.list(), [])
   assert.ok((await history.getDismissals()).clearedThrough >= now)
   assert.equal(dismissed, 4)
+})
+
+test('entries that make room for new ones keep their system notifications', async () => {
+  await history.clear()
+  history.add(Array.from({ length: NOTIFICATION_HISTORY_LIMIT }, (_, index) => video(`full${index}`, Date.now() + index)))
+  closed.length = 0
+  history.add([video('newest', Date.now() + NOTIFICATION_HISTORY_LIMIT)])
+  assert.equal((await history.list()).length, NOTIFICATION_HISTORY_LIMIT)
+  assert.deepEqual(closed, [])
 })

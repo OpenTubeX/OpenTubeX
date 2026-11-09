@@ -318,23 +318,23 @@ test('dismissals match notifications about the same item on every device, except
 })
 
 test('merged dismissals agree on every device, keep removals, and drop the oldest', () => {
-  const phone = { readThrough: 5, clearedThrough: 0, dismissals: [{ key: 'video:/watch/a', removed: false, at: 10 }, { key: 'video:/watch/b', removed: true, at: 3 }] }
-  const laptop = { readThrough: 0, clearedThrough: 7, dismissals: [{ key: 'video:/watch/a', removed: true, at: 4 }, { key: 'post:/post/c', removed: false, at: 8 }] }
+  const phone = { readThrough: 5, clearedThrough: 0, dismissals: [{ key: 'video:/watch/a', at: 10 }, { key: 'video:/watch/b', at: 3, removedAt: 3 }] }
+  const laptop = { readThrough: 0, clearedThrough: 7, dismissals: [{ key: 'video:/watch/a', at: 4, removedAt: 4 }, { key: 'post:/post/c', at: 8 }] }
   const merged = mergeNotificationDismissals(phone, laptop)
   assert.deepEqual(merged, {
     readThrough: 5,
     clearedThrough: 7,
     dismissals: [
       // A read on one device does not bring back an entry another removed.
-      { key: 'video:/watch/a', removed: true, at: 10 },
-      { key: 'post:/post/c', removed: false, at: 8 },
-      { key: 'video:/watch/b', removed: true, at: 3 }
+      { key: 'video:/watch/a', at: 10, removedAt: 4 },
+      { key: 'post:/post/c', at: 8 },
+      { key: 'video:/watch/b', at: 3, removedAt: 3 }
     ]
   })
   assert.deepEqual(mergeNotificationDismissals(laptop, phone), merged)
   assert.deepEqual(mergeNotificationDismissals(merged, phone), merged)
 
-  const many = { readThrough: 0, clearedThrough: 0, dismissals: Array.from({ length: NOTIFICATION_DISMISSAL_LIMIT + 3 }, (_, index) => ({ key: `video:/watch/${index}`, removed: false, at: index + 1 })) }
+  const many = { readThrough: 0, clearedThrough: 0, dismissals: Array.from({ length: NOTIFICATION_DISMISSAL_LIMIT + 3 }, (_, index) => ({ key: `video:/watch/${index}`, at: index + 1 })) }
   const pruned = normalizeNotificationDismissals(many)
   assert.equal(pruned.dismissals.length, NOTIFICATION_DISMISSAL_LIMIT)
   assert.equal(pruned.dismissals.at(-1).key, 'video:/watch/3')
@@ -342,7 +342,7 @@ test('merged dismissals agree on every device, keep removals, and drop the oldes
   assert.deepEqual(normalizeNotificationDismissals({
     readThrough: 'soon',
     clearedThrough: -1,
-    dismissals: [null, { key: 1, removed: true, at: 1 }, { key: 'video:/watch/a', removed: 'yes', at: 1 }, { key: 'video:/watch/a', removed: true, at: Infinity }]
+    dismissals: [null, { key: 1, at: 1 }, { key: 'video:/watch/a', removedAt: 'yes' }, { key: 'video:/watch/a', at: Infinity, removedAt: -1 }]
   }), none)
 })
 
@@ -352,7 +352,7 @@ test('dismissals record entries with keys, and mark all or clear all also cover 
     { kind: 'download-failed', title: 'Download', body: 'Failed', path: '/downloads', createdAt: 2 }
   ]).toReversed()
   assert.deepEqual(recordNotificationDismissals(none, [video, download], { removed: false, now: 5 }),
-    { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'video:/watch/abc', removed: false, at: 5 }] })
+    { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'video:/watch/abc', at: 5 }] })
   assert.equal(recordNotificationDismissals(none, [download], { removed: true, now: 5 }), none)
   assert.deepEqual(recordNotificationDismissals(none, [], { removed: false, through: true, now: 5 }), { ...none, readThrough: 5 })
   assert.deepEqual(recordNotificationDismissals(none, [download], { removed: true, through: true, now: 5 }), { ...none, clearedThrough: 5 })
@@ -370,7 +370,7 @@ test('dismissals apply to existing entries and ones added later, but not to down
   const dismissals = {
     readThrough: 10,
     clearedThrough: 5,
-    dismissals: [{ key: 'video:/watch/a', removed: false, at: 30 }, { key: 'video:/watch/b', removed: true, at: 30 }]
+    dismissals: [{ key: 'video:/watch/a', at: 30 }, { key: 'video:/watch/b', at: 30, removedAt: 30 }]
   }
   const applied = applyNotificationDismissals(entries, dismissals)
   assert.deepEqual(applied.map(entry => [entry.title, entry.read]), [
@@ -386,14 +386,35 @@ test('dismissals apply to existing entries and ones added later, but not to down
   assert.deepEqual(getDismissedNotificationEntries(applied, applied), [])
 })
 
+test('entries that make room for new ones keep their system notifications', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'notification-history-'))
+  try {
+    const file = path.join(directory, 'history.json')
+    const full = addNotificationHistoryEntries([], Array.from({ length: NOTIFICATION_HISTORY_LIMIT }, (_, index) =>
+      ({ kind: 'video', title: String(index), body: '', path: `/watch/${index}`, createdAt: index + 1 })))
+    await writeFile(file, JSON.stringify(full))
+    const stale = []
+    const history = createNotificationHistory({ file, dismissalsFile: path.join(directory, 'dismissals.json'), onChange: () => {}, onStale: entries => stale.push(...entries) })
+    await history.add({ kind: 'video', title: 'New', body: '', path: '/watch/new' })
+    assert.equal((await history.list()).length, NOTIFICATION_HISTORY_LIMIT)
+    assert.deepEqual(stale, [])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 test('a dismissed reminder does not dismiss one for a later premiere of the same video', () => {
   const reminder = createdAt => ({ kind: 'live-reminder', title: 'Live', body: '', path: '/watch/stream', createdAt })
-  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', removed: true, at: 100 }] }
+  const dismissals = { readThrough: 0, clearedThrough: 0, dismissals: [{ key: 'live-reminder:/watch/stream', at: 100, removedAt: 100 }] }
   // Another device removed the reminder for the original start, after it fired there.
   assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(90)]), dismissals), [])
   // The stream moved, and its new reminder fires later.
   const later = addNotificationHistoryEntries([], [reminder(200)])
   assert.equal(applyNotificationDismissals(later, dismissals), later)
+  // Reading the new reminder keeps the old removal from reaching it.
+  const read = mergeNotificationDismissals(dismissals, recordNotificationDismissals(dismissals, later, { removed: false, now: 300 }))
+  assert.deepEqual(applyNotificationDismissals(later, read).map(entry => entry.read), [true])
+  assert.deepEqual(applyNotificationDismissals(addNotificationHistoryEntries([], [reminder(90)]), read), [])
 })
 
 test('the desktop history keeps dismissals for other devices and applies theirs', async () => {
@@ -411,7 +432,7 @@ test('the desktop history keeps dismissals for other devices and applies theirs'
     const first = await history.add({ kind: 'video', title: 'First', body: '', path: '/watch/a' })
     await history.add({ kind: 'download-completed', title: 'Download', body: '', path: '/watch/a', query: { downloadId: '1' } })
     await history.markRead(first.id)
-    assert.deepEqual((await history.getDismissals()).dismissals.map(({ key, removed }) => [key, removed]), [['video:/watch/a', false]])
+    assert.deepEqual((await history.getDismissals()).dismissals.map(({ key, removedAt }) => [key, removedAt !== undefined]), [['video:/watch/a', false]])
     assert.equal(dismissed, 1)
     assert.deepEqual(stale, ['First'])
 
@@ -422,7 +443,7 @@ test('the desktop history keeps dismissals for other devices and applies theirs'
     const merged = await history.mergeDismissals({
       readThrough: 0,
       clearedThrough: 0,
-      dismissals: [{ key: 'video:/watch/b', removed: false, at: now }, { key: 'post:/post/c', removed: true, at: now }]
+      dismissals: [{ key: 'video:/watch/b', at: now }, { key: 'post:/post/c', at: now, removedAt: now }]
     })
     assert.equal(merged.dismissals.length, 3)
     assert.deepEqual((await history.list()).map(entry => [entry.title, entry.read]), [['Second', true], ['Download', false], ['First', true]])

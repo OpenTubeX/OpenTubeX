@@ -41,6 +41,14 @@ function readDismissals() {
 function write(previous, entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
   for (const listener of listeners) listener(entries)
+  closeStale(previous, entries)
+}
+
+/**
+ * @param {import('../../notificationHistory').NotificationHistoryEntry[]} previous
+ * @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries
+ */
+function closeStale(previous, entries) {
   const stale = getDismissedNotificationEntries(previous, entries)
   if (stale.length > 0) closeCapacitorSystemNotifications(stale)
 }
@@ -76,12 +84,12 @@ export const capacitorNotificationHistory = {
     if (additions.length === 0) return []
     const now = Date.now()
     const current = read()
-    const next = applyNotificationDismissals(addNotificationHistoryEntries(current, additions, now), readDismissals())
+    // Entries that made room for the additions were not dismissed.
+    const withAdditions = addNotificationHistoryEntries(current, additions, now)
+    const next = applyNotificationDismissals(withAdditions, readDismissals())
     const added = next.filter(entry => !current.includes(entry))
-    if (added.length > 0) write(current, next)
-    const unread = new Set(added.filter(entry => !entry.read).map(entry => `${entry.path} ${entry.createdAt}`))
-    const dismissed = additions.filter(addition => !unread.has(`${addition.path} ${addition.createdAt ?? now}`))
-    if (dismissed.length > 0) closeCapacitorSystemNotifications(dismissed)
+    if (added.length > 0) write(withAdditions, next)
+    else closeStale(withAdditions, next)
     return added
   },
 

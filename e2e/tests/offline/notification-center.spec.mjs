@@ -619,6 +619,64 @@ test('system notifications and the bell stay in step', async ({ app, page }) => 
   await expect.poll(async () => (await closedNotifications(app)).toSorted()).toStrictEqual([`Upload ${timedOut}`, `Upload ${readInApp}`].toSorted())
 })
 
+test.describe('with notification sync turned off', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: {
+        ...seed.settings,
+        syncServerEnabled: false,
+        syncServerAutoSync: true,
+        syncServerUrl: 'https://sync-notifications-off.example',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: Buffer.alloc(32, 1).toString('base64'),
+        syncServerPrivacySalt: Buffer.alloc(16, 2).toString('base64'),
+        syncServerSyncSubscriptions: false,
+        syncServerSyncPlaylists: false,
+        syncServerSyncHistory: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncSettings: false,
+        syncServerSyncSessions: false,
+        syncServerSyncWatchStats: false,
+        syncServerSyncLiveReminders: false,
+        syncServerSyncNotifications: false,
+      }
+    }
+  })
+
+  test('turning it on syncs notifications right away', async ({ page }) => {
+    const downloads = []
+    await page.route('https://sync-notifications-off.example/**', async route => {
+      const path = new URL(route.request().url()).pathname
+      let json
+      if (path === '/health') json = { capabilities: { encrypted_sync: 1, live_sync: 1, notification_dismissals: 1 } }
+      else if (path === '/v1/account/sessions') json = { sessions: [] }
+      else if (path === '/v1/encrypted_sync/events') json = []
+      else if (path === '/v1/encrypted_sync') json = { collections: [], legacy_data: false }
+      else {
+        if (path === '/v1/encrypted_sync/notificationDismissals') downloads.push(route.request().method())
+        json = { revision: 0, payload: null }
+      }
+      await route.fulfill({ json })
+    })
+    await page.evaluate(() => window.$store.dispatch('updateSyncServerEnabled', true))
+    expect(await page.evaluate(async () => {
+      await window.$store.dispatch('syncWithSyncServer')
+      return window.$store.state.syncServer.syncServerStatus
+    })).toBe('success')
+    expect(downloads).toStrictEqual([])
+
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Notifications', exact: true })
+    await expect(toggle).toBeEnabled()
+    await toggle.locator('..').getByText('Notifications', { exact: true }).click()
+    await expect(toggle).toBeChecked()
+    // Live sync downloads only on changes, so nothing else would sync them.
+    await expect.poll(() => downloads.length).toBeGreaterThan(0)
+  })
+})
+
 test.describe('with notification sync', () => {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
@@ -660,8 +718,8 @@ test.describe('with notification sync', () => {
         readThrough: 0,
         clearedThrough: 0,
         dismissals: [
-          { key: `video:/watch/${removedElsewhere}`, removed: true, at: now },
-          { key: `video:/watch/${readElsewhere}`, removed: false, at: now }
+          { key: `video:/watch/${removedElsewhere}`, at: now, removedAt: now },
+          { key: `video:/watch/${readElsewhere}`, at: now }
         ]
       }, key, salt)
     }
@@ -706,7 +764,7 @@ test.describe('with notification sync', () => {
     expect(await sync()).toBe('success')
     expect(remote.revision).toBe(2)
     const uploaded = await decryptSyncDocument(remote.payload, key)
-    expect(uploaded.dismissals.map(({ key, removed }) => [key, removed]).toSorted()).toStrictEqual([
+    expect(uploaded.dismissals.map(({ key, removedAt }) => [key, removedAt !== undefined]).toSorted()).toStrictEqual([
       [`video:/watch/${readHere}`, false],
       [`video:/watch/${readElsewhere}`, false],
       [`video:/watch/${removedElsewhere}`, true]

@@ -156,8 +156,9 @@ export function getAutomaticDownloadTarget(phase, videoId, downloadId) {
 
 /**
  * Read and removed notifications, shared with other devices by sync. Each
- * device creates its own entries, so dismissals match them by target.
- * @typedef {{ key: string, removed: boolean, at: number }} NotificationDismissal
+ * device creates its own entries, so dismissals match them by target. `at` is
+ * when the item was last read or removed, and `removedAt` when it was last removed.
+ * @typedef {{ key: string, at: number, removedAt?: number }} NotificationDismissal
  * @typedef {{ readThrough: number, clearedThrough: number, dismissals: NotificationDismissal[] }} NotificationDismissals
  */
 
@@ -193,14 +194,11 @@ export function normalizeNotificationDismissals(value) {
   /** @type {Map<string, NotificationDismissal>} */
   const byKey = new Map()
   for (const dismissal of Array.isArray(value?.dismissals) ? value.dismissals : []) {
-    if (typeof dismissal?.key !== 'string' || dismissal.key.length > 2048 ||
-      typeof dismissal.removed !== 'boolean' || !timestamp(dismissal.at)) continue
-    const known = byKey.get(dismissal.key)
-    byKey.set(dismissal.key, {
-      key: dismissal.key,
-      removed: dismissal.removed || known?.removed === true,
-      at: Math.max(dismissal.at, known?.at ?? 0)
-    })
+    if (typeof dismissal?.key !== 'string' || dismissal.key.length > 2048) continue
+    const removedAt = Math.max(timestamp(dismissal.removedAt), byKey.get(dismissal.key)?.removedAt ?? 0)
+    const at = Math.max(timestamp(dismissal.at), removedAt, byKey.get(dismissal.key)?.at ?? 0)
+    if (!at) continue
+    byKey.set(dismissal.key, { key: dismissal.key, at, ...(removedAt ? { removedAt } : {}) })
   }
   return {
     readThrough: timestamp(value?.readThrough),
@@ -212,7 +210,8 @@ export function normalizeNotificationDismissals(value) {
 }
 
 /**
- * Combines dismissals from several devices. A removal outlasts a read.
+ * Combines dismissals from several devices. A removal outlasts a read of the
+ * same notification.
  * @param {NotificationDismissals[]} values
  * @returns {NotificationDismissals}
  */
@@ -244,7 +243,7 @@ export function areNotificationDismissalsEqual(left, right) {
 export function recordNotificationDismissals(dismissals, entries, { removed, through = false, now = Date.now() }) {
   const added = entries.flatMap(entry => {
     const key = getNotificationKey(entry)
-    return key ? [{ key, removed, at: now }] : []
+    return key ? [{ key, at: now, ...(removed ? { removedAt: now } : {}) }] : []
   })
   if (added.length === 0 && !through) return dismissals
   const next = mergeNotificationDismissals(dismissals, {
@@ -269,14 +268,15 @@ export function applyNotificationDismissals(entries, { readThrough, clearedThrou
   const next = entries.flatMap(entry => {
     const key = getNotificationKey(entry)
     if (!key) return [entry]
-    let dismissal = byKey.get(key)
-    // A reminder for a later premiere of the same video is a new notification.
-    if (dismissal && entry.kind === 'live-reminder' && entry.createdAt > dismissal.at) dismissal = undefined
-    if (dismissal?.removed || entry.createdAt <= clearedThrough) {
+    const dismissal = byKey.get(key)
+    // A reminder for a later premiere of the same video is a new notification,
+    // so only what happened after it was due applies to it.
+    const since = entry.kind === 'live-reminder' ? entry.createdAt : 0
+    if ((dismissal?.removedAt ?? 0) >= Math.max(since, 1) || entry.createdAt <= clearedThrough) {
       changed = true
       return []
     }
-    if (!entry.read && (dismissal || entry.createdAt <= readThrough)) {
+    if (!entry.read && ((dismissal && dismissal.at >= since) || entry.createdAt <= readThrough)) {
       changed = true
       return [{ ...entry, read: true }]
     }

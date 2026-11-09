@@ -159,28 +159,28 @@
             :default-value="syncSubscriptionsEnabled"
             :disabled="busy"
             compact
-            @change="store.dispatch('updateSyncServerSyncSubscriptions', $event)"
+            @change="setCollectionSync('Subscriptions', 'subscriptions', $event)"
           />
           <FtToggleSwitch
             :label="t('Playlists')"
             :default-value="syncPlaylistsEnabled"
             :disabled="busy"
             compact
-            @change="store.dispatch('updateSyncServerSyncPlaylists', $event)"
+            @change="setCollectionSync('Playlists', 'playlists', $event)"
           />
           <FtToggleSwitch
             :label="t('History.History')"
             :default-value="syncHistoryEnabled"
             :disabled="busy || historySupported === false"
             compact
-            @change="store.dispatch('updateSyncServerSyncHistory', $event)"
+            @change="setCollectionSync('History', 'history', $event)"
           />
           <FtToggleSwitch
             :label="t('Settings.Sync Settings.Watch stats')"
             :default-value="syncWatchStatsEnabled"
             :disabled="busy || watchStatsSupported !== true"
             compact
-            @change="store.dispatch('updateSyncServerSyncWatchStats', $event)"
+            @change="setCollectionSync('WatchStats', 'watchStats', $event)"
           />
           <FtToggleSwitch
             v-if="sessionsSupported"
@@ -188,7 +188,7 @@
             :default-value="syncLiveRemindersEnabled"
             :disabled="busy || !liveRemindersSupported"
             compact
-            @change="store.dispatch('updateSyncServerSyncLiveReminders', $event)"
+            @change="setCollectionSync('LiveReminders', 'liveReminders', $event)"
           />
           <FtToggleSwitch
             v-if="sessionsSupported"
@@ -196,14 +196,14 @@
             :default-value="syncNotificationsEnabled"
             :disabled="busy || !notificationDismissalsSupported"
             compact
-            @change="store.dispatch('updateSyncServerSyncNotifications', $event)"
+            @change="setCollectionSync('Notifications', 'notificationDismissals', $event)"
           />
           <FtToggleSwitch
             :label="t('Settings.Sync Settings.Profiles')"
             :default-value="syncProfilesEnabled"
             :disabled="busy"
             compact
-            @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
+            @change="setCollectionSync('Profiles', 'profiles', $event)"
           />
           <FtToggleSwitch
             v-if="sessionsSupported"
@@ -211,7 +211,7 @@
             :default-value="syncSessionsEnabled"
             :disabled="busy"
             compact
-            @change="store.dispatch('updateSyncServerSyncSessions', $event)"
+            @change="setCollectionSync('Sessions', 'sessions', $event)"
           />
           <FtToggleSwitch
             v-if="sessionsSupported && syncSessionsEnabled"
@@ -226,7 +226,7 @@
             :default-value="syncSettingsEnabled"
             :disabled="busy || settingsSupported === false"
             compact
-            @change="store.dispatch('updateSyncServerSyncSettings', $event)"
+            @change="setCollectionSync('Settings', 'settings', $event)"
           />
         </FtFlexBox>
         <p
@@ -924,6 +924,18 @@ async function disconnect() {
 
 function setAutoSync(enabled) {
   store.dispatch('setSyncServerAutoSync', enabled)
+}
+
+/**
+ * These settings stay on this device and sync nothing by themselves, and live
+ * sync only downloads on changes, so turning one on syncs its data right away.
+ * @param {string} collection
+ * @param {string} reason
+ * @param {boolean} enabled
+ */
+async function setCollectionSync(collection, reason, enabled) {
+  await store.dispatch(`updateSyncServerSync${collection}`, enabled)
+  if (enabled) store.dispatch('scheduleSyncServer', reason)
 }
 
 async function setSharedTabs(enabled) {
