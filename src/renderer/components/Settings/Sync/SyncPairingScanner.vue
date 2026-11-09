@@ -1,9 +1,16 @@
 <template>
   <p>{{ hint }}</p>
   <div class="scannerFrame">
+    <FtIcon
+      class="scannerPlaceholderIcon"
+      :icon="['fas', 'camera']"
+    />
+    <!-- Android WebView draws a stretched play icon as the default poster until
+    the first camera frame, so a transparent poster shows the placeholder. -->
     <video
       ref="scannerVideo"
       class="scannerVideo"
+      :poster="TRANSPARENT_POSTER"
       autoplay
       muted
       playsinline
@@ -28,6 +35,8 @@ defineProps({
     required: true,
   },
 })
+
+const TRANSPARENT_POSTER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 const emit = defineEmits(['scan', 'unavailable'])
 const { t } = useI18n()
