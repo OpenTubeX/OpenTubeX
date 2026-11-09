@@ -21,14 +21,17 @@ export function parseBackgroundFeed(payload, feedType, channelId, instanceUrl, t
   return entries
 }
 
-/** Complete RSS metadata in the utility process before committing its cache result. */
-export async function parseAndEnrichBackgroundFeed(payload, feedType, channelId, instanceUrl, fetchText, signal) {
+/**
+ * Complete RSS metadata in the utility process before committing its cache result.
+ * `cachedShorts` are earlier entries whose dates spare those Shorts a watch page.
+ */
+export async function parseAndEnrichBackgroundFeed(payload, feedType, channelId, instanceUrl, fetchText, signal, cachedShorts = []) {
   let entries = parseBackgroundFeed(payload, feedType, channelId, instanceUrl)
   if (feedType === 'shorts' && payload.backgroundFormat?.startsWith('local')) {
     entries = await enrichShortPublicationDates(entries, videoId => {
       signal.throwIfAborted()
       return fetchText({ url: `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` }, signal)
-    })
+    }, cachedShorts)
   }
   return mapConcurrently(entries, 3, async entry => {
     signal.throwIfAborted()
