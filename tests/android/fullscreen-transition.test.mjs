@@ -216,7 +216,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
     // the user physically turned the phone while watching). The native display
     // remains real; only the unlock request is held for this case.
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement && innerWidth > innerHeight)).toBe(true)
     await page.evaluate(() => {
@@ -227,7 +227,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       }
     })
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => !document.fullscreenElement && !document.querySelector(':popover-open')), {
       timeout: 1500, message: 'Exit promptly when the native display remains landscape',
@@ -236,7 +236,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
     // Start the next session in landscape, then let unlock restore portrait.
     // Entry orientation cannot predict where a locked device will rotate on exit.
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     await page.evaluate(() => {
@@ -249,7 +249,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       })
     })
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => window.__landscapeExitRetained), {
       message: 'Protect rotation even when fullscreen started in landscape',
@@ -261,7 +261,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setRotateFullscreenToLandscape', false)
     })
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     await page.evaluate(() => {
@@ -272,7 +272,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       })
     })
     await session.send('Runtime.evaluate', {
-      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+      expression: 'document.querySelector(\'.shaka-fullscreen-button\').click()', userGesture: true,
     })
     await expect.poll(() => page.evaluate(() => window.__portraitExitRetained), {
       message: 'Exit immediately when fullscreen never requested rotation',

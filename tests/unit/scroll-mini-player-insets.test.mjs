@@ -149,7 +149,8 @@ test('a desktop side navigation does not pad the bottom inset', () => {
 test('a short landscape sidebar does not become bottom navigation when expanded', () => {
   stubViewport({
     sideNavRect: { left: 0, right: 200, top: 60, bottom: 253.333, width: 200, height: 193.333 },
-    clientWidth: 833.333, clientHeight: 253.333,
+    clientWidth: 833.333,
+    clientHeight: 253.333,
   })
   const insets = getViewportInsets({ includeSideNav: true })
   assert.equal(insets.left, 200 + MARGIN)
@@ -160,7 +161,8 @@ for (const [width, right] of [[200.25, false], [80, true]]) {
   test(`the mobile bar reserves a ${width}px sidebar on the ${right ? 'right' : 'left'}`, () => {
     stubViewport({
       sideNavRect: { left: right ? 1000 - width : 0, right: right ? 1000 : width, top: 60, bottom: 500, width, height: 440 },
-      clientWidth: 1000, clientHeight: 500,
+      clientWidth: 1000,
+      clientHeight: 500,
     })
     const insets = getViewportInsets({ includeSideNav: true })
     assert.equal(insets[right ? 'right' : 'left'], width + MARGIN)

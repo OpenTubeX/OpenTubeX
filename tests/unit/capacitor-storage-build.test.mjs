@@ -9,7 +9,8 @@ for (const separator of ['/', '\\']) {
     const config = { plugins: [], entry: { web: 'app.js' } }
     let replace
     const dependencies = {
-      path, 'node:child_process': { execFileSync() {} },
+      path,
+      'node:child_process': { execFileSync() {} },
       'copy-webpack-plugin': class {},
       webpack: {
         NormalModuleReplacementPlugin: class { constructor(_pattern, callback) { replace = callback } },
@@ -19,8 +20,10 @@ for (const separator of ['/', '\\']) {
       './webpack.botGuardScript.config': { output: {} },
     }
     vm.runInNewContext(readFileSync(new URL('../../_scripts/webpack.capacitor.config.js', import.meta.url), 'utf8'), {
-      require: name => dependencies[name], process: { env: {}, execPath: 'node' },
-      __dirname: '/project/_scripts', module: {},
+      require: name => dependencies[name],
+      process: { env: {}, execPath: 'node' },
+      __dirname: '/project/_scripts',
+      module: {},
     })
     const resource = { context: ['project', 'node_modules', '@seald-io', 'nedb', 'lib'].join(separator), request: './storage.js' }
     replace(resource)

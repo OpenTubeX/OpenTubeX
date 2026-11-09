@@ -40,13 +40,11 @@ test('allows local DASH and remote HLS but excludes SABR, blobs and files', () =
   assert.equal(castSourceAvailable({ url: 'https://user:password@media.test/video', contentType: 'video/mp4' }), false)
 })
 
-
 test('prefers adaptive manifests over a lower-quality progressive fallback', () => {
   const source = selectCastSource([{ url: 'https://media.test/360', mimeType: 'video/mp4', height: 360 }],
     'https://media.test/4k.mpd', 'application/dash+xml')
   assert.deepEqual(source, { url: 'https://media.test/4k.mpd', contentType: 'application/dash+xml' })
 })
-
 
 test('does not replace video with an audio-only DASH manifest', () => {
   const url = 'https://media.test/video.mp4'
@@ -76,8 +74,14 @@ test('Cast refreshes reuse normal yt-dlp playback cache entries without subtitle
   const keyCode = code.slice(code.indexOf('function effectivePlaybackSourceCacheKey('), code.indexOf('\n/**', code.indexOf('function effectivePlaybackSourceCacheKey(')))
   const loaderCode = code.slice(code.indexOf('export function getYtDlpPlaybackSource(')).replace('export function', 'function')
   const cache = new YtDlpPlaybackSourceCache()
-  const cached = { legacyFormats: [], manifestSrc: 'https://media.test/cached.mpd', manifestMimeType: 'application/dash+xml',
-    expiryDate: new Date(Date.now() + 3600_000), isLive: false, subtitlesIncluded: true }
+  const cached = {
+    legacyFormats: [],
+    manifestSrc: 'https://media.test/cached.mpd',
+    manifestMimeType: 'application/dash+xml',
+    expiryDate: new Date(Date.now() + 3600_000),
+    isLive: false,
+    subtitlesIncluded: true
+  }
   cache.set('video', JSON.stringify(['cache-key', false]), cached)
   let extractions = 0
   const getSource = compileFunction(`${keyCode}\n${loaderCode}\nreturn getYtDlpPlaybackSource`,
@@ -88,8 +92,14 @@ test('Cast refreshes reuse normal yt-dlp playback cache entries without subtitle
   const { getChromecastSource } = compileFunction(`return {${methodCode}}`,
     ['selectCastSource', 'supportsYtDlp', 'MANIFEST_TYPE_SABR', 'getYtDlpPlaybackSource'])(
     selectCastSource, true, 'application/sabr+json', getSource)
-  const watch = { videoId: 'video', ytDlpPlaybackCacheKey: 'cache-key', alwaysUseYtDlpPlaybackCookies: false,
-    legacyFormats: [], manifestSrc: 'https://media.test/source.sabr', manifestMimeType: 'application/sabr+json' }
+  const watch = {
+    videoId: 'video',
+    ytDlpPlaybackCacheKey: 'cache-key',
+    alwaysUseYtDlpPlaybackCookies: false,
+    legacyFormats: [],
+    manifestSrc: 'https://media.test/source.sabr',
+    manifestMimeType: 'application/sabr+json'
+  }
   for (let i = 0; i < 3; i++) {
     assert.deepEqual(await getChromecastSource.call(watch), { url: cached.manifestSrc, contentType: cached.manifestMimeType })
   }
@@ -110,9 +120,12 @@ for (const outcome of ['adaptive', 'failed extraction', 'non-SABR']) {
       selectCastSource, true, 'application/sabr+json', getSource,
     )
     const source = await getChromecastSource.call({
-      legacyFormats: [progressive], manifestSrc: null,
+      legacyFormats: [progressive],
+      manifestSrc: null,
       manifestMimeType: outcome === 'non-SABR' ? null : 'application/sabr+json',
-      videoId: 'video', ytDlpPlaybackCacheKey: 'cache-key', alwaysUseYtDlpPlaybackCookies: false
+      videoId: 'video',
+      ytDlpPlaybackCacheKey: 'cache-key',
+      alwaysUseYtDlpPlaybackCookies: false
     })
     assert.equal(lookups, outcome === 'non-SABR' ? 0 : 1)
     assert.deepEqual(source, outcome === 'adaptive'

@@ -194,11 +194,15 @@ test('saves and restores attachments without URL.canParse', t => {
   delete URL.canParse
   t.after(() => Object.defineProperty(URL, 'canParse', descriptor))
   const storage = createMemoryStorage()
-  const imageAttachment = { image: { sources: [
-    { url: 'https://' },
-    { url: 'http://images.test/insecure.webp' },
-    { url: 'https://images.test/animation.webp', width: 120, height: 240 }
-  ] } }
+  const imageAttachment = {
+    image: {
+      sources: [
+        { url: 'https://' },
+        { url: 'http://images.test/insecure.webp' },
+        { url: 'https://images.test/animation.webp', width: 120, height: 240 }
+      ]
+    }
+  }
   saveCommentPins('profile:video', {
     commentIds: new Set(['pinned']),
     commentSnapshots: [createCommentPinSnapshot({ id: 'pinned', author: 'Viewer', text: '', replies: [], imageAttachment })]

@@ -28,6 +28,7 @@ test('PO token generation preserves replacement sequences in YouTube JSON argume
         },
         close() { closed = true },
       }
+
       setBounds() {}
     },
     withTimeout: promise => promise,

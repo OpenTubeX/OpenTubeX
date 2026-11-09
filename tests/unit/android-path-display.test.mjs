@@ -17,8 +17,12 @@ for (const [path, display] of [
 ]) {
   test(`download destination display: ${path}`, () => {
     const result = vm.runInNewContext(`${helper.replace(/^import .*\n/gm, '').replace(/^export /gm, '')}\n${component.slice(start, end)}; destinations.value`, {
-      computed, URL, process: { env: { IS_CAPACITOR: true } }, registerPlugin: () => ({}),
-      MAX_VISIBLE_DESTINATIONS: 3, props: { download: { destinations: [path] } },
+      computed,
+      URL,
+      process: { env: { IS_CAPACITOR: true } },
+      registerPlugin: () => ({}),
+      MAX_VISIBLE_DESTINATIONS: 3,
+      props: { download: { destinations: [path] } },
     })
     assert.equal(result[0], display)
   })

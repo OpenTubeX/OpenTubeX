@@ -145,7 +145,7 @@ test('holding the mobile mini bar still continues the same jump', () => {
 
 test('SponsorBlock draft jumps are the viewer\'s own seeks', async () => {
   const submissionSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
-  const match = submissionSource.match(/  async function previewSponsorBlockDraft\([^]*?\n  }/)
+  const match = submissionSource.match(/ {2}async function previewSponsorBlockDraft\([^]*?\n {2}}/)
   assert.ok(match, 'missing previewSponsorBlockDraft')
 
   for (const [mode, point] of [['inspect', false], ['end', false], ['preview', false], ['preview', true]]) {

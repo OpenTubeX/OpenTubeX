@@ -82,19 +82,23 @@ test('maps channel and playlist results into the existing list data formats', ()
 })
 
 test('normalizes protocol-relative channel avatars for the local card and subscription metadata', () => {
-  const { results } = normalizeYtDlpSearchResults({ entries: [{
-    id: 'UC' + 'x'.repeat(22), title: 'Creator', thumbnails: [{ url: '//yt3.ggpht.com/avatar' }]
-  }] })
+  const { results } = normalizeYtDlpSearchResults({
+    entries: [{
+      id: 'UC' + 'x'.repeat(22), title: 'Creator', thumbnails: [{ url: '//yt3.ggpht.com/avatar' }]
+    }]
+  })
   assert.equal(results[0].thumbnail, 'https://yt3.ggpht.com/avatar')
 })
 
 test('completes flat playlist metadata without replacing a search thumbnail or using the loaded entry count', async () => {
-  const { results } = normalizeYtDlpSearchResults({ entries: [
-    { id: 'PLmissing', ie_key: 'YoutubeTab', title: 'Missing metadata' },
-    { id: 'PLcount', ie_key: 'YoutubeTab', title: 'Missing count', thumbnails: [{ url: 'https://i.ytimg.com/search.jpg' }] },
-    { id: 'PLcomplete', ie_key: 'YoutubeTab', title: 'Complete', playlist_count: 0, thumbnails: [{ url: 'https://i.ytimg.com/empty.jpg' }] },
-    { id: 'dQw4w9WgXcQ', title: 'Video' }
-  ] })
+  const { results } = normalizeYtDlpSearchResults({
+    entries: [
+      { id: 'PLmissing', ie_key: 'YoutubeTab', title: 'Missing metadata' },
+      { id: 'PLcount', ie_key: 'YoutubeTab', title: 'Missing count', thumbnails: [{ url: 'https://i.ytimg.com/search.jpg' }] },
+      { id: 'PLcomplete', ie_key: 'YoutubeTab', title: 'Complete', playlist_count: 0, thumbnails: [{ url: 'https://i.ytimg.com/empty.jpg' }] },
+      { id: 'dQw4w9WgXcQ', title: 'Video' }
+    ]
+  })
   const requested = []
   const completed = await completeYtDlpSearchPlaylists(results, async id => {
     requested.push(id)
@@ -117,9 +121,11 @@ test('retains search results and an unknown count when playlist metadata cannot 
 })
 
 test('limits playlist enrichment to two concurrent lookups on a full playlist page', async () => {
-  const { results } = normalizeYtDlpSearchResults({ entries: Array.from({ length: 20 }, (_, index) => ({
-    id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`
-  })) })
+  const { results } = normalizeYtDlpSearchResults({
+    entries: Array.from({ length: 20 }, (_, index) => ({
+      id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`
+    }))
+  })
   let release
   const gate = new Promise(resolve => { release = resolve })
   let active = 0
@@ -144,10 +150,14 @@ test('limits playlist enrichment to two concurrent lookups on a full playlist pa
 
 test('aborts active lookups at the shared deadline and leaves queued results intact', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
-  const { results } = normalizeYtDlpSearchResults({ entries: Array.from({ length: 20 }, (_, index) => ({
-    id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`,
-    thumbnails: [{ url: `https://i.ytimg.com/${index}.jpg` }]
-  })) })
+  const { results } = normalizeYtDlpSearchResults({
+    entries: Array.from({ length: 20 }, (_, index) => ({
+      id: `PL${index}`,
+      ie_key: 'YoutubeTab',
+      title: `Playlist ${index}`,
+      thumbnails: [{ url: `https://i.ytimg.com/${index}.jpg` }]
+    }))
+  })
   const signals = []
   const pending = completeYtDlpSearchPlaylists(results, async (id, signal) => {
     signals.push(signal)

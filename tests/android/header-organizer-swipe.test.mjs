@@ -48,11 +48,23 @@ test('Android organizer pull follows the finger, settles into its card and prese
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
-        EnableDownloads: true, MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
-        AlwaysShowMobileSearchBar: false, ShowTabPreviews: true, UiScale: 100, ReducedMotion: 'off',
-        NewTabPosition: 'afterCurrent', AnimationSpeed: 100,
-        BaseTheme: 'system', SystemDarkTheme: 'dark', SystemLightTheme: 'light', MainColor: 'Red', SecColor: 'Blue',
+        CapacitorLayoutMode: 'phone',
+        CurrentLocale: 'en-US',
+        EnableMobileTabs: true,
+        EnableDownloads: true,
+        MoveDownloadsToAppHeader: true,
+        MoveSettingsToAppHeader: true,
+        AlwaysShowMobileSearchBar: false,
+        ShowTabPreviews: true,
+        UiScale: 100,
+        ReducedMotion: 'off',
+        NewTabPosition: 'afterCurrent',
+        AnimationSpeed: 100,
+        BaseTheme: 'system',
+        SystemDarkTheme: 'dark',
+        SystemLightTheme: 'light',
+        MainColor: 'Red',
+        SecColor: 'Blue',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
       const tabs = JSON.parse(JSON.stringify(store.state.tabs))
@@ -101,8 +113,12 @@ test('Android organizer pull follows the finger, settles into its card and prese
         const initial = await page.evaluate(() => {
           window.scrollTo(0, 900.5)
           const page = document.querySelector('.app > .routerView').getBoundingClientRect()
-          return { scroll: window.scrollY, top: page.top, width: page.width,
-            header: document.querySelector('.topNav').getBoundingClientRect().bottom }
+          return {
+            scroll: window.scrollY,
+            top: page.top,
+            width: page.width,
+            header: document.querySelector('.topNav').getBoundingClientRect().bottom
+          }
         })
         assert.ok(initial.top < 0)
         const start = await pointFor('.capacitorPhoneTabSwitcherButton')
@@ -135,13 +151,17 @@ test('Android organizer pull follows the finger, settles into its card and prese
           const top = Number.parseFloat(style.clipPath.slice(6))
           const visibleBottom = Number(style.clipPath.match(/calc\(100% - ([-\d.]+)px\)/)[1])
           const scale = new DOMMatrixReadOnly(style.transform).a
-          return { left: bounds.left, top: bounds.top + top * scale, width: bounds.width,
-            height: (visibleBottom - top) * scale }
+          return {
+            left: bounds.left,
+            top: bounds.top + top * scale,
+            width: bounds.width,
+            height: (visibleBottom - top) * scale
+          }
         })
         const preview = await thumbnail.boundingBox()
         assert.ok(Math.abs(geometry.left - preview.x) < 1 && Math.abs(geometry.top - preview.y) < 1 &&
           Math.abs(geometry.width - preview.width) < 1 && Math.abs(geometry.height - preview.height) < 1,
-          'the visible crop must land in its card')
+        'the visible crop must land in its card')
         const corners = await movingPage.evaluate(element => {
           const style = getComputedStyle(element)
           return { radius: Number.parseFloat(style.clipPath.split('round ')[1]), scale: new DOMMatrixReadOnly(style.transform).a }

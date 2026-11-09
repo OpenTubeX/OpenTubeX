@@ -352,7 +352,7 @@ for (const manifestType of [null, 'DASH']) {
         player.dispatchEvent(new Event('canupdatestarttime'))
         mediaElement.dispatchEvent(new Event('loadedmetadata'))
       }
-      const match = source.match(/    async function loadPlaybackSource\([^]*?\n    }/)
+      const match = source.match(/ {4}async function loadPlaybackSource\([^]*?\n {4}}/)
       assert.ok(match)
       const loadPlaybackSource = vm.runInNewContext(`${match[0]}\nloadPlaybackSource`, {
         player,

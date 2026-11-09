@@ -242,7 +242,6 @@ test('settings search retains the subpage containing each control', () => {
   }
 })
 
-
 test('activity links retain search tabs and subpages and reject unavailable or ambiguous labels', () => {
   const match = { label: 'Playback Speed', tab: 'player', subpage: 'quick-playback-speed' }
   const index = new Map([
@@ -257,7 +256,6 @@ test('activity links retain search tabs and subpages and reject unavailable or a
     section: 'playback', match: { ...match, settingKey: 'defaultPlayback' }
   })
 })
-
 
 test('subscription activity resolves to its control even with a partially translated Channel group', () => {
   const index = createSettingsSearchIndex({

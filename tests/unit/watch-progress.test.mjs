@@ -78,7 +78,10 @@ test('watch time ignores delayed ticks and records pending seconds per day', asy
 
 test('timestamp actions use the active receiver position and return to local playback', () => {
   const view = {
-    ...timestampMethods, isLoading: false, chromecastActive: true, chromecastStatus: { currentTime: 28.75 },
+    ...timestampMethods,
+    isLoading: false,
+    chromecastActive: true,
+    chromecastStatus: { currentTime: 28.75 },
     $refs: { player: { hasLoaded: true, getCurrentTime: () => 5.5 } },
   }
   assert.equal(view.getWatchedProgress(), 28.75)
@@ -102,22 +105,39 @@ function fixture(existing = true) {
   })
   const hasPlaybackPosition = { value: false }
   const handleSeeking = runInNewContext(`${seekingHandler}; handleSeeking`, {
-    hasPlaybackPosition, playbackEnded: { value: false }, shortsNavigationSuspended: { value: false }, endSeekTarget: null,
-    video: { value: element }, cancelSponsorBlockSkipSchedule() {},
-    handleAbRepeatSeeking() {}, sleepTimer: { checkChapterBoundary() {} }, syncPlayPauseControlIcons() {}, emit() {},
+    hasPlaybackPosition,
+    playbackEnded: { value: false },
+    shortsNavigationSuspended: { value: false },
+    endSeekTarget: null,
+    video: { value: element },
+    cancelSponsorBlockSkipSchedule() {},
+    handleAbRepeatSeeking() {},
+    sleepTimer: { checkChapterBoundary() {} },
+    syncPlayPauseControlIcons() {},
+    emit() {},
   })
   const player = {
-    hasLoaded: false, get hasPlaybackPosition() { return hasPlaybackPosition.value },
+    hasLoaded: false,
+    get hasPlaybackPosition() { return hasPlaybackPosition.value },
     getCurrentTime: () => element.currentTime,
   }
   element.addEventListener('seeking', handleSeeking)
   const history = existing ? { watchProgress: 11 * 3600 } : {}
   const view = {
-    canSaveWatchProgress: true, isCurrentlyPresented: () => true, hasBeenPresented: true,
-    $refs: { player }, isLoading: false, videoId: 'D8P-16SMdlg',
-    historyEntryExists: existing, historyEntry: existing ? history : undefined,
-    videoTitle: 'Long video', channelName: 'Channel', channelId: 'channel', videoLengthSeconds: 52991,
-    addToHistory, updateHistory: payload => Object.assign(history, payload),
+    canSaveWatchProgress: true,
+    isCurrentlyPresented: () => true,
+    hasBeenPresented: true,
+    $refs: { player },
+    isLoading: false,
+    videoId: 'D8P-16SMdlg',
+    historyEntryExists: existing,
+    historyEntry: existing ? history : undefined,
+    videoTitle: 'Long video',
+    channelName: 'Channel',
+    channelId: 'channel',
+    videoLengthSeconds: 52991,
+    addToHistory,
+    updateHistory: payload => Object.assign(history, payload),
     updateWatchProgress: payload => Object.assign(history, payload),
   }
   return { element, player, history, view, save: () => _saveWatchProgress.call(view) }

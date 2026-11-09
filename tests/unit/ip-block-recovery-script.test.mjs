@@ -21,10 +21,14 @@ function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => tru
     process: { platform, env: { SystemRoot: 'C:\\Windows' } },
     cp: { spawn },
     asyncFs: { stat: fileStat },
-    baseHandlers: { settings: { _findOne: async (key) => {
-      assert.equal(key, 'videoIpBlockScriptPath')
-      return { value: savedPath }
-    } } }
+    baseHandlers: {
+      settings: {
+        _findOne: async (key) => {
+          assert.equal(key, 'videoIpBlockScriptPath')
+          return { value: savedPath }
+        }
+      }
+    }
   })
   return (scriptPath, configuredPath = scriptPath) => {
     savedPath = configuredPath

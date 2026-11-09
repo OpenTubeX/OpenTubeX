@@ -117,10 +117,12 @@ test('finishing an IP recovery script cannot reload a superseded offline downloa
     ${source.slice(source.indexOf('    async runIpBlockRecoveryScriptAndReload()'), source.indexOf('    extractExpiryDateFromStreamingUrl:'))}
   })`, {
     process: { env: { IS_ELECTRON: true } },
-    window: { ftElectron: {
-      startIpBlockRecoveryScript: async () => true,
-      executeIpBlockRecoveryScript: () => new Promise(resolve => { resolveScript = resolve }),
-    } },
+    window: {
+      ftElectron: {
+        startIpBlockRecoveryScript: async () => true,
+        executeIpBlockRecoveryScript: () => new Promise(resolve => { resolveScript = resolve }),
+      }
+    },
     showToastOnAllTabs() {},
   })
   const watch = {

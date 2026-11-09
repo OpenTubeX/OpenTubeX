@@ -19,13 +19,24 @@ test('parses tagged IRC chat without interpreting message text as markup', () =>
 })
 
 test('parses VOD comments and continuation cursor', () => {
-  const page = parseTwitchReplayPage({ data: { video: { comments: {
-    pageInfo: { hasNextPage: true },
-    edges: [{ cursor: 'next', node: {
-      id: 'm1', contentOffsetSeconds: 12.5, commenter: { displayName: 'Viewer' },
-      message: { userColor: '#123ABC', fragments: [{ text: 'Hello ' }, { text: 'world' }] }
-    } }]
-  } } } })
+  const page = parseTwitchReplayPage({
+    data: {
+      video: {
+        comments: {
+          pageInfo: { hasNextPage: true },
+          edges: [{
+            cursor: 'next',
+            node: {
+              id: 'm1',
+              contentOffsetSeconds: 12.5,
+              commenter: { displayName: 'Viewer' },
+              message: { userColor: '#123ABC', fragments: [{ text: 'Hello ' }, { text: 'world' }] }
+            }
+          }]
+        }
+      }
+    }
+  })
   assert.deepEqual(page, {
     messages: [{ id: 'm1', name: 'Viewer', text: 'Hello world', color: '#123ABC', offset: 12.5 }],
     cursor: 'next'

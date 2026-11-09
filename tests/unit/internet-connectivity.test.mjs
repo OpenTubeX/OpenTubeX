@@ -46,8 +46,11 @@ test('airplane mode cancels checks, ignores stale results, and does not poll unt
   let resolveProbe
   let signal
   let calls = 0
-  const monitor = createInternetConnectivity({ eventTarget: events, isOnline: () => hardwareOnline,
-    probe: inputSignal => { calls++; signal = inputSignal; return new Promise(resolve => { resolveProbe = resolve }) } })
+  const monitor = createInternetConnectivity({
+    eventTarget: events,
+    isOnline: () => hardwareOnline,
+    probe: inputSignal => { calls++; signal = inputSignal; return new Promise(resolve => { resolveProbe = resolve }) }
+  })
   t.after(() => monitor.dispose())
   assert.equal(await monitor.ready, false)
   t.mock.timers.tick(3600000)
@@ -70,8 +73,11 @@ test('airplane mode cancels checks, ignores stale results, and does not poll unt
 test('concurrent checks share one probe and outage polling backs off to a minute', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   let calls = 0
-  const monitor = createInternetConnectivity({ eventTarget: new EventTarget(), isOnline: () => true,
-    probe: async () => { calls++; return false } })
+  const monitor = createInternetConnectivity({
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
+    probe: async () => { calls++; return false }
+  })
   t.after(() => monitor.dispose())
   await Promise.all(Array.from({ length: 30 }, () => monitor.check()))
   assert.equal(calls, 1)
@@ -97,8 +103,12 @@ test('opt-out stops active and scheduled checks and keeps OS connectivity events
   let complete
   let online = true
   const events = new EventTarget()
-  const monitor = createInternetConnectivity({ eventTarget: events, isOnline: () => online, enabled: false,
-    probe: inputSignal => { calls++; signal = inputSignal; return new Promise(resolve => { complete = resolve }) } })
+  const monitor = createInternetConnectivity({
+    eventTarget: events,
+    isOnline: () => online,
+    enabled: false,
+    probe: inputSignal => { calls++; signal = inputSignal; return new Promise(resolve => { complete = resolve }) }
+  })
   t.after(() => monitor.dispose())
   await monitor.check()
   t.mock.timers.tick(3600000)
@@ -131,8 +141,13 @@ test('healthy connections stay idle and app resume checks reachability again', a
   let calls = 0
   let visible = true
   const visibilityTarget = new EventTarget()
-  const monitor = createInternetConnectivity({ eventTarget: new EventTarget(), isOnline: () => true,
-    visibilityTarget, isVisible: () => visible, probe: async () => { calls++; return true } })
+  const monitor = createInternetConnectivity({
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
+    visibilityTarget,
+    isVisible: () => visible,
+    probe: async () => { calls++; return true }
+  })
   t.after(() => monitor.dispose())
   await monitor.ready
   t.mock.timers.tick(3600000)

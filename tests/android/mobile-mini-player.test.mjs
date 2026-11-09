@@ -36,7 +36,6 @@ test('mobile mini-player progress line seeks with touch and expands while held',
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { seekingOnly: true }))
 
-
 test('audio fullscreen swipes give feedback and mini-player transitions suspend visualizer painting', {
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true, feedbackOnly: true }))
@@ -62,11 +61,15 @@ async function sampleAudioArtwork({ png, cropToSurface }) {
   for (let i = 0; i < pixels.length; i += 4) {
     if (pixels[i] < 20 && pixels[i + 1] > 220 && pixels[i + 2] < 20) green++
   }
-  return { green, rect: rect.toJSON(), scale, viewport: [innerWidth, innerHeight],
+  return {
+    green,
+    rect: rect.toJSON(),
+    scale,
+    viewport: [innerWidth, innerHeight],
     artwork: surface.querySelector('.musicAudioArtwork').getBoundingClientRect().toJSON(),
-    player: surface.parentElement.className }
+    player: surface.parentElement.className
+  }
 }
-
 
 for (const [audioOnly, landscape] of [[false, false], [true, true]]) {
   test(`mobile ${audioOnly ? 'music artwork' : '4:3 video'} fills the mini thumbnail and restores its inline layout in ${landscape ? 'landscape' : 'portrait'}`, {
@@ -91,20 +94,36 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false, PlayNextVideo: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone',
-        UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
-        EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
-        MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
-        MusicVisualizer: true, AmbientMode: true, AlwaysShowNavigationBar: false, CompactMobileMiniPlayer: false, IconPack: 'material',
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        PlayNextVideo: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        KeepPlayingOnNavigation: true,
+        ScrollPlayerMode: 'mini',
+        CapacitorLayoutMode: 'phone',
+        UiScale: 100,
+        ReducedMotion: 'off',
+        AnimationSpeed: 100,
+        EnableMobileFullscreenSwipe: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        PlayingInterfaceHideDelay: 5,
+        MobileLeftSwipeAction: 'disabled',
+        MobileRightSwipeAction: 'disabled',
+        MusicVisualizer: true,
+        AmbientMode: true,
+        AlwaysShowNavigationBar: false,
+        CompactMobileMiniPlayer: false,
+        IconPack: 'material',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       store.dispatch('updateReducedMotion', 'off')
       window.__miniPlayerFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__miniPlayerFetch(url, options) : Promise.reject(new Error('Offline mini-player test'))
+        ? window.__miniPlayerFetch(url, options)
+        : Promise.reject(new Error('Offline mini-player test'))
       const style = document.createElement('style')
       style.id = 'mini-player-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -118,9 +137,11 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
     const loadTestVideo = async () => {
-      const previous = watch ? await watch.evaluate(component => ({
-        uid: component.uid, generation: component.proxy.videoLoadGeneration,
-      })) : null
+      const previous = watch
+        ? await watch.evaluate(component => ({
+            uid: component.uid, generation: component.proxy.videoLoadGeneration,
+          }))
+        : null
       await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
       await expect.poll(async () => {
         const handle = await page.evaluateHandle(findWatchComponent)
@@ -128,8 +149,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
           return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun && !component.proxy.isLoading &&
             component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented() &&
             (!previous || component.uid !== previous.uid || component.proxy.videoLoadGeneration > previous.generation), previous)
-        }
-        finally { await handle.dispose() }
+        } finally { await handle.dispose() }
       }).toBe(true)
       await watch?.dispose()
       watch = await page.evaluateHandle(findWatchComponent)
@@ -137,15 +157,29 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         const watch = component.proxy
         watch.videoLoadGeneration++
         Object.assign(watch, {
-          isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-          isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-          videoTitle: 'A long mini-player title with more room after removing the expand arrow', videoLengthSeconds: 60,
+          isLoading: false,
+          ytDlpStreamsPending: false,
+          errorMessage: null,
+          isUpcoming: false,
+          isLive: false,
+          localFilePlayback: true,
+          activeFormat: 'legacy',
+          videoTitle: 'A long mini-player title with more room after removing the expand arrow',
+          videoLengthSeconds: 60,
           musicMediaType: audioOnly ? 'audioTrack' : 'unknown',
           thumbnail: audioOnly
             ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Cpath fill='lime' d='M0 0h320v180H0z'/%3E%3C/svg%3E"
             : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#326b8a"/></svg>'),
-          legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-            width: 320, height: posterOnly ? 240 : 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+          legacyFormats: [{
+            itag: 0,
+            qualityLabel: 'Test',
+            mimeType: 'video/webm',
+            width: 320,
+            height: posterOnly ? 240 : 180,
+            bitrate: 0,
+            localFile: true,
+            url: `data:video/webm;base64,${media}`
+          }],
         })
       }, { media, audioOnly, posterOnly })
       await expect(player).toBeVisible()
@@ -255,9 +289,11 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         const saved = JSON.parse(JSON.stringify(store.getters.getHistoryCacheSorted))
         const history = Array.from({ length: 40 }, (_, index) => ({
-          ...entry, _id: index ? `history-${index}` : entry.videoId,
+          ...entry,
+          _id: index ? `history-${index}` : entry.videoId,
           videoId: index ? `history-${index}` : entry.videoId,
-          title: `History video ${index}`, timeWatched: Date.now() - index * 1000,
+          title: `History video ${index}`,
+          timeWatched: Date.now() - index * 1000,
         }))
         store.commit('setHistoryCacheSorted', history)
         store.commit('setHistoryCacheById', Object.fromEntries(history.map(item => [item.videoId, item])))
@@ -863,11 +899,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { historyScrollOnly = fal
         element.removeEventListener('transitionrun', recordTransition)
         queueMicrotask(() => {
           const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
-          if (animation) animation.ready.then(() => {
-            window.__miniDismissRegression.transition = {
-              duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
-            }
-          })
+          if (animation) {
+            animation.ready.then(() => {
+              window.__miniDismissRegression.transition = {
+                duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
+              }
+            })
+          }
         })
       }
       element.addEventListener('transitionrun', recordTransition)

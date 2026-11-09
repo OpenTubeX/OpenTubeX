@@ -17,7 +17,9 @@ function appFunction(name, context = {}) {
 
 function animation() {
   return {
-    currentTime: 0, playState: 'paused', finished: Promise.resolve(),
+    currentTime: 0,
+    playState: 'paused',
+    finished: Promise.resolve(),
     pause() { this.playState = 'paused' },
     play() { this.playState = 'finished' },
     reverse() { this.playState = 'finished' },
@@ -61,15 +63,21 @@ function bottomSheet({ canDismissOnBack, onDismiss = () => {} } = {}) {
   const previews = []
   const backdrop = { style: {}, animate: () => animation() }
   const element = {
-    style: {}, parentElement: backdrop,
+    style: {},
+    parentElement: backdrop,
     animate: () => animation(),
   }
   backdrop.querySelector = () => element
   const sheet = ref(null)
   let dismissed = 0
   const useBottomSheetDismiss = vm.runInNewContext(`${sheetSource}; useBottomSheetDismiss`, {
-    process: { env: { IS_CAPACITOR: true } }, watch, nextTick, onBeforeUnmount() {}, settleAndroidBackAnimation,
-    applyAnimationSpeed: animation => animation, isReducedMotionEnabled: () => false,
+    process: { env: { IS_CAPACITOR: true } },
+    watch,
+    nextTick,
+    onBeforeUnmount() {},
+    settleAndroidBackAnimation,
+    applyAnimationSpeed: animation => animation,
+    isReducedMotionEnabled: () => false,
     registerAndroidBackSheet: (_element, preview) => { previews.push(preview); return () => {} },
     getComputedStyle: () => ({ transform: 'none' }),
     window: { removeEventListener() {} },

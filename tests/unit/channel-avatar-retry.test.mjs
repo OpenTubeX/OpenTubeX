@@ -46,17 +46,27 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     },
     clearTimeout: id => timers.delete(id)
   })
-  const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
-    FtRetryImage: RetryImage, FtIcon: { render: () => Vue.h('fallback') },
-    Icon: { render: () => Vue.h('fallback') }, getCustomIconImageSource,
-    resolveIconifyId: () => 'test:icon', normalizeFaIcon: () => null,
-    currentIconPack: Vue.ref('material'), faAliasToCanon: {},
-    getTabAvatarUrl: tab => tab.avatarUrl, getTabPreviewFallbackUrl: () => null,
-    getTabPageIcon: () => null, formatTabTitle: title => title
-  })
+  const Avatar = componentPath === 'FtRetryImage.vue'
+    ? RetryImage
+    : await compileComponent(componentPath, {
+        FtRetryImage: RetryImage,
+        FtIcon: { render: () => Vue.h('fallback') },
+        Icon: { render: () => Vue.h('fallback') },
+        getCustomIconImageSource,
+        resolveIconifyId: () => 'test:icon',
+        normalizeFaIcon: () => null,
+        currentIconPack: Vue.ref('material'),
+        faAliasToCanon: {},
+        getTabAvatarUrl: tab => tab.avatarUrl,
+        getTabPreviewFallbackUrl: () => null,
+        getTabPageIcon: () => null,
+        formatTabTitle: title => title
+      })
   const renderer = Vue.createRenderer({
     createElement: tag => ({
-      tag, props: {}, children: [],
+      tag,
+      props: {},
+      children: [],
       dispatchEvent(event) {
         Object.defineProperties(event, { target: { value: this }, currentTarget: { value: this } })
         this.props[event.type === 'error' ? 'onError' : 'onLoad']?.(event)
@@ -64,7 +74,8 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     }),
     createComment: () => ({ tag: 'comment' }),
     createText: text => ({ tag: 'text', text }),
-    setElementText() {}, setText() {},
+    setElementText() {},
+    setText() {},
     patchProp: (node, key, previous, value) => {
       node.props[key] = value
       if (key === 'loading') node.loading = value
@@ -87,13 +98,15 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   })
   const thumbnail = Vue.ref('https://yt3.ggpht.com/avatar')
   const root = { children: [] }
-  const app = renderer.createApp({ render: () => Vue.h(Avatar, componentPath === 'FtRetryImage.vue'
-    ? { ...attrs, src: thumbnail.value, onLoad: event => loads.push({ type: event.type, target: event.target, currentTarget: event.currentTarget }) }
-    : componentPath === 'FtIcon/FtIcon.vue'
-    ? { icon: { type: 'image', value: thumbnail.value } }
-    : componentPath.startsWith('TabBar/')
-    ? { tab: { id: 'channel-tab', avatarUrl: thumbnail.value, title: 'Channel' } }
-    : { thumbnail: thumbnail.value }) })
+  const app = renderer.createApp({
+    render: () => Vue.h(Avatar, componentPath === 'FtRetryImage.vue'
+      ? { ...attrs, src: thumbnail.value, onLoad: event => loads.push({ type: event.type, target: event.target, currentTarget: event.currentTarget }) }
+      : componentPath === 'FtIcon/FtIcon.vue'
+        ? { icon: { type: 'image', value: thumbnail.value } }
+        : componentPath.startsWith('TabBar/')
+          ? { tab: { id: 'channel-tab', avatarUrl: thumbnail.value, title: 'Channel' } }
+          : { thumbnail: thumbnail.value })
+  })
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
@@ -413,7 +426,6 @@ test('unexpected native recovery errors still allow the delayed retry and termin
   await fail(f.find('img'))
   assert.ok(f.find('fallback'))
 })
-
 
 test('completed failed images leave the skeleton even when their error event was missed', async t => {
   const src = 'https://yt3.ggpht.com/avatar'

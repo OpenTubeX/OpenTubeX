@@ -29,14 +29,29 @@ function harness(pages, { needed = true } = {}) {
     props: { playlistId: 'long-playlist' },
     playlistLoadGeneration: 0,
     getPlaylistInfoRun: false,
-    playlistItems: shallowRef([]), isLoading: ref(true), isFetchingPlaylistContinuation: ref(false), hasUnloadedPlaylistVideos, playlistContinuationFailed,
+    playlistItems: shallowRef([]),
+    isLoading: ref(true),
+    isFetchingPlaylistContinuation: ref(false),
+    hasUnloadedPlaylistVideos,
+    playlistContinuationFailed,
     needsMorePlaylistVideos: computed(() => hasUnloadedPlaylistVideos.value && !playlistContinuationFailed.value && needsNextPage.value),
-    reversePlaylist: ref(false), nextTick, triggerRef, updatePlaylistPanelNearEnd() {},
-    shuffleEnabled: ref(false), randomizedPlaylistItems: shallowRef([]),
-    playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
-    backendPreference: ref('invidious'), backendFallback: ref(false), isUserPlaylist: ref(false), playlistCacheTabId: 'web',
+    reversePlaylist: ref(false),
+    nextTick,
+    triggerRef,
+    updatePlaylistPanelNearEnd() {},
+    shuffleEnabled: ref(false),
+    randomizedPlaylistItems: shallowRef([]),
+    playlistTitle: ref(''),
+    playlistTotalVideoCount: ref(0),
+    channelName: ref(''),
+    channelId: ref(''),
+    backendPreference: ref('invidious'),
+    backendFallback: ref(false),
+    isUserPlaylist: ref(false),
+    playlistCacheTabId: 'web',
     store: { commit() {} },
-    hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos,
+    hasMoreInvidiousPlaylistPages,
+    mergeInvidiousPlaylistVideos,
     invidiousGetPlaylistInfo: async (_id, page = 1) => {
       requests.push(page)
       const videos = pages[page - 1] ?? []
@@ -81,8 +96,14 @@ test('the watch page loads the needed Invidious pages after showing the first on
 test('a playlist handed over from the Playlist page continues with its next Invidious page', async () => {
   const { context, requests, loadCachedPlaylistInformation } = harness([range(0, 200), range(100, 250)])
   await loadCachedPlaylistInformation({
-    id: 'long-playlist', title: 'Long', totalVideoCount: 250, channelName: 'Channel', channelId: 'channel',
-    items: range(0, 200), continuationData: null, nextInvidiousPage: 2,
+    id: 'long-playlist',
+    title: 'Long',
+    totalVideoCount: 250,
+    channelName: 'Channel',
+    channelId: 'channel',
+    items: range(0, 200),
+    continuationData: null,
+    nextInvidiousPage: 2,
   })
   assert.deepEqual(requests, [2])
   assert.deepEqual(context.playlistItems.value.map(item => item.index), range(0, 250).map(item => item.index))

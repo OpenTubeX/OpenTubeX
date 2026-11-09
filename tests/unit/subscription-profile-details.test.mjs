@@ -54,9 +54,18 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
       return result
     }
     const context = vm.createContext({
-      MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
-      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp,
-      deepCopy: value => JSON.parse(JSON.stringify(value)), console
+      MAIN_PROFILE_ID: 'allChannels',
+      THEME_BG_COLOR: '#000000',
+      THEME_TEXT_COLOR: '#ffffff',
+      DEFAULT_PROFILE_ICON,
+      DBProfileHandlers: handlers,
+      getProfileWithUpdatedSubscriptionDetails,
+      copySubscriptionChannelSettings,
+      getChannelWithUpdatedSettings,
+      getNextSubscriptionSettingsTimestamp,
+      isValidSubscriptionSettingsTimestamp,
+      deepCopy: value => JSON.parse(JSON.stringify(value)),
+      console
     })
     vm.runInContext(profileSource
       .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -118,8 +127,12 @@ test('subscription details refreshed before profiles load still reach the datast
 
 test('bulk disables 939 subscriptions with one write per profile and synchronizes other windows', async t => {
   const subscriptions = Array.from({ length: 939 }, (_, index) => ({
-    id: `channel-${index}`, name: `Channel ${index}`, thumbnail: '', showMembersOnly: true,
-    feedTypes: index % 2 ? ['videos'] : ['shorts', 'live'], dailyVideoLimit: index % 3 + 1
+    id: `channel-${index}`,
+    name: `Channel ${index}`,
+    thumbnail: '',
+    showMembersOnly: true,
+    feedTypes: index % 2 ? ['videos'] : ['shorts', 'live'],
+    dailyVideoLimit: index % 3 + 1
   }))
   const { db, store, createStore } = await profileStore(subscriptions)
   const other = createStore()
@@ -175,10 +188,12 @@ test('bulk edits keep one channel’s future timestamp out of other channels’ 
     }
   }
   const value = getSubscriptionSettingsForSync({ state: { profiles: store.state } })
-  const remoteEntry = { value: {
-    ...value,
-    second: { value: { ...value.second.value, showMembersOnly: true }, updatedAt: now + 1000 }
-  } }
+  const remoteEntry = {
+    value: {
+      ...value,
+      second: { value: { ...value.second.value, showMembersOnly: true }, updatedAt: now + 1000 }
+    }
+  }
   const merged = mergeSubscriptionSettingsEntry({ old, value, remoteEntry, now: now + 1000 })
   assert.equal(merged.value.first.value.showMembersOnly, false)
   assert.equal(merged.value.second.value.showMembersOnly, true)
@@ -192,7 +207,9 @@ for (const action of ['batchUpdateChannelSettings', 'updateChannelSettings']) {
       id: 'channel', showMembersOnly: true, subscriptionSettingsUpdatedAt: timestamp
     }))
     subscriptions.push({
-      id: 'channel', showMembersOnly: true, subscriptionSettingsUpdatedAt: 100,
+      id: 'channel',
+      showMembersOnly: true,
+      subscriptionSettingsUpdatedAt: 100,
       subscriptionSettingsUpdatedAtByField: { showMembersOnly: 1e300 }
     })
     for (const subscription of subscriptions) {
@@ -288,7 +305,9 @@ for (const dailyVideoLimit of [7, undefined]) {
       }
     }
     const merged = mergeSubscriptionSettingsEntry({
-      old, remoteEntry, now: Date.now(),
+      old,
+      remoteEntry,
+      now: Date.now(),
       value: getSubscriptionSettingsForSync({ state: { profiles: store.state } })
     })
     assert.equal(merged.value.first.value.showMembersOnly, false)
@@ -384,7 +403,7 @@ for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetai
         ? [settingsUpdate]
         : action === 'updateChannelSettings'
           ? settingsUpdate
-        : action === 'batchUpdateSubscriptionDetails' ? [channel] : channel), false)
+          : action === 'batchUpdateSubscriptionDetails' ? [channel] : channel), false)
       assert.ok(savedProfileId)
       for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
         for (const profile of profiles) {

@@ -20,11 +20,14 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const player = Object.assign(new EventTarget(), {
     coversWindow: false,
     shorts: false,
-    classList: { contains(name) {
-      return (name === 'shortsPlayer' && player.shorts) ||
+    classList: {
+      contains(name) {
+        return (name === 'shortsPlayer' && player.shorts) ||
         (name === 'fullWindow' && player.coversWindow)
-    } },
-    setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
+      }
+    },
+    setAttribute: name => attributes.add(name),
+    removeAttribute: name => attributes.delete(name),
     hasAttribute: name => attributes.has(name),
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
   })
@@ -32,39 +35,67 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const inlineElement = shallowRef(inlinePlayer)
   const animations = []
   const element = {
-    open: false, style: {},
+    open: false,
+    style: {},
     getBoundingClientRect: () => ({ top: 300, height: 500 }),
-    show() { this.open = true }, showModal() { this.open = true }, close() { this.open = false },
+    show() { this.open = true },
+    showModal() { this.open = true },
+    close() { this.open = false },
     animate: (frames, options) => {
       const animation = {
-        frames, effect: { getTiming: () => options }, currentTime: 0, playState: 'running',
-        pause() { this.playState = 'paused' }, play() { this.playState = 'running' },
-        reverse() { this.playState = 'running' }, cancel() { this.playState = 'idle' },
+        frames,
+        effect: { getTiming: () => options },
+        currentTime: 0,
+        playState: 'running',
+        pause() { this.playState = 'paused' },
+        play() { this.playState = 'running' },
+        reverse() { this.playState = 'running' },
+        cancel() { this.playState = 'idle' },
         finished: Promise.resolve()
       }
       animations.push(animation)
       return animation
-    }, querySelector: () => null
+    },
+    querySelector: () => null
   }
   const dialog = shallowRef(element)
   const document = Object.assign(new EventTarget(), {
-    fullscreenElement: null, activeElement: null, querySelector: () => null,
+    fullscreenElement: null,
+    activeElement: null,
+    querySelector: () => null,
     body: { classList: { contains: () => false } }
   })
   const window = Object.assign(new EventTarget(), { innerHeight: 800, scrollBy() {} })
   const events = []
   const context = {
-    computed, ref, shallowRef, watch, nextTick, document, window, innerHeight: 800,
-    isAppHidden: () => !!document.hidden, isReducedMotionEnabled: () => reducedMotion,
-    process: { env: { IS_CAPACITOR: true } }, registerAndroidBackSheet, settleAndroidBackAnimation,
-    defineProps: () => props, defineEmits: () => (...args) => events.push(args),
+    computed,
+    ref,
+    shallowRef,
+    watch,
+    nextTick,
+    document,
+    window,
+    innerHeight: 800,
+    isAppHidden: () => !!document.hidden,
+    isReducedMotionEnabled: () => reducedMotion,
+    process: { env: { IS_CAPACITOR: true } },
+    registerAndroidBackSheet,
+    settleAndroidBackAnimation,
+    defineProps: () => props,
+    defineEmits: () => (...args) => events.push(args),
     defineOptions() {},
-    useTemplateRef: () => dialog, usePhoneLayout: () => landscape,
-    inject: name => name === 'phonePanelPlayer' ? () => player
-      : name === 'phonePanelInlinePlayer' ? () => inlineElement.value
+    useTemplateRef: () => dialog,
+    usePhoneLayout: () => landscape,
+    inject: name => name === 'phonePanelPlayer'
+      ? () => player
+      : name === 'phonePanelInlinePlayer'
+        ? () => inlineElement.value
         : name === 'expandPhonePanel' ? expandPanel : null,
     performance,
-    onBeforeUnmount: callback => cleanup.push(callback), onUpdated() {}, onActivated() {}, onDeactivated() {},
+    onBeforeUnmount: callback => cleanup.push(callback),
+    onUpdated() {},
+    onActivated() {},
+    onDeactivated() {},
     updateMobileSheetRootClass() {},
     MutationObserver: class { observe() {} disconnect() {} },
     ResizeObserver: class {
@@ -73,14 +104,29 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
       unobserve(element) { activeObservers.delete(element) }
       disconnect() { activeObservers.clear() }
     },
-    applyAnimationSpeed: animation => animation, lockBodyScroll() {}, unlockBodyScroll() {},
+    applyAnimationSpeed: animation => animation,
+    lockBodyScroll() {},
+    unlockBodyScroll() {},
     motionTiming: (_token, duration, easing) => reducedMotion ? { duration: 0, easing: 'linear' } : { duration, easing },
-    matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1, getPropertyValue: () => '' })
+    matchMedia: () => ({ matches: true }),
+    getComputedStyle: () => ({ transform: 'none', opacity: 1, getPropertyValue: () => '' })
   }
   scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
   t.after(unmount)
-  return { ...context, element, player, inlinePlayer, inlineElement, props, landscape, observed, activeObservers, events, animations, unmount,
+  return {
+    ...context,
+    element,
+    player,
+    inlinePlayer,
+    inlineElement,
+    props,
+    landscape,
+    observed,
+    activeObservers,
+    events,
+    animations,
+    unmount,
     resize() { resizeCallback?.() },
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
@@ -181,7 +227,10 @@ test('sheet header controls allow dragging without capturing ordinary taps', asy
   await sheet.settle()
   const captures = []
   const event = {
-    button: 0, pointerId: 1, clientX: 100, clientY: 400,
+    button: 0,
+    pointerId: 1,
+    clientX: 100,
+    clientY: 400,
     target: { closest: selector => selector.includes('button') ? {} : null },
     currentTarget: { setPointerCapture: id => captures.push(id) }
   }
@@ -205,7 +254,10 @@ test('sheet drags suppress control clicks while horizontal gestures and keyboard
   sheet.props.open = true
   await sheet.settle()
   const event = {
-    button: 0, pointerId: 1, clientX: 100, clientY: 400,
+    button: 0,
+    pointerId: 1,
+    clientX: 100,
+    clientY: 400,
     currentTarget: { setPointerCapture() {} }
   }
   let clicksBlocked = 0
@@ -307,7 +359,9 @@ test('unmounting a suspended expanded sheet restores playback', async t => {
   sheet.props.open = true
   await sheet.settle()
   const event = {
-    button: 0, pointerId: 1, clientY: 400,
+    button: 0,
+    pointerId: 1,
+    clientY: 400,
     target: { closest: () => null },
     currentTarget: { setPointerCapture() {} }
   }

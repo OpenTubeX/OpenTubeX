@@ -57,7 +57,9 @@ test('Android stalled avatars use native recovery before the bounded browser ret
           query,
           data: [{ type: 'channel', dataSource: 'local', name: 'Native avatar recovery', id: query, thumbnail: `https://yt3.ggpht.com/opentubex-timeout-avatar?case=${succeeds}` }],
           searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
-          nextPageRef: null, hasMoreResults: false, apiUsed: 'local'
+          nextPageRef: null,
+          hasMoreResults: false,
+          apiUsed: 'local'
         })
         location.hash = `#/search/${query}`
       }, succeeds)
@@ -110,14 +112,16 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       }
     }
   } finally {
-    if (saved) await page.evaluate(saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      Object.assign(store.state.settings, saved.settings)
-      location.hash = saved.route
-      window.Capacitor.nativePromise = window.__timeoutAvatarNativePromise
-      delete window.__timeoutAvatarNativePromise
-      delete window.__timeoutAvatarRequest
-    }, saved)
+    if (saved) {
+      await page.evaluate(saved => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        Object.assign(store.state.settings, saved.settings)
+        location.hash = saved.route
+        window.Capacitor.nativePromise = window.__timeoutAvatarNativePromise
+        delete window.__timeoutAvatarNativePromise
+        delete window.__timeoutAvatarRequest
+      }, saved)
+    }
     await page.unroute(avatarPattern)
     await browser.close()
   }

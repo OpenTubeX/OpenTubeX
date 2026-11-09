@@ -72,21 +72,26 @@ for (const colors of [
   })
 }
 
-
 for (const deletedFrom of ['server', 'device']) {
   test(`destructive profile sync identifies the profile deleted from the ${deletedFrom}`, async () => {
     const profile = { _id: 'profile-1', name: 'Music', subscriptions: [] }
     const store = {
-      state: { profiles: { profileList: [
-        { _id: MAIN_PROFILE_ID, subscriptions: [] },
-        ...(deletedFrom === 'server' ? [profile] : []),
-      ] } },
+      state: {
+        profiles: {
+          profileList: [
+            { _id: MAIN_PROFILE_ID, subscriptions: [] },
+            ...(deletedFrom === 'server' ? [profile] : []),
+          ]
+        }
+      },
       dispatch: async () => assert.fail('Must not change local data before confirmation'),
     }
     const client = {
-      getSubscriptionGroups: async () => deletedFrom === 'server' ? [] : [{
-        group: { id: 'remote-1', local_id: profile._id, title: profile.name }, channels: [],
-      }],
+      getSubscriptionGroups: async () => deletedFrom === 'server'
+        ? []
+        : [{
+            group: { id: 'remote-1', local_id: profile._id, title: profile.name }, channels: [],
+          }],
     }
     await assert.rejects(context.syncProfiles(client, store, {
       'profile-1': { remoteId: 'remote-1', metadata: { title: 'Old name' }, channels: [] },

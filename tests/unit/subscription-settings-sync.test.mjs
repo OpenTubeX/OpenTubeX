@@ -11,7 +11,14 @@ import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettin
 
 const key = subscriptionSync.SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
+const context = vm.createContext({
+  DEFAULT_CHANNEL_AVATAR,
+  UNKNOWN_SYNC_UPLOADER_ID,
+  uploaderToLocal,
+  normalizeChannelAvatar,
+  enrichSyncVideo,
+  mergeSyncIds,
+  syncVideoToRemote,
   ...subscriptionSync,
   areSyncSettingValuesEqual,
   mergeSettingEntry,
@@ -72,8 +79,13 @@ test('syncs subscription settings through the existing settings collection to an
   await context.syncSettings(client, second)
   for (const profile of second.state.profiles.profileList) {
     assert.deepEqual(profile.subscriptions[0], {
-      id: 'channel', name: 'Local name', thumbnail: 'local-thumbnail',
-      feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true,
+      id: 'channel',
+      name: 'Local name',
+      thumbnail: 'local-thumbnail',
+      feedTypes: ['shorts'],
+      notificationFeedTypes: ['posts'],
+      dailyVideoLimit: 3,
+      showMembersOnly: true,
       subscriptionSettingsUpdatedAt: client.entries.find(entry => entry.key === key).value.channel.updatedAt,
     })
   }
@@ -247,7 +259,9 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
   let failWrite = true
   let persistedChannel
   const persistenceContext = vm.createContext({
-    MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
+    MAIN_PROFILE_ID: 'allChannels',
+    THEME_BG_COLOR: '#000000',
+    THEME_TEXT_COLOR: '#ffffff',
     DEFAULT_PROFILE_ICON,
     copySubscriptionChannelSettings,
     getChannelWithUpdatedSettings,
@@ -255,11 +269,13 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
     isValidSubscriptionSettingsTimestamp,
     deepCopy: structuredClone,
     console: { error() {} },
-    DBProfileHandlers: { async updateChannelSettings(channel, ids) {
-      if (failWrite) throw new Error('Channel write failed')
-      persistedChannel = structuredClone(channel)
-      return ids
-    } },
+    DBProfileHandlers: {
+      async updateChannelSettings(channel, ids) {
+        if (failWrite) throw new Error('Channel write failed')
+        persistedChannel = structuredClone(channel)
+        return ids
+      }
+    },
   })
   vm.runInContext(profilesSource
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

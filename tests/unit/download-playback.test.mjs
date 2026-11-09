@@ -5,11 +5,17 @@ import { cardDownloadId, downloadQueueVideos, isDownloadPlaybackSupported, local
 
 test('queues a downloaded video with its saved-file route and metadata', () => {
   const [video] = downloadQueueVideos({
-    id: 42, videoId: 'saved', title: 'Saved video', thumbnail: 'data:image/png;base64,thumbnail',
+    id: 42,
+    videoId: 'saved',
+    title: 'Saved video',
+    thumbnail: 'data:image/png;base64,thumbnail',
     files: [{ videoId: 'saved', path: '/downloads/video.webm', author: 'Channel', authorId: 'channel' }],
   })
   assert.deepEqual(video, {
-    videoId: 'saved', title: 'Saved video', author: 'Channel', authorId: 'channel',
+    videoId: 'saved',
+    title: 'Saved video',
+    author: 'Channel',
+    authorId: 'channel',
     thumbnail: 'data:image/png;base64,thumbnail',
     route: { path: '/watch/saved', query: { downloadId: '42', downloadFilePath: '/downloads/video.webm' } },
   })
@@ -17,7 +23,10 @@ test('queues a downloaded video with its saved-file route and metadata', () => {
 
 test('queues available playlist files in order and keeps their playlist context', () => {
   const videos = downloadQueueVideos({
-    id: 7, playlistId: 'playlist', title: 'Playlist title', mode: 'audio',
+    id: 7,
+    playlistId: 'playlist',
+    title: 'Playlist title',
+    mode: 'audio',
     files: [
       { videoId: 'first', path: '/downloads/First.m4a', title: 'First track' },
       { videoId: 'missing', path: '/downloads/Missing.m4a', available: false },
@@ -53,10 +62,16 @@ test('checks platform eligibility before exposing external downloads', t => {
 
 test('refreshes selected file availability and preserves its current playlist route', async () => {
   const selected = { videoId: 'second', path: '/downloads/second.webm', available: true }
-  const download = { id: 42, status: 'completed', mode: 'video', playlistKey: 'current-playlist', files: [
-    { videoId: 'first', path: '/downloads/first.webm', available: true },
-    { ...selected, isShort: false },
-  ] }
+  const download = {
+    id: 42,
+    status: 'completed',
+    mode: 'video',
+    playlistKey: 'current-playlist',
+    files: [
+      { videoId: 'first', path: '/downloads/first.webm', available: true },
+      { ...selected, isShort: false },
+    ]
+  }
   const commits = []
   const navigations = []
   await playDownloadedFile(42, selected, {
@@ -105,7 +120,6 @@ test('iOS opens the selected external file through the native player and reports
   assert.deepEqual(nativeCalls, [[42, '/native.mp4'], [42, '/native.mp4']])
   assert.equal(missing, 1)
 })
-
 
 test('preserves the selected path when a download repeats a video ID', async () => {
   const files = [

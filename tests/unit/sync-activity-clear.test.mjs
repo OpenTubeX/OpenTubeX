@@ -16,10 +16,16 @@ function fixture({ fail = false, locked = true } = {}) {
   const writes = []
   const commits = []
   const context = vm.createContext({
-    navigator: locked ? { locks: { request(_name, operation) {
-      pending = pending.catch(() => {}).then(operation)
-      return pending
-    } } } : {},
+    navigator: locked
+      ? {
+          locks: {
+            request(_name, operation) {
+              pending = pending.catch(() => {}).then(operation)
+              return pending
+            }
+          }
+        }
+      : {},
     DBSettingHandlers: {
       async find() {
         return [{ _id: 'syncServerActivityClearedThrough', value: { ...saved } }]

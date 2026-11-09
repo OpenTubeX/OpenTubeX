@@ -56,9 +56,13 @@ function html({ live = true, upcoming = false, watching = '2,500', status = 'OK'
     playabilityStatus: { status },
     videoDetails: { videoId, isLive: live, isLiveContent: false, isUpcoming: upcoming, viewCount: '9000', lengthSeconds: '702' },
     microformat: { playerMicroformatRenderer: { liveBroadcastDetails: { isLiveNow: live && !upcoming }, ...microformat } }
-  })}; var ytInitialData = ${JSON.stringify({ contents: { videoViewCountRenderer: {
+  })}; var ytInitialData = ${JSON.stringify({
+ contents: {
+ videoViewCountRenderer: {
     viewCount: { runs: [{ text: watching }, { text: ' watching now' }] }, isLive: true
-  } } })};</script>`
+  }
+}
+})};</script>`
 }
 
 test('polls due and running premieres, excluding ordinary videos and future premieres', () => {

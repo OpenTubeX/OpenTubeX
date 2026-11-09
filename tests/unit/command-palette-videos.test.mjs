@@ -39,9 +39,13 @@ test('keeps duplicate videos in each source and preserves the selected playlist 
   const video = { videoId: 'local123456', title: 'Journey', isShort: false }
   const { commands, navigations } = registry({
     history: [video],
-    playlists: [{ _id: 'playlist-1', playlistName: 'Travel', videos: [
-      { ...video, playlistItemId: 'first' }, { ...video, playlistItemId: 'second' },
-    ] }],
+    playlists: [{
+      _id: 'playlist-1',
+      playlistName: 'Travel',
+      videos: [
+        { ...video, playlistItemId: 'first' }, { ...video, playlistItemId: 'second' },
+      ]
+    }],
   })
   assert.equal(commands.length, 3)
   assert.equal(new Set(commands.map(command => command.id)).size, 3)
@@ -57,17 +61,26 @@ test('keeps duplicate videos in each source and preserves the selected playlist 
 
 test('history playback respects the saved-playlist setting and reads current context', () => {
   const video = {
-    videoId: 'local123456', title: 'Journey', isShort: false,
-    lastViewedPlaylistId: 'playlist-1', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'first',
+    videoId: 'local123456',
+    title: 'Journey',
+    isShort: false,
+    lastViewedPlaylistId: 'playlist-1',
+    lastViewedPlaylistType: 'user',
+    lastViewedPlaylistItemId: 'first',
   }
   for (const enabled of [true, false]) {
     const { commands, navigations } = registry({ history: [video], saveVideoHistoryWithLastViewedPlaylist: enabled })
     commands[0].run()
     assert.deepEqual(navigations[0], {
       path: '/watch/local123456',
-      query: { short: 'false', ...(enabled ? {
-        playlistId: 'playlist-1', playlistType: 'user', playlistItemId: 'first',
-      } : {}) },
+      query: {
+        short: 'false',
+        ...(enabled
+          ? {
+              playlistId: 'playlist-1', playlistType: 'user', playlistItemId: 'first',
+            }
+          : {})
+      },
     })
     video.lastViewedPlaylistItemId = 'second'
     commands[0].run()
@@ -79,11 +92,18 @@ test('history playback respects the saved-playlist setting and reads current con
 test('searches available download files and delegates playback of the selected file', () => {
   const { commands, playedDownloads } = registry({
     downloads: {
-      42: { id: 42, title: 'Downloaded playlist', status: 'completed', mode: 'video', playlistKey: 'saved-playlist', files: [
-        { videoId: 'first', title: 'First journey', author: 'North Channel' },
-        { videoId: 'second', title: 'Second journey' },
-        { videoId: 'deleted', title: 'Deleted journey', available: false },
-      ] },
+      42: {
+        id: 42,
+        title: 'Downloaded playlist',
+        status: 'completed',
+        mode: 'video',
+        playlistKey: 'saved-playlist',
+        files: [
+          { videoId: 'first', title: 'First journey', author: 'North Channel' },
+          { videoId: 'second', title: 'Second journey' },
+          { videoId: 'deleted', title: 'Deleted journey', available: false },
+        ]
+      },
       43: { id: 43, videoId: 'audio', title: 'Audio journey', author: 'South Channel', status: 'completed', mode: 'audio', files: [{ videoId: 'audio' }] },
       44: { id: 44, title: 'Metadata journey', mode: 'info', files: [{ videoId: 'info' }] },
       45: { id: 45, title: 'Pending journey', mode: 'video', files: [] },
@@ -126,10 +146,17 @@ test('offers downloaded files only once local playback accepts their status', ()
 })
 
 test('does not offer external downloads as YouTube watch-page results on desktop', () => {
-  const { commands } = registry({ downloads: { 42: {
-    id: 42, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123456' },
-    files: [{ videoId: '123456', title: 'External video', extension: 'mp4', path: '/downloads/external.mp4' }],
-  } } })
+  const { commands } = registry({
+    downloads: {
+      42: {
+        id: 42,
+        status: 'completed',
+        mode: 'video',
+        retryPayload: { externalUrl: 'https://vimeo.com/123456' },
+        files: [{ videoId: '123456', title: 'External video', extension: 'mp4', path: '/downloads/external.mp4' }],
+      }
+    }
+  })
   assert.deepEqual(commands, [])
 })
 
@@ -138,10 +165,17 @@ test('respects the existing iOS playable-file filter', () => {
   process.env.IS_IOS = 'true'
   try {
     const { commands } = registry({
-      downloads: { 42: { id: 42, status: 'completed', mode: 'video', files: [
-        { videoId: 'supported', extension: 'mp4' },
-        { videoId: 'unsupported', extension: 'webm' },
-      ] } },
+      downloads: {
+        42: {
+          id: 42,
+          status: 'completed',
+          mode: 'video',
+          files: [
+            { videoId: 'supported', extension: 'mp4' },
+            { videoId: 'unsupported', extension: 'webm' },
+          ]
+        }
+      },
     })
     assert.deepEqual(commands.map(command => command.label), ['supported'])
   } finally {
@@ -154,11 +188,19 @@ test('iOS native downloads without YouTube IDs remain searchable by their file t
   const previous = process.env.IS_IOS
   process.env.IS_IOS = 'true'
   try {
-    const { commands, playedDownloads } = registry({ downloads: { 42: {
-      id: 42, videoId: '', title: 'Aggregate title', status: 'completed', mode: 'video',
-      retryPayload: { externalUrl: 'https://vimeo.com/123' },
-      files: [{ videoId: '', path: '/downloads/Native file.mp4', extension: 'mp4', available: true }],
-    } } })
+    const { commands, playedDownloads } = registry({
+      downloads: {
+        42: {
+          id: 42,
+          videoId: '',
+          title: 'Aggregate title',
+          status: 'completed',
+          mode: 'video',
+          retryPayload: { externalUrl: 'https://vimeo.com/123' },
+          files: [{ videoId: '', path: '/downloads/Native file.mp4', extension: 'mp4', available: true }],
+        }
+      }
+    })
     assert.equal(commands[0].label, 'Native file')
     commands[0].run()
     assert.equal(playedDownloads[0].file.path, '/downloads/Native file.mp4')
@@ -214,8 +256,13 @@ test('cancelled streaming searches stop reading metadata before scanning the lib
       videoId: `video${index}`,
       get title() { titleReads++; return 'Mountain journey' },
     })),
-    playlists: [], downloads: {}, queue: [], group: 'Local videos',
-    sources: { history: 'History' }, navigate() {}, removeQueuedVideo() {},
+    playlists: [],
+    downloads: {},
+    queue: [],
+    group: 'Local videos',
+    sources: { history: 'History' },
+    navigate() {},
+    removeQueuedVideo() {},
   }
   const commands = iterateLocalVideoCommands(context)
   assert.equal(titleReads, 0)

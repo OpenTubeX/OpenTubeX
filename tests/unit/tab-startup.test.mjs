@@ -6,13 +6,18 @@ import test from 'node:test'
 const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier === 'electron') {
-      return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
+      return {
+        shortCircuit: true,
+        url: 'data:text/javascript,' + encodeURIComponent(`
         export const BrowserWindow = {}, ipcMain = {}, nativeImage = {}, shell = {};
         export const app = { getName: () => 'OpenTubeX' };
-      `) }
+      `)
+      }
     }
     if (specifier.endsWith('/datastores/handlers/base.js')) {
-      return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
+      return {
+        shortCircuit: true,
+        url: 'data:text/javascript,' + encodeURIComponent(`
         export const settings = { _findOne: async () => null };
         export const tabSession = {
           saved: null,
@@ -20,7 +25,8 @@ const hooks = registerHooks({
           async save(id, data) { this.saved = structuredClone(data); },
           async clear(id) { this.cleared.push(id); }
         };
-      `) }
+      `)
+      }
     }
     return nextResolve(specifier, context)
   }

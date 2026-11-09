@@ -26,11 +26,13 @@ function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test')
   const unmount = []
   const scope = effectScope()
   const setTitle = scope.run(() => vm.runInNewContext(`${contextSource}; useTabTitle()`, {
-    computed, watch,
+    computed,
+    watch,
     inject: key => key === 'tabRoute' ? route : key.description === 'logical-tab-id' ? 'tab' : null,
     onBeforeUnmount: callback => unmount.push(callback),
     process: { env: { IS_ELECTRON: true } },
-    store, getTabNavigationService: () => navigation,
+    store,
+    getTabNavigationService: () => navigation,
   }))
   t.after(() => {
     unmount.forEach(callback => callback())
@@ -42,8 +44,12 @@ function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test')
 function setup() {
   const packageDetails = { productName: 'OpenTubeX' }
   const { module, cloneRoute, normalizeRoute } = vm.runInNewContext(`${storeSource}; ({ module, cloneRoute, normalizeRoute })`, {
-    URL, URLSearchParams, packageDetails, DEFAULT_VIDEO_ZOOM: 1,
-    formatTabTitle: title => title, reconcilePendingTabOrder,
+    URL,
+    URLSearchParams,
+    packageDetails,
+    DEFAULT_VIDEO_ZOOM: 1,
+    formatTabTitle: title => title,
+    reconcilePendingTabOrder,
   })
   const store = createStore(module)
   const router = createRouter({
@@ -56,16 +62,26 @@ function setup() {
     ],
   })
   const Service = vm.runInNewContext(`${navigationSource}; TabNavigationService`, {
-    cloneRoute, normalizeRoute, packageDetails, tabLifecycleService, nextTick, START_LOCATION,
-    getFixedInternalRouteTitle, translateWindowTitle: title => title,
+    cloneRoute,
+    normalizeRoute,
+    packageDetails,
+    tabLifecycleService,
+    nextTick,
+    START_LOCATION,
+    getFixedInternalRouteTitle,
+    translateWindowTitle: title => title,
     runPendingViewTransition: run => run(),
     window: { setTimeout: () => 0, clearTimeout() {} },
   })
   const navigation = new Service(router, store)
-  store.commit('setTabsState', { tabs: [{
-    id: 'tab', title: 'Test channel', loadState: 'loaded',
-    route: { path: '/channel/UC-test', fullPath: '/channel/UC-test' },
-  }] })
+  store.commit('setTabsState', {
+    tabs: [{
+      id: 'tab',
+      title: 'Test channel',
+      loadState: 'loaded',
+      route: { path: '/channel/UC-test', fullPath: '/channel/UC-test' },
+    }]
+  })
   return { store, navigation, tab: () => store.getters.getTabById('tab') }
 }
 

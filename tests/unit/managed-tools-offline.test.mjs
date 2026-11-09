@@ -18,7 +18,9 @@ function setup(t, online, checkInternet) {
   const calls = []
   const toasts = []
   const context = vm.createContext({
-    isElectron: false, isCapacitor: true, supportsYtDlp: true,
+    isElectron: false,
+    isCapacitor: true,
+    supportsYtDlp: true,
     initializeNetworkRecovery: () => recovery,
     classifyRequestFailure,
     managedToolErrorMessage,

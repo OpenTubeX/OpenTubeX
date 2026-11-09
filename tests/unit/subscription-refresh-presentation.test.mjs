@@ -21,10 +21,18 @@ function setup(channelCount, presented = true, feed = 'videos', isLargeFeed = un
   let now = 1_000_000
   const scope = effectScope()
   const context = vm.createContext({
-    window, computed, nextTick, reactive, watch, store: { getters: state }, getSubscriptionsForFeed,
+    window,
+    computed,
+    nextTick,
+    reactive,
+    watch,
+    store: { getters: state },
+    getSubscriptionsForFeed,
     SUBSCRIPTION_REFRESH_CHANNEL_EVENT: 'channel',
     useTabContext: () => ({ isTabPresented: visibility }),
-    onActivated() {}, onDeactivated() {}, onBeforeUnmount() {},
+    onActivated() {},
+    onDeactivated() {},
+    onBeforeUnmount() {},
     Date: { now: () => now },
     setTimeout: (callback, delay) => { const id = callbacks.size + 1; callbacks.set(id, { callback, delay }); return id },
     clearTimeout: id => callbacks.delete(id)
@@ -32,7 +40,9 @@ function setup(channelCount, presented = true, feed = 'videos', isLargeFeed = un
   vm.runInContext(source, context)
   scope.run(() => context.useSubscriptionChannelUpdates(feed, () => { updates++; now += publishDuration }, isLargeFeed))
   return {
-    state, visibility, scope,
+    state,
+    visibility,
+    scope,
     get updates() { return updates },
     async channel() { window.dispatchEvent(new CustomEvent('channel', { detail: { tab: feed } })); await nextTick() },
     get delays() { return [...callbacks.values()].map(({ delay }) => delay) },

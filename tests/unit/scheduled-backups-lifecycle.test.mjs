@@ -6,7 +6,7 @@ import vm from 'node:vm'
 const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
 const start = source.indexOf("  app.on('window-all-closed',")
 const events = source.slice(start, source.indexOf('  function handleQuit()', start))
-const handleQuit = source.match(/  function handleQuit\(\) {[\s\S]*?^  }/m)[0]
+const handleQuit = source.match(/ {2}function handleQuit\(\) {[\s\S]*?^ {2}}/m)[0]
 const cleanup = source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))
 
 function lifecycle(platform) {

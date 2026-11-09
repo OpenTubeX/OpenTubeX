@@ -100,11 +100,17 @@ test('Takeout selection opens before decoding and previews only selected categor
   const reads = []
   const errors = []
   const context = vm.createContext({
-    ref: value => ({ value }), shallowRef: value => ({ value }), computed: getter => ({ get value() { return getter() } }),
-    pickFileWithPicker: async () => file, listYouTubeTakeoutZipEntries: async () => entries,
+    ref: value => ({ value }),
+    shallowRef: value => ({ value }),
+    computed: getter => ({ get value() { return getter() } }),
+    pickFileWithPicker: async () => file,
+    listYouTubeTakeoutZipEntries: async () => entries,
     readImportState: async categories => { reads.push(categories); return {} },
-    primaryProfile: { value: { subscriptions: [] } }, IMPORT_DIRECTORY_ID: '', START_IN_DIRECTORY: '',
-    t: key => key, showToast: error => errors.push(error),
+    primaryProfile: { value: { subscriptions: [] } },
+    IMPORT_DIRECTORY_ID: '',
+    START_IN_DIRECTORY: '',
+    t: key => key,
+    showToast: error => errors.push(error),
     previewTakeoutImport: async (_file, selected) => {
       previewCalls.push(selected)
       return selected.map(entry => ({ category: entry.type, added: 1, existing: 0, skipped: 0 }))
@@ -135,12 +141,20 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   const profiles = new Map()
   const playlists = new Map()
   const context = vm.createContext({
-    backupBusy: { value: false }, backupData: { value: data }, selectedBackupSections: { value: ['profiles', 'playlists'] },
+    backupBusy: { value: false },
+    backupData: { value: data },
+    selectedBackupSections: { value: ['profiles', 'playlists'] },
     DBProfileHandlers: { find: async () => [], upsert: async record => profiles.set(record._id, record) },
     DBPlaylistHandlers: { find: async () => [] },
-    mergeBackupProfile, mergeBackupPlaylist, processToBeAddedPlaylistVideo, normalizeImportedPlaylistThumbnail: async () => {},
+    mergeBackupProfile,
+    mergeBackupPlaylist,
+    processToBeAddedPlaylistVideo,
+    normalizeImportedPlaylistThumbnail: async () => {},
     store: { dispatch: async (action, record) => { if (action === 'updatePlaylist' || action === 'importPlaylist') playlists.set(record._id, record); return true } },
-    compactAllDatastores: async () => true, closeBackupImport() {}, showToast() {}, t: key => key,
+    compactAllDatastores: async () => true,
+    closeBackupImport() {},
+    showToast() {},
+    t: key => key,
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
   await context.importUnifiedBackup()
@@ -155,8 +169,12 @@ test('watch history with empty subtitles imports the record counted in the previ
   assert.equal(rows[0].added, 1)
   let imported
   const context = vm.createContext({
-    parseTakeoutWatchHistory, historyCacheById: { value: {} }, deepCopy: structuredClone,
-    store: { dispatch: async (_action, records) => { imported = records } }, showToast() {}, t: key => key,
+    parseTakeoutWatchHistory,
+    historyCacheById: { value: {} },
+    deepCopy: structuredClone,
+    store: { dispatch: async (_action, records) => { imported = records } },
+    showToast() {},
+    t: key => key,
   })
   vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
   await context.importYouTubeWatchHistory([record])
@@ -222,17 +240,23 @@ test('preview reports existing generated playlist names as merge targets on repe
     'Second/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-01T00:00:00Z\n'),
   })])
   const paths = await listYouTubeTakeoutZipEntries(file)
-  const playlists = { value: [
-    { _id: 'first', playlistName: 'List', videos: [] },
-    { _id: 'second', playlistName: 'List (2)', videos: [{ videoId: 'zzzzzzzzzzz', timeAdded: 10 }] },
-  ] }
+  const playlists = {
+    value: [
+      { _id: 'first', playlistName: 'List', videos: [] },
+      { _id: 'second', playlistName: 'List (2)', videos: [{ videoId: 'zzzzzzzzzzz', timeAdded: 10 }] },
+    ]
+  }
   const context = vm.createContext({
-    allPlaylists: playlists, deepCopy: structuredClone, processToBeAddedPlaylistVideo() {},
-    store: { dispatch: async (action, playlist) => {
-      assert.equal(action, 'importPlaylist', 'Matching names must merge rather than create renamed duplicates')
-      const index = playlists.value.findIndex(saved => saved._id === playlist._id)
-      playlists.value[index] = playlist
-    } },
+    allPlaylists: playlists,
+    deepCopy: structuredClone,
+    processToBeAddedPlaylistVideo() {},
+    store: {
+      dispatch: async (action, playlist) => {
+        assert.equal(action, 'importPlaylist', 'Matching names must merge rather than create renamed duplicates')
+        const index = playlists.value.findIndex(saved => saved._id === playlist._id)
+        playlists.value[index] = playlist
+      }
+    },
   })
   vm.runInContext(componentSection('async function importTakeoutPlaylist(', 'async function importPlaylists()'), context)
   for (let attempt = 0; attempt < 2; attempt++) {

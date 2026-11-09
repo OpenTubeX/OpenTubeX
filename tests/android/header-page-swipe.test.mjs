@@ -55,11 +55,22 @@ test('Android header swipes include controls and preserve taps and long presses'
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
-        EnableDownloads: true, MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
-        AlwaysShowMobileSearchBar: false, ShowTabPreviews: true, UiScale: 100, ReducedMotion: 'off',
+        CapacitorLayoutMode: 'phone',
+        CurrentLocale: 'en-US',
+        EnableMobileTabs: true,
+        EnableDownloads: true,
+        MoveDownloadsToAppHeader: true,
+        MoveSettingsToAppHeader: true,
+        AlwaysShowMobileSearchBar: false,
+        ShowTabPreviews: true,
+        UiScale: 100,
+        ReducedMotion: 'off',
         NewTabPosition: 'afterCurrent',
-        BaseTheme: 'system', SystemDarkTheme: 'dark', SystemLightTheme: 'light', MainColor: 'Red', SecColor: 'Blue',
+        BaseTheme: 'system',
+        SystemDarkTheme: 'dark',
+        SystemLightTheme: 'light',
+        MainColor: 'Red',
+        SecColor: 'Blue',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
       const tabs = JSON.parse(JSON.stringify(store.state.tabs))
@@ -100,10 +111,12 @@ test('Android header swipes include controls and preserve taps and long presses'
           window.delayNextHeaderSwipeCapture = false
         }
         const result = original.call(this, plugin, method, options)
-        return delay ? result.then(async image => {
-          await new Promise(resolve => { window.releaseHeaderSwipeCapture = resolve })
-          return image
-        }) : result
+        return delay
+          ? result.then(async image => {
+              await new Promise(resolve => { window.releaseHeaderSwipeCapture = resolve })
+              return image
+            })
+          : result
       }
     })
     for (const scale of [100, 125]) {
@@ -309,13 +322,15 @@ test('Android header swipes include controls and preserve taps and long presses'
     }).catch(() => {})
     const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
     if (await close.isVisible()) await close.click()
-    if (saved) await page.evaluate(async saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-      store.commit('setTabsState', saved.tabs)
-      store.commit('setPresentedTab', saved.tabs.presentedTabId)
-      location.hash = saved.route
-    }, saved)
+    if (saved) {
+      await page.evaluate(async saved => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+        store.commit('setTabsState', saved.tabs)
+        store.commit('setPresentedTab', saved.tabs.presentedTabId)
+        location.hash = saved.route
+      }, saved)
+    }
     await session.detach()
     await browser.close()
     clearTimeout(keepAlive)

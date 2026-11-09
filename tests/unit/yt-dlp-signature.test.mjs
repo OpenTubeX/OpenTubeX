@@ -21,7 +21,7 @@ test('rejects a release signed before the installed one', () => {
 })
 
 test('rejects a checksum file that differs from the signed one', () => {
-  const tampered = Buffer.from(checksums.toString('utf8').replace(/^[\da-f]{64}(?=  yt-dlp_linux$)/m, '0'.repeat(64)))
+  const tampered = Buffer.from(checksums.toString('utf8').replace(/^[\da-f]{64}(?= {2}yt-dlp_linux$)/m, '0'.repeat(64)))
   assert.notDeepEqual(tampered, checksums)
 
   assert.throws(

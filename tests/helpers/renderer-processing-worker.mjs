@@ -19,9 +19,14 @@ parentPort.on('message', async message => {
     await sendJobValue(value => parentPort.postMessage(value), message.id, result)
     parentPort.postMessage({ type: 'done', id: message.id })
   } catch (error) {
-    parentPort.postMessage({ type: 'error', id: message.id, error: {
-      name: error.name, message: error.message,
-      details: error.name === 'SyncServerDataLossError' ? error.details : undefined,
-    } })
+    parentPort.postMessage({
+      type: 'error',
+      id: message.id,
+      error: {
+        name: error.name,
+        message: error.message,
+        details: error.name === 'SyncServerDataLossError' ? error.details : undefined,
+      }
+    })
   }
 })

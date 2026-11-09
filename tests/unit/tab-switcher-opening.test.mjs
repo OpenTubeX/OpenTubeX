@@ -25,10 +25,14 @@ function createSwitcher() {
     showTabPreviews: { value: true },
     process: { env: { IS_ELECTRON: true } },
     store: { getters: { getActiveTabId: 'first' }, dispatch: (_, id) => work.activated.push(id) },
-    window: { ftElectron: { tabs: {
-      setPreviewCapturePaused: paused => work.capturePause.push(paused),
-      getCachedPreviews: async () => { work.previews++; return {} }
-    } } },
+    window: {
+      ftElectron: {
+        tabs: {
+          setPreviewCapturePaused: paused => work.capturePause.push(paused),
+          getCachedPreviews: async () => { work.previews++; return {} }
+        }
+      }
+    },
     nextTick: callback => ticks.push(callback),
     document: { getElementById: () => ({ scrollIntoView: () => work.scroll++ }) },
     setTimeout: callback => { timers.set(callback, callback); return callback },
@@ -39,7 +43,11 @@ function createSwitcher() {
     ${handlers}
     ;({ cycleTabSwitcher, cancelTabSwitcher, handleKeyboardShortcutKeyup })`, context)
   return {
-    ...api, visible, work, tabs, timers,
+    ...api,
+    visible,
+    work,
+    tabs,
+    timers,
     flushRender() { for (const callback of ticks.splice(0)) callback() },
     release() { api.handleKeyboardShortcutKeyup({ key: 'Control', ctrlKey: false, preventDefault() {} }) },
     openMenu() { for (const callback of [...timers.values()]) { timers.delete(callback); callback() } }

@@ -62,10 +62,14 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     if (url.includes('/watch?v=')) {
       await beforeShortMetadata()
       const videoId = new URL(url).searchParams.get('v')
-      return { ok: true, status: 200, text: async () => `var ytInitialPlayerResponse = ${JSON.stringify({
+      return {
+        ok: true,
+        status: 200,
+        text: async () => `var ytInitialPlayerResponse = ${JSON.stringify({
         videoDetails: { videoId },
         microformat: { playerMicroformatRenderer: { publishDate: shortPublishDate } }
-      })};` }
+      })};`
+      }
     }
     return { videos: [], posts: [], status: url.includes('/feed/channel/') ? channelStatus : rssStatus, text: async () => '<feed><author><name>Channel</name></author></feed>' }
   }
@@ -76,17 +80,39 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const fetchLocal = fallbackWorks && backend === 'invidious' ? fetchFallback : fetchChannel
   const fetchInvidious = fallbackWorks && backend === 'local' ? fetchFallback : fetchChannel
   const context = vm.createContext({
-    shallowReactive, subscriptionRefreshErrors, window, navigator, CustomEvent, AbortController, AbortSignal, Request, Response, URL, EventTarget, createAbortError,
-    location: { href: 'https://localhost/', origin: 'https://localhost' }, setTimeout, clearTimeout, console: { error() {}, warn() {} },
+    shallowReactive,
+    subscriptionRefreshErrors,
+    window,
+    navigator,
+    CustomEvent,
+    AbortController,
+    AbortSignal,
+    Request,
+    Response,
+    URL,
+    EventTarget,
+    createAbortError,
+    location: { href: 'https://localhost/', origin: 'https://localhost' },
+    setTimeout,
+    clearTimeout,
+    console: { error() {}, warn() {} },
     process: { env: { IS_CAPACITOR: true, SUPPORTS_LOCAL_API: true } },
     store: {
       getters,
       commit(key, value) { if (key === 'setSubscriptionFeedRefreshInProgress') getters.getSubscriptionFeedRefreshInProgress = value },
       async dispatch(key, value) { writes.push({ key, value }) },
     },
-    createSubscriptionNetworkRecovery, SubscriptionNetworkError,
-    mapConcurrently, buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic, getSubscriptionsForFeed,
-    reconcileFetchedSubscriptionEntries, extractAssignedJsonObject, getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState,
+    createSubscriptionNetworkRecovery,
+    SubscriptionNetworkError,
+    mapConcurrently,
+    buildRequestDiagnostic,
+    classifyRequestFailure,
+    formatRequestDiagnostic,
+    getSubscriptionsForFeed,
+    reconcileFetchedSubscriptionEntries,
+    extractAssignedJsonObject,
+    getSubscriptionVideoSortTimestamp,
+    updateUpcomingPremiereState,
     isAndroidSubscriptionRefreshActive: async () => false,
     finishAndroidSubscriptionRefresh: finishNative,
     includeAutomaticDownloadChannels: channels => channels,
@@ -119,7 +145,11 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     invidiousGetCommunityPosts: fetchInvidious,
     getLocalChannel: async () => channelInfo,
     getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: playlistItems } },
-    parseLocalPlaylistVideos, parseLocalChannelShorts, parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate,
+    parseLocalPlaylistVideos,
+    parseLocalChannelShorts,
+    parseSubscriptionRss,
+    parseRssUpcomingInfo,
+    isRssUpcomingPremiereCandidate,
     mergeSubscriptionShortThumbnails: videos => videos,
     DOMParser: class {
       parseFromString() {
@@ -143,7 +173,18 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   vm.runInContext(`${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, cancelSubscriptionRefresh, updateVideoListAfterProcessing }`, context)
   return {
     get details() { return [...subscriptionRefreshErrors.value.values()].map(channel => channel.trace).join('\n') },
-    ...context.api, refresh: context.api[`refreshSubscription${feed}FromRemote`], navigator, requests, fallbackRequests, toasts, warnings, copied, writes, events, getters, recovery: sharedRecovery,
+    ...context.api,
+    refresh: context.api[`refreshSubscription${feed}FromRemote`],
+    navigator,
+    requests,
+    fallbackRequests,
+    toasts,
+    warnings,
+    copied,
+    writes,
+    events,
+    getters,
+    recovery: sharedRecovery,
     reconnect() {
       fail = false
       navigator.onLine = true
@@ -397,11 +438,13 @@ test('Shorts refresh loads the channel tab when its automatic playlist does not 
       has_shorts: true,
       async getShorts() {
         tabRequests++
-        return { videos: [new YTNodes.ReelItem({
-          videoId: 'C9wafAQcub0',
-          headline: { simpleText: 'CAIVA Short' },
-          thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/C9wafAQcub0/hqdefault.jpg' }] },
-        }), new YTNodes.ReelItem({ videoId: 'cached-short', headline: { simpleText: 'Older Short' }, thumbnail: { thumbnails: [] } })] }
+        return {
+          videos: [new YTNodes.ReelItem({
+            videoId: 'C9wafAQcub0',
+            headline: { simpleText: 'CAIVA Short' },
+            thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/C9wafAQcub0/hqdefault.jpg' }] },
+          }), new YTNodes.ReelItem({ videoId: 'cached-short', headline: { simpleText: 'Older Short' }, thumbnail: { thumbnails: [] } })]
+        }
       }
     }
   })
@@ -445,9 +488,11 @@ test('Shorts fallback overlaps date requests with bounded concurrency and preser
     playlistError: new Error('The playlist does not exist.'),
     channelInfo: {
       has_shorts: true,
-      getShorts: async () => ({ videos: videoIds.map(videoId => new YTNodes.ReelItem({
-        videoId, headline: { simpleText: videoId }, thumbnail: { thumbnails: [] }
-      })) })
+      getShorts: async () => ({
+        videos: videoIds.map(videoId => new YTNodes.ReelItem({
+          videoId, headline: { simpleText: videoId }, thumbnail: { thumbnails: [] }
+        }))
+      })
     },
     async beforeShortMetadata() {
       active++
@@ -481,9 +526,11 @@ for (const failure of ['playlist request', 'Shorts tab request', 'publication da
         async getShorts() {
           tabRequests++
           if (failure !== 'publication date') throw new Error('Request rejected')
-          return { videos: [new YTNodes.ReelItem({
-            videoId: 'short-without-date', headline: { simpleText: 'Short' }, thumbnail: { thumbnails: [] }
-          })] }
+          return {
+            videos: [new YTNodes.ReelItem({
+              videoId: 'short-without-date', headline: { simpleText: 'Short' }, thumbnail: { thumbnails: [] }
+            })]
+          }
         }
       }
     })
@@ -583,11 +630,12 @@ for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
   })
 }
 
-
 test('confirmed HTTP failures stay accessible while another channel retries and after cancellation', async () => {
-  const app = createRefresh({ error: url => url.includes('UC0')
-    ? Object.assign(new Error('HTTP 500'), { status: 500 })
-    : new TypeError('Failed to fetch') })
+  const app = createRefresh({
+    error: url => url.includes('UC0')
+      ? Object.assign(new Error('HTTP 500'), { status: 500 })
+      : new TypeError('Failed to fetch')
+  })
   app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }, { id: 'UC1' }]
   const refresh = app.refresh({ t: translateSummary })
   try {
@@ -634,10 +682,12 @@ test('Shorts playlist fallback dates new Shorts so they can be marked as new', a
   const lockup = videoId => ({ type: 'ShortsLockupView', on_tap_endpoint: { payload: { videoId } }, overlay_metadata: { primary_text: { text: videoId } }, thumbnail: [] })
   const app = createRefresh({ rssStatus: 404, playlistItems: ['new-short', 'old-short', 'older-short'].map(lockup) })
   app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]
-  app.getters.getShortsCache = { [channelId]: {
-    timestamp: new Date('2026-09-06T00:00:00Z'),
-    videos: [{ videoId: 'old-short', published: Date.parse('2026-09-01T00:00:00Z'), isNewInSubscriptionFeed: false }]
-  } }
+  app.getters.getShortsCache = {
+    [channelId]: {
+      timestamp: new Date('2026-09-06T00:00:00Z'),
+      videos: [{ videoId: 'old-short', published: Date.parse('2026-09-01T00:00:00Z'), isNewInSubscriptionFeed: false }]
+    }
+  }
   app.getters.getBackendFallback = false
   app.reconnect()
   await app.refresh({ t: key => key, errorChannels: [] })
@@ -670,10 +720,16 @@ for (const hasByline of [false, true]) {
       title: { simpleText: 'A Short', accessibility: { accessibilityData: { label: 'A Short' } } },
       thumbnail: { thumbnails: [] },
       lengthSeconds: '30',
-      ...(hasByline ? { shortBylineText: { runs: [{
-        text: 'Provided channel',
-        navigationEndpoint: { browseEndpoint: { browseId: 'UCprovided-channel' } }
-      }] } } : {})
+      ...(hasByline
+        ? {
+            shortBylineText: {
+              runs: [{
+                text: 'Provided channel',
+                navigationEndpoint: { browseEndpoint: { browseId: 'UCprovided-channel' } }
+              }]
+            }
+          }
+        : {})
     })
     const app = createRefresh({ rssStatus: 404, playlistItems: [short] })
     app.getters.getActiveProfile.subscriptions = [{ id: channelId, name: 'Shorts channel' }]

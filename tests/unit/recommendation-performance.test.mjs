@@ -42,7 +42,8 @@ test('cancellation stops feedback preprocessing before the whole library is read
   let reads = 0
   const records = Array.from({ length: 1500 }, (_, index) => ({
     get videoId() { reads++; return `feedback-${index}` },
-    title: 'Linux desktop customization', feedback: 'positive',
+    title: 'Linux desktop customization',
+    feedback: 'positive',
   }))
   assert.equal(await buildRecommendationProfileAsync([], { records, now }, () => reads >= 10), null)
   assert.ok(reads <= 12, `preprocessed ${reads} identifiers before cancellation`)

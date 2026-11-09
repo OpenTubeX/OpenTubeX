@@ -15,7 +15,8 @@ function setup(count = 150) {
   let scrolls = 0
   const frames = []
   const context = createContext({
-    nextTick, takeDueReplayComments,
+    nextTick,
+    takeDueReplayComments,
     comments: shallowReactive([]),
     superChatComments: [],
     pendingReplayComments: Array.from({ length: count }, (_, id) => ({ offsetMs: 1000, comment: { id } })),
@@ -33,10 +34,14 @@ function setup(count = 150) {
   for (const name of ['scheduleLiveEdgeScroll', 'pushComment', 'trimLiveChatComments', 'deliverComment', 'releaseReplayComments', 'onLiveChatMessageEntered']) {
     runInContext(functionSource(name), context)
   }
-  return { context, scrolls: () => scrolls, frame: async () => {
-    await nextTick()
-    for (const callback of frames.splice(0)) callback()
-  } }
+  return {
+    context,
+    scrolls: () => scrolls,
+    frame: async () => {
+      await nextTick()
+      for (const callback of frames.splice(0)) callback()
+    }
+  }
 }
 
 test('a replay burst performs one scroll correction after rendering', async () => {

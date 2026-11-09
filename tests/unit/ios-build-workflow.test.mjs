@@ -20,7 +20,8 @@ for (const [snapshot, ref, expected] of [
     const job = (await workflow('package-ios')).jobs.archive
     const metadata = job.steps.find(step => step.id === 'package')
     const result = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', metadata.run], {
-      cwd: directory, encoding: 'utf8',
+      cwd: directory,
+      encoding: 'utf8',
       env: { ...process.env, SNAPSHOT: snapshot, GITHUB_REF: ref, GITHUB_RUN_NUMBER: '123', GITHUB_OUTPUT: output },
     })
     assert.equal(result.status, 0, result.stderr)

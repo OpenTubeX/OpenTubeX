@@ -17,7 +17,10 @@ vm.runInContext(source
 
 const remote = {
   video: {
-    id: 'video-id', title: 'Bricks', duration: 0, upload_date: 100,
+    id: 'video-id',
+    title: 'Bricks',
+    duration: 0,
+    upload_date: 100,
     uploader: { id: 'channel-id', name: 'Test channel' },
   },
   metadata: { added_date: 200, watched_state: 'completed', position_millis: 1000 },
@@ -86,10 +89,18 @@ for (const [id, name] of [['', ''], [UNKNOWN_SYNC_UPLOADER_ID, remote.video.uplo
 }
 
 const imported = {
-  videoId: remote.video.id, title: remote.video.title,
-  author: remote.video.uploader.name, authorId: remote.video.uploader.id,
-  published: 200, timeWatched: 200, description: '',
-  lengthSeconds: 0, isLive: true, isWatched: true, watchProgress: 1, type: 'video',
+  videoId: remote.video.id,
+  title: remote.video.title,
+  author: remote.video.uploader.name,
+  authorId: remote.video.uploader.id,
+  published: 200,
+  timeWatched: 200,
+  description: '',
+  lengthSeconds: 0,
+  isLive: true,
+  isWatched: true,
+  watchProgress: 1,
+  type: 'video',
 }
 
 test('sync preserves imported live status when optional metadata is absent', async () => {
@@ -142,7 +153,6 @@ test('a synced duration clears stale live and upcoming flags', async () => {
   assert.equal(changes.updates[0].lengthSeconds, 682)
 })
 
-
 test('equal timestamps refresh duration and stale flags without discarding newer local progress', async () => {
   const local = { ...imported, watchProgress: 200, isWatched: false, isUpcoming: true }
   const entry = { ...remote, video: { ...remote.video, duration: 682 } }
@@ -173,8 +183,12 @@ test('equal timestamps persist remote metadata even when watch state already mat
 for (const duration of [null, 0, '', '0:00', undefined]) {
   test(`newer local history with unknown duration ${JSON.stringify(duration)} preserves the known server duration`, async () => {
     const local = {
-      ...imported, lengthSeconds: duration, isLive: false,
-      timeWatched: 300, watchProgress: 200, isWatched: false,
+      ...imported,
+      lengthSeconds: duration,
+      isLive: false,
+      timeWatched: 300,
+      watchProgress: 200,
+      isWatched: false,
     }
     const entry = { ...remote, video: { ...remote.video, duration: 682 } }
     const uploaded = []
@@ -249,8 +263,13 @@ test('history repairs upload without watch-state changes and settle across two d
   await laptop.sync(server)
   await phone.sync(server)
   Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], {
-    title: 'Recovered title', author: 'Recovered channel', authorId: incomplete.authorId,
-    published: 100, lengthSeconds: 120, isLive: false, isUpcoming: false,
+    title: 'Recovered title',
+    author: 'Recovered channel',
+    authorId: incomplete.authorId,
+    published: 100,
+    lengthSeconds: 120,
+    isLive: false,
+    isUpcoming: false,
   }))
   await laptop.sync(server)
   assert.equal(server.writes, 1, 'a metadata-only repair must upload')

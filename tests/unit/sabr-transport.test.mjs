@@ -24,8 +24,17 @@ class ShakaError extends Error {
 }
 const audioFormatId = { itag: 140, lastModified: '123' }
 const videoFormatId = { itag: 137, lastModified: '456' }
-const context = { audioFormatId, videoFormatId, bufferedRanges: [], drcEnabled: false,
-  enableVoiceBoost: false, bandwidthEstimate: 2000000, playbackRate: 1.5, width: 640, height: 360 }
+const context = {
+  audioFormatId,
+  videoFormatId,
+  bufferedRanges: [],
+  drcEnabled: false,
+  enableVoiceBoost: false,
+  bandwidthEstimate: 2000000,
+  playbackRate: 1.5,
+  width: 640,
+  height: 360
+}
 const sabrData = { url: 'https://example.test/sabr', scheme: 'sabr1', poToken: '', ustreamerConfig: '', clientInfo: {} }
 const request = uri => ({ uris: [uri], retryParameters: { timeout: 1000 } })
 
@@ -41,14 +50,16 @@ function response(data, isInit = false, formatId = audioFormatId, contentLength 
   return new Response(utils.concatenateChunks(buffer.chunks), { status: 200 })
 }
 
-for (const headerId of [130, 256]) test(`reads SABR media header ID ${headerId} without adding ID bytes to the segment`, async () => {
-  const { createSabrTransport } = load(async () => response([1, 2, 3], false, audioFormatId, 3, headerId))
-  const transport = createSabrTransport(sabrData, () => context)
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  const segment = await transport.request(uri, request(uri), 1).promise
-  assert.deepEqual([...segment.data], [1, 2, 3])
-  transport.cleanup()
-})
+for (const headerId of [130, 256]) {
+  test(`reads SABR media header ID ${headerId} without adding ID bytes to the segment`, async () => {
+    const { createSabrTransport } = load(async () => response([1, 2, 3], false, audioFormatId, 3, headerId))
+    const transport = createSabrTransport(sabrData, () => context)
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    const segment = await transport.request(uri, request(uri), 1).promise
+    assert.deepEqual([...segment.data], [1, 2, 3])
+    transport.cleanup()
+  })
+}
 
 test('complete SABR media survives every network chunk boundary', async t => {
   const bytes = new Uint8Array(await response([1, 2, 3]).arrayBuffer())
@@ -138,38 +149,40 @@ test('oversized SABR declarations abort the fetch and allow a fresh retry', asyn
   assert.deepEqual([...result.data], [1, 2])
 })
 
-for (const media of [false, true]) test(`many ${media ? 'media' : 'unknown'} parts cannot exceed the SABR response budget`, async t => {
-  const buffer = new CompositeBuffer([])
-  const payload = new Uint8Array(1024 * 1024)
-  payload[0] = 1
-  new UmpWriter(buffer).write(media ? protos.UMPPartId.MEDIA : 300, payload)
-  const header = new CompositeBuffer([])
-  new UmpWriter(header).write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-    headerId: 1, formatId: audioFormatId, sequenceNumber: 1,
-  }).finish())
-  const chunk = utils.concatenateChunks(buffer.chunks)
-  let reads = 0
-  let signal
-  const { createSabrTransport } = load(async (_url, options) => {
-    signal = options.signal
-    return new Response(new ReadableStream({
-      start(controller) {
-        if (media) controller.enqueue(utils.concatenateChunks(header.chunks))
-      },
-      pull(controller) {
-        if (++reads <= 140) controller.enqueue(chunk)
-        else controller.close()
-      }
-    }, { highWaterMark: 0 }))
+for (const media of [false, true]) {
+  test(`many ${media ? 'media' : 'unknown'} parts cannot exceed the SABR response budget`, async t => {
+    const buffer = new CompositeBuffer([])
+    const payload = new Uint8Array(1024 * 1024)
+    payload[0] = 1
+    new UmpWriter(buffer).write(media ? protos.UMPPartId.MEDIA : 300, payload)
+    const header = new CompositeBuffer([])
+    new UmpWriter(header).write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber: 1,
+    }).finish())
+    const chunk = utils.concatenateChunks(buffer.chunks)
+    let reads = 0
+    let signal
+    const { createSabrTransport } = load(async (_url, options) => {
+      signal = options.signal
+      return new Response(new ReadableStream({
+        start(controller) {
+          if (media) controller.enqueue(utils.concatenateChunks(header.chunks))
+        },
+        pull(controller) {
+          if (++reads <= 140) controller.enqueue(chunk)
+          else controller.close()
+        }
+      }, { highWaterMark: 0 }))
+    })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    await assert.rejects(transport.request(uri, { ...request(uri), retryParameters: { timeout: 60000 } }, 1).promise,
+      error => error.code === ShakaError.Code.HTTP_ERROR)
+    assert.equal(reads, 128, 'stop at the budget, without reading the rest of the response')
+    assert.equal(signal.aborted, true)
   })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  await assert.rejects(transport.request(uri, { ...request(uri), retryParameters: { timeout: 60000 } }, 1).promise,
-    error => error.code === ShakaError.Code.HTTP_ERROR)
-  assert.equal(reads, 128, 'stop at the budget, without reading the rest of the response')
-  assert.equal(signal.aborted, true)
-})
+}
 
 test('rejects a SABR segment shorter than its declared content length', async () => {
   let calls = 0
@@ -266,12 +279,28 @@ test('a SABR request switches to the backup server when its node cannot be reach
 function load(fetch, globals = {}) {
   const schemes = new Map()
   const api = vm.runInNewContext(`${source}\n({ createSabrTransport, setupSabrScheme })`, {
-    ...utils, ...protos, ...protocol, ...googleVideoFallback, CompositeBuffer, UmpReader,
-    shaka: { util: { AbortableOperation: Operation, Error: ShakaError }, net: {
-      NetworkingEngine: { registerScheme: (key, value) => schemes.set(key, value),
-        unregisterScheme: key => schemes.delete(key) },
-    } },
-    fetch, process: { env: {} }, URL, AbortController, setTimeout, clearTimeout, console,
+    ...utils,
+    ...protos,
+    ...protocol,
+    ...googleVideoFallback,
+    CompositeBuffer,
+    UmpReader,
+    shaka: {
+      util: { AbortableOperation: Operation, Error: ShakaError },
+      net: {
+        NetworkingEngine: {
+          registerScheme: (key, value) => schemes.set(key, value),
+          unregisterScheme: key => schemes.delete(key)
+        },
+      }
+    },
+    fetch,
+    process: { env: {} },
+    URL,
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    console,
     ...globals,
   })
   return { ...api, schemes }
@@ -332,61 +361,67 @@ test('retries a context-only response with the supplied context', async t => {
   assert.deepEqual([...bodies[1].streamerContext.sabrContexts[0].value], [42])
 })
 
-for (const withPolicy of [false, true]) test(`activates a retained context when the server changes sendByDefault ${withPolicy ? 'with' : 'without'} a retry policy`, async t => {
-  const bodies = []
-  const { createSabrTransport } = load(async (_uri, options) => {
-    bodies.push(protos.VideoPlaybackAbrRequest.decode(options.body))
-    if (bodies.length === 1) return contextResponse(false, protos.SabrContextWritePolicy.OVERWRITE, withPolicy)
-    if (bodies.length === 2) return contextResponse(true, protos.SabrContextWritePolicy.KEEP_EXISTING, withPolicy, 99)
-    return response([1])
+for (const withPolicy of [false, true]) {
+  test(`activates a retained context when the server changes sendByDefault ${withPolicy ? 'with' : 'without'} a retry policy`, async t => {
+    const bodies = []
+    const { createSabrTransport } = load(async (_uri, options) => {
+      bodies.push(protos.VideoPlaybackAbrRequest.decode(options.body))
+      if (bodies.length === 1) return contextResponse(false, protos.SabrContextWritePolicy.OVERWRITE, withPolicy)
+      if (bodies.length === 2) return contextResponse(true, protos.SabrContextWritePolicy.KEEP_EXISTING, withPolicy, 99)
+      return response([1])
+    })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    await transport.request(uri, request(uri), 1).promise
+    assert.deepEqual([...bodies[1].streamerContext.unsentSabrContexts], [1])
+    assert.deepEqual([...bodies[2].streamerContext.unsentSabrContexts], [])
+    assert.equal(bodies[2].streamerContext.sabrContexts[0].type, 1)
+    assert.deepEqual([...bodies[2].streamerContext.sabrContexts[0].value], [42], 'KEEP_EXISTING must retain the original value')
   })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  await transport.request(uri, request(uri), 1).promise
-  assert.deepEqual([...bodies[1].streamerContext.unsentSabrContexts], [1])
-  assert.deepEqual([...bodies[2].streamerContext.unsentSabrContexts], [])
-  assert.equal(bodies[2].streamerContext.sabrContexts[0].type, 1)
-  assert.deepEqual([...bodies[2].streamerContext.sabrContexts[0].value], [42], 'KEEP_EXISTING must retain the original value')
-})
+}
 
 for (const [sendByDefault, writePolicy] of [
   [true, protos.SabrContextWritePolicy.OVERWRITE],
   [false, protos.SabrContextWritePolicy.OVERWRITE],
   [true, protos.SabrContextWritePolicy.KEEP_EXISTING],
-]) test(`stops context-only retries when ${writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? 'KEEP_EXISTING' : 'OVERWRITE'} updates leave the ${sendByDefault ? 'active' : 'inactive'} context unchanged`, async t => {
-  let calls = 0
-  let reloads = 0
-  const { createSabrTransport } = load(async () => {
-    calls++
-    return contextResponse(sendByDefault, writePolicy, false,
-      writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? calls : 42)
+]) {
+  test(`stops context-only retries when ${writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? 'KEEP_EXISTING' : 'OVERWRITE'} updates leave the ${sendByDefault ? 'active' : 'inactive'} context unchanged`, async t => {
+    let calls = 0
+    let reloads = 0
+    const { createSabrTransport } = load(async () => {
+      calls++
+      return contextResponse(sendByDefault, writePolicy, false,
+        writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? calls : 42)
+    })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onReloadOnce(() => reloads++)
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    await assert.rejects(transport.request(uri, request(uri), 1).promise,
+      error => error.code === ShakaError.Code.HTTP_ERROR)
+    assert.equal(calls, 2)
+    assert.equal(reloads, 0)
   })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  transport.onReloadOnce(() => reloads++)
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  await assert.rejects(transport.request(uri, request(uri), 1).promise,
-    error => error.code === ShakaError.Code.HTTP_ERROR)
-  assert.equal(calls, 2)
-  assert.equal(reloads, 0)
-})
+}
 
-for (const withPolicy of [false, true]) test(`bounds ${withPolicy ? 'explicit policy' : 'changing context-only'} retries before requesting a fresh player session`, async t => {
-  let calls = 0
-  let reloads = 0
-  const { createSabrTransport } = load(async () => {
-    calls++
-    return contextResponse(true, protos.SabrContextWritePolicy.OVERWRITE, withPolicy, withPolicy ? 42 : calls)
+for (const withPolicy of [false, true]) {
+  test(`bounds ${withPolicy ? 'explicit policy' : 'changing context-only'} retries before requesting a fresh player session`, async t => {
+    let calls = 0
+    let reloads = 0
+    const { createSabrTransport } = load(async () => {
+      calls++
+      return contextResponse(true, protos.SabrContextWritePolicy.OVERWRITE, withPolicy, withPolicy ? 42 : calls)
+    })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onReloadOnce(() => reloads++)
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    await assert.rejects(transport.request(uri, request(uri), 1).promise)
+    assert.equal(calls, 100)
+    assert.equal(reloads, 1)
   })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  transport.onReloadOnce(() => reloads++)
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  await assert.rejects(transport.request(uri, request(uri), 1).promise)
-  assert.equal(calls, 100)
-  assert.equal(reloads, 1)
-})
+}
 
 test('server pacing after delivered media does not reload a healthy stream', async t => {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
@@ -603,46 +638,48 @@ test('resumed audio and video requests retain the playback cookie from a complet
   }
 })
 
-for (const segmentComplete of [true, false]) test(`a cookie-less policy ${segmentComplete ? 'with a completed segment' : 'requiring a retry'} retains the established playback cookie`, async t => {
-  const cookie = Uint8Array.of(0x08, 0x01, 0x10, 0x00, 0x78, 0x02)
-  const requests = []
-  const { createSabrTransport } = load(async (_uri, options) => {
-    const body = protos.VideoPlaybackAbrRequest.decode(options.body)
-    requests.push(body)
-    const formatId = body.clientAbrState.enabledTrackTypesBitfield === 1 ? audioFormatId : videoFormatId
-    if (requests.length === 1) {
-      const policy = new CompositeBuffer([])
-      new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY,
-        Uint8Array.of(0x3a, cookie.length, ...cookie))
-      const media = new Uint8Array(await response([1], true, formatId).arrayBuffer())
-      return new Response(utils.concatenateChunks([...policy.chunks, media]))
+for (const segmentComplete of [true, false]) {
+  test(`a cookie-less policy ${segmentComplete ? 'with a completed segment' : 'requiring a retry'} retains the established playback cookie`, async t => {
+    const cookie = Uint8Array.of(0x08, 0x01, 0x10, 0x00, 0x78, 0x02)
+    const requests = []
+    const { createSabrTransport } = load(async (_uri, options) => {
+      const body = protos.VideoPlaybackAbrRequest.decode(options.body)
+      requests.push(body)
+      const formatId = body.clientAbrState.enabledTrackTypesBitfield === 1 ? audioFormatId : videoFormatId
+      if (requests.length === 1) {
+        const policy = new CompositeBuffer([])
+        new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+          Uint8Array.of(0x3a, cookie.length, ...cookie))
+        const media = new Uint8Array(await response([1], true, formatId).arrayBuffer())
+        return new Response(utils.concatenateChunks([...policy.chunks, media]))
+      }
+      if (requests.length === 2) {
+        const policy = new CompositeBuffer([])
+        // An explicit zero keeps the cookie-less policy present on the wire.
+        new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY, Uint8Array.of(0x20, 0))
+        const media = segmentComplete
+          ? new Uint8Array(await response([2], false, formatId).arrayBuffer())
+          : new Uint8Array()
+        return new Response(utils.concatenateChunks([...policy.chunks, media]))
+      }
+      return response([2], false, formatId)
+    })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    for (const uri of [
+      'sabr1:audio?formatId=140-123-&init',
+      'sabr1:audio?formatId=140-123-&startTimeMs=600000&sq=1',
+      'sabr1:video?formatId=137-456-&resolution=1080&startTimeMs=600000&sq=1',
+    ]) {
+      await transport.request(uri, request(uri), 1).promise
     }
-    if (requests.length === 2) {
-      const policy = new CompositeBuffer([])
-      // An explicit zero keeps the cookie-less policy present on the wire.
-      new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY, Uint8Array.of(0x20, 0))
-      const media = segmentComplete
-        ? new Uint8Array(await response([2], false, formatId).arrayBuffer())
-        : new Uint8Array()
-      return new Response(utils.concatenateChunks([...policy.chunks, media]))
+    assert.equal(requests.length, segmentComplete ? 3 : 4)
+    for (const body of requests.slice(1)) {
+      assert.deepEqual(body.streamerContext.playbackCookie, cookie,
+        'omitting a cookie must preserve it in retries and subsequent segment requests')
     }
-    return response([2], false, formatId)
   })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  for (const uri of [
-    'sabr1:audio?formatId=140-123-&init',
-    'sabr1:audio?formatId=140-123-&startTimeMs=600000&sq=1',
-    'sabr1:video?formatId=137-456-&resolution=1080&startTimeMs=600000&sq=1',
-  ]) {
-    await transport.request(uri, request(uri), 1).promise
-  }
-  assert.equal(requests.length, segmentComplete ? 3 : 4)
-  for (const body of requests.slice(1)) {
-    assert.deepEqual(body.streamerContext.playbackCookie, cookie,
-      'omitting a cookie must preserve it in retries and subsequent segment requests')
-  }
-})
+}
 
 function errorWithPolicyResponse(backoffTimeMs, policyFirst) {
   const buffer = new CompositeBuffer([])
@@ -665,27 +702,29 @@ async function flushRequests() {
   for (let i = 0; i < 30; i++) await Promise.resolve()
 }
 
-for (const policyFirst of [false, true]) test(`a SABR error ${policyFirst ? 'after' : 'before'} a retry policy fails without a long backoff`, async t => {
-  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
-  let calls = 0
-  const waits = []
-  const { createSabrTransport } = load(async () => {
-    calls++
-    return calls === 1 ? errorWithPolicyResponse(20000, policyFirst) : response([1])
-  }, { Date })
-  const transport = createSabrTransport(sabrData, () => context)
-  t.after(() => transport.cleanup())
-  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
-  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
-  const pending = transport.request(uri, request(uri), 1).promise
-  await flushRequests()
-  assert.deepEqual(waits, [], 'a terminal error must not start a 20-second countdown')
-  assert.equal(calls, 1)
-  await assert.rejects(pending, error => error.code === ShakaError.Code.HTTP_ERROR)
-  await transport.request(uri, request(uri), 1).promise
-  assert.deepEqual(waits, [], 'a failed response must not delay the next request')
-  assert.equal(calls, 2)
-})
+for (const policyFirst of [false, true]) {
+  test(`a SABR error ${policyFirst ? 'after' : 'before'} a retry policy fails without a long backoff`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+    let calls = 0
+    const waits = []
+    const { createSabrTransport } = load(async () => {
+      calls++
+      return calls === 1 ? errorWithPolicyResponse(20000, policyFirst) : response([1])
+    }, { Date })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    const pending = transport.request(uri, request(uri), 1).promise
+    await flushRequests()
+    assert.deepEqual(waits, [], 'a terminal error must not start a 20-second countdown')
+    assert.equal(calls, 1)
+    await assert.rejects(pending, error => error.code === ShakaError.Code.HTTP_ERROR)
+    await transport.request(uri, request(uri), 1).promise
+    assert.deepEqual(waits, [], 'a failed response must not delay the next request')
+    assert.equal(calls, 2)
+  })
+}
 
 test('an HTTP error with a retry policy fails without a long backoff', async t => {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
@@ -925,7 +964,8 @@ test('the Shaka adapter retains format selection, registration and teardown beha
   const player = {
     isAudioOnly: () => false,
     getVariantTracks: () => [{ originalVideoId: '137-456-', originalAudioId: '140-123-', audioRoles: ['main'] }],
-    getStats: () => ({ estimatedBandwidth: 1234567 }), getPlaybackRate: () => 2,
+    getStats: () => ({ estimatedBandwidth: 1234567 }),
+    getPlaybackRate: () => 2,
   }
   const transport = setupSabrScheme(sabrData, () => player, () => ({}), { value: 1920 }, { value: 1080 })
   const uri = 'sabr1:audio?formatId=140-123-&init'

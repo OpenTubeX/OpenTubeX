@@ -45,10 +45,12 @@ function androidRotationHarness(overrides = {}) {
     observeAndroidDisplayRotation: createRotationObserver(),
     observeAndroidDeviceRotation: createRotationObserver(),
     startInFullwindow: false,
-    events: { dispatchEvent: event => {
-      fullWindowEnabled.value = event.detail
-      calls.push(event.detail)
-    } },
+    events: {
+      dispatchEvent: event => {
+        fullWindowEnabled.value = event.detail
+        calls.push(event.detail)
+      }
+    },
     CustomEvent: class { constructor(_name, options) { this.detail = options.detail } },
     setLandscapeOrientation: async landscape => { calls.push(`orientation:${landscape}`) },
     setAndroidNavigationBarVisible: async visible => { calls.push(`navigation:${visible}`) },
@@ -270,21 +272,27 @@ test('Android retains the exit surface only for a requested rotation', async () 
   let cleanup
   let exitTimeout
   const host = {
-    setAttribute() {}, removeAttribute() {},
-    showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
+    setAttribute() {},
+    removeAttribute() {},
+    showPopover() { open = true },
+    hidePopover() { open = false },
+    matches() { return open },
   }
   const context = {
-    androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
+    androidFullscreenHost: host,
+    androidFullscreenHostActive: { value: false },
     document: { fullscreenElement: null },
     getAndroidDisplayOrientation: async () => 'landscape-primary',
     onBeforeUnmount: callback => { cleanup = callback },
-    watch() {}, isActiveTab: {},
+    watch() {},
+    isActiveTab: {},
     suppressPanelTransitions() {},
     requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
     cancelAnimationFrame: id => frames.delete(id),
     clearTimeout: id => timers.delete(id),
     window: {
-      innerWidth: 800, innerHeight: 400,
+      innerWidth: 800,
+      innerHeight: 400,
       addEventListener: (name, callback) => listeners.set(name, callback),
       removeEventListener: name => listeners.delete(name),
       setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },

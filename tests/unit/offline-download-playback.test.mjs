@@ -33,10 +33,20 @@ for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invid
       videoLoadGeneration: 0,
       videoId: 'downloaded1',
       tabRoute: { params: { id: 'downloaded1' }, query: { downloadId: '1' } },
-      $store: { getters: { getYtDlpDownloads: { 1: {
-        id: 1, videoId: 'downloaded1', title: 'Offline video', status: 'completed', mode,
-        files: [{ path: android ? 'content://downloads/document/1' : '/downloads/video.mp4', videoId: 'downloaded1', extension: 'mp4', duration: 42 }],
-      } } } },
+      $store: {
+        getters: {
+          getYtDlpDownloads: {
+            1: {
+              id: 1,
+              videoId: 'downloaded1',
+              title: 'Offline video',
+              status: 'completed',
+              mode,
+              files: [{ path: android ? 'content://downloads/document/1' : '/downloads/video.mp4', videoId: 'downloaded1', extension: 'mp4', duration: 42 }],
+            }
+          }
+        }
+      },
       playbackSourceKey: 0,
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
       cacheOnlinePlaybackSource() {},
@@ -241,11 +251,20 @@ for (const android of [false]) {
       { videoId: 'dupevideo01', path: '/downloads/Later #2.webm', available: true, title: 'Later local take', author: 'Later Channel', authorId: 'later-channel' },
     ]
     const watch = {
-      ...methods, videoId: 'dupevideo01', tabRoute: { query: { downloadId: '43', downloadFilePath: files[1].path } },
+      ...methods,
+      videoId: 'dupevideo01',
+      tabRoute: { query: { downloadId: '43', downloadFilePath: files[1].path } },
       $store: { getters: { getYtDlpDownloads: { 43: { status: 'completed', mode: 'video', files } } } },
-      downloadedPlaybackWithoutMetadata: true, videoTitle: files[0].title, channelName: files[0].author, channelId: files[0].authorId,
-      initializePlaybackRate() {}, initializeVideoQuality() {}, updateTitle() {},
-      cacheOnlinePlaybackSource() {}, playbackSourceKey: 0, t: key => key,
+      downloadedPlaybackWithoutMetadata: true,
+      videoTitle: files[0].title,
+      channelName: files[0].author,
+      channelId: files[0].authorId,
+      initializePlaybackRate() {},
+      initializeVideoQuality() {},
+      updateTitle() {},
+      cacheOnlinePlaybackSource() {},
+      playbackSourceKey: 0,
+      t: key => key,
     }
     assert.equal(watch.applyDownloadedPlaybackSource(), files[1])
     assert.equal(watch.legacyFormats[0].url, android
@@ -275,9 +294,11 @@ test('Electron protocol lookup accepts only the requested file recorded in the d
   ]
   const existing = new Set([...files.map(file => file.path), '/private/unrecorded.webm'])
   const lookup = runInNewContext(`${mainSource.slice(start, mainSource.indexOf('\n/**', start)).replace('export ', '')}\ngetYtDlpDownloadFile`, {
-    ID_REGEX: /^[\w-]{11}$/, loadDownloadRecords: async () => {},
+    ID_REGEX: /^[\w-]{11}$/,
+    loadDownloadRecords: async () => {},
     downloadRecords: new Map([[43, { status: 'completed', mode: 'video', files }]]),
-    getDownloadFiles: record => record.files, existsSync: path => existing.has(path),
+    getDownloadFiles: record => record.files,
+    existsSync: path => existing.has(path),
   })
   assert.equal((await lookup(43, 'dupevideo01', files[1].path)).path, files[1].path)
   assert.equal((await lookup(43, 'dupevideo01')).path, files[0].path, 'Existing routes keep their first-file behavior')

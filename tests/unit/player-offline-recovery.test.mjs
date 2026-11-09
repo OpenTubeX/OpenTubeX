@@ -79,7 +79,8 @@ for (const requestedVideoId of ['current-video', 'next-video']) {
     const state = { captionTimingOffset: 1.5 }
     const sameVideo = requestedVideoId === 'current-video'
     await reload.call({
-      videoId: 'current-video', tabRoute: { params: { id: requestedVideoId } },
+      videoId: 'current-video',
+      tabRoute: { params: { id: requestedVideoId } },
       beginStreamErrorRecoveryOnce: () => true,
       $refs: { player: { getSabrReloadState: () => state } },
       setPlayerReloadState: payload => saved.push(payload),

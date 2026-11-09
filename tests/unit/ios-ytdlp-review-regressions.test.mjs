@@ -110,11 +110,13 @@ test('iOS does not select an HLS manifest rejected by every probe', async () => 
   const end = source.indexOf('/**\n * @param {YtDlpPlaybackFormat} format', start)
   const context = vm.createContext({
     process: { env: { IS_IOS: true } },
-    ytDlp: { ytDlpGetPlaybackInfo: async () => ({
-      formats: [{ protocol: 'm3u8', url: 'https://example.test/broken.m3u8', manifestUrl: 'https://example.test/broken.m3u8' }],
-      hlsManifestUrl: 'https://example.test/broken.m3u8',
-      isLive: true,
-    }) },
+    ytDlp: {
+      ytDlpGetPlaybackInfo: async () => ({
+        formats: [{ protocol: 'm3u8', url: 'https://example.test/broken.m3u8', manifestUrl: 'https://example.test/broken.m3u8' }],
+        hlsManifestUrl: 'https://example.test/broken.m3u8',
+        isLive: true,
+      })
+    },
     getTwitchVodId: () => null,
     isAudioFormat: () => false,
     isVideoFormat: () => true,

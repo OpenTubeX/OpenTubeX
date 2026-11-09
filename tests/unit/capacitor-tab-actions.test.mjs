@@ -46,7 +46,10 @@ function setup(t, options = {}) {
     async reloadTab(id) { calls.push(['reload', id]) },
   }
   const context = vm.createContext({
-    computed, nextTick, ref, watch,
+    computed,
+    nextTick,
+    ref,
+    watch,
     useI18n: () => ({ t: key => key }),
     getCapacitorTabService: () => service,
     showToast: toast => calls.push(['toast', toast.message]),
@@ -255,7 +258,6 @@ test('failed closure stops the batch and always releases the busy state', async 
   await assert.rejects(actions.closeRelatedTabs('other'), /navigation failed/)
   assert.equal(actions.closingTabs.value, false)
 })
-
 
 test('tablet selection arrows move focus without toggling or activating tabs', async () => {
   const component = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabletTabBar.vue', import.meta.url), 'utf8')

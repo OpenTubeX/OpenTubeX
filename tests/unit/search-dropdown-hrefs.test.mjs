@@ -14,7 +14,12 @@ function topNav() {
   const resolved = []
   const searchSettings = ref({ prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] })
   const api = vm.runInNewContext(`${code}\n;({ getSearchResultHref, getSearchDestination })`, {
-    ref, shallowReactive, watch, searchSettings, CHANNEL_HANDLE_REGEX, console,
+    ref,
+    shallowReactive,
+    watch,
+    searchSettings,
+    CHANNEL_HANDLE_REGEX,
+    console,
     supportsYtDlp: false,
     shouldOpenExternalMediaUrl: () => false,
     store: {

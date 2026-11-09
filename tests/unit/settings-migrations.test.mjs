@@ -177,10 +177,12 @@ for (const failure of [null, 'hash', 'write']) {
         if (failure === 'hash') throw new Error('hash failed')
         return 'hashed-password'
       },
-      DBSettingHandlers: { upsert: async (key, value) => {
-        if (failure === 'write') throw new Error('write failed')
-        writes.push([key, value])
-      } },
+      DBSettingHandlers: {
+        upsert: async (key, value) => {
+          if (failure === 'write') throw new Error('write failed')
+          writes.push([key, value])
+        }
+      },
       console: { error: error => errors.push(error.message) },
     })
     const result = await actions.updateSettingsPassword({ commit: (...args) => commits.push(args) }, 'password')

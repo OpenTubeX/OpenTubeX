@@ -42,7 +42,9 @@ test('repair uses latest entries, batches saves, reports errors and skips remove
   let maxActive = 0
   const saved = []
   const result = await repairHistory({
-    records: rows, signal: new AbortController().signal, onProgress: () => {},
+    records: rows,
+    signal: new AbortController().signal,
+    onProgress: () => {},
     getRecord: id => id.endsWith('0') ? null : rows.find(row => row.videoId === id),
     fetchMetadata: async id => {
       active++; maxActive = Math.max(active, maxActive)
@@ -61,7 +63,9 @@ test('cancellation stops queued work and does not save in-flight responses', asy
   const controller = new AbortController()
   let requests = 0
   await repairHistory({
-    records: Array(8).fill(record), signal: controller.signal, onProgress: () => {},
+    records: Array(8).fill(record),
+    signal: controller.signal,
+    onProgress: () => {},
     getRecord: () => record,
     fetchMetadata: async () => { requests++; controller.abort(); return metadata },
     saveMetadata: () => { assert.fail('Cancelled repair saved metadata') }
@@ -93,13 +97,15 @@ test('missing channel metadata is filled without replacing existing titles or wa
 test('database failures are counted and do not stop later repair batches', async () => {
   let saves = 0
   const result = await repairHistory({
-    records: Array(8).fill(record), signal: new AbortController().signal, onProgress: () => {},
-    getRecord: () => record, fetchMetadata: async () => metadata,
+    records: Array(8).fill(record),
+    signal: new AbortController().signal,
+    onProgress: () => {},
+    getRecord: () => record,
+    fetchMetadata: async () => metadata,
     saveMetadata: async patches => { if (++saves === 1) throw new Error('Write failed'); return { repaired: patches.length, failed: 0 } }
   })
   assert.deepEqual(result, { total: 8, checked: 8, repaired: 4, failed: 4 })
 })
-
 
 test('repair selects imports whose only missing metadata is the publication date', () => {
   for (const published of [undefined, null, 0, '']) {
@@ -108,7 +114,6 @@ test('repair selects imports whose only missing metadata is the publication date
     assert.equal(historyRepairPatch(imported, { ...metadata, published: 123 }).published, 123)
   }
 })
-
 
 test('explicit broadcast status overrides legacy isLive on ended and upcoming premieres', () => {
   for (const isUpcoming of [false, true]) {
@@ -134,7 +139,9 @@ test('upcoming status suppresses legacy live status even without broadcast metad
 test('temporary metadata failures recover within one repair run', async () => {
   let attempts = 0
   const result = await repairHistory({
-    records: [record], signal: new AbortController().signal, onProgress: () => {},
+    records: [record],
+    signal: new AbortController().signal,
+    onProgress: () => {},
     getRecord: () => record,
     fetchMetadata: async () => {
       if (++attempts === 1) throw new TypeError('Failed to fetch')
@@ -145,7 +152,6 @@ test('temporary metadata failures recover within one repair run', async () => {
   assert.deepEqual(result, { total: 1, checked: 1, repaired: 1, failed: 0 })
 })
 
-
 test('retries only failed requests after the first pass, with decreasing concurrency', async () => {
   const rows = Array.from({ length: 8 }, (_, i) => ({ ...record, videoId: `abcdefghij${i}` }))
   const attempts = new Map()
@@ -155,7 +161,8 @@ test('retries only failed requests after the first pass, with decreasing concurr
   const activeByPass = [0, 0, 0]
   const maxByPass = [0, 0, 0]
   const result = await repairHistory({
-    records: rows, signal: new AbortController().signal,
+    records: rows,
+    signal: new AbortController().signal,
     getRecord: id => rows.find(row => row.videoId === id),
     onProgress: value => progress.push(value),
     wait: async milliseconds => waits.push(milliseconds),
@@ -185,7 +192,9 @@ test('retries only failed requests after the first pass, with decreasing concurr
 test('persistent server failures stop after three attempts and count once', async () => {
   let attempts = 0
   const result = await repairHistory({
-    records: [record], signal: new AbortController().signal, onProgress: () => {},
+    records: [record],
+    signal: new AbortController().signal,
+    onProgress: () => {},
     getRecord: () => record,
     fetchMetadata: async () => { attempts++; throw Object.assign(new Error('Service unavailable'), { status_code: 503 }) },
     saveMetadata: () => assert.fail('Unavailable metadata must not be saved')
@@ -198,7 +207,8 @@ test('cancellation during the retry pause starts no additional requests', async 
   const controller = new AbortController()
   let attempts = 0
   const result = await runRepairHistory({
-    records: [record], signal: controller.signal,
+    records: [record],
+    signal: controller.signal,
     onProgress: value => { if (value.failed) setImmediate(() => controller.abort()) },
     getRecord: () => record,
     fetchMetadata: async () => { attempts++; throw new Error('Temporary failure') },
@@ -213,7 +223,9 @@ test('retry skips entries removed or repaired while waiting', async () => {
   for (const current of [null, { ...record, ...metadata }]) {
     let attempts = 0
     const result = await repairHistory({
-      records: [record], signal: new AbortController().signal, onProgress: () => {},
+      records: [record],
+      signal: new AbortController().signal,
+      onProgress: () => {},
       getRecord: () => current,
       fetchMetadata: async () => { attempts++; throw new Error('Temporary failure') },
       saveMetadata: () => assert.fail('Already repaired or removed entry was saved')
@@ -229,7 +241,9 @@ test('YouTube bot checks pause the batch before requesting more history entries'
   const requests = []
   const waits = []
   const result = await repairHistory({
-    records: rows, signal: new AbortController().signal, onProgress: () => {},
+    records: rows,
+    signal: new AbortController().signal,
+    onProgress: () => {},
     getRecord: id => rows.find(row => row.videoId === id),
     wait: async milliseconds => {
       waits.push(milliseconds)
@@ -256,7 +270,8 @@ test('persistent YouTube bot checks stop after bounded cooldowns without exhaust
   const progress = []
   let requests = 0
   await assert.rejects(repairHistory({
-    records: rows, signal: new AbortController().signal,
+    records: rows,
+    signal: new AbortController().signal,
     getRecord: id => rows.find(row => row.videoId === id),
     onProgress: value => progress.push(value),
     wait: async milliseconds => waits.push(milliseconds),
@@ -271,13 +286,14 @@ test('persistent YouTube bot checks stop after bounded cooldowns without exhaust
   assert.deepEqual(progress.at(-1), { total: 12, checked: 4, repaired: 0, failed: 4 })
 })
 
-
 test('untouched entries retain their retries after both bot cooldowns', async () => {
   const rows = Array.from({ length: 5 }, (_, i) => ({ ...record, videoId: `abcdefghij${i}` }))
   const attempts = new Map()
   let cooldowns = 0
   const result = await repairHistory({
-    records: rows, signal: new AbortController().signal, onProgress: () => {},
+    records: rows,
+    signal: new AbortController().signal,
+    onProgress: () => {},
     getRecord: id => rows.find(row => row.videoId === id),
     wait: async milliseconds => { if (milliseconds >= 30000) cooldowns++ },
     fetchMetadata: async id => {
@@ -292,14 +308,15 @@ test('untouched entries retain their retries after both bot cooldowns', async ()
   assert.deepEqual(result, { total: 5, checked: 5, repaired: 5, failed: 0 })
 })
 
-
 for (const failure of ['unavailable', 404, 429, 'network']) {
   test(`classifies ${failure} metadata failures before retrying`, async () => {
     let attempts = 0
     const waits = []
     const retryable = [429, 503, 'network'].includes(failure)
     const result = await repairHistory({
-      records: [record], signal: new AbortController().signal, onProgress: () => {},
+      records: [record],
+      signal: new AbortController().signal,
+      onProgress: () => {},
       getRecord: () => record,
       wait: async milliseconds => waits.push(milliseconds),
       fetchMetadata: async () => {
@@ -321,8 +338,13 @@ for (const failure of ['unavailable', 404, 429, 'network']) {
 test('yt-dlp history metadata repairs fields without overwriting watch state', async () => {
   const { parseHistoryRepairYtDlp } = await import('../../src/historyRepair.js')
   const parsed = parseHistoryRepairYtDlp({
-    id: record.videoId, title: 'Recovered title', channel: 'Channel', channel_id: 'channel',
-    duration: 120, upload_date: '20250920', live_status: 'was_live'
+    id: record.videoId,
+    title: 'Recovered title',
+    channel: 'Channel',
+    channel_id: 'channel',
+    duration: 120,
+    upload_date: '20250920',
+    live_status: 'was_live'
   }, record.videoId)
   assert.equal(parsed.published, Date.parse('2025-09-20'))
   assert.equal(parsed.authorId, 'channel')
@@ -337,8 +359,11 @@ test('yt-dlp rate limits pause repair before retrying', async () => {
   const waits = []
   let calls = 0
   const result = await repairHistory({
-    records: [record], getRecord: () => record, signal: new AbortController().signal,
-    onProgress: () => {}, wait: async delay => waits.push(delay),
+    records: [record],
+    getRecord: () => record,
+    signal: new AbortController().signal,
+    onProgress: () => {},
+    wait: async delay => waits.push(delay),
     fetchMetadata: async () => ++calls === 1 ? parseHistoryRepairYtDlp({ error: 'rate-limit' }, record.videoId) : metadata,
     saveMetadata: async () => ({ repaired: 1, failed: 0 })
   })
@@ -349,7 +374,7 @@ test('yt-dlp rate limits pause repair before retrying', async () => {
 
 test('yt-dlp errors preserve rate limits without exposing native error details', async () => {
   const { historyRepairYtDlpError } = await import('../../src/historyRepair.js')
-  for (const message of ['HTTP Error 429', 'Too Many Requests', "Sign in to confirm you’re not a bot"]) {
+  for (const message of ['HTTP Error 429', 'Too Many Requests', 'Sign in to confirm you’re not a bot']) {
     assert.deepEqual(historyRepairYtDlpError(message), { error: 'rate-limit' })
   }
   assert.deepEqual(historyRepairYtDlpError('Cannot read /private/cookies.txt'), { error: 'History metadata unavailable' })

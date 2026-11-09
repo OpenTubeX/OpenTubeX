@@ -35,8 +35,12 @@ test('FCast receiver plays MP4, DASH and HLS through the relay', { skip: !device
       const match = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range ?? '')
       const start = match ? Number(match[1]) : 0
       const end = match && match[2] ? Math.min(Number(match[2]), data.length - 1) : data.length - 1
-      response.writeHead(match ? 206 : 200, { 'content-type': type, 'accept-ranges': 'bytes', 'content-length': end - start + 1,
-        ...(match ? { 'content-range': `bytes ${start}-${end}/${data.length}` } : {}) })
+      response.writeHead(match ? 206 : 200, {
+        'content-type': type,
+        'accept-ranges': 'bytes',
+        'content-length': end - start + 1,
+        ...(match ? { 'content-range': `bytes ${start}-${end}/${data.length}` } : {})
+      })
       response.end(request.method === 'HEAD' ? undefined : data.subarray(start, end + 1))
     } catch { response.writeHead(404).end() }
   })

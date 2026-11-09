@@ -62,11 +62,17 @@ test('malformed responses try the next source instead of saving an empty success
 function channelPage(id, urls, layout = 'twoColumnBrowseResultsRenderer') {
   return {
     metadata: { channelMetadataRenderer: { externalId: id } },
-    contents: { [layout]: { tabs: urls.map((url, index) => ({ tabRenderer: {
-      selected: index === 0,
-      ...(index === 0 ? { content: { videoRenderer: { videoId: 'regular-video' } } } : {}),
-      endpoint: { commandMetadata: { webCommandMetadata: { url } } }
-    } })) } }
+    contents: {
+      [layout]: {
+        tabs: urls.map((url, index) => ({
+          tabRenderer: {
+            selected: index === 0,
+            ...(index === 0 ? { content: { videoRenderer: { videoId: 'regular-video' } } } : {}),
+            endpoint: { commandMetadata: { webCommandMetadata: { url } } }
+          }
+        }))
+      }
+    }
   }
 }
 
@@ -88,9 +94,19 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
     // YouTube answers every tab of such a channel with an endpoint-less Home tab.
     const page = {
       metadata: { channelMetadataRenderer: { externalId: 'UCtest' } },
-      contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { title: 'Home', selected: true, content: {
-        sectionListRenderer: { contents: [{ channelOwnerEmptyStateRenderer: { description: { simpleText: "This channel doesn't have any content" } } }] }
-      } } }] } }
+      contents: {
+        twoColumnBrowseResultsRenderer: {
+          tabs: [{
+            tabRenderer: {
+              title: 'Home',
+              selected: true,
+              content: {
+                sectionListRenderer: { contents: [{ channelOwnerEmptyStateRenderer: { description: { simpleText: "This channel doesn't have any content" } } }] }
+              }
+            }
+          }]
+        }
+      }
     }
     const result = await fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
       if (request.format !== 'local') throw new Error('HTTP 404')
@@ -143,10 +159,13 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
 }
 
 function configuration(interval = 100) {
-  return { intervals: { videos: interval }, profiles: [
-    { id: 'all', channels: { videos: ['UC1', 'UC2'] } },
-    { id: 'custom', channels: { videos: ['UC1'] } }
-  ] }
+  return {
+    intervals: { videos: interval },
+    profiles: [
+      { id: 'all', channels: { videos: ['UC1', 'UC2'] } },
+      { id: 'custom', channels: { videos: ['UC1'] } }
+    ]
+  }
 }
 
 test('background scheduling respects deadlines, deduplicates channels, and excludes foreground work', async () => {
@@ -297,7 +316,10 @@ test('closing the last window leaves process shutdown to Quit, including macOS r
     const calls = []
     const closed = vm.runInNewContext(`(${source.slice(start, end)})`, {
       process: { platform },
-      mainWindow: {}, trayWindows: [], keepRefreshingInBackground: enabled, isQuitting: quitting,
+      mainWindow: {},
+      trayWindows: [],
+      keepRefreshingInBackground: enabled,
+      isQuitting: quitting,
       backgroundSubscriptions: {
         stop: () => calls.push('stop'),
         setBackground: async value => { assert.equal(value, true); calls.push('background') }
@@ -362,7 +384,8 @@ test('utility completes missing Local Shorts dates without forwarding backend cr
   const { mapConcurrently } = await import('../../src/renderer/helpers/concurrent-map.js')
   const source = await readFile(new URL('../../src/renderer/helpers/api/background-feed-parser.js', import.meta.url), 'utf8')
   const context = vm.createContext({
-    enrichShortPublicationDates, mapConcurrently,
+    enrichShortPublicationDates,
+    mapConcurrently,
     parseBackgroundFeed: () => [{ videoId: 'short', isShort: true }]
   })
   vm.runInContext(source.slice(source.indexOf('export async function parseAndEnrichBackgroundFeed')).replace('export ', ''), context)
@@ -412,7 +435,6 @@ test('a failed retention is retried for an identical worker configuration', asyn
   assert.equal(attempts, 2)
 })
 
-
 test('invalid Local browse shapes fall back without treating malformed responses as empty feeds', async () => {
   const valid = { contents: { twoColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { selected: true, content: {} } }] } } }
   for (const contents of [{}, [], '', { unrecognizedRenderer: {} }, { twoColumnBrowseResultsRenderer: { tabs: [] } }]) {
@@ -455,7 +477,8 @@ test('a failed completion write retries after five minutes instead of the normal
   let now = 0
   let fetches = 0
   let fail = true
-  const scheduler = createSubscriptionBackgroundScheduler({ now: () => now,
+  const scheduler = createSubscriptionBackgroundScheduler({
+    now: () => now,
     fetchChannel: async () => { fetches++; return {} },
     saveResult: async result => { if (result.kind === 'completion' && fail) throw new Error('disk full') }
   })
@@ -477,10 +500,14 @@ for (const kind of ['channel', 'completion']) {
     let now = 0
     const saved = []
     let scheduler
-    scheduler = createSubscriptionBackgroundScheduler({ now: () => now, fetchChannel: async () => ({}), saveResult: async result => {
-      saved.push(result)
-      if (result.kind === kind) scheduler.configure({ profiles: [], intervals: {} })
-    } })
+    scheduler = createSubscriptionBackgroundScheduler({
+      now: () => now,
+      fetchChannel: async () => ({}),
+      saveResult: async result => {
+        saved.push(result)
+        if (result.kind === kind) scheduler.configure({ profiles: [], intervals: {} })
+      }
+    })
     scheduler.configure({ intervals: { videos: 100 }, profiles: ['all', 'custom'].map(id => ({ id, channels: { videos: ['UC1'] } })) })
     await scheduler.setBackground(true)
     now = 100
@@ -491,9 +518,18 @@ for (const kind of ['channel', 'completion']) {
 
 test('topic channels accept the selected videos tab in either browse layout', () => {
   for (const layout of ['singleColumnBrowseResultsRenderer', 'twoColumnBrowseResultsRenderer']) {
-    const data = { metadata: { channelMetadataRenderer: { musicArtistName: 'Artist' } }, contents: { [layout]: { tabs: [{ tabRenderer: {
-      selected: true, content: {}, endpoint: { commandMetadata: { webCommandMetadata: { url: '/channel/UCtest/videos' } } }
-    } }] } } }
+    const data = {
+      metadata: { channelMetadataRenderer: { musicArtistName: 'Artist' } },
+      contents: {
+        [layout]: {
+          tabs: [{
+            tabRenderer: {
+              selected: true, content: {}, endpoint: { commandMetadata: { webCommandMetadata: { url: '/channel/UCtest/videos' } } }
+            }
+          }]
+        }
+      }
+    }
     assert.equal(parseBackgroundSubscriptionResponse('local', JSON.stringify(data), 'videos').backgroundFormat, 'local')
   }
 })

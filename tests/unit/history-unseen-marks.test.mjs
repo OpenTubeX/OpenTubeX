@@ -22,8 +22,8 @@ async function fixture(fail = false) {
   const records = ['unseen', 'seen', 'unrelated'].map(record)
   await db.history.insertAsync(records)
   const baseDependencies = { db, ...historyHelpers, ...seenHelpers, migrateStoredSettings, console: { error() {} } }
-  const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {'))
-    + '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
+  const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {')) +
+    '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }
   const dependencies = { toRaw, ...historyHelpers, DBHistoryHandlers: History, console: { error() {} } }
   const module = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

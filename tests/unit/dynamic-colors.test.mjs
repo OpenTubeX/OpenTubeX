@@ -72,17 +72,19 @@ test('switching back from dynamic colors or a custom-theme preview restores the 
   const classes = new Set()
   const originalDocument = globalThis.document
   const originalWindow = globalThis.window
-  globalThis.document = { body: {
-    style: {
-      setProperty: (key, value) => properties.set(key, value),
-      removeProperty: key => properties.delete(key),
-    },
-    classList: {
-      add: (...values) => values.forEach(value => classes.add(value)),
-      remove: (...values) => values.forEach(value => classes.delete(value)),
-    },
-    dataset: {},
-  } }
+  globalThis.document = {
+    body: {
+      style: {
+        setProperty: (key, value) => properties.set(key, value),
+        removeProperty: key => properties.delete(key),
+      },
+      classList: {
+        add: (...values) => values.forEach(value => classes.add(value)),
+        remove: (...values) => values.forEach(value => classes.delete(value)),
+      },
+      dataset: {},
+    }
+  }
   let dark = false
   globalThis.window = { matchMedia: () => ({ matches: dark }) }
   androidDynamicColors.value = { supported: true, palette: palette() }
@@ -192,16 +194,21 @@ test('startup uses a timely palette and propagates native errors to the fallback
   await assert.rejects(initializeAndroidDynamicColors(Promise.reject(new Error('bridge failed'))), /bridge failed/)
 })
 
-
 for (const mode of ['light', 'dark', 'black']) {
   test(`Material ${mode} palettes retain contrast across vivid, neutral and extreme seeds`, () => {
     const seeds = ['#000000', '#ffffff', '#808080', ...MATERIAL_SEED_PRESETS.map(preset => preset.color)]
     // Cover the entire hue wheel, including yellow where RGB lightening fails.
     for (let hue = 0; hue < 360; hue += 15) {
       const x = 255 * (1 - Math.abs((hue / 60) % 2 - 1))
-      const channels = hue < 60 ? [255, x, 0] : hue < 120 ? [x, 255, 0]
-        : hue < 180 ? [0, 255, x] : hue < 240 ? [0, x, 255]
-          : hue < 300 ? [x, 0, 255] : [255, 0, x]
+      const channels = hue < 60
+        ? [255, x, 0]
+        : hue < 120
+          ? [x, 255, 0]
+          : hue < 180
+            ? [0, 255, x]
+            : hue < 240
+              ? [0, x, 255]
+              : hue < 300 ? [x, 0, 255] : [255, 0, x]
       seeds.push('#' + channels.map(c => Math.round(c).toString(16).padStart(2, '0')).join(''))
     }
     for (const seed of seeds) {
@@ -228,7 +235,6 @@ for (const mode of ['light', 'dark', 'black']) {
     }
   })
 }
-
 
 for (const dark of [false, true]) {
   test(`Material ${dark ? 'dark' : 'light'} container pairs and state layers retain contrast for every preset`, () => {

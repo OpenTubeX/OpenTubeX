@@ -3,19 +3,26 @@ import test from 'node:test'
 import { createIOSMediaTransport } from '../../src/renderer/helpers/player/iosMediaTransport.js'
 
 function fixture(overrides = {}) {
-  const prepared = [], aborted = [], fetched = []
+  const prepared = []; const aborted = []; const fetched = []
   let fetchAborts = 0
   class Operation {
     constructor(promise, abort) { this.promise = promise; this.abort = abort }
   }
   const shaka = {
-    util: { AbortableOperation: Operation, Error: Object.assign(class extends Error {}, {
-      Severity: { RECOVERABLE: 1 }, Category: { NETWORK: 1 }, Code: { OPERATION_ABORTED: 7001 }
-    }) },
-    net: { HttpFetchPlugin: { parse: (url, request) => {
-      fetched.push({ url, request })
-      return new Operation(Promise.resolve({ uri: url, headers: { 'x-opentubex-media-url': 'https://rr2.googlevideo.com/final/index.m3u8' }, data: new Uint8Array([1, 2]).buffer }), async () => { fetchAborts++ })
-    } } }
+    util: {
+      AbortableOperation: Operation,
+      Error: Object.assign(class extends Error {}, {
+        Severity: { RECOVERABLE: 1 }, Category: { NETWORK: 1 }, Code: { OPERATION_ABORTED: 7001 }
+      })
+    },
+    net: {
+      HttpFetchPlugin: {
+        parse: (url, request) => {
+          fetched.push({ url, request })
+          return new Operation(Promise.resolve({ uri: url, headers: { 'x-opentubex-media-url': 'https://rr2.googlevideo.com/final/index.m3u8' }, data: new Uint8Array([1, 2]).buffer }), async () => { fetchAborts++ })
+        }
+      }
+    }
   }
   const native = {
     prepare: async options => { prepared.push(options); return { requestId: `request-${prepared.length}` } },

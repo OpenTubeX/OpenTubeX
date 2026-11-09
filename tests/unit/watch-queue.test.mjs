@@ -4,11 +4,6 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { createStore } from 'vuex'
 import { computed, ref } from 'vue'
-
-const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const autoplayStart = playerSource.indexOf('    const autoplayVideos = computed(')
-const autoplayEnd = playerSource.indexOf('\n    })', autoplayStart) + '\n    })'.length
-const autoplaySource = playerSource.slice(autoplayStart, autoplayEnd)
 import downloads from '../../src/renderer/store/modules/downloads.js'
 import { navigationDownloadId } from '../../src/renderer/helpers/downloadPlayback.js'
 
@@ -19,6 +14,11 @@ import {
   watchQueueMutations,
   persistWatchQueue,
 } from '../../src/renderer/store/modules/watch-queue.js'
+
+const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const autoplayStart = playerSource.indexOf('    const autoplayVideos = computed(')
+const autoplayEnd = playerSource.indexOf('\n    })', autoplayStart) + '\n    })'.length
+const autoplaySource = playerSource.slice(autoplayStart, autoplayEnd)
 
 function video (videoId) {
   return { videoId, title: `Video ${videoId}` }
@@ -87,10 +87,12 @@ test('storage failures leave the in-memory queue usable', () => {
 })
 
 test('removing a download also removes its queued copies without affecting other sources', () => {
-  const store = createStore({ modules: {
-    downloads: { ...downloads, state: () => ({ ytDlpDownloads: { 1: { id: 1 }, 2: { id: 2 } } }) },
-    watchQueue,
-  } })
+  const store = createStore({
+    modules: {
+      downloads: { ...downloads, state: () => ({ ytDlpDownloads: { 1: { id: 1 }, 2: { id: 2 } } }) },
+      watchQueue,
+    }
+  })
   for (const downloadId of ['1', '2', '1', undefined]) {
     store.commit('addVideoToWatchQueue', {
       video: { videoId: 'same-video', route: downloadId ? { query: { downloadId } } : undefined },
@@ -201,17 +203,22 @@ test('queued downloads explicitly start after loading even when general autoplay
     $store: { commit() {}, getters: { getAutoplayVideos: false } },
     tabRouter: { resolve: route => ({ fullPath: route.path }), push() {} },
     t: key => key,
-    isLoading: false, preparingVideoLoadGeneration: null,
-    localFilePlayback: true, videoPlayerLoaded: true,
-    videoId: 'previous', tabRoute: { fullPath: '/watch/previous', query: { downloadId: '42' } },
+    isLoading: false,
+    preparingVideoLoadGeneration: null,
+    localFilePlayback: true,
+    videoPlayerLoaded: true,
+    videoId: 'previous',
+    tabRoute: { fullPath: '/watch/previous', query: { downloadId: '42' } },
     isCurrentlyPresented: () => true,
   }
   watch.playNextQueuedVideo()
   watch.videoId = 'saved'
   const autoplay = active => runInNewContext(autoplaySource + '\nautoplayVideos.value', {
-    computed, suppressInitialAutoplay: false,
+    computed,
+    suppressInitialAutoplay: false,
     autoplayRequested: { value: watch.queuedPlaybackVideoId === watch.videoId },
-    store: watch.$store, isActiveTab: { value: active },
+    store: watch.$store,
+    isActiveTab: { value: active },
   })
   assert.equal(autoplay(true), true, 'the next queued file starts without enabling general autoplay')
   assert.equal(autoplay(false), false, 'a hidden tab must not start playing')
@@ -219,15 +226,20 @@ test('queued downloads explicitly start after loading even when general autoplay
   assert.equal(watch.queuedPlaybackVideoId, null, 'the start request is consumed for later visits')
 })
 
-
 test('playlist and recommendation autoplay start the next video even when general autoplay is disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
   const methods = watchMethods(source, ['playNextVideoNow', 'handleUnavailablePlaylistVideoSkipped', 'restartCurrentVideo', 'watchRouteForVideo'])
   const actions = []
   const watch = {
-    ...methods, watchingPlaylist: true, isOffline: false, videoId: 'current', queuedPlaybackVideoId: null,
+    ...methods,
+    watchingPlaylist: true,
+    isOffline: false,
+    videoId: 'current',
+    queuedPlaybackVideoId: null,
     abortAutoplayCountdown() { this.autoplayCountdown = null },
-    $store: { getters: {} }, tabRouter: { push() {} }, t: key => key,
+    $store: { getters: {} },
+    tabRouter: { push() {} },
+    t: key => key,
     $refs: {
       player: { isPaused: () => true, setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) },
       watchVideoPlaylist: { playNextVideo: options => { actions.push(['next', options]); return 'next' } },
@@ -255,30 +267,41 @@ test('playlist and recommendation autoplay start the next video even when genera
   assert.equal(watch.queuedPlaybackVideoId, 'recommended', 'the next recommended video starts')
 })
 
-for (const timestamp of ['', '&timestamp=0.25']) test(`a queued duplicate of the current download replays${timestamp ? ' from a timestamped route' : ' without a route change'}`, async () => {
-  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-  const methods = watchMethods(source, ['playNextQueuedVideo', 'restartCurrentVideo', 'watchRouteWithoutTimestamp'])
-  const route = { path: '/watch/saved', query: { downloadId: '42' } }
-  const actions = []
-  const watch = {
-    ...methods, nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
-    tabRoute: { fullPath: '/watch/saved?downloadId=42' + timestamp },
-    tabRouter: { resolve: () => ({ fullPath: '/watch/saved?downloadId=42' }), push() { assert.fail('duplicate must not navigate') } },
-    $store: { commit: (name, id) => actions.push([name, id]) }, t: key => key,
-    $refs: { player: { setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) } },
-  }
-  assert.equal(watch.playNextQueuedVideo(), true)
-  assert.deepEqual(actions, [['removeVideoFromWatchQueue', 1], ['seek', 0], ['play']])
-})
+for (const timestamp of ['', '&timestamp=0.25']) {
+  test(`a queued duplicate of the current download replays${timestamp ? ' from a timestamped route' : ' without a route change'}`, async () => {
+    const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+    const methods = watchMethods(source, ['playNextQueuedVideo', 'restartCurrentVideo', 'watchRouteWithoutTimestamp'])
+    const route = { path: '/watch/saved', query: { downloadId: '42' } }
+    const actions = []
+    const watch = {
+      ...methods,
+      nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
+      tabRoute: { fullPath: '/watch/saved?downloadId=42' + timestamp },
+      tabRouter: { resolve: () => ({ fullPath: '/watch/saved?downloadId=42' }), push() { assert.fail('duplicate must not navigate') } },
+      $store: { commit: (name, id) => actions.push([name, id]) },
+      t: key => key,
+      $refs: { player: { setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) } },
+    }
+    assert.equal(watch.playNextQueuedVideo(), true)
+    assert.deepEqual(actions, [['removeVideoFromWatchQueue', 1], ['seek', 0], ['play']])
+  })
+}
 
 test('queued autoplay ends after playback starts so later source loads obey the preference', async () => {
   const playing = playerSource.slice(playerSource.indexOf('    function handlePlaying() {'), playerSource.indexOf('    function handleWaiting() {'))
   const autoplayRequested = ref(true)
   const autoplay = runInNewContext(`${autoplaySource}\n${playing}\nautoplayVideos.value; handlePlaying(); autoplayVideos.value`, {
-    autoplayRequested, computed, suppressInitialAutoplay: false,
-    store: { getters: { getAutoplayVideos: false } }, isActiveTab: { value: true },
-    shortsNavigationSuspended: { value: false }, hasPlaybackPosition: { value: false }, showPoster: { value: true },
-    startPaidPromotionTimer() {}, emit() {}, process: { env: {} },
+    autoplayRequested,
+    computed,
+    suppressInitialAutoplay: false,
+    store: { getters: { getAutoplayVideos: false } },
+    isActiveTab: { value: true },
+    shortsNavigationSuspended: { value: false },
+    hasPlaybackPosition: { value: false },
+    showPoster: { value: true },
+    startPaidPromotionTimer() {},
+    emit() {},
+    process: { env: {} },
   })
   assert.equal(autoplay, false, 'a consumed queue request must not leave autoplay enabled for later source loads')
 })
@@ -287,7 +310,10 @@ test('an explicit queue request starts a SABR replacement without re-enabling pr
   const autoplayRequested = ref(false)
   const isActiveTab = ref(true)
   const autoplay = runInNewContext(autoplaySource + '\nautoplayVideos', {
-    autoplayRequested, isActiveTab, computed, suppressInitialAutoplay: true,
+    autoplayRequested,
+    isActiveTab,
+    computed,
+    suppressInitialAutoplay: true,
     store: { getters: { getAutoplayVideos: true } },
   })
   assert.equal(autoplay.value, false, 'a paused SABR replacement must stay paused')
@@ -319,13 +345,26 @@ for (const format of ['dash', 'legacy']) {
         const starts = []
         const context = {
           props: { format, startTime: 2, autoplayRequested: queued, localFilePlayback: true, manifestSrc: 'queued-file', manifestMimeType: 'audio/mpeg' },
-          autoplayRequested: ref(queued), formatSwitchGeneration: 0, pendingFormatSwitchState: null, restartedSourceKey: null,
-          hasLoaded: ref(false), preferAutoQuality: ref(true), hasMultipleAudioTracks: ref(false),
-          player: { configure() {}, getVariantTracks: () => [] }, ui: {}, ignoreErrors: false,
-          foregroundLoadAbortController: null, clearSabrBackoffTimer() {}, clearPreRollTimer() {},
-          unloadForFormatSwitch: async () => {}, ensureSabrStream() {}, getPlayerConfig: () => ({}),
-          loadPlaybackSource: async (url, start) => starts.push(start), setLegacyQuality: async start => starts.push(start),
-          process: { env: {} }, Date,
+          autoplayRequested: ref(queued),
+          formatSwitchGeneration: 0,
+          pendingFormatSwitchState: null,
+          restartedSourceKey: null,
+          hasLoaded: ref(false),
+          preferAutoQuality: ref(true),
+          hasMultipleAudioTracks: ref(false),
+          player: { configure() {}, getVariantTracks: () => [] },
+          ui: {},
+          ignoreErrors: false,
+          foregroundLoadAbortController: null,
+          clearSabrBackoffTimer() {},
+          clearPreRollTimer() {},
+          unloadForFormatSwitch: async () => {},
+          ensureSabrStream() {},
+          getPlayerConfig: () => ({}),
+          loadPlaybackSource: async (url, start) => starts.push(start),
+          setLegacyQuality: async start => starts.push(start),
+          process: { env: {} },
+          Date,
         }
         await runInNewContext(`(async () => { ${firstLoad}\nconst initialSwitch = ${initialSwitch}; await ${switchArgs ? `initialSwitch(${switchArgs})` : 'performFirstLoad()'} })()`, context)
         assert.deepEqual(starts, starts.map(() => restart ? 0 : 2))

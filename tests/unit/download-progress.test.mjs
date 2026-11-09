@@ -11,10 +11,16 @@ function replay(lines, initialStatus = 'downloading') {
   const entry = {}
   const updates = []
   const context = vm.createContext({
-    status, entry, sendStatus: force => updates.push({ ...status, force }),
-    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:', FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
-    SUBTITLE_DESTINATION_REGEX: /^never$/, PROGRESS_REGEX: /^\[download\]\s+(\d+(?:\.\d+)?)%(?:.*?\bat\s+(\S+))?(?:.*?\bETA\s+(\S+))?/,
-    DESTINATION_REGEX: /^never$/, MERGER_REGEX: /^never$/, subtitlesOnly: false,
+    status,
+    entry,
+    sendStatus: force => updates.push({ ...status, force }),
+    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+    FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
+    SUBTITLE_DESTINATION_REGEX: /^never$/,
+    PROGRESS_REGEX: /^\[download\]\s+(\d+(?:\.\d+)?)%(?:.*?\bat\s+(\S+))?(?:.*?\bETA\s+(\S+))?/,
+    DESTINATION_REGEX: /^never$/,
+    MERGER_REGEX: /^never$/,
+    subtitlesOnly: false,
   })
   vm.runInContext(`${handler}\nglobalThis.handleLine = handleStdoutLine`, context)
   for (const line of lines) context.handleLine(line)
@@ -79,7 +85,9 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
   const wiring = source.slice(source.indexOf("  let stdoutBuffer = ''"), source.indexOf("  child.on('error',", source.indexOf("  let stdoutBuffer = ''")))
   vm.runInNewContext(wiring, {
     child: { stdout: stream('stdout'), stderr: stream('stderr') },
-    handleStdoutLine: line => lines.push(line), stderrLines, errorLines: [],
+    handleStdoutLine: line => lines.push(line),
+    stderrLines,
+    errorLines: [],
   })
   listeners['stdout:data']('__OPENTUBEX_PREPARING__:aaaaaaaaaaa\n')
   listeners['stderr:data']('__OPENTUBEX_DOWN')
@@ -127,11 +135,24 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
   let close
   vm.runInNewContext(`${source.slice(start, source.indexOf("  child.on('error',", start))}${source.slice(closeStart, closeEnd)}
     for (const line of stderr) handleStderrLine(line)`, {
-    id: 1, stderr, stderrLines: [], errorLines: [], status, payload, subtitleFormat, finished: false,
-    subtitleDestinations: new Set(destinations), existsSync: file => existingFiles.includes(file),
-    entry: { cancelled: false, restarting: false }, activeDownloads: new Map(),
-    handleStdoutLine() {}, releaseDownloadSlot() {}, removeTemporaryDownloadFolder() {}, sendStatus() {},
-    saveDownloadRecords: async () => {}, showAutomaticDownloadNotification: (_, state) => notifications.push(state),
+    id: 1,
+    stderr,
+    stderrLines: [],
+    errorLines: [],
+    status,
+    payload,
+    subtitleFormat,
+    finished: false,
+    subtitleDestinations: new Set(destinations),
+    existsSync: file => existingFiles.includes(file),
+    entry: { cancelled: false, restarting: false },
+    activeDownloads: new Map(),
+    handleStdoutLine() {},
+    releaseDownloadSlot() {},
+    removeTemporaryDownloadFolder() {},
+    sendStatus() {},
+    saveDownloadRecords: async () => {},
+    showAutomaticDownloadNotification: (_, state) => notifications.push(state),
     child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })

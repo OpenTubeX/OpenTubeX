@@ -9,13 +9,19 @@ const loaderCode = code.slice(code.indexOf('async function loadYtDlpPlaybackSour
 function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true, cacheExpiresDuringExtraction = false } = {}) {
   const attempts = []
   const info = {
-    isLive: false, liveStatus: 'not_live', duration: 47, storyboardVtt: null, incomplete,
-    formats: combinedOnly ? [
-      { protocol: 'https', url: 'https://media.test/combined', vcodec: 'avc1', acodec: 'mp4a', formatNote: '360s, mesh' }
-    ] : [
-      { protocol: 'https', url: 'https://media.test/video', vcodec: 'avc1', acodec: 'none', formatNote: mesh ? '1080s60, mesh' : '1080p60' },
-      { protocol: 'https', url: 'https://media.test/audio', vcodec: 'none', acodec: 'mp4a' }
-    ]
+    isLive: false,
+    liveStatus: 'not_live',
+    duration: 47,
+    storyboardVtt: null,
+    incomplete,
+    formats: combinedOnly
+      ? [
+          { protocol: 'https', url: 'https://media.test/combined', vcodec: 'avc1', acodec: 'mp4a', formatNote: '360s, mesh' }
+        ]
+      : [
+          { protocol: 'https', url: 'https://media.test/video', vcodec: 'avc1', acodec: 'none', formatNote: mesh ? '1080s60, mesh' : '1080p60' },
+          { protocol: 'https', url: 'https://media.test/audio', vcodec: 'none', acodec: 'mp4a' }
+        ]
   }
   const dependencies = {
     effectivePlaybackSourceCacheKey: () => 'key',
@@ -37,7 +43,8 @@ function loader({ mesh = true, cached = null, panorama = true, incomplete = fals
     getEarliestYtDlpFormatExpiry: () => new Date(Date.now() + 3600_000),
     cacheYtDlpPlaybackSource: async () => {},
     probeYtDlpHlsManifest: async () => probePlayable,
-    MANIFEST_TYPE_DASH: 'application/dash+xml', MANIFEST_TYPE_HLS: 'application/x-mpegurl',
+    MANIFEST_TYPE_DASH: 'application/dash+xml',
+    MANIFEST_TYPE_HLS: 'application/x-mpegurl',
     console,
   }
   const load = compileFunction(`${loaderCode}\nreturn loadYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
@@ -58,10 +65,12 @@ test('built-in panorama extraction uses an isolated VR client and deciphers its 
     Session: class {
       constructor(context) {
         requestedContext = context
-        this.actions = { execute: async (_endpoint, options) => {
-          requestedOptions = options
-          return { data: { streamingData: { hlsManifestUrl: 'https://media.test/panorama.m3u8' } } }
-        } }
+        this.actions = {
+          execute: async (_endpoint, options) => {
+            requestedOptions = options
+            return { data: { streamingData: { hlsManifestUrl: 'https://media.test/panorama.m3u8' } } }
+          }
+        }
       }
     },
     decipherManifestUrl: async (url, player, token, isDash) => {
@@ -136,8 +145,11 @@ test('a rejected supplied panorama retries the built-in VR client', async () => 
     return vrHlsManifestUrl
   }`, Object.keys(dependencies))(...Object.values(dependencies))
   const watch = {
-    vrProjection: 'MESH', playbackEngineSwitchGeneration: 1,
-    isCurrentVideoLoad: () => true, isYtDlpPlaybackRequested: () => false, updateTitle: () => {},
+    vrProjection: 'MESH',
+    playbackEngineSwitchGeneration: 1,
+    isCurrentVideoLoad: () => true,
+    isYtDlpPlaybackRequested: () => false,
+    updateTitle: () => {},
   }
   assert.equal(await select.call(watch), 'https://media.test/fresh.m3u8')
   assert.equal(watch.vrProjection, 'EQUIRECTANGULAR')
@@ -147,10 +159,17 @@ test('a rejected supplied panorama retries the built-in VR client', async () => 
 
 for (const savedPanorama of [false, true]) {
   test(`switching a ${savedPanorama ? 'saved' : 'current'} built-in panorama to yt-dlp ignores cached flat streams`, async () => {
-    const { load, attempts } = loader({ cached: {
-      subtitlesIncluded: true, vrProjection: null, captions: [], captionTranslations: [],
-      manifestSrc: 'data:application/dash+xml,<MPD/>', legacyFormats: [], expiryDate: null,
-    } })
+    const { load, attempts } = loader({
+      cached: {
+        subtitlesIncluded: true,
+        vrProjection: null,
+        captions: [],
+        captionTranslations: [],
+        manifestSrc: 'data:application/dash+xml,<MPD/>',
+        legacyFormats: [],
+        expiryDate: null,
+      }
+    })
     const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
       (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
     )
@@ -159,9 +178,13 @@ for (const savedPanorama of [false, true]) {
       manifestMimeType: 'application/x-mpegurl',
       builtInPlaybackSource: savedPanorama ? { vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/x-mpegurl' } : null,
       activePlaybackEngine: savedPanorama ? 'yt-dlp' : 'built-in',
-      playbackEngineSwitchGeneration: 1, playbackEngineFallbackTarget: null,
-      captions: [], videoStoryboardSrc: '', hasResolvedVideoTitle: true,
-      isCurrentVideoLoad: () => true, alignActiveFormatWithAvailableSources: () => {},
+      playbackEngineSwitchGeneration: 1,
+      playbackEngineFallbackTarget: null,
+      captions: [],
+      videoStoryboardSrc: '',
+      hasResolvedVideoTitle: true,
+      isCurrentVideoLoad: () => true,
+      alignActiveFormatWithAvailableSources: () => {},
     }
     assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
     assert.equal(watch.manifestSrc, 'https://media.test/panorama.m3u8')
@@ -178,12 +201,17 @@ for (const savedPanorama of [false, true]) {
         (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
       )
       const watch = {
-        vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/dash+xml',
+        vrProjection: 'EQUIRECTANGULAR',
+        manifestMimeType: 'application/dash+xml',
         builtInPlaybackSource: savedPanorama ? { vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/dash+xml' } : null,
         activePlaybackEngine: savedPanorama ? 'yt-dlp' : 'built-in',
-        playbackEngineSwitchGeneration: 1, playbackEngineFallbackTarget: null,
-        captions: [], videoStoryboardSrc: '', hasResolvedVideoTitle: true,
-        isCurrentVideoLoad: () => true, alignActiveFormatWithAvailableSources: () => {},
+        playbackEngineSwitchGeneration: 1,
+        playbackEngineFallbackTarget: null,
+        captions: [],
+        videoStoryboardSrc: '',
+        hasResolvedVideoTitle: true,
+        isCurrentVideoLoad: () => true,
+        alignActiveFormatWithAvailableSources: () => {},
       }
       assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
       assert.equal(watch.manifestMimeType, 'application/dash+xml')
@@ -224,7 +252,8 @@ test('a combined-only mesh stream still retries and prefers a recovered panorama
 for (const projection of [null]) {
   test(`failed panorama extraction uses a cached ${projection ?? 'unmarked'} flat source only as the final fallback`, async () => {
     const cached = {
-      subtitlesIncluded: true, vrProjection: projection,
+      subtitlesIncluded: true,
+      vrProjection: projection,
       manifestSrc: 'data:application/dash+xml,<MPD/>',
       legacyFormats: [{ url: 'https://media.test/combined' }],
     }
@@ -263,8 +292,11 @@ for (const backend of ['Local', 'Invidious']) {
       }`, Object.keys(dependencies))(...Object.values(dependencies))
       let current = true
       const watch = {
-        vrProjection: 'MESH', playbackEngineSwitchGeneration: 1, proxyVideos: false,
-        isCurrentVideoLoad: () => current, isYtDlpPlaybackRequested: () => false,
+        vrProjection: 'MESH',
+        playbackEngineSwitchGeneration: 1,
+        proxyVideos: false,
+        isCurrentVideoLoad: () => current,
+        isYtDlpPlaybackRequested: () => false,
         updateTitle: () => {},
       }
       const pending = select.call(watch)

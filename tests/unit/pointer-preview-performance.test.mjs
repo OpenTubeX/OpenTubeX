@@ -42,7 +42,11 @@ function colorPicker() {
   const declarations = source.match(/^let saturationValue\w* = .*$/gm).join('\n')
   const methods = source.slice(source.indexOf('function startSaturationValue('), source.indexOf('function adjustSaturationValue('))
   const api = vm.runInNewContext(`${declarations}\n${methods}\n({ startSaturationValue, updateSaturationValue, stopSaturationValue, cancelSaturationValue })`, {
-    ...frames, saturation, value, open, settingsOverlayActive,
+    ...frames,
+    saturation,
+    value,
+    open,
+    settingsOverlayActive,
     saturationValueRef: { value: surface },
     clamp: (number, min, max) => Math.min(max, Math.max(min, number)),
     emitCurrentColor() { calls.colors++ },
@@ -110,9 +114,15 @@ test('playlist preview measures one pointer position per frame and uses the late
   const declarations = source.match(/^let preview\w* = .*$/gm).join('\n')
   const method = source.slice(source.indexOf('function updateProgressBarPreview('), source.indexOf('function handleProgressBarClick('))
   const api = vm.runInNewContext(`${declarations}\n${method}\n;({ updateProgressBarPreview })`, {
-    ...frames, nextTick: async () => {}, watch() {}, onBeforeUnmount() {},
-    playlistProgressBar: { value: bar }, progressBarPreview: { value: preview },
-    previewVideoIndex, previewPositionPixels, showProgressBarPreview,
+    ...frames,
+    nextTick: async () => {},
+    watch() {},
+    onBeforeUnmount() {},
+    playlistProgressBar: { value: bar },
+    progressBarPreview: { value: preview },
+    previewVideoIndex,
+    previewPositionPixels,
+    showProgressBarPreview,
     playlistVideoCount: ref(100)
   })
   for (let index = 0; index < 50; index++) api.updateProgressBarPreview({ clientX: 50 + index })

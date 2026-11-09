@@ -19,10 +19,14 @@ test('Android fullscreen docks animate without reflowing the player every frame'
     settings = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,
-        ReducedMotion: 'off', AnimationSpeed: 100,
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        ReducedMotion: 'off',
+        AnimationSpeed: 100,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) {
@@ -31,7 +35,8 @@ test('Android fullscreen docks animate without reflowing the player every frame'
       }
       window.__fullscreenDocksFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenDocksFetch(url, options) : Promise.reject(new Error('Offline dock test'))
+        ? window.__fullscreenDocksFetch(url, options)
+        : Promise.reject(new Error('Offline dock test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-docks-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -41,8 +46,7 @@ test('Android fullscreen docks animate without reflowing the player every frame'
     })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -50,11 +54,25 @@ test('Android fullscreen docks animate without reflowing the player every frame'
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: false, activeFormat: 'legacy',
-        videoTitle: 'Fullscreen dock performance test', videoLengthSeconds: 60,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: false,
+        activeFormat: 'legacy',
+        videoTitle: 'Fullscreen dock performance test',
+        videoLengthSeconds: 60,
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 320,
+          height: 180,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')

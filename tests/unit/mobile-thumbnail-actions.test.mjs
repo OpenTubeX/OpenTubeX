@@ -11,20 +11,32 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   assert.notEqual(start, -1, 'thumbnail actions must be available in the mobile context menu')
   const end = source.indexOf('\nconst openMobileContextActions', start)
   const calls = []
-  const context = { computed, process: { env: { IS_CAPACITOR: true } },
+  const context = {
+    computed,
+    process: { env: { IS_CAPACITOR: true } },
     store: { getters: reactive({ getTabsEnabled: true }) },
-    extraThumbnailActionButton: ref(null), showPlaylists: ref(true),
-    isInAnyPlaylist: ref(false), isQuickBookmarkEnabled: ref(true), props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
-    quickBookmarkIconText: ref('Bookmark'), quickBookmarkIcon: ref(['far', 'bookmark']),
+    extraThumbnailActionButton: ref(null),
+    showPlaylists: ref(true),
+    isInAnyPlaylist: ref(false),
+    isQuickBookmarkEnabled: ref(true),
+    props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
+    quickBookmarkIconText: ref('Bookmark'),
+    quickBookmarkIcon: ref(['far', 'bookmark']),
     quickBookmarkPlaylist: ref({ playlistName: 'Favorites' }),
-    isInQuickBookmarkPlaylist: ref(false), inUserPlaylist: ref(false),
+    isInQuickBookmarkPlaylist: ref(false),
+    inUserPlaylist: ref(false),
     verticalMoveControls: ref(true),
-    canToggleLiveReminder: ref(false), liveReminderActive: ref(false), liveReminderLoading: ref(false),
+    canToggleLiveReminder: ref(false),
+    liveReminderActive: ref(false),
+    liveReminderLoading: ref(false),
     t: key => key,
     mobilePlaylistPickerOpen: ref(false),
-    handleOptionsClick: option => calls.push(option), toggleQuickBookmarked: () => calls.push('bookmark'),
-    moveVideoUp: () => calls.push('up'), moveVideoDown: () => calls.push('down'),
-    removeFromPlaylist: () => calls.push('remove'), toggleLiveReminder: () => calls.push('reminder')
+    handleOptionsClick: option => calls.push(option),
+    toggleQuickBookmarked: () => calls.push('bookmark'),
+    moveVideoUp: () => calls.push('up'),
+    moveVideoDown: () => calls.push('down'),
+    removeFromPlaylist: () => calls.push('remove'),
+    toggleLiveReminder: () => calls.push('reminder')
   }
   vm.runInNewContext(source.slice(start, end) + '\nglobalThis.actions = mobileThumbnailActions', context)
   assert.equal(context.actions.value.length, 3)

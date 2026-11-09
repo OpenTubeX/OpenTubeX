@@ -11,9 +11,14 @@ test('download metadata preserves each playlist file channel regardless of outpu
   for (const metadataFirst of [false, true]) {
     const status = { videoId: '', files: [], destinations: [] }
     const handle = vm.runInNewContext(`${source.slice(start, end)} }\nhandleStdoutLine`, {
-      status, metadataByVideoId: new Map(),
-      FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:', FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
-      ID_REGEX: /^[\w-]{11}$/, truncatesLongTitles: false, sendStatus() {}, Buffer,
+      status,
+      metadataByVideoId: new Map(),
+      FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+      FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
+      ID_REGEX: /^[\w-]{11}$/,
+      truncatesLongTitles: false,
+      sendStatus() {},
+      Buffer,
     })
     const metadata = '__OPENTUBEX_METADATA__:"abcdefghijk"\t"Title"\t"thumbnail"\t"Channel"\t"UC-channel"'
     const file = '__OPENTUBEX_FILE__:abcdefghijk\t120\t1920\t1080\t/video.mp4'

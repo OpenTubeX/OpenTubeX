@@ -13,14 +13,21 @@ const dialogSource = readFileSync(new URL('../../src/renderer/helpers/androidBac
 function loadPreviewSelection(context) {
   const start = appSource.indexOf('function isSideNavShown()')
   const createAndroidBackDialogPreview = vm.runInNewContext(`${dialogSource}; createAndroidBackDialogPreview`, {
-    nextTick, settleAndroidBackAnimation, applyAnimationSpeed: animation => animation,
-    isReducedMotionEnabled: () => false, requestAnimationFrame: context.requestAnimationFrame,
+    nextTick,
+    settleAndroidBackAnimation,
+    applyAnimationSpeed: animation => animation,
+    isReducedMotionEnabled: () => false,
+    requestAnimationFrame: context.requestAnimationFrame,
     getComputedStyle: () => ({ inlineSize: '200px' }),
   })
   return vm.runInNewContext(`${appSource.slice(start, appSource.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
-    mobileContextLink: { value: null }, mobileContextActions: { value: null }, createAndroidBackDialogPreview,
-    isAnyPromptOpen: { value: false }, settingsWindowOpen: { value: false },
-    getComputedStyle: () => ({ inlineSize: '200px' }), ...context,
+    mobileContextLink: { value: null },
+    mobileContextActions: { value: null },
+    createAndroidBackDialogPreview,
+    isAnyPromptOpen: { value: false },
+    settingsWindowOpen: { value: false },
+    getComputedStyle: () => ({ inlineSize: '200px' }),
+    ...context,
   })
 }
 
@@ -30,7 +37,10 @@ function drawerDocument(drawer, activeElement = { closest: () => null }) {
 
 function drawerElement(animation) {
   return {
-    isConnected: true, inert: false, querySelector: () => null, animate: () => animation,
+    isConnected: true,
+    inert: false,
+    querySelector: () => null,
+    animate: () => animation,
     getBoundingClientRect: () => ({ width: 240 }),
     style: { getPropertyValue: () => '', getPropertyPriority: () => '', setProperty() {}, removeProperty() {} },
   }
@@ -149,8 +159,12 @@ test('root allows the system preview only when no confirmation, history, fullscr
   const refs = Object.fromEntries(['isSideNavOpen', 'settingsWindowOpen', 'isAnyPromptOpen', 'mobileContextLink', 'mobileContextActions']
     .map(name => [name, { value: null }]))
   const shouldIntercept = vm.runInNewContext(`${source.slice(start, source.indexOf('\n/** @param {Element} target */', start))}\nshouldInterceptAndroidBack`, {
-    store: { getters }, presentedTabId: { value: 'one' }, document, window: { matchMedia: () => ({ matches: wide }) },
-    hasVisibleGamepadLayer: () => layerVisible, ...refs
+    store: { getters },
+    presentedTabId: { value: 'one' },
+    document,
+    window: { matchMedia: () => ({ matches: wide }) },
+    hasVisibleGamepadLayer: () => layerVisible,
+    ...refs
   })
   assert.equal(shouldIntercept(), false)
   getters.getConfirmCloseApp = true
@@ -184,10 +198,14 @@ test('Back previews a prompt or dropdown above the side nav instead of the side 
   let animated = false
   const drawer = { ...drawerElement({}), animate: () => { animated = true } }
   const context = {
-    isSideNavOpen: { value: true }, useWatchSideNavOverlay: { value: false }, isLocaleRightToLeft: { value: false },
-    window: { matchMedia: () => ({ matches: true }) }, handleAndroidBack: async () => {},
+    isSideNavOpen: { value: true },
+    useWatchSideNavOverlay: { value: false },
+    isLocaleRightToLeft: { value: false },
+    window: { matchMedia: () => ({ matches: true }) },
+    handleAndroidBack: async () => {},
     getAndroidBackTarget: () => ({ closest: () => null, classList: { contains: () => false } }),
-    getAndroidBackSheet: () => null, presentedTabId: { value: null },
+    getAndroidBackSheet: () => null,
+    presentedTabId: { value: null },
   }
   const prompt = loadPreviewSelection({ ...context, isAnyPromptOpen: { value: true }, document: drawerDocument(drawer) })()
   assert.ok(!prompt?.begin(), 'an inert side nav behind a prompt is not the Back target')

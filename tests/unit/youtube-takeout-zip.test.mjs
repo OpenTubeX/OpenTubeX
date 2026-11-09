@@ -167,8 +167,10 @@ for (const [filename, title] of [
       assert.deepEqual(errors, [])
       assert.equal(metadata.size, 1)
       assert.deepEqual(metadata.get(`${root}/${filename}`), {
-        playlistName: title, description: 'Description',
-        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+        playlistName: title,
+        description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'),
+        lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
       })
     })
   }
@@ -289,8 +291,10 @@ for (const [schema, badMetadata] of [
       const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob([archive]))
       assert.equal(metadata.size, 2)
       assert.deepEqual(metadata.get('Good account/playlists/Good_List-videos.csv'), {
-        playlistName: 'Good/List', description: 'Description',
-        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+        playlistName: 'Good/List',
+        description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'),
+        lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
       })
       assert.equal(metadata.get('Good account/playlists/Empty-videos.csv').playlistName, 'Empty')
       assert.equal(errors.length, 1)
@@ -302,8 +306,10 @@ for (const [schema, badMetadata] of [
 test('parses reordered metadata columns, BOM, CRLF and quoted multiline descriptions', () => {
   const content = '\uFEFFPlaylist Description (Original),Playlist Title (Original),Playlist ID,Playlist Update Timestamp,Playlist Create Timestamp\r\n"First, second\r\nSay ""hello""","A/B-videos",PLexample,2025-02-01T00:00:00Z,2024-01-01T00:00:00Z\r\n'
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content), [{
-    playlistName: 'A/B-videos', description: 'First, second\r\nSay "hello"',
-    createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
+    playlistName: 'A/B-videos',
+    description: 'First, second\r\nSay "hello"',
+    createdAt: Date.parse('2024-01-01T00:00:00Z'),
+    lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
   }])
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv('Playlist ID,Playlist Title (Original)\nPLempty,Empty'), [{ playlistName: 'Empty' }])
 })

@@ -58,7 +58,10 @@ function fixture({ index = 1, active = true, presented = true, tabSelected = tru
   const opened = []
   const viewport = viewportFixture()
   const options = {
-    active, presented, tabSelected, panelOpen: false,
+    active,
+    presented,
+    tabSelected,
+    panelOpen: false,
     feed: [{ videoId: 'previous' }, { videoId: 'current' }, { videoId: 'next' }],
     index,
   }

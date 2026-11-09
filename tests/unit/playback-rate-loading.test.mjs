@@ -83,7 +83,7 @@ function fixture(music, controllerReady = false, { musicMode = false, sabrReload
   playerFunctions.registerQuickPlaybackRateBar()
 
   const select = vm.runInNewContext(
-    `(${barSource.match(/  setPlaybackRate_\(rate\) \{[^]*?\n  }/)[0].replace('setPlaybackRate_(rate)', 'function (rate)')})`,
+    `(${barSource.match(/ {2}setPlaybackRate_\(rate\) \{[^]*?\n {2}}/)[0].replace('setPlaybackRate_(rate)', 'function (rate)')})`,
     { quickPlaybackRateBarContexts: new Map([[state.ui.getControls, { events: state.events }]]), CustomEvent },
   )
   const bar = { controls: state.ui.getControls, player, updateButtonStates_() {} }

@@ -80,11 +80,17 @@ test('Android enriches incomplete playlist cards with the saved session and pres
   const bridge = adapter(getters, async ({ args, cookies, timeoutMs }) => {
     assert.equal(cookies, getters.getYtDlpPlaybackCookiesPath)
     const url = new URL(args.at(-1))
-    if (url.pathname === '/results') return { stdout: JSON.stringify({ entries: [
-      { id: 'PLmissing', ie_key: 'YoutubeTab', title: 'Missing metadata' },
-      { id: 'PLcount', ie_key: 'YoutubeTab', title: 'Missing count', thumbnails: [{ url: 'https://i.ytimg.com/search.jpg' }] },
-      { id: 'PLcomplete', ie_key: 'YoutubeTab', title: 'Complete', playlist_count: 0, thumbnails: [{ url: thumbnail }] }
-    ] }) }
+    if (url.pathname === '/results') {
+      return {
+        stdout: JSON.stringify({
+          entries: [
+            { id: 'PLmissing', ie_key: 'YoutubeTab', title: 'Missing metadata' },
+            { id: 'PLcount', ie_key: 'YoutubeTab', title: 'Missing count', thumbnails: [{ url: 'https://i.ytimg.com/search.jpg' }] },
+            { id: 'PLcomplete', ie_key: 'YoutubeTab', title: 'Complete', playlist_count: 0, thumbnails: [{ url: thumbnail }] }
+          ]
+        })
+      }
+    }
     assert.equal(url.origin, 'https://www.youtube.com')
     assert.equal(url.pathname, '/playlist')
     assert.ok(timeoutMs > 0 && timeoutMs <= 10_000, 'Native metadata extraction must use the remaining time budget')
@@ -120,9 +126,13 @@ test('Android bounds optional playlist metadata waits and leaves queued lookups 
       lookups++
       return new Promise(() => {})
     }
-    return { stdout: JSON.stringify({ entries: Array.from({ length: 20 }, (_, index) => ({
-      id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`
-    })) }) }
+    return {
+      stdout: JSON.stringify({
+        entries: Array.from({ length: 20 }, (_, index) => ({
+          id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`
+        }))
+      })
+    }
   })
   const pending = bridge.ytDlpSearch('query')
   await new Promise(setImmediate)

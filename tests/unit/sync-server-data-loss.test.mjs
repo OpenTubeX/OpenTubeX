@@ -20,7 +20,10 @@ const baselineMethod = storeSource.slice(storeSource.indexOf('    async persistP
 function playlistBaseline(previous = {}) {
   const settings = { syncServerSnapshot: JSON.stringify({ playlists: previous }) }
   const persistPlaylistSyncBaseline = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
-    rootState: { settings }, encrypted: false, historyAccount: Array(5).fill(undefined), parseSnapshot: JSON.parse,
+    rootState: { settings },
+    encrypted: false,
+    historyAccount: Array(5).fill(undefined),
+    parseSnapshot: JSON.parse,
     dispatch: async (action, value) => { assert.equal(action, 'updateSyncServerSnapshot'); settings.syncServerSnapshot = value },
   })
   return { persistPlaylistSyncBaseline, readBaseline: () => JSON.parse(settings.syncServerSnapshot).playlists }
@@ -38,41 +41,55 @@ const bookmark = bookmarks.createPlaylistBookmark({ id: 'playlist-1', title: 'A 
 const profile = { _id: 'profile-1', name: 'A profile', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [channel] }
 const playlist = { _id: 'playlist-1', playlistName: 'A playlist', videos: [video] }
 const largePlaylist = {
-  _id: 'playlist-large', playlistName: 'A large playlist',
+  _id: 'playlist-large',
+  playlistName: 'A large playlist',
   videos: Array.from({ length: 10 }, (_, index) => ({ videoId: `video-${index}`, title: `Video ${index}`, authorId: 'channel-1' })),
 }
 const largeProfile = {
-  _id: 'profile-large', name: 'A large profile', bgColor: '#000000', textColor: '#FFFFFF',
+  _id: 'profile-large',
+  name: 'A large profile',
+  bgColor: '#000000',
+  textColor: '#FFFFFF',
   subscriptions: Array.from({ length: 10 }, (_, index) => ({ id: `channel-${index}`, name: `Channel ${index}` })),
 }
 const cases = [
   {
-    collection: 'subscriptions', method: 'syncSubscriptions',
+    collection: 'subscriptions',
+    method: 'syncSubscriptions',
     state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }] } },
     client: { getSubscriptions: async () => [] },
-    previous: [channel.id], item: { id: channel.id, name: channel.name },
+    previous: [channel.id],
+    item: { id: channel.id, name: channel.name },
   },
   {
-    collection: 'playlistBookmarks', method: 'syncPlaylistBookmarks',
+    collection: 'playlistBookmarks',
+    method: 'syncPlaylistBookmarks',
     state: { settings: { playlistBookmarks: [bookmark] } },
     client: { getPlaylistBookmarks: async () => [] },
-    previous: [bookmark.playlist.id], item: { id: bookmark.playlist.id, name: bookmark.playlist.title },
+    previous: [bookmark.playlist.id],
+    item: { id: bookmark.playlist.id, name: bookmark.playlist.title },
   },
   {
-    collection: 'playlists', method: 'syncPlaylists',
+    collection: 'playlists',
+    method: 'syncPlaylists',
     state: { playlists: { playlists: [playlist] } },
     client: { getPlaylists: async () => [] },
     previous: { [playlist._id]: { metadata: { title: 'Old title' } } },
     item: { id: playlist._id, name: playlist.playlistName },
   },
   {
-    collection: 'history', method: 'syncHistory',
+    collection: 'history',
+    method: 'syncHistory',
     state: { history: { historyCacheSorted: [video] } },
     client: { getWatchHistory: async () => [] },
-    previous: [video.videoId], item: { id: video.videoId, name: video.title },
+    previous: [video.videoId],
+    item: { id: video.videoId, name: video.title },
   },
   {
-    collection: 'playlistVideos', scope: largePlaylist._id, scopeName: largePlaylist.playlistName, method: 'syncPlaylists',
+    collection: 'playlistVideos',
+    scope: largePlaylist._id,
+    scopeName: largePlaylist.playlistName,
+    method: 'syncPlaylists',
     state: { playlists: { playlists: [largePlaylist] } },
     client: {
       getPlaylists: async () => [{ id: largePlaylist._id }],
@@ -82,7 +99,10 @@ const cases = [
     items: largePlaylist.videos.map(item => ({ id: item.videoId, name: item.title })),
   },
   {
-    collection: 'profileChannels', scope: largeProfile._id, scopeName: largeProfile.name, method: 'syncProfiles',
+    collection: 'profileChannels',
+    scope: largeProfile._id,
+    scopeName: largeProfile.name,
+    method: 'syncProfiles',
     state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: largeProfile.subscriptions }, largeProfile] } },
     client: {
       getSubscriptionGroups: async () => [{ group: { id: largeProfile._id, title: largeProfile.name }, channels: [] }],
@@ -126,8 +146,12 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
   await adapter.createPlaylist({ id: local._id, title: local.playlistName, description: '' })
   await adapter.addPlaylistVideos(local._id, [{
-    id, title: id, uploader: { id: 'UCchannel', name: 'UCchannel', avatar: 'keep-avatar', verified: true },
-    upload_date: 0, duration: 0, thumbnail_url: 'keep-thumbnail',
+    id,
+    title: id,
+    uploader: { id: 'UCchannel', name: 'UCchannel', avatar: 'keep-avatar', verified: true },
+    upload_date: 0,
+    duration: 0,
+    thumbnail_url: 'keep-thumbnail',
   }])
   let uploads = 0
   const upload = adapter.addPlaylistVideos.bind(adapter)
@@ -173,7 +197,9 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
 for (const addVideosToTop of [false, true]) {
   test(`playlist sync places remote-only videos using local insertion preference ${addVideosToTop}`, async () => {
     const local = {
-      _id: 'insertion-order', playlistName: 'Ordered', addVideosToTop,
+      _id: 'insertion-order',
+      playlistName: 'Ordered',
+      addVideosToTop,
       videos: [
         { videoId: 'existing', title: 'Existing', authorId: 'UCchannel', playlistItemId: 'first' },
         { videoId: 'existing', title: 'Existing', authorId: 'UCchannel', playlistItemId: 'duplicate' },
@@ -293,12 +319,11 @@ for (const stage of ['headers', 'creation', 'upload', 'save']) {
     const remote = new Map()
     let created = 0
     const store = {
-    ...playlistBaseline(),
+      ...playlistBaseline(),
       state: { playlists: { playlists: [local] } },
       dispatch: async (action, payload) => {
         if (action === 'addPlaylist') store.state.playlists.playlists.push(payload)
-        else if (stage === 'save') { store.state.playlists.playlists = []; return false }
-        else assert.fail(`Unexpected action: ${action}`)
+        else if (stage === 'save') { store.state.playlists.playlists = []; return false } else assert.fail(`Unexpected action: ${action}`)
       },
     }
     const client = {

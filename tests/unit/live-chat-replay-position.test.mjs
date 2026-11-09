@@ -19,7 +19,9 @@ function setup(t, isReplay = true, ready = true) {
   const instance = { seekTo: position => seeks.push(position), is_replay: true, on() {}, once() {}, start() {} }
   const context = createContext({
     ...replayHelpers,
-    props, comments, watch,
+    props,
+    comments,
+    watch,
     isReplay: { value: isReplay },
     liveChatInstance: ready ? instance : null,
     pendingReplaySeekSeconds: null,
@@ -112,7 +114,6 @@ test('the Watch seeking handler forwards the player position even before loading
   assert.match(template, /@seeking="handlePlayerSeeking"/)
   assert.match(template, /<watch-video-live-chat\b[^>]*:seek-request="liveChatSeekRequest"/)
 })
-
 
 for (const playbackPosition of [null, 20, 23]) {
   test(`a seek during metadata loading follows the latest position after update ${playbackPosition}`, async t => {

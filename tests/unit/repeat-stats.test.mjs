@@ -5,8 +5,12 @@ import { createRepeatStatsTracker } from '../../src/renderer/helpers/player/repe
 
 function setup() {
   const video = Object.assign(new EventTarget(), {
-    currentTime: 0, duration: 30, playbackRate: 1,
-    paused: true, seeking: false, readyState: 4,
+    currentTime: 0,
+    duration: 30,
+    playbackRate: 1,
+    paused: true,
+    seeking: false,
+    readyState: 4,
   })
   let clock = 0
   let stats

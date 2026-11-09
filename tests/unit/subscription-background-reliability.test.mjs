@@ -34,14 +34,24 @@ test('desktop transport supports a configured HTTP instance and rejects non-HTTP
       if (message.method) queueMicrotask(() => this.emit('message', { id: message.id, value: null }))
       else if (message.type === 'response') receive(message)
     }
+
     kill() { this.emit('exit') }
   }
   const worker = new Worker()
   const requests = []
   const context = vm.createContext({
-    path, existsSync: () => false, __dirname: '/fixture',
-    setInterval: () => 0, clearInterval() {}, setTimeout, clearTimeout,
-    URL, AbortController, AbortSignal, Buffer, console,
+    path,
+    existsSync: () => false,
+    __dirname: '/fixture',
+    setInterval: () => 0,
+    clearInterval() {},
+    setTimeout,
+    clearTimeout,
+    URL,
+    AbortController,
+    AbortSignal,
+    Buffer,
+    console,
     utilityProcess: { fork: () => worker },
     net: { isOnline: () => true, fetch: async url => { requests.push(url); return { ok: true, body: [Buffer.from('feed')] } } }
   })
@@ -70,11 +80,17 @@ async function serviceFixture(timers = { setTimeout, clearTimeout }) {
       this.messages.push(message)
       queueMicrotask(() => this.emit('message', { id: message.id, value: null }))
     }
+
     kill() { this.killed = true; this.emit('exit') }
   }
   const context = vm.createContext({
-    path, existsSync: () => true, __dirname: '/fixture', setInterval: () => 0, clearInterval() {},
-    ...timers, console,
+    path,
+    existsSync: () => true,
+    __dirname: '/fixture',
+    setInterval: () => 0,
+    clearInterval() {},
+    ...timers,
+    console,
     utilityProcess: { fork() { const child = new Worker(); children.push(child); return child } },
     net: { isOnline: () => true }
   })
@@ -158,7 +174,10 @@ test('the worker reports uploads only for feeds with notifications turned on', a
     fetchBackgroundSubscriptionChannel: async (configuration, feed, channel, signal, fetchText, parse) => parse('<feed/>'),
     parseAndEnrichBackgroundFeed: async () => [{ id: 'video' }],
     normalizeUploadEntries: entries => entries,
-    results: {}, processSubscriptionFeed() {}, fetchText() {}, JSON
+    results: {},
+    processSubscriptionFeed() {},
+    fetchText() {},
+    JSON
   })
   vm.runInContext(source.slice(source.indexOf('let uploadChannels'), source.indexOf('\nfunction tick()')) + '\nglobalThis.methods = methods', context)
   const fetch = (feed = 'videos') => options.fetchChannel({ instanceUrl: '' }, feed, 'UCtest', null)
@@ -172,4 +191,3 @@ test('the worker reports uploads only for feeds with notifications turned on', a
   await fetch()
   assert.equal(messages.length, 1)
 })
-

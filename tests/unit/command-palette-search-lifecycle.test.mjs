@@ -15,25 +15,37 @@ const source = compileScript(descriptor, { id: 'palette-search-lifecycle-test' }
 function setup(searchVideos = palette.filterCommandPaletteCommandsAsync) {
   let searchWatcher
   const component = runInNewContext(`${source}; component`, {
-    ...Vue, ...palette, ...videos,
+    ...Vue,
+    ...palette,
+    ...videos,
     filterCommandPaletteCommandsAsync: searchVideos,
-    FtRetryImage: {}, FtIcon: {}, FtProfileIcon: {}, FtLoader: {},
+    FtRetryImage: {},
+    FtIcon: {},
+    FtProfileIcon: {},
+    FtLoader: {},
     useI18n: () => ({ locale: Vue.ref('en-US'), t: key => key }),
-    useId: () => 'test', useTemplateRef: () => Vue.ref(null),
-    onBeforeMount() {}, onBeforeUnmount() {}, onMounted() {},
+    useId: () => 'test',
+    useTemplateRef: () => Vue.ref(null),
+    onBeforeMount() {},
+    onBeforeUnmount() {},
+    onMounted() {},
     watch: (sources, callback, options) => {
       if (options?.immediate) searchWatcher = callback
     },
     store: { subscribe: () => () => {} },
     document: {},
-    clampOverlayScrollTop() {}, restoreOverlayScrollTop() {},
-    getLocalizedShortcut() {}, lockBodyScroll() {}, unlockBodyScroll() {},
+    clampOverlayScrollTop() {},
+    restoreOverlayScrollTop() {},
+    getLocalizedShortcut() {},
+    lockBodyScroll() {},
+    unlockBodyScroll() {},
     useFullscreenTeleportTarget: () => '.app',
   })
   const sources = { history: [], playlists: [], downloads: {}, queue: [] }
   const state = component.setup({ commands: [], videoSources: sources }, { expose() {}, emit() {} })
   return {
-    state, sources,
+    state,
+    sources,
     search(query) {
       let cleanup
       const result = searchWatcher([query, sources, 'en-US'], [], callback => { cleanup = callback })

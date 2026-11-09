@@ -42,20 +42,29 @@ test('downloaded audio docks on scroll, navigation and swipe without an online c
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone',
-        UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100,
-        EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        KeepPlayingOnNavigation: true,
+        ScrollPlayerMode: 'mini',
+        CapacitorLayoutMode: 'phone',
+        UiScale: 100,
+        ReducedMotion: 'off',
+        AnimationSpeed: 100,
+        EnableMobileFullscreenSwipe: false,
+        RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false,
-        MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
+        MobileLeftSwipeAction: 'disabled',
+        MobileRightSwipeAction: 'disabled',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       store.dispatch('updateReducedMotion', 'off')
       window.__offlineMiniFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__offlineMiniFetch(url, options) : Promise.reject(new Error('Offline mini-player test'))
+        ? window.__offlineMiniFetch(url, options)
+        : Promise.reject(new Error('Offline mini-player test'))
       location.hash = '#/watch/jNQXAC9IVRw'
       return saved
     })
@@ -78,15 +87,24 @@ test('downloaded audio docks on scroll, navigation and swipe without an online c
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false,
-        videoTitle: 'Downloaded audio mini-player regression', channelName: 'Offline test channel', videoLengthSeconds: 60,
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        videoTitle: 'Downloaded audio mini-player regression',
+        channelName: 'Offline test channel',
+        videoLengthSeconds: 60,
         thumbnail: `data:image/svg+xml;base64,${thumbnail}`,
         // Online metadata can still carry a future preroll deadline for a download.
         adEndTimeUnixMs: Date.now() + 60000,
       })
       watch.$store.commit('upsertYtDlpDownload', {
-        id: downloadId, videoId: watch.videoId, title: watch.videoTitle, mode: 'audio', status: 'completed',
+        id: downloadId,
+        videoId: watch.videoId,
+        title: watch.videoTitle,
+        mode: 'audio',
+        status: 'completed',
         files: [{ videoId: watch.videoId, path: mediaPath, extension: 'mp3' }],
       })
       watch.applyDownloadedPlaybackSource(downloadId)

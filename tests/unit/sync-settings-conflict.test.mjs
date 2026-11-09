@@ -12,8 +12,11 @@ test('theme sync does not echo colors filled in while loading a received theme',
   delete theme.blurs.thumbnailBadgeBackground
   const received = { key: 'customThemes', value: [theme], updatedAt: 10 }
   const entry = mergeSettingEntry({
-    key: 'customThemes', value: normalizeCustomThemes(received.value),
-    old: received, remoteEntry: received, now: 100,
+    key: 'customThemes',
+    value: normalizeCustomThemes(received.value),
+    old: received,
+    remoteEntry: received,
+    now: 100,
   })
   assert.deepEqual(entry, received, 'Loading default colors must not create another sync update')
 })
@@ -25,8 +28,11 @@ test('theme sync does not echo a desktop theme list sorted by name', () => {
   ])
   const received = { key: 'customThemes', value: themes, updatedAt: 10 }
   const entry = mergeSettingEntry({
-    key: 'customThemes', value: [...themes].reverse(),
-    old: received, remoteEntry: received, now: 100,
+    key: 'customThemes',
+    value: [...themes].reverse(),
+    old: received,
+    remoteEntry: received,
+    now: 100,
   })
   assert.deepEqual(entry, received, 'Storage order must not create another sync update')
 })
@@ -40,9 +46,12 @@ test('equivalent theme snapshots with the same edit time keep the server represe
   for (const [saved, remote] of [[withoutDefaults, themes], [themes, withoutDefaults]]) {
     const remoteEntry = { key: 'customThemes', value: remote, updatedAt: 10 }
     const entry = mergeSettingEntry({
-      key: 'customThemes', value: themes,
+      key: 'customThemes',
+      value: themes,
       old: { key: 'customThemes', value: saved, updatedAt: 10 },
-      remoteEntry, localUpdatedAt: 5, now: 100,
+      remoteEntry,
+      localUpdatedAt: 5,
+      now: 100,
     })
     assert.deepEqual(entry, remoteEntry, 'An unchanged snapshot must not overwrite the server on a timestamp tie')
   }
@@ -85,8 +94,12 @@ test('normalizes newer theme selections against a winning collection deletion', 
     baseTheme: 'solarizedDark', systemLightTheme: 'light', systemDarkTheme: 'dark',
   })) {
     const entry = mergeSettingEntry({
-      key, value: 'custom:removed', old: { key, value: fallback, updatedAt: 10 },
-      remoteEntry: { key, value: fallback, updatedAt: 30 }, localUpdatedAt: 40, now: 100,
+      key,
+      value: 'custom:removed',
+      old: { key, value: fallback, updatedAt: 10 },
+      remoteEntry: { key, value: fallback, updatedAt: 30 },
+      localUpdatedAt: 40,
+      now: 100,
     })
     assert.equal(entry.value, 'custom:removed')
     assert.deepEqual(resolveMergedThemeEntry(entry, [], previousThemes, 100), {

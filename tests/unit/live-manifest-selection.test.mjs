@@ -17,10 +17,12 @@ test('ongoing streams and premieres use WEB HLS even when DASH is available', ()
     for (const duration of [30, 21600]) {
       const watch = { isLive: true, isPremiere, isPostLiveDvr: false }
       const hls = `https://example.com/manifest_duration/${duration}/live.m3u8`
-      selectManifest.call(watch, { streaming_data: {
-        hls_manifest_url: hls,
-        dash_manifest_url: 'https://example.com/live.mpd'
-      } }, 'https://example.com/android.m3u8', 'https://example.com/android.mpd')
+      selectManifest.call(watch, {
+        streaming_data: {
+          hls_manifest_url: hls,
+          dash_manifest_url: 'https://example.com/live.mpd'
+        }
+      }, 'https://example.com/android.m3u8', 'https://example.com/android.mpd')
       assert.equal(watch.manifestSrc, hls)
       assert.equal(watch.manifestMimeType, 'application/x-mpegurl')
     }
@@ -43,10 +45,12 @@ test('keeps a missing live HLS source null so playback engine fallback can recov
 
 test('recently ended streams retain their remote DASH fallback', () => {
   const watch = { isLive: false, isPostLiveDvr: true }
-  selectManifest.call(watch, { streaming_data: {
-    dash_manifest_url: 'https://example.com/post-live.mpd',
-    hls_manifest_url: 'https://example.com/post-live.m3u8'
-  } }, null)
+  selectManifest.call(watch, {
+    streaming_data: {
+      dash_manifest_url: 'https://example.com/post-live.mpd',
+      hls_manifest_url: 'https://example.com/post-live.m3u8'
+    }
+  }, null)
   assert.equal(watch.manifestSrc, 'https://example.com/post-live.mpd')
   assert.equal(watch.manifestMimeType, 'application/dash+xml')
 })

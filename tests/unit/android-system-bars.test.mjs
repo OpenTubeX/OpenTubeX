@@ -20,7 +20,8 @@ test('status bar contrast uses the theme color while native video makes the WebV
     calculateColorLuminance: color => color === '#f1f1f1' ? '#000000' : '#FFFFFF',
     setAndroidSystemBarsBackground: (color, followSystem) => { backgrounds.push([color, followSystem]); return Promise.resolve() },
     SystemBars: { setStyle: options => { calls.push(options.style); return Promise.resolve() } },
-    SystemBarType: { StatusBar: 'status' }, SystemBarsStyle: { Light: 'light', Dark: 'dark' }
+    SystemBarType: { StatusBar: 'status' },
+    SystemBarsStyle: { Light: 'light', Dark: 'dark' }
   })
   update()
   theme = '#111111'

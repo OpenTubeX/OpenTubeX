@@ -26,7 +26,8 @@ test('play-next moves an existing entry to the front then removes it on the next
   const other = { videoId: 'other', queueItemId: 'other' }
   const state = { items: [other, { ...video, queueItemId: 'video' }] }
   const options = {
-    t, commit: (name, payload) => watchQueueMutations[name](state, payload),
+    t,
+    commit: (name, payload) => watchQueueMutations[name](state, payload),
     add: () => assert.fail('must move the queued item, not duplicate it'),
   }
   const resolve = () => queueSwipeAction('playNext', [video], state.items, options)

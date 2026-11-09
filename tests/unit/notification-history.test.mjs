@@ -495,11 +495,16 @@ test('system notifications and their entries stay in step', async () => {
     link: links.link
   })
   const shown = new Map()
-  const show = title => notify({ title, body: '', target: { kind: 'video', path: '/watch/abc' }, showSystemNotification: () => {
-    const notification = new FakeNotification()
-    shown.set(title, notification)
-    return notification
-  } })
+  const show = title => notify({
+    title,
+    body: '',
+    target: { kind: 'video', path: '/watch/abc' },
+    showSystemNotification: () => {
+      const notification = new FakeNotification()
+      shown.set(title, notification)
+      return notification
+    }
+  })
   for (const title of ['clicked', 'dismissed', 'timed out', 'read in the app']) await show(title)
 
   shown.get('clicked').emit('click')
@@ -548,12 +553,17 @@ test('a notification whose entry was read while it loaded closes instead of stay
     link: entry => linked.push(entry.id)
   })
   const shown = {}
-  const show = (title, whileLoading) => notify({ title, body: '', target: { kind: 'video', path: `/watch/${title}` }, showSystemNotification: async () => {
+  const show = (title, whileLoading) => notify({
+    title,
+    body: '',
+    target: { kind: 'video', path: `/watch/${title}` },
+    showSystemNotification: async () => {
     // Another device or the bell dismisses the entry while the thumbnail loads.
-    whileLoading()
-    shown[title] = Object.assign(new EventEmitter(), { closed: false, close() { this.closed = true } })
-    return shown[title]
-  } })
+      whileLoading()
+      shown[title] = Object.assign(new EventEmitter(), { closed: false, close() { this.closed = true } })
+      return shown[title]
+    }
+  })
   await show('read', () => { entries[0] = { ...entries[0], read: true } })
   await show('removed', () => { entries.pop() })
   await show('unread', () => {})

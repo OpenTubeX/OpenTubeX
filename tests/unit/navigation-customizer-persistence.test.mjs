@@ -28,9 +28,11 @@ for (const electron of [true, false]) {
         { replace: async ({ path }) => calls.push(path) },
       )
       assert.equal(await updateItems(['home', 'subscriptions']), false)
-      assert.deepEqual(calls, homeRetained ? ['updateNavigationItems'] : [
-        'updateNavigationItems', electron ? 'redirectHomeTabsToLandingPage' : '/subscriptions',
-      ])
+      assert.deepEqual(calls, homeRetained
+        ? ['updateNavigationItems']
+        : [
+            'updateNavigationItems', electron ? 'redirectHomeTabsToLandingPage' : '/subscriptions',
+          ])
     })
   }
 }

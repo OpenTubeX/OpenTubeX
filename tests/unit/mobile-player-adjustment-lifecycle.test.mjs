@@ -38,10 +38,18 @@ test('fullscreen brightness follows Android visibility when Chromium remains vis
   const props = reactive({ videoId: 'test' })
   const resets = []
   scope.run(() => vm.runInNewContext(lifecycle, {
-    ref, computed, watch, document, isAppHidden,
+    ref,
+    computed,
+    watch,
+    document,
+    isAppHidden,
     process: { env: { IS_CAPACITOR: true } },
-    isActiveTab: ref(true), scrollMiniPlayerActive: miniPlayerActive, scrollMiniPlayerDragStyle: ref(null), isFullscreen,
-    mobileMiniPlayerDismissSettling: dismissing, props,
+    isActiveTab: ref(true),
+    scrollMiniPlayerActive: miniPlayerActive,
+    scrollMiniPlayerDragStyle: ref(null),
+    isFullscreen,
+    mobileMiniPlayerDismissSettling: dismissing,
+    props,
     store: { getters: { getMobileFullscreenBrightness: true } },
     mobileAdjustments,
     resetMobileAdjustments: preserve => { resets.push(preserve); mobileAdjustments.reset() },

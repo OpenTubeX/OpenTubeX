@@ -30,16 +30,23 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
   let allowPrivate = true
   let pendingConsent
   const context = vm.createContext({
-    URL, randomUUID, IpcChannels: { CAST_START: 'start', CAST_PREPARE: 'prepare', CAST_CANCEL_PREPARATION: 'cancel', CAST_PROGRESS: 'progress' },
+    URL,
+    randomUUID,
+    IpcChannels: { CAST_START: 'start', CAST_PREPARE: 'prepare', CAST_CANCEL_PREPARATION: 'cancel', CAST_PROGRESS: 'progress' },
     ipcMain: { handle: (channel, handler) => handlers.set(channel, handler), on: (channel, handler) => listeners.set(channel, handler) },
     ipcRenderer,
-    navigator: { userActivation }, document: { body: { dataset: {} } }, webFrame: {},
-    process: { argv: [], env: {}, versions: {} }, console,
+    navigator: { userActivation },
+    document: { body: { dataset: {} } },
+    webFrame: {},
+    process: { argv: [], env: {}, versions: {} },
+    console,
     isOpenTubeXUrl: url => url === 'app://opentubex/index.html',
     baseHandlers: { settings: { _findOne: async id => ({ value: id in settings ? settings[id] : defaultInstance }) } },
     normalizeYatteeServerUrl,
     invidiousAuthorizations: new Map(),
-    resolveCastMediaAddresses, applyTwitchPlaylistOrigin, isInvidiousInstanceUrl,
+    resolveCastMediaAddresses,
+    applyTwitchPlaylistOrigin,
+    isInvidiousInstanceUrl,
     BrowserWindow: { fromWebContents: () => ({}) },
     createMainTranslator: async () => (key, values) => values?.instance ?? key,
     dialog: { showMessageBox: async (_window, options) => { prompts.push(options); return pendingConsent ? await pendingConsent : { response: allowPrivate ? 1 : 0 } } },
@@ -57,7 +64,7 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
       }
     }
   })
-  vm.runInContext(main.match(/  async function getConfiguredApiServerUrl\(\) \{[\s\S]*?\n  \}/)[0], context)
+  vm.runInContext(main.match(/ {2}async function getConfiguredApiServerUrl\(\) \{[\s\S]*?\n {2}\}/)[0], context)
   vm.runInContext(castIpc.slice(castIpc.indexOf('  const createMediaAddressResolver ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.DLNA_DISCOVER')), context)
   vm.runInContext(castIpc.slice(castIpc.indexOf('  const castOwners ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.CAST_STATUS')), context)
   const preloadTabs = (await readFile(new URL('../../src/preload/tabs.js', import.meta.url), 'utf8'))
@@ -129,9 +136,11 @@ test('Cast playlist redirects receive the Twitch Origin without forwarding it to
   const media = createCastMediaServer({ url: initial }, '127.0.0.1', 'token', url => f.headers(1, url), () => [{ address: '127.0.0.1', family: 4 }], async (url, { headers }) => {
     requests.push({ url, origin: headers.get('Origin') })
     if (url === initial) return new Response(null, { status: 302, headers: { location: playlist } })
-    if (url === playlist) return headers.get('Origin') === 'https://www.twitch.tv'
-      ? new Response('#EXTM3U\n#EXTINF:5,\nhttps://media.test/segment.ts\n', { headers: { 'content-type': 'application/x-mpegurl' } })
-      : new Response('Origin required', { status: 403 })
+    if (url === playlist) {
+      return headers.get('Origin') === 'https://www.twitch.tv'
+        ? new Response('#EXTM3U\n#EXTINF:5,\nhttps://media.test/segment.ts\n', { headers: { 'content-type': 'application/x-mpegurl' } })
+        : new Response('Origin required', { status: 403 })
+    }
     return new Response('segment')
   })
   await new Promise(resolve => media.server.listen(0, '127.0.0.1', resolve))
@@ -160,7 +169,6 @@ test('unfocused windows and non-app frames cannot authorize a private Cast origi
   assert.match((await f.start('http://192.168.1.10:3000', 1, true, 'https://example.test')).error, /active OpenTubeX window/)
   assert.equal(f.resolvers.size, 0)
 })
-
 
 test('Cast preparation retains initial focus authorization through the actual preload/main handoff', async () => {
   const f = await fixture('')
@@ -263,7 +271,6 @@ test('public media and private resources outside the instance path never request
   assert.equal(f.prompts.length, 0)
 })
 
-
 test('Cast grants are single-use and cancelled preparation cannot start', async () => {
   const f = await fixture('')
   const first = await f.prepare()
@@ -286,7 +293,6 @@ test('Cast grants reject another frame, owner, or a forged identifier', async ()
   f.changeOwner(1)
   assert.equal((await f.complete(preparation.preparationId)).castId, 'cast-1')
 })
-
 
 test('closing the owner discards a pending Cast preparation grant', async () => {
   const f = await fixture('')

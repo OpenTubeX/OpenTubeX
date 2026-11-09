@@ -23,7 +23,8 @@ async function importFile(content) {
     showToast: toast => toasts.push(toast),
     t: key => key,
     console: { error() {} },
-    IMPORT_DIRECTORY_ID: 'test', START_IN_DIRECTORY: 'documents',
+    IMPORT_DIRECTORY_ID: 'test',
+    START_IN_DIRECTORY: 'documents',
   })
   await run()
   return { applied: Object.keys(changes).length ? [changes] : [], toasts }

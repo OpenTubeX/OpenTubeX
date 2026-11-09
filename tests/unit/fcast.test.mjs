@@ -93,8 +93,13 @@ function managerForTest(t, receiver, options = {}) {
 
 const allowLocal = async () => [{ address: '127.0.0.1', family: 4 }]
 const payload = (url, overrides = {}) => ({
-  deviceId: 'Living Room', title: 'Test video', startSeconds: 12, paused: false, playbackRate: 1.5,
-  source: { url, contentType: 'video/mp4' }, ...overrides
+  deviceId: 'Living Room',
+  title: 'Test video',
+  startSeconds: 12,
+  paused: false,
+  playbackRate: 1.5,
+  source: { url, contentType: 'video/mp4' },
+  ...overrides
 })
 const startPlayback = (body, receiver) => {
   receiver.send(FcastOpcode.PLAYBACK_UPDATE, { generationTime: Date.now(), state: 1, time: body.time ?? 0, duration: 120, speed: body.speed })

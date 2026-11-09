@@ -41,9 +41,19 @@ test('external media downloads use their web URL without treating it as a YouTub
 
 test('desktop and Android download options preserve format, subtitles, clipping, and metadata', () => {
   const { args, truncatesLongTitles } = buildYtDlpDownloadArguments({
-    videoId, mode: 'video', quality: '1080', videoCodec: 'h264', videoFormat: 'mp4',
-    includeSubtitles: true, embedSubtitles: true, subtitleLanguages: 'en,de', subtitleFormat: 'srt',
-    embedThumbnail: true, embedMetadata: true, startTime: '0:10', endTime: '0:15'
+    videoId,
+    mode: 'video',
+    quality: '1080',
+    videoCodec: 'h264',
+    videoFormat: 'mp4',
+    includeSubtitles: true,
+    embedSubtitles: true,
+    subtitleLanguages: 'en,de',
+    subtitleFormat: 'srt',
+    embedThumbnail: true,
+    embedMetadata: true,
+    startTime: '0:10',
+    endTime: '0:15'
   })
   assert.equal(truncatesLongTitles, true)
   for (const [option, value] of [['-S', 'res:1080,codec:h264'], ['--merge-output-format', 'mp4'],
@@ -139,8 +149,18 @@ test('custom arguments keep unrelated long and short options', () => {
 })
 
 test('playback mapping retains alternate audio and live stream timing', () => {
-  const format = mapPlaybackFormat({ format_id: '140-2', url: 'https://example.test/audio', protocol: 'https', ext: 'm4a',
-    acodec: 'mp4a.40.2', vcodec: 'none', language: 'de', tbr: 128.5, available_at: '123', fragments: [{}, {}] })
+  const format = mapPlaybackFormat({
+    format_id: '140-2',
+    url: 'https://example.test/audio',
+    protocol: 'https',
+    ext: 'm4a',
+    acodec: 'mp4a.40.2',
+    vcodec: 'none',
+    language: 'de',
+    tbr: 128.5,
+    available_at: '123',
+    fragments: [{}, {}]
+  })
   assert.equal(format.language, 'de')
   assert.equal(format.bitrate, 128500)
   assert.equal(format.availableAt, 123)

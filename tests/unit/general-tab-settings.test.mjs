@@ -18,10 +18,15 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
 ]) {
   test(`${platform} renders the general tab settings supported by its tab system`, async () => {
     const bindings = {
-      USING_ELECTRON, IS_CAPACITOR, t: key => key,
+      USING_ELECTRON,
+      IS_CAPACITOR,
+      t: key => key,
       store: { getters: { getTabsEnabled: true } },
-      defaultPageNames: [], defaultPageValues: [],
-      NEW_TAB_POSITION_VALUES: [], TAB_CLOSE_FOCUS_VALUES: [], STARTUP_BEHAVIOR_VALUES: [],
+      defaultPageNames: [],
+      defaultPageValues: [],
+      NEW_TAB_POSITION_VALUES: [],
+      TAB_CLOSE_FOCUS_VALUES: [],
+      STARTUP_BEHAVIOR_VALUES: [],
     }
     for (const key of keys) {
       bindings[key] = ''

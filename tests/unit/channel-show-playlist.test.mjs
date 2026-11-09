@@ -8,12 +8,16 @@ const { parseLocalListPlaylist, parseLocalListPlaylists } = createLocalFeedParse
 
 function playlistCard() {
   return {
-    type: 'LockupView', content_type: 'PLAYLIST', content_id: 'PLexample',
+    type: 'LockupView',
+    content_type: 'PLAYLIST',
+    content_id: 'PLexample',
     metadata: { title: { text: 'Example playlist' } },
-    content_image: { primary_thumbnail: {
-      image: [{ url: 'https://example.com/thumbnail.jpg' }],
-      overlays: [{ is: type => type === YTNodes.ThumbnailOverlayBadgeView, badges: [{ text: '12 videos' }] }],
-    } },
+    content_image: {
+      primary_thumbnail: {
+        image: [{ url: 'https://example.com/thumbnail.jpg' }],
+        overlays: [{ is: type => type === YTNodes.ThumbnailOverlayBadgeView, badges: [{ text: '12 videos' }] }],
+      }
+    },
   }
 }
 
@@ -42,9 +46,11 @@ test('parses a GridShow as its episode playlist and preserves the season label',
   const show = new YTNodes.GridShow({
     title: { simpleText: 'Example show' },
     navigationEndpoint: { browseEndpoint: { browseId: 'VLPLexample' } },
-    thumbnailRenderer: { showCustomThumbnailRenderer: {
-      thumbnail: { thumbnails: [{ url: 'https://example.com/show.jpg', width: 1280, height: 720 }] },
-    } },
+    thumbnailRenderer: {
+      showCustomThumbnailRenderer: {
+        thumbnail: { thumbnails: [{ url: 'https://example.com/show.jpg', width: 1280, height: 720 }] },
+      }
+    },
     thumbnailOverlays: [{ thumbnailOverlayBottomPanelRenderer: { text: { simpleText: '3 seasons' } } }],
   })
   const playlist = parseLocalListPlaylist(show, 'UCfallback', 'Fallback channel')
@@ -123,13 +129,17 @@ test('replaces a generic playlist label only when a channel name fallback is ava
     metadata: {
       title: { text: 'Example playlist' },
       metadata: {
-        metadata_rows: [{ metadata_parts: [{ text: {
-          text: 'Playlist',
-          endpoint: {
-            metadata: { page_type: 'WEB_PAGE_TYPE_CHANNEL' },
-            payload: { browseId: 'UCchannel' }
-          }
-        } }] }]
+        metadata_rows: [{
+          metadata_parts: [{
+            text: {
+              text: 'Playlist',
+              endpoint: {
+                metadata: { page_type: 'WEB_PAGE_TYPE_CHANNEL' },
+                payload: { browseId: 'UCchannel' }
+              }
+            }
+          }]
+        }]
       }
     },
     content_image: {

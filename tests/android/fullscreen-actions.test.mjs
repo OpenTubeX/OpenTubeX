@@ -19,17 +19,23 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        CurrentLocale: 'en-US', FullscreenActions: ['share', 'sponsorBlock'],
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false, UseSponsorBlock: true,
-        UseReturnYouTubeDislikes: false, RotateFullscreenToLandscape: false,
-        EnterFullscreenOnDisplayRotate: false, EnableDownloads: true,
+        CurrentLocale: 'en-US',
+        FullscreenActions: ['share', 'sponsorBlock'],
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: true,
+        UseReturnYouTubeDislikes: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        EnableDownloads: true,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__fullscreenActionsQueue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
       window.__fullscreenActionsFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenActionsFetch(url, options) : Promise.reject(new Error('Offline fullscreen actions test'))
+        ? window.__fullscreenActionsFetch(url, options)
+        : Promise.reject(new Error('Offline fullscreen actions test'))
       document.querySelector('.tutorialOverlay')?.remove()
       return saved
     })
@@ -52,8 +58,7 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -61,11 +66,25 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'Fullscreen actions test', videoLengthSeconds: 30,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 640, height: 360, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: true,
+        activeFormat: 'legacy',
+        videoTitle: 'Fullscreen actions test',
+        videoLengthSeconds: 30,
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 640,
+          height: 360,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')
@@ -87,15 +106,22 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
       watch.isOffline = false
       watch.recommendedVideos = Array.from({ length: 20 }, (_, index) => ({
         videoId: `related${String(index).padStart(4, '0')}`,
-        title: `Recommended video ${index + 1}`, author: 'Recommendation channel',
-        authorId: 'UC-recommendation-test', lengthSeconds: 60, viewCount: 100,
-        type: 'video', isLive: false,
+        title: `Recommended video ${index + 1}`,
+        author: 'Recommendation channel',
+        authorId: 'UC-recommendation-test',
+        lengthSeconds: 60,
+        viewCount: 100,
+        type: 'video',
+        isLive: false,
       }))
       for (let index = 0; index < 20; index++) {
-        watch.$store.commit('addVideoToWatchQueue', { video: {
-          videoId: `queued${String(index).padStart(5, '0')}`,
-          title: `Queued video ${index + 1}`, author: 'Queue channel',
-        } })
+        watch.$store.commit('addVideoToWatchQueue', {
+          video: {
+            videoId: `queued${String(index).padStart(5, '0')}`,
+            title: `Queued video ${index + 1}`,
+            author: 'Queue channel',
+          }
+        })
       }
       await watch.$store.dispatch('updateFullscreenActions', [
         'queue', 'download', 'recommendations', 'share', 'sponsorBlock', 'comments', 'addToPlaylist', 'quickBookmark'

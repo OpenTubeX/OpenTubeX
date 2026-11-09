@@ -20,7 +20,8 @@ test('selects the best complete MP4 stream for DLNA playback', () => {
 test('selects iOS registered progressive MP4 URLs and rejects unrelated native assets', () => {
   const registered = {
     url: 'capacitor://localhost/_opentubex_media/5CD72AC0-BA1B-402B-9BA3-81455F753D8A',
-    mimeType: 'video/mp4', height: 480
+    mimeType: 'video/mp4',
+    height: 480
   }
   assert.equal(selectDlnaSource([
     { url: 'capacitor://localhost/private.mp4', mimeType: 'video/mp4', height: 1080 },
@@ -28,7 +29,6 @@ test('selects iOS registered progressive MP4 URLs and rejects unrelated native a
   ]), registered)
   assert.equal(selectDlnaSource([{ ...registered, requiresSeparateAudio: true }]), null)
 })
-
 
 test('selects high-resolution H.264 and original AAC over WebM, AV1, HE-AAC and DRC', () => {
   const video = { url: 'https://media.test/1080', protocol: 'https', ext: 'mp4', acodec: 'none', vcodec: 'avc1.64002a', height: 1080, fps: 60 }

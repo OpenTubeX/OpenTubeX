@@ -17,10 +17,12 @@ function fixture(configure, { failWrite = false, persisted = null, permission = 
     readAndroidProxySettings: async () => persisted,
     defaultUpdaterId: key => key,
     defaultMutationId: key => key,
-    DBSettingHandlers: { upsert: async (key, value) => {
-      if (failWrite) throw new Error('Renderer database is full')
-      writes.push([key, value])
-    } },
+    DBSettingHandlers: {
+      upsert: async (key, value) => {
+        if (failWrite) throw new Error('Renderer database is full')
+        writes.push([key, value])
+      }
+    },
     showToast: toast => errors.push(toast),
     i18n: { global: { t: key => key } },
   })

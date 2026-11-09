@@ -26,13 +26,16 @@ test('startup archives migrate historical watch time and preserve it through res
   const hooks = registerHooks({
     resolve(specifier, context, nextResolve) {
       if (specifier === '../index' && context.parentURL?.endsWith('/datastores/handlers/base.js')) {
-        return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
+        return {
+          shortCircuit: true,
+          url: 'data:text/javascript,' + encodeURIComponent(`
           const databases = globalThis.__scheduledBackupMigrationDatastores;
           export const settings = databases.settings;
           export const history = databases.history;
           export const watchStats = databases['watch-stats'];
           export const recommendations = {};
-        `) }
+        `)
+        }
       }
       if (specifier.startsWith('.') && !specifier.endsWith('.js')) return nextResolve(`${specifier}.js`, context)
       return nextResolve(specifier, context)

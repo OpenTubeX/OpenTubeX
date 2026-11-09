@@ -20,7 +20,10 @@ test('treats videos as music from their genre or the list hint in the route', ()
 
 test('starts music videos at normal speed', () => {
   const watch = {
-    musicMode: false, channelId: 'channel', isMusicVideo: true, sabrReloadState: null,
+    musicMode: false,
+    channelId: 'channel',
+    isMusicVideo: true,
+    sabrReloadState: null,
     $store: { getters: { getDefaultPlayback: 2, getChannelPlaybackSpeeds: '{"channel":2.5}', getEnableChannelSettings: true } },
   }
   initializePlaybackRate.call(watch)

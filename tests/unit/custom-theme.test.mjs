@@ -133,7 +133,6 @@ test('preserves source fingerprints through save and sync, but drops them from c
   assert.equal(normalizeCustomTheme({ ...theme, discussionThemeHash: 'invalid' }).discussionThemeHash, undefined)
 })
 
-
 test('theme fingerprints ignore formatting, key order, local IDs and source fingerprints', async () => {
   const theme = normalizeCustomTheme(DEFAULT_CUSTOM_THEME)
   const expected = await customThemeContentHash(theme)

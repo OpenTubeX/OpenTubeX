@@ -10,8 +10,8 @@ for (const outcome of ['disconnect', 'rejection', 'stale playback']) {
   for (const afterStop of [false, true]) {
     test(`intentional stop ignores ${outcome} ${afterStop ? 'after' : 'during'} stop completion`, async () => {
       let resolveStatus, rejectStatus, resolveStop
-      let errors = 0, stops = 0, timers = 0
-      const releases = [], events = []
+      let errors = 0; let stops = 0; let timers = 0
+      const releases = []; const events = []
       const castId = { value: 'session' }
       const status = { value: { connected: true, currentTime: 18, paused: false } }
       const api = {

@@ -35,20 +35,33 @@ function overview(store) {
   const cleanups = []
   const scope = effectScope()
   const api = scope.run(() => vm.runInNewContext(`${code}\n;({ activeData, query, handleQueryChange, filterPlaylist, doSearchPlaylistsWithMatchingVideos })`, {
-    computed, provide() {}, ref, toRaw, watch, store, nextTick,
-    playlistRepairState: { running: false }, metadataRepairBusy: ref(false), repairCookiesConfigured: ref(false),
+    computed,
+    provide() {},
+    ref,
+    toRaw,
+    watch,
+    store,
+    nextTick,
+    playlistRepairState: { running: false },
+    metadataRepairBusy: ref(false),
+    repairCookiesConfigured: ref(false),
     process: { env: {} },
-    onMounted() {}, onBeforeUnmount: callback => cleanups.push(callback),
+    onMounted() {},
+    onBeforeUnmount: callback => cleanups.push(callback),
     useTemplateRef: () => ref(null),
     useI18n: () => ({ locale: ref('en-US'), t: key => key }),
     useTabContext: () => ({ tabId: 'test' }),
-    useRouter: () => ({ replace: async () => {} }), useRoute: () => ({ query: {} }),
+    useRouter: () => ({ replace: async () => {} }),
+    useRoute: () => ({ query: {} }),
     sessionStorage: { getItem: () => null, setItem() {} },
     document: { removeEventListener() {} },
     getIconForSortPreference() {},
     useGridReorder: () => ({ draggedId: ref(null), onPointerDown() {} }),
-    playlistKey, sortUserPlaylists, SORT_BY_OPTIONS: USER_PLAYLISTS_SORT_BY_OPTIONS,
-    isValidPlaylistBookmark: () => true, playlistBookmarkToListData: value => value,
+    playlistKey,
+    sortUserPlaylists,
+    SORT_BY_OPTIONS: USER_PLAYLISTS_SORT_BY_OPTIONS,
+    isValidPlaylistBookmark: () => true,
+    playlistBookmarkToListData: value => value,
     debounce(callback) {
       const wrapped = () => pending.add(callback)
       wrapped.cancel = () => pending.delete(callback)
@@ -73,7 +86,9 @@ test('100 quick-bookmark controls share one scan of a 10,000-video playlist', ()
   reads = 0
   for (let index = 0; index < 100; index++) {
     const control = vm.runInNewContext(`${membership}\nisInQuickBookmarkPlaylist`, {
-      computed, store, id: ref(`missing-${index}`),
+      computed,
+      store,
+      id: ref(`missing-${index}`),
       quickBookmarkPlaylist: computed(() => store.getters.getQuickBookmarkPlaylist),
       isQuickBookmarkEnabled: ref(true),
     })
@@ -108,10 +123,13 @@ test('idle playlist overview never traverses the saved video metadata', async ()
 
 test('bookmark membership follows duplicate removal, replacement and target changes', () => {
   const store = playlistStore([
-    { _id: 'favorites', videos: [
-      { videoId: 'saved', playlistItemId: 'first' },
-      { videoId: 'saved', playlistItemId: 'second' },
-    ] },
+    {
+      _id: 'favorites',
+      videos: [
+        { videoId: 'saved', playlistItemId: 'first' },
+        { videoId: 'saved', playlistItemId: 'second' },
+      ]
+    },
     { _id: 'other', videos: [{ videoId: 'other-video' }] },
   ])
   const initial = store.getters.getQuickBookmarkVideoIds
@@ -132,9 +150,12 @@ test('bookmark membership follows duplicate removal, replacement and target chan
 })
 
 test('bulk playlist removal indexes selected entries once', () => {
-  const store = playlistStore([{ _id: 'favorites', videos: Array.from({ length: 1000 }, (_, index) => ({
-    videoId: `video-${index}`, playlistItemId: `item-${index}`,
-  })) }])
+  const store = playlistStore([{
+    _id: 'favorites',
+    videos: Array.from({ length: 1000 }, (_, index) => ({
+      videoId: `video-${index}`, playlistItemId: `item-${index}`,
+    }))
+  }])
   let reads = 0
   const playlistItemIds = new Proxy(Array.from({ length: 500 }, (_, index) => `item-${index}`), {
     get(target, key, receiver) {
@@ -153,7 +174,8 @@ test('bulk playlist removal indexes selected entries once', () => {
 
 test('playlist search stays debounced and reacts to matching video edits outside the first page', async () => {
   const playlists = Array.from({ length: 105 }, (_, index) => ({
-    _id: `playlist-${index}`, playlistName: `Playlist ${String(index).padStart(3, '0')}`,
+    _id: `playlist-${index}`,
+    playlistName: `Playlist ${String(index).padStart(3, '0')}`,
     videos: [{ videoId: `video-${index}`, title: 'Original title', author: 'Creator' }],
   }))
   const store = playlistStore(playlists)

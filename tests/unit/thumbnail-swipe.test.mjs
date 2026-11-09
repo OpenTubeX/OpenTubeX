@@ -14,10 +14,15 @@ function gesture(actions = { left: { label: 'Left' }, right: { label: 'Right' } 
     getSettleDuration: () => duration,
   })
   const event = (x, y = 0, overrides = {}) => ({
-    pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: x, clientY: y,
+    pointerType: 'touch',
+    isPrimary: true,
+    pointerId: 1,
+    clientX: x,
+    clientY: y,
     target: { closest: () => false },
     currentTarget: { contains: () => true, getBoundingClientRect: () => ({ width: 240 }), setPointerCapture() {} },
-    stopPropagation() {}, ...overrides,
+    stopPropagation() {},
+    ...overrides,
   })
   const run = (positions, finish = 'finishSwipe') => {
     swipe.startSwipe(event(0))

@@ -9,7 +9,8 @@ const source = (await readFile(new URL('../../src/renderer/store/modules/invidio
   .replace(/^import .* from .*\n/gm, '')
   .replace('export default', 'globalThis.module =')
 const { mutations } = vm.runInNewContext(`${source}; module`, {
-  URL, process: { env: { IS_ELECTRON: false } },
+  URL,
+  process: { env: { IS_ELECTRON: false } },
   base64EncodeUtf8: value => Buffer.from(value).toString('base64')
 })
 

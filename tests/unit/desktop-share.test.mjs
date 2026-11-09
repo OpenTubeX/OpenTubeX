@@ -41,7 +41,6 @@ test('sharing rejects untrusted requests, credentials and non-web URLs before op
   assert.deepEqual(f.calls, [])
 })
 
-
 test('Windows development resolves the addon from dist even with webpack relative filenames', t => {
   const directory = mkdtempSync(path.join(tmpdir(), 'opentubex-share-'))
   t.after(() => rmSync(directory, { recursive: true }))

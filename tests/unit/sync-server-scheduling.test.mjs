@@ -64,8 +64,14 @@ async function loadLocalChangePlugin() {
   const source = await readFile(new URL('../../src/renderer/store/index.js', import.meta.url), 'utf8')
   return vm.runInNewContext(
     source.slice(source.indexOf('function syncOnLocalChanges('), source.indexOf('function reloadRecommendationEvidenceAfterHistoryRemoval(')) + '\nsyncOnLocalChanges',
-    { SYNC_ACTION_REASONS, SYNC_MUTATION_REASONS, isRemoteSyncDispatch, ...profileSync,
-      isSettingSyncable: key => key === 'autoplayVideos', isSettingSyncEnabled: () => true }
+    {
+      SYNC_ACTION_REASONS,
+      SYNC_MUTATION_REASONS,
+      isRemoteSyncDispatch,
+      ...profileSync,
+      isSettingSyncable: key => key === 'autoplayVideos',
+      isSettingSyncEnabled: () => true
+    }
   )
 }
 
@@ -95,9 +101,12 @@ async function profileChangeFixture() {
   const profiles = vm.runInNewContext(source
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default {', 'globalThis.profiles = {') + '\nprofiles', {
-    MAIN_PROFILE_ID, DEFAULT_PROFILE_ICON: {},
-    THEME_BG_COLOR: 'theme', THEME_TEXT_COLOR: 'theme',
-    getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings,
+    MAIN_PROFILE_ID,
+    DEFAULT_PROFILE_ICON: {},
+    THEME_BG_COLOR: 'theme',
+    THEME_TEXT_COLOR: 'theme',
+    getProfileWithUpdatedSubscriptionDetails,
+    copySubscriptionChannelSettings,
     deepCopy: value => JSON.parse(JSON.stringify(value)),
     DBProfileHandlers: {
       upsert: async () => {},
@@ -253,9 +262,14 @@ async function schedulingFixture(t, platform = {}) {
   const liveConnection = new SyncLiveConnectionState(null)
   const context = {
     rootState: {
-      settings: settings({ syncServerEnabled: true, syncServerAutoSync: true,
-        syncServerToken: 'token', syncServerSyncHistory: true,
-        syncServerSyncSessions: true, syncServerSyncSettings: true }),
+      settings: settings({
+        syncServerEnabled: true,
+        syncServerAutoSync: true,
+        syncServerToken: 'token',
+        syncServerSyncHistory: true,
+        syncServerSyncSessions: true,
+        syncServerSyncSettings: true
+      }),
       syncServer: { syncServerStatus: 'idle' },
     },
   }
@@ -276,7 +290,8 @@ async function schedulingFixture(t, platform = {}) {
     stopLive: () => {},
   })
   return {
-    calls, context,
+    calls,
+    context,
     liveConnection,
     holds,
     holdCounts,

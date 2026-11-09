@@ -10,18 +10,24 @@ const end = source.indexOf('\n/**', start)
 const extract = compileFunction(`${source.slice(start, end).replace('export ', '')}\nreturn extractLocalContentDisclosures`, ['YTNodes'])(YTNodes)
 
 function videoInfo(items) {
-  return { page: [{}, { engagement_panels: [{
-    target_id: 'engagement-panel-structured-description',
-    content: new YTNodes.StructuredDescriptionContent({ items })
-  }] }] }
+  return {
+    page: [{}, {
+      engagement_panels: [{
+        target_id: 'engagement-panel-structured-description',
+        content: new YTNodes.StructuredDescriptionContent({ items })
+      }]
+    }]
+  }
 }
 
 test('extracts disclosure text and attribution using the installed YouTube parser', () => {
-  assert.deepEqual(extract(videoInfo([{ howThisWasMadeSectionView: {
-    bodyHeader: { content: 'Altered or synthetic content' },
-    bodyText: { content: 'Sound or visuals were significantly edited. Learn more.' },
-    attributionText: { content: 'Disclosure added by the creator' }
-  } }])), [{
+  assert.deepEqual(extract(videoInfo([{
+    howThisWasMadeSectionView: {
+      bodyHeader: { content: 'Altered or synthetic content' },
+      bodyText: { content: 'Sound or visuals were significantly edited. Learn more.' },
+      attributionText: { content: 'Disclosure added by the creator' }
+    }
+  }])), [{
     label: 'Altered or synthetic content',
     description: 'Sound or visuals were significantly edited.',
     attribution: 'Disclosure added by the creator'

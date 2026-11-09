@@ -18,10 +18,12 @@ const getShortThumbnailUrl = vm.runInNewContext(source.slice(shortsStart, shorts
 
 for (const type of ['ReelItem', 'ShortsLockupView']) {
   test(`${type} selects the largest supplied portrait image in feeds and playlists`, () => {
-    const thumbnail = { thumbnails: [
-      { url: 'https://i.ytimg.com/small.jpg', width: 120, height: 180 },
-      { url: 'https://i.ytimg.com/large.jpg', width: 720, height: 1080 },
-    ] }
+    const thumbnail = {
+      thumbnails: [
+        { url: 'https://i.ytimg.com/small.jpg', width: 120, height: 180 },
+        { url: 'https://i.ytimg.com/large.jpg', width: 720, height: 1080 },
+      ]
+    }
     const short = type === 'ReelItem'
       ? new YTNodes.ReelItem({ videoId: 'short', headline: { simpleText: 'Short' }, viewCountText: { simpleText: '123 views' }, thumbnail })
       : new YTNodes.ShortsLockupView({
@@ -41,10 +43,12 @@ test('Shorts view model images retain both resolutions with missing legacy thumb
   const short = new YTNodes.ShortsLockupView({
     thumbnailViewModel: {
       thumbnailViewModel: {
-        image: { sources: [
-          { url: 'https://i.ytimg.com/short-small.jpg?rs=signed', width: 120, height: 180 },
-          { url: 'https://i.ytimg.com/short-large.jpg?rs=signed', width: 720, height: 1080 }
-        ] }
+        image: {
+          sources: [
+            { url: 'https://i.ytimg.com/short-small.jpg?rs=signed', width: 120, height: 180 },
+            { url: 'https://i.ytimg.com/short-large.jpg?rs=signed', width: 720, height: 1080 }
+          ]
+        }
       }
     },
     onTap: { innertubeCommand: { reelWatchEndpoint: { videoId: 'short' } } },
@@ -55,7 +59,6 @@ test('Shorts view model images retain both resolutions with missing legacy thumb
     assert.equal(parse(short).lowResolutionThumbnailUrl, 'https://i.ytimg.com/short-small.jpg?rs=signed')
   }
 })
-
 
 test('data saver restores medium-resolution sources and preserves thumbnail preferences', () => {
   for (const origin of ['https://i.ytimg.com', 'https://invidious.test']) {

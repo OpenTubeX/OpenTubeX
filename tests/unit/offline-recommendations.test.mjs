@@ -12,13 +12,25 @@ const computed = runInNewContext(`({${source.slice(source.indexOf('    offlineDo
 test('offline recommendations retain saved thumbnails and exclude unavailable files and the current video', () => {
   const watch = {
     videoId: 'current',
-    $store: { getters: { getYtDlpDownloads: {
-      1: { id: 1, status: 'completed', mode: 'audio', videoId: 'saved', title: 'Saved audio', thumbnail: 'data:image/png;base64,saved', files: [
-        { videoId: 'saved', path: '/saved.mp3', extension: 'mp3' },
-        { videoId: 'current', path: '/current.mp3', extension: 'mp3' },
-        { videoId: 'missing', path: '/missing.mp3', extension: 'mp3', available: false },
-      ] },
-    } } },
+    $store: {
+      getters: {
+        getYtDlpDownloads: {
+          1: {
+            id: 1,
+            status: 'completed',
+            mode: 'audio',
+            videoId: 'saved',
+            title: 'Saved audio',
+            thumbnail: 'data:image/png;base64,saved',
+            files: [
+              { videoId: 'saved', path: '/saved.mp3', extension: 'mp3' },
+              { videoId: 'current', path: '/current.mp3', extension: 'mp3' },
+              { videoId: 'missing', path: '/missing.mp3', extension: 'mp3', available: false },
+            ]
+          },
+        }
+      }
+    },
   }
   const suggestions = computed.offlineDownloadSuggestions.call(watch)
   assert.equal(suggestions.length, 1)
@@ -32,8 +44,11 @@ for (const localFilePlayback of [false, true]) {
     const online = [{ videoId: 'online' }]
     const offline = [{ videoId: 'saved', route: { path: '/watch/saved', query: { downloadId: '1' } } }]
     const watch = {
-      isLoading: false, localFilePlayback, isOffline: false,
-      recommendedVideos: online, offlineDownloadSuggestions: offline,
+      isLoading: false,
+      localFilePlayback,
+      isOffline: false,
+      recommendedVideos: online,
+      offlineDownloadSuggestions: offline,
       abortAutoplayCountdown() {},
     }
     assert.equal(computed.displayedRecommendations.call(watch), online)

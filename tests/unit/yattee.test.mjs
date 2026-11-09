@@ -349,4 +349,3 @@ test('Shorts dates come from earlier refreshes and lookups of new Shorts only', 
   assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], [unresolved], getVideo), [{ videoId: 'new', published: 1_700_000_000_000 }])
   assert.deepEqual(lookups, ['new'])
 })
-

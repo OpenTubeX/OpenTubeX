@@ -87,7 +87,6 @@ test('uses supplied collaborator avatars without another request', async () => {
   assert.deepEqual(f.calls, [])
 })
 
-
 test('a supplied avatar on an unflagged ordinary result avoids a video lookup', async () => {
   const f = resolve({ videoId: 'regular', author: 'Creator', authorThumbnailUrl: '//images.test/direct.jpg' })
   await f.pending

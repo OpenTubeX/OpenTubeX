@@ -8,9 +8,9 @@ import { renderToString } from 'vue/server-renderer'
 const componentUrl = new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url)
 const { descriptor } = parse(readFileSync(componentUrl, 'utf8'))
 
-function* elements(node) {
+function * elements(node) {
   if (node.type === 1) yield node
-  for (const child of node.children ?? []) yield* elements(child)
+  for (const child of node.children ?? []) yield * elements(child)
 }
 
 const syncedTabButtons = [...elements(descriptor.template.ast)].filter(node => (

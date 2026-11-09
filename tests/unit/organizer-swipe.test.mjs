@@ -30,15 +30,23 @@ for (const reduced of [false, true]) {
     const ctx = vm.createContext({
       document: { documentElement: { dataset: { reducedMotion: reduced ? 'reduce' : 'off' } }, querySelector: () => null },
       window: { innerWidth: 375.5, innerHeight: 800 },
-      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
-      applyAnimationSpeed: animation => animation, requestAnimationFrame: () => 1, cancelAnimationFrame() {},
+      matchMedia: () => ({ matches: false }),
+      getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
+      applyAnimationSpeed: animation => animation,
+      requestAnimationFrame: () => 1,
+      cancelAnimationFrame() {},
     })
     vm.runInContext(regionSource + source, ctx)
-    const page = { animate, classList: { add: name => classes.add(name), remove: name => classes.delete(name) },
-      getBoundingClientRect: () => ({ left: 0, top: 80.5, width: 375.5, height: 700.25 }) }
+    const page = {
+      animate,
+      classList: { add: name => classes.add(name), remove: name => classes.delete(name) },
+      getBoundingClientRect: () => ({ left: 0, top: 80.5, width: 375.5, height: 700.25 })
+    }
     const previewClasses = new Set()
-    const preview = { classList: { add: name => previewClasses.add(name), remove: name => previewClasses.delete(name) },
-      getBoundingClientRect: () => ({ left: 16.25, top: 180.75, width: 160.5, height: 90.28125 }) }
+    const preview = {
+      classList: { add: name => previewClasses.add(name), remove: name => previewClasses.delete(name) },
+      getBoundingClientRect: () => ({ left: 16.25, top: 180.75, width: 160.5, height: 90.28125 })
+    }
     const transition = ctx.createOrganizerSwipeAnimation(page, preview, { animate })
     transition.update(0.4)
     assert.ok(animations.every(animation => animation.currentTime === 400))

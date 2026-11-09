@@ -40,8 +40,12 @@ test('authenticated Cast receiver plays MP4, DASH, HLS and shared merged tracks'
       const match = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range ?? '')
       const start = match ? Number(match[1]) : 0
       const end = match && match[2] ? Math.min(Number(match[2]), data.length - 1) : data.length - 1
-      response.writeHead(match ? 206 : 200, { 'content-type': type, 'accept-ranges': 'bytes', 'content-length': end - start + 1,
-        ...(match ? { 'content-range': `bytes ${start}-${end}/${data.length}` } : {}) })
+      response.writeHead(match ? 206 : 200, {
+        'content-type': type,
+        'accept-ranges': 'bytes',
+        'content-length': end - start + 1,
+        ...(match ? { 'content-range': `bytes ${start}-${end}/${data.length}` } : {})
+      })
       response.end(request.method === 'HEAD' ? undefined : data.subarray(start, end + 1))
     } catch { response.writeHead(404).end() }
   })
@@ -78,16 +82,24 @@ test('authenticated Cast receiver plays MP4, DASH, HLS and shared merged tracks'
     { url: mergedUrl, contentType: 'video/mp4' }
   ]) {
     const requestCount = requests.length
-    const result = await manager.start(1, { deviceId: device.id, source, title: 'OpenTubeX Cast integration test', startSeconds: 1, paused: false, playbackRate: 1,
-      captions: [{ url: `${upstreamUrl}/caption.vtt`, label: 'English', language: 'en' }], captionIndex: null }, () => ({}), url => [upstreamUrl, mergedOrigin].includes(url.origin))
+    const result = await manager.start(1, {
+      deviceId: device.id,
+      source,
+      title: 'OpenTubeX Cast integration test',
+      startSeconds: 1,
+      paused: false,
+      playbackRate: 1,
+      captions: [{ url: `${upstreamUrl}/caption.vtt`, label: 'English', language: 'en' }],
+      captionIndex: null
+    }, () => ({}), url => [upstreamUrl, mergedOrigin].includes(url.origin))
     assert.ok(result.castId, JSON.stringify(result))
     const id = result.castId
     await eventually(id, state => state.connected && !state.paused && state.duration >= 29 && state.currentTime >= 1 && state.currentTime <= 4 &&
       requests.slice(requestCount).some(request => source.url === mergedUrl
         ? request.filename === 'video-only.mp4'
         : source.contentType === 'video/mp4'
-        ? request.filename === 'video.mp4'
-        : source.contentType === 'application/dash+xml' ? request.filename.startsWith('chunk-') : request.filename.endsWith('.ts')))
+          ? request.filename === 'video.mp4'
+          : source.contentType === 'application/dash+xml' ? request.filename.startsWith('chunk-') : request.filename.endsWith('.ts')))
     assert.equal((await manager.control(1, id, 'pause')).error, undefined)
     await eventually(id, state => state.paused)
     // Verify pause/resume before seeking; bridge unit tests separately cover

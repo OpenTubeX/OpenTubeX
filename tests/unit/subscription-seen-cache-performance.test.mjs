@@ -61,10 +61,12 @@ test('marking another video seen only reapplies seen state in its channel', () =
 
 for (const reactiveMarks of [false, true]) {
   test(`cached seen state follows metadata and ${reactiveMarks ? 'reactive' : 'serialized'} mark edits`, () => {
-    const cache = reactive({ channel: {
-      timestamp: 1,
-      videos: [{ videoId: 'video', title: 'Old', isNewInSubscriptionFeed: true, isMembersOnly: true }],
-    } })
+    const cache = reactive({
+      channel: {
+        timestamp: 1,
+        videos: [{ videoId: 'video', title: 'Old', isNewInSubscriptionFeed: true, isMembersOnly: true }],
+      }
+    })
     const initial = [{ videoId: 'video', seenAt: 1000, isMembersOnly: true }]
     const marks = ref(reactiveMarks ? initial : JSON.stringify(initial))
     const feed = computed(() => applySubscriptionSeenVideosToCache(cache, marks.value))

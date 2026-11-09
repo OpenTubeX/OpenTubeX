@@ -44,9 +44,14 @@ test('does not expose browser, worker, Electron or Node globals to player code',
     fetch: typeof fetch, postMessage: typeof postMessage, process: typeof process,
     require: typeof require, electron: typeof ftElectron
   }`), {
-    window: 'undefined', document: 'undefined', parent: 'undefined',
-    fetch: 'undefined', postMessage: 'undefined', process: 'undefined',
-    require: 'undefined', electron: 'undefined'
+    window: 'undefined',
+    document: 'undefined',
+    parent: 'undefined',
+    fetch: 'undefined',
+    postMessage: 'undefined',
+    process: 'undefined',
+    require: 'undefined',
+    electron: 'undefined'
   })
   assert.equal(await evaluatePlayerCode('return globalThis.constructor.constructor("return typeof fetch")()'), 'undefined')
 })
@@ -116,10 +121,15 @@ test('retries WASM initialization after a transient failure', async () => {
   const source = readFileSync(new URL('../../src/renderer/helpers/api/player-script-runtime.js', import.meta.url), 'utf8')
     .replace(/^import .*$/gm, '').replace('export async function', 'async function')
   const runtime = {
-    setMemoryLimit() {}, setMaxStackSize() {}, setInterruptHandler() {}, dispose() {},
+    setMemoryLimit() {},
+    setMaxStackSize() {},
+    setInterruptHandler() {},
+    dispose() {},
     newContext: () => ({
-      evalCode: () => ({ dispose() {} }), unwrapResult: value => value,
-      dump: () => 42, dispose() {}
+      evalCode: () => ({ dispose() {} }),
+      unwrapResult: value => value,
+      dump: () => 42,
+      dispose() {}
     })
   }
   const evaluate = vm.runInNewContext(`${source}; evaluatePlayerCode`, {
@@ -142,20 +152,28 @@ test('bounds host-stack recovery and abandons trapped instances without calling 
   let cleanups = 0
   let trap = true
   const evaluate = vm.runInNewContext(`${source}; evaluatePlayerCode`, {
-    variant: {}, RangeError, WebAssembly,
+    variant: {},
+    RangeError,
+    WebAssembly,
     newQuickJSWASMModuleFromVariant: async () => {
       modules++
-      return { newRuntime: () => ({
-        setMemoryLimit() {}, setMaxStackSize: value => limits.push(value), setInterruptHandler() {},
-        dispose: () => cleanups++,
-        newContext: () => ({
-          evalCode: () => {
-            if (trap) throw new RangeError('Maximum call stack size exceeded')
-            return { dispose: () => cleanups++ }
-          },
-          unwrapResult: value => value, dump: () => 42, dispose: () => cleanups++
+      return {
+        newRuntime: () => ({
+          setMemoryLimit() {},
+          setMaxStackSize: value => limits.push(value),
+          setInterruptHandler() {},
+          dispose: () => cleanups++,
+          newContext: () => ({
+            evalCode: () => {
+              if (trap) throw new RangeError('Maximum call stack size exceeded')
+              return { dispose: () => cleanups++ }
+            },
+            unwrapResult: value => value,
+            dump: () => 42,
+            dispose: () => cleanups++
+          })
         })
-      }) }
+      }
     }
   })
   await assert.rejects(evaluate('return 42'), /Maximum call stack size exceeded/)

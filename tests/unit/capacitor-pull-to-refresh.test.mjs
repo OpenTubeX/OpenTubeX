@@ -17,8 +17,11 @@ function mountFeedRefreshWidget(state) {
   const presented = ref(true)
   let unregister
   vm.runInNewContext(refreshWidgetSource, {
-    computed, ref, watch,
-    onMounted: () => {}, onBeforeUnmount: () => {},
+    computed,
+    ref,
+    watch,
+    onMounted: () => {},
+    onBeforeUnmount: () => {},
     defineProps: () => ({ disableRefresh: false, refreshInProgress: false }),
     defineEmits: () => event => state.calls.push(`feed:${event}`),
     useI18n: () => ({ t: key => key }),
@@ -56,21 +59,30 @@ function setup({ handled = false, fail = false, enabled = true, lifecycle } = {}
     finish: async () => calls.push('finish')
   }
   const api = vm.runInNewContext(`${source}\n({ canPullToRefreshTarget, initializeCapacitorPullToRefresh })`, {
-    Capacitor: { isPluginAvailable: () => true }, registerPlugin: () => plugin,
-    window, document, Date, setTimeout,
+    Capacitor: { isPluginAvailable: () => true },
+    registerPlugin: () => plugin,
+    window,
+    document,
+    Date,
+    setTimeout,
     getComputedStyle: element => ({ overflowX: 'visible', overflowY: 'visible', getPropertyValue: () => '#ffffff', ...element.style }),
     resolveColorProperty: () => '#ffffff',
-    store: { getters, watch: (getter, callback, options) => watch(() => getter({}, getters), callback, options) }, nextTick: async () => {},
-    getCapacitorTabService: () => ({ reloadTab: async id => {
-      calls.push(`reload:${id}`)
-      if (fail) throw new Error('reload failed')
-    } }),
+    store: { getters, watch: (getter, callback, options) => watch(() => getter({}, getters), callback, options) },
+    nextTick: async () => {},
+    getCapacitorTabService: () => ({
+      reloadTab: async id => {
+        calls.push(`reload:${id}`)
+        if (fail) throw new Error('reload failed')
+      }
+    }),
     tabRuntimeRegistry: { getRoot: () => root },
-    tabLifecycleService: lifecycle ?? { run: async (id, hook, request) => {
-      assert.equal(hook, 'pullToRefresh')
-      request.handled = handled
-      calls.push(`refresh:${id}`)
-    } },
+    tabLifecycleService: lifecycle ?? {
+      run: async (id, hook, request) => {
+        assert.equal(hook, 'pullToRefresh')
+        request.handled = handled
+        calls.push(`refresh:${id}`)
+      }
+    },
     console: { error: () => calls.push('error') }
   })
   return { api, calls, tab, root, child, document, window, getters, plugin, refresh: context => refresh(context) }

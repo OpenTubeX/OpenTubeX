@@ -38,7 +38,8 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     removeAttribute(name) { this.attributes.delete(name) },
     style: { setProperty(name, value) { this[name] = value }, removeProperty(name) { delete this[name] } },
     getBoundingClientRect: () => ({ left: (index % 2) * 192.5, top: Math.floor(index / 2) * 240.5, width: 180.5, height: 228.5 }),
-    setPointerCapture() {}, querySelector() { return { dataset: { tabId: `tab-${index}` } } }
+    setPointerCapture() {},
+    querySelector() { return { dataset: { tabId: `tab-${index}` } } }
   })
   const rows = tabs.value.map(row)
   const api = vm.runInNewContext(`${declarations}\n${handlers}\n${teardown}\n;({
@@ -47,11 +48,20 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     settledCloses: () => swipeCloseQueue,
     renderRows: () => tabs.value.map(tab => [(${rowClasses}), tabCardStyle(tab.id)])
   })`, {
-    reactive, ref, nextTick, tabs, shouldCloseSwipedTab, activeTabId: ref('tab-0'),
-    disposed: false, onBeforeUnmount: callback => { unmount = callback },
-    organizerSwipe: { cancel() {} }, stopObservingContent() {}, releaseModalLock() {},
+    reactive,
+    ref,
+    nextTick,
+    tabs,
+    shouldCloseSwipedTab,
+    activeTabId: ref('tab-0'),
+    disposed: false,
+    onBeforeUnmount: callback => { unmount = callback },
+    organizerSwipe: { cancel() {} },
+    stopObservingContent() {},
+    releaseModalLock() {},
     console: { error: (...args) => errors.push(args) },
-    selecting: ref(false), actionTab: ref(null),
+    selecting: ref(false),
+    actionTab: ref(null),
     performance: { now: () => now },
     getTabGridReorder(...args) { layouts++; return getTabGridReorder(...args) },
     getComputedStyle: () => ({ paddingBottom: '88px' }),
@@ -66,14 +76,33 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     getCapacitorTabService: () => ({ moveTab(tabId, index) { moved.push({ tabId, index }); return true } }),
     openTabsContentRef: ref({ querySelectorAll: () => rows, getBoundingClientRect: () => ({ bottom: 12025 }) }),
     openTabsScrollRef: ref({ scrollTop: 0, clientHeight: 600, getBoundingClientRect: () => ({ top: 0, bottom: 600 }) }),
-    openTabActions() {}, closeTabActions() {}, lightHaptic() {}, clampOverlayScrollTop() {},
+    openTabActions() {},
+    closeTabActions() {},
+    lightHaptic() {},
+    clampOverlayScrollTop() {},
   })
   function event(x, index = 0) {
-    return { button: 0, pointerId: index + 1, pointerType: 'touch', clientX: x, clientY: 100,
-      timeStamp: now, currentTarget: rows[index], target: { closest: () => null }, preventDefault() {} }
+    return {
+      button: 0,
+      pointerId: index + 1,
+      pointerType: 'touch',
+      clientX: x,
+      clientY: 100,
+      timeStamp: now,
+      currentTarget: rows[index],
+      target: { closest: () => null },
+      preventDefault() {}
+    }
   }
   return {
-    api, closed, moved, errors, frames, rows, unmount: () => unmount(), get layouts() { return layouts },
+    api,
+    closed,
+    moved,
+    errors,
+    frames,
+    rows,
+    unmount: () => unmount(),
+    get layouts() { return layouts },
     timers,
     start: (index = 0) => api.startTabGesture(event(0, index), `tab-${index}`),
     move: (x, index = 0) => api.moveTabGesture(event(x, index)),

@@ -24,16 +24,21 @@ for (const failure of ['image loading', 'canvas rendering']) {
       clearTimeout(id) { timers.delete(id) },
       window: { devicePixelRatio: 2 },
       getComputedStyle: () => ({
-        visibility: 'visible', display: 'block', opacity: '1', content: 'none',
+        visibility: 'visible',
+        display: 'block',
+        opacity: '1',
+        content: 'none',
         * [Symbol.iterator]() {}
       }),
       HTMLInputElement: class {},
       XMLSerializer: class { serializeToString() { return '<div />' } },
       Image: class { constructor() { images.push(this) } },
-      document: { createElement: () => ({
-        getContext: () => ({ drawImage() { if (failCanvas) throw new Error('Canvas unavailable') } }),
-        toDataURL: () => 'data:image/png;base64,controls'
-      }) }
+      document: {
+        createElement: () => ({
+          getContext: () => ({ drawImage() { if (failCanvas) throw new Error('Canvas unavailable') } }),
+          toDataURL: () => 'data:image/png;base64,controls'
+        })
+      }
     })
     vm.runInContext(source, context)
     const snapshot = context.createMiniControlsSnapshot(value => changes.push(value), error => errors.push(error))

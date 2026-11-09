@@ -20,11 +20,13 @@ function fixture(screenWake) {
   let finishStop
   const native = {
     async discover() {
-      return { responses: [
-        { message: `HTTP/1.1 200 OK\r\nLOCATION: ${location}\r\n`, address: '192.168.1.7' },
-        { message: `HTTP/1.1 200 OK\r\nLOCATION: ${location}\r\n`, address: '192.168.1.7' },
-        { message: 'LOCATION: http://192.168.1.8/private', address: '192.168.1.7' }
-      ] }
+      return {
+        responses: [
+          { message: `HTTP/1.1 200 OK\r\nLOCATION: ${location}\r\n`, address: '192.168.1.7' },
+          { message: `HTTP/1.1 200 OK\r\nLOCATION: ${location}\r\n`, address: '192.168.1.7' },
+          { message: 'LOCATION: http://192.168.1.8/private', address: '192.168.1.7' }
+        ]
+      }
     },
     async request(request) {
       calls.push(request)
@@ -40,7 +42,9 @@ function fixture(screenWake) {
     async stopMediaServer(options) { calls.push({ stop: options }) }
   }
   return {
-    cast: createMobileDlnaCast(native, screenWake), calls, native,
+    cast: createMobileDlnaCast(native, screenWake),
+    calls,
+    native,
     fail(action) { failure = action },
     failStream() { streamFailed = true },
     delayStop(promise) { finishStop = promise }
@@ -188,7 +192,6 @@ test('merged casting passes both tracks and start time to native without sending
   assert.ok((await cast.start({ ...payload, audioUrl: 'file:///private/audio' })).error)
 })
 
-
 test('a failed merged relay can recover through the complete source without another user gesture', async () => {
   const setup = fixture()
   await setup.cast.discover()
@@ -202,7 +205,6 @@ test('a failed merged relay can recover through the complete source without anot
   assert.deepEqual(actions(setup.calls), ['SetAVTransportURI', 'Play', 'GetPositionInfo', 'Stop', 'SetAVTransportURI', 'Play', 'Seek'])
   assert.deepEqual(setup.calls.filter(call => call.start).at(-1).start, { mediaUrl: payload.mediaUrl, address: '192.168.1.7' })
 })
-
 
 test('recovery uses the renderer position plus the merged source offset', async () => {
   const setup = fixture()
@@ -238,7 +240,6 @@ test('recovery uses the native keyframe base rather than the requested start', a
     await setup.cast.stop('cast-1')
   }
 })
-
 
 test('renderer position parsing accepts valid SOAP time and rejects unavailable or malformed values', () => {
   assert.equal(parseDlnaPosition('<response><RelTime>01:02:03.5</RelTime></response>'), 3723.5)

@@ -17,22 +17,40 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
     let focused = null
     let finishAnimation
     const context = vm.createContext({
-      props: { enabled: true }, open, disposed: false,
+      props: { enabled: true },
+      open,
+      disposed: false,
       document: { querySelector: () => ({}) },
       window: { innerHeight: 800, addEventListener(name, listener) { listeners.set(name, listener) }, removeEventListener(name) { listeners.delete(name) } },
-      organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
-      prepareForTabOrganizer: () => {}, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
-      dialogRef: { value: {
-        querySelector: () => ({ querySelector: () => ({}), getBoundingClientRect: () => ({ top: 800, bottom: 900 }) }),
-        closest: () => ({}),
-      } },
-      openTabsScrollRef: ref(scroll), organizerSwipeProgress: distance => distance / 320,
+      organizerGesture: ref(false),
+      skipDialogTransition: ref(false),
+      activeView: ref('open'),
+      prepareForTabOrganizer: () => {},
+      nextTick,
+      presentedTabId: ref('tab'),
+      CSS: { escape: value => value },
+      dialogRef: {
+        value: {
+          querySelector: () => ({ querySelector: () => ({}), getBoundingClientRect: () => ({ top: 800, bottom: 900 }) }),
+          closest: () => ({}),
+        }
+      },
+      openTabsScrollRef: ref(scroll),
+      organizerSwipeProgress: distance => distance / 320,
       restoreOverlayScrollTop: (element, top) => { element.scrollTop = top },
-      createOrganizerSwipeAnimation: () => ({ update() {}, dispose() {}, finish: () => ending.endsWith('while settling')
-        ? new Promise(resolve => { finishAnimation = resolve }) : Promise.resolve() }),
+      createOrganizerSwipeAnimation: () => ({
+        update() {},
+        dispose() {},
+        finish: () => ending.endsWith('while settling')
+          ? new Promise(resolve => { finishAnimation = resolve })
+          : Promise.resolve()
+      }),
       shouldOpenSwipedOrganizer: distance => distance >= 100,
-      focusActiveTab() { focused = 'tab' }, activeScrollRef: () => scroll, viewScrollTop: saved,
-      observeActiveContent() {}, stopObservingContent() {},
+      focusActiveTab() { focused = 'tab' },
+      activeScrollRef: () => scroll,
+      viewScrollTop: saved,
+      observeActiveContent() {},
+      stopObservingContent() {},
       watch: (...args) => { const stop = watch(...args); t.after(stop) },
     })
     const gesture = vm.runInContext(`${controller}; ${openWatcher}; organizerSwipe`, context)

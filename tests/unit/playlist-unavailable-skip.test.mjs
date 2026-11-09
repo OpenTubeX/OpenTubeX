@@ -40,7 +40,12 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
   const skippedTo = []
   const restarts = []
   const context = vm.createContext({
-    props, playlistItems, randomizedPlaylistItems, computed, ref, watch,
+    props,
+    playlistItems,
+    randomizedPlaylistItems,
+    computed,
+    ref,
+    watch,
     playlistTotalVideoCount: ref(items.length),
     prevVideoBeforeDeletion: ref(null),
     shuffleEnabled: ref(true),

@@ -40,7 +40,9 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   const rootClasses = new Map()
   let savedBrowsingScroll = null
   const viewport = {
-    scrollX: 0, scrollY: 20, innerHeight: 800,
+    scrollX: 0,
+    scrollY: 20,
+    innerHeight: 800,
     scrollTo(position) { this.lastScroll = position; this.scrollX = position.left; this.scrollY = position.top },
     addEventListener(name, callback) { listeners.set(name, callback) },
     removeEventListener(name) { listeners.delete(name) }
@@ -64,7 +66,12 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     await lifecycle.afterNavigate({ to })
   }
   const previewStyle = scope.run(() => vm.runInNewContext(`${source}\npreviewStyle`, {
-    computed, nextTick, reactive, ref, shallowRef, watch,
+    computed,
+    nextTick,
+    reactive,
+    ref,
+    shallowRef,
+    watch,
     mobileNavigationMinimizePreview,
     window: viewport,
     ResizeObserver: class {
@@ -82,16 +89,24 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
-    store: { getters, commit: (_name, payload) => {
-      savedBrowsingScroll = payload.scroll
-      scrollCommits.push(payload)
-      if (tab?.history[payload.historyIndex]) tab.history[payload.historyIndex].scroll = { ...payload.scroll }
-    } },
+    store: {
+      getters,
+      commit: (_name, payload) => {
+        savedBrowsingScroll = payload.scroll
+        scrollCommits.push(payload)
+        if (tab?.history[payload.historyIndex]) tab.history[payload.historyIndex].scroll = { ...payload.scroll }
+      }
+    },
     resolveRouteComponent: () => ({}),
     getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
-    tabLifecycleKey: 'lifecycle', tabPresentedKey: 'presented', watchNavigationKey: 'navigation', getPreviousBrowsingRoute,
-    routeLocationKey: 'route', routerKey: 'router', console
+    tabLifecycleKey: 'lifecycle',
+    tabPresentedKey: 'presented',
+    watchNavigationKey: 'navigation',
+    getPreviousBrowsingRoute,
+    routeLocationKey: 'route',
+    routerKey: 'router',
+    console
   }))
   const updateTitle = vm.runInNewContext(`${titleSource}; useTabTitle()`, {
     inject: key => key.description === 'watch-navigation' ? provides.get('navigation') : null,
@@ -104,7 +119,23 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     scope.stop()
   })
   return {
-    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, resizeObservers, rootClasses, titles, updateTitle,
+    scrollCommits,
+    mobileNavigationMinimizePreview,
+    unmount,
+    props,
+    getters,
+    provides,
+    lifecycle,
+    previewRoot,
+    previewStyle,
+    hostBounds,
+    tabBounds,
+    viewport,
+    listeners,
+    resizeObservers,
+    rootClasses,
+    titles,
+    updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
@@ -135,10 +166,13 @@ for (const commit of [false, true]) {
 
 test('navigation interrupting a preview preserves the original Watch history scroll', async t => {
   const mounted = mountWatch(t)
-  const tab = { historyIndex: 1, history: [
-    { route: { path: '/history' }, scroll: { left: 0, top: 600.25 } },
-    { route: { path: '/watch/video', fullPath: '/watch/video' } }
-  ] }
+  const tab = {
+    historyIndex: 1,
+    history: [
+      { route: { path: '/history' }, scroll: { left: 0, top: 600.25 } },
+      { route: { path: '/watch/video', fullPath: '/watch/video' } }
+    ]
+  }
   mounted.getters.getTabById = () => tab
   const navigation = mounted.provides.get('navigation')
   await navigation.beginMinimizePreview()
@@ -169,10 +203,13 @@ test('settling minimize does not queue navigation behind an interruption awaitin
 
 for (const destination of ['/subscriptions', '/watch/next']) {
   test(`settling minimize does not navigate again after interruption by ${destination}`, async t => {
-    const tab = { historyIndex: 1, history: [
-      { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
-      { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
-    ] }
+    const tab = {
+      historyIndex: 1,
+      history: [
+        { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
+        { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
+      ]
+    }
     const mounted = mountWatch(t, { tab })
     const navigation = mounted.provides.get('navigation')
     await navigation.beginMinimizePreview()
@@ -186,10 +223,13 @@ for (const destination of ['/subscriptions', '/watch/next']) {
 
 for (const destination of ['/subscriptions', '/watch/next']) {
   test(`preview preserves Watch scroll when capped history shifts on ${destination}`, async t => {
-    const tab = { historyIndex: 99, history: Array.from({ length: 100 }, (_, index) => ({
-      route: { path: '/watch/video', fullPath: '/watch/video' },
-      scroll: { left: 0, top: index + 0.25 }
-    })) }
+    const tab = {
+      historyIndex: 99,
+      history: Array.from({ length: 100 }, (_, index) => ({
+        route: { path: '/watch/video', fullPath: '/watch/video' },
+        scroll: { left: 0, top: index + 0.25 }
+      }))
+    }
     const mounted = mountWatch(t, { tab })
     const navigation = mounted.provides.get('navigation')
     mounted.viewport.scrollY = 700.25
@@ -315,7 +355,6 @@ for (const previous of [null, '/watch/other']) {
   })
 }
 
-
 for (const commit of [false, true]) {
   test(`drag keeps navigation idle until release and ${commit ? 'commits' : 'cancels'}`, async t => {
     const mounted = mountWatch(t, { paused: true, enabled: false })
@@ -339,7 +378,6 @@ for (const commit of [false, true]) {
     assert.equal(mounted.disposals(), 0)
   })
 }
-
 
 for (const commit of [false, true]) {
   test(`upward drag reveals retained Watch before release and ${commit ? 'restores' : 'cancels'}`, async t => {
@@ -365,7 +403,6 @@ for (const commit of [false, true]) {
     assert.equal(mounted.listeners.has('scroll'), false)
   })
 }
-
 
 for (const commit of [true, false]) {
   test(`swiping a loading video keeps its component through ${commit ? 'minimization' : 'cancellation'}`, async t => {

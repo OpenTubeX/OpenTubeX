@@ -20,7 +20,10 @@ async function membersOnlyStore(authMode) {
     .replace(/^import[\s\S]*?from '[^']+'\n/gm, '')
     .replace('export default', 'const module =')
   const profiles = vm.runInNewContext(`${code}\nmodule`, {
-    MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff', DEFAULT_PROFILE_ICON: {},
+    MAIN_PROFILE_ID: 'allChannels',
+    THEME_BG_COLOR: '#000000',
+    THEME_TEXT_COLOR: '#ffffff',
+    DEFAULT_PROFILE_ICON: {},
     hasConfiguredRestrictedPlaybackAuthentication: getters => hasConfiguredRestrictedPlaybackAuthentication(getters, true, false),
   })
   const settings = {

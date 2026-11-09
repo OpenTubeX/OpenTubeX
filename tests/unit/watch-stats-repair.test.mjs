@@ -13,16 +13,32 @@ const actionSource = storeSource.slice(storeSource.indexOf('  replaceSyncWatchSt
 async function fixture({ sourceChanged = false, localChanged = false, conflict = false, uploadFails = false, nested = false, rootChanged = false, resetChanged = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
-  const settings = { syncServerEnabled: true, syncServerToken: 'token', syncServerUrl: 'https://sync.example',
-    syncServerUsername: 'test', syncServerDeviceId: 'pixel', syncServerDeviceName: 'Pixel',
-    syncServerPrivacyMode: 'enhanced', syncServerPrivacyKey: key, syncServerPrivacySalt: salt,
-    syncServerSyncWatchStats: true, syncServerWatchStatsReset: null, syncServerSnapshot: '{}' }
+  const settings = {
+    syncServerEnabled: true,
+    syncServerToken: 'token',
+    syncServerUrl: 'https://sync.example',
+    syncServerUsername: 'test',
+    syncServerDeviceId: 'pixel',
+    syncServerDeviceName: 'Pixel',
+    syncServerPrivacyMode: 'enhanced',
+    syncServerPrivacyKey: key,
+    syncServerPrivacySalt: salt,
+    syncServerSyncWatchStats: true,
+    syncServerWatchStatsReset: null,
+    syncServerSnapshot: '{}'
+  }
   const localDays = { '2026-10-02': 120 }
   const source = { deviceId: 'old', deviceName: 'Pixel', platform: 'android', days: { '2026-10-01': 60, '2026-10-02': 100 } }
   let remote = [source, { deviceId: 'pixel', days: localDays, platform: 'android' }]
-  if (nested) remote[1] = { deviceId: 'root', days: { '2026-10-03': 100 }, replacedDevices: [
-    { ...remote[1], overlap: 'sum', replacedAt: 100 },
-  ] }
+  if (nested) {
+    remote[1] = {
+      deviceId: 'root',
+      days: { '2026-10-03': 100 },
+      replacedDevices: [
+        { ...remote[1], overlap: 'sum', replacedAt: 100 },
+      ]
+    }
+  }
   const currentDays = helpers.watchStatsDeviceDays(remote[1], 'pixel', localDays)
   const replacedDevices = structuredClone(remote[1].replacedDevices ?? [])
   if (rootChanged) remote[1].days['2026-10-03'] = 1000
@@ -38,6 +54,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
       assert.equal(collection, 'watchStats')
       return { revision, payload: await encryptSyncDocument(remote, key, salt) }
     }
+
     async putEncryptedSyncCollection(collection, expectedRevision, payload) {
       assert.equal(collection, 'watchStats')
       assert.equal(expectedRevision, revision)
@@ -52,21 +69,43 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
       return { revision: ++revision }
     }
   }
-  const bindings = { ...helpers, SyncServerClient: Client, areJsonValuesEqual, decryptSyncDocument, encryptSyncDocument, readSyncCollection,
-    i18n: { global: { t: key => key } }, ENCRYPTED_SYNC_RETRIES: 3,
+  const bindings = {
+    ...helpers,
+    SyncServerClient: Client,
+    areJsonValuesEqual,
+    decryptSyncDocument,
+    encryptSyncDocument,
+    readSyncCollection,
+    i18n: { global: { t: key => key } },
+    ENCRYPTED_SYNC_RETRIES: 3,
     activityAccountKey: value => JSON.stringify([value.syncServerUrl, value.syncServerUsername, value.syncServerDeviceId]),
-    assertSyncEnabled: () => {}, SyncServerCancelledError: Error, withSyncLock: callback => callback(),
-    trackSyncClient: value => value, releaseSyncClient: () => {},
-    collectionCache: { put: () => {} }, parseSnapshot: JSON.parse, DBWatchStatsHandlers: { find: async () => records } }
+    assertSyncEnabled: () => {},
+    SyncServerCancelledError: Error,
+    withSyncLock: callback => callback(),
+    trackSyncClient: value => value,
+    releaseSyncClient: () => {},
+    collectionCache: { put: () => {} },
+    parseSnapshot: JSON.parse,
+    DBWatchStatsHandlers: { find: async () => records }
+  }
   const actions = compileFunction(`return ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
-  const context = { rootState: { settings }, commit(name, value) {
-    if (name === 'setSyncedWatchStats') visible = value
-  }, dispatch: async (name, value) => {
-    assert.equal(name, 'updateSyncServerSnapshot')
-    settings.syncServerSnapshot = value
-  } }
-  return { run: overlap => actions.replaceSyncWatchStatsDevice(context, { source: snapshot, overlap, localDays, currentDays, replacedDevices, localReset: null }),
-    remote: () => remote, visible: () => visible, puts: () => puts, settings }
+  const context = {
+    rootState: { settings },
+    commit(name, value) {
+      if (name === 'setSyncedWatchStats') visible = value
+    },
+    dispatch: async (name, value) => {
+      assert.equal(name, 'updateSyncServerSnapshot')
+      settings.syncServerSnapshot = value
+    }
+  }
+  return {
+    run: overlap => actions.replaceSyncWatchStatsDevice(context, { source: snapshot, overlap, localDays, currentDays, replacedDevices, localReset: null }),
+    remote: () => remote,
+    visible: () => visible,
+    puts: () => puts,
+    settings
+  }
 }
 
 test('replacement saves encrypted histories and restores the repaired snapshot after restart', async () => {
