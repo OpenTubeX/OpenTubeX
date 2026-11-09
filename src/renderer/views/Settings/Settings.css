@@ -528,18 +528,22 @@
   padding: 0;
 }
 
-/* The window already paints the card gradient behind the About card. */
 .settingsAboutPage {
-  --card-bg-image: none;
-
   /* These cards scroll inside the window, which can't clip a fixed layer. */
   --fixed-background-display: none;
   --fixed-background-host-clip: border-box;
+
+  /* Center the page vertically, but keep its top reachable when it overflows. */
+  display: grid;
+  align-content: safe center;
 }
 
-/* The scroller already pads the page, so drop the route's bottom margin. */
+/* The window is the page's surface, so drop the route's card styling. */
 .settingsAboutPage :deep(.card) {
   margin-block-end: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .settingsDownloadsPage {
