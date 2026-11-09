@@ -59,7 +59,7 @@ test.describe('with several playlists', () => {
     },
   })
 
-  test('puts the playlist options beside the search outside the phone layout @scale', async ({ app, page }) => {
+  test('puts the playlist options beside the search outside the phone layout, and behind a button with rows in it @scale', async ({ app, page }) => {
     await showPrompt(page, [video(1)])
     const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
     const toggle = prompt.getByRole('checkbox', { name: 'Playlists with matching videos', exact: true })
@@ -81,6 +81,12 @@ test.describe('with several playlists', () => {
 
     await setWindowSize(app, page, { width: 480, height: 800 })
     await expect(searchRow.locator('.matchingVideoToggle')).toHaveCount(0)
+    // Grid tiles left room for only one playlist on a phone screen
+    await expect(prompt.locator('.ft-playlist-selector.list')).toHaveCount(2)
+    await expect(prompt.locator('.ft-playlist-selector', { hasText: 'Second' })).toBeInViewport({ ratio: 1 })
+    await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeHidden()
+
+    await prompt.getByRole('button', { name: 'Search filters', exact: true }).click()
     await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeVisible()
     await expect(toggle).toBeChecked()
   })
@@ -119,10 +125,14 @@ test.describe('with long option labels', () => {
     await showPrompt(page, [video(1), video(2)])
     const toggles = page.locator('.prompt .promptContent .optionToggles')
 
+    // The duplicate switch stays visible while the filters are collapsed
     await expect(toggles.locator('.allowDuplicateToggle')).toBeVisible()
+    await page.locator('.prompt').getByRole('button', { name: 'Suchfilter', exact: true }).click()
+    await expect(toggles.locator('.matchingVideoToggle')).toBeVisible()
     await expect.poll(() => toggles.evaluate((element) => {
       const [first, second] = [...element.querySelectorAll('.switch-label')].map(label => label.getBoundingClientRect())
       return first.bottom - second.top
-    })).toBeLessThanOrEqual(0)
+    // Fractional UI Scale can leave a rounding overlap far below a pixel
+    })).toBeLessThanOrEqual(0.01)
   })
 })

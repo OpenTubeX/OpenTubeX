@@ -1,7 +1,7 @@
 <template>
   <div
-    class="ft-playlist-selector grid"
-    :class="{ selected }"
+    class="ft-playlist-selector"
+    :class="[appearance, { selected }]"
     @click="toggleSelection"
     @keydown.enter.space.prevent="toggleSelection"
   >
@@ -72,6 +72,7 @@ const props = defineProps({
   appearance: {
     type: String,
     default: 'grid',
+    validator: (value) => ['grid', 'list'].includes(value),
   },
   selected: {
     type: Boolean,

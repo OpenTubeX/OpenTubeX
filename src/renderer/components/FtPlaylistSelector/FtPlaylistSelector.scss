@@ -1,3 +1,10 @@
+.selectedIcon {
+  position: absolute;
+  inset-block-start: calc(50% - 25px);
+  inset-inline-start: calc(50% - 25px);
+  font-size: 50px;
+}
+
 .ft-playlist-selector {
   padding: 6px;
   border-radius: var(--shape-corner-large);
@@ -96,11 +103,50 @@
       font-size: 22px;
     }
   }
-}
 
-.selectedIcon {
-  position: absolute;
-  inset-block-start: calc(50% - 25px);
-  inset-inline-start: calc(50% - 25px);
-  font-size: 50px;
+  // Compact rows, so several playlists fit on a phone screen at once
+  &.list {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .thumbnail {
+      flex-shrink: 0;
+      inline-size: 112px;
+
+      .thumbnailImage {
+        display: block;
+        inline-size: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+      }
+
+      .videoCountContainer {
+        inline-size: 36px;
+        font-size: 13px;
+      }
+    }
+
+    .selectedIcon {
+      inset-block-start: calc(50% - 14px);
+      inset-inline-start: calc(50% - 14px);
+      font-size: 28px;
+    }
+
+    .info {
+      min-inline-size: 0;
+    }
+
+    .title {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: 16px;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .videoPresenceCount {
+      font-size: 13px;
+    }
+  }
 }
