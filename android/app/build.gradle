@@ -239,7 +239,6 @@ android {
 }
 
 apply from: '../trim-runtime.gradle'
-apply from: '../strip-mlkit.gradle'
 
 repositories {
     flatDir{
@@ -265,17 +264,11 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation "androidx.work:work-runtime:$androidxWorkVersion"
-    // The ML Kit stand-ins implement the barcode plugin's scanner interfaces.
-    compileOnly "io.ionic.libs:ionbarcode-android:2.1.1@aar"
-    compileOnly "androidx.camera:camera-core:1.5.1"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     if (!optimizedTestBuild) {
         androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
         androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
-        // Match the barcode plugin to control CameraX initialization in tests.
-        androidTestImplementation "androidx.camera:camera-camera2:1.5.1"
-        androidTestImplementation "androidx.camera:camera-lifecycle:1.5.1"
     }
     implementation project(':capacitor-cordova-android-plugins')
 }

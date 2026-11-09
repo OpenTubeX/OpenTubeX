@@ -58,7 +58,6 @@
           :key="receiveScanAttempt"
           :hint="t('Settings.Sync Settings.Pairing Invite Scan Hint')"
           @scan="submitInvite"
-          @cancel="openInviteEntry"
           @unavailable="openInviteEntry(t('Settings.Sync Settings.Camera Unavailable'))"
         />
         <FtFlexBox class="pairingActions">
@@ -243,7 +242,6 @@
           :key="approveScanAttempt"
           :hint="t('Settings.Sync Settings.Pairing Scan Hint')"
           @scan="handleScan"
-          @cancel="openManualEntry"
           @unavailable="approveScannerUnavailable"
         />
         <FtFlexBox class="pairingActions">
@@ -534,7 +532,8 @@ const props = defineProps({
 
 const emit = defineEmits(['paired'])
 const { locale, t } = useI18n()
-const usingNativeScanner = Boolean(process.env.IS_CAPACITOR)
+// The mobile apps offer manual entry instead of an error page when the camera is unavailable.
+const manualEntryWithoutCamera = Boolean(process.env.IS_CAPACITOR)
 const timeFormat = computed(() => store.getters.getTimeFormat)
 
 // Invites stay valid longer than the server's two-minute session because the
@@ -917,7 +916,7 @@ function restartScanner() {
 }
 
 async function approveScannerUnavailable() {
-  if (usingNativeScanner) {
+  if (manualEntryWithoutCamera) {
     await openManualEntry()
   } else {
     approveStage.value = 'error'

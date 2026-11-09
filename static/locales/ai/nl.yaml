@@ -1300,8 +1300,6 @@ Settings:
     Previous Auto Sync Notice: "Automatische synchronisatie is uitgeschakeld. Een eerdere versie heeft deze mogelijk uitgeschakeld om gegevensverlies te voorkomen."
     Enable Automatic Sync: "Automatische synchronisatie inschakelen"
     Destructive Sync Blocked: "Synchronisatie is gestopt om gegevensverlies te voorkomen. Automatische synchronisatie is uitgeschakeld. Open de synchronisatie-instellingen om de verwijderingen te bekijken."
-    Turn Flashlight On: Zaklamp inschakelen
-    Turn Flashlight Off: Zaklamp uitschakelen
     Devices: "Apparaten"
     Devices Hint: "Bekijk de apparaten die toegang hebben tot dit synchronisatieaccount."
     Change Password: "Wachtwoord wijzigen"

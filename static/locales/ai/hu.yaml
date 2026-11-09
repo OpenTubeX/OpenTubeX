@@ -1273,8 +1273,6 @@ Settings:
     Previous Auto Sync Notice: "Az automatikus szinkronizálás ki van kapcsolva. Egy korábbi verzió kikapcsolhatta az adatvesztés megelőzése érdekében."
     Enable Automatic Sync: "Automatikus szinkronizálás bekapcsolása"
     Destructive Sync Blocked: "A szinkronizálás leállt az adatvesztés megelőzése érdekében. Az automatikus szinkronizálás ki van kapcsolva. Nyissa meg a szinkronizálási beállításokat a törlések áttekintéséhez."
-    Turn Flashlight On: Zseblámpa bekapcsolása
-    Turn Flashlight Off: Zseblámpa kikapcsolása
     Devices: "Eszközök"
     Devices Hint: "Tekintse át azokat az eszközöket, amelyek hozzáférhetnek ehhez a szinkronizálási fiókhoz."
     Change Password: "Jelszó módosítása"

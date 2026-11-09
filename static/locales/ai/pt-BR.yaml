@@ -1244,8 +1244,6 @@ Settings:
     Previous Auto Sync Notice: "A sincronização automática está desativada. Uma versão anterior pode tê-la desativado para evitar a perda de dados."
     Enable Automatic Sync: "Ativar sincronização automática"
     Destructive Sync Blocked: "A sincronização foi interrompida para evitar a perda de dados. A sincronização automática está desativada. Abra as configurações de sincronização para revisar as exclusões."
-    Turn Flashlight On: Ligar a lanterna
-    Turn Flashlight Off: Desligar a lanterna
     Devices: "Dispositivos"
     Devices Hint: "Confira os dispositivos que podem acessar esta conta de sincronização."
     Change Password: "Alterar senha"

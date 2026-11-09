@@ -1275,8 +1275,6 @@ Settings:
     Previous Auto Sync Notice: "Otomatik eşitleme kapalı. Önceki bir sürüm, veri kaybını önlemek için bunu devre dışı bırakmış olabilir."
     Enable Automatic Sync: "Otomatik eşitlemeyi etkinleştir"
     Destructive Sync Blocked: "Veri kaybını önlemek için eşitleme durduruldu. Otomatik eşitleme kapalı. Silinecek öğeleri incelemek için eşitleme ayarlarını açın."
-    Turn Flashlight On: El fenerini aç
-    Turn Flashlight Off: El fenerini kapat
     Devices: "Cihazlar"
     Devices Hint: "Bu eşitleme hesabına erişebilen cihazları inceleyin."
     Change Password: "Parolayı değiştir"

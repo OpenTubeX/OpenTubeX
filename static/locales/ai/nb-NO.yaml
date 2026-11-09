@@ -1273,8 +1273,6 @@ Settings:
     Previous Auto Sync Notice: "Automatisk synkronisering er slått av. En tidligere versjon kan ha slått den av for å hindre tap av data."
     Enable Automatic Sync: "Slå på automatisk synkronisering"
     Destructive Sync Blocked: "Synkroniseringen er stoppet for å forhindre tap av data. Automatisk synkronisering er slått av. Åpne synkroniseringsinnstillingene for å se gjennom slettingene."
-    Turn Flashlight On: Slå på lommelykten
-    Turn Flashlight Off: Slå av lommelykten
     Devices: "Enheter"
     Devices Hint: "Se gjennom enhetene som har tilgang til denne synkroniseringskontoen."
     Change Password: "Endre passord"

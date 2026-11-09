@@ -1276,8 +1276,6 @@ Settings:
     Previous Auto Sync Notice: "Automatická synchronizácia je vypnutá. Staršia verzia ju mohla vypnúť, aby zabránila strate údajov."
     Enable Automatic Sync: "Zapnúť automatickú synchronizáciu"
     Destructive Sync Blocked: "Synchronizácia bola zastavená, aby sa zabránilo strate údajov. Automatická synchronizácia je vypnutá. Otvorte nastavenia synchronizácie a skontrolujte vymazávania."
-    Turn Flashlight On: Zapnúť baterku
-    Turn Flashlight Off: Vypnúť baterku
     Devices: "Zariadenia"
     Devices Hint: "Skontrolujte zariadenia, ktoré majú prístup k tomuto synchronizačnému účtu."
     Change Password: "Zmeniť heslo"

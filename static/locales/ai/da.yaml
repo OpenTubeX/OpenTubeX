@@ -1317,8 +1317,6 @@ Settings:
     Previous Auto Sync Notice: "Automatisk synkronisering er slået fra. En tidligere version kan have slået den fra for at forhindre datatab."
     Enable Automatic Sync: "Slå automatisk synkronisering til"
     Destructive Sync Blocked: "Synkronisering er stoppet for at forhindre datatab. Automatisk synkronisering er slået fra. Åbn synkroniseringsindstillingerne for at gennemgå sletningerne."
-    Turn Flashlight On: Tænd lommelygten
-    Turn Flashlight Off: Sluk lommelygten
     Devices: "Enheder"
     Devices Hint: "Gennemse de enheder, der har adgang til denne synkroniseringskonto."
     Change Password: "Skift adgangskode"

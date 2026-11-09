@@ -1273,8 +1273,6 @@ Settings:
     Previous Auto Sync Notice: "自動同期はオフです。データの損失を防ぐため、以前のバージョンで無効になった可能性があります。"
     Enable Automatic Sync: "自動同期を有効にする"
     Destructive Sync Blocked: "データの損失を防ぐため同期を停止しました。自動同期はオフになっています。同期設定を開いて削除内容を確認してください。"
-    Turn Flashlight On: ライトをオンにする
-    Turn Flashlight Off: ライトをオフにする
     Devices: "デバイス"
     Devices Hint: "この同期アカウントにアクセスできるデバイスを確認します。"
     Change Password: "パスワードを変更"
