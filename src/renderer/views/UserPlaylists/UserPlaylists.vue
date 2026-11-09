@@ -34,39 +34,40 @@
             />
           </div>
         </div>
-        <FtInput
-          v-if="fullData.length > 1"
-          ref="searchBar"
-          class="playlistSearch"
-          input-type="search"
-          :label="$t('User Playlists.Search bar placeholder')"
-          :icon="['fas', 'search']"
-          :placeholder="$t('Form Inputs.Search Text Hint')"
-          :value="query"
-          :show-action-button="false"
-          :maxlength="255"
-          @input="handleQueryChange"
-        />
         <div
           v-if="fullData.length > 1"
-          class="optionsRow"
+          class="controlsRow"
         >
-          <FtToggleSwitch
-            class="matchingVideosToggle"
-            :label="$t('User Playlists.Playlists with Matching Videos')"
-            :compact="true"
-            :default-value="doSearchPlaylistsWithMatchingVideos"
-            @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
+          <FtInput
+            ref="searchBar"
+            class="playlistSearch"
+            input-type="search"
+            :label="$t('User Playlists.Search bar placeholder')"
+            :icon="['fas', 'search']"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
+            :value="query"
+            :show-action-button="false"
+            :maxlength="255"
+            @input="handleQueryChange"
           />
-          <FtSelect
-            class="sortSelect"
-            :value="sortBy"
-            :select-names="sortByNames"
-            :select-values="SORT_BY_VALUES"
-            :placeholder="$t('Global.Sort By')"
-            :icon="sortByIcon"
-            @change="updateUserPlaylistsSortBy"
-          />
+          <div class="optionsRow">
+            <FtToggleSwitch
+              class="matchingVideosToggle"
+              :label="$t('User Playlists.Playlists with Matching Videos')"
+              :compact="true"
+              :default-value="doSearchPlaylistsWithMatchingVideos"
+              @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
+            />
+            <FtSelect
+              class="sortSelect"
+              :value="sortBy"
+              :select-names="sortByNames"
+              :select-values="SORT_BY_VALUES"
+              :placeholder="$t('Global.Sort By')"
+              :icon="sortByIcon"
+              @change="updateUserPlaylistsSortBy"
+            />
+          </div>
         </div>
       </div>
       <section
