@@ -424,9 +424,14 @@
   min-block-size: 44px;
   box-sizing: border-box;
   padding: 12px;
+  border: 0;
   color: var(--primary-text-color);
+  background-color: transparent;
   border-radius: inherit;
+  font: inherit;
+  text-align: start;
   text-decoration: none;
+  cursor: pointer;
   transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 

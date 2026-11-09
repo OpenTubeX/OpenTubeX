@@ -187,7 +187,7 @@ test('captures the originating tab and blocks loading, dialogs, fullscreen and u
   state.tab.isLoading = true
   assert.equal(probe(), null)
   state.tab.isLoading = false
-  state.tab.route.name = 'settings'
+  state.tab.route.name = 'stats'
   assert.equal(probe(), null)
 })
 

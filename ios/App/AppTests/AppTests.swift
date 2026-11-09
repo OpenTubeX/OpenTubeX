@@ -1032,7 +1032,7 @@ final class AppTests: XCTestCase {
         let info = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.info()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
         XCTAssertEqual((info?["ffmpeg"] as? [String: Any])?["available"] as? Bool, true)
         XCTAssertEqual((info?["ffprobe"] as? [String: Any])?["available"] as? Bool, true)
-        _ = try await evaluate("testStore.dispatch('updateEnableDownloads', true); testRouter.push('/settings'); true")
+        _ = try await evaluate("testStore.dispatch('updateEnableDownloads', true); testStore.dispatch('showSettingsWindow'); true")
         try await wait("!!document.querySelector('.settingsMenu button[data-section=download]')")
         _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
         try await wait("Array.from(document.querySelectorAll('.section[data-section=download] button')).some(button=>button.textContent.includes('Manage Download Templates'))")
@@ -3103,7 +3103,7 @@ final class AppTests: XCTestCase {
             let inset = try webView.safeAreaInsets.left
             let navigationLeft = try await evaluate("document.querySelector('.sideNav .navOption').getBoundingClientRect().left * visualViewport.scale") as? Double
             XCTAssertGreaterThanOrEqual(try XCTUnwrap(navigationLeft) + 1, inset, "Navigation overlaps cutout at \(scale)%")
-            _ = try await evaluate("testRouter.push('/settings'); true")
+            _ = try await evaluate("testStore.dispatch('showSettingsWindow'); true")
             try await wait("!!document.querySelector('.settingsWindowHeader')")
             let headerLeft = try await evaluate("document.querySelector('.settingsWindowHeader').getBoundingClientRect().left * visualViewport.scale") as? Double
             XCTAssertGreaterThanOrEqual(try XCTUnwrap(headerLeft) + 1, inset, "Settings overlaps cutout at \(scale)%")
@@ -3132,7 +3132,7 @@ final class AppTests: XCTestCase {
 
     func testSettingsAtMobileScales() async throws {
         try await openApplication()
-        _ = try await evaluate("testRouter.push('/settings'); true")
+        _ = try await evaluate("testStore.dispatch('showSettingsWindow'); true")
         try await wait("!!document.querySelector('.settingsMenu')")
         for scale in [75, 100, 150] {
             _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateUiScale', scale)", arguments: ["scale": scale], in: nil, contentWorld: .page)

@@ -93,7 +93,7 @@ async function showSystemNotificationForDownload(payload, phase, downloadId, tit
 
       const tabManager = TabManager.getForWindow(browserWindow.id)
       if (phase === 'started') {
-        browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, '/downloads')
+        browserWindow.webContents.send(IpcChannels.SHOW_SETTINGS_WINDOW, { view: 'downloads' })
       } else if (phase === 'completed' && tabManager && ID_REGEX.test(payload.videoId) && Number.isInteger(downloadId)) {
         tabManager.createTabWithPreference({
           route: `/watch/${payload.videoId}`,

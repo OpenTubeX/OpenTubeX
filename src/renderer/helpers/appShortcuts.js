@@ -9,6 +9,11 @@ export function createAppShortcuts(labels) {
   return shortcuts.map(shortcut => ({ ...shortcut, title: labels[shortcut.id] }))
 }
 
+/**
+ * Downloads opens in the settings window, so it has no path.
+ * @param {unknown} shortcutId
+ * @returns {string | null}
+ */
 export function getAppShortcutPath(shortcutId) {
-  return shortcuts.some(shortcut => shortcut.id === shortcutId) ? `/${shortcutId}` : null
+  return shortcutId !== 'downloads' && shortcuts.some(shortcut => shortcut.id === shortcutId) ? `/${shortcutId}` : null
 }

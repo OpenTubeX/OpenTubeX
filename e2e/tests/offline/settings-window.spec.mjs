@@ -55,51 +55,40 @@ async function pressSettingsShortcut(app) {
 }
 
 test.describe('settings', () => {
-  test('opens from Preferences without remounting the current feed', async ({ app, page }) => {
+  test('opens from the application menu without remounting the current feed', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
     const subscriptionsPage = page.locator('.subscriptionsPage')
     await subscriptionsPage.evaluate(element => {
       element.dataset.settingsShortcutMarker = 'preserved'
     })
 
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
+    const clickMenuItem = label => app.electronApp.evaluate(({ BrowserWindow, Menu }, label) => {
       const browserWindow = BrowserWindow.getAllWindows()[0]
       if (!browserWindow) throw new Error('Browser window was not found')
-      browserWindow.webContents.send('change-view', {
-        route: '/settings',
-        tabId: 'preferences-test'
-      })
-    })
+      const item = Menu.getApplicationMenu().items
+        .flatMap(menu => menu.submenu?.items ?? [])
+        .find(candidate => candidate.label === label)
+      item.click({}, browserWindow, browserWindow.webContents)
+    }, label)
 
-    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await clickMenuItem('Preferences')
+    await expect(page.locator('.settingsWindow .settingsMenu')).toBeVisible()
     await expect(subscriptionsPage).toHaveAttribute('data-settings-shortcut-marker', 'preserved')
+    await clickMenuItem('Preferences')
+    await expect(page.locator('.settingsWindow')).toHaveCount(0)
+
+    await clickMenuItem('Profile Manager')
+    await expect(page.locator('.settingsWindow .profileSettingsContent')).toBeVisible()
+    await expect(subscriptionsPage).toHaveAttribute('data-settings-shortcut-marker', 'preserved')
+    await expect(page).toHaveURL(/#\/subscriptions$/)
   })
 
-  test('keeps a direct legacy settings route inside the app', async ({ page }) => {
-    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
-      route: '/settings',
-      makeActive: true
-    }))
-
-    await expect(page.locator('.settingsWindow')).toBeVisible()
-    await expect.poll(async () => {
-      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
-      return state.tabs.find(candidate => candidate.id === tab.id)?.route.fullPath
-    }).toBe('/')
-  })
-
-  test('opens a background About tab only once it is selected', async ({ page }) => {
+  test('shows Subscriptions for a restored legacy About tab', async ({ page }) => {
     const tab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/about', makeActive: false }))
-    await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"] .settingsRoute`)).toBeAttached()
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-    const routeOf = () => page.evaluate(id => window.ftElectron.tabs.getState()
-      .then(state => state.tabs.find(candidate => candidate.id === id)?.route.fullPath), tab.id)
-    expect(await routeOf()).toBe('/about')
-
     await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
-    await expect(page.locator('.settingsWindow .settingsAboutPage')).toBeVisible()
-    await expect.poll(routeOf).toBe('/')
+    await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"] .subscriptionsPage`)).toBeVisible()
+    await expect(page).toHaveURL(/#\/$/)
+    await expect(page.locator('.settingsWindow')).toHaveCount(0)
   })
 
   test('toggles from the app settings button', async ({ page }) => {

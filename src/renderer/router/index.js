@@ -78,7 +78,6 @@ function createPreloadedRoute(name, loader) {
 }
 
 const settingsWindowRoute = createPreloadedRoute('SettingsWindowRoute', () => import('../views/Settings/Settings.vue'))
-const SettingsRoute = createAsyncRoute(() => import('../views/Settings/SettingsRoute.vue'))
 const Stats = createAsyncRoute(() => import('../views/Stats/Stats.vue'))
 
 // Keep Settings in its own chunk so its styles retain their established load
@@ -163,17 +162,6 @@ export const routes = [
     },
     component: History
   },
-  ...(supportsYtDlp
-    ? [{
-        path: '/downloads',
-        name: 'downloads',
-        meta: {
-          title: getFixedInternalRouteTitle('/downloads')
-        },
-        component: SettingsRoute
-      }]
-    // Lite Android builds may receive these paths from tabs synced by a full build.
-    : [{ path: '/downloads', redirect: '/' }]),
   {
     path: '/stats',
     name: 'stats',
@@ -182,30 +170,10 @@ export const routes = [
     },
     component: Stats
   },
-  {
-    path: '/settings',
-    name: 'settings',
-    meta: {
-      title: getFixedInternalRouteTitle('/settings')
-    },
-    component: SettingsRoute
-  },
-  {
-    path: '/about',
-    name: 'about',
-    meta: {
-      title: getFixedInternalRouteTitle('/about')
-    },
-    component: SettingsRoute
-  },
-  {
-    path: '/settings/profile',
-    name: 'profileSettings',
-    meta: {
-      title: getFixedInternalRouteTitle('/settings/profile')
-    },
-    component: SettingsRoute
-  },
+  // Settings, Downloads, About and the Profile Manager open in the settings
+  // window. Released builds also had routes for them, so restored and synced
+  // tabs can still hold these paths.
+  ...['/settings', '/settings/profile', '/downloads', '/about'].map(path => ({ path, redirect: '/' })),
   {
     path: '/search/:query',
     meta: {

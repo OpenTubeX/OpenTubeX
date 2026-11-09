@@ -623,7 +623,7 @@ test('re-enabling mobile tabs restores the previous tabs within the same app ses
     assert.equal(saved.closedTabs.length, 0)
     const current = service.currentSession()
     const tab = current.tabs[0]
-    const route = router.resolve(cycle === 0 ? '/settings' : '/history')
+    const route = router.resolve(cycle === 0 ? '/stats' : '/history')
     tab.route = route
     tab.history.push({ route, title: route.fullPath, scroll: { left: 0, top: 120 } })
     tab.historyIndex = tab.history.length - 1

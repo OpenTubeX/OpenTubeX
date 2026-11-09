@@ -321,7 +321,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSettingsWindowSection', 'playback')
-      location.hash = '#/settings'
+      store.dispatch('showSettingsWindow')
     })
     const previewToggle = page.locator('[data-setting-key="showMobileSeekPreview"]')
     await expect(previewToggle).toBeVisible()

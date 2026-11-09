@@ -438,7 +438,7 @@
           @view-all="openDownloads"
         />
         <HomeShelf
-          :items="recentDownloads"
+          :items="recentDownloadEntries"
           :label="sectionLabel(section.id)"
           :item-min-width="320"
           :item-gap="10"
@@ -446,13 +446,14 @@
           <template #default="{ items }">
             <ul class="activityList">
               <li
-                v-for="download in items"
+                v-for="{ download, route } in items"
                 :key="download.id"
                 class="recentDownloadItem"
               >
-                <RouterLink
+                <component
+                  :is="route ? RouterLink : 'button'"
                   class="activityLink"
-                  :to="downloadRoute(download)"
+                  v-bind="route ? { to: route } : { type: 'button', onClick: openDownloads }"
                 >
                   <span class="activityIcon">
                     <FtIcon :icon="['fas', 'download']" />
@@ -461,7 +462,7 @@
                     <strong dir="auto">{{ download.title }}</strong>
                     <span>{{ downloadStatus(download) }}</span>
                   </span>
-                </RouterLink>
+                </component>
               </li>
             </ul>
           </template>
@@ -538,6 +539,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import FtAutoGrid from '../../components/FtAutoGrid/FtAutoGrid.vue'
 import FtListVideo from '../../components/FtListVideo/FtListVideo.vue'
@@ -677,7 +679,9 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
     const bTimestamp = b.lastPlayedAt ?? b.lastUpdatedAt ?? b.createdAt ?? 0
     return bTimestamp - aTimestamp
   }))
-const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads))
+// Downloads without a playable file open the Downloads window instead.
+const recentDownloadEntries = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads)
+  .map(download => ({ download, route: downloadRoute(download) })))
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
 const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
@@ -751,7 +755,7 @@ const sectionDefinitions = computed(() => ({
   },
   recentDownloads: {
     label: t('Home Page.Recent downloads'),
-    get hasContent() { return recentDownloads.value.length > 0 },
+    get hasContent() { return recentDownloadEntries.value.length > 0 },
   },
   reminders: {
     label: t('Home Page.Upcoming reminders'),
@@ -941,7 +945,7 @@ function downloadStatus(download) {
 function downloadRoute(download) {
   const firstFile = download.files?.find(file => file.available !== false)
   if (!['video', 'audio'].includes(download.mode) || firstFile?.videoId == null) {
-    return '/downloads'
+    return null
   }
 
   const query = { downloadId: String(download.id) }
