@@ -71,6 +71,19 @@ export function isNonPublicNetworkAddress(address) {
 }
 
 /**
+ * Whether an authentication challenge comes from the enabled custom proxy, so
+ * its saved credentials are never sent to a system or other proxy.
+ * @param {{ isProxy: boolean, host: string, port: number }} authInfo
+ * @param {{ useProxy: unknown, hostname: unknown, port: unknown }} settings
+ */
+export function isConfiguredProxyChallenge(authInfo, { useProxy, hostname, port }) {
+  if (!authInfo.isProxy || useProxy !== true) return false
+  const normalizeHost = host => String(host).replace(/^\[(.*)\]$/, '$1').toLowerCase()
+  return normalizeHost(authInfo.host) === normalizeHost(hostname || DEFAULT_PROXY_SETTINGS.hostname) &&
+    authInfo.port === Number(port || DEFAULT_PROXY_SETTINGS.port)
+}
+
+/**
  * Builds a proxy URL from the app's proxy settings,
  * for tools that take the proxy as a single URL (e.g. yt-dlp's `--proxy`).
  *

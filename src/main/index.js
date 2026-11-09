@@ -47,7 +47,7 @@ import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
-import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { normalizeYatteeServerUrl, usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
@@ -1574,12 +1574,16 @@ function runApp() {
   })
 
   app.on('login', async (event, webContents, request, authInfo, callback) => {
-    if (authInfo.isProxy) {
-      event.preventDefault()
-      const proxyUsername = (await baseHandlers.settings._findOne('proxyUsername'))?.value
-      const proxyPassword = (await baseHandlers.settings._findOne('proxyPassword'))?.value
-      callback(proxyUsername, proxyPassword)
+    if (!authInfo.isProxy) return
+    // The settings are read asynchronously, so take over the challenge and cancel it with an empty callback when it is not ours.
+    event.preventDefault()
+    const setting = async id => (await baseHandlers.settings._findOne(id))?.value
+    const [useProxy, hostname, port] = await Promise.all([setting('useProxy'), setting('proxyHostname'), setting('proxyPort')])
+    if (!isConfiguredProxyChallenge(authInfo, { useProxy, hostname, port })) {
+      callback()
+      return
     }
+    callback(await setting('proxyUsername'), await setting('proxyPassword'))
   })
 
   function isTrayEnabled() {
