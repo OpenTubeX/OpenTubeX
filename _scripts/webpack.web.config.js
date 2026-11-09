@@ -188,6 +188,12 @@ const config = {
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.IS_CAPACITOR': isCapacitor,
       'process.env.IS_IOS': isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios',
+      // Matches the scheme _scripts/prepareIos.mjs registers.
+      'process.env.APP_URL_SCHEME': JSON.stringify(
+        isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios' && /-nightly-\d+$/.test(require('../package.json').version)
+          ? 'opentubex-nightly'
+          : 'opentubex'
+      ),
       'process.env.SUPPORTS_LOCAL_API': isCapacitor,
       'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',

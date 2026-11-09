@@ -21,6 +21,9 @@ test('recognizes only the OIDC callback URL', () => {
   // Windows may append a slash to protocol arguments.
   assert.equal(isSyncServerOidcCallbackUrl('opentubex://oidc/?token=abc'), true)
   assert.equal(isSyncServerOidcCallbackUrl('OpenTubeX://OIDC?token=abc'), true)
+  // iOS nightly builds use their own scheme.
+  assert.equal(isSyncServerOidcCallbackUrl('opentubex-nightly://oidc?token=abc'), true)
+  assert.equal(isSyncServerOidcCallbackUrl('opentubex-dev://oidc?token=abc'), false)
   assert.equal(isSyncServerOidcCallbackUrl('opentubex://oidcx?token=abc'), false)
   assert.equal(isSyncServerOidcCallbackUrl('opentubex://https://www.youtube.com/watch?v=abc'), false)
   assert.equal(isSyncServerOidcCallbackUrl('https://oidc/?token=abc'), false)

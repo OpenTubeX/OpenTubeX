@@ -2,9 +2,10 @@
 
 /**
  * The URL sync servers redirect to after an OIDC login or account deletion.
- * Server operators must list it in `oidc.allowed_redirect_urls`.
+ * Server operators must list it in `oidc.allowed_redirect_urls`. iOS nightly
+ * builds register their own scheme so they can sit next to the stable app.
  */
-export const SYNC_SERVER_OIDC_REDIRECT_URL = 'opentubex://oidc'
+export const SYNC_SERVER_OIDC_REDIRECT_URL = `${process.env.APP_URL_SCHEME ?? 'opentubex'}://oidc`
 
 // OIDC accounts have no username, but sync keys its saved state and pairing by
 // one. Servers refuse to register names with this prefix, so a password account
@@ -18,7 +19,7 @@ const OIDC_USERNAME_PREFIX = 'OIDC-ACCOUNT-'
 export function isSyncServerOidcCallbackUrl(value) {
   // Match the text: Android WebViews before Chromium 130 parse no host from
   // URLs with custom schemes and put `//oidc` into the path instead.
-  return typeof value === 'string' && /^opentubex:\/\/oidc(?:[/?#]|$)/i.test(value)
+  return typeof value === 'string' && /^opentubex(?:-nightly)?:\/\/oidc(?:[/?#]|$)/i.test(value)
 }
 
 /**
