@@ -118,7 +118,7 @@ test('storage history includes only terminal downloads that the backend can clea
   assert.deepEqual(Array.from(result, record => record.status), ['completed', 'failed', 'cancelled', 'skipped'])
 })
 
-function finishDownload({ code, payload, destinations, stderr }) {
+function finishDownload({ code, payload, destinations, stderr, subtitleFormat = '', existingFiles = [] }) {
   const start = source.indexOf('  /** @param {string} line */\n  function handleStderrLine(line) {')
   const closeStart = source.indexOf("  child.on('close', (code) => {", start)
   const closeEnd = source.indexOf('\n  })\n', closeStart) + 5
@@ -127,7 +127,8 @@ function finishDownload({ code, payload, destinations, stderr }) {
   let close
   vm.runInNewContext(`${source.slice(start, source.indexOf("  child.on('error',", start))}${source.slice(closeStart, closeEnd)}
     for (const line of stderr) handleStderrLine(line)`, {
-    id: 1, stderr, stderrLines: [], errorLines: [], status, payload, subtitleFormat: '', finished: false,
+    id: 1, stderr, stderrLines: [], errorLines: [], status, payload, subtitleFormat, finished: false,
+    subtitleDestinations: new Set(destinations), existsSync: file => existingFiles.includes(file),
     entry: { cancelled: false, restarting: false }, activeDownloads: new Map(),
     handleStdoutLine() {}, releaseDownloadSlot() {}, removeTemporaryDownloadFolder() {}, sendStatus() {},
     saveDownloadRecords: async () => {}, showAutomaticDownloadNotification: (_, state) => notifications.push(state),
@@ -158,4 +159,17 @@ test('a playlist without any downloaded file and a failed single video still fai
   const video = finishDownload({ code: 1, payload: {}, destinations: ['/downloads/Video [aaaaaaaaaaa].mp4'], stderr: [membersOnlyError] })
   assert.equal(video.status.status, 'failed')
   assert.equal(video.status.errorMessage, membersOnlyError)
+})
+
+test('a playlist keeps the original subtitle when converting a skipped entry failed', () => {
+  const { status } = finishDownload({
+    code: 1,
+    payload: { isPlaylist: true },
+    destinations: ['/downloads/First.en.vtt', '/downloads/Second.en.vtt'],
+    stderr: ['ERROR: Postprocessing: Conversion failed!'],
+    subtitleFormat: 'srt',
+    existingFiles: ['/downloads/First.en.srt'],
+  })
+  assert.equal(status.status, 'completed')
+  assert.deepEqual(status.destinations, ['/downloads/First.en.srt', '/downloads/Second.en.vtt'])
 })

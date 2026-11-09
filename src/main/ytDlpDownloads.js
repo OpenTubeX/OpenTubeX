@@ -879,10 +879,10 @@ async function startYtDlpDownload(
       // videos, but still exits with an error after downloading the others.
       if (code !== 0) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n')
       if (subtitleFormat !== '') {
-        const convertedSubtitleDestinations = new Map([...subtitleDestinations].map((subtitlePath) => [
-          subtitlePath,
-          subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)
-        ]))
+        const convertedSubtitleDestinations = new Map([...subtitleDestinations]
+          .map((subtitlePath) => [subtitlePath, subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)])
+          // A playlist entry that failed may not have been converted
+          .filter(([, convertedPath]) => code === 0 || existsSync(convertedPath)))
         status.destinations = status.destinations.map((destination) => (
           convertedSubtitleDestinations.get(destination) ?? destination
         ))
