@@ -124,6 +124,29 @@ test('a seek that starts playback resumes from the chosen position', async ({ ap
   expect(resumedAt).toBeGreaterThanOrEqual(20)
 })
 
+test('saving a screenshot through a file picker resumes without rewinding', async ({ app, page }) => {
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateEnableScreenshot', true)
+    await window.$store.dispatch('updateScreenshotMode', 'prompt_folder')
+    await window.$store.dispatch('updateScreenshotFormat', 'png')
+  })
+  const video = await openPlayingVideo(app, page, 5)
+  await page.evaluate(() => {
+    Object.defineProperty(window, 'showSaveFilePicker', {
+      configurable: true,
+      value: async () => ({ createWritable: async () => ({ write: async () => {}, close: async () => {} }) })
+    })
+    document.activeElement?.blur()
+  })
+
+  const startedAt = await video.evaluate(element => element.currentTime)
+  const resumedAt = await resume(page, video, async () => {
+    await page.keyboard.press('u')
+    await expect(page.locator('.toast', { hasText: 'Saved screenshot' })).toBeVisible()
+  })
+  expect(resumedAt).toBeGreaterThanOrEqual(startedAt)
+})
+
 test('resuming does not rewind when the setting is 0', async ({ app, page }) => {
   const video = await openPlayingVideo(app, page, 0)
 

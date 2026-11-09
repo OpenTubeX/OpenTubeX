@@ -1159,6 +1159,8 @@ export default defineComponent({
     // When the viewer paused playback, consumed by the next play.
     /** @type {number|null} */
     let rewindOnResumePausedAt = null
+    // Pausing to save a screenshot resumes where it paused.
+    let screenshotPausePending = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -4998,10 +5000,12 @@ export default defineComponent({
       const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
       if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
       // Only a pause during playback rewinds on resume. Ending, scrubbing,
-      // format switches and releasing a hold that started paused don't.
+      // format switches, screenshots and releasing a hold that started paused don't.
       const video_ = video.value
       const rewindOnResumeApplies = !!video_ && video_.played.length > 0 && !video_.ended &&
-        !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause
+        !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause &&
+        !screenshotPausePending
+      screenshotPausePending = false
       // Keep the earlier time when a play in a background tab is paused again.
       rewindOnResumePausedAt = rewindOnResumeApplies ? (rewindOnResumePausedAt ?? performance.now()) : null
       playerPaused.value = true
@@ -6499,6 +6503,7 @@ export default defineComponent({
         (process.env.IS_CAPACITOR && screenshotMode.value === 'default_folder' && !store.getters.getScreenshotFolderPath)
       const pauseForScreenshot = needsFilePicker || (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR)
       if (pauseForScreenshot && wasPlaying) {
+        screenshotPausePending = true
         video_.pause()
       }
 
