@@ -651,6 +651,17 @@ test('Shorts playlist fallback dates new Shorts so they can be marked as new', a
   assert.deepEqual(app.requests.filter(url => url.includes('/watch?v=')), ['https://www.youtube.com/watch?v=new-short'])
 })
 
+test('a failed Shorts date lookup keeps cached Shorts when the Invidious fallback has no playlist', async () => {
+  const lockup = videoId => ({ type: 'ShortsLockupView', on_tap_endpoint: { payload: { videoId } }, overlay_metadata: { primary_text: { text: videoId } }, thumbnail: [] })
+  const app = createRefresh({ rssStatus: 404, channelStatus: 200, shortPublishDate: null, playlistItems: ['new-short', 'old-short'].map(lockup) })
+  app.getters.getActiveProfile.subscriptions = [{ id: 'UC-test' }]
+  app.getters.getShortsCache = { 'UC-test': { timestamp: new Date(), videos: [{ videoId: 'old-short', published: Date.now() }] } }
+  app.reconnect()
+  await app.refresh({ t: key => key, errorChannels: [] })
+  assert.ok(app.requests.some(url => url.startsWith('https://invidious.example/feed/playlist/')))
+  assert.equal(app.writes.filter(write => write.key === 'updateSubscriptionShortsCacheByChannel').length, 0)
+})
+
 for (const hasByline of [false, true]) {
   test(`Shorts playlist refresh handles PlaylistVideo with byline=${hasByline}`, async () => {
     const channelId = 'UCshorts-channel'

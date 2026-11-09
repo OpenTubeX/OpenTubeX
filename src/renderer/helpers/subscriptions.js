@@ -1553,6 +1553,8 @@ async function fillLocalShortDates(videos, channelId, newOnly = false) {
     .map(entry => [entry.videoId, entry.published]))
   const firstCachedIndex = videos.findIndex(video => cachedDates.has(video.videoId))
   const fetchLimit = !newOnly ? videos.length : Math.max(firstCachedIndex, 0)
+  // One missing date fails the channel, so stop the other lookups too.
+  const lookups = new AbortController()
   await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async (video, index) => {
     if (Number.isFinite(video.published)) return
     const cached = cachedDates.get(video.videoId)
@@ -1564,6 +1566,7 @@ async function fillLocalShortDates(videos, channelId, newOnly = false) {
     const response = await localApiFetch(`https://www.youtube.com/watch?v=${video.videoId}`, {
       signal: AbortSignal.any([
         activeRefresh?.controller.signal,
+        lookups.signal,
         AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
       ].filter(Boolean)),
       nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
@@ -1575,6 +1578,9 @@ async function fillLocalShortDates(videos, channelId, newOnly = false) {
       throw new Error(`Could not load the publication date for Short ${video.videoId}`)
     }
     video.published = published
+  }).catch(error => {
+    lookups.abort()
+    throw error
   })
 }
 
@@ -1621,6 +1627,9 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
     const response = await invidiousFetch(feedUrl, activeRefresh?.controller.signal)
 
     if (response.status === 404) {
+      // As the local API's fallback, a missing playlist means the fallback
+      // failed too, not that the channel has no Shorts. Keep the cached ones.
+      if (failedAttempts > 0) return { videos: null }
       const response2 = await fetch(`${store.getters.getCurrentInvidiousInstanceUrl}/feed/channel/${channel.id}`, {
         method: 'GET',
         signal: activeRefresh?.controller.signal
