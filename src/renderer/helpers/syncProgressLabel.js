@@ -7,6 +7,7 @@ export function syncProgressLabel(t, stage) {
     history: t('Settings.Sync Settings.Syncing history'),
     watchStats: t('Settings.Sync Settings.Syncing statistics'),
     liveReminders: t('Home Page.Upcoming reminders'),
+    notificationDismissals: t('Notification Center.Notifications'),
     profiles: t('Settings.Sync Settings.Syncing profiles'),
     sessions: t('Settings.Sync Settings.Syncing open tabs'),
     sessionsV2: t('Settings.Sync Settings.Syncing open tabs'),

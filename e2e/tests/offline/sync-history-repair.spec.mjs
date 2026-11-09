@@ -84,6 +84,7 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
       syncServerSyncProfiles: false,
       syncServerSyncWatchStats: false,
       syncServerSyncLiveReminders: false,
+      syncServerSyncNotifications: false,
       syncServerSyncSessions: false,
       syncServerSyncSettings: false,
       syncServerSnapshot: beforeFirstSync ? JSON.stringify({ history: { [record.videoId]: metadata } }) : '{}',

@@ -46,6 +46,7 @@ test.use({
       syncServerSyncSettings: false,
       syncServerSyncWatchStats: false,
       syncServerSyncLiveReminders: false,
+      syncServerSyncNotifications: false,
       syncServerSyncSessions: false,
       historyRetentionDays: '0',
       uiScale: 95,

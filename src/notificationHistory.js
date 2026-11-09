@@ -153,3 +153,145 @@ export function getAutomaticDownloadTarget(phase, videoId, downloadId) {
     ? { kind: 'download-completed', path: `/watch/${videoId}`, query: { downloadId: String(downloadId) } }
     : { kind: phase === 'failed' ? 'download-failed' : 'download-started', path: '/downloads' }
 }
+
+/**
+ * Read and removed notifications, shared with other devices by sync. Each
+ * device creates its own entries, so dismissals match them by target.
+ * @typedef {{ key: string, removed: boolean, at: number }} NotificationDismissal
+ * @typedef {{ readThrough: number, clearedThrough: number, dismissals: NotificationDismissal[] }} NotificationDismissals
+ */
+
+/**
+ * Each device keeps only its newest notifications, so a dismissal that much
+ * older than the newest ones no longer matches any entry. Clearing a full
+ * history alone records as many as the history holds.
+ */
+export const NOTIFICATION_DISMISSAL_LIMIT = 2 * NOTIFICATION_HISTORY_LIMIT
+
+/**
+ * The key of the item a notification is about, the same on every device.
+ * Downloads describe work on one device and have none.
+ * @param {NotificationHistoryTarget} target
+ * @returns {string | null}
+ */
+export function getNotificationKey({ kind, path, query }) {
+  if (kind.startsWith('download-')) return null
+  const search = query ? new URLSearchParams(Object.entries(query).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)).toString() : ''
+  return `${kind}:${path}${search ? `?${search}` : ''}`
+}
+
+/** @param {unknown} value */
+const timestamp = value => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0
+
+/**
+ * Keeps the valid dismissals, one per key, newest first, in an order every
+ * device agrees on.
+ * @param {any} value
+ * @returns {NotificationDismissals}
+ */
+export function normalizeNotificationDismissals(value) {
+  /** @type {Map<string, NotificationDismissal>} */
+  const byKey = new Map()
+  for (const dismissal of Array.isArray(value?.dismissals) ? value.dismissals : []) {
+    if (typeof dismissal?.key !== 'string' || dismissal.key.length > 2048 ||
+      typeof dismissal.removed !== 'boolean' || !timestamp(dismissal.at)) continue
+    const known = byKey.get(dismissal.key)
+    byKey.set(dismissal.key, {
+      key: dismissal.key,
+      removed: dismissal.removed || known?.removed === true,
+      at: Math.max(dismissal.at, known?.at ?? 0)
+    })
+  }
+  return {
+    readThrough: timestamp(value?.readThrough),
+    clearedThrough: timestamp(value?.clearedThrough),
+    dismissals: [...byKey.values()]
+      .sort((left, right) => right.at - left.at || (left.key < right.key ? -1 : left.key > right.key ? 1 : 0))
+      .slice(0, NOTIFICATION_DISMISSAL_LIMIT)
+  }
+}
+
+/**
+ * Combines dismissals from several devices. A removal outlasts a read.
+ * @param {NotificationDismissals[]} values
+ * @returns {NotificationDismissals}
+ */
+export function mergeNotificationDismissals(...values) {
+  return normalizeNotificationDismissals({
+    readThrough: Math.max(0, ...values.map(value => value.readThrough)),
+    clearedThrough: Math.max(0, ...values.map(value => value.clearedThrough)),
+    dismissals: values.flatMap(value => value.dismissals)
+  })
+}
+
+/**
+ * @param {NotificationDismissals} left
+ * @param {NotificationDismissals} right
+ */
+export function areNotificationDismissalsEqual(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+/**
+ * Records that entries were read or removed here, and with `through`, also
+ * the ones other devices hold from before then.
+ * Returns the same dismissals when nothing changes.
+ * @param {NotificationDismissals} dismissals
+ * @param {NotificationHistoryEntry[]} entries
+ * @param {{ removed: boolean, through?: boolean, now?: number }} options
+ * @returns {NotificationDismissals}
+ */
+export function recordNotificationDismissals(dismissals, entries, { removed, through = false, now = Date.now() }) {
+  const added = entries.flatMap(entry => {
+    const key = getNotificationKey(entry)
+    return key ? [{ key, removed, at: now }] : []
+  })
+  if (added.length === 0 && !through) return dismissals
+  const next = mergeNotificationDismissals(dismissals, {
+    readThrough: through && !removed ? now : 0,
+    clearedThrough: through && removed ? now : 0,
+    dismissals: added
+  })
+  return areNotificationDismissalsEqual(next, dismissals) ? dismissals : next
+}
+
+/**
+ * Marks entries read or removes them as dismissals say, including entries
+ * this device adds after another one dismissed them. Returns the same array
+ * when nothing changes.
+ * @param {NotificationHistoryEntry[]} entries
+ * @param {NotificationDismissals} dismissals
+ * @returns {NotificationHistoryEntry[]}
+ */
+export function applyNotificationDismissals(entries, { readThrough, clearedThrough, dismissals }) {
+  const byKey = new Map(dismissals.map(dismissal => [dismissal.key, dismissal]))
+  let changed = false
+  const next = entries.flatMap(entry => {
+    const key = getNotificationKey(entry)
+    if (!key) return [entry]
+    const dismissal = byKey.get(key)
+    if (dismissal?.removed || entry.createdAt <= clearedThrough) {
+      changed = true
+      return []
+    }
+    if (!entry.read && (dismissal || entry.createdAt <= readThrough)) {
+      changed = true
+      return [{ ...entry, read: true }]
+    }
+    return [entry]
+  })
+  return changed ? next : entries
+}
+
+/**
+ * The entries that were unread and are now read or gone, whose system
+ * notifications have become stale.
+ * @param {NotificationHistoryEntry[]} previous
+ * @param {NotificationHistoryEntry[]} next
+ * @returns {NotificationHistoryEntry[]}
+ */
+export function getDismissedNotificationEntries(previous, next) {
+  if (previous === next) return []
+  const byId = new Map(next.map(entry => [entry.id, entry]))
+  return previous.filter(entry => !entry.read && byId.get(entry.id)?.read !== false)
+}

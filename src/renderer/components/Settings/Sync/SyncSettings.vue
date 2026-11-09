@@ -191,6 +191,14 @@
             @change="store.dispatch('updateSyncServerSyncLiveReminders', $event)"
           />
           <FtToggleSwitch
+            v-if="sessionsSupported"
+            :label="t('Notification Center.Notifications')"
+            :default-value="syncNotificationsEnabled"
+            :disabled="busy || !notificationDismissalsSupported"
+            compact
+            @change="store.dispatch('updateSyncServerSyncNotifications', $event)"
+          />
+          <FtToggleSwitch
             :label="t('Settings.Sync Settings.Profiles')"
             :default-value="syncProfilesEnabled"
             :disabled="busy"
@@ -668,6 +676,8 @@ const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory
 const syncWatchStatsEnabled = computed(() => store.getters.getSyncServerSyncWatchStats)
 const syncLiveRemindersEnabled = computed(() => store.getters.getSyncServerSyncLiveReminders)
 const liveRemindersSupported = computed(() => store.getters.getSyncServerLiveRemindersSupported)
+const syncNotificationsEnabled = computed(() => store.getters.getSyncServerSyncNotifications)
+const notificationDismissalsSupported = computed(() => store.getters.getSyncServerNotificationDismissalsSupported)
 const watchStatsSupported = computed(() => store.getters.getSyncServerWatchStatsSupported)
 const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)

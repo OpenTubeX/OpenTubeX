@@ -143,6 +143,7 @@ test('sync adapter edits replace shared collections and record what they touched
     removePlaylistVideo: ['playlists', 'playlist', 'video'],
     putWatchStats: ['watchStats', []],
     putLiveReminders: ['liveReminders', []],
+    putNotificationDismissals: ['notificationDismissals', { readThrough: 0, clearedThrough: 1, dismissals: [] }],
     putSeenVideos: ['seenVideos', []],
     putSeenPosts: ['seenPosts', []],
     putSeenRssItems: ['seenRssItems', []],

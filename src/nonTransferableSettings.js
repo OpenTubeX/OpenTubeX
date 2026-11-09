@@ -79,6 +79,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSyncHistory',
   'syncServerSyncWatchStats',
   'syncServerSyncLiveReminders',
+  'syncServerSyncNotifications',
   'syncServerSyncProfiles',
   'syncServerSyncSessions',
   'syncServerSharedTabs',

@@ -95,6 +95,7 @@ export function createEmptySyncDocument() {
     history: [],
     watchStats: [],
     liveReminders: [],
+    notificationDismissals: { readThrough: 0, clearedThrough: 0, dismissals: [] },
     seenVideos: [],
     seenPosts: [],
     seenRssItems: [],
@@ -179,6 +180,7 @@ export class EncryptedSyncAdapter {
     this.document.history ??= []
     this.document.watchStats ??= []
     this.document.liveReminders ??= []
+    this.document.notificationDismissals ??= { readThrough: 0, clearedThrough: 0, dismissals: [] }
     this.document.seenVideos ??= []
     this.document.seenPosts ??= []
     this.document.seenRssItems ??= []
@@ -279,6 +281,8 @@ export class EncryptedSyncAdapter {
   async putWatchStats(value) { this.#set('watchStats', structuredClone(value)) }
   async getLiveReminders() { return structuredClone(this.document.liveReminders) }
   async putLiveReminders(value) { this.#set('liveReminders', structuredClone(value)) }
+  async getNotificationDismissals() { return structuredClone(this.document.notificationDismissals) }
+  async putNotificationDismissals(value) { this.#set('notificationDismissals', structuredClone(value)) }
 
   async getSeenVideos() { return structuredClone(this.document.seenVideos) }
 

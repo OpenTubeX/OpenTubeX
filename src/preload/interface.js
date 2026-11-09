@@ -1005,6 +1005,27 @@ export default {
 
     clear: () => ipcRenderer.invoke(IpcChannels.NOTIFICATION_HISTORY_CLEAR),
 
+    /** @returns {Promise<import('../notificationHistory').NotificationDismissals>} */
+    getDismissals: () => ipcRenderer.invoke(IpcChannels.NOTIFICATION_DISMISSALS_GET),
+
+    /**
+     * Adds and applies the dismissals of other devices.
+     * @param {import('../notificationHistory').NotificationDismissals} dismissals
+     * @returns {Promise<import('../notificationHistory').NotificationDismissals>} the combined dismissals
+     */
+    mergeDismissals: (dismissals) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, dismissals),
+
+    /**
+     * Notifications read or removed on this device, for other devices.
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onDismissed: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on(IpcChannels.NOTIFICATION_DISMISSALS_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.NOTIFICATION_DISMISSALS_UPDATED, listener)
+    },
+
     /**
      * @param {(entries: import('../notificationHistory').NotificationHistoryEntry[]) => void} handler
      * @returns {() => void}

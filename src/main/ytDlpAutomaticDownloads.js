@@ -106,6 +106,7 @@ async function showSystemNotificationForDownload(payload, phase, downloadId, tit
     }
   })
   notification.show()
+  return notification
 }
 
 /**

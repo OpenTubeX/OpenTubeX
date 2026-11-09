@@ -42,6 +42,10 @@ final class UploadNotifications {
     private static final String CONFIGURATION_KEY = "configuration";
     private static final String STATE_FILE = "upload-notifications.json";
     private static final String SHOWN_FILE = "shown-upload-notifications.json";
+    private static final String DISMISSED_FILE = "dismissed-upload-notifications.json";
+    static final String EXTRA_FEED_TYPE = "org.opentubex.app.extra.UPLOAD_FEED_TYPE";
+    static final String EXTRA_ID = "org.opentubex.app.extra.UPLOAD_ID";
+    static final String EXTRA_LIVE = "org.opentubex.app.extra.UPLOAD_LIVE";
     static final String ACTION_QUEUED = "org.opentubex.app.action.UPLOAD_NOTIFICATIONS_QUEUED";
     // Matches the in-app notification history limit.
     private static final int SHOWN_LIMIT = 100;
@@ -168,7 +172,7 @@ final class UploadNotifications {
             return;
         }
         try {
-            show(context, title, body, url(feedType, upload.getString("id")), silent, thumbnail);
+            show(context, title, body, feedType, upload.getString("id"), upload.optBoolean("live"), history, silent, thumbnail);
         } catch (RuntimeException error) {
             // One failed notification must not skip the others.
             android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
@@ -184,9 +188,43 @@ final class UploadNotifications {
         writeAtomically(file, kept.toString());
     }
 
-    /** Returns the notifications shown since the last call, oldest first. */
-    static synchronized JSONArray takeShown(Context context) throws Exception {
-        return takeShown(shownFile(context));
+    /**
+     * Returns the notifications shown since the last call, and the ones the user
+     * opened or dismissed, oldest first. Taken together, so the app adds every
+     * entry before it marks the handled ones read.
+     */
+    static synchronized JSONObject takeShown(Context context) throws Exception {
+        return new JSONObject()
+            .put("notifications", takeShown(shownFile(context)))
+            .put("dismissed", takeShown(dismissedFile(context)));
+    }
+
+    /**
+     * Records that the user opened or dismissed an upload notification, so the
+     * app marks its entry read, and tells a running app to collect it.
+     */
+    static void recordDismissed(Context context, Intent intent) {
+        String feedType = intent == null ? null : intent.getStringExtra(EXTRA_FEED_TYPE);
+        String id = intent == null ? null : intent.getStringExtra(EXTRA_ID);
+        if (feedType == null || id == null) return;
+        // Opening the notification again from a restored activity must not record it twice.
+        intent.removeExtra(EXTRA_FEED_TYPE);
+        try {
+            synchronized (UploadNotifications.class) {
+                recordShown(dismissedFile(context), new JSONArray().put(new JSONObject()
+                    .put("feedType", feedType)
+                    .put("id", id)
+                    .put("live", intent.getBooleanExtra(EXTRA_LIVE, false))));
+            }
+            context.sendBroadcast(new Intent(ACTION_QUEUED).setPackage(context.getPackageName()));
+        } catch (Exception error) {
+            android.util.Log.w("OpenTubeXUploads", "Unable to record a dismissed upload notification", error);
+        }
+    }
+
+    /** Removes the notifications of uploads the user read or removed in the app. */
+    static void cancel(Context context, String feedType, String id) {
+        context.getSystemService(NotificationManager.class).cancel(TAG, url(feedType, id).hashCode());
     }
 
     static JSONArray takeShown(File file) throws Exception {
@@ -206,6 +244,10 @@ final class UploadNotifications {
 
     private static File shownFile(Context context) {
         return new File(context.getFilesDir(), SHOWN_FILE);
+    }
+
+    private static File dismissedFile(Context context) {
+        return new File(context.getFilesDir(), DISMISSED_FILE);
     }
 
     /**
@@ -472,13 +514,17 @@ final class UploadNotifications {
         return "https://www.youtube.com/watch?v=" + encoded;
     }
 
-    private static void show(Context context, String title, String body, String url, boolean silent, String thumbnail) {
+    /** @param history whether the app keeps an entry, which opening or dismissing the notification marks read */
+    private static void show(Context context, String title, String body, String feedType, String id, boolean live,
+        boolean history, boolean silent, String thumbnail) {
+        String url = url(feedType, id);
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
             : new Notification.Builder(context);
         // MainActivity forwards YouTube links to the renderer, including on cold start.
         Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), context, MainActivity.class);
+        if (history) putUpload(open, feedType, id, live);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
             url.hashCode(),
@@ -492,6 +538,15 @@ final class UploadNotifications {
             .setStyle(new Notification.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
             .setAutoCancel(true);
+        if (history) {
+            Intent dismiss = putUpload(new Intent(context, UploadNotificationDismissReceiver.class), feedType, id, live);
+            builder.setDeleteIntent(PendingIntent.getBroadcast(
+                context,
+                url.hashCode(),
+                dismiss,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            ));
+        }
         if (silent) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         manager.notify(TAG, url.hashCode(), builder.build());
@@ -519,6 +574,10 @@ final class UploadNotifications {
                 android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
             }
         });
+    }
+
+    private static Intent putUpload(Intent intent, String feedType, String id, boolean live) {
+        return intent.putExtra(EXTRA_FEED_TYPE, feedType).putExtra(EXTRA_ID, id).putExtra(EXTRA_LIVE, live);
     }
 
     /** Whether a notification is still shown, so adding its thumbnail does not bring back a dismissed one. */

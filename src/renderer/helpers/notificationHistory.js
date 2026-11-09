@@ -88,7 +88,8 @@ let collectAgain = false
 
 async function collectOnce() {
   collectFiredCapacitorReminders()
-  const additions = (await takeAndroidUploadNotifications()).flatMap(({ feedType, id, live, title, body, createdAt, inApp, thumbnail }) => {
+  const { notifications, dismissed } = await takeAndroidUploadNotifications()
+  const additions = notifications.flatMap(({ feedType, id, live, title, body, createdAt, inApp, thumbnail }) => {
     const target = getUploadTarget(feedType, id, live === true)
     return target && typeof title === 'string' && typeof body === 'string' && Number.isFinite(createdAt)
       ? [{ title, body, createdAt, ...target, thumbnail, inApp: inApp === true }]
@@ -96,17 +97,23 @@ async function collectOnce() {
   })
   const inApp = new Set(additions.filter(addition => addition.inApp).map(({ path, createdAt }) => `${path} ${createdAt}`))
   const entries = capacitorNotificationHistory.add(additions)
+  // Android records system notifications the user opened or dismissed after
+  // showing them, so their entries exist by now.
+  const handled = dismissed.flatMap(({ feedType, id, live }) => getUploadTarget(feedType, id, live === true) ?? [])
+  if (handled.length > 0) capacitorNotificationHistory.markTargetsRead(handled)
   // Notifications may have changed mode while Android handed the uploads over.
   if (store.getters.getNotificationMode !== 'both') return
   for (const entry of entries) {
-    if (inApp.has(`${entry.path} ${entry.createdAt}`)) showInAppNotification(entry)
+    // Read entries were dismissed on another device.
+    if (!entry.read && inApp.has(`${entry.path} ${entry.createdAt}`)) showInAppNotification(entry)
   }
 }
 
 /**
  * Adds the notifications the mobile system showed without the app, such as
- * reminders and uploads found by closed-app refreshes, and shows the uploads
- * Android left to the app because it was visible.
+ * reminders and uploads found by closed-app refreshes, shows the uploads
+ * Android left to the app because it was visible, and marks the ones the
+ * user opened or dismissed in the system read.
  */
 export function collectNotificationHistory() {
   if (!process.env.IS_CAPACITOR) return Promise.resolve()

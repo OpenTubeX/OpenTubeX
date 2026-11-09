@@ -752,6 +752,9 @@ test.describe('OpenTubeX sync server', () => {
         : []),
       ...(capabilities.live_reminders === 1
         ? [{ collection: 'liveReminders', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.notification_dismissals === 1
+        ? [{ collection: 'notificationDismissals', revision: 1, payload: null }]
         : [])
     ]
     expect(encryptedUploadBodies).toHaveLength(expectedUploads.length)
@@ -835,7 +838,7 @@ test.describe('OpenTubeX sync server', () => {
       await clientPage.evaluate(async () => {
         const store = window.$store
         await store.dispatch('updateSyncServerAutoSync', false)
-        for (const collection of ['Subscriptions', 'Playlists', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+        for (const collection of ['Subscriptions', 'Playlists', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
           await store.dispatch(`updateSyncServerSync${collection}`, false)
         }
       })
@@ -1034,7 +1037,7 @@ test.describe('OpenTubeX sync server', () => {
           const store = window.$store
           await store.dispatch('updatePlaylistViewType', 'list')
           await store.dispatch('updateSyncServerAutoSync', false)
-          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
             await store.dispatch(`updateSyncServerSync${collection}`, false)
           }
         })
