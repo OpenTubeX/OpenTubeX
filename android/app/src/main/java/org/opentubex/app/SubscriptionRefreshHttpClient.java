@@ -244,7 +244,7 @@ final class SubscriptionRefreshHttpClient {
         throws IOException, JSONException {
         URL url = new URL(substitute(request.getString("url"), type, channelId));
         if (!url.getProtocol().equals("https") && !url.getProtocol().equals("http")) throw new IOException("Background refresh requires HTTP or HTTPS");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) AndroidProxy.openConnection(url);
         connection.setConnectTimeout(TIMEOUT_MILLIS);
         connection.setReadTimeout(TIMEOUT_MILLIS);
         // Never forward credentials to a redirect target.

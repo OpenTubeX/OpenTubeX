@@ -375,6 +375,45 @@ public class AndroidProxyIntegrationTest {
         }
     }
 
+    /** HttpURLConnection tries a direct connection after a failed proxy route unless the proxy
+     * is explicit. That bypassed an unreachable proxy and doubled the wait during an outage. */
+    @Test public void nativeHttpNeverBypassesAnUnreachableProxy() throws Exception {
+        AndroidProxy.ready().get(10, TimeUnit.SECONDS);
+        // Only loopback literals and localhost itself go direct; DNS resolves other *.localhost names.
+        java.net.ProxySelector selector = java.net.ProxySelector.getDefault();
+        assertEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://localhost:1/")).get(0));
+        assertEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://[::1]:1/")).get(0));
+        assertNotEquals(Proxy.NO_PROXY, selector.select(java.net.URI.create("https://app.localhost.:1/")).get(0));
+        // An origin on this device's own network address, which the relay proxies like any host
+        InetAddress device = java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces()).stream()
+            .flatMap(network -> java.util.Collections.list(network.getInetAddresses()).stream())
+            .filter(address -> address instanceof java.net.Inet4Address && !address.isLoopbackAddress() && !address.isLinkLocalAddress())
+            .findFirst().orElseThrow();
+        int unreachable;
+        try (ServerSocket closed = new ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"))) { unreachable = closed.getLocalPort(); }
+        try (ServerSocket origin = new ServerSocket(0, 20, device)) {
+            AndroidProxy.configure(new JSONObject().put("enabled", true).put("protocol", "http")
+                .put("hostname", "127.0.0.1").put("port", Integer.toString(unreachable))
+                .put("username", "alice").put("password", "secret"));
+            URL url = new URL("https://" + device.getHostAddress() + ":" + origin.getLocalPort() + "/");
+            List<HttpURLConnection> connections = List.of(
+                (HttpURLConnection) AndroidProxy.openConnection(url),
+                new com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder()
+                    .setUrl(url).setMethod("GET").setHeaders(new com.getcapacitor.JSObject())
+                    .openConnection().build().getHttpConnection());
+            for (HttpURLConnection connection : connections) {
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(3000);
+                try { assertThrows(java.io.IOException.class, connection::getInputStream); }
+                finally { connection.disconnect(); }
+            }
+            origin.setSoTimeout(500);
+            assertThrows("A request bypassed the proxy", SocketTimeoutException.class, origin::accept);
+        } finally {
+            AndroidProxy.configure(new JSONObject().put("enabled", false));
+        }
+    }
+
     /** Android 8's URLConnection threw a NullPointerException when the relay's challenge
      * for a plain HTTP request with a body closed the connection. */
     @Test public void nativeHttpPostsPlainHttpBodiesThroughTheRelay() throws Exception {

@@ -284,7 +284,7 @@ final class UploadNotifications {
         long deadline = System.nanoTime() + ORIGINAL_TITLE_TIMEOUT_MILLIS * 1_000_000L;
         try {
             String video = "https://www.youtube.com/watch?v=" + Uri.encode(videoId);
-            connection = (HttpURLConnection) new URL("https://www.youtube.com/oembed?url=" + Uri.encode(video)).openConnection();
+            connection = (HttpURLConnection) AndroidProxy.openConnection(new URL("https://www.youtube.com/oembed?url=" + Uri.encode(video)));
             connection.setConnectTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
             connection.setReadTimeout(ORIGINAL_TITLE_TIMEOUT_MILLIS);
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) return null;

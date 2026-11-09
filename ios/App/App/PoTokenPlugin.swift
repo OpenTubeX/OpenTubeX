@@ -68,7 +68,7 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
             const requests = new Map(); let sequence = 0;
             window.__respond = (id, result) => {
                 const pending = requests.get(id); if (!pending) return; requests.delete(id);
-                if (result.error) pending.reject(new Error(result.error));
+                if (result.error) pending.reject(result.network ? new TypeError('Failed to fetch: ' + result.error) : new Error(result.error));
                 else pending.resolve(new Response(result.body, { status: result.status }));
             };
             window.fetch = (url, options = {}) => new Promise((resolve, reject) => {
@@ -116,7 +116,8 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
         }
         session.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                if let error = error { self?.respond(id, ["error": error.localizedDescription]) }
+                // The description is localized, so mark connection failures for JavaScript by their code.
+                if let error = error { self?.respond(id, ["error": error.localizedDescription, "network": isConnectionFailure(error)]) }
                 else { self?.respond(id, ["status": (response as? HTTPURLResponse)?.statusCode ?? 502, "body": String(decoding: data ?? Data(), as: UTF8.self)]) }
             }
         }.resume()

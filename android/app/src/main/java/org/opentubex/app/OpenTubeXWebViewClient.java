@@ -88,7 +88,7 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
 
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) AndroidProxy.openConnection(url);
             connection.setRequestMethod(request.getMethod());
             connection.setConnectTimeout(15_000);
             connection.setReadTimeout(30_000);
@@ -179,7 +179,7 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
 
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) request.url().openConnection();
+            connection = (HttpURLConnection) AndroidProxy.openConnection(request.url());
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);

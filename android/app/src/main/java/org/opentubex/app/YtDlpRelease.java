@@ -12,7 +12,7 @@ final class YtDlpRelease {
      * REST API has no 60 requests per hour limit for unauthenticated clients.
      */
     static String latestTag(String origin, String repository) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(origin + "/" + repository + "/releases/latest").openConnection();
+        HttpURLConnection connection = (HttpURLConnection) AndroidProxy.openConnection(new URL(origin + "/" + repository + "/releases/latest"));
         connection.setInstanceFollowRedirects(false);
         connection.setRequestMethod("HEAD");
         connection.setConnectTimeout(15_000);

@@ -19,15 +19,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 /** Installed before activities and background workers can send requests. */
@@ -79,7 +84,14 @@ final class AndroidProxy {
         ProxySelector.setDefault(new ProxySelector() {
             @Override public List<Proxy> select(URI uri) {
                 if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
-                    return Collections.singletonList(local);
+                    // The relay refuses loopback destinations, and their traffic never leaves
+                    // the device, so a server on this device is reached directly. Only literals
+                    // and "localhost" itself qualify: DNS resolves other *.localhost names.
+                    String host = uri.getHost() == null ? "" : uri.getHost().replace("[", "").replace("]", "");
+                    String name = host.toLowerCase(Locale.ROOT).replaceFirst("\\.$", "");
+                    boolean direct = name.equals("localhost") ||
+                        (!name.endsWith(".localhost") && AndroidProxyRelay.isLoopbackName(name));
+                    return Collections.singletonList(direct ? Proxy.NO_PROXY : local);
                 }
                 return systemSelector == null ? Collections.singletonList(Proxy.NO_PROXY) : systemSelector.select(uri);
             }
@@ -156,6 +168,23 @@ final class AndroidProxy {
             relay.configure(new ProxyConfiguration(true, "invalid", "", "0", "", ""));
             throw error;
         }
+    }
+
+    /**
+     * Opens a connection through the proxy ProxySelector picks for it. Once every
+     * selected proxy fails, HttpURLConnection tries a direct connection, which would
+     * bypass the app's proxy and add a second DNS lookup and connect timeout to an
+     * outage. An explicit proxy has no such fallback.
+     */
+    static URLConnection openConnection(URL url) throws IOException {
+        ProxySelector selector = ProxySelector.getDefault();
+        List<Proxy> proxies;
+        try {
+            proxies = selector == null ? null : selector.select(url.toURI());
+        } catch (URISyntaxException error) {
+            throw new MalformedURLException(error.getMessage());
+        }
+        return url.openConnection(proxies == null || proxies.isEmpty() ? Proxy.NO_PROXY : proxies.get(0));
     }
 
     /** The current routing policy. A BotGuard attestation is bound to the route it was made on. */

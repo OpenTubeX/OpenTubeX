@@ -362,7 +362,7 @@ public class PoTokenPlugin extends Plugin {
         private WebResourceResponse loadGoogleInterpreter(WebResourceRequest request) {
             HttpURLConnection connection = null;
             try {
-                connection = (HttpURLConnection) new URL(request.getUrl().toString()).openConnection();
+                connection = (HttpURLConnection) AndroidProxy.openConnection(new URL(request.getUrl().toString()));
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(15_000);
                 connection.setReadTimeout(15_000);
