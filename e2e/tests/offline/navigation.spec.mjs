@@ -271,7 +271,7 @@ test.describe('compact navigation labels', () => {
         await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeLessThan(previousHeight)
         await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - (document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight)))).toBeLessThanOrEqual(1)
       }
-      await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${height + 24 + 6}px`)
+      await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${height + 24 + 10}px`)
       await expect.poll(() => page.evaluate(() => {
         const nav = document.querySelector('.sideNav').getBoundingClientRect()
         const progress = document.querySelector('.progressBar').getBoundingClientRect()

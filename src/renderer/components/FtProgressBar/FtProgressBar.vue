@@ -1,12 +1,15 @@
 <template>
   <div
     class="progressBar"
+    :style="{ '--progress-fraction': progressFraction }"
   >
-    <div
-      v-show="progressBarPercentage > 0"
-      class="progressBarFill"
-      :style="{ inlineSize: progressBarPercentage + '%' }"
-    />
+    <div class="progressBarIndicator">
+      <div
+        v-show="progressFraction > 0"
+        class="progressBarActive"
+      />
+      <div class="progressBarTrack" />
+    </div>
   </div>
 </template>
 
@@ -20,7 +23,7 @@ const props = defineProps({
   }
 })
 
-const progressBarPercentage = computed(() => props.progress)
+const progressFraction = computed(() => Math.min(100, Math.max(0, props.progress)) / 100)
 </script>
 
 <style scoped src="./FtProgressBar.css" />

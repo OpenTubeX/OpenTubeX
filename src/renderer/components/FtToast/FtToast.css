@@ -769,7 +769,7 @@
 }
 
 :root.appProgressBar body {
-  --connection-progress-inset: 6px;
+  --connection-progress-inset: var(--progress-bar-height);
 }
 
 :root.appPhoneLayout body {

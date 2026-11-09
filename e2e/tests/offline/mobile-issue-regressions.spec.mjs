@@ -55,9 +55,9 @@ test('connection banner follows hidden navigation above progress', { tag: '@scal
   await expect(banner).toBeVisible()
   // innerHeight is rounded; the layout viewport can be fractional at non-100% UI scales.
   const gap = () => banner.evaluate(element => visualViewport.height - element.getBoundingClientRect().bottom)
-  await expect.poll(gap).toBeCloseTo(66, 0)
+  await expect.poll(gap).toBeCloseTo(70, 0)
   await page.locator('.sideNav').evaluate(element => element.classList.add('scrollHidden'))
-  await expect.poll(gap).toBeCloseTo(6, 0)
+  await expect.poll(gap).toBeCloseTo(10, 0)
   // Overlay layouts must cancel the hidden-nav transform, including reduced motion.
   for (const kind of ['sheet', 'settings']) {
     if (kind === 'sheet') {
@@ -73,7 +73,7 @@ test('connection banner follows hidden navigation above progress', { tag: '@scal
       await goTo(page, 'settings')
       await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
     }
-    await expect.poll(gap).toBeCloseTo(6, 0)
+    await expect.poll(gap).toBeCloseTo(10, 0)
     await expect(banner).toHaveCSS('transition-duration', '0s')
     if (kind === 'sheet') {
       await page.evaluate(() => {
@@ -88,7 +88,7 @@ test('connection banner follows hidden navigation above progress', { tag: '@scal
     }
   }
   await page.locator('.sideNav').evaluate(element => element.classList.remove('scrollHidden'))
-  await expect.poll(gap).toBeCloseTo(66, 0)
+  await expect.poll(gap).toBeCloseTo(70, 0)
   await page.locator('.app > .progressBar').evaluate(element => element.remove())
   await expect.poll(gap).toBeCloseTo(60, 0)
 })
