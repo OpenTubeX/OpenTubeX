@@ -26,6 +26,7 @@
           @blur="saveServerUrl"
         />
         <FtInput
+          v-if="!connected || !oidcAccount"
           :icon="['fas', 'circle-user']"
           :label="t('Settings.Sync Settings.Username')"
           :placeholder="t('Form Inputs.Example', { example: 'alex' })"
@@ -129,7 +130,9 @@
 
       <template v-if="connected">
         <p class="connectionStatus">
-          {{ t('Settings.Sync Settings.Connected as', { username: savedUsername }) }}
+          {{ oidcAccount
+            ? t('Settings.Sync Settings.Connected with Single Sign-On')
+            : t('Settings.Sync Settings.Connected as', { username: savedUsername }) }}
         </p>
         <p
           v-if="privacyMode === 'enhanced'"
@@ -316,7 +319,29 @@
           :disabled="authenticationActionsDisabled"
           @click="authenticate('register')"
         />
+        <FtButton
+          v-if="oidcLogin && oidcPending !== 'login'"
+          :label="oidcLogin.name
+            ? t('Settings.Sync Settings.Log In with Provider', { provider: oidcLogin.name })
+            : t('Settings.Sync Settings.Log In with Single Sign-On')"
+          :icon="['fas', 'arrow-up-right-from-square']"
+          :disabled="oidcLoginDisabled"
+          @click="loginWithOidc"
+        />
+        <FtButton
+          v-if="oidcPending === 'login'"
+          :label="t('Cancel')"
+          :icon="['fas', 'xmark']"
+          @click="store.dispatch('cancelSyncServerOidc')"
+        />
       </FtButtonGroup>
+      <p
+        v-if="!connected && oidcPending === 'login'"
+        class="serverCheckStatus"
+        aria-live="polite"
+      >
+        {{ t('Settings.Sync Settings.Continue in Browser') }}
+      </p>
       <FtPrompt
         v-if="showSharedTabsPrompt"
         :label="t('Settings.Sync Settings.Use Shared Tabs')"
@@ -463,7 +488,17 @@
           <p class="deleteAccountWarning">
             {{ t('Settings.Sync Settings.Delete Account Warning') }}
           </p>
+          <p
+            v-if="oidcAccount"
+            class="deleteAccountWarning"
+            aria-live="polite"
+          >
+            {{ oidcPending === 'delete'
+              ? t('Settings.Sync Settings.Continue in Browser')
+              : t('Settings.Sync Settings.Delete Single Sign-On Account Hint') }}
+          </p>
           <FtInput
+            v-else
             :icon="['fas', 'lock']"
             :label="t('Settings.Password Dialog.Password')"
             :placeholder="t('Form Inputs.Enter Password Hint')"
@@ -492,8 +527,8 @@
             <FtButton
               :label="t('Cancel')"
               :icon="['fas', 'xmark']"
-              :disabled="accountActionBusy"
-              @click="closeDeleteAccountPrompt"
+              :disabled="accountActionBusy && oidcPending !== 'delete'"
+              @click="cancelDeleteAccount"
             />
           </FtFlexBox>
         </div>
@@ -522,6 +557,7 @@ import { settingsSubpageKey } from '../../FtSettingsSubpage/settingsSubpage'
 
 import store from '../../../store/index'
 import {
+  SyncServerCancelledError,
   SyncServerClient,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
@@ -536,6 +572,7 @@ import {
   randomSyncServerDeviceId,
   resolveSyncServerDeviceName,
 } from '../../../helpers/sync-server-sessions'
+import { isSyncServerOidcUsername } from '../../../helpers/sync-server-oidc'
 
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
@@ -547,12 +584,13 @@ const syncServerInstances = [
 ]
 
 const serverUrl = ref(store.getters.getSyncServerUrl)
-const username = ref(store.getters.getSyncServerUsername)
+const username = ref(editableUsername())
 const password = ref('')
 const privacyPassphrase = ref('')
 const serverPrivacySupported = ref(null)
 const serverPairingSupported = ref(false)
 const serverAccountSessionsSupported = ref(false)
+const oidcLogin = ref(null)
 const serverCheckStatus = ref('idle')
 const serverCheckError = ref('')
 const localError = ref('')
@@ -588,6 +626,8 @@ const dataLossCollection = computed(() => {
 })
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
+const oidcAccount = computed(() => isSyncServerOidcUsername(savedUsername.value))
+const oidcPending = computed(() => store.getters.getSyncServerOidcPending)
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
 const syncServerToken = computed(() => store.getters.getSyncServerToken)
@@ -605,8 +645,10 @@ const pairingActionDisabled = computed(() => (
   serverCredentialsDisabled.value
 ))
 const authenticationActionsDisabled = computed(() => (
+  oidcLoginDisabled.value || !accountCredentialsReady.value
+))
+const oidcLoginDisabled = computed(() => (
   serverCredentialsDisabled.value ||
-  !accountCredentialsReady.value ||
   (serverPrivacySupported.value === true && privacyPassphrase.value === '')
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
@@ -677,6 +719,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
   serverPrivacySupported.value = null
   serverPairingSupported.value = false
   serverAccountSessionsSupported.value = false
+  oidcLogin.value = null
   privacyPolicyUrl.value = null
   serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
@@ -691,12 +734,15 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
     )
     serverCheckClient = client
     try {
-      const [capabilities, policyUrl] = await Promise.all([
+      const [capabilities, policyUrl, oidc] = await Promise.all([
         client.getCapabilities(),
         client.getPrivacyPolicyUrl(),
+        // Only the login form offers OIDC. The browser cannot return to the web build.
+        !isConnected && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) ? client.getOidcLogin() : null,
       ])
       if (sequence !== serverCheckSequence) return
       privacyPolicyUrl.value = policyUrl
+      oidcLogin.value = oidc
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverPairingSupported.value = capabilities.key_pairing === 1
       serverAccountSessionsSupported.value = capabilities.encrypted_sync === 1 &&
@@ -749,16 +795,47 @@ async function authenticate(mode) {
       deviceName: identity.name,
       deviceSystemInfo: identity.systemInfo,
     })
-    serverUrl.value = store.getters.getSyncServerUrl
-    username.value = store.getters.getSyncServerUsername
-    password.value = ''
-    privacyPassphrase.value = ''
-    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+    authenticated()
   } catch (error) {
     localError.value = error.message
   } finally {
     authenticating.value = false
   }
+}
+
+async function loginWithOidc() {
+  if (busy.value || oidcLoginDisabled.value) return
+  localError.value = ''
+  authenticating.value = true
+  try {
+    const identity = await ensureDeviceIdentity()
+    await store.dispatch('loginSyncServerWithOidc', {
+      serverUrl: serverUrl.value,
+      privacyPassphrase: privacyPassphrase.value,
+      deviceId: identity.id,
+      deviceName: identity.name,
+      deviceSystemInfo: identity.systemInfo,
+    })
+    authenticated()
+  } catch (error) {
+    if (!(error instanceof SyncServerCancelledError)) localError.value = error.message
+  } finally {
+    authenticating.value = false
+  }
+}
+
+function authenticated() {
+  serverUrl.value = store.getters.getSyncServerUrl
+  username.value = editableUsername()
+  password.value = ''
+  privacyPassphrase.value = ''
+  showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+}
+
+/** OIDC accounts keep an internal username that users cannot type. */
+function editableUsername() {
+  const value = store.getters.getSyncServerUsername
+  return isSyncServerOidcUsername(value) ? '' : value
 }
 
 async function ensureDeviceIdentity() {
@@ -797,7 +874,7 @@ async function syncNow() {
 
 function pairingCompleted(result) {
   serverUrl.value = store.getters.getSyncServerUrl
-  username.value = store.getters.getSyncServerUsername
+  username.value = editableUsername()
   password.value = ''
   privacyPassphrase.value = ''
   const message = result === 'approved'
@@ -871,9 +948,22 @@ function closeDeleteAccountPrompt(value) {
   deleteAccountError.value = ''
 }
 
+function cancelDeleteAccount() {
+  if (oidcPending.value === 'delete') {
+    store.dispatch('cancelSyncServerOidc')
+    closeDeleteAccountPrompt(null)
+    return
+  }
+  closeDeleteAccountPrompt()
+}
+
 async function deleteAccount() {
   if (busy.value || accountActionBusy.value) return
   deleteAccountError.value = ''
+  if (oidcAccount.value) {
+    await deleteOidcAccount()
+    return
+  }
   if (!deleteAccountPassword.value) {
     deleteAccountError.value = t('Settings.Sync Settings.Password Required')
     return
@@ -886,6 +976,27 @@ async function deleteAccount() {
     deleted = true
   } catch (error) {
     deleteAccountError.value = error.message
+  } finally {
+    accountActionBusy.value = false
+  }
+  if (deleted) {
+    closeDeleteAccountPrompt()
+    showToast({ message: t('Settings.Sync Settings.Account Deleted'), icon: ['fas', 'trash'] })
+  }
+}
+
+async function deleteOidcAccount() {
+  accountActionBusy.value = true
+  let deleted = false
+  try {
+    await store.dispatch('deleteSyncServerOidcAccount')
+    deleted = true
+  } catch (error) {
+    if (isSessionExpiredError(error)) {
+      await store.dispatch('expireSyncServerSession')
+    } else if (!(error instanceof SyncServerCancelledError)) {
+      deleteAccountError.value = error.message
+    }
   } finally {
     accountActionBusy.value = false
   }

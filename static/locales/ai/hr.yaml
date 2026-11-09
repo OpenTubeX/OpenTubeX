@@ -1423,6 +1423,11 @@ Settings:
     Open All Tabs: 'Otvori sve kartice'
     Open All Tabs Confirmation: "Otvoriti sve kartice?"
     Server Update Required: "Ažurirajte ovaj poslužitelj za podršku šifriranoj sinkronizaciji u stvarnom vremenu."
+    Log In with Provider: 'Prijava putem {provider}'
+    Log In with Single Sign-On: 'Prijava jedinstvenom prijavom'
+    Continue in Browser: 'Nastavite u pregledniku. OpenTubeX nastavlja kada završite.'
+    Connected with Single Sign-On: 'Povezano jedinstvenom prijavom'
+    Delete Single Sign-On Account Hint: 'Otvorit će se preglednik kako biste brisanje potvrdili kod svog pružatelja prijave.'
   Proxy Settings:
     IP Block Recovery Script Path: Skripta za oporavak od blokiranja IP-a
     Select IP Block Recovery Script File: Odaberi datoteku skripte za oporavak nakon blokiranja IP adrese

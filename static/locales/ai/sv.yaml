@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Öppna alla flikar'
     Open All Tabs Confirmation: "Öppna alla flikar?"
     Server Update Required: "Uppdatera den här servern för att stödja krypterad synkronisering i realtid."
+    Log In with Provider: 'Logga in med {provider}'
+    Log In with Single Sign-On: 'Logga in med enkel inloggning'
+    Continue in Browser: 'Fortsätt i webbläsaren. OpenTubeX fortsätter när du är klar.'
+    Connected with Single Sign-On: 'Ansluten med enkel inloggning'
+    Delete Single Sign-On Account Hint: 'Webbläsaren öppnas så att du kan bekräfta borttagningen hos din inloggningsleverantör.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript för återställning efter IP-blockering
     Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering

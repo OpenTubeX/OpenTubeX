@@ -1442,6 +1442,11 @@ Settings:
     Open All Tabs: 'פתיחת כל הכרטיסיות'
     Open All Tabs Confirmation: "לפתוח את כל הכרטיסיות?"
     Server Update Required: "יש לעדכן שרת זה כדי לתמוך בסנכרון מוצפן בזמן אמת."
+    Log In with Provider: 'התחברות עם {provider}'
+    Log In with Single Sign-On: 'התחברות עם כניסה אחידה'
+    Continue in Browser: 'יש להמשיך בדפדפן. OpenTubeX ימשיך כשתסיימו.'
+    Connected with Single Sign-On: 'מחובר עם כניסה אחידה'
+    Delete Single Sign-On Account Hint: 'הדפדפן ייפתח כדי שתוכלו לאשר את המחיקה אצל ספק ההתחברות שלכם.'
   Proxy Settings:
     IP Block Recovery Script Path: סקריפט שחזור מחסימת IP
     Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP

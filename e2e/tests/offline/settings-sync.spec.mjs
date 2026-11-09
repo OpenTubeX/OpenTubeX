@@ -979,6 +979,275 @@ test.describe('sync settings', () => {
   })
 })
 
+test.describe('OIDC sync login', () => {
+  const OIDC_ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce26'
+
+  function oidcToken(accountId = OIDC_ACCOUNT_ID) {
+    const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url')
+    return `${encode({ alg: 'HS256' })}.${encode({ sub: accountId, exp: 4102444800 })}.signature`
+  }
+
+  /** Delivers a link the way the OS hands it to a running app. */
+  function openLink(app, url) {
+    return app.electronApp.evaluate(({ app }, url) => {
+      app.emit('second-instance', {}, [process.execPath, url], '')
+    }, url)
+  }
+
+  async function recordExternalLinks(app) {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.oidcExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.oidcExternalUrls.push(url)
+      }
+    })
+    return async () => await app.electronApp.evaluate(() => globalThis.oidcExternalUrls)
+  }
+
+  test.describe('signed out', () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          syncServerEnabled: true,
+          syncServerAutoSync: false,
+          syncServerUrl: 'https://sync.example',
+        }
+      }
+    })
+
+    /**
+     * @param {import('@playwright/test').Page} page
+     * @param {{ sessionDeviceId?: (deviceId: string) => string }} [options]
+     */
+    async function routeOidcServer(page, { sessionDeviceId = deviceId => deviceId } = {}) {
+      const server = { deviceId: '' }
+      await page.route('https://sync.example/**', async (route) => {
+        const request = route.request()
+        const { pathname } = new URL(request.url())
+        if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
+        } else if (pathname === '/meta') {
+          await route.fulfill({ json: { oidc: true, oidc_display_name: 'Authelia' } })
+        } else if (pathname === '/v1/account/sessions') {
+          await route.fulfill({
+            json: {
+              sessions: [{ id: 'session-1', current: true, device_id: sessionDeviceId(server.deviceId) }],
+              password_login: false,
+            }
+          })
+        } else if (pathname === '/v1/encrypted_sync/events') {
+          await route.fulfill({ json: [] })
+        } else if (pathname === '/v1/encrypted_sync') {
+          await route.fulfill({ json: { collections: [] } })
+        } else if (request.method() === 'PATCH') {
+          await route.fulfill({ status: 204 })
+        } else if (request.method() === 'PUT') {
+          await route.fulfill({ json: {} })
+        } else {
+          await route.fulfill({ json: { revision: 0 } })
+        }
+      })
+      return server
+    }
+
+    test('signs in through the server’s OIDC provider', async ({ app, page, attachScreenshot }) => {
+      const externalLinks = await recordExternalLinks(app)
+      const server = await routeOidcServer(page)
+      const section = await goToSettingsSection(page, 'sync')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      const login = section.getByRole('button', { name: 'Log in with Authelia' })
+      await expect(login).toBeEnabled()
+      await login.click()
+
+      await expect.poll(externalLinks).toHaveLength(1)
+      const url = new URL((await externalLinks())[0])
+      expect(url.origin + url.pathname).toBe('https://sync.example/v1/account/oidc/authenticate')
+      expect(url.searchParams.get('redirect_url')).toBe('opentubex://oidc')
+      server.deviceId = url.searchParams.get('device_id')
+      expect(server.deviceId).toBe(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerDeviceId)
+      await expect(section.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
+      await expect(section.getByRole('button', { name: 'Cancel' })).toBeVisible()
+      await attachScreenshot('OIDC login pending')
+
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+      await expect(section.getByLabel('Username')).toHaveCount(0)
+      await attachScreenshot('OIDC login connected')
+      await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerUsername)
+        .toBe(`OIDC-ACCOUNT-${OIDC_ACCOUNT_ID}`)
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe(oidcToken())
+    })
+
+    test('ignores sign-ins this device did not start', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await routeOidcServer(page, { sessionDeviceId: () => 'another-device' })
+      const section = await goToSettingsSection(page, 'sync')
+      const login = section.getByRole('button', { name: 'Log in with Authelia' })
+      await expect(login).toBeVisible()
+
+      // A link alone, without a pending sign-in, does nothing.
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+      // Give an accepted callback time to sign in.
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toHaveCount(0)
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken ?? '').toBe('')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      await login.click()
+      await expect.poll(externalLinks).toHaveLength(1)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+
+      await expect(section.locator('.error')).toHaveText('This sign-in was not started on this device')
+      await expect(login).toBeEnabled()
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken ?? '').toBe('')
+    })
+
+    test('cancels a pending sign-in', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await routeOidcServer(page)
+      const section = await goToSettingsSection(page, 'sync')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      await section.getByRole('button', { name: 'Log in with Authelia' }).click()
+      await expect.poll(externalLinks).toHaveLength(1)
+      await section.getByRole('button', { name: 'Cancel' }).click()
+
+      await expect(section.getByRole('button', { name: 'Log in with Authelia' })).toBeEnabled()
+      await expect(section.locator('.error')).toHaveCount(0)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toHaveCount(0)
+    })
+
+    test('labels the login generically when the server names no provider', async ({ page }) => {
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        await route.fulfill({
+          json: pathname === '/meta'
+            ? { oidc: true }
+            : { status: 'ok', capabilities: { account_sessions: 1 } }
+        })
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await expect(section.getByRole('button', { name: 'Log in with single sign-on' })).toBeEnabled()
+    })
+
+    test('offers no login on servers that cannot tell which device started it', async ({ page }) => {
+      const metaRequests = []
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/meta') metaRequests.push(pathname)
+        await route.fulfill({
+          json: pathname === '/meta'
+            ? { oidc: true, oidc_display_name: 'Authelia' }
+            : { status: 'ok', capabilities: {} }
+        })
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByLabel('Username').fill('alice')
+      await section.getByLabel('Password', { exact: true }).fill('password')
+      // Enabled once the server check is done.
+      await expect(section.getByRole('button', { name: 'Log in', exact: true })).toBeEnabled()
+      await expect(section.getByRole('button', { name: /Log in with/ })).toHaveCount(0)
+      expect(metaRequests).toEqual([])
+    })
+  })
+
+  test.describe('signed in', () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          syncServerEnabled: true,
+          syncServerAutoSync: false,
+          syncServerPrivacyMode: 'legacy',
+          syncServerToken: 'oidc-token',
+          syncServerUrl: 'https://sync.example',
+          syncServerUsername: `OIDC-ACCOUNT-${OIDC_ACCOUNT_ID}`,
+          syncServerLastSyncAt: 1234,
+        }
+      }
+    })
+
+    test('deletes the account after the provider confirms it', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      let deleted = false
+      const deletionRequests = []
+      await page.route('https://sync.example/**', async (route) => {
+        const request = route.request()
+        const { pathname } = new URL(request.url())
+        if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: { account_sessions: 1 } } })
+        } else if (pathname === '/meta') {
+          await route.fulfill({ json: { oidc: true } })
+        } else if (deleted) {
+          // Servers answer a deleted account's token like this, not with 401.
+          await route.fulfill({ status: 404, body: "account doesn't exist" })
+        } else if (pathname === '/v1/account/oidc/delete') {
+          deletionRequests.push(request.postDataJSON())
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize?state=abc' } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      await expect(dialog.getByText('Your browser opens so that you can confirm the deletion with your sign-in provider.')).toBeVisible()
+      await expect(dialog.getByLabel('Password')).toHaveCount(0)
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+
+      await expect.poll(externalLinks).toEqual(['https://auth.example/authorize?state=abc'])
+      expect(deletionRequests).toEqual([{ redirect_url: 'opentubex://oidc' }])
+      await expect(dialog.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
+
+      // A connection drop while the browser is open cancels running sync requests.
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+        window.dispatchEvent(new Event('online'))
+      })
+      deleted = true
+      await openLink(app, 'opentubex://oidc')
+
+      await expect(page.locator('.toast', { hasText: 'Sync account deleted' })).toBeVisible()
+      await expect(dialog).toHaveCount(0)
+      await expect(section.getByRole('button', { name: 'Log in with single sign-on' })).toBeVisible()
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe('')
+    })
+
+    test('keeps the account when the provider did not confirm the deletion', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/v1/account/oidc/delete') {
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize' } })
+        } else if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: {} } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect.poll(externalLinks).toHaveLength(1)
+
+      await openLink(app, 'opentubex://oidc')
+
+      await expect(dialog.locator('.error')).toHaveText('The sync account was not deleted')
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe('oidc-token')
+    })
+  })
+})
+
 test.describe('tabs from other synced devices', () => {
   test.use({
     seed: {

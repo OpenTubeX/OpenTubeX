@@ -1416,6 +1416,11 @@ Settings:
     Open All Tabs: 'Otvoriť všetky karty'
     Open All Tabs Confirmation: "Otvoriť všetky karty?"
     Server Update Required: "Aktualizujte tento server, aby podporoval šifrovanú synchronizáciu v reálnom čase."
+    Log In with Provider: 'Prihlásiť sa cez {provider}'
+    Log In with Single Sign-On: 'Prihlásiť sa jednotným prihlásením'
+    Continue in Browser: 'Pokračujte v prehliadači. OpenTubeX bude pokračovať, keď skončíte.'
+    Connected with Single Sign-On: 'Pripojené jednotným prihlásením'
+    Delete Single Sign-On Account Hint: 'Otvorí sa prehliadač, aby ste mohli odstránenie potvrdiť u svojho poskytovateľa prihlásenia.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript na obnovu po blokovaní IP
     Select IP Block Recovery Script File: Vybrať súbor skriptu na obnovenie po zablokovaní IP adresy

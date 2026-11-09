@@ -40,6 +40,7 @@ const IpcChannels = {
   UPDATE_SEARCH_INPUT_TEXT: 'update-search-input-text',
 
   OPEN_URL: 'open-url',
+  SYNC_SERVER_OIDC_CALLBACK: 'sync-server-oidc-callback',
   CHANGE_VIEW: 'change-view',
   SHOW_TOAST: 'show-toast',
   LIVE_REMINDER_GET: 'live-reminder-get',

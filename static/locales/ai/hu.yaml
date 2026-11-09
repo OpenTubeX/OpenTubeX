@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Összes lap megnyitása'
     Open All Tabs Confirmation: "Megnyitja az összes lapot?"
     Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
+    Log In with Provider: 'Bejelentkezés ezzel: {provider}'
+    Log In with Single Sign-On: 'Bejelentkezés egyszeri bejelentkezéssel'
+    Continue in Browser: 'Folytasd a böngészőben. Az OpenTubeX folytatja, amikor végeztél.'
+    Connected with Single Sign-On: 'Egyszeri bejelentkezéssel csatlakoztatva'
+    Delete Single Sign-On Account Hint: 'Megnyílik a böngésző, hogy a bejelentkezési szolgáltatódnál megerősíthesd a törlést.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokkolás helyreállítási szkriptje
     Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása

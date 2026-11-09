@@ -1442,6 +1442,11 @@ Settings:
     Open All Tabs: 'Avaa kaikki välilehdet'
     Open All Tabs Confirmation: "Avataanko kaikki välilehdet?"
     Server Update Required: "Päivitä tämä palvelin tukemaan salattua reaaliaikaista synkronointia."
+    Log In with Provider: 'Kirjaudu palvelulla {provider}'
+    Log In with Single Sign-On: 'Kirjaudu kertakirjautumisella'
+    Continue in Browser: 'Jatka selaimessa. OpenTubeX jatkaa, kun olet valmis.'
+    Connected with Single Sign-On: 'Yhdistetty kertakirjautumisella'
+    Delete Single Sign-On Account Hint: 'Selain avautuu, jotta voit vahvistaa poiston kirjautumispalvelussasi.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-eston palautusskripti
     Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto

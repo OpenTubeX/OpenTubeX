@@ -1419,6 +1419,11 @@ Settings:
     Open All Tabs: 'Opna alla flipa'
     Open All Tabs Confirmation: "Opna alla flipa?"
     Server Update Required: "Uppfærðu þennan þjón til að styðja dulkóðaða samstillingu í rauntíma."
+    Log In with Provider: 'Skrá inn með {provider}'
+    Log In with Single Sign-On: 'Skrá inn með einskráningu'
+    Continue in Browser: 'Haltu áfram í vafranum. OpenTubeX heldur áfram þegar þú ert búin(n).'
+    Connected with Single Sign-On: 'Tengt með einskráningu'
+    Delete Single Sign-On Account Hint: 'Vafrinn opnast svo þú getir staðfest eyðinguna hjá innskráningarveitunni þinni.'
   Proxy Settings:
     IP Block Recovery Script Path: Skrifta fyrir endurheimt eftir IP-lokun
     Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun

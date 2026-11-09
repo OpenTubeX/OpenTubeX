@@ -1430,6 +1430,11 @@ Settings:
     Open All Tabs: 'Deschide toate filele'
     Open All Tabs Confirmation: "Deschideți toate filele?"
     Server Update Required: "Actualizați acest server pentru a accepta sincronizarea criptată în timp real."
+    Log In with Provider: 'Conectează-te cu {provider}'
+    Log In with Single Sign-On: 'Conectează-te cu autentificare unică'
+    Continue in Browser: 'Continuă în browser. OpenTubeX va continua după ce termini.'
+    Connected with Single Sign-On: 'Conectat cu autentificare unică'
+    Delete Single Sign-On Account Hint: 'Browserul se deschide ca să poți confirma ștergerea la furnizorul tău de autentificare.'
   Proxy Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy

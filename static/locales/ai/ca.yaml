@@ -1739,6 +1739,11 @@ Settings:
     Open All Tabs: 'Obre totes les pestanyes'
     Open All Tabs Confirmation: "Voleu obrir totes les pestanyes?"
     Server Update Required: "Actualitza aquest servidor perquè admeti la sincronització en directe xifrada."
+    Log In with Provider: 'Inicia la sessió amb {provider}'
+    Log In with Single Sign-On: 'Inicia la sessió amb inici de sessió únic'
+    Continue in Browser: 'Continueu al navegador. OpenTubeX continuarà quan acabeu.'
+    Connected with Single Sign-On: 'Connectat amb inici de sessió únic'
+    Delete Single Sign-On Account Hint: 'S''obrirà el navegador perquè pugueu confirmar la supressió amb el vostre proveïdor d''inici de sessió.'
   Proxy Settings:
     Proxy Warning: L'OpenTubeX no té cap servidor intermediari integrat, però es pot connectar a un d'extern, com ara Tor executant-se al vostre ordinador o un servidor intermediari SOCKS5 proporcionat per algunes VPN. Si l'activeu, assegureu-vos que el servidor intermediari o Tor estigui ben configurat; altrament, l'OpenTubeX no podrà obtenir dades.
     Proxy Username: Nom d'usuari del servidor intermediari

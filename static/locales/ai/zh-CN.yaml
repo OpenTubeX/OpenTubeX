@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: '打开所有标签页'
     Open All Tabs Confirmation: "打开所有标签页？"
     Server Update Required: "请更新此服务器以支持加密实时同步。"
+    Log In with Provider: '使用 {provider} 登录'
+    Log In with Single Sign-On: '使用单点登录'
+    Continue in Browser: '请在浏览器中继续。完成后 OpenTubeX 将继续。'
+    Connected with Single Sign-On: '已通过单点登录连接'
+    Delete Single Sign-On Account Hint: '浏览器将打开，以便你在登录提供方处确认删除。'
   Proxy Settings:
     IP Block Recovery Script Path: IP 封禁恢复脚本
     Select IP Block Recovery Script File: 选择 IP 封锁恢复脚本文件

@@ -1,7 +1,7 @@
 import { runBackgroundJob } from '../../helpers/background-jobs.js'
 import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../helpers/sync-server-live'
 import i18n from '../../i18n/index'
-import { showToastOnAllTabs } from '../../helpers/utils'
+import { openExternalLink, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
 import { onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
@@ -61,6 +61,13 @@ import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
 import { syncDeletionKey, syncDeletions } from '../../helpers/sync-deletions.js'
+import {
+  SYNC_SERVER_OIDC_REDIRECT_URL,
+  SyncServerOidcCallbacks,
+  getSyncServerOidcCallbackToken,
+  syncServerOidcLoginUrl,
+  syncServerOidcUsername,
+} from '../../helpers/sync-server-oidc'
 
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
@@ -72,6 +79,8 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 ]
 
 const collectionCache = new SyncCollectionCache()
+const oidcCallbacks = new SyncServerOidcCallbacks()
+let oidcFlow = 0
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let syncCapabilities = null
@@ -188,6 +197,8 @@ const state = {
   syncServerDevices: {},
   /** Deletions the last sync stopped at, until the user reviews them */
   syncServerPendingDeletion: null,
+  /** The OIDC flow waiting for the browser: 'login', 'delete', or null */
+  syncServerOidcPending: null,
 }
 
 const getters = {
@@ -203,6 +214,7 @@ const getters = {
     : state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerPendingDeletion: state => state.syncServerPendingDeletion,
+  getSyncServerOidcPending: state => state.syncServerOidcPending,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
   getSyncServerWatchStatsSupported: state => state.syncServerWatchStatsSupported,
   getSyncServerLiveRemindersSupported: state => state.syncServerLiveRemindersSupported,
@@ -295,6 +307,43 @@ async function getSyncServerCapabilities(client, { refresh = false, requiredCapa
 function assertEncryptionSupported(supported, required) {
   if (required && !supported) {
     throw new Error('This account requires encrypted sync, but the server no longer supports it')
+  }
+}
+
+function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
+  if (!supported) return
+  if (!privacyPassphrase) {
+    throw new Error('A privacy passphrase is required by this server')
+  }
+  if (privacyPassphrase.length < 12) {
+    throw new Error('The privacy passphrase must be at least 12 characters')
+  }
+  if (privacyPassphrase === password) {
+    throw new Error('The privacy passphrase must be different from the account password')
+  }
+}
+
+/**
+ * Opens an OIDC flow in the browser and resolves with the URL the server
+ * redirects back to.
+ * @param {Function} commit
+ * @param {'login' | 'delete'} kind
+ * @param {string} url
+ * @returns {Promise<string>}
+ */
+async function runOidcFlow(commit, kind, url) {
+  oidcCallbacks.cancel(new SyncServerCancelledError())
+  const flow = ++oidcFlow
+  const callback = oidcCallbacks.wait()
+  commit('setSyncServerOidcPending', kind)
+  try {
+    await openExternalLink(url)
+    return await callback
+  } catch (error) {
+    oidcCallbacks.cancel(error)
+    throw error
+  } finally {
+    if (flow === oidcFlow) commit('setSyncServerOidcPending', null)
   }
 }
 
@@ -1420,17 +1469,18 @@ const actions = {
 
   async authenticateSyncServer(
     { commit, dispatch, rootState, state },
-    { mode, serverUrl, username, password, privacyPassphrase, deviceId, deviceName, deviceSystemInfo }
+    { mode, serverUrl, username, password, token: oidcToken, privacyPassphrase, deviceId, deviceName, deviceSystemInfo }
   ) {
-    if (mode !== 'login' && mode !== 'register') {
+    if (mode !== 'login' && mode !== 'register' && mode !== 'oidc') {
       throw new Error('Invalid authentication mode')
     }
     if (!rootState.settings.syncServerEnabled) {
       throw new Error('Enable sync first')
     }
 
+    const oidc = mode === 'oidc'
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
-    const trimmedUsername = username.trim()
+    const trimmedUsername = oidc ? syncServerOidcUsername(oidcToken) : username.trim()
     const previousToken = rootState.settings.syncServerToken
     const resumesExpiredSession = isExpiredSessionReauthentication({
       expired: state.syncServerSessionExpired,
@@ -1439,7 +1489,7 @@ const actions = {
       serverUrl: normalizedUrl,
       username: trimmedUsername,
     })
-    if (!trimmedUsername || !password || !deviceId || !deviceName || !deviceSystemInfo) {
+    if (!trimmedUsername || (!oidc && !password) || !deviceId || !deviceName || !deviceSystemInfo) {
       throw new Error('Username, password, and device information are required')
     }
 
@@ -1456,16 +1506,21 @@ const actions = {
         trimmedUsername === rootState.settings.syncServerUsername
       assertEncryptionSupported(privacySupported, Boolean(privacyPassphrase) ||
         (sameAccount && requiresEncryptedSync(rootState.settings)))
-      if (privacySupported && !privacyPassphrase) {
-        throw new Error('A privacy passphrase is required by this server')
+      assertPrivacyPassphrase(privacySupported, privacyPassphrase, password)
+      let token
+      if (oidc) {
+        token = oidcToken
+        client.token = token
+        // Anyone can send the app a callback link. A session the server opened
+        // for this device's ID proves that this device started the sign-in.
+        // The login button only appears on servers that list sessions.
+        const { sessions } = await client.getAccountSessions()
+        if (sessions?.find(session => session.current)?.device_id !== deviceId) {
+          throw new Error('This sign-in was not started on this device')
+        }
+      } else {
+        token = await client.authenticate(mode, trimmedUsername, password, deviceId)
       }
-      if (privacySupported && privacyPassphrase.length < 12) {
-        throw new Error('The privacy passphrase must be at least 12 characters')
-      }
-      if (privacySupported && privacyPassphrase === password) {
-        throw new Error('The privacy passphrase must be different from the account password')
-      }
-      const token = await client.authenticate(mode, trimmedUsername, password, deviceId)
       let privacyKey = ''
       let privacySalt = ''
 
@@ -1528,6 +1583,45 @@ const actions = {
     } finally {
       releaseSyncClient(client)
     }
+  },
+
+  async loginSyncServerWithOidc(
+    { commit, dispatch, rootState },
+    { serverUrl, privacyPassphrase, deviceId, deviceName, deviceSystemInfo }
+  ) {
+    if (!rootState.settings.syncServerEnabled) {
+      throw new Error('Enable sync first')
+    }
+    const normalizedUrl = normalizeSyncServerUrl(serverUrl)
+    const client = trackSyncClient(new SyncServerClient(normalizedUrl))
+    try {
+      // Check the passphrase before the user signs in at the provider.
+      assertPrivacyPassphrase(await client.supportsEncryptedSync(), privacyPassphrase, '')
+    } finally {
+      releaseSyncClient(client)
+    }
+
+    const callbackUrl = await runOidcFlow(commit, 'login', syncServerOidcLoginUrl(normalizedUrl, deviceId))
+    const token = getSyncServerOidcCallbackToken(callbackUrl)
+    if (!token) throw new Error('The sync server did not complete the sign-in')
+    return dispatch('authenticateSyncServer', {
+      mode: 'oidc',
+      serverUrl: normalizedUrl,
+      token,
+      privacyPassphrase,
+      deviceId,
+      deviceName,
+      deviceSystemInfo,
+    })
+  },
+
+  /** @returns {boolean} whether an OIDC flow was waiting for the callback */
+  receiveSyncServerOidcCallback(_context, url) {
+    return oidcCallbacks.receive(url)
+  },
+
+  cancelSyncServerOidc() {
+    oidcCallbacks.cancel(new SyncServerCancelledError())
   },
 
   /**
@@ -1602,6 +1696,41 @@ const actions = {
       commit('setSyncServerStatus', 'error')
       await dispatch('startSyncServerAutoSync')
       throw error
+    }
+  },
+
+  async deleteSyncServerOidcAccount({ commit, dispatch, rootState }) {
+    if (!rootState.settings.syncServerToken) {
+      throw new Error('Connect to a sync server first')
+    }
+
+    const { syncServerUrl: url, syncServerToken: token } = rootState.settings
+    let client = trackSyncClient(new SyncServerClient(url, token))
+    let authorizationUrl
+    try {
+      authorizationUrl = await client.startOidcAccountDeletion(SYNC_SERVER_OIDC_REDIRECT_URL)
+    } finally {
+      releaseSyncClient(client)
+    }
+    await runOidcFlow(commit, 'delete', authorizationUrl)
+
+    // The callback carries no proof, but the deleted account's token stops
+    // working. A sync may have noticed that first and disconnected already.
+    client = trackSyncClient(new SyncServerClient(url, token))
+    try {
+      try {
+        await (await client.supportsAccountSessions()
+          ? client.getAccountSessions()
+          : client.getSubscriptions())
+      } catch (error) {
+        if (!isSessionExpiredError(error)) throw error
+        assertSyncEnabled(rootState, client)
+        if (rootState.settings.syncServerToken === token) await dispatch('disconnectSyncServer')
+        return
+      }
+      throw new Error('The sync account was not deleted')
+    } finally {
+      releaseSyncClient(client)
     }
   },
 
@@ -1819,6 +1948,7 @@ const actions = {
   async applySyncServerEnabled({ commit, dispatch, rootState }, enabled) {
     if (!enabled) {
       cancelActiveSyncClients()
+      oidcCallbacks.cancel(new SyncServerCancelledError())
       await dispatch('stopSyncServerAutoSync')
       await dispatch('updateSyncServerResumeAutoSync', false, { root: true })
       commit('setSyncServerProgress', null)
@@ -1884,6 +2014,9 @@ const mutations = {
   },
   setSyncServerLiveRemindersPending(state, pending) {
     state.syncServerLiveRemindersPending = pending
+  },
+  setSyncServerOidcPending(state, kind) {
+    state.syncServerOidcPending = kind
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

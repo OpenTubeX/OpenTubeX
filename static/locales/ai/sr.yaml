@@ -1456,6 +1456,11 @@ Settings:
     Open All Tabs: 'Отвори све картице'
     Open All Tabs Confirmation: "Отворити све картице?"
     Server Update Required: "Ажурирајте овај сервер да подржи шифровану синхронизацију у реалном времену."
+    Log In with Provider: 'Пријави се преко {provider}'
+    Log In with Single Sign-On: 'Пријави се јединственом пријавом'
+    Continue in Browser: 'Наставите у прегледачу. OpenTubeX ће наставити када завршите.'
+    Connected with Single Sign-On: 'Повезано јединственом пријавом'
+    Delete Single Sign-On Account Hint: 'Отвориће се прегледач да бисте брисање потврдили код свог добављача пријаве.'
   Proxy Settings:
     Proxy Username: Корисничко име за прокси
     Proxy Password: Лозинка за прокси

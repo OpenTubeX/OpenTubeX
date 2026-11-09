@@ -1621,6 +1621,11 @@ Settings:
     Keep Deleted Items: Behou items
     Confirm Data Loss: Skrap en gaan voort
     Server Update Required: Werk hierdie bediener by om geënkripteerde regstreekse sinkronisering te ondersteun.
+    Log In with Provider: 'Meld aan met {provider}'
+    Log In with Single Sign-On: 'Meld aan met enkelaanmelding'
+    Continue in Browser: 'Gaan voort in jou blaaier. OpenTubeX gaan voort wanneer jy klaar is.'
+    Connected with Single Sign-On: 'Gekoppel met enkelaanmelding'
+    Delete Single Sign-On Account Hint: 'Jou blaaier maak oop sodat jy die skrapping by jou aanmeldverskaffer kan bevestig.'
   Proxy Settings:
     Proxy Username: Gebruikersnaam vir instaanbediener
     Proxy Password: Wagwoord vir instaanbediener

@@ -1442,6 +1442,11 @@ Settings:
     Open All Tabs: 'Alle tabbladen openen'
     Open All Tabs Confirmation: "Alle tabbladen openen?"
     Server Update Required: "Werk deze server bij om versleutelde livesynchronisatie te ondersteunen."
+    Log In with Provider: 'Inloggen met {provider}'
+    Log In with Single Sign-On: 'Inloggen met eenmalige aanmelding'
+    Continue in Browser: 'Ga verder in je browser. OpenTubeX gaat verder zodra je klaar bent.'
+    Connected with Single Sign-On: 'Verbonden met eenmalige aanmelding'
+    Delete Single Sign-On Account Hint: 'Je browser wordt geopend zodat je het verwijderen kunt bevestigen bij je aanmeldprovider.'
   Proxy Settings:
     IP Block Recovery Script Path: Script voor herstel na IP-blokkering
     Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren

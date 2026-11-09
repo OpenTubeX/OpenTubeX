@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Tüm sekmeleri aç'
     Open All Tabs Confirmation: "Tüm sekmeler açılsın mı?"
     Server Update Required: "Şifreli canlı eşitlemeyi desteklemek için bu sunucuyu güncelleyin."
+    Log In with Provider: '{provider} ile giriş yap'
+    Log In with Single Sign-On: 'Çoklu oturum açma ile giriş yap'
+    Continue in Browser: 'Tarayıcınızda devam edin. İşiniz bittiğinde OpenTubeX devam eder.'
+    Connected with Single Sign-On: 'Çoklu oturum açma ile bağlandı'
+    Delete Single Sign-On Account Hint: 'Silme işlemini giriş sağlayıcınızda onaylayabilmeniz için tarayıcınız açılır.'
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli kurtarma betiği
     Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç

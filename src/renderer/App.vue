@@ -635,6 +635,7 @@ import { playbackScreenWake } from './helpers/playbackScreenWake'
 import { FtIcon } from '@opentubex/icons'
 import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
@@ -667,6 +668,7 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import { isSyncServerOidcCallbackUrl } from './helpers/sync-server-oidc'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
 import { SIGNAL_THEME_VALUES } from '../signalTheme.js'
 import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
@@ -4354,11 +4356,18 @@ async function handleYoutubeLink(href, {
 }
 
 function enableOpenUrl() {
-  return window.ftElectron.handleOpenUrl((url, tabId) => {
+  const removeOpenUrl = window.ftElectron.handleOpenUrl((url, tabId) => {
     if (url) {
       handleYoutubeLink(url, { tabId })
     }
   })
+  const removeOidcCallback = window.ftElectron.handleSyncServerOidcCallback(url => {
+    store.dispatch('receiveSyncServerOidcCallback', url)
+  })
+  return () => {
+    removeOpenUrl()
+    removeOidcCallback()
+  }
 }
 
 function openExternalMedia(url) {
@@ -4399,6 +4408,12 @@ function openSharedYoutubeLink() {
 async function enableCapacitorIntegrations() {
   const openUrl = async url => {
     if (!url) return
+    if (isSyncServerOidcCallbackUrl(url)) {
+      // The browser stays open over the app on iOS.
+      if (Capacitor.getPlatform() === 'ios') Browser.close().catch(() => {})
+      store.dispatch('receiveSyncServerOidcCallback', url)
+      return
+    }
     const widgetPage = getHomeWidgetPage(url)
     if (widgetPage) {
       await store.dispatch('hideSettingsWindow')

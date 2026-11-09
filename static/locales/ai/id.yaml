@@ -1419,6 +1419,11 @@ Settings:
     Open All Tabs: 'Buka semua tab'
     Open All Tabs Confirmation: "Buka semua tab?"
     Server Update Required: "Perbarui server ini untuk mendukung sinkronisasi langsung terenkripsi."
+    Log In with Provider: 'Masuk dengan {provider}'
+    Log In with Single Sign-On: 'Masuk dengan sistem masuk tunggal'
+    Continue in Browser: 'Lanjutkan di peramban Anda. OpenTubeX akan melanjutkan setelah Anda selesai.'
+    Connected with Single Sign-On: 'Terhubung dengan sistem masuk tunggal'
+    Delete Single Sign-On Account Hint: 'Peramban Anda akan terbuka agar Anda dapat mengonfirmasi penghapusan dengan penyedia masuk Anda.'
   Proxy Settings:
     IP Block Recovery Script Path: Skrip pemulihan blokir IP
     Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP

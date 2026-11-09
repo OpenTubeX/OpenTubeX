@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Ava kõik vahelehed'
     Open All Tabs Confirmation: "Kas avada kõik vahelehed?"
     Server Update Required: "Uuenda seda serverit, et toetada krüptitud reaalajas sünkroonimist."
+    Log In with Provider: 'Logi sisse teenusega {provider}'
+    Log In with Single Sign-On: 'Logi sisse ühekordse sisselogimisega'
+    Continue in Browser: 'Jätka brauseris. OpenTubeX jätkab, kui oled valmis.'
+    Connected with Single Sign-On: 'Ühendatud ühekordse sisselogimisega'
+    Delete Single Sign-On Account Hint: 'Brauser avaneb, et saaksid kustutamise oma sisselogimisteenuse pakkuja juures kinnitada.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokeeringust taastamise skript
     Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail

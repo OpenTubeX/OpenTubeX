@@ -1468,6 +1468,11 @@ Settings:
     Open All Tabs: 'Адкрыць усе ўкладкі'
     Open All Tabs Confirmation: "Адкрыць усе ўкладкі?"
     Server Update Required: "Абнавіце гэты сервер для падтрымкі шыфраванай сінхранізацыі ў рэальным часе."
+    Log In with Provider: 'Увайсці праз {provider}'
+    Log In with Single Sign-On: 'Увайсці праз адзіны ўваход'
+    Continue in Browser: 'Працягніце ў браўзеры. OpenTubeX працягне, калі вы скончыце.'
+    Connected with Single Sign-On: 'Падключана праз адзіны ўваход'
+    Delete Single Sign-On Account Hint: 'Адкрыецца браўзер, каб вы пацвердзілі выдаленне ў пастаўшчыка ўваходу.'
   Proxy Settings:
     Proxy Username: Імя карыстальніка проксі
     Proxy Password: Пароль проксі

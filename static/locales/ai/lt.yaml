@@ -1670,6 +1670,11 @@ Settings:
     Open All Tabs: 'Atverti visas korteles'
     Open All Tabs Confirmation: "Atverti visas korteles?"
     Server Update Required: "Atnaujinkite šį serverį, kad jis palaikytų šifruotą sinchronizavimą realiuoju laiku."
+    Log In with Provider: 'Prisijungti per {provider}'
+    Log In with Single Sign-On: 'Prisijungti vieningu prisijungimu'
+    Continue in Browser: 'Tęskite naršyklėje. OpenTubeX tęs, kai baigsite.'
+    Connected with Single Sign-On: 'Prisijungta vieningu prisijungimu'
+    Delete Single Sign-On Account Hint: 'Atsidarys naršyklė, kad galėtumėte patvirtinti ištrynimą savo prisijungimo teikėjo svetainėje.'
   Proxy Settings:
     Proxy Warning: OpenTubeX neturi integruoto įgaliotojo serverio, tačiau gali prisijungti prie išorinio, pavyzdžiui, šiame kompiuteryje veikiančio Tor arba kai kurių VPN teikiamo SOCKS5 įgaliotojo serverio. Įjungę įsitikinkite, kad įgaliotasis serveris arba Tor tinkamai sukonfigūruotas, kitaip OpenTubeX negalės gauti duomenų.
     Proxy Username: Įgaliotojo serverio naudotojo vardas

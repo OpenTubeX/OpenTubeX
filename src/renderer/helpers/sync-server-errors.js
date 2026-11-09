@@ -85,14 +85,17 @@ export const SYNC_SERVER_SESSION_EXPIRED_MESSAGE =
 /**
  * Whether an error means the stored token is no longer accepted.
  *
- * Only 401 qualifies. The server answers 403 for wrong credentials and for
- * resources owned by someone else, and 404 for plenty of ordinary misses, so
- * treating those as an expired session would sign people out for unrelated
- * reasons.
+ * Only 401 qualifies, and the 404 servers answer when the token's account was
+ * deleted. The server answers 403 for wrong credentials and for resources owned
+ * by someone else, and 404 for plenty of ordinary misses, so treating those as
+ * an expired session would sign people out for unrelated reasons.
  * @param {unknown} error
  */
 export function isSessionExpiredError(error) {
-  return error instanceof SyncServerError && error.status === 401
+  return error instanceof SyncServerError && (
+    error.status === 401 ||
+    (error.status === 404 && error.message === "account doesn't exist")
+  )
 }
 
 /**

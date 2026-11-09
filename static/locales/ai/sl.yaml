@@ -1704,6 +1704,11 @@ Settings:
     Open All Tabs: 'Odpri vse zavihke'
     Open All Tabs Confirmation: "Odprem vse zavihke?"
     Server Update Required: "Posodobite ta strežnik, da bo podpiral šifrirano sinhronizacijo v živo."
+    Log In with Provider: 'Prijava s {provider}'
+    Log In with Single Sign-On: 'Prijava z enotno prijavo'
+    Continue in Browser: 'Nadaljujte v brskalniku. OpenTubeX bo nadaljeval, ko končate.'
+    Connected with Single Sign-On: 'Povezano z enotno prijavo'
+    Delete Single Sign-On Account Hint: 'Odprl se bo brskalnik, da izbris potrdite pri svojem ponudniku prijave.'
   Proxy Settings:
     Proxy Warning: OpenTubeX nima vgrajenega posredniškega strežnika, vendar se lahko poveže z zunanjim posredniškim strežnikom, na primer s storitvijo Tor v vašem računalniku ali strežnikom SOCKS5, ki ga ponujajo nekatera navidezna zasebna omrežja. Če ga omogočite, preverite, ali je posredniški strežnik oziroma Tor pravilno nastavljen, sicer OpenTubeX ne bo mogel pridobiti podatkov.
     Proxy Username: Uporabniško ime posredniškega strežnika

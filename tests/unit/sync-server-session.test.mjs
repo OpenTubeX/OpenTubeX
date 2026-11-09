@@ -21,6 +21,12 @@ test('treats 401 as an expired session', () => {
   )
 })
 
+test('treats a token whose account was deleted as an expired session', () => {
+  // Servers answer authenticated requests for a deleted account with 404.
+  assert.equal(isSessionExpiredError(new SyncServerError("account doesn't exist", 404)), true)
+  assert.equal(isSessionExpiredError(new SyncServerError("playlist doesn't exist", 404)), false)
+})
+
 test('does not treat other sync server failures as an expired session', () => {
   // 403 is wrong credentials or someone else's resource, not a dead token
   assert.equal(isSessionExpiredError(new SyncServerError('invalid accountname or password', 403)), false)

@@ -1451,6 +1451,11 @@ Settings:
     Keep Deleted Items: Konservi erojn
     Confirm Data Loss: Forigi kaj daŭrigi
     Server Update Required: Ĝisdatigu ĉi tiun servilon por subteni ĉifritan tujan sinkronigon.
+    Log In with Provider: 'Ensaluti per {provider}'
+    Log In with Single Sign-On: 'Ensaluti per unuopa ensaluto'
+    Continue in Browser: 'Daŭrigu en via retumilo. OpenTubeX daŭrigos kiam vi finos.'
+    Connected with Single Sign-On: 'Konektita per unuopa ensaluto'
+    Delete Single Sign-On Account Hint: 'Via retumilo malfermiĝos, por ke vi konfirmu la forigon ĉe via ensaluta provizanto.'
   Proxy Settings:
     IP Block Recovery Script Path: Skripto por restariĝo post IP-bloko
     Select IP Block Recovery Script File: Elekti skriptodosieron por restariĝo post IP-bloko

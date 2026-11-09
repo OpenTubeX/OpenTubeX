@@ -1470,6 +1470,11 @@ Settings:
     Open All Tabs: 'باز کردن همهٔ زبانه‌ها'
     Open All Tabs Confirmation: "همهٔ زبانه‌ها باز شوند؟"
     Server Update Required: "این سرور را برای پشتیبانی از همگام‌سازی زندهٔ رمزگذاری‌شده به‌روز کنید."
+    Log In with Provider: 'ورود با {provider}'
+    Log In with Single Sign-On: 'ورود با ورود یکپارچه'
+    Continue in Browser: 'در مرورگر خود ادامه دهید. OpenTubeX پس از پایان کار شما ادامه می‌دهد.'
+    Connected with Single Sign-On: 'متصل با ورود یکپارچه'
+    Delete Single Sign-On Account Hint: 'مرورگر شما باز می‌شود تا حذف را نزد ارائه‌دهندهٔ ورود خود تأیید کنید.'
   Proxy Settings:
     IP Block Recovery Script Path: اسکریپت بازیابی مسدودیت IP
     Select IP Block Recovery Script File: انتخاب فایل اسکریپت بازیابی مسدودشدن IP

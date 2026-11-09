@@ -21,6 +21,7 @@ import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } f
 import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
+import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
 import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
@@ -100,6 +101,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     delegateRequests: () => () => {},
     ...subscriptionSettingsSync,
     ...errors,
+    ...oidc,
+    openExternalLink: async () => {},
     showToast: options => notifications.push(options),
     showToastOnAllTabs: (message, time, icon, buttonAction) => notifications.push({
       message, time, icon, buttonAction, broadcast: true,

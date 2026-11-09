@@ -1415,6 +1415,11 @@ Settings:
     Open All Tabs: 'Ireki fitxa guztiak'
     Open All Tabs Confirmation: "Fitxa guztiak ireki?"
     Server Update Required: "Eguneratu zerbitzari hau zifratutako zuzeneko sinkronizazioa onartzeko."
+    Log In with Provider: 'Hasi saioa {provider} erabiliz'
+    Log In with Single Sign-On: 'Hasi saioa saio-hasiera bakarrarekin'
+    Continue in Browser: 'Jarraitu nabigatzailean. OpenTubeX-ek jarraituko du amaitzen duzunean.'
+    Connected with Single Sign-On: 'Saio-hasiera bakarrarekin konektatuta'
+    Delete Single Sign-On Account Hint: 'Nabigatzailea irekiko da, ezabatzea zure saio-hornitzailearekin berresteko.'
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoaren berreskuratze-scripta
     Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia

@@ -1380,6 +1380,11 @@ Settings:
     Open All Tabs: 'Abrir todas las pestañas'
     Open All Tabs Confirmation: "¿Abrir todas las pestañas?"
     Server Update Required: "Actualiza este servidor para admitir la sincronización cifrada en tiempo real."
+    Log In with Provider: 'Iniciar sesión con {provider}'
+    Log In with Single Sign-On: 'Iniciar sesión con inicio de sesión único'
+    Continue in Browser: 'Continúa en tu navegador. OpenTubeX seguirá cuando termines.'
+    Connected with Single Sign-On: 'Conectado con inicio de sesión único'
+    Delete Single Sign-On Account Hint: 'Se abrirá tu navegador para que confirmes la eliminación con tu proveedor de inicio de sesión.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de recuperación del bloqueo de IP
     Select IP Block Recovery Script File: Seleccionar archivo del script de recuperación tras un bloqueo de IP
