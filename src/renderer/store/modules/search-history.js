@@ -1,5 +1,6 @@
 import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
 import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
+import { getRetentionCutoff } from '../../../history'
 import {
   getSearchHistoryEntryQuery,
   mergeSearchHistoryEntries,
@@ -41,10 +42,24 @@ const getters = {
   },
 }
 const actions = {
-  async grabSearchHistoryEntries({ commit }) {
+  async grabSearchHistoryEntries({ commit, dispatch, rootGetters }) {
     try {
       const results = await DBSearchHistoryHandlers.find()
       commit('mergeLoadedSearchHistoryEntries', results)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+    await dispatch('removeSearchHistoryOlderThan', rootGetters.getSearchHistoryRetentionDays)
+  },
+
+  async removeSearchHistoryOlderThan({ commit, state }, days) {
+    const cutoff = getRetentionCutoff(days)
+    // The list mirrors the datastore, so skip the query when nothing expired.
+    if (cutoff === null || !state.searchHistoryEntries.some(entry => entry.lastUpdatedAt < cutoff)) return
+
+    try {
+      const remaining = await DBSearchHistoryHandlers.deleteOlderThan(cutoff)
+      if (remaining !== null) commit('setSearchHistoryEntries', remaining)
     } catch (errMessage) {
       console.error(errMessage)
     }

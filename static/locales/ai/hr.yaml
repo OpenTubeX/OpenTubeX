@@ -1037,6 +1037,8 @@ Settings:
     Automatic History Retention: Automatsko čuvanje povijesti (dani)
     Automatic History Retention Placeholder: Ostavite prazno za trajno čuvanje
     Automatic History Retention Tooltip: Ostavite prazno kako biste trajno čuvali povijest. Spremanjem broja stariji se unosi odmah uklanjaju, a zatim i automatski dok je aplikacija otvorena.
+    Automatic Search History Retention: Automatsko čuvanje povijesti pretraživanja (dani)
+    Automatic Search History Retention Tooltip: Ostavite prazno kako biste trajno čuvali povijest pretraživanja. Spremanjem broja starija se pretraživanja odmah uklanjaju, a zatim i automatski dok je aplikacija otvorena.
     History Retention Saved: Postavka čuvanja povijesti spremljena je
     Invalid History Retention Days: Unesite cijeli broj dana veći od nule
     Enable Watch Statistics: Omogući statistiku gledanja

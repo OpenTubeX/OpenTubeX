@@ -1043,6 +1043,8 @@ Settings:
     Automatic History Retention: Retenção automática do histórico (dias)
     Automatic History Retention Placeholder: Deixar em branco para manter para sempre
     Automatic History Retention Tooltip: Deixe em branco para manter o histórico para sempre. Guardar um número remove agora as entradas mais antigas e passa a removê-las automaticamente enquanto a aplicação estiver aberta.
+    Automatic Search History Retention: Retenção automática do histórico de pesquisa (dias)
+    Automatic Search History Retention Tooltip: Deixe em branco para manter o histórico de pesquisa para sempre. Guardar um número remove agora as pesquisas mais antigas e passa a removê-las automaticamente enquanto a aplicação estiver aberta.
     History Retention Saved: Retenção do histórico guardada
     Invalid History Retention Days: Introduza um número inteiro de dias superior a zero
     Enable Watch Statistics: Ativar estatísticas de visualização

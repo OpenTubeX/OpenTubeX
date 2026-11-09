@@ -1037,6 +1037,8 @@ Settings:
     Automatic History Retention: Păstrarea automată a istoricului (zile)
     Automatic History Retention Placeholder: Lăsați necompletat pentru păstrare permanentă
     Automatic History Retention Tooltip: Lăsați necompletat pentru a păstra istoricul permanent. Salvarea unui număr elimină înregistrările mai vechi acum și automat cât timp aplicația este deschisă.
+    Automatic Search History Retention: Păstrarea automată a istoricului căutărilor (zile)
+    Automatic Search History Retention Tooltip: Lăsați necompletat pentru a păstra istoricul căutărilor permanent. Salvarea unui număr elimină căutările mai vechi acum și automat cât timp aplicația este deschisă.
     History Retention Saved: Perioada de păstrare a istoricului a fost salvată
     Invalid History Retention Days: Introduceți un număr întreg de zile mai mare decât zero
     Enable Watch Statistics: Activează statisticile de vizionare

@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Conservazione automatica della cronologia (giorni)
     Automatic History Retention Placeholder: Lascia vuoto per conservarla sempre
     Automatic History Retention Tooltip: Lascia vuoto per conservare sempre la cronologia. Se salvi un numero, le voci meno recenti vengono rimosse subito e poi automaticamente mentre l'app è aperta.
+    Automatic Search History Retention: Conservazione automatica della cronologia delle ricerche (giorni)
+    Automatic Search History Retention Tooltip: Lascia vuoto per conservare sempre la cronologia delle ricerche. Se salvi un numero, le ricerche meno recenti vengono rimosse subito e poi automaticamente mentre l'app è aperta.
     History Retention Saved: Conservazione della cronologia salvata
     Invalid History Retention Days: Inserisci un numero intero di giorni maggiore di zero
     Enable Watch Statistics: Abilita statistiche di visione

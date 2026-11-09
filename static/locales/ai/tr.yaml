@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Otomatik Geçmiş Saklama Süresi (Gün)
     Automatic History Retention Placeholder: Süresiz saklamak için boş bırakın
     Automatic History Retention Tooltip: Geçmişi süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski kayıtlar hemen ve uygulama açıkken otomatik olarak kaldırılır.
+    Automatic Search History Retention: Otomatik Arama Geçmişi Saklama Süresi (Gün)
+    Automatic Search History Retention Tooltip: Arama geçmişini süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski aramalar hemen ve uygulama açıkken otomatik olarak kaldırılır.
     History Retention Saved: Geçmiş saklama süresi kaydedildi
     Invalid History Retention Days: Sıfırdan büyük bir tam gün sayısı girin
     Enable Watch Statistics: İzleme İstatistiklerini Etkinleştir

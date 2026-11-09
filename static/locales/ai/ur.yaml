@@ -1092,6 +1092,8 @@ Settings:
     Automatic History Retention: خودکار ہسٹری برقرار رکھنا (دن)
     Automatic History Retention Placeholder: ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں
     Automatic History Retention Tooltip: ہسٹری ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں۔ کوئی عدد محفوظ کرنے سے پرانے اندراجات ابھی اور ایپ کھلی رہنے کے دوران خود بخود ہٹ جاتے ہیں۔
+    Automatic Search History Retention: خودکار تلاش کی ہسٹری برقرار رکھنا (دن)
+    Automatic Search History Retention Tooltip: تلاش کی ہسٹری ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں۔ کوئی عدد محفوظ کرنے سے پرانی تلاشیں ابھی اور ایپ کھلی رہنے کے دوران خود بخود ہٹ جاتی ہیں۔
     History Retention Saved: ہسٹری برقرار رکھنے کی مدت محفوظ ہو گئی ہے
     Invalid History Retention Days: صفر سے زیادہ دنوں کا پورا عدد درج کریں
     Enable Watch Statistics: دیکھنے کے اعداد و شمار فعال کریں

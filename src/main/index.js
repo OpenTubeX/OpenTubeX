@@ -3583,6 +3583,28 @@ function runApp() {
           )
           return null
 
+        case DBActions.SEARCH_HISTORY.DELETE_OLDER_THAN: {
+          if (
+            typeof data !== 'number' ||
+            !Number.isFinite(data) ||
+            data < 0 ||
+            data > Date.now()
+          ) {
+            throw new TypeError('invalid search history cutoff')
+          }
+
+          const remaining = await baseHandlers.searchHistory.deleteOlderThan(data)
+          if (remaining !== null) {
+            // find() sorts the list, as OVERWRITE expects.
+            syncOtherWindows(
+              IpcChannels.SYNC_SEARCH_HISTORY,
+              event,
+              { event: SyncEvents.GENERAL.OVERWRITE, data: remaining }
+            )
+          }
+          return remaining
+        }
+
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.searchHistory.deleteAll()
           syncOtherWindows(

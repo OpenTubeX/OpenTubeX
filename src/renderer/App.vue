@@ -1129,6 +1129,8 @@ const defaultInvidiousInstance = computed(() => store.getters.getDefaultInvidiou
 
 /** @type {import('vue').ComputedRef<string>} */
 const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
+/** @type {import('vue').ComputedRef<string>} */
+const searchHistoryRetentionDays = computed(() => store.getters.getSearchHistoryRetentionDays)
 
 const dataReady = ref(false)
 // Page-wide and teleported styles read the layout from <html>.
@@ -1337,6 +1339,7 @@ function startTabMemoryPressureMonitor(getHeapStatistics, unloadTabs) {
 
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
 let historyCleanupTimer = null
+let searchHistoryCleanupTimer = null
 let removeTabsStateListener = null
 let stopMemoryPressureMonitor = null
 let removeReloadRequestListener = null
@@ -2043,6 +2046,7 @@ onBeforeUnmount(() => {
   subscriptionAutoRefresh.stop()
   rssFeedAutoRefresh.stop()
   clearInterval(historyCleanupTimer)
+  clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
   store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
@@ -2151,19 +2155,28 @@ watch(presentedTabId, async (tabId, previousTabId) => {
   }
 })
 
-watch(historyRetentionDays, scheduleHistoryCleanup)
-
-function scheduleHistoryCleanup(days) {
+watch(historyRetentionDays, days => {
   clearInterval(historyCleanupTimer)
-  historyCleanupTimer = null
+  historyCleanupTimer = scheduleRetentionCleanup('removeHistoryOlderThan', days)
+})
+watch(searchHistoryRetentionDays, days => {
+  clearInterval(searchHistoryCleanupTimer)
+  searchHistoryCleanupTimer = scheduleRetentionCleanup('removeSearchHistoryOlderThan', days)
+})
 
+/**
+ * @param {string} action
+ * @param {string} days
+ * @returns {ReturnType<typeof setInterval> | null}
+ */
+function scheduleRetentionCleanup(action, days) {
   const parsedDays = Number(days)
   if (!Number.isInteger(parsedDays) || parsedDays < 1) {
-    return
+    return null
   }
 
-  historyCleanupTimer = setInterval(() => {
-    store.dispatch('removeHistoryOlderThan', parsedDays)
+  return setInterval(() => {
+    store.dispatch(action, parsedDays)
   }, HISTORY_CLEANUP_INTERVAL)
 }
 

@@ -1235,6 +1235,8 @@ Settings:
     Automatic History Retention: Automatinis istorijos saugojimas (dienomis)
     Automatic History Retention Placeholder: Palikite tuščią, kad būtų saugoma neribotai
     Automatic History Retention Tooltip: Palikite tuščią, kad istorija būtų saugoma neribotai. Išsaugojus skaičių, senesni įrašai pašalinami dabar ir automatiškai, kol programa atidaryta.
+    Automatic Search History Retention: Automatinis paieškos istorijos saugojimas (dienomis)
+    Automatic Search History Retention Tooltip: Palikite tuščią, kad paieškos istorija būtų saugoma neribotai. Išsaugojus skaičių, senesnės paieškos pašalinamos dabar ir automatiškai, kol programa atidaryta.
     History Retention Saved: Istorijos saugojimo nuostata išsaugota
     Invalid History Retention Days: Įveskite už nulį didesnį sveikąjį dienų skaičių
     Enable Watch Statistics: Įjungti žiūrėjimo statistiką
