@@ -106,3 +106,10 @@ test('limits seekbar thumbnails from oversized yt-dlp storyboard metadata', () =
   assert.match(vtt, /00:00:49\.999 --> 00:00:50\.000/)
   assert.doesNotMatch(vtt, /00:00:50\.000 -->/)
 })
+
+test('skips storyboard fragment URLs that could add WebVTT cues', () => {
+  const format = { protocol: 'mhtml', width: 160, height: 90, fps: 0.5, rows: 1, columns: 1 }
+  const fragments = ['https://example.com/a.jpg\n\n00:00.000 --> 99:00.000\nfile:///etc/passwd', 'javascript:alert(1)', 'https://example.com/b-->c.jpg']
+    .map(url => ({ url, duration: 2 }))
+  assert.equal(buildYtDlpStoryboardVtt([{ ...format, fragments }], 10), null)
+})

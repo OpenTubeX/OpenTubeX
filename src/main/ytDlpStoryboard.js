@@ -41,7 +41,9 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
     }
 
     const fragments = format.fragments.flatMap((fragment) => {
-      if (fragment === null || typeof fragment !== 'object' || typeof fragment.url !== 'string' || fragment.url === '') {
+      // A line break or `-->` in the URL would start a new cue in the generated WebVTT
+      if (fragment === null || typeof fragment !== 'object' || typeof fragment.url !== 'string' ||
+        !/^https?:\/\/\S+$/.test(fragment.url) || fragment.url.includes('-->')) {
         return []
       }
 
