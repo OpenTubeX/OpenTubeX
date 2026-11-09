@@ -61,6 +61,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
 const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
 // Tabs each run this, so only the player that offset the page scrollbar resets it.
 let pageScrollbarStartOwner = null
+let pageScrollbarBlockEnd = 0
 
 /**
  * OpenTubeX's scroll mini-player integration. Keeping this composable outside the
@@ -1730,15 +1731,17 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   watch(scrollPlayerMode, () => updateScrollMiniPlayer())
   // The pinned player covers the top of the page, so the page scrollbar starts below it.
-  let pinnedAreaObserver = null
+  let pinnedAreaObservers = []
   function releasePageScrollbarStart() {
-    pinnedAreaObserver?.disconnect()
-    pinnedAreaObserver = null
+    for (const observer of pinnedAreaObservers) observer.disconnect()
+    pinnedAreaObservers = []
     if (pageScrollbarStartOwner !== container) return
     pageScrollbarStartOwner = null
     setPageScrollbarStart(0)
   }
   function setPageScrollbarStart(blockEnd) {
+    if (blockEnd === pageScrollbarBlockEnd) return
+    pageScrollbarBlockEnd = blockEnd
     if (blockEnd === 0) {
       document.documentElement.style.removeProperty('--pinned-player-block-end')
     } else {
@@ -1754,14 +1757,20 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const area = pinned ? container.value?.closest('.videoArea') : null
     if (!area) return
     pageScrollbarStartOwner = container
-    pinnedAreaObserver = new ResizeObserver(() => {
+    const update = () => {
       // Wide layouts keep the player in the page and dock it instead.
       const style = getComputedStyle(area)
       setPageScrollbarStart(style.position === 'sticky'
         ? parseFloat(style.insetBlockStart) + area.getBoundingClientRect().height
         : 0)
-    })
-    pinnedAreaObserver.observe(area)
+    }
+    const resizeObserver = new ResizeObserver(update)
+    resizeObserver.observe(area)
+    // Opening a sidebar panel in theatre mode stops the pinning without resizing the player.
+    const layoutObserver = new MutationObserver(update)
+    const layout = area.closest('.videoLayout')
+    if (layout) layoutObserver.observe(layout, { attributes: true, attributeFilter: ['class'] })
+    pinnedAreaObservers = [resizeObserver, layoutObserver]
   }, { flush: 'post' })
   onBeforeUnmount(releasePageScrollbarStart)
   watch(() => watchNavigation?.detached.value, detached => {
