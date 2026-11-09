@@ -28,13 +28,29 @@ for (const name of ['retired-history-route']) {
   })
 }
 
+test('restored routes of redirects resolve to their target', async () => {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', name: 'default', component: {} },
+      { path: '/settings', redirect: '/' }
+    ]
+  })
+  await router.push('/')
+  const navigation = new Service(router, {})
+  const route = { name: null, path: '/settings', query: {}, hash: '', fullPath: '/settings' }
+  assert.equal(navigation.resolve(route).name, 'default')
+  await navigation.projectRoute(route)
+  assert.equal(router.currentRoute.value.fullPath, '/')
+})
+
 test('route presentation markers follow the current projection and clear after failures', async () => {
   const pending = new Map()
   let projectionStarted
   const router = {
     currentRoute: { value: { fullPath: '/subscriptions' } },
     isReady: async () => {},
-    resolve: route => ({ ...route, fullPath: route.path }),
+    resolve: route => ({ ...route, fullPath: route.path, matched: [] }),
     replace: route => new Promise((resolve, reject) => {
       pending.set(route.path, { resolve, reject })
       projectionStarted()

@@ -239,7 +239,7 @@ test.describe('tab bar', () => {
               : tab),
           {
             id: 'remote-new-tab',
-            url: 'app://bundle/#/settings',
+            url: 'app://bundle/#/history',
             title: 'Opened remotely',
             isPinned: false,
             color: null,
@@ -488,11 +488,7 @@ test.describe('tab bar', () => {
       ['/popular', 'Most Popular'],
       ['/userplaylists', 'Your Playlists'],
       ['/history', 'History'],
-      ['/downloads', 'Downloads'],
-      ['/stats', 'Stats'],
-      ['/settings', 'Settings'],
-      ['/about', 'About'],
-      ['/settings/profile', 'Profile Manager']
+      ['/stats', 'Stats']
     ]
     const tabs = await page.evaluate(async (routes) => {
       return await Promise.all(routes.map(route => (

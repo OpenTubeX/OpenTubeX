@@ -367,6 +367,12 @@ test('shows recent active and completed downloads', async ({ page }) => {
 
   await expect(page.locator('.settingsWindow')).toBeVisible()
   await expect(page.locator('.settingsDownloadsPage')).toBeVisible()
+  await page.locator('.settingsCloseButton').click()
+  await expect(page.locator('.settingsWindow')).toHaveCount(0)
+
+  // Downloads without a playable file open the Downloads window too.
+  await section.getByRole('button', { name: /Completed missing video/ }).click()
+  await expect(page.locator('.settingsDownloadsPage')).toBeVisible()
   expect(await page.evaluate(() => window.__homeDownloadsHashChanges)).toEqual([])
   expect(await page.evaluate(() => window.__homePageWasRemoved)).toBe(false)
 })

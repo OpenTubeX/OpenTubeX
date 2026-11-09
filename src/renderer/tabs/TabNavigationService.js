@@ -435,10 +435,13 @@ export class TabNavigationService {
   }
 
   resolve(location, currentRoute = START_LOCATION) {
-    if (typeof location?.fullPath === 'string' && typeof location.path === 'string') {
-      return this.router.resolve({ path: location.path, query: location.query, hash: location.hash }, currentRoute)
-    }
-    return this.router.resolve(location, currentRoute)
+    const resolved = typeof location?.fullPath === 'string' && typeof location.path === 'string'
+      ? this.router.resolve({ path: location.path, query: location.query, hash: location.hash }, currentRoute)
+      : this.router.resolve(location, currentRoute)
+    // Tabs render matched components themselves, so they follow the redirects
+    // that router navigation would apply.
+    const redirect = resolved.matched.at(-1)?.redirect
+    return redirect ? this.resolve(typeof redirect === 'function' ? redirect(resolved) : redirect) : resolved
   }
 
   createPresentedRouterFacade() {

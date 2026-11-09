@@ -95,7 +95,7 @@ for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) 
     await expect.poll(() => adb('shell', 'dumpsys', 'media_session'), { timeout: 20000 }).toMatch(/Offline queue track 1/)
     await expect.poll(() => page.locator('video').evaluate(video => !video.paused && video.currentTime > 0.1)).toBe(true)
     if (browseDownloads) {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/downloads'))
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
       await expect(page.locator('.ftVideoPlayer')).toHaveClass(/mobileMiniBar/)
       await expect(page.locator('.ftVideoPlayer')).not.toHaveAttribute('data-mobile-mini-morph')
     }

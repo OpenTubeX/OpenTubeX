@@ -63,28 +63,6 @@ test('Ctrl+Alt+middle-clicking an internal link leaves its background tab unload
   await expect(page.locator(sel.tabs).nth(1)).not.toHaveClass(/unloaded/)
 })
 
-test('middle-clicking a downloads link opens Downloads only when its tab is selected', async ({ page }) => {
-  await goTo(page, 'subscriptions')
-  await page.locator('body').evaluate(body => {
-    body.insertAdjacentHTML('beforeend', '<a href="#/downloads" style="position: fixed; inset-block-start: 200px; inset-inline-start: 300px; z-index: 1000">Downloads link</a>')
-  })
-
-  await page.getByRole('link', { name: 'Downloads link' }).click({ button: 'middle' })
-
-  await expect(page.locator(sel.tabs)).toHaveCount(2)
-  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
-  await expect.poll(() => page.evaluate(async () => {
-    const state = await window.ftElectron.tabs.getState()
-    return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
-  })).toBe('/downloads')
-  // The settings window covers the tab that shows it, not the one the link was in.
-  await expect(page.locator('.settingsWindow')).toHaveCount(0)
-  await expect(page).toHaveURL(/#\/subscriptions$/)
-
-  await page.locator(sel.tabs).nth(1).click()
-  await expect(page.locator('.settingsWindow')).toBeVisible()
-})
-
 test('Ctrl or Cmd-clicking an internal link opens it in an active tab', async ({ page }) => {
   const linkLabel = await historyLinkLabel(page)
 

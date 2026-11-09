@@ -84,7 +84,11 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     playbackScreenWake: { setAppActive: active => wakeStates.push(active) },
     store: {
       getters: {},
-      dispatch: async action => {
+      dispatch: async (action, view) => {
+        if (action === 'showSettingsWindow') {
+          paths.push(`settings:${view}`)
+          return
+        }
         assert.equal(action, 'hideSettingsWindow')
         settingsOpen = false
       },
@@ -114,7 +118,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     await listeners.get('click')({ shortcutId: page })
   }
   await listeners.get('click')({ shortcutId: 'settings' })
-  assert.deepEqual(paths, pages.map(page => `/${page}`))
+  assert.deepEqual(paths, ['/subscriptions', '/userplaylists', '/history', 'settings:downloads'])
   listeners.get('appUrlOpen')({ url: 'https://youtu.be/123' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })

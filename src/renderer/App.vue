@@ -3968,9 +3968,6 @@ function handleInternalLinkShortcut(event, link) {
   }
 
   const destination = router.resolve(hashRoute)
-  // Downloads and settings links open the settings window over whichever tab
-  // shows them, so background tabs wait until they are selected.
-  const opensSettings = destination.path === '/downloads' || destination.path.startsWith('/settings')
   event.preventDefault()
   openInternalPath({
     path: destination.path,
@@ -3979,7 +3976,7 @@ function handleInternalLinkShortcut(event, link) {
     doCreateNewWindow: event.shiftKey,
     doCreateNewTab: !event.shiftKey,
     makeActive: isCtrlOrCmdClick,
-    lazyLoad: isUnloadedBackgroundTabClick(event) || (isMiddleClick && opensSettings)
+    lazyLoad: isUnloadedBackgroundTabClick(event)
   })
   return true
 }
@@ -4485,6 +4482,10 @@ async function enableCapacitorIntegrations() {
     openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
+    if (shortcutId === 'downloads') {
+      await store.dispatch('showSettingsWindow', 'downloads')
+      return
+    }
     const path = getAppShortcutPath(shortcutId)
     if (!path) return
     await store.dispatch('hideSettingsWindow')
@@ -4747,14 +4748,6 @@ function handleDragStart(event) {
       break
     case 'userplaylists':
       transformedURL.pathname = '/feed/playlists'
-      transformed = true
-      break
-    case 'settings':
-      transformedURL.pathname = '/account'
-      transformed = true
-      break
-    case 'about':
-      transformedURL.pathname = '/about'
       transformed = true
       break
     case 'popular':

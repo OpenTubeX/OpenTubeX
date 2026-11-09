@@ -93,20 +93,17 @@ Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(as
 
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
-  window.ftElectron.handleChangeView((route, tabId, toggle) => {
-    if (typeof route === 'string' && (route === '/downloads' || route === '/settings' || route.startsWith('/settings/profile'))) {
-      const view = route === '/downloads'
-        ? 'downloads'
-        : route.startsWith('/settings/profile') ? 'profile' : null
-      const settingsWindowOpen = store.getters.getSettingsWindowOpen &&
-        !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
-      if (toggle && route === '/settings' && settingsWindowOpen) {
-        store.dispatch('hideSettingsWindow')
-      } else {
-        store.dispatch('showSettingsWindow', view)
-      }
-      return
+  window.ftElectron.handleShowSettingsWindow((view, toggle) => {
+    const settingsWindowOpen = store.getters.getSettingsWindowOpen &&
+      !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
+    if (toggle && settingsWindowOpen) {
+      store.dispatch('hideSettingsWindow')
+    } else {
+      store.dispatch('showSettingsWindow', view)
     }
+  })
+
+  window.ftElectron.handleChangeView((route, tabId) => {
     const targetTabId = tabId ?? store.getters.getActiveTabId
     if (route && targetTabId) {
       tabNavigation.push(targetTabId, route)

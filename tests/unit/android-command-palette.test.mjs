@@ -24,7 +24,7 @@ test('opening the ordinary command registry does not read the video library', ()
     get: () => { throw new Error('History was scanned before searching') },
   })
   assert.doesNotThrow(() => createRegistry({
-    isElectron: false, downloads: [], isCapacitor: false, routePath: '/settings',
+    isElectron: false, downloads: [], isCapacitor: false, routePath: '/history',
     routeAvailable: () => true, t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
     store: { getters },
@@ -38,7 +38,7 @@ test('download settings commands respect Android availability', () => {
     isElectron: false,
     downloads: [],
     isCapacitor: true,
-    routePath: '/settings',
+    routePath: '/history',
     routeAvailable: () => true,
     t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
@@ -68,7 +68,7 @@ test('lite Android builds omit download commands', () => {
     isElectron: false,
     downloads: [],
     isCapacitor: true,
-    routePath: '/settings',
+    routePath: '/history',
     routeAvailable: () => true,
     t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),

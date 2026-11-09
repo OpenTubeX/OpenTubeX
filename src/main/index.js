@@ -4054,20 +4054,25 @@ function runApp() {
   })
    */
 
-  function navigateTo(path, browserWindow, toggle = false) {
-    if (browserWindow == null) {
+  function navigateTo(path, browserWindow) {
+    if (browserWindow == null || !isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       return
     }
 
     const tabManager = TabManager.getForWindow(browserWindow.id)
-    if (tabManager?.activeTabId && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
-      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, {
-        tabId: tabManager.activeTabId,
-        route: path,
-        toggle
-      })
-    } else if (isOpenTubeXUrl(browserWindow.webContents.getURL())) {
-      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, toggle ? { route: path, toggle } : path)
+    browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, tabManager?.activeTabId
+      ? { tabId: tabManager.activeTabId, route: path }
+      : path)
+  }
+
+  /**
+   * @param {BrowserWindow | undefined} browserWindow
+   * @param {'downloads' | 'profile' | null} view
+   * @param {boolean} [toggle]
+   */
+  function showSettingsWindow(browserWindow, view, toggle = false) {
+    if (browserWindow != null && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
+      browserWindow.webContents.send(IpcChannels.SHOW_SETTINGS_WINDOW, { view, toggle })
     }
   }
 
@@ -4136,7 +4141,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              navigateTo('/settings', browserWindow, true)
+              showSettingsWindow(browserWindow, null, true)
             },
             type: 'normal'
           },
@@ -4339,7 +4344,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_DOWNLOADS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              navigateTo('/downloads', browserWindow)
+              showSettingsWindow(browserWindow, 'downloads')
             },
             type: 'normal'
           },
@@ -4357,7 +4362,7 @@ function runApp() {
           {
             label: 'Profile Manager',
             click: (_menuItem, browserWindow, _event) => {
-              navigateTo('/settings/profile/', browserWindow)
+              showSettingsWindow(browserWindow, 'profile')
             },
             type: 'normal'
           },

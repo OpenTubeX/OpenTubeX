@@ -42,6 +42,7 @@ const IpcChannels = {
   OPEN_URL: 'open-url',
   SYNC_SERVER_OIDC_CALLBACK: 'sync-server-oidc-callback',
   CHANGE_VIEW: 'change-view',
+  SHOW_SETTINGS_WINDOW: 'show-settings-window',
   SHOW_TOAST: 'show-toast',
   LIVE_REMINDER_GET: 'live-reminder-get',
   LIVE_REMINDER_LIST: 'live-reminder-list',

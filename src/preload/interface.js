@@ -914,7 +914,7 @@ export default {
   },
 
   /**
-   * @param {(route: string, tabId?: string, toggle?: boolean) => void} handler
+   * @param {(route: string, tabId?: string) => void} handler
    * @returns {() => void}
    */
   handleChangeView: (handler) => {
@@ -922,11 +922,23 @@ export default {
       if (typeof payload === 'string') {
         handler(payload)
       } else {
-        handler(payload?.route, payload?.tabId, payload?.toggle)
+        handler(payload?.route, payload?.tabId)
       }
     }
     ipcRenderer.on(IpcChannels.CHANGE_VIEW, listener)
     return () => ipcRenderer.removeListener(IpcChannels.CHANGE_VIEW, listener)
+  },
+
+  /**
+   * @param {(view: 'downloads' | 'profile' | null, toggle: boolean) => void} handler
+   * @returns {() => void}
+   */
+  handleShowSettingsWindow: (handler) => {
+    const listener = (_event, payload) => {
+      handler(payload?.view ?? null, payload?.toggle === true)
+    }
+    ipcRenderer.on(IpcChannels.SHOW_SETTINGS_WINDOW, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.SHOW_SETTINGS_WINDOW, listener)
   },
 
   /**

@@ -8,7 +8,7 @@ import { resolveColorProperty } from './colors'
 
 const PullToRefresh = registerPlugin('PullToRefresh')
 const EXCLUDED_TARGETS = '[data-playlist-drag-item] .grabBar, [data-playlist-drag-item] .videoIndexArea, button, input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="slider"], [role="dialog"], [role="menu"], video, audio, .shaka-video-container'
-const EXCLUDED_ROUTES = new Set(['settings', 'profileSettings', 'about', 'stats', 'downloads'])
+const EXCLUDED_ROUTES = new Set(['stats'])
 
 export function canPullToRefreshTarget(target, root, pageScrollY) {
   if (!target || !root?.contains(target) || root.closest('[inert]') || pageScrollY > 1 || target.closest(EXCLUDED_TARGETS)) {
