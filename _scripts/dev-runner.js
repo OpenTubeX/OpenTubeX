@@ -124,7 +124,8 @@ async function restartElectron() {
     remoteDebugging ? '--inspect=9222' : '',
     remoteDebugging ? '--remote-debugging-port=9223' : ''
   ],
-    // { stdio: 'inherit' } // required for logs to actually appear in the stdout
+  // an unread pipe hides the logs and blocks Electron once it is full
+  { stdio: 'inherit' }
   )
 
   electronProcess.on('exit', (code, _) => {
