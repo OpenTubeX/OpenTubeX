@@ -909,6 +909,17 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: originalFile), Data("original".utf8))
     }
 
+    func testPoTokenAttestationIsKeptOnlyWhileAttestedAndUnexpired() {
+        let attested = String(repeating: "a", count: PoTokenPlugin.maxAttestedPoTokenLength)
+        let pending = String(repeating: "p", count: PoTokenPlugin.maxAttestedPoTokenLength + 4)
+        let startedAt = Date(timeIntervalSince1970: 1)
+        let now = Date(timeIntervalSince1970: 3)
+        XCTAssertEqual(PoTokenPlugin.attestationExpiry(token: attested, startedAt: startedAt, validForSecs: 43_200, now: now),
+                       Date(timeIntervalSince1970: 43_201))
+        XCTAssertNil(PoTokenPlugin.attestationExpiry(token: pending, startedAt: startedAt, validForSecs: 43_200, now: now))
+        XCTAssertNil(PoTokenPlugin.attestationExpiry(token: attested, startedAt: startedAt, validForSecs: 1, now: now))
+    }
+
     func testPoTokenWebViewKeepsYouTubeNavigationInsideApp() async throws {
         let redirected = expectation(description: "Blocked navigation to a YouTube watch page")
         let guardDelegate = RecordingPoTokenNavigationGuard { url, policy in
