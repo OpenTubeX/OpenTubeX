@@ -102,7 +102,7 @@ test('hides collaboration videos when any collaborator is on the blocklist', () 
   }), false)
 })
 
-test('hides collaboration videos by their main author and regular videos by author ID', () => {
+test('hides collaboration videos when any collaborator is hidden and regular videos by author ID', () => {
   const hiddenChannelNames = new Set([CHANNEL_ID])
   const collaboration = {
     title: 'Title',
@@ -113,7 +113,8 @@ test('hides collaboration videos by their main author and regular videos by auth
 
   assert.equal(isVideoHiddenByPreferences(collaboration, { hiddenChannelNames }), true)
   assert.equal(isVideoHiddenByPreferences({ title: 'Title', author: 'Main', authorId: CHANNEL_ID }, { hiddenChannelNames }), true)
-  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: collaboration.collaborators.toReversed() }, { hiddenChannelNames }), false)
+  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: collaboration.collaborators.toReversed() }, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: [{ id: 'UCmain', name: 'Main' }, { id: 'UCguest', name: 'Guest' }] }, { hiddenChannelNames }), false)
 })
 
 test('keeps collaborators on compact watch-next videos', () => {
