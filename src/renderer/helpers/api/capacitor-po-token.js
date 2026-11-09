@@ -5,8 +5,8 @@ import { mintAttestedPoToken } from '../../../main/attestedPoToken'
 const PoToken = registerPlugin('PoToken')
 
 /**
- * Runs YouTube's BotGuard program in an isolated native WebView. Android keeps
- * an attested BotGuard run and mints later tokens from it until it expires.
+ * Runs YouTube's BotGuard program in an isolated native WebView. Android and
+ * iOS keep an attested BotGuard run and mint later tokens from it until it expires.
  * @param {string} videoId
  * @param {import('youtubei.js').Session['context']} context
  * @param {object} initialAttestationData
