@@ -255,7 +255,11 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
                 DispatchQueue.main.async {
                     self?.tasks.removeValue(forKey: id)
                     if let error {
-                        call.reject(IOSHttpPlugin.rejectionMessage(error), (error as NSError).domain, error)
+                        // Prefix connection failures like fetch does, so JavaScript
+                        // waits to reconnect whatever the device language.
+                        let message = error.localizedDescription
+                        call.reject(isConnectionFailure(error) ? "Failed to fetch: \(message)" : message,
+                                    (error as NSError).domain, error)
                     } else if let response = response as? HTTPURLResponse {
                         call.resolve(HttpRequestHandler.buildResponse(data, response,
                             responseType: ResponseType(string: call.getString("responseType"))))
@@ -267,18 +271,6 @@ public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
             self.tasks[id] = task
             task.resume()
         }
-    }
-
-    private static let connectionFailures: Set<URLError.Code> = [
-        .timedOut, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .networkConnectionLost,
-        .notConnectedToInternet, .internationalRoamingOff, .callIsActive, .dataNotAllowed,
-    ]
-
-    // URLSession localizes its descriptions. Prefix connection failures like
-    // fetch does, so JavaScript waits to reconnect on any device language.
-    static func rejectionMessage(_ error: Error) -> String {
-        guard let code = (error as? URLError)?.code, connectionFailures.contains(code) else { return error.localizedDescription }
-        return "Failed to fetch: \(error.localizedDescription)"
     }
 
     @objc func abort(_ call: CAPPluginCall) {

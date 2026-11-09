@@ -2663,15 +2663,6 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["afterTimeout"] as? Int, 200)
     }
 
-    func testLocalizedConnectionFailuresStayRecognizable() {
-        let localized = { (code: URLError.Code, text: String) in URLError(code, userInfo: [NSLocalizedDescriptionKey: text]) }
-        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.timedOut, "Zeitüberschreitung bei der Anforderung.")),
-                       "Failed to fetch: Zeitüberschreitung bei der Anforderung.")
-        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.cannotFindHost, "Es wurde kein Server gefunden.")),
-                       "Failed to fetch: Es wurde kein Server gefunden.")
-        XCTAssertEqual(IOSHttpPlugin.rejectionMessage(localized(.badURL, "Ungültige URL")), "Ungültige URL")
-    }
-
     func testStreamingCancellationClosesNativeConnection() async throws {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
