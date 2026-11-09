@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -56,7 +56,7 @@ test('presets and sliders set the buffer sizes', async ({ page, attachScreenshot
   await expect(bufferBeforePlaying).toHaveValue('0')
   await expect(section.locator('.pure-material-slider').filter({ hasText: 'Buffer Ahead' })).toContainText('Buffer Ahead: 180s')
 
-  await preset.selectOption('smooth')
+  await chooseSelectOption(preset, 'smooth')
   await expect.poll(() => readBufferSettings(page)).toEqual({ bufferAhead: 600, bufferBehind: 300, bufferBeforePlaying: 3 })
   await expect(bufferAhead).toHaveValue('600')
   await expect(bufferBeforePlaying).toHaveValue('3')

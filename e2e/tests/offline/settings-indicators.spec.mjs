@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo, goToSettingsSection, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('highlights changed settings and resets them to defaults', async ({ page, attachScreenshot }) => {
@@ -26,7 +26,7 @@ test.describe('settings', () => {
     })
     const select = setting.locator('select')
 
-    await select.selectOption('blur')
+    await chooseSelectOption(select, 'blur')
     await expect(select).toHaveValue('blur')
 
     const resetButton = setting.getByRole('button', {

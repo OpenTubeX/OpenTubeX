@@ -1,4 +1,5 @@
 import {
+  chooseSelectOption,
   test,
   expect,
   goTo,
@@ -370,13 +371,13 @@ test('the notification setting turns the bell and the notification options off a
   await expect(mode).toHaveValue('both')
   await expect(mode.locator('option')).toHaveText(['System and in-app', 'System only', 'Off'])
 
-  await mode.selectOption('off')
+  await chooseSelectOption(mode, 'off')
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).notificationMode).toBe('off')
   await expect(page.locator('.notificationCenter')).toHaveCount(0)
   const subscriptions = await goToSettingsSection(page, 'subscription')
   await expect(subscriptions.getByText('Notify About New Uploads', { exact: true })).toHaveCount(0)
 
-  await (await goToSettingsSection(page, 'general')).locator('.select').filter({ hasText: 'Notifications' }).locator('select').selectOption('system')
+  await chooseSelectOption((await goToSettingsSection(page, 'general')).locator('.select').filter({ hasText: 'Notifications' }).locator('select'), 'system')
   await expect(page.locator('.notificationCenter')).toHaveCount(0)
   await expect((await goToSettingsSection(page, 'subscription')).getByText('Notify About New Uploads', { exact: true })).toBeVisible()
 })

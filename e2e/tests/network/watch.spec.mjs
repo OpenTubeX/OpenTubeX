@@ -1,4 +1,4 @@
-import { openPlaylistMenuItem, sel } from '../../helpers/app.mjs'
+import { chooseSelectOption, openPlaylistMenuItem, sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
 import { findWatchComponent, openVideoOrSkip, playWhenLoaded, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
@@ -917,7 +917,7 @@ test.describe('watch page', () => {
     await page.locator('.sponsorblock-end-button').click({ force: true })
 
     const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
-    await submissionMenu.locator('select').nth(1).selectOption('mute')
+    await chooseSelectOption(submissionMenu.locator('select').nth(1), 'mute')
     await submissionMenu.getByRole('button', { name: 'Preview' }).click()
     await video.evaluate(element => {
       element.currentTime = 11.5

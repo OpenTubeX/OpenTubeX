@@ -1,4 +1,4 @@
-import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { chooseSelectOption, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -87,7 +87,7 @@ test('submits category corrections, preserves failed edits, and updates marker c
   const category = panel.locator('select')
   await expect(category.locator('option[value="exclusive_access"]')).toHaveCount(0)
   await expect(category.locator('option[value="poi_highlight"]')).toHaveCount(0)
-  await category.selectOption('intro')
+  await chooseSelectOption(category, 'intro')
   await captureThemes(page, panel, testInfo, 'sponsorblock-category')
   await panel.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.getByText('Failed to submit SponsorBlock vote.', { exact: true })).toBeVisible()
@@ -207,7 +207,7 @@ test('stops muting when a category correction disables the last playback segment
   await panel.getByRole('button', { name: 'Edit', exact: true }).click()
   await panel.getByRole('button', { name: 'Change category', exact: true }).click()
   await expect(panel.locator('select option[value="music_offtopic"]')).toHaveCount(0)
-  await panel.locator('select').selectOption('intro')
+  await chooseSelectOption(panel.locator('select'), 'intro')
   await panel.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(panel.locator('.sponsorBlockCategory')).toHaveText('Intermission')
   await expect.poll(() => video.evaluate(element => element.muted)).toBe(false)
@@ -233,7 +233,7 @@ test('keeps a grouped skip toast working after its first segment is disabled by 
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(13)
   await toast.getByRole('button', { name: 'Edit', exact: true }).click()
   await toast.getByRole('button', { name: 'Change category', exact: true }).click()
-  await toast.locator('select').selectOption('intro')
+  await chooseSelectOption(toast.locator('select'), 'intro')
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
   // the label describes the segment the toast still acts on, not the disabled one
@@ -272,7 +272,7 @@ test('closes an unskipped toast when a category correction disables its segment'
   await expect(toast.getByRole('button', { name: /^Reskip/ })).toBeVisible()
   await toast.getByRole('button', { name: 'Edit', exact: true }).click()
   await toast.getByRole('button', { name: 'Change category', exact: true }).click()
-  await toast.locator('select').selectOption('intro')
+  await chooseSelectOption(toast.locator('select'), 'intro')
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
   await expect(toast).toHaveCount(0)
@@ -282,7 +282,7 @@ test('closes an unskipped toast when a category correction disables its segment'
   await panel.locator('.sponsorBlockSegmentSummary').click()
   await panel.getByRole('button', { name: 'Edit', exact: true }).click()
   await panel.getByRole('button', { name: 'Change category', exact: true }).click()
-  await panel.locator('select').selectOption('sponsor')
+  await chooseSelectOption(panel.locator('select'), 'sponsor')
   await panel.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
   await video.evaluate(element => {
@@ -313,7 +313,7 @@ test('shrinks an unskipped group to its remaining segments after a category corr
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11)
   await toast.getByRole('button', { name: 'Edit', exact: true }).click()
   await toast.getByRole('button', { name: 'Change category', exact: true }).click()
-  await toast.locator('select').selectOption('intro')
+  await chooseSelectOption(toast.locator('select'), 'intro')
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
 
@@ -481,7 +481,7 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     await expect(toast.locator('.btn')).toHaveCount(2)
     await toast.getByRole('button', { name: 'Change category', exact: true }).click()
     await expect.soft(toast.locator('.select-label')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
-    await toast.locator('select').selectOption('intro')
+    await chooseSelectOption(toast.locator('select'), 'intro')
     await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
     await expect(toast.locator('.skippedSegmentText')).toContainText('Intermission')
     expect(votes[0].category).toBe('intro')

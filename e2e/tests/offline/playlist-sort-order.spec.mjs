@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo } from '../../helpers/app.mjs'
 import { waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -56,7 +56,7 @@ function titles(page) {
 test('each playlist keeps its own sort order across restarts', async ({ app, page, attachScreenshot }) => {
   await openPlaylist(page, 'Sorted mix')
   await expect(titles(page)).toHaveText(customTitles)
-  await page.locator('.sortSelect select').selectOption('video_title_ascending')
+  await chooseSelectOption(page.locator('.sortSelect select'), 'video_title_ascending')
   await expect(titles(page)).toHaveText(ascendingTitles)
   await attachScreenshot('playlist-sorted-by-title')
 
@@ -83,7 +83,7 @@ test('each playlist keeps its own sort order across restarts', async ({ app, pag
 test('the watch page playlist follows the playlist sort order', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openPlaylist(page, 'Sorted mix')
-  await page.locator('.sortSelect select').selectOption('video_title_ascending')
+  await chooseSelectOption(page.locator('.sortSelect select'), 'video_title_ascending')
   await titles(page).first().click()
   await waitForPlayback(page)
 

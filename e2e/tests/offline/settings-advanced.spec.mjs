@@ -1,5 +1,5 @@
 import { DBActions } from '../../../src/constants.js'
-import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 async function expectExternalSoftwarePathAlignment(tool, sourceName, pathLabel) {
   const source = tool.locator('.select').filter({ hasText: sourceName })
@@ -81,7 +81,7 @@ test.describe('settings', () => {
       positionWithinTool(ffmpegSource)
     ])
 
-    await ytDlpSource.locator('select').selectOption('managed')
+    await chooseSelectOption(ytDlpSource.locator('select'), 'managed')
     await expect(ytDlpTool.getByRole('combobox', { name: 'yt-dlp Channel' })).toBeVisible()
     await expect(ytDlpTool.getByLabel('yt-dlp executable')).toHaveCount(0)
     await expect(ytDlpTool.getByRole('button', { name: 'Update yt-dlp' })).toBeVisible()
@@ -96,7 +96,7 @@ test.describe('settings', () => {
       expect(positionsAfter[index].y).toBeCloseTo(positionsBefore[index].y, 0)
     }
 
-    await ffmpegSource.locator('select').selectOption('managed')
+    await chooseSelectOption(ffmpegSource.locator('select'), 'managed')
     await expect(ffmpegTool.getByLabel('FFmpeg executable')).toHaveCount(0)
     await expect(ffmpegTool.getByRole('button', { name: 'Update FFmpeg and FFprobe' })).toBeVisible()
     await expect(externalSoftware.getByRole('combobox', { name: 'Managed Tool Updates' })).toBeVisible()
@@ -154,7 +154,7 @@ test.describe('settings', () => {
     await expect(page.locator('body > [role="tooltip"]:visible')).toHaveText(
       "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
     )
-    await cookieSource.selectOption('browser')
+    await chooseSelectOption(cookieSource, 'browser')
 
     const browser = authentication.locator('.restrictedPlaybackAuthDetail select')
     await expect(browser.locator('option')).toHaveText([
@@ -162,7 +162,7 @@ test.describe('settings', () => {
       'Firefox',
       'Vivaldi'
     ])
-    await browser.selectOption('firefox')
+    await chooseSelectOption(browser, 'firefox')
 
     const profile = authentication.getByPlaceholder('Profile name or path')
     await profile.fill('/tmp/firefox-profile')

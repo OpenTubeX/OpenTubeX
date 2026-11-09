@@ -1,5 +1,5 @@
 import { DBActions, IpcChannels } from '../../../src/constants.js'
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
 async function waitForToastsToSettle(page) {
   await expect.poll(() => page.locator('.toast-holder').evaluate(async holder => {
@@ -91,7 +91,7 @@ test.describe('settings', () => {
 
     const dismissDragDistance = 120
 
-    await positionSelect.selectOption('bottom-left')
+    await chooseSelectOption(positionSelect, 'bottom-left')
     await expect(holder).toHaveClass(/position-bottom-left/)
     let toast = await showToast('Left toast')
     let bounds = await toast.boundingBox()
@@ -105,7 +105,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
-    await positionSelect.selectOption('bottom-center')
+    await chooseSelectOption(positionSelect, 'bottom-center')
     await expect(holder).toHaveClass(/position-bottom-center/)
     toast = await showToast('Center toast dragged left')
     bounds = await toast.boundingBox()
@@ -120,7 +120,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
-    await positionSelect.selectOption('bottom-right')
+    await chooseSelectOption(positionSelect, 'bottom-right')
     await expect(holder).toHaveClass(/position-bottom-right/)
     toast = await showToast('Right toast')
     bounds = await toast.boundingBox()
@@ -134,7 +134,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
-    await positionSelect.selectOption('top-left')
+    await chooseSelectOption(positionSelect, 'top-left')
     await expect(holder).toHaveClass(/position-top-left/)
     toast = await showToast('Top left toast')
     bounds = await toast.boundingBox()
@@ -145,7 +145,7 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
-    await positionSelect.selectOption('top-center')
+    await chooseSelectOption(positionSelect, 'top-center')
     await expect(holder).toHaveClass(/position-top-center/)
     toast = await showToast('Top center toast')
     bounds = await toast.boundingBox()
@@ -155,8 +155,8 @@ test.describe('settings', () => {
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
-    await positionSelect.selectOption('bottom-right')
-    await positionSelect.selectOption('top-right')
+    await chooseSelectOption(positionSelect, 'bottom-right')
+    await chooseSelectOption(positionSelect, 'top-right')
     await expect(holder).toHaveClass(/position-top-right/)
     toast = await showToast('Top right toast')
     bounds = await toast.boundingBox()
@@ -194,12 +194,12 @@ test.describe('settings', () => {
       })
     })
 
-    await select.selectOption('top-right')
+    await chooseSelectOption(select, 'top-right')
     await expect.poll(() => app.electronApp.evaluate(() =>
       typeof globalThis.__releaseToastPositionSave === 'function'
     )).toBe(true)
     try {
-      await select.selectOption('bottom-right')
+      await chooseSelectOption(select, 'bottom-right')
       await setting.getByRole('button', { name: 'Reset this setting to its default' }).click()
     } finally {
       await app.electronApp.evaluate(() => globalThis.__releaseToastPositionSave())
@@ -315,7 +315,7 @@ test.describe('settings', () => {
     }
 
     async function expectBottomLeftToast (message) {
-      await positionSelect.selectOption('bottom-left')
+      await chooseSelectOption(positionSelect, 'bottom-left')
       await expect(holder).toHaveClass(/position-bottom-left/)
       const progressInset = await preparePhoneEdge('bottom')
       await page.evaluate((text) => {
@@ -343,7 +343,7 @@ test.describe('settings', () => {
     }
 
     async function expectTopRightToast (message) {
-      await positionSelect.selectOption('top-right')
+      await chooseSelectOption(positionSelect, 'top-right')
       await expect(holder).toHaveClass(/position-top-right/)
       const progressInset = await preparePhoneEdge('top')
       await page.evaluate((text) => {
@@ -398,10 +398,9 @@ test.describe('settings', () => {
       .filter({ has: page.getByRole('heading', { name: 'Layout', exact: true }) })
     const toastPositionRow = layoutSection.locator('.themeSelectRow')
       .filter({ hasText: 'Toast Position' })
-    await toastPositionRow.locator('.select')
+    await chooseSelectOption(toastPositionRow.locator('.select')
       .filter({ hasText: 'Toast Position' })
-      .locator('select')
-      .selectOption('top-left')
+      .locator('select'), 'top-left')
     await page.evaluate(() => {
       window.ftElectron.showToastOnAllTabs('Earlier tablet toast', 10000)
     })

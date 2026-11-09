@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -9,7 +9,7 @@ test('codec preference defaults to auto and persists independently of quality', 
   const select = field.locator('select')
   await expect(select).toHaveValue('auto')
   const quality = await page.evaluate(() => window.$store.getters.getDefaultQuality)
-  await select.selectOption('vp9')
+  await chooseSelectOption(select, 'vp9')
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPreferredVideoCodec)).toBe('vp9')
   await page.reload()
   await goToSettingsSection(page, 'advanced')

@@ -1,4 +1,4 @@
-import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../../src/renderer/helpers/quickSettings.js'
 
 // Mixes selects, sliders and toggles across every common category. Startup
@@ -608,7 +608,7 @@ test.describe('quick thumbnail blur', () => {
       const select = appearance.locator('.select').filter({
         has: page.getByRole('combobox', { name: 'Thumbnail Preference' })
       }).locator('select')
-      await select.selectOption(preference)
+      await chooseSelectOption(select, preference)
       await expect(select).toHaveValue(preference)
       await page.locator('.settingsCloseButton').click()
       await page.locator('.profileTrigger').click()
