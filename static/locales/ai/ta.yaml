@@ -1053,6 +1053,8 @@ Settings:
     Automatic History Retention: தானியக்க வரலாற்றுத் தக்கவைப்பு (நாட்கள்)
     Automatic History Retention Placeholder: நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும்
     Automatic History Retention Tooltip: வரலாற்றை நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும். ஓர் எண்ணைச் சேமித்தால், பழைய உள்ளீடுகள் இப்போதும் செயலி திறந்திருக்கும் போதும் தானாக நீக்கப்படும்.
+    Automatic Search History Retention: தானியக்கத் தேடல் வரலாற்றுத் தக்கவைப்பு (நாட்கள்)
+    Automatic Search History Retention Tooltip: தேடல் வரலாற்றை நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும். ஓர் எண்ணைச் சேமித்தால், பழைய தேடல்கள் இப்போதும் செயலி திறந்திருக்கும் போதும் தானாக நீக்கப்படும்.
     History Retention Saved: வரலாற்றுத் தக்கவைப்பு சேமிக்கப்பட்டது
     Invalid History Retention Days: பூஜ்ஜியத்தைவிடப் பெரிய முழு நாள் எண்ணை உள்ளிடவும்
     Enable Watch Statistics: பார்வைப் புள்ளிவிவரங்களை இயக்கு

@@ -110,7 +110,7 @@
 .storageSettingControl {
   display: flex;
   flex: 1 1 240px;
-  max-inline-size: 380px;
+  max-inline-size: 420px;
   min-inline-size: 0;
 }
 

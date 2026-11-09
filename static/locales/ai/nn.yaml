@@ -1133,6 +1133,8 @@ Settings:
     Automatic History Retention: Automatisk oppbevaring av historikk (dagar)
     Automatic History Retention Placeholder: La stå tomt for å ta vare på historikken for alltid
     Automatic History Retention Tooltip: La stå tomt for å ta vare på historikken for alltid. Når du lagrar eit tal, blir eldre oppføringar fjerna no og automatisk medan appen er open.
+    Automatic Search History Retention: Automatisk oppbevaring av søkjehistorikk (dagar)
+    Automatic Search History Retention Tooltip: La stå tomt for å ta vare på søkjehistorikken for alltid. Når du lagrar eit tal, blir eldre søk fjerna no og automatisk medan appen er open.
     History Retention Saved: Oppbevaringstida for historikken er lagra
     Invalid History Retention Days: Skriv inn eit heilt tal dagar som er større enn null
     Enable Watch Statistics: Slå på visingsstatistikk

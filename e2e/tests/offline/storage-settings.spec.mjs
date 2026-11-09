@@ -1,4 +1,4 @@
-import { IpcChannels } from '../../../src/constants.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { access, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
@@ -222,12 +222,13 @@ test('moves storage controls into one searchable category', async ({ app, attach
 })
 
 test('separates replaceable search results from saved search history', async ({ page }) => {
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'temporary search',
       data: [{ videoId: 'aaaaaaaaaaa' }]
     })
+    await store.dispatch('updateSearchHistoryEntry', { _id: 'recent search', query: 'recent search', lastUpdatedAt: Date.now() })
   })
 
   const storage = await goToSettingsSection(page, 'storage')
@@ -245,12 +246,22 @@ test('separates replaceable search results from saved search history', async ({ 
       .getters.getSessionSearchHistory.length,
     saved: window.$store
       .getters.getSearchHistoryEntries.length
-  }))).toEqual({ cached: 0, saved: 1 })
+  }))).toEqual({ cached: 0, saved: 2 })
   await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
 
   const searchHistory = storage.locator('.storageItem').filter({
     has: page.getByRole('heading', { name: 'Search history', exact: true })
   })
+  // Retention removes only the searches last used before its cutoff, in the saved list and its datastore.
+  const retention = searchHistory.getByRole('spinbutton', { name: 'Automatic Search History Retention (Days)', exact: true })
+  await retention.fill('3')
+  await retention.press('Enter')
+  await expect(page.locator('.toast', { hasText: 'History retention has been saved' })).toBeVisible()
+  expect(await page.evaluate(async action => ({
+    setting: window.$store.getters.getSearchHistoryRetentionDays,
+    saved: window.$store.getters.getSearchHistoryEntries.map(entry => entry._id),
+    stored: (await window.ftElectron.dbSearchHistory(action)).map(entry => entry._id)
+  }), DBActions.GENERAL.FIND)).toEqual({ setting: '3', saved: ['recent search'], stored: ['recent search'] })
   await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
   await page.getByRole('dialog', { name: 'Delete all saved search history?' })
     .getByRole('button', { name: 'Delete' })

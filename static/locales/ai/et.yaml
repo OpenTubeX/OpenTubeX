@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Ajaloo automaatne säilitusaeg (päevades)
     Automatic History Retention Placeholder: Tähtajatult säilitamiseks jäta tühjaks
     Automatic History Retention Tooltip: Ajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad kirjed kohe ja edaspidi automaatselt, kuni rakendus on avatud.
+    Automatic Search History Retention: Otsinguajaloo automaatne säilitusaeg (päevades)
+    Automatic Search History Retention Tooltip: Otsinguajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad otsingud kohe ja edaspidi automaatselt, kuni rakendus on avatud.
     History Retention Saved: Ajaloo säilitusaeg on salvestatud
     Invalid History Retention Days: Sisesta päevade arvuks nullist suurem täisarv
     Enable Watch Statistics: Luba vaatamisstatistika

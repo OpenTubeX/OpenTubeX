@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: Automatické uchovávanie histórie (dni)
     Automatic History Retention Placeholder: Prázdna hodnota uchová históriu navždy
     Automatic History Retention Tooltip: Ak chcete históriu uchovať navždy, ponechajte pole prázdne. Po zadaní a uložení počtu dní sa staršie záznamy odstránia ihneď aj automaticky počas spustenia aplikácie.
+    Automatic Search History Retention: Automatické uchovávanie histórie vyhľadávania (dni)
+    Automatic Search History Retention Tooltip: Ak chcete históriu vyhľadávania uchovať navždy, ponechajte pole prázdne. Po uložení počtu dní sa staršie vyhľadávania odstránia ihneď aj automaticky počas spustenia aplikácie.
     History Retention Saved: Uchovávanie histórie bolo uložené
     Invalid History Retention Days: Zadajte celé číslo dní väčšie ako nula
     Enable Watch Statistics: Zapnúť štatistiky sledovania

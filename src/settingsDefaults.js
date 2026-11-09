@@ -313,6 +313,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // Empty means history is retained indefinitely.
     historyRetentionDays: '',
     rememberSearchHistory: true,
+    // Empty means search history is retained indefinitely.
+    searchHistoryRetentionDays: '',
     rememberTabNavigationHistory: false,
     // 'auto', 'semi-auto', 'never'
     watchedProgressSavingMode: 'auto',

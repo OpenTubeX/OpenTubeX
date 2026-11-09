@@ -1032,6 +1032,8 @@ Settings:
     Automatic History Retention: 自动保留历史记录（天）
     Automatic History Retention Placeholder: 留空则永久保留
     Automatic History Retention Tooltip: 留空可永久保留历史记录。保存数字后，会立即删除更早的条目，并在应用打开期间自动清理。
+    Automatic Search History Retention: 自动保留搜索记录（天）
+    Automatic Search History Retention Tooltip: 留空可永久保留搜索记录。保存数字后，会立即删除更早的搜索，并在应用打开期间自动清理。
     History Retention Saved: 已保存历史记录保留期限
     Invalid History Retention Days: 请输入大于零的整数天数
     Enable Watch Statistics: 启用观看统计

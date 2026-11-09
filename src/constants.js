@@ -286,6 +286,10 @@ const DBActions = {
     REMOVE_DUPLICATES: 25,
   },
 
+  SEARCH_HISTORY: {
+    DELETE_OLDER_THAN: 20,
+  },
+
   WATCH_STATS: {
     ADD_WATCH_TIME: 20,
     MIGRATE_HISTORY: 21,

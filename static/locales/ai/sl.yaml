@@ -1252,6 +1252,8 @@ Settings:
     Automatic History Retention: Samodejna hramba zgodovine (dnevi)
     Automatic History Retention Placeholder: Pustite prazno za trajno hrambo
     Automatic History Retention Tooltip: Za trajno hrambo zgodovine pustite prazno. Če shranite število, se starejši vnosi odstranijo takoj in nato samodejno, dokler je aplikacija odprta.
+    Automatic Search History Retention: Samodejna hramba zgodovine iskanja (dnevi)
+    Automatic Search History Retention Tooltip: Za trajno hrambo zgodovine iskanja pustite prazno. Če shranite število, se starejša iskanja odstranijo takoj in nato samodejno, dokler je aplikacija odprta.
     History Retention Saved: Hramba zgodovine je shranjena
     Invalid History Retention Days: Vnesite celo število dni, večje od nič
     Enable Watch Statistics: Omogoči statistiko gledanja

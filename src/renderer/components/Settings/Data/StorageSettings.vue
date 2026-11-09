@@ -277,7 +277,7 @@
             :tooltip="t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
             :disabled="!rememberHistory"
             @input="historyRetentionDaysInput = $event"
-            @click="saveHistoryRetention"
+            @click="saveRetention('watch')"
           />
         </template>
         <FtButton
@@ -302,6 +302,23 @@
         :description="t('Settings.Storage Settings.Search History Description')"
         :location="storedDataLocation('search-history.sqlite')"
       >
+        <template #setting>
+          <FtInput
+            :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+            :icon="['fas', 'clock']"
+            :label="t('Settings.Privacy Settings.Automatic Search History Retention')"
+            input-type="number"
+            :value="searchHistoryRetentionDaysInput"
+            setting-key="searchHistoryRetentionDays"
+            :show-label="true"
+            :allow-action-button-when-empty="true"
+            :force-action-button-icon-name="['fas', 'check']"
+            :tooltip="t('Settings.Privacy Settings.Automatic Search History Retention Tooltip')"
+            :disabled="!rememberSearchHistory"
+            @input="searchHistoryRetentionDaysInput = $event"
+            @click="saveRetention('search')"
+          />
+        </template>
         <FtButton
           :label="t('Settings.Storage Settings.Delete Search History')"
           theme="destructive"
@@ -612,10 +629,18 @@ const rememberHistory = computed(() => store.getters.getRememberHistory)
 /** @type {import('vue').ComputedRef<string>} */
 const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
 const historyRetentionDaysInput = ref(historyRetentionDays.value)
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
+/** @type {import('vue').ComputedRef<string>} */
+const searchHistoryRetentionDays = computed(() => store.getters.getSearchHistoryRetentionDays)
+const searchHistoryRetentionDaysInput = ref(searchHistoryRetentionDays.value)
 const profileList = computed(() => store.getters.getProfileList)
 
 watch(historyRetentionDays, value => {
   historyRetentionDaysInput.value = value
+})
+watch(searchHistoryRetentionDays, value => {
+  searchHistoryRetentionDaysInput.value = value
 })
 
 const cleanupPrompt = computed(() => {
@@ -841,14 +866,24 @@ async function removeSubscriptionsAndProfiles() {
   await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
 }
 
-function parseDays(value, allowEmpty = false) {
-  if (allowEmpty && value === '') return ''
+function parseDays(value) {
+  if (value === '') return ''
   const days = Number(value)
   return Number.isInteger(days) && days > 0 ? String(days) : null
 }
 
-async function saveHistoryRetention() {
-  const days = parseDays(historyRetentionDaysInput.value, true)
+const RETENTION_SETTINGS = {
+  watch: { input: historyRetentionDaysInput, update: 'updateHistoryRetentionDays', remove: 'removeHistoryOlderThan' },
+  search: { input: searchHistoryRetentionDaysInput, update: 'updateSearchHistoryRetentionDays', remove: 'removeSearchHistoryOlderThan' }
+}
+
+/**
+ * Saves a retention period and removes the entries it no longer keeps.
+ * @param {keyof typeof RETENTION_SETTINGS} kind
+ */
+async function saveRetention(kind) {
+  const { input, update, remove } = RETENTION_SETTINGS[kind]
+  const days = parseDays(input.value)
   if (days === null) {
     showToast({
       message: t('Settings.Privacy Settings.Invalid History Retention Days'),
@@ -857,9 +892,9 @@ async function saveHistoryRetention() {
     return
   }
 
-  historyRetentionDaysInput.value = days
-  await store.dispatch('updateHistoryRetentionDays', days)
-  if (days !== '') await store.dispatch('removeHistoryOlderThan', days)
+  input.value = days
+  await store.dispatch(update, days)
+  if (days !== '') await store.dispatch(remove, days)
   await compactAndRefresh()
   showToast({
     message: t('Settings.Privacy Settings.History Retention Saved'),
