@@ -581,6 +581,9 @@ const subscriptionInfo = computed(() => {
 
 const isSubscribed = computed(() => subscriptionInfo.value !== null)
 
+// The main profile holds every subscription, even ones the active profile lacks.
+const savedHandle = computed(() => store.getters.getSubscribedChannelsById.get(id.value)?.handle ?? null)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSubscribedInAnyProfile = computed(() => {
   return store.getters.getSubscribedChannelIdSet.has(id.value)
@@ -965,7 +968,7 @@ async function getChannelLocal() {
     channelVerified.value = parsedHeader.authorVerified
     channelVerifiedArtist.value = parsedHeader.authorVerifiedArtist
     thumbnailUrl.value = channelThumbnailUrl
-    channelHandle.value = parsedHeader.handle ?? subscriptionInfo.value?.handle ?? null
+    channelHandle.value = parsedHeader.handle ?? savedHandle.value
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
     isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
@@ -1251,7 +1254,7 @@ async function getChannelInfoInvidious() {
     const thumbnail = response.authorThumbnails.at(-1)?.url ?? null
     thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail)
     // Invidious channel responses have no handle.
-    channelHandle.value = subscriptionInfo.value?.handle ?? null
+    channelHandle.value = savedHandle.value
     updateChannelDetails({ channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
     links.value = []
@@ -2793,7 +2796,7 @@ function setErrorMessage(message, responseHasNameAndThumbnail = false) {
     thumbnailUrl.value = subscriptionInfo.value?.thumbnail
   }
 
-  channelHandle.value = subscriptionInfo.value?.handle ?? null
+  channelHandle.value = savedHandle.value
   bannerUrl.value = null
   subCount.value = null
   channelVerified.value = false

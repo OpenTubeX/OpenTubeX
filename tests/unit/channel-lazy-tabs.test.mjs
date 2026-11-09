@@ -60,6 +60,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     channelTabs,
     subscriptionInfo: ref(null),
     channelHandle: ref(null),
+    savedHandle: ref(null),
     currentInvidiousInstanceUrl: ref('https://invidious.test'),
     hideChannelHome: ref(false),
     hideChannelShorts: ref(false),
