@@ -358,6 +358,13 @@ test('removes a queued video that a click opens in the default external player',
     await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
   }, { executable, capturedArguments })
 
+  // Canceling the argument confirmation keeps the queued video.
+  await answerNextMessageBox(app, 0)
+  await queue.locator('.queueItem a.title').filter({ hasText: 'External player video' }).click()
+  await expect(page.locator('.toast .message', { hasText: 'Did not open mpv' })).toBeVisible()
+  await expect(queue.locator('.queueItem h3')).toHaveText(['External player video', 'Next queued video'])
+  expect(await page.evaluate(() => window.$store.getters.getHistoryCacheById.externalQ01?.isWatched ?? false)).toBe(false)
+
   await answerNextMessageBox(app, 1)
   await queue.locator('.queueItem a.title').filter({ hasText: 'External player video' }).click()
   await expect.poll(async () => {

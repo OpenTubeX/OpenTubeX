@@ -6,7 +6,7 @@ import { settings } from '../datastores/handlers/base'
 import { createMainTranslator } from './mainTranslator'
 import { EXTERNAL_PLAYER_APPROVED_ARGS_SETTING } from './settingWriteGuard'
 import { isOpenTubeXUrl } from './utils'
-import { IpcChannels, UnsupportedPlayerActions } from '../constants'
+import { UnsupportedPlayerActions } from '../constants'
 
 /**
  * @typedef ExternalPlayerPayload
@@ -40,19 +40,28 @@ const ID_REGEX = /^[\w-]+$/
 const externalPlayerCmdArgs = new Map()
 
 /**
- * @param {import('electron').IpcMainEvent} event
+ * @typedef ExternalPlayerResult
+ * @property {string} externalPlayer
+ * @property {import('../constants').UnsupportedPlayerAction[]} unsupportedActions
+ * @property {boolean} isPlaylist
+ * @property {'opened' | 'failed' | 'cancelled'} status
+ */
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
  * @param {ExternalPlayerPayload} payload
+ * @returns {Promise<ExternalPlayerResult | null>} null when nothing was requested
  */
 export async function handleOpenInExternalPlayer(event, payload) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
-    return
+    return null
   }
 
   const hasValidVideoId = typeof payload.videoId === 'string' && payload.videoId.length === 11 && ID_REGEX.test(payload.videoId)
   const hasValidPlaylistId = typeof payload.playlistId === 'string' && payload.playlistId.length > 2 && ID_REGEX.test(payload.playlistId)
 
   if (!hasValidVideoId && !hasValidPlaylistId) {
-    return
+    return null
   }
 
   /** @type {string} */
@@ -60,7 +69,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
 
   // External player setting not set or set to "none"
   if (externalPlayer === '') {
-    return
+    return null
   }
 
   if (externalPlayerCmdArgs.size === 0) {
@@ -70,7 +79,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
   const cmdArgs = externalPlayerCmdArgs.get(externalPlayer)
 
   if (cmdArgs === undefined) {
-    return
+    return null
   }
 
   const args = []
@@ -86,7 +95,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
   const customArgs = parseCustomArguments((await settings._findOne('externalPlayerCustomArgs'))?.value)
   if (customArgs === null) {
     console.error('Invalid external player arguments')
-    return
+    return null
   }
 
   if (customArgs.length > 0) {
@@ -190,10 +199,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
   const executable = externalPlayerExecutable.length > 0 ? externalPlayerExecutable : cmdArgs.defaultExecutable
 
   if (!await confirmCustomArguments(event.sender, externalPlayer, executable, customArgs)) {
-    if (!event.sender.isDestroyed()) {
-      event.reply(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, externalPlayer, [], hasValidPlaylistId, false, true)
-    }
-    return
+    return { externalPlayer, unsupportedActions: [], isPlaylist: hasValidPlaylistId, status: 'cancelled' }
   }
 
   let launchFailed = false
@@ -210,15 +216,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
     launchFailed = true
   }
 
-  if (event.sender.isDestroyed()) return
-
-  event.reply(
-    IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-    externalPlayer,
-    unsupportedActions,
-    hasValidPlaylistId,
-    launchFailed
-  )
+  return { externalPlayer, unsupportedActions, isPlaylist: hasValidPlaylistId, status: launchFailed ? 'failed' : 'opened' }
 }
 
 /**

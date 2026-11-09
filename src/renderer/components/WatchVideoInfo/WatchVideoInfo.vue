@@ -399,7 +399,7 @@ import store from '../../store'
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
-import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
+import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
@@ -1077,7 +1077,7 @@ function handleExternalPlayer() {
   }
 
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.openInExternalPlayer(payload)
+    openInExternalPlayer(payload)
   }
 }
 

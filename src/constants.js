@@ -196,7 +196,6 @@ const IpcChannels = {
   WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT: 'wait-for-ip-block-recovery-script',
 
   OPEN_IN_EXTERNAL_PLAYER: 'open-in-external-player',
-  OPEN_IN_EXTERNAL_PLAYER_RESULT: 'open-in-external-player-result',
   DLNA_DISCOVER: 'dlna-discover',
   DLNA_START: 'dlna-start',
   DLNA_STOP: 'dlna-stop',

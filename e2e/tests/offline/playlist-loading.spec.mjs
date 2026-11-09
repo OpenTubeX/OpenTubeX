@@ -612,8 +612,11 @@ test.describe('YouTube playlist search', () => {
   test('numbers search results like the playlist when a members-only video is hidden', async ({ app, page }) => {
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.__externalLaunches = []
-      ipcMain.removeAllListeners('open-in-external-player')
-      ipcMain.on('open-in-external-player', (event, payload) => globalThis.__externalLaunches.push(payload.playlistIndex))
+      ipcMain.removeHandler('open-in-external-player')
+      ipcMain.handle('open-in-external-player', (event, payload) => {
+        globalThis.__externalLaunches.push(payload.playlistIndex)
+        return null
+      })
     })
     await page.evaluate(() => window.$store.dispatch('updateExternalPlayer', 'mpv'))
     await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({

@@ -574,6 +574,7 @@ import {
   getShortThumbnailUrl,
   getVideoThumbnailUrl,
   openExternalLink,
+  openInExternalPlayer as openExternalPlayer,
   openInternalPath,
   isUnloadedBackgroundTabClick,
   shareLink,
@@ -2113,8 +2114,7 @@ async function handleWatchPageLinkClick(event) {
 
   if (externalPlayerIsDefaultViewingMode.value) {
     event?.preventDefault()
-    if (plainLeftClick) emit('open-video')
-    openInExternalPlayer()
+    if (await openInExternalPlayer() && plainLeftClick) emit('open-video')
     return
   }
 
@@ -2269,7 +2269,11 @@ function handleExternalPlayer() {
   openInExternalPlayer()
 }
 
-function openInExternalPlayer() {
+/**
+ * Marks the video as watched only once the player has started.
+ * @returns {Promise<boolean>} whether the player started
+ */
+async function openInExternalPlayer() {
   emit('pause-player')
 
   const payload = {
@@ -2293,13 +2297,14 @@ function openInExternalPlayer() {
     })
   }
 
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.openInExternalPlayer(payload)
+  if (!process.env.IS_ELECTRON || !await openExternalPlayer(payload)) {
+    return false
   }
 
   if (rememberHistory.value && canMarkAsWatched.value) {
     markAsWatched()
   }
+  return true
 }
 
 /**

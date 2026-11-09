@@ -2741,8 +2741,13 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, (event, payload) => {
-    handleOpenInExternalPlayer(event, payload).catch(error => console.error('Could not open the external player', error))
+  ipcMain.handle(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, async (event, payload) => {
+    try {
+      return await handleOpenInExternalPlayer(event, payload)
+    } catch (error) {
+      console.error('Could not open the external player', error)
+      return null
+    }
   })
   /** The API server the user configured, which may run on a private network */
   async function getConfiguredApiServerUrl() {

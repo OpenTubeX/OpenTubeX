@@ -11,8 +11,8 @@ const settingValues = new Map()
 /** @type {object[]} */
 const messageBoxes = []
 let messageBoxResponse = 1
-const [{ handleOpenInExternalPlayer }, { IpcChannels }] = await importWithStubs(
-  [sourceUrl('src/main/externalPlayer.js'), sourceUrl('src/constants.js')],
+const [{ handleOpenInExternalPlayer }] = await importWithStubs(
+  [sourceUrl('src/main/externalPlayer.js')],
   {
     electron: {
       BrowserWindow: { fromWebContents: () => null },
@@ -37,14 +37,14 @@ const [{ handleOpenInExternalPlayer }, { IpcChannels }] = await importWithStubs(
 )
 
 function createEvent() {
-  const replies = []
   return {
-    replies,
     senderFrame: { url: 'app://bundle/index.html' },
     sender: { isFocused: () => true, isDestroyed: () => false },
-    reply: (channel, ...args) => replies.push([channel, ...args]),
   }
 }
+
+/** @param {'opened' | 'failed' | 'cancelled'} status */
+const result = (status, externalPlayer = 'mpv') => ({ externalPlayer, unsupportedActions: [], isPlaylist: false, status })
 
 test('a missing external player executable is reported instead of crashing the main process', async () => {
   settingValues.set('externalPlayer', 'mpv')
@@ -53,13 +53,12 @@ test('a missing external player executable is reported instead of crashing the m
   const onUncaught = error => uncaught.push(error)
   process.prependListener('uncaughtException', onUncaught)
   try {
-    const event = createEvent()
-    await handleOpenInExternalPlayer(event, { videoId: 'dQw4w9WgXcQ' })
+    const launched = await handleOpenInExternalPlayer(createEvent(), { videoId: 'dQw4w9WgXcQ' })
     // A spawn error is emitted on a later tick
     await new Promise(resolve => setImmediate(resolve))
 
     assert.deepEqual(uncaught, [])
-    assert.deepEqual(event.replies, [[IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, 'mpv', [], false, true]])
+    assert.deepEqual(launched, result('failed'))
   } finally {
     process.removeListener('uncaughtException', onUncaught)
   }
@@ -70,10 +69,7 @@ test('a started external player is reported as opening', async () => {
   settingValues.set('externalPlayerExecutable', process.execPath)
   settingValues.set('externalPlayerCustomArgs', JSON.stringify(['--eval', '']))
   try {
-    const event = createEvent()
-    await handleOpenInExternalPlayer(event, { videoId: 'dQw4w9WgXcQ' })
-
-    assert.deepEqual(event.replies, [[IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, 'mpv', [], false, false]])
+    assert.deepEqual(await handleOpenInExternalPlayer(createEvent(), { videoId: 'dQw4w9WgXcQ' }), result('opened'))
   } finally {
     settingValues.delete('externalPlayerCustomArgs')
   }
@@ -85,22 +81,19 @@ test('custom arguments run only after the user approves them for that player', a
   settingValues.set('externalPlayerCustomArgs', JSON.stringify(['--eval', '']))
   settingValues.delete('externalPlayerApprovedArgs')
   messageBoxes.length = 0
-  const launch = async () => {
-    const event = createEvent()
-    await handleOpenInExternalPlayer(event, { videoId: 'dQw4w9WgXcQ' })
-    return event.replies
-  }
+  const launch = () => handleOpenInExternalPlayer(createEvent(), { videoId: 'dQw4w9WgXcQ' })
   try {
     messageBoxResponse = 0
-    assert.deepEqual(await launch(), [[IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, 'mpv', [], false, false, true]])
+    // The renderer marks the video watched and removes it from the queue only once it opened.
+    assert.deepEqual(await launch(), result('cancelled'))
     assert.equal(messageBoxes.length, 1)
     // The dialog shows the program and each argument exactly.
     assert.match(messageBoxes[0].detail, new RegExp(`^${process.execPath.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')}\n"--eval"\n""\n`))
     assert.equal(settingValues.has('externalPlayerApprovedArgs'), false)
 
     messageBoxResponse = 1
-    assert.deepEqual(await launch(), [[IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, 'mpv', [], false, false]])
-    assert.deepEqual(await launch(), [[IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, 'mpv', [], false, false]])
+    assert.deepEqual(await launch(), result('opened'))
+    assert.deepEqual(await launch(), result('opened'))
     assert.equal(messageBoxes.length, 2)
 
     // Another player or changed arguments need a new approval.

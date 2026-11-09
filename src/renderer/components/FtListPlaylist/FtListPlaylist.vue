@@ -151,7 +151,7 @@ import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import store from '../../store/index'
 
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
-import { copyToClipboard, openInternalPath, showToast } from '../../helpers/utils'
+import { copyToClipboard, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -484,7 +484,7 @@ const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
 function handleExternalPlayer() {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.openInExternalPlayer({
+    openInExternalPlayer({
       playlistId: playlistMetadata.value.playlistId,
       playbackRate: defaultPlayback.value,
     })

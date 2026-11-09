@@ -422,9 +422,10 @@ test.describe('local video commands', () => {
     test(`honors external-player viewing mode for ${source} results`, async ({ app, page }) => {
       await app.electronApp.evaluate(({ ipcMain }) => {
         globalThis.__paletteExternalLaunches = []
-        ipcMain.removeAllListeners('open-in-external-player')
-        ipcMain.on('open-in-external-player', (event, payload) => {
+        ipcMain.removeHandler('open-in-external-player')
+        ipcMain.handle('open-in-external-player', (event, payload) => {
           globalThis.__paletteExternalLaunches.push(payload)
+          return { externalPlayer: 'mpv', unsupportedActions: [], isPlaylist: false, status: 'opened' }
         })
       })
       await page.evaluate(async video => {

@@ -539,12 +539,13 @@ export default {
 
   /**
    * @param {import('../main/externalPlayer').ExternalPlayerPayload} payload
+   * @returns {Promise<import('../main/externalPlayer').ExternalPlayerResult | null>}
    */
   openInExternalPlayer: (payload) => {
     // require the user to have interacted with the page recently
-    if (navigator.userActivation.isActive) {
-      ipcRenderer.send(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, payload)
-    }
+    return navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, payload)
+      : Promise.resolve(null)
   },
 
   dlna: {
@@ -562,22 +563,6 @@ export default {
 
   chromecast: createCastInterface('google'),
   fcast: createCastInterface('fcast'),
-
-  /**
-   * @param {(
-   *   externalPlayer: string,
-   *   unsuportedActions: (import('../constants').UnsupportedPlayerAction)[],
-   *   isPlaylist: boolean,
-   *   launchFailed: boolean,
-   *   cancelled: boolean
-   * ) => void} handler
-   */
-  handleOpenInExternalPlayerResult: (handler) => {
-    ipcRenderer.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-      (event, externalPlayer, unsupportedActions, isPlaylist, launchFailed, cancelled = false) => {
-        handler(externalPlayer, unsupportedActions, isPlaylist, launchFailed, cancelled)
-      })
-  },
 
   /**
    * @param {import('../main/ytDlp').YtDlpDownloadPayload} payload

@@ -713,7 +713,7 @@ import {
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
-import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showToast } from './helpers/utils'
+import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import { showInAppNotification } from './helpers/notificationHistory'
@@ -2651,21 +2651,21 @@ function navigateFromCommandPalette(location) {
   return router.push(location)
 }
 
-function playLibraryVideoFromCommandPalette(video, location) {
+async function playLibraryVideoFromCommandPalette(video, location) {
   if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
     return navigateFromCommandPalette(location)
   }
   const history = store.getters.getHistoryCacheById[video.videoId]
   const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
   tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
-  window.ftElectron.openInExternalPlayer({
+  const opened = await openInExternalPlayer({
     videoId: video.videoId,
     // Palette results have no position within a remote playlist.
     playlistId: null,
     startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
     playbackRate: store.getters.getDefaultPlayback,
   })
-  if (store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+  if (opened && store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
     store.dispatch('updateHistory', {
       ...video,
       ...history,
