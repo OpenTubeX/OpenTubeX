@@ -140,7 +140,7 @@
 <script setup>
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -155,8 +155,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useTabToast } from '../../composables/useTabToast'
 import { getLocalTrending } from '../../helpers/api/local'
-import { KeyboardShortcuts } from '../../../constants'
-import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const { t } = useI18n()
@@ -336,33 +335,7 @@ function changeTab(tab) {
   }
 }
 
-/**
- * @param {KeyboardEvent} event the keyboard event
- */
-function keyboardShortcutHandler(event) {
-  if (document.activeElement.classList.contains('ft-input')) {
-    return
-  }
-
-  // Avoid handling events due to user holding a key (not released)
-  // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
-  if (event.repeat) { return }
-
-  if (
-    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
-    !isLoading.value[currentTab.value]
-  ) {
-    getTrendingInfo(true)
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
-})
+useFeedRefreshShortcut(() => !isLoading.value[currentTab.value], () => getTrendingInfo(true))
 </script>
 
 <style scoped src="./Trending.css" />
