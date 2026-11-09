@@ -361,8 +361,16 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
   // Fetch hides the network error behind a TypeError. A redirect loop, for
   // example, would otherwise be retried like a lost connection.
   const fetch = async (input, init) => {
+    // During an outage, the HTTP cache could answer a read without the
+    // network. Revalidate it with the server, so its success proves that the
+    // internet is reachable again.
+    if (appRecovery?.state === 'offline' && ['GET', 'HEAD'].includes((init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase()) &&
+      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default') {
+      init = { ...init, cache: 'no-cache' }
+    }
+    let response
     try {
-      return await nativeFetch(input, init)
+      response = await nativeFetch(input, init)
     } catch (error) {
       if (getRequestError && error?.name === 'TypeError') {
         let requestError = null
@@ -373,6 +381,10 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
       }
       throw error
     }
+    try {
+      if (confirmsInternetReachability(input, init, false)) appRecovery?.confirmInternetReachable()
+    } catch {}
+    return response
   }
   const probe = createInternetProbe(nativeFetch)
   let requestLocalPermission = true
@@ -419,18 +431,13 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
   })
   window.fetch = async (input, init) => {
     if (networkRecoveryBypasses === 0) return recoveringFetch(input, init)
-    let response
     try {
-      response = await fetch(input, init)
+      // Bypassed requests still show that the internet is reachable.
+      return await fetch(input, init)
     } catch (error) {
       // The caller retries on its own, but an outage must still be noticed.
       if (classifyRequestFailure(error) === 'network') appRecovery?.checkConnection().catch(() => {})
       throw error
     }
-    // Bypassed requests still show that the internet is reachable.
-    try {
-      if (confirmsInternetReachability(input, init, false)) appRecovery?.confirmInternetReachable()
-    } catch {}
-    return response
   }
 }
