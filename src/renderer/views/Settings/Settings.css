@@ -286,6 +286,23 @@
   padding-inline: 20px;
 }
 
+.settingsSectionTabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(var(--settings-section-tab-count), minmax(0, 1fr));
+  container-type: inline-size;
+}
+
+/* Three or more labels beside their icons wrap awkwardly in narrow windows. */
+@container (max-width: 600px) {
+  .settingsSectionTab:nth-last-child(n + 3),
+  .settingsSectionTab:nth-last-child(n + 3) ~ .settingsSectionTab {
+    flex-direction: column;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+}
+
 .settingsContent {
   flex: 1 1 auto;
   container-name: settings-content;

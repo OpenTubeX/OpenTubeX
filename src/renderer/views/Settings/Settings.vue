@@ -266,11 +266,42 @@
             class="settingsContentPane"
           >
             <div
-              v-show="activeSectionTabs[activeSettingsSection?.type] !== undefined"
-              :id="contentHeaderTargetId"
+              v-if="activeSettingsSection?.tabs"
               ref="settingsContentHeaderRef"
               class="settingsContentHeader"
-            />
+            >
+              <FtTabs
+                class="settingsSectionTabs"
+                :style="{ '--settings-section-tab-count': activeSettingsSection.tabs.length }"
+                variant="segmented"
+                :aria-label="activeSettingsSection.title"
+              >
+                <button
+                  v-for="(tab, index) in activeSettingsSection.tabs"
+                  :id="`${sectionTabIdPrefix}-${tab.id}`"
+                  :key="tab.id"
+                  type="button"
+                  class="settingsSectionTab"
+                  :class="{ selected: activeSectionTab === tab.id }"
+                  role="tab"
+                  :aria-controls="sectionTabPanelId"
+                  :aria-selected="activeSectionTab === tab.id"
+                  :tabindex="activeSectionTab === tab.id ? 0 : -1"
+                  :data-settings-tab="tab.id"
+                  @click="activateSectionTab(tab.id)"
+                  @keydown.left.prevent="activateSectionTab(activeSettingsSection.tabs.at(index - 1).id, true)"
+                  @keydown.right.prevent="activateSectionTab(activeSettingsSection.tabs[(index + 1) % activeSettingsSection.tabs.length].id, true)"
+                  @keydown.home.prevent="activateSectionTab(activeSettingsSection.tabs[0].id, true)"
+                  @keydown.end.prevent="activateSectionTab(activeSettingsSection.tabs.at(-1).id, true)"
+                >
+                  <FtIcon
+                    :icon="tab.icon"
+                    aria-hidden="true"
+                  />
+                  {{ tab.label }}
+                </button>
+              </FtTabs>
+            </div>
             <div
               ref="settingsContentRef"
               v-overlay-scrollbars
@@ -285,12 +316,13 @@
               <component
                 :is="activeSettingsSection.component"
                 v-if="activeSettingsSection"
-                ref="activeSettingsSectionRef"
+                :id="activeSettingsSection.tabs ? sectionTabPanelId : undefined"
                 :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
-                :initial-tab="activeSectionTabs[activeSettingsSection.type]"
+                :active-tab="activeSectionTab"
                 class="section"
                 :data-section="activeSettingsSection.type"
-                @update:active-tab="activeSectionTabs[activeSettingsSection.type] = $event"
+                :role="activeSettingsSection.tabs ? 'tabpanel' : undefined"
+                :aria-labelledby="activeSettingsSection.tabs ? `${sectionTabIdPrefix}-${activeSectionTab}` : undefined"
               />
               <div
                 v-else-if="settingsSearchQuery !== ''"
@@ -367,6 +399,7 @@
 
 <script setup>
 import FtInput from '../../components/FtInput/FtInput.vue'
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { useRootClass } from '../../helpers/rootClasses'
 import { FtIcon } from '@opentubex/icons'
@@ -507,11 +540,8 @@ const LEGACY_SETTINGS_SECTION_TABS = {
   distraction: 'distraction',
   'parental-control': 'parental'
 }
-const activeSectionTabs = ref({
-  data: 'data',
-  focus: 'distraction',
-  ...sectionTabFor(store.getters.getSettingsWindowSection)
-})
+/** @type {import('vue').Ref<Record<string, string>>} */
+const activeSectionTabs = ref(sectionTabFor(store.getters.getSettingsWindowSection) ?? {})
 const settingsSearchQuery = ref('')
 const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
@@ -520,7 +550,6 @@ const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentHeaderRef = useTemplateRef('settingsContentHeaderRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
 const settingsSubpageContentRef = useTemplateRef('settingsSubpageContentRef')
-const activeSettingsSectionRef = useTemplateRef('activeSettingsSectionRef')
 const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
 const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
 const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
@@ -529,7 +558,8 @@ const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
-const contentHeaderTargetId = `settings-content-header-${useId().replaceAll(':', '')}`
+const sectionTabIdPrefix = `settings-section-tab-${useId().replaceAll(':', '')}`
+const sectionTabPanelId = `${sectionTabIdPrefix}-panel`
 const subpageTitle = ref('')
 const subpageIcon = ref(null)
 const subpageFlush = ref(false)
@@ -644,7 +674,24 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Focus'),
     description: t('Settings.Categories.Focus Description'),
     icon: ['fas', 'bullseye'],
-    component: FocusSection
+    component: FocusSection,
+    tabs: [
+      {
+        id: 'distraction',
+        label: t('Settings.Distraction Free Settings.Distraction Free Settings'),
+        icon: ['fas', 'eye-slash']
+      },
+      {
+        id: 'wellbeing',
+        label: t('Settings.Distraction Free Settings.Sections.Digital Wellbeing'),
+        icon: ['fas', 'heart']
+      },
+      {
+        id: 'parental',
+        label: t('Settings.Parental Control Settings.Parental Control Settings'),
+        icon: ['fas', 'shield-halved']
+      }
+    ]
   },
   {
     type: 'privacy',
@@ -659,7 +706,19 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Data Settings.Data And Storage'),
     description: t('Settings.Categories.Data And Storage Description'),
     icon: ['fas', 'box-archive'],
-    component: DataSection
+    component: DataSection,
+    tabs: [
+      {
+        id: 'data',
+        label: t('Settings.Data Settings.Data Settings'),
+        icon: ['fas', 'layer-group']
+      },
+      {
+        id: 'storage',
+        label: t('Settings.Storage Settings.Storage'),
+        icon: ['fas', 'database']
+      }
+    ]
   },
   {
     type: 'sync',
@@ -735,6 +794,10 @@ const filteredSettingsSectionComponents = computed(() => {
 const activeSettingsSection = computed(() => {
   return settingsSectionComponents.value.find(({ type }) => type === activeSection.value) ?? null
 })
+const activeSectionTab = computed(() => {
+  const section = activeSettingsSection.value
+  return section?.tabs ? activeSectionTabs.value[section.type] ?? section.tabs[0].id : undefined
+})
 const currentSectionTitle = computed(() => {
   if (isKeyboardShortcutPromptOpen.value) {
     return t('KeyboardShortcutPrompt.Keyboard Shortcuts')
@@ -793,7 +856,6 @@ provide(settingsSubpageKey, {
   isActive: computed(() => store.getters.getSettingsWindowOpen && (unlocked.value || isStandaloneViewOpen.value)),
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
-  contentHeaderTargetId,
   open(title, close, icon = null, flush = false) {
     subpageTitle.value = title
     subpageIcon.value = icon
@@ -901,15 +963,12 @@ watch([
   if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
   handledSectionRequest = request
   const { section } = request
-  const sectionTab = sectionTabFor(section)
-  Object.assign(activeSectionTabs.value, sectionTab)
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
   if (settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)) {
     navigateToSection(normalizedSection)
   }
-  if (sectionTab) {
-    await nextTick()
-    await activeSettingsSectionRef.value?.activateTab(LEGACY_SETTINGS_SECTION_TABS[section])
+  if (LEGACY_SETTINGS_SECTION_TABS[section]) {
+    await activateSectionTab(LEGACY_SETTINGS_SECTION_TABS[section])
   }
   if (request.subpage) {
     await nextTick()
@@ -1156,12 +1215,29 @@ function navigateToSection(sectionType) {
       'settingsCompactSlideForward'
     )
     nextTick(() => {
-      const selectedTab = activeSectionTabs.value[sectionType] !== undefined
-        ? settingsContentHeaderRef.value?.querySelector('[role="tab"][aria-selected="true"]')
-        : null
+      const selectedTab = settingsContentHeaderRef.value?.querySelector('[role="tab"][aria-selected="true"]')
       const focusTarget = selectedTab ?? settingsContentRef.value
       focusTarget?.focus({ preventScroll: true })
     })
+  }
+}
+
+/**
+ * @param {string} tab
+ * @param {boolean} [focus]
+ */
+async function activateSectionTab(tab, focus = false) {
+  const section = activeSettingsSection.value
+  if (!section?.tabs?.some(({ id }) => id === tab)) return
+  const changed = activeSectionTab.value !== tab
+  activeSectionTabs.value[section.type] = tab
+  await nextTick()
+
+  if (focus) {
+    settingsContentHeaderRef.value?.querySelector(`[data-settings-tab="${tab}"]`)?.focus()
+  }
+  if (changed && settingsContentRef.value) {
+    restoreOverlayScrollTop(settingsContentRef.value, 0)
   }
 }
 
@@ -1216,7 +1292,7 @@ async function openSearchResult(sectionType, match) {
   const normalizedLabel = normalizeSearchText(label.trim())
   const searchTab = findSettingsSearchTab(match)
   if (searchTab) {
-    await activeSettingsSectionRef.value?.activateTab(searchTab)
+    await activateSectionTab(searchTab)
     await nextTick()
   }
 

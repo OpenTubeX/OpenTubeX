@@ -28,7 +28,6 @@ h2 {
   justify-content: center;
   gap: 16px;
   max-inline-size: 1000px;
-  margin-block: 0 10px;
   margin-inline: auto;
 }
 
@@ -85,6 +84,9 @@ h2 {
   inline-size: 85%;
   margin-block: 0 15px;
   margin-inline: auto;
+
+  /* The settings window hides the card heading, so pad the profiles evenly. */
+  padding-block: 16px;
 }
 
 @media only screen and (width <= 680px) {
