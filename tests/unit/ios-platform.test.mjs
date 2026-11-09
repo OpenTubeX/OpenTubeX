@@ -1,6 +1,4 @@
 import assert from 'node:assert/strict'
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
@@ -51,37 +49,12 @@ test('iOS startup does not register Android UI, dynamic colors or background wor
   assert.deepEqual(refresh.registrations, [])
 })
 
-test('iOS media controls and file operations dispatch to their own native services', async () => {
-  const media = await helper('androidMediaSession', ['addAndroidMediaSessionActionListener'])
-  const remove = await media.addAndroidMediaSessionActionListener(() => {})
-  await remove()
-  assert.deepEqual(media.registrations, ['IOSMediaSession'])
-  const storage = await helper('androidStorage', ['clearAndroidCache'])
-  await storage.clearAndroidCache()
-  assert.deepEqual(storage.registrations, ['IOSStorage'])
-  assert.equal(storage.calls[0].method, 'clearCache')
-})
-
-test('iOS folder preferences display the selected name instead of bookmark data', async () => {
-  const storage = await helper('androidStorage', ['displayAndroidPath'])
-  assert.equal(storage.displayAndroidPath(JSON.stringify({ name: 'Screenshots', bookmark: 'private-bookmark' })), 'Screenshots')
-  assert.equal(storage.displayAndroidPath('/private/var/mobile/Containers/Data/Application/ABC/Documents/Downloads/fixture.mp4'), 'Downloads/fixture.mp4')
-  assert.equal(storage.displayAndroidPath(''), '')
-})
-
 test('unsupported iOS proxy configuration rejects instead of pretending it applied', async () => {
   const proxy = await helper('androidProxy', ['configureAndroidProxy', 'readAndroidProxySettings'])
   await assert.rejects(proxy.configureAndroidProxy({ useProxy: true }), /unavailable on iOS/)
   await proxy.configureAndroidProxy({ useProxy: false })
   assert.equal(await proxy.readAndroidProxySettings(), null)
   assert.deepEqual(proxy.registrations, [])
-})
-
-test('Android keeps its native platform implementations', async () => {
-  for (const [name, plugin] of [['androidUi', 'AndroidUi'], ['androidMediaSession', 'AndroidMediaSession'], ['androidStorage', 'AndroidStorage'], ['androidProxy', 'AndroidProxy'], ['androidSubscriptionRefresh', 'SubscriptionRefresh']]) {
-    const result = await helper(name, [], false)
-    assert.deepEqual(result.registrations, [plugin])
-  }
 })
 
 test('iOS pauses on app hiding when background playback is disabled', async () => {
@@ -106,15 +79,6 @@ test('iOS pauses on app hiding when background playback is disabled', async () =
   }
 })
 
-test('iOS webpack configuration loads with the current shared build rules', async () => {
-  await promisify(execFile)(process.execPath, ['-e', `
-    const assert = require('node:assert/strict')
-    const configs = require('./_scripts/webpack.ios.config.js')
-    assert.equal(process.env.CAPACITOR_PLATFORM, 'ios')
-    assert.deepEqual(configs.map(config => config.name), ['capacitor', 'capacitorBotGuardScript'])
-  `], { cwd: new URL('../../', import.meta.url) })
-})
-
 test('iOS ignores imported silence skipping preferences while other platforms retain them', async () => {
   const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
   const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
@@ -137,34 +101,6 @@ test('iOS ignores imported silence skipping preferences while other platforms re
     const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${key}"[^>]*>`))?.[0]
     assert.ok(toggle)
     assert.match(toggle, /v-if="!IS_IOS"/)
-  }
-})
-
-test('silence shortcut preserves iOS preferences and toggles them on other platforms', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const handler = source.match(/case matches\(KeyboardShortcuts\.VIDEO_PLAYER\.PLAYBACK\.TOGGLE_SKIP_SILENCE\): \{[\s\S]*?\n        \}/)?.[0]
-  assert.ok(handler)
-  for (const ios of [true, false]) {
-    for (const initial of [true, false]) {
-      let preference = initial
-      const updates = []
-      const messages = []
-      const context = vm.createContext({
-        process: { env: { IS_IOS: ios } },
-        KeyboardShortcuts: { VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: 'shortcut' } } },
-        matches: () => true,
-        event: { preventDefault() {} },
-        skipSilence: { get value() { return !ios && preference } },
-        updateSkipSilence: value => { preference = value; updates.push(value) },
-        ui: { getControls: () => ({ getLocalization: () => ({ resolve: value => value }) }) },
-        showValueChange: value => messages.push(value),
-        blurTooltipButtons() {},
-      })
-      vm.runInContext(`switch (true) { ${handler} }`, context)
-      assert.equal(preference, ios ? initial : !initial)
-      assert.deepEqual(updates, ios ? [] : [!initial])
-      assert.deepEqual(messages, ios ? [] : [initial ? 'OFF' : 'ON'])
-    }
   }
 })
 

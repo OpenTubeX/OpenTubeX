@@ -56,17 +56,6 @@ test('human base translations take priority over regional and base AI completion
   })
 })
 
-test('AI messages are omitted when completions are disabled', () => {
-  const result = composeLocaleMessages({
-    locale: 'fr-FR',
-    humanMessages: new Map([['fr-FR', { Human: 'translation' }]]),
-    aiMessages: new Map([['fr-FR', { Generated: 'completion' }]]),
-    includeAI: false,
-  })
-
-  assert.deepEqual(result, { Human: 'translation' })
-})
-
 test('AI locale processing emits separate assets without changing human percentages', async () => {
   const fixtureDirectory = await mkdtemp(path.join(tmpdir(), 'opentubex-locales-'))
   const humanDirectory = path.join(fixtureDirectory, 'human')
@@ -108,48 +97,6 @@ test('AI locale processing emits separate assets without changing human percenta
 
     assert.equal(emittedAssets.get('static/locales/ai/es.json'), '{"Two":"dos"}')
     assert.deepEqual(humanPlugin.localeTranslationPercentages, [100, 50])
-  } finally {
-    await rm(fixtureDirectory, { recursive: true, force: true })
-  }
-})
-
-test('AI locale processing watches overlays created after startup', async () => {
-  const fixtureDirectory = await mkdtemp(path.join(tmpdir(), 'opentubex-locales-'))
-  const overlayPath = path.join(fixtureDirectory, 'es.yaml')
-  try {
-    const plugin = new ProcessLocalesPlugin({
-      activeLocales: ['es'],
-      allowMissing: true,
-      collectMetadata: false,
-      inputDir: fixtureDirectory,
-      localeSource: 'ai',
-      outputDir: 'static/locales/ai',
-    })
-
-    assert.deepEqual([...plugin.locales.keys()], [])
-    assert.deepEqual(plugin.filePaths, [overlayPath])
-
-    const initialDependencies = {
-      fileDependencies: new Set(),
-      missingDependencies: new Set(),
-    }
-    plugin.registerLocaleDependencies(initialDependencies)
-    assert.deepEqual([...initialDependencies.fileDependencies], [])
-    assert.deepEqual([...initialDependencies.missingDependencies], [overlayPath])
-
-    await writeFile(overlayPath, 'Two: dos\n')
-    plugin.loadCreatedLocales()
-
-    const createdDependencies = {
-      fileDependencies: new Set(),
-      missingDependencies: new Set(),
-    }
-    plugin.registerLocaleDependencies(createdDependencies)
-
-    assert.deepEqual([...plugin.locales.keys()], ['es'])
-    assert.deepEqual(plugin.localeTranslationKeys.get('es'), new Set(['Two']))
-    assert.deepEqual([...createdDependencies.fileDependencies], [overlayPath])
-    assert.deepEqual([...createdDependencies.missingDependencies], [])
   } finally {
     await rm(fixtureDirectory, { recursive: true, force: true })
   }

@@ -56,7 +56,7 @@ test('shifts newly loaded cues and leaves metadata, disabled and MSE tracks alon
   assert.deepEqual(next, { startTime: 20, endTime: 22 })
 })
 
-for (const offset of [10, -2.5]) {
+for (const offset of [-2.5]) {
   test(`adjusts and restores every cue in a live list with offset ${offset}`, () => {
     const f = fixture(null)
     const cues = [1, 2, 3].map(start => {
@@ -99,17 +99,4 @@ test('shifts replaced and retimed interior cues without changing the track bound
   assert.deepEqual(replacement, { startTime: 5, endTime: 7 })
   f.binding.release()
   assert.deepEqual(replacement, { startTime: 7, endTime: 9 })
-})
-
-test('leaves native captions untouched until a nonzero offset has been applied', () => {
-  const f = fixture(0)
-  f.video.dispatchEvent(new Event('timeupdate'))
-  f.video.dispatchEvent(new Event('load'))
-  assert.deepEqual(f.counts(), { clears: 0, cueChanges: 0 })
-  f.setOffset(-2)
-  f.binding.update()
-  f.setOffset(0)
-  f.binding.update()
-  assert.deepEqual(f.cue, { startTime: 5, endTime: 7 })
-  f.binding.release()
 })

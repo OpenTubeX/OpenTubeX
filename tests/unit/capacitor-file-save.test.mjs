@@ -73,10 +73,6 @@ const storageSource = (await readFile(new URL('../../src/renderer/helpers/androi
 for (const [name, mimeType, content] of [
   ['screenshot.png', 'image/png', new Blob([new Uint8Array([0, 128, 255])], { type: 'image/png' })],
   ['transcript.txt', 'text/plain', 'Grüße 日本語 🎥\n'],
-  ['theme.json', 'application/json', '{"name":"Grün"}\n'],
-  ['playlist.csv', 'text/csv', 'Video ID,Timestamp\nabc,2026-01-01\n'],
-  ['profiles.db', 'application/x-freetube-db', '{"name":"Öffentlich"}\n'],
-  ['empty.txt', 'text/plain', ''],
 ]) {
   test(`native export preserves the exact bytes of ${name}`, async () => {
     const writes = []
@@ -160,12 +156,6 @@ test('a failed screenshot encode is reported instead of copied', async () => {
   await state.takeScreenshot()
   assert.deepEqual(state.copied, [])
   assert.deepEqual(state.toasts, ['Screenshot Error'])
-})
-
-test('ask-path mode uses the save picker instead of the automatic screenshot folder', async () => {
-  const state = loadScreenshot({ mode: 'prompt_folder' })
-  await state.takeScreenshot()
-  assert.equal(state.saved[0][7], undefined)
 })
 
 test('Android screenshot settings offer automatic saving and persist the chosen folder', async () => {

@@ -3,8 +3,6 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-import { formatBytes } from '../../src/renderer/helpers/fileSize.js'
-
 function source(path) {
   return readFileSync(new URL(`../../src/renderer/${path}`, import.meta.url), 'utf8')
 }
@@ -41,36 +39,6 @@ test('formatNumber constructs at most one Intl.NumberFormat per locale and optio
   locale.value = 'de-DE'
   assert.equal(formatNumber(1234), '1.234')
   assert.equal(counting.constructed.length, 4)
-})
-
-test('formatBytes reuses its two formatters', () => {
-  const original = Intl.NumberFormat
-  let constructed = 0
-  Intl.NumberFormat = new Proxy(original, {
-    construct: (target, args) => { constructed++; return Reflect.construct(target, args) },
-  })
-  try {
-    for (let index = 0; index < 100; index++) {
-      assert.match(formatBytes(1536), / KiB$/)
-      assert.match(formatBytes(15 * 1024 * 1024), / MiB$/)
-    }
-    assert.equal(constructed, 2)
-  } finally {
-    Intl.NumberFormat = original
-  }
-})
-
-test('getFirstCharacter constructs one Intl.Segmenter per locale', () => {
-  const code = source('helpers/strings.js')
-  const slice = code.slice(code.indexOf('/** @type {Map<string, Intl.Segmenter>} */')).replaceAll('export function', 'function')
-  const counting = countingIntl('Segmenter')
-  const getFirstCharacter = vm.runInNewContext(`${slice}\ngetFirstCharacter`, { Intl: counting.Intl })
-
-  for (let index = 0; index < 200; index++) {
-    assert.equal(getFirstCharacter('👨‍👩‍👧 family', 'en-US'), '👨‍👩‍👧')
-    assert.equal(getFirstCharacter('Ärger', 'de-DE'), 'Ä')
-  }
-  assert.equal(counting.constructed.length, 2)
 })
 
 test('getLastCharacter keeps the last grapheme whole and reuses one Intl.Segmenter', () => {

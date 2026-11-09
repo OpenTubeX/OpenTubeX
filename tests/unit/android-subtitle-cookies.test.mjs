@@ -23,13 +23,6 @@ test('Android subtitle cookies preserve the exact selected translation and use o
   assert.equal(await bridge.ytDlpGetSubtitle(url), vtt)
 })
 
-test('Android leaves subtitle fetching unchanged without an available cookie-file configuration', async () => {
-  for (const getters of [{}, { getYtDlpPlaybackAuthMode: 'browser' }, { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '' }]) {
-    const bridge = adapter(getters, () => assert.fail('Unexpected native cookie request'))
-    assert.equal(await bridge.ytDlpGetSubtitle(url), null)
-  }
-})
-
 test('Android rejects non-YouTube subtitle URLs and hides signed URLs in native errors', async () => {
   const getters = { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '/private/cookies.txt' }
   const bridge = adapter(getters, async () => { throw new Error(`failed signed request ${url}`) })

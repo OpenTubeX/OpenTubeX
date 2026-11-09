@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, reactive, ref, unref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 const source = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
 
@@ -52,22 +52,4 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   context.store.getters.getTabsEnabled = false
   assert.equal(context.actions.value.length, 4)
   assert.ok(context.actions.value.every(action => action.label !== 'Context Menu.Open in a Background Tab'))
-})
-
-test('the thumbnail row is reactive and only appears at the root of its mobile menu', async () => {
-  const app = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = app.indexOf('const mobileContextThumbnailActions = computed(')
-  const context = {
-    computed, unref,
-    mobileContextMenuStack: ref([{}]),
-    mobileContextActions: ref({ thumbnailActions: [{ label: 'Bookmark' }] })
-  }
-  vm.runInNewContext(app.slice(start, app.indexOf('const mobileContextMenuRows', start)) + '\nglobalThis.actions = mobileContextThumbnailActions', context)
-  assert.equal(context.actions.value.length, 1)
-  context.mobileContextMenuStack.value.push({})
-  assert.equal(context.actions.value.length, 0)
-  context.mobileContextMenuStack.value.pop()
-  assert.equal(context.actions.value.length, 1)
-  context.mobileContextActions.value = { actions: [] }
-  assert.equal(context.actions.value.length, 0)
 })

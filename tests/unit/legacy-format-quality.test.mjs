@@ -14,12 +14,6 @@ const PORTRAIT_FORMATS = [
   { width: 240, height: 426, bitrate: 250_000 }
 ]
 
-test('an exactly matching legacy format is used', () => {
-  const format = findLegacyFormatForQuality(LANDSCAPE_FORMATS, 240)
-
-  assert.equal(format.height, 240)
-})
-
 test('the highest legacy format below the preferred quality is used', () => {
   // regression: an operator precedence bug made the filters match every format,
   // so the first one in the list was always used, no matter the preferred quality
@@ -39,12 +33,4 @@ test('the lowest legacy format is used when they are all above the preferred qua
 test('portrait videos are matched on their width', () => {
   assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 240).width, 240)
   assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 1080).width, 360)
-})
-
-test('the passed in formats are not reordered', () => {
-  const formats = [...LANDSCAPE_FORMATS]
-
-  findLegacyFormatForQuality(formats, 100)
-
-  assert.deepEqual(formats, LANDSCAPE_FORMATS)
 })

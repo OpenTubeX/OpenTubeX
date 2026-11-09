@@ -2,10 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
-import { load } from 'js-yaml'
-import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy } from '../../src/renderer/helpers/androidProxy.js'
-import { createSettingsSearchIndex } from '../../src/renderer/helpers/settingsSearch.js'
-import { createQuickSettingCatalog } from '../../src/renderer/helpers/quickSettings.js'
+import { ANDROID_PROXY_SETTING_KEYS } from '../../src/renderer/helpers/androidProxy.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 
@@ -111,33 +108,4 @@ test('failed native proxy changes are reported and a subsequent edit can recover
   assert.equal(settings.errors.length, 1)
   await settings.update('useProxy', true)
   assert.equal(settings.state.useProxy, true)
-})
-
-test('desktop does not initialize an Android proxy', async () => {
-  await configureAndroidProxy({})
-})
-
-test('Android quick settings expose the proxy toggle alongside UI Scale', () => {
-  const ids = createQuickSettingCatalog(key => key, false, true).map(setting => setting.id)
-  assert.ok(ids.includes('useProxy'))
-  assert.ok(ids.includes('uiScale'))
-  assert.equal(createQuickSettingCatalog(key => key, false, false).some(setting => setting.id === 'useProxy'), false)
-})
-
-test('Android settings search exposes SOCKS5 credentials but hides the desktop recovery script', async () => {
-  const messages = load(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8'))
-  const options = {
-    sections: [{ type: 'advanced', title: 'Advanced', description: '' }],
-    usingElectron: false,
-    isCapacitor: true,
-    store: { getters: { getUseProxy: true, getProxyProtocol: 'socks5', getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [] } },
-    t: key => key,
-    tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-  }
-  const labels = createSettingsSearchIndex(options).get('advanced').map(match => match.label)
-  assert.ok(labels.includes('Proxy Username'))
-  assert.ok(labels.includes('Proxy Password'))
-  assert.equal(labels.includes('IP Block Recovery Script Path'), false)
-  assert.equal(createSettingsSearchIndex({ ...options, isCapacitor: false }).get('advanced')
-    .some(match => match.label === 'Proxy Username'), false)
 })

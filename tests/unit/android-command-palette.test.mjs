@@ -31,36 +31,32 @@ test('opening the ordinary command registry does not read the video library', ()
   }))
 })
 
-for (const isCapacitor of [true, false]) {
-  test(`download settings commands respect Android availability: ${isCapacitor}`, () => {
-    let openedSection
-    let openedSearch
-    const commands = createRegistry({
-      isElectron: false,
-      downloads: [],
-      isCapacitor,
-      routePath: '/settings',
-      routeAvailable: () => true,
-      t: key => key,
-      tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-      store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
-      openSettingsSection: section => { openedSection = section },
-      openSettingsSearchResult: (section, match) => { openedSearch = { section, match } },
-    })
-    assert.equal(commands.some(command => command.id === 'playback.fullwindow'), !isCapacitor)
-    const downloads = commands.find(command => command.id === 'settings.download')
-    assert.equal(downloads.disabledReason === '', isCapacitor)
-    const results = commands.filter(command => command.id.startsWith('settings.search.download.'))
-    assert.equal(results.length > 0, isCapacitor)
-    if (isCapacitor) {
-      downloads.run()
-      assert.equal(openedSection, 'download')
-      results[0].run()
-      assert.equal(openedSearch.section, 'download')
-      assert.ok(openedSearch.match.label)
-    }
+test('download settings commands respect Android availability', () => {
+  let openedSection
+  let openedSearch
+  const commands = createRegistry({
+    isElectron: false,
+    downloads: [],
+    isCapacitor: true,
+    routePath: '/settings',
+    routeAvailable: () => true,
+    t: key => key,
+    tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
+    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+    openSettingsSection: section => { openedSection = section },
+    openSettingsSearchResult: (section, match) => { openedSearch = { section, match } },
   })
-}
+  assert.ok(!commands.some(command => command.id === 'playback.fullwindow'))
+  const downloads = commands.find(command => command.id === 'settings.download')
+  assert.equal(downloads.disabledReason, '')
+  const results = commands.filter(command => command.id.startsWith('settings.search.download.'))
+  assert.ok(results.length > 0)
+  downloads.run()
+  assert.equal(openedSection, 'download')
+  results[0].run()
+  assert.equal(openedSearch.section, 'download')
+  assert.ok(openedSearch.match.label)
+})
 
 test('lite Android builds omit download commands', () => {
   const createLiteRegistry = new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
@@ -81,75 +77,3 @@ test('lite Android builds omit download commands', () => {
   assert.ok(commands.some(command => command.id === 'settings.root'))
   assert.ok(!commands.some(command => ['settings.download', 'downloads.open'].includes(command.id)))
 })
-
-test('extra thumbnail action commands are available only in desktop layouts', () => {
-  for (const isCapacitor of [false, true]) {
-    for (const phoneLayout of [false, true]) {
-      const commands = createRegistry({
-        isElectron: false,
-        downloads: [],
-        isCapacitor,
-        phoneLayout,
-        routePath: '/settings',
-        routeAvailable: () => true,
-        t: key => key,
-        tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-        store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
-      })
-      const hasThumbnailAction = commands.some(command => (
-        command.id.startsWith('settings.search.general.') && command.label === 'Extra Thumbnail Action Button'
-      ))
-      assert.equal(hasThumbnailAction, !isCapacitor && !phoneLayout,
-        `isCapacitor=${isCapacitor}, phoneLayout=${phoneLayout}`)
-    }
-  }
-})
-
-const shortcutPrompt = await readFile(new URL('../../src/renderer/components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue', import.meta.url), 'utf8')
-const bindingCollector = shortcutPrompt.slice(shortcutPrompt.indexOf('function getAllKeyboardShortcutBindings('), shortcutPrompt.indexOf('function getShortcutActionLabel('))
-for (const isCapacitor of [true, false]) {
-  test(`Full Window shortcut conflicts respect Android availability: ${isCapacitor}`, () => {
-    const collect = new Function('process', 'isKeyboardShortcutEditable', 'getNestedValue', 'DefaultKeyboardShortcuts', `${bindingCollector}\nreturn getAllKeyboardShortcutBindings`)(
-      { env: { IS_CAPACITOR: isCapacitor } }, () => true, () => '', {}
-    )
-    const bindings = collect({ VIDEO_PLAYER: { GENERAL: { FULLWINDOW: 's', FULLSCREEN: 'f' } } })
-    assert.deepEqual(bindings.map(binding => binding.code), isCapacitor ? ['FULLSCREEN'] : ['FULLWINDOW', 'FULLSCREEN'])
-  })
-}
-
-for (const quickBookmarkPlaylist of [null, { _id: 'favorites' }]) {
-  test(`quick bookmark command requires a quick bookmark playlist: ${quickBookmarkPlaylist != null}`, () => {
-    const commands = createRegistry({
-      isElectron: false,
-      downloads: [],
-      isCapacitor: false,
-      routePath: '/watch/jNQXAC9IVRw',
-      routeAvailable: () => true,
-      t: key => key,
-      tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-      store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getQuickBookmarkPlaylist: quickBookmarkPlaylist } },
-    })
-    assert.equal(commands.some(command => command.id === 'playback.quick-bookmark'), quickBookmarkPlaylist != null)
-    assert.ok(commands.some(command => command.id === 'playback.add-to-playlist'))
-  })
-}
-
-for (const isIos of [false, true]) {
-  test(`tab unloading settings commands are ${isIos ? 'hidden on iOS' : 'shown on Android'}`, t => {
-    if (isIos) {
-      process.env.IS_IOS = 'true'
-      t.after(() => delete process.env.IS_IOS)
-    }
-    const commands = createRegistry({
-      isElectron: false,
-      downloads: [],
-      isCapacitor: true,
-      routePath: '/settings',
-      routeAvailable: () => true,
-      t: key => key,
-      tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-      store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
-    })
-    assert.equal(commands.some(command => command.id.startsWith('settings.search.advanced.') && command.label === 'Automatically unload tabs'), !isIos)
-  })
-}

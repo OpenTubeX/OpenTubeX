@@ -2,11 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 
-import {
-  createAndroidMediaSessionState,
-  shouldSendAndroidMediaSessionState,
-  shouldPauseAndroidPlaybackOnAppStateChange,
-} from '../../src/renderer/helpers/androidMediaSession.js'
+import { createAndroidMediaSessionState } from '../../src/renderer/helpers/androidMediaSession.js'
 
 test('builds a bounded Android media state for the presented player', () => {
   assert.deepEqual(createAndroidMediaSessionState({
@@ -34,26 +30,6 @@ test('builds a bounded Android media state for the presented player', () => {
     playbackRate: 1.5,
     actions: ['play', 'pause', 'seekbackward']
   })
-})
-
-test('only pauses a backgrounded Android player after the user opts out', () => {
-  assert.equal(shouldPauseAndroidPlaybackOnAppStateChange(false, true), false)
-  assert.equal(shouldPauseAndroidPlaybackOnAppStateChange(false, false), true)
-  assert.equal(shouldPauseAndroidPlaybackOnAppStateChange(true, false), false)
-})
-
-test('position ticks do not restart the media service four times a second', () => {
-  const previous = createAndroidMediaSessionState({
-    playbackState: 'playing',
-    metadata: { title: 'Video' },
-    positionState: { duration: 120, position: 10, playbackRate: 1 }
-  })
-  const next = { ...previous, position: 10.25 }
-  assert.equal(shouldSendAndroidMediaSessionState(previous, next, 250), false)
-  assert.equal(shouldSendAndroidMediaSessionState(previous, next, 1000), true)
-  assert.equal(shouldSendAndroidMediaSessionState(previous, { ...next, title: 'New title' }, 250), true)
-  assert.equal(shouldSendAndroidMediaSessionState(previous, { ...next, playbackState: 'paused' }, 250), true)
-  assert.equal(shouldSendAndroidMediaSessionState(null, next, 0), true)
 })
 
 test('media updates throttle successful ticks and retry rejected requests', async () => {

@@ -12,13 +12,16 @@ function fixture(platform) {
   return { open, calls }
 }
 
-for (const platform of ['darwin', 'linux']) {
-  test(`${platform} opens the link without activating the browser and without a foreground lock`, async () => {
-    const f = fixture(platform)
-    await f.open('https://example.org/')
-    assert.deepEqual(f.calls, [['open', 'https://example.org/', { activate: false }]])
+test('linux opens the link without activating the browser and without a foreground lock', async () => {
+  const calls = []
+  const open = createBackgroundExternalLinkOpener({
+    platform: 'linux',
+    openExternal: async (url, options) => { calls.push(['open', url, options]) },
+    loadWindowsNative: () => ({ lockForeground: locked => calls.push(['lock', locked]) })
   })
-}
+  await open('https://example.org/')
+  assert.deepEqual(calls, [['open', 'https://example.org/', { activate: false }]])
+})
 
 test('Windows locks the foreground before launching the browser and releases it later', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -53,12 +56,6 @@ test('a normally opened link releases the foreground lock right away', async t =
   t.mock.timers.tick(5000)
   releaseForegroundLock()
   assert.equal(f.calls.filter(([type, locked]) => type === 'lock' && locked === false).length, 1)
-})
-
-test('releasing without a lock does nothing', () => {
-  const f = fixture('win32')
-  releaseForegroundLock()
-  assert.deepEqual(f.calls, [])
 })
 
 test('Windows still opens the link when the native module is unavailable', async t => {

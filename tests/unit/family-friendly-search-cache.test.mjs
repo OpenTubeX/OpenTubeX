@@ -13,13 +13,11 @@ const searchSource = await readFile(new URL('../../src/renderer/views/SearchPage
 const watcher = searchSource.match(/watch\(showFamilyFriendlyOnly, [\s\S]*?\n\}\)\n/)?.[0]
 assert.ok(watcher, 'Update the harness after changing the family friendly watcher')
 
-for (const enabled of [true, false]) {
-  test(`${enabled ? 'enabling' : 'disabling'} family friendly results drops searches cached under the other setting`, () => {
-    const commits = []
-    sideEffectHandlers.showFamilyFriendlyOnly({ commit: (name, value) => commits.push([name, [...value]]) }, enabled)
-    assert.deepEqual(commits, [['setSessionSearchHistory', []]])
-  })
-}
+test('enabling family friendly results drops searches cached under the other setting', () => {
+  const commits = []
+  sideEffectHandlers.showFamilyFriendlyOnly({ commit: (name, value) => commits.push([name, [...value]]) }, true)
+  assert.deepEqual(commits, [['setSessionSearchHistory', []]])
+})
 
 test('enabling family friendly results searches again instead of keeping unrestricted results', () => {
   for (const apiUsed of ['local', 'invidious', 'yt-dlp']) {

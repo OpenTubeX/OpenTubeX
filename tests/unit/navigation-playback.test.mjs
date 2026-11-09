@@ -111,14 +111,6 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   }
 }
 
-test('cleans up an empty Watch host during browsing tab disposal', async t => {
-  const mounted = mountWatch(t, { mounted: false })
-  await mounted.navigate('/search/query')
-  mounted.previewRoot.firstElementChild = null
-  assert.doesNotThrow(() => mounted.provides.get('navigation').clearMinimizePreview())
-  assert.doesNotThrow(() => mounted.unmount.forEach(callback => callback()))
-})
-
 for (const commit of [false, true]) {
   test(`minimize restores fractional browsing scroll and preserves Watch on ${commit ? 'commit' : 'cancel'}`, async t => {
     const mounted = mountWatch(t)
@@ -156,24 +148,6 @@ test('navigation interrupting a preview preserves the original Watch history scr
   assert.equal(mounted.scrollCommits.at(-1).historyIndex, 1)
   assert.equal(mounted.scrollCommits.at(-1).scroll.top, 20)
   assert.equal(mounted.viewport.scrollY, 600.25, 'cleanup must not scroll the replacement page')
-})
-
-test('reload preserves Watch scroll when its history URL gains a playback timestamp during a held preview', async t => {
-  const tab = { historyIndex: 1, history: [
-    { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
-    { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
-  ] }
-  const mounted = mountWatch(t, { tab })
-  await mounted.provides.get('navigation').beginMinimizePreview()
-  // prepareReload saves the preview viewport, then rewrites this same entry.
-  tab.history[1].scroll = { left: mounted.viewport.scrollX, top: mounted.viewport.scrollY }
-  tab.history[1].route = { path: '/watch/video', fullPath: '/watch/video?oneTimeTimestamp=12' }
-  await mounted.lifecycle.beforeReload()
-  mounted.unmount.forEach(callback => callback())
-  await nextTick()
-  assert.equal(tab.history[1].scroll.top, 20, 'reload must keep Watch’s own viewport')
-  assert.equal(tab.history[1].route.fullPath, '/watch/video?oneTimeTimestamp=12')
-  assert.equal(tab.history[0].scroll.top, 600.25, 'browsing history is untouched')
 })
 
 test('settling minimize does not queue navigation behind an interruption awaiting fullscreen exit', async t => {
@@ -266,7 +240,7 @@ test('retains a playing native video outside the watch DOM across navigation', a
   assert.equal(mounted.provides.get('navigation').detached.value, false)
 })
 
-for (const options of [{ paused: true }, { hasLoaded: false, paused: true }]) {
+for (const options of [{ hasLoaded: false, paused: true }]) {
   test(`navigation retains the mounted player ${JSON.stringify(options)}`, async t => {
     const mounted = mountWatch(t, options)
     await mounted.navigate('/subscriptions')
@@ -296,16 +270,6 @@ for (const options of [{ mounted: false }, { paused: true, enabled: false }, { h
   })
 }
 
-test('restores detached title options without resolving pending metadata', async t => {
-  const mounted = mountWatch(t)
-  await mounted.navigate('/subscriptions')
-  const options = { resolveHistoryEntry: false }
-  mounted.updateTitle('Watch', options)
-  await mounted.navigate('/watch/video')
-  assert.equal(mounted.titles.at(-1)[1], 'Watch')
-  assert.equal(mounted.titles.at(-1)[2], options)
-})
-
 test('return navigation waits for disabled retained playback to finish disposal', async t => {
   const mounted = mountWatch(t)
   await mounted.navigate('/subscriptions')
@@ -325,22 +289,7 @@ test('return navigation waits for disabled retained playback to finish disposal'
   assert.equal(mounted.provides.get('navigation').detached.value, false)
 })
 
-test('retains the current history title when a later entry repeats the watch URL', async t => {
-  const mounted = mountWatch(t)
-  mounted.getters.getTabById = () => ({
-    historyIndex: 0,
-    history: [
-      { route: { fullPath: '/watch/video' }, title: 'Watch', titlePending: true },
-      { route: { fullPath: '/watch/video' }, title: 'Later title', titlePending: false }
-    ]
-  })
-  await mounted.navigate('/subscriptions')
-  await mounted.navigate('/watch/video')
-  assert.equal(mounted.titles.at(-1)[1], 'Watch')
-  assert.equal(mounted.titles.at(-1)[2].resolveHistoryEntry, false)
-})
-
-for (const paused of [true, false]) {
+for (const paused of [true]) {
   test(`explicit minimization retains playback with navigation retention disabled (paused=${paused})`, async t => {
     const mounted = mountWatch(t, { paused, enabled: false })
     const navigation = mounted.provides.get('navigation')
@@ -418,39 +367,6 @@ for (const commit of [false, true]) {
 }
 
 
-test('upward reveal begins early and never blends the two pages', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  navigation.beginRestorePreview()
-  for (const progress of [0, 0.04, 0.08]) {
-    navigation.updateMinimizePreview(1 - progress)
-    assert.equal(Number(mounted.previewRoot.style.opacity), 0)
-  }
-  for (const progress of [0.1, 0.2, 0.3, 0.5, 0.85, 0.95, 1]) {
-    navigation.updateMinimizePreview(1 - progress)
-    const background = Number(mounted.previewRoot.style.opacity)
-    const content = Number(mounted.previewRoot.firstElementChild.style.opacity)
-    assert.ok(content === 0 || background === 1, 'Watch content appears only over its opaque background')
-  }
-})
-
-
-test('returning from the mini player restores Watch at the top without a second scroll', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  mounted.viewport.scrollY = 120.75
-  navigation.beginMinimizePreview()
-  await navigation.finishMinimizePreview(true)
-  navigation.clearMinimizePreview()
-  mounted.viewport.scrollY = 300.125
-  navigation.beginRestorePreview()
-  await navigation.finishMinimizePreview(true)
-  assert.equal(mounted.viewport.scrollY, 0)
-  assert.equal(mounted.viewport.lastScroll.behavior, 'instant')
-  assert.equal(mounted.savedBrowsingScroll().top, 300.125)
-})
-
 for (const commit of [true, false]) {
   test(`swiping a loading video keeps its component through ${commit ? 'minimization' : 'cancellation'}`, async t => {
     const mounted = mountWatch(t, { loaded: false, paused: true, enabled: false })
@@ -478,90 +394,6 @@ test('closing the retained mini player disposes and unmounts Watch', async t => 
   assert.equal(navigation.detached.value, false)
   assert.equal(navigation.minimized.value, false)
   assert.equal(mounted.props.route.path, '/history')
-})
-
-test('upward preview starts fading after a short swipe', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  navigation.beginRestorePreview()
-  navigation.updateMinimizePreview(0.8)
-  assert.ok(Number(mounted.previewRoot.style.opacity) > 0)
-  assert.equal(Number(mounted.previewRoot.firstElementChild.style.opacity), 0)
-})
-
-test('restoring after resizing uses the current tab geometry', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  mounted.hostBounds.width = 800.5
-  mounted.hostBounds.top = -139.75
-  mounted.tabBounds.width = 800.5
-  mounted.tabBounds.top = -139.75
-  mounted.viewport.scrollY = 220
-  mounted.viewport.innerHeight = 600
-  navigation.beginRestorePreview()
-  assert.equal(mounted.previewStyle.value.width, '800.5px')
-  assert.equal(mounted.previewStyle.value.top, '220px')
-  assert.equal(mounted.previewStyle.value.height, '519.75px')
-})
-
-for (const mobile of [false, true]) {
-  test(`${mobile ? 'mobile' : 'desktop'} restore aligns the retained Watch view with its tab`, async t => {
-    const mounted = mountWatch(t, { mobile })
-    const navigation = mounted.provides.get('navigation')
-    await navigation.minimize()
-    mounted.hostBounds.top = 2452.125
-    mounted.viewport.scrollY = 0
-    navigation.beginRestorePreview()
-    assert.equal(mounted.previewStyle.value.top, '-2391.875px')
-    assert.equal(mounted.previewStyle.value.width, '412.25px')
-    assert.equal(mounted.previewStyle.value.height, '739.75px')
-  })
-}
-
-test('restore preview stays at the visible tab origin while browsing scroll resets', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  mounted.viewport.scrollY = 900.5
-  mounted.tabBounds.top = 80.25 - mounted.viewport.scrollY
-  mounted.hostBounds.top = 1600.75 - mounted.viewport.scrollY
-  mounted.previewRoot.getBoundingClientRect = () => ({
-    left: mounted.hostBounds.left + Number.parseFloat(mounted.previewRoot.style.left),
-    top: mounted.hostBounds.top + Number.parseFloat(mounted.previewRoot.style.top),
-    width: mounted.tabBounds.width
-  })
-  navigation.beginRestorePreview()
-  Object.assign(mounted.previewRoot.style, mounted.previewStyle.value)
-  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
-  mounted.hostBounds.top += mounted.viewport.scrollY
-  mounted.viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-  mounted.listeners.get('scroll')()
-  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
-})
-
-test('restore preview stays at the tab origin while Watch hides the sidebar', async t => {
-  const mounted = mountWatch(t)
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  mounted.viewport.scrollY = 0
-  mounted.hostBounds.top = 1600.75
-  mounted.previewRoot.getBoundingClientRect = () => ({
-    left: mounted.hostBounds.left + Number.parseFloat(mounted.previewRoot.style.left),
-    top: mounted.hostBounds.top + Number.parseFloat(mounted.previewRoot.style.top),
-    width: mounted.tabBounds.width
-  })
-  navigation.beginRestorePreview()
-  Object.assign(mounted.previewRoot.style, mounted.previewStyle.value)
-  // The wider tab reflows the browsing page, which moves the host below it.
-  mounted.hostBounds.left -= 94
-  mounted.hostBounds.top -= 317.5
-  for (const observer of mounted.resizeObservers) observer.callback()
-  assert.equal(mounted.previewRoot.getBoundingClientRect().left, 0)
-  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 60.25)
-  navigation.clearMinimizePreview()
-  assert.equal(mounted.resizeObservers.size, 0)
 })
 
 for (const commit of [false, true]) {

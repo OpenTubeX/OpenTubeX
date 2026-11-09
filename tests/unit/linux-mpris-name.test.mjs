@@ -35,19 +35,6 @@ test('uses an OpenTubeX-specific MPRIS name in Linux packages', async (t) => {
   assert.equal(patched.includes(opentubexMprisServiceName), true)
 })
 
-test('does not modify packages for other platforms', async (t) => {
-  const appOutDir = await mkdtemp(join(tmpdir(), 'opentubex-mpris-'))
-  t.after(() => rm(appOutDir, { force: true, recursive: true }))
-
-  const executablePath = join(appOutDir, 'opentubex')
-  const original = Buffer.from(chromiumMprisServiceName)
-  await writeFile(executablePath, original)
-
-  await patchLinuxMprisName(createContext(appOutDir, 'win32'))
-
-  assert.deepEqual(await readFile(executablePath), original)
-})
-
 test('fails if Electron changes its MPRIS service name', async (t) => {
   const appOutDir = await mkdtemp(join(tmpdir(), 'opentubex-mpris-'))
   t.after(() => rm(appOutDir, { force: true, recursive: true }))

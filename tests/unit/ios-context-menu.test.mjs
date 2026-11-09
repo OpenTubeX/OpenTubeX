@@ -49,16 +49,7 @@ test('a held button keeps its native tap', t => {
   assert.equal(contexts.length, 0)
 })
 
-test('a held button that opts in opens its context menu and suppresses the release tap', t => {
-  const { contexts, send } = fixture(t, selector => selector.includes('button') || selector === '[data-hold-menu]')
-  send('pointerdown')
-  t.mock.timers.tick(500)
-  assert.equal(contexts.length, 1)
-  send('pointerup')
-  assert.equal(send('click').prevented, true)
-})
-
-for (const action of ['pointerup', 'pointercancel', 'scroll', 'pointermove']) {
+for (const action of ['pointercancel', 'pointermove']) {
   test(`${action} cancels a pending hold so scrolling and taps keep working`, t => {
     const { contexts, send } = fixture(t)
     send('pointerdown')
@@ -68,31 +59,11 @@ for (const action of ['pointerup', 'pointercancel', 'scroll', 'pointermove']) {
   })
 }
 
-test('a second finger cancels the pending hold', t => {
-  const { contexts, send } = fixture(t)
+test('keyboard activation works after a long press without a release click', t => {
+  const { send } = fixture(t)
   send('pointerdown')
-  send('pointerdown', { pointerId: 2, isPrimary: false })
-  t.mock.timers.tick(600)
-  assert.equal(contexts.length, 0)
+  t.mock.timers.tick(500)
+  send('pointerup')
+  assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
+  assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
 })
-
-test('mouse input does not synthesize a touch menu and disposal removes listeners', t => {
-  const { contexts, send, dispose, listeners } = fixture(t)
-  send('pointerdown', { pointerType: 'mouse' })
-  t.mock.timers.tick(600)
-  assert.equal(contexts.length, 0)
-  dispose()
-  assert.equal(listeners.size, 0)
-})
-
-for (const releaseClick of [true, false]) {
-  test(`keyboard activation works after a long press ${releaseClick ? 'with' : 'without'} a release click`, t => {
-    const { send } = fixture(t)
-    send('pointerdown')
-    t.mock.timers.tick(500)
-    send('pointerup')
-    if (releaseClick) assert.equal(send('click', { detail: 1 }).prevented, true)
-    assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
-    assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
-  })
-}

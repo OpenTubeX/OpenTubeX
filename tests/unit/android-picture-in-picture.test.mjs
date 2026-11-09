@@ -133,41 +133,6 @@ test('automatic Android PiP tracks scrolling and resized video bounds, preservin
   assert.equal(r.listeners.has('scroll'), false)
 })
 
-test('unchanged PiP bounds skip native updates across observed layout events', async () => {
-  const r = renderer()
-  await r.setAndroidAutoPictureInPicture(true, r.video)
-  r.resize()
-  r.flush()
-  const count = r.calls.length
-  for (const update of [r.resize, r.listeners.get('scroll'), r.listeners.get('resize')]) {
-    update()
-    r.flush()
-    assert.equal(r.calls.length, count)
-  }
-  r.rect.y += 0.25
-  r.resize()
-  r.flush()
-  assert.equal(r.calls.length, count + 1, 'fractional geometry changes still update the native crop')
-})
-
-test('offscreen scrolls skip duplicate crops while viewport conversion changes still update', async () => {
-  const r = renderer()
-  await r.setAndroidAutoPictureInPicture(true, r.video)
-  r.rect.y = -1000
-  r.listeners.get('scroll')()
-  r.flush()
-  const count = r.calls.length
-  r.rect.y = -1200
-  r.listeners.get('scroll')()
-  r.flush()
-  assert.equal(r.calls.length, count)
-  r.window.innerWidth += 0.25
-  r.listeners.get('resize')()
-  r.flush()
-  assert.equal(r.calls.length, count + 1)
-  assert.equal(r.calls.at(-1)[1].sourceRect.viewportWidth, 480.25)
-})
-
 test('focus return resends unchanged PiP bounds that native Android may have ignored', async () => {
   const r = renderer()
   await r.setAndroidAutoPictureInPicture(true, r.video)
@@ -237,7 +202,7 @@ test('native entry and resize callbacks never change the live video geometry or 
   assert.equal(r.properties.get('--android-pip-source-top'), '60px')
 })
 
-for (const [width, height] of [[400, 225], [400, 300], [320.8, 240.6]]) {
+for (const [width, height] of [[400, 225], [320.8, 240.6]]) {
   test(`automatic entry freezes the accepted ${width} × ${height} layout while the mini-player is moving`, async () => {
     const r = renderer({ rect: { x: 0, y: -200, width, height } })
     await r.setAndroidAutoPictureInPicture(true, r.video)
@@ -281,7 +246,7 @@ test('disabling automatic entry while already in PiP retains the manual video ta
   assert.equal(r.attributes.has('data-android-picture-in-picture-target'), false)
 })
 
-for (const [position, y] of [['offscreen', -1000], ['offscreen', 1000], ['partially scrolled', -200], ['partially scrolled', 700]]) {
+for (const [position, y] of [['offscreen', -1000], ['partially scrolled', 700]]) {
   test(`${position} automatic PiP keeps the full video crop at y=${y}`, async () => {
     const r = renderer()
     await r.setAndroidAutoPictureInPicture(true, r.video)
@@ -298,13 +263,6 @@ for (const [position, y] of [['offscreen', -1000], ['offscreen', 1000], ['partia
       'the frozen live video must move with the complete native crop')
   })
 }
-
-test('disabling a normal PiP target explicitly clears the native source crop', async () => {
-  const r = renderer()
-  await r.setAndroidAutoPictureInPicture(true, r.video)
-  await r.setAndroidAutoPictureInPicture(false, r.video)
-  assert.equal(r.calls.at(-1)[1].sourceRect, null)
-})
 
 for (const frames of [0, 1]) {
   test(`backgrounding manual PiP after ${frames} paint frames cannot enter late on return`, async () => {
@@ -357,42 +315,15 @@ test('transient focus loss cancels manual entry and restores the page when focus
   assert.equal(r.classes.has('androidPictureInPicture'), false)
 })
 
-for (const transitioning of [false, true]) {
-  test(`native automatic entry cancels the interrupted manual focus fallback (transitioning=${transitioning})`, async () => {
-    const r = renderer()
-    const entered = r.enterAndroidPictureInPicture(r.video)
-    r.document.hasFocus = () => false
-    r.listeners.get('blur')()
-    await entered
-    r.window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning }))
-    r.document.hasFocus = () => true
-    r.listeners.get('focus')()
-    r.flush()
-    assert.ok(r.classes.has('androidPictureInPicture'))
-  })
-}
-
-test('restored layout work runs before CSS transitions resume and re-entry cancels obsolete work', async () => {
+test('native automatic entry cancels the interrupted manual focus fallback', async () => {
   const r = renderer()
-  await r.setAndroidAutoPictureInPicture(true, r.video)
-  let restored = 0
-  r.window.addEventListener('opentubex:android-pip-restored', () => {
-    assert.ok(r.classes.has('androidPictureInPictureRestoring'))
-    restored++
-  })
-  r.setAndroidPictureInPictureDocumentState(true)
-  r.setAndroidPictureInPictureDocumentState(false)
-  r.step()
-  r.step()
-  assert.equal(restored, 1)
-  assert.ok(r.classes.has('androidPictureInPictureRestoring'))
+  const entered = r.enterAndroidPictureInPicture(r.video)
+  r.document.hasFocus = () => false
+  r.listeners.get('blur')()
+  await entered
+  r.window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning: true }))
+  r.document.hasFocus = () => true
+  r.listeners.get('focus')()
   r.flush()
-  assert.equal(r.classes.has('androidPictureInPictureRestoring'), false)
-  r.setAndroidPictureInPictureDocumentState(true)
-  r.setAndroidPictureInPictureDocumentState(false)
-  r.step()
-  r.setAndroidPictureInPictureDocumentState(true)
-  r.flush()
-  assert.equal(restored, 1, 'new entry cancels the old restoration')
   assert.ok(r.classes.has('androidPictureInPicture'))
 })

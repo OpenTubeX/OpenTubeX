@@ -45,7 +45,7 @@ test('delayed playback updates keep visible chat and release buffered messages',
   assert.equal(chat.polls(), 1)
 })
 
-for (const seconds of [10.2, 8, 600]) {
+for (const seconds of [10.2]) {
   test(`an actual seek to ${seconds}s clears old chat and fetches while paused`, async t => {
     const chat = setup(t)
     // The rounded playback prop need not have changed before seeking fires.

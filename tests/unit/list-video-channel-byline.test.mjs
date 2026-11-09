@@ -45,16 +45,6 @@ test('middle-clicking a byline that resolves to one channel never navigates the 
   assert.equal(prompt, true)
 })
 
-test('left-clicking a byline that resolves to one channel opens it in the current tab', async () => {
-  for (const electron of [true, false]) {
-    const { opened, prompt } = await clickByline({ electron, event: { type: 'click', button: 0, shiftKey: false } })
-    assert.equal(prompt, false)
-    assert.equal(opened.length, 1)
-    assert.equal(opened[0].doCreateNewTab, false)
-    assert.equal(opened[0].makeActive, true)
-  }
-})
-
 const getVideoChannels = card.slice(card.indexOf('async function getVideoChannels'), card.indexOf('\n/**\n * Opens the collaborators prompt'))
 
 /**

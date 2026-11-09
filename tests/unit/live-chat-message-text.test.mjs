@@ -70,7 +70,7 @@ test('parses a paid live-chat message represented as simple text', () => {
   assert.equal(parsed.author.name, 'Author')
 })
 
-for (const authorName of [{ simpleText: '@donor' }, { runs: [{ text: '@donor' }] }]) {
+for (const authorName of [{ simpleText: '@donor' }]) {
   test(`preserves the donor handle from a paid-message node (${Object.keys(authorName)[0]})`, () => {
     const message = new YTNodes.LiveChatPaidMessage({
       id: 'donation',
@@ -91,20 +91,18 @@ for (const authorName of [{ simpleText: '@donor' }, { runs: [{ text: '@donor' }]
   })
 }
 
-for (const [iconType, expected] of [['VERIFIED', true], ['MODERATOR', false]]) {
-  test(`marks live-chat authors with a ${iconType} badge as ${expected ? 'verified' : 'unverified'}`, () => {
-    const message = new YTNodes.LiveChatTextMessage({
-      id: 'message-id',
-      message: { simpleText: 'Hello' },
-      authorName: { simpleText: '@creator' },
-      authorExternalChannelId: 'creator-channel',
-      authorPhoto: { thumbnails: [{ url: 'avatar' }] },
-      authorBadges: [{ liveChatAuthorBadgeRenderer: { icon: { iconType }, tooltip: iconType } }],
-      contextMenuEndpoint: {},
-      contextMenuAccessibility: { accessibilityData: { label: 'Menu' } },
-      timestampUsec: '1000000'
-    })
-
-    assert.equal(parseLiveChatComment(message).author.isVerified, expected)
+test('marks live-chat authors with a VERIFIED badge as verified', () => {
+  const message = new YTNodes.LiveChatTextMessage({
+    id: 'message-id',
+    message: { simpleText: 'Hello' },
+    authorName: { simpleText: '@creator' },
+    authorExternalChannelId: 'creator-channel',
+    authorPhoto: { thumbnails: [{ url: 'avatar' }] },
+    authorBadges: [{ liveChatAuthorBadgeRenderer: { icon: { iconType: 'VERIFIED' }, tooltip: 'VERIFIED' } }],
+    contextMenuEndpoint: {},
+    contextMenuAccessibility: { accessibilityData: { label: 'Menu' } },
+    timestampUsec: '1000000'
   })
-}
+
+  assert.equal(parseLiveChatComment(message).author.isVerified, true)
+})

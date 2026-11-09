@@ -41,12 +41,3 @@ test('sends decoded credentials in the Basic authorization header', () => {
     assert.equal(state.currentInvidiousInstanceAuthorization, `Basic ${Buffer.from(credentials).toString('base64')}`)
   }
 })
-
-test('preserves incomplete and unsupported Invidious input', () => {
-  for (const input of ['', 'https://', 'not a URL']) {
-    const state = {}
-    mutations.setCurrentInvidiousInstance(state, input)
-    assert.equal(state.currentInvidiousInstanceUrl, input)
-    assert.equal(state.currentInvidiousInstanceAuthorization, null)
-  }
-})

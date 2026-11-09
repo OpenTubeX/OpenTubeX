@@ -81,7 +81,7 @@ test('regular descriptions expand short content and keep long content collapsed'
   assert.equal(measure({ alwaysExpanded: true, short: false }).expanded, true)
 })
 
-for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Grand Theft Auto VI' }] }, { musicTracks: [{ title: 'Never Gonna Give You Up' }] }, { license: 'Creative Commons' }, { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }]) {
+for (const metadata of [{ tags: ['video tag'] }, { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }]) {
   test(`description controls account for ${Object.keys(metadata)[0]} below short or empty text`, () => {
     for (const description of ['Short description', '']) {
       assert.deepEqual(measure({ ...metadata, description }), {

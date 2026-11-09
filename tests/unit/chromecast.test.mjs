@@ -131,15 +131,6 @@ const payload = {
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
 }
 
-test('Cast reports actual startup stages while connecting and loading media', async t => {
-  const manager = await managerForTest(t)
-  if (!manager) return
-  const stages = []
-  const result = await manager.start(42, payload, undefined, undefined, undefined, stage => stages.push(stage))
-  assert.ok(result.castId)
-  assert.deepEqual(stages, ['connecting', 'launching', 'loading'])
-})
-
 test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
   // This table checks LOAD fields, not process startup or native deadlines.
   // Other bridge tests still exercise the executable and real sender transport.

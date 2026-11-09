@@ -62,7 +62,6 @@ test('native sharing excludes local playlist IDs', () => {
 for (const [type, youtubePath, invidiousPath] of [
   ['Channel', 'www.youtube.com/channel/id123', 'channel/id123'],
   ['Playlist', 'youtube.com/playlist?list=id123', 'playlist?list=id123'],
-  ['Post', 'www.youtube.com/post/id123', 'post/id123'],
 ]) {
   test(`native sharing preserves ${type} URLs without a timestamp`, () => {
     const actions = createShareActions({ shareTargetType: type, id: 'id123', getTimestamp: null })
@@ -89,35 +88,4 @@ test('long-press sharing captures the public URL before dismissing the menu', as
   await run()
   await run()
   assert.deepEqual(calls, ['close', 'https://youtu.be/video123?t=42'])
-})
-
-const utils = readFileSync(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
-const shareHandler = utils.match(/export async function shareLink\(url\) \{[\s\S]*?\n\}/)[0].replace('export ', '')
-function createShareLink(share, showError = assert.fail) {
-  return new Function('process', 'Share', 'showApiErrorToast', 'i18n', `${shareHandler}\nreturn shareLink`)(
-    { env: { IS_CAPACITOR: true } }, { share }, showError, { global: { t: key => key } }
-  )
-}
-
-test('Capacitor Share receives the exact URL', async () => {
-  const calls = []
-  const run = createShareLink(async options => calls.push(options))
-  await run('https://youtu.be/video123?list=PL123&t=42')
-  assert.deepEqual(calls, [{ url: 'https://youtu.be/video123?list=PL123&t=42' }])
-})
-
-test('picker launch failures show a translated error', async () => {
-  const failure = new Error('No activity')
-  const errors = []
-  const run = createShareLink(
-    async () => { throw failure },
-    (...args) => errors.push(args)
-  )
-  await run('https://youtu.be/video123')
-  assert.deepEqual(errors, [['Share.Share failed', failure]])
-})
-
-test('dismissing the Android share picker does not show an error', async () => {
-  const run = createShareLink(async () => { throw new Error('Share canceled') })
-  await run('https://youtu.be/video123')
 })

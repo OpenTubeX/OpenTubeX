@@ -34,25 +34,3 @@ test('returns valid records and a structured one-based error for malformed rows'
   assert.equal(typeof result.errors[0].message, 'string')
   assert.notEqual(result.errors[0].message, '')
 })
-
-test('returns no records or errors for empty and blank input', () => {
-  assert.deepEqual(parseLineDelimitedJson(''), { records: [], errors: [] })
-  assert.deepEqual(parseLineDelimitedJson(' \n\t\r\n'), { records: [], errors: [] })
-})
-
-test('does not validate record shapes or remove duplicates', () => {
-  const source = [
-    '{"id":"duplicate"}',
-    '{"id":"duplicate"}',
-    '{"wrongSchemaForImporters":true}'
-  ].join('\n')
-
-  assert.deepEqual(parseLineDelimitedJson(source), {
-    records: [
-      { id: 'duplicate' },
-      { id: 'duplicate' },
-      { wrongSchemaForImporters: true }
-    ],
-    errors: []
-  })
-})

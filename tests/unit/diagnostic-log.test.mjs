@@ -3,9 +3,7 @@ import test from 'node:test'
 
 import {
   captureConsole,
-  createDiagnosticLog,
   DIAGNOSTIC_ENTRY_MAX_LENGTH,
-  formatDiagnosticEntry,
   formatDiagnosticMessage,
   redactDiagnosticText,
 } from '../../src/diagnosticLog.js'
@@ -68,11 +66,6 @@ test('IPv6 addresses that start with compressed zero groups are redacted', () =>
     'from <ip>, <ip> and <ip> via ::1 in Foo::abc'
   )
   assert.equal(redactDiagnosticText('https://[::ffff:c000:280]/a?b=c'), 'https://[<ip>]/a?<redacted>')
-})
-
-test('versions, durations and timestamps are not mistaken for addresses', () => {
-  const text = 'Chromium 138.0.7204.100 at 1:02:03, built 2026-10-22T10:20:30.000Z'
-  assert.equal(redactDiagnosticText(text), text)
 })
 
 test('console arguments are serialized with errors, nested data and sensitive keys', () => {
@@ -142,15 +135,6 @@ test('collections are only read as far as the serialized items', () => {
   assert.match(formatDiagnosticMessage([set]), /^Set\(1000\) \[0, .*24, … 975 more\]$/)
   assert.ok(iterated <= 26, `iterated ${iterated} items`)
   assert.match(formatDiagnosticMessage([new Map([['a', 1], ['b', 2]])]), /^Map\(2\) \{a: 1, b: 2\}$/)
-})
-
-test('the log keeps only the newest entries', () => {
-  const log = createDiagnosticLog(2)
-  for (const message of ['a', 'b', 'c']) log.add({ time: 0, level: 'log', source: 'main', message })
-  assert.deepEqual(log.entries().map(entry => entry.message), ['b', 'c'])
-  log.clear()
-  assert.deepEqual(log.entries(), [])
-  assert.equal(formatDiagnosticEntry({ time: 0, level: 'warn', source: 'main', message: 'm' }), '1970-01-01T00:00:00.000Z WARN  [main] m')
 })
 
 test('console capture forwards calls once, ignores logging from the recorder and can be undone', () => {

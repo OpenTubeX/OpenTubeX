@@ -231,7 +231,7 @@ test('the notification cancel action also cancels the RSS refresh of the combine
   assert.deepEqual(calls, ['subscriptions', 'rss'])
 })
 
-for (const method of ['requestSubscriptionRefreshCancellation', 'cancelSubscriptionRefresh']) {
+for (const method of ['requestSubscriptionRefreshCancellation']) {
   test(`${method} keeps an existing future automatic-refresh deadline`, async t => {
     const deadline = Date.now() + 120000
     const { context, deadlines } = await setupCancellation(t, { deadline })

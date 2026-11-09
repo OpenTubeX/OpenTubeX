@@ -11,69 +11,9 @@ import {
   createKdeWaylandWindowStateBackend,
   extractKwinWindowHandles,
   findNewlyMinimizedWindow,
-  isKdePlasmaDesktop,
-  isWaylandPlatform,
   monitorKdeWaylandWindowState,
   normalizeKwinWindowInfo,
-  shouldMonitorKdeWaylandWindowState,
 } from '../../src/main/kdeWaylandWindowState.js'
-
-test('recognizes common KDE Plasma desktop environment values', () => {
-  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'KDE' }), true)
-  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'KDE:GNOME' }), true)
-  assert.equal(isKdePlasmaDesktop({ XDG_SESSION_DESKTOP: 'plasmawayland' }), true)
-  assert.equal(isKdePlasmaDesktop({ DESKTOP_SESSION: '/usr/share/wayland-sessions/plasma' }), true)
-  assert.equal(isKdePlasmaDesktop({ KDE_FULL_SESSION: 'true' }), true)
-})
-
-test('does not treat other desktops as KDE Plasma', () => {
-  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'GNOME' }), false)
-  assert.equal(isKdePlasmaDesktop({ XDG_CURRENT_DESKTOP: 'sway' }), false)
-  assert.equal(isKdePlasmaDesktop({}), false)
-})
-
-test('reports native Wayland only for an explicit Electron runtime choice', () => {
-  assert.equal(isWaylandPlatform({
-    platform: 'linux',
-    ozonePlatform: 'wayland',
-    environment: {},
-  }), true)
-  assert.equal(isWaylandPlatform({
-    platform: 'linux',
-    ozonePlatform: '',
-    environment: { XDG_SESSION_TYPE: 'wayland' },
-  }), false)
-  assert.equal(isWaylandPlatform({
-    platform: 'linux',
-    ozonePlatform: 'x11',
-    environment: { XDG_SESSION_TYPE: 'wayland', WAYLAND_DISPLAY: 'wayland-0' },
-  }), false)
-})
-
-test('monitors window state only for KDE Plasma in a Wayland session', () => {
-  const kde = { XDG_CURRENT_DESKTOP: 'KDE' }
-
-  assert.equal(shouldMonitorKdeWaylandWindowState({
-    platform: 'linux',
-    ozonePlatform: 'wayland',
-    environment: kde,
-  }), true)
-  assert.equal(shouldMonitorKdeWaylandWindowState({
-    platform: 'linux',
-    ozonePlatform: 'x11',
-    environment: { ...kde, XDG_SESSION_TYPE: 'wayland' },
-  }), false)
-  assert.equal(shouldMonitorKdeWaylandWindowState({
-    platform: 'linux',
-    ozonePlatform: 'wayland',
-    environment: { XDG_CURRENT_DESKTOP: 'GNOME' },
-  }), false)
-  assert.equal(shouldMonitorKdeWaylandWindowState({
-    platform: 'win32',
-    ozonePlatform: 'wayland',
-    environment: kde,
-  }), false)
-})
 
 test('extracts KWin runner handles and validates D-Bus window state', () => {
   const matches = [

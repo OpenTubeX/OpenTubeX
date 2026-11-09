@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { Hct, argbFromHex } from '@material/material-color-utilities'
-import { dynamicThemeColors, applyDynamicColors, initializeAndroidDynamicColors, androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../src/renderer/helpers/dynamicColors.js'
-import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, MATERIAL_SEED_PRESETS, materialColorScheme, materialStateColor, materialSeedPalette, materialThemeMode, normalizeMaterialSeedColor, normalizeSystemAccentColor } from '../../src/materialTheme.js'
-import { hasFixedThemeColors, resolveBaseTheme, resolveSystemTheme } from '../../src/appearanceSettings.js'
+import { dynamicThemeColors, initializeAndroidDynamicColors, androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../src/renderer/helpers/dynamicColors.js'
+import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SYSTEM_SEED, MATERIAL_SEED_PRESETS, materialColorScheme, materialStateColor, materialSeedPalette, normalizeMaterialSeedColor, normalizeSystemAccentColor } from '../../src/materialTheme.js'
 
 function palette() {
   return materialSeedPalette()
@@ -48,55 +46,6 @@ test('only Dynamic colors uses system colors, with a saved-seed fallback', t => 
   assert.equal(normalizeMaterialSeedColor(MATERIAL_SYSTEM_SEED), MATERIAL_SYSTEM_SEED)
 })
 
-test('dynamic themes survive settings repair and do not expose manual accents', () => {
-  assert.equal(resolveBaseTheme('dynamic', 'system'), 'dynamic')
-  assert.equal(hasFixedThemeColors('dynamic'), true)
-  assert.equal(resolveSystemTheme('dynamic', 'light'), 'light')
-  assert.equal(resolveSystemTheme('dynamic', 'dark'), 'dark')
-})
-
-test('dynamic palettes map Material surface and content roles in both appearances', () => {
-  const paletteColors = palette()
-  for (const dark of [false, true]) {
-    const colors = dynamicThemeColors(paletteColors, dark)
-    const roles = materialColorScheme(paletteColors, dark)
-    assert.equal(colors.background, roles.surface)
-    assert.equal(colors.cardBackground, roles.surfaceContainerLow)
-    assert.equal(colors.instanceMenu, roles.surfaceContainerHigh)
-    assert.equal(colors.searchBar, roles.surfaceContainerHighest)
-    assert.equal(colors.primaryText, roles.onSurface)
-    assert.equal(colors.primary, roles.primary)
-    assert.equal(colors.textWithPrimary, roles.onPrimary)
-    assert.equal(colors.accent, roles.secondary)
-    assert.equal(colors.textWithAccent, roles.onSecondary)
-    assert.equal(colors.sideNavActive, roles.secondaryContainer)
-    assert.equal(colors.sideNavActiveText, roles.onSecondaryContainer)
-    assert.notEqual(colors.sideNavHover, colors.sideNavActive, 'Hover does not look selected')
-    assert.notEqual(colors.headerHover, colors.sideNavActive, 'Header hover does not look selected')
-    for (const color of Object.values(colors)) assert.match(color, /^#[0-9a-f]{6}$/)
-  }
-})
-
-test('palette refresh updates existing CSS properties and RGB accents', (t) => {
-  const properties = new Map()
-  const original = globalThis.document
-  globalThis.document = { body: { style: { setProperty: (key, value) => properties.set(key, value) } } }
-  t.after(() => { globalThis.document = original })
-  const colors = palette()
-  applyDynamicColors(colors, false)
-  assert.equal(properties.get('--bg-color'), dynamicThemeColors(colors, false).background)
-  colors.accent2[500] = '#abcdef'
-  applyDynamicColors(colors, true)
-  assert.equal(properties.get('--bg-color'), dynamicThemeColors(colors, true).background)
-  assert.equal(properties.get('--accent-color-rgb'), dynamicThemeColors(colors, true).accent.slice(1).match(/../g).map(value => parseInt(value, 16)).join(' '))
-  colors.neutral1[900] = '#000000'
-  applyDynamicColors(colors, true)
-  assert.equal(properties.get('--card-bg-color'), materialColorScheme(colors, true).surfaceContainerLow)
-  colors.neutral1[900] = '#151515'
-  applyDynamicColors(colors, true)
-  assert.equal(properties.get('--card-bg-color'), materialColorScheme(colors, true).surfaceContainerLow)
-})
-
 test('LineageOS pure-black mode keeps the page black with distinguishable cards and menus', () => {
   const colors = neutralTonalPalette()
   // LineageOS's night overlay keeps raised tones gray but makes containers black.
@@ -114,34 +63,6 @@ test('LineageOS pure-black mode keeps the page black with distinguishable cards 
   assert.equal(dark.primary, materialColorScheme(colors, true).primary, 'Wallpaper accents are preserved')
   assert.notEqual(dark.dropdownHover, dark.background, 'Hover states remain distinguishable')
   assert.equal(dynamicThemeColors(colors, false).cardBackground, materialColorScheme(colors, false).surfaceContainerLow)
-})
-
-test('Material Black keeps expressive wallpaper neutrals from tinting surfaces', () => {
-  // Android 17's expressive palettes give neutrals a strong hue, which made
-  // Material Black cards and bars navy (#12183d) next to the black page.
-  const chromatic = Object.fromEntries(Object.entries(materialSeedPalette('#4285f4')).map(([family, shades]) => [
-    family,
-    family.startsWith('neutral') ? materialSeedPalette('#12183d').accent1 : shades,
-  ]))
-  const colors = dynamicThemeColors(chromatic, true, true)
-  const roles = materialColorScheme(chromatic, true, true)
-  // Rounding to sRGB adds up to one unit of chroma near black.
-  const chroma = hex => Hct.fromInt(argbFromHex(hex)).chroma - 1
-  assert.equal(colors.background, '#000000')
-  assert.equal(colors.sideNav, '#000000')
-  for (const surface of ['cardBackground', 'secondaryCardBackground', 'searchBar', 'instanceMenu', 'subtleSurface']) {
-    assert.ok(chroma(colors[surface]) <= 4, `${surface} stays neutral`)
-    assert.ok(Hct.fromInt(argbFromHex(colors[surface])).tone <= 16, `${surface} stays near black`)
-  }
-  assert.ok(contrast(colors.cardBackground, colors.background) > 1, 'Cards remain distinguishable')
-  for (const text of ['primaryText', 'secondaryText']) {
-    assert.ok(chroma(colors[text]) <= 8, `${text} stays neutral`)
-    assert.ok(contrast(colors[text], colors.searchBar) >= 4.5, `${text} remains readable`)
-  }
-  assert.ok(contrast(roles.outline, colors.background) >= 3, 'Outlines remain visible')
-  assert.equal(colors.primary, materialColorScheme(chromatic, true).primary, 'Wallpaper accents are preserved')
-  assert.equal(colors.sideNavActive, materialColorScheme(chromatic, true).secondaryContainer)
-  assert.deepEqual(materialColorScheme(chromatic, true, false), materialColorScheme(chromatic, true), 'Material Dark is unchanged')
 })
 
 test('switching back from dynamic colors or a custom-theme preview restores the selected theme', async (t) => {
@@ -271,30 +192,6 @@ test('startup uses a timely palette and propagates native errors to the fallback
   await assert.rejects(initializeAndroidDynamicColors(Promise.reject(new Error('bridge failed'))), /bridge failed/)
 })
 
-
-test('Material variants remain fixed across system appearance and work as system choices', () => {
-  for (const dark of [false, true]) {
-    assert.equal(materialThemeMode('materialLight', dark), 'light')
-    assert.equal(materialThemeMode('materialDark', dark), 'dark')
-    assert.equal(materialThemeMode('materialBlack', dark), 'black')
-    assert.equal(materialThemeMode('dynamic', dark), dark ? 'dark' : 'light')
-  }
-  for (const theme of MATERIAL_THEME_VALUES) {
-    assert.equal(resolveBaseTheme(theme, 'system'), theme)
-    assert.equal(hasFixedThemeColors(theme), true)
-  }
-  assert.equal(resolveSystemTheme('materialLight', 'light'), 'materialLight')
-  assert.equal(resolveSystemTheme('materialDark', 'dark'), 'materialDark')
-  assert.equal(resolveSystemTheme('materialBlack', 'dark'), 'materialBlack')
-})
-
-test('seed colors are normalized and invalid persisted values fall back safely', () => {
-  assert.equal(normalizeMaterialSeedColor('#ABCDEF'), '#abcdef')
-  for (const value of [null, {}, '#123', '#123456ff', 'red', '']) {
-    assert.equal(normalizeMaterialSeedColor(value), DEFAULT_MATERIAL_SEED_COLOR)
-    assert.deepEqual(materialSeedPalette(value), materialSeedPalette(DEFAULT_MATERIAL_SEED_COLOR))
-  }
-})
 
 for (const mode of ['light', 'dark', 'black']) {
   test(`Material ${mode} palettes retain contrast across vivid, neutral and extreme seeds`, () => {

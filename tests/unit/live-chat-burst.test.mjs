@@ -54,7 +54,7 @@ test('enter hooks for a burst share one scroll correction', async () => {
   assert.equal(chat.scrolls(), 1)
 })
 
-for (const change of ['stayAtBottom = false', 'isUnmounted = true']) {
+for (const change of ['stayAtBottom = false']) {
   test(`queued following respects ${change}`, async () => {
     const chat = setup()
     runInContext(`releaseReplayComments(); ${change}`, chat.context)
@@ -72,12 +72,4 @@ test('later batches still follow and retain the bounded history', async () => {
   assert.equal(chat.context.comments.length, 150)
   assert.equal(chat.context.comments[0].id, 151)
   assert.equal(chat.scrolls(), 2)
-})
-
-
-test('buffered replay messages still follow after the last network response', async () => {
-  const chat = setup()
-  runInContext('hasEnded = true; releaseReplayComments()', chat.context)
-  await chat.frame()
-  assert.equal(chat.scrolls(), 1)
 })

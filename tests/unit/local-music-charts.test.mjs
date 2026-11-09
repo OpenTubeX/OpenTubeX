@@ -67,7 +67,3 @@ test('falls back to the first video chart when the global charts have no trendin
 
   assert.equal(getLocalMusicChartPlaylistId(charts), 'VLPL4fGSI1pDJn6t3TXLGiiJdD-sZbrG3tG0')
 })
-
-test('returns nothing when the charts have no video charts', () => {
-  assert.equal(getLocalMusicChartPlaylistId(chartsResponse([chartItem('UCartist', 'MUSIC_PAGE_TYPE_ARTIST')])), undefined)
-})

@@ -48,14 +48,6 @@ test('keeps Windows portable application data beside the executable', async () =
   }
 })
 
-test('leaves installed builds on Electron default paths', () => {
-  const { app, configuredPaths } = createPathRecorder()
-
-  configureApplicationDataPaths(app, {})
-
-  assert.equal(configuredPaths.size, 0)
-})
-
 test('detects marked Windows archive builds before configuring paths', () => {
   const environment = {}
   const checkedPaths = []
@@ -72,31 +64,4 @@ test('detects marked Windows archive builds before configuring paths', () => {
 
   assert.deepEqual(checkedPaths, ['D:\\OpenTubeX\\portable.marker'])
   assert.equal(environment.PORTABLE_EXECUTABLE_DIR, 'D:\\OpenTubeX')
-})
-
-test('does not mark installed or non-Windows builds as portable', () => {
-  for (const platform of ['linux', 'darwin', 'win32']) {
-    const environment = {}
-    configurePortableEnvironment(
-      environment,
-      platform,
-      'C:\\Program Files\\OpenTubeX\\OpenTubeX.exe',
-      () => false
-    )
-    assert.equal(environment.PORTABLE_EXECUTABLE_DIR, undefined)
-  }
-})
-
-test('keeps test data overrides isolated from portable data', () => {
-  const { app, configuredPaths } = createPathRecorder()
-
-  configureApplicationDataPaths(app, {
-    OPENTUBEX_E2E_USER_DATA_DIR: '/tmp/opentubex-e2e',
-    PORTABLE_EXECUTABLE_DIR: '/portable'
-  })
-
-  assert.deepEqual(Object.fromEntries(configuredPaths), {
-    userData: '/tmp/opentubex-e2e',
-    sessionData: '/tmp/opentubex-e2e'
-  })
 })

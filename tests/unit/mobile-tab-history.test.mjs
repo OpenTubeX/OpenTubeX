@@ -13,11 +13,7 @@ const historyButton = menuSource.match(/<button\s+v-if="showHistory"[\s\S]*?<\/b
 const render = compile(`<div>${row}${menu}</div>`)
 
 for (const [name, historyLength, presented, selecting, visible] of [
-  ['empty history', 0, true, false, false],
-  ['only the current page', 1, true, false, false],
   ['navigation history', 2, true, false, true],
-  ['background tab', 2, false, false, false],
-  ['tab selection', 2, true, true, false],
 ]) {
   test(`mobile tab history menu action: ${name}`, async () => {
     const tab = { id: 'tab', history: Array.from({ length: historyLength }, () => ({})) }

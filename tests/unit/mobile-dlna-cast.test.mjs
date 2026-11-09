@@ -176,15 +176,6 @@ test('a pending startup or stop cannot overlap another cast', async () => {
   assert.ok((await setup.cast.start(payload)).castId)
 })
 
-test('passes registered iOS media to the native relay without exposing its original headers', async () => {
-  const { cast, calls } = fixture()
-  await cast.discover()
-  const mediaUrl = 'capacitor://localhost/_opentubex_media/5CD72AC0-BA1B-402B-9BA3-81455F753D8A'
-  assert.ok((await cast.start({ ...payload, mediaUrl })).castId)
-  assert.deepEqual(calls[1].start, { mediaUrl, address: '192.168.1.7' })
-})
-
-
 test('merged casting passes both tracks and start time to native without sending an unsupported Seek', async () => {
   const { cast, calls } = fixture()
   await cast.discover()

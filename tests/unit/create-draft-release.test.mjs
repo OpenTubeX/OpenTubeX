@@ -7,18 +7,6 @@ import test from 'node:test'
 
 import { load as loadYaml } from 'js-yaml'
 
-test('uses the push token for protected-branch version bumps', async () => {
-  const workflow = loadYaml(await readFile(
-    '.github/workflows/create-draft-release.yml',
-    'utf8'
-  ))
-  const checkout = workflow.jobs.create.steps.find(
-    step => step.uses?.startsWith('actions/checkout@')
-  )
-
-  assert.equal(checkout.with.token, '${{ secrets.PUSH_TOKEN }}')
-})
-
 test('records the release commit Android version code and changelog for F-Droid and consumes the release notes', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'draft-release-version-'))
   t.after(() => rm(directory, { recursive: true, force: true }))

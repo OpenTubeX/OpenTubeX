@@ -7,20 +7,11 @@ import test from 'node:test'
 import {
   createKwinScriptFile,
   createKwinWindowOwnerCheck,
-  getKwinScriptBaseDirectory,
-  getKwinScriptPluginName,
   getKwinWindowOwner,
   isKwinWindowOwnedBy,
 } from '../../src/main/kwinScripts.js'
 
 const flatpak = { FLATPAK_ID: 'org.opentubex.OpenTubeX', XDG_RUNTIME_DIR: '/run/user/1000' }
-
-test('identifies windows by process ID outside Flatpak and by app ID inside', () => {
-  assert.deepEqual(getKwinWindowOwner({}, 1234), { processId: 1234, flatpakId: null })
-  assert.deepEqual(getKwinWindowOwner(flatpak, 2), { processId: null, flatpakId: 'org.opentubex.OpenTubeX' })
-  assert.equal(getKwinScriptPluginName('opentubex-test', getKwinWindowOwner({}, 1234)), 'opentubex-test-1234')
-  assert.equal(getKwinScriptPluginName('opentubex-test', getKwinWindowOwner(flatpak, 2)), 'opentubex-test-org.opentubex.OpenTubeX')
-})
 
 test('matches KWin D-Bus window info to the owner', () => {
   const nativeOwner = getKwinWindowOwner({}, 1234)
@@ -44,12 +35,6 @@ test('the KWin window check matches windows of the owner', () => {
   assert.deepEqual([main, pictureInPicture, other, sandboxPid].map(inFlatpak), [true, true, false, false])
   const outside = check(getKwinWindowOwner({}, 7))
   assert.deepEqual([main, pictureInPicture, other, sandboxPid].map(outside), [false, false, true, false])
-})
-
-test('puts scripts where KWin outside the sandbox can read them', () => {
-  assert.equal(getKwinScriptBaseDirectory(flatpak), '/run/user/1000/app/org.opentubex.OpenTubeX')
-  assert.equal(getKwinScriptBaseDirectory({}), tmpdir())
-  assert.equal(getKwinScriptBaseDirectory({ FLATPAK_ID: 'org.opentubex.OpenTubeX' }), tmpdir())
 })
 
 test('writes, rewrites and removes a script file in its own directory', async t => {

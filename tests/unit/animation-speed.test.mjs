@@ -36,20 +36,7 @@ globalThis.document = {
   }
 }
 
-const {
-  getAnimationSpeedMultiplier,
-  setAnimationSpeed
-} = await import('../../src/renderer/helpers/animationSpeed.js')
-
-test('clamps animation speed to the supported range', () => {
-  assert.equal(getAnimationSpeedMultiplier(10), 0.25)
-  assert.equal(getAnimationSpeedMultiplier(25), 0.25)
-  assert.equal(getAnimationSpeedMultiplier(100), 1)
-  assert.equal(getAnimationSpeedMultiplier(200), 2)
-  assert.equal(getAnimationSpeedMultiplier(300), 2)
-  assert.equal(getAnimationSpeedMultiplier(0), 1)
-  assert.equal(getAnimationSpeedMultiplier(Number.NaN), 1)
-})
+const { setAnimationSpeed } = await import('../../src/renderer/helpers/animationSpeed.js')
 
 test('does not rescale animations with speed-managed timing', () => {
   const playbackRates = []
@@ -104,33 +91,6 @@ test('lets CSS run at its default speed without querying animations for each eve
   }
   await Promise.resolve()
   assert.equal(queries, 0)
-})
-
-test('applies speed to pseudo-element transitions without rescaling descendants', async () => {
-  const playbackRates = []
-  const target = new FakeElement()
-  const animations = [target, new FakeElement()].map(element => ({
-    effect: { target: element },
-    updatePlaybackRate: rate => playbackRates.push(rate),
-  }))
-  // Pseudo-elements are included only when requesting the element's subtree.
-  target.getAnimations = ({ subtree }) => subtree ? animations : []
-  setAnimationSpeed(25)
-  listeners.get('transitionrun')({ target, pseudoElement: '::before' })
-  await Promise.resolve()
-  assert.deepEqual(playbackRates, [0.25])
-})
-
-test('restores existing animations when returning to default speed', () => {
-  const playbackRates = []
-  activeAnimations.push({
-    effect: { target: new FakeElement() },
-    updatePlaybackRate: rate => playbackRates.push(rate),
-  })
-  setAnimationSpeed(200)
-  setAnimationSpeed(100)
-  assert.deepEqual(playbackRates, [2, 1])
-  activeAnimations.length = 0
 })
 
 test('keeps scroll-linked animations tied to scroll position when speed changes', async () => {

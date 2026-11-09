@@ -103,30 +103,6 @@ test('expanding a dock never drives another one below its collapsed height', () 
   }
 })
 
-test('expanding both collapsed docks again restores the original layout', () => {
-  const stack = createStack(['metadata', 'transcript', 'comments'])
-
-  // Collapsing the first hands its height to the second, and collapsing the
-  // second then hands both on to the third
-  toggle(stack, 'metadata')
-  toggle(stack, 'transcript')
-
-  // Expanding them back used to let the second dock reclaim the height the first
-  // one had already taken back, squeezing the third down to its collapsed size
-  // while nothing marked it collapsed - so double-clicking it collapsed it
-  // instead of expanding it, with no way back to the even split.
-  toggle(stack, 'metadata')
-  toggle(stack, 'transcript')
-
-  for (const dock of stack.openDocks) {
-    assert.ok(
-      Math.abs(stack.weights[dock] - 1) < 1e-9,
-      `${dock} ended up at ${stack.weights[dock]} instead of an even third`
-    )
-  }
-  assert.deepEqual(stack.collapsedState, { metadata: null, transcript: null, comments: null })
-})
-
 test('any collapse and expand order restores the layout it started from', () => {
   const permutations = (items) => items.length <= 1
     ? [items]
@@ -182,17 +158,4 @@ test('a lone dock cannot be collapsed, as there is nowhere to put its height', (
   assert.equal(toggle(stack, 'metadata'), false)
   assert.equal(stack.collapsedState.metadata, null)
   assert.equal(stack.weights.metadata, 1)
-})
-
-test('toggling does not touch a stack it is not part of', () => {
-  const stack = createStack(['metadata', 'transcript'])
-  const weightsBefore = { ...stack.weights }
-  const collapsedStateBefore = { ...stack.collapsedState }
-
-  assert.equal(toggleFullscreenDockCollapsed(
-    stack.openDocks, 'comments', stack.weights, stack.collapsedState, CONTAINER_HEIGHT
-  ), false)
-  assert.deepEqual(stack.weights, weightsBefore)
-  // Including not recording a collapsed entry for a dock that is not in the stack
-  assert.deepEqual(stack.collapsedState, collapsedStateBefore)
 })

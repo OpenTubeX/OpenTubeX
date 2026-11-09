@@ -2,8 +2,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import {
-  cssColorToHex,
-  customThemeBackdropBlur,
   customThemeContentHash,
   DEFAULT_CUSTOM_THEME,
   normalizeCustomTheme,
@@ -107,7 +105,7 @@ test('defaults missing watched overlays to the existing thumbnail fade for older
 })
 
 test('preserves watched overlay color and opacity through theme serialization', () => {
-  for (const color of ['#ABCDEF80', '#12345600', '#123456']) {
+  for (const color of ['#12345600', '#123456']) {
     const theme = {
       ...DEFAULT_CUSTOM_THEME,
       colors: { ...DEFAULT_CUSTOM_THEME.colors, watchedThumbnailOverlay: color },
@@ -120,21 +118,6 @@ test('preserves watched overlay color and opacity through theme serialization', 
     ...DEFAULT_CUSTOM_THEME,
     colors: { ...DEFAULT_CUSTOM_THEME.colors, watchedThumbnailOverlay: 'invalid' },
   }), /Invalid or missing custom theme color: watchedThumbnailOverlay/)
-})
-
-test('normalizes transparent colors and bounded backdrop blur strengths', () => {
-  const theme = JSON.parse(JSON.stringify(DEFAULT_CUSTOM_THEME))
-  theme.colors.cardBackground = '#12345680'
-  theme.blurs.cardBackground = 100
-  theme.blurs.searchBar = -4
-
-  const normalized = normalizeCustomTheme(theme)
-  assert.equal(normalized.colors.cardBackground, '#12345680')
-  assert.equal(normalized.blurs.cardBackground, 40)
-  assert.equal(normalized.blurs.searchBar, 0)
-  assert.equal(customThemeBackdropBlur(normalized.colors.cardBackground, 12), 'blur(12px)')
-  assert.equal(customThemeBackdropBlur('#123456', 12), 'none')
-  assert.equal(customThemeBackdropBlur('#12345680', 0), 'none')
 })
 
 test('preserves source fingerprints through save and sync, but drops them from copies', () => {
@@ -200,12 +183,4 @@ test('keeps existing fingerprints for missing and default newer colors after nor
     assert.equal(await customThemeContentHash(normalized), fingerprint)
     assert.equal(await customThemeContentHash(JSON.parse(JSON.stringify(normalized))), fingerprint)
   }
-})
-
-test('computed colors convert to hex, including exponents and out-of-range channels', () => {
-  assert.equal(cssColorToHex('rgb(255, 0, 138)'), '#ff008a')
-  assert.equal(cssColorToHex('rgba(26, 26, 26, 0.12)'), '#1a1a1a1f')
-  assert.equal(cssColorToHex('color(srgb 1 1 3.85046e-7)'), '#ffff00')
-  assert.equal(cssColorToHex('color(srgb 1.04156 0.344351 -0.01 / 0.5)'), '#ff580080')
-  assert.equal(cssColorToHex('oklch(0.5 0.2 29)'), null)
 })

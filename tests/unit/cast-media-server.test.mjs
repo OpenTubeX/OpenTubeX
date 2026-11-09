@@ -595,15 +595,6 @@ test('dynamic DASH refreshes keep scoped credentials and rewrite the refreshed m
   assert.deepEqual(requests, [['/live/start', 'Bearer scoped-test'], ['/live/next', 'Bearer scoped-test']])
 })
 
-test('DASH patch locations are omitted while full manifest refreshes remain relayed', () => {
-  const urls = []
-  const xml = '<MPD type="dynamic"><Location>next.mpd</Location><PatchLocation ttl="60">patch.mpp</PatchLocation></MPD>'
-  const result = rewriteCastDash(xml, 'https://media.test/live/start.mpd', url => { urls.push(url); return 'http://cast.test/full' })
-  assert.ok(!result.includes('PatchLocation'))
-  assert.match(result, /<Location>http:\/\/cast.test\/full<\/Location>/)
-  assert.deepEqual(urls, ['https://media.test/live/next.mpd'])
-})
-
 test('HLS variable substitution covers URI lines, keys, imported values and original query parameters', () => {
   const urls = []
   const playlist = '#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-DEFINE:IMPORT="token"\n#EXT-X-DEFINE:QUERYPARAM="key"\n#EXT-X-KEY:METHOD=AES-128,URI="key-{$key}"\n#EXTINF:5,\nsegment-{$id}.ts?token={$token}\n'

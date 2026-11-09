@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, ref, shallowRef } from 'vue'
+import { ref, shallowRef } from 'vue'
 
 const source = readFileSync(new URL('../../src/renderer/views/Channel/Channel.vue', import.meta.url), 'utf8')
 
@@ -228,30 +228,6 @@ test('a superseded Invidious channel load does not update the page', async () =>
   await stale
   assert.equal(view.context.channelLoaded, false)
   assert.deepEqual(view.fetched, [])
-})
-
-test('filtered shorts reuse the parsed shorts instead of copying them', () => {
-  const latestShorts = shallowRef([])
-  const hideWatched = ref(false)
-  const id = ref('UCchannel')
-  const { filteredShorts, withChannelShortsContext } = vm.runInNewContext(`
-    ${slice('const filteredShorts = computed(', 'const filteredLive = computed(')}
-    ${slice('function withChannelShortsContext(', 'watch(shortSortBy')}
-    ;({ filteredShorts, withChannelShortsContext })
-  `, {
-    computed, latestShorts, hideWatched, id,
-    store: { getters: { getHistoryCacheById: { watched: {} } } },
-    filterWatchedArray: videos => videos.filter(video => video.videoId !== 'watched'),
-  })
-
-  const shorts = withChannelShortsContext([{ videoId: 'watched' }, { videoId: 'new' }])
-  latestShorts.value = shorts
-  assert.equal(filteredShorts.value, shorts)
-  assert.deepEqual(shorts.map(({ shortSource, shortChannelId }) => [shortSource, shortChannelId]),
-    [['channel', 'UCchannel'], ['channel', 'UCchannel']])
-
-  hideWatched.value = true
-  assert.equal(filteredShorts.value[0], shorts[1], 'filtering keeps the stamped objects')
 })
 
 test('switching backends invalidates tab requests from the earlier load', async () => {

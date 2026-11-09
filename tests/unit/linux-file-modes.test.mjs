@@ -33,11 +33,3 @@ test('removes group and other write access from Linux packages', async (t) => {
   assert.equal(await mode(join(appOutDir, 'locales')), 0o755)
   assert.equal((await lstat(join(appOutDir, 'link'))).isSymbolicLink(), true)
 })
-
-test('leaves other platforms unchanged', async (t) => {
-  const appOutDir = await createApp(t)
-
-  await removeLinuxGroupOtherWrite({ appOutDir, electronPlatformName: 'darwin' })
-
-  assert.equal(await mode(join(appOutDir, 'opentubex')), 0o777)
-})

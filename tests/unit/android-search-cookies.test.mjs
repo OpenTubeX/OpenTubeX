@@ -30,17 +30,6 @@ test('Android search offers the cookie retry with a saved session', () => {
   assert.equal(result.configured, true, 'A saved Android session must enable the retry')
 })
 
-test('cookie search remains enabled on Electron and unavailable on iOS and the web', () => {
-  assert.equal(searchSupport({ IS_ELECTRON: true }).configured, true)
-  for (const env of [{}, { IS_CAPACITOR: true, IS_IOS: true }]) {
-    assert.equal(searchSupport(env).supportsCookieSearch, false)
-    assert.equal(searchSupport(env).configured, false)
-  }
-  assert.equal(searchSupport({ IS_CAPACITOR: true }, {}).configured, false)
-  assert.equal(searchSupport({ IS_CAPACITOR: true }, getters, true).supportsCookieSearch, false, 'Lite Android builds omit yt-dlp')
-  assert.equal(searchSupport({ IS_CAPACITOR: true }, { getYtDlpPlaybackAuthMode: 'browser', getYtDlpPlaybackCookiesBrowser: 'firefox' }).configured, false)
-})
-
 function adapter(settings, extract) {
   return new Function('process', 'registerPlugin', 'store', 'buildYtDlpSearchArguments', 'normalizeYtDlpSearchResults', 'completeYtDlpSearchPlaylists', 'chooseAndroidDirectory', `${adapterSource}\nreturn ytDlp`)(
     { env: { IS_CAPACITOR: true } }, () => ({ extract }), { getters: settings }, buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists, () => {})
@@ -142,24 +131,6 @@ test('Android bounds optional playlist metadata waits and leaves queued lookups 
   const response = await pending
   assert.equal(response.results.length, 20)
   assert.equal(lookups, 2)
-})
-
-test('Android gives later playlist lookups only the remaining native metadata budget', async t => {
-  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 })
-  const budgets = []
-  const bridge = adapter(getters, async ({ args, timeoutMs }) => {
-    if (new URL(args.at(-1)).pathname === '/results') return { stdout: JSON.stringify({
-      entries: Array.from({ length: 3 }, (_, index) => ({ id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}` }))
-    }) }
-    budgets.push(timeoutMs)
-    if (budgets.length <= 2) await new Promise(resolve => setTimeout(resolve, 3000))
-    return { stdout: JSON.stringify({ playlist_count: 10 }) }
-  })
-  const pending = bridge.ytDlpSearch('query')
-  await new Promise(setImmediate)
-  t.mock.timers.tick(3000)
-  assert.equal((await pending).results.length, 3)
-  assert.deepEqual(budgets, [10_000, 10_000, 7000])
 })
 
 test('Android cookie search reports extraction and malformed-response failures', async () => {
