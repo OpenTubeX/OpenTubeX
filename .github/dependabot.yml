@@ -21,7 +21,6 @@ updates:
       - dependency-name: "@capacitor-community/screen-brightness"
       - dependency-name: "@capacitor/android"
       - dependency-name: "@capacitor/app"
-      - dependency-name: "@capacitor/barcode-scanner"
       - dependency-name: "@capacitor/browser"
       - dependency-name: "@capacitor/cli"
       - dependency-name: "@capacitor/core"

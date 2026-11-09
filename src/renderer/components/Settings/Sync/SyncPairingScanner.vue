@@ -1,10 +1,6 @@
 <template>
   <p>{{ hint }}</p>
-  <FtLoader v-if="usingNativeScanner" />
-  <div
-    v-else
-    class="scannerFrame"
-  >
+  <div class="scannerFrame">
     <video
       ref="scannerVideo"
       class="scannerVideo"
@@ -26,18 +22,15 @@ import QrScanner from 'qr-scanner'
 import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtLoader from '../../FtLoader/FtLoader.vue'
-
-const props = defineProps({
+defineProps({
   hint: {
     type: String,
     required: true,
   },
 })
 
-const emit = defineEmits(['scan', 'cancel', 'unavailable'])
+const emit = defineEmits(['scan', 'unavailable'])
 const { t } = useI18n()
-const usingNativeScanner = Boolean(process.env.IS_CAPACITOR)
 const scannerVideo = useTemplateRef('scannerVideo')
 
 let scanner = null
@@ -50,24 +43,10 @@ function stopScanner() {
 
 onMounted(async () => {
   try {
-    // Keep the build flag here so Webpack excludes native scanner chunks on desktop/web.
-    if (process.env.IS_CAPACITOR) {
-      const { scanNativePairingCode } = await import('../../../helpers/nativePairingScanner')
-      if (!active) return
-      const code = await scanNativePairingCode({
-        instructions: props.hint,
-        cancelLabel: t('Cancel'),
-        torchOnLabel: t('Settings.Sync Settings.Turn Flashlight Off'),
-        torchOffLabel: t('Settings.Sync Settings.Turn Flashlight On'),
-      })
-      if (!active) return
-      if (code === null) {
-        emit('cancel')
-      } else {
-        emit('scan', code)
-      }
-      return
-    }
+    // Android WebView advertises QR support in BarcodeDetector but never finds a
+    // code. qr-scanner sets this flag itself only when the detector reports that
+    // it is unavailable, so the mobile apps set it to decode with its worker.
+    if (process.env.IS_CAPACITOR) QrScanner._disableBarcodeDetector = true
     scanner = new QrScanner(scannerVideo.value, (result) => {
       if (!active || !scanner) return
       stopScanner()

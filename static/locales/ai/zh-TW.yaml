@@ -1276,8 +1276,6 @@ Settings:
     Previous Auto Sync Notice: "自動同步已關閉。較早的版本可能為防止資料遺失而將其停用。"
     Enable Automatic Sync: "啟用自動同步"
     Destructive Sync Blocked: "為防止資料遺失，同步已停止。自動同步已關閉。請開啟同步設定查看將要刪除的項目。"
-    Turn Flashlight On: 開啟手電筒
-    Turn Flashlight Off: 關閉手電筒
     Devices: "裝置"
     Devices Hint: "檢視可存取此同步帳戶的裝置。"
     Change Password: "變更密碼"

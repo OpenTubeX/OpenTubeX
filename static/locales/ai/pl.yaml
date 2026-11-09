@@ -798,8 +798,6 @@ Settings:
     Previous Auto Sync Notice: "Automatyczna synchronizacja jest wyłączona. Wcześniejsza wersja mogła ją wyłączyć, aby zapobiec utracie danych."
     Enable Automatic Sync: "Włącz automatyczną synchronizację"
     Destructive Sync Blocked: "Synchronizacja została zatrzymana, aby zapobiec utracie danych. Automatyczna synchronizacja jest wyłączona. Otwórz ustawienia synchronizacji, aby sprawdzić usuwane elementy."
-    Turn Flashlight On: Włącz latarkę
-    Turn Flashlight Off: Wyłącz latarkę
     Devices: "Urządzenia"
     Devices Hint: "Sprawdź urządzenia, które mają dostęp do tego konta synchronizacji."
     Change Password: "Zmień hasło"

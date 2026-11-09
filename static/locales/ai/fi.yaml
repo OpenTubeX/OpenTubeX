@@ -1300,8 +1300,6 @@ Settings:
     Previous Auto Sync Notice: "Automaattinen synkronointi on pois käytöstä. Aiempi versio on saattanut poistaa sen käytöstä tietojen menetyksen estämiseksi."
     Enable Automatic Sync: "Ota automaattinen synkronointi käyttöön"
     Destructive Sync Blocked: "Synkronointi pysäytettiin tietojen menetyksen estämiseksi. Automaattinen synkronointi on pois käytöstä. Tarkista poistot avaamalla synkronointiasetukset."
-    Turn Flashlight On: Sytytä taskulamppu
-    Turn Flashlight Off: Sammuta taskulamppu
     Devices: "Laitteet"
     Devices Hint: "Tarkista laitteet, joilla on tämän synkronointitilin käyttöoikeus."
     Change Password: "Vaihda salasana"

@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -126,24 +125,16 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             }
             report("Worker passed");
 
-            evaluate(web, "window.optimizedScan = 'pending'; Capacitor.nativePromise('CapacitorBarcodeScanner', 'scanBarcode', " +
-                "{hint: 0, cameraDirection: 1, scanOrientation: 3, scanButton: false, android: {scanningLibrary: 'zxing'}})" +
-                ".then(() => window.optimizedScan = 'scanned', error => window.optimizedScan = error.code)");
+            // Pairing scans QR codes from the WebView camera. Capacitor's WebChromeClient
+            // must turn the WebView request into Android's camera permission prompt.
+            evaluate(web, "window.optimizedScan = 'pending'; navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}})" +
+                ".then(stream => { window.optimizedScan = stream.getVideoTracks().length > 0 ? 'opened' : 'no video';" +
+                " stream.getTracks().forEach(track => track.stop()) }, error => window.optimizedScan = error.name)");
             if (getTargetContext().checkSelfPermission(android.Manifest.permission.CAMERA)
                     != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 clickPermissionAllow();
             }
-            long scannerDeadline = SystemClock.elapsedRealtime() + 15000;
-            AtomicReference<Boolean> scannerReady = new AtomicReference<>(false);
-            do {
-                runOnMainSync(() -> scannerReady.set(resumedActivity != null && resumedActivity.hasWindowFocus() &&
-                    resumedActivity.getClass().getName().equals("com.outsystems.plugins.barcode.view.OSBARCScannerActivity")));
-                if (scannerReady.get()) break;
-                Thread.sleep(100);
-            } while (SystemClock.elapsedRealtime() < scannerDeadline);
-            check(scannerReady.get(), "Native QR scanner opens and receives focus");
-            sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
-            await(web, "window.optimizedScan === 'OS-PLUG-BARC-0006'");
+            await(web, "window.optimizedScan === 'opened'");
             checkPlayerFullscreen(web, fixture);
             report("Player fullscreen passed");
             result.putString("stream", "\nOK (8 checks: bridge, shortcuts, callbacks, runtimes, playback, worker, scanner, fullscreen)\n");
@@ -228,7 +219,7 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             if (focused.get()) break;
             Thread.sleep(100);
         } while (SystemClock.elapsedRealtime() < deadline);
-        check(focused.get(), "Main activity regains focus after the scanner");
+        check(focused.get(), "Main activity regains focus after the camera check");
         await(web, "!!document.querySelector('.app') && document.visibilityState === 'visible'");
         // A fresh install may show the tutorial over the real player controls.
         evaluate(web, "document.querySelector('.tutorialOverlay .tutorialActions button')?.click()");

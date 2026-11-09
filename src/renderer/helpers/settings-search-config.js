@@ -343,7 +343,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
       'Show QR Code', 'Enter Pairing Code', 'Check Pairing Code', 'Scan QR Code',
       'Use Pairing Invite', 'Show Pairing Invite',
       'Pairing Codes Match', 'Approve Pairing', 'Try Again', 'Scan Again',
-      'Turn Flashlight On', 'Turn Flashlight Off', 'Confirm Data Loss',
+      'Confirm Data Loss',
       'Sync Automatically', 'Watch stats', 'Profiles', 'Open Tabs', 'Use Shared Tabs',
       'Open All Tabs', 'Open On Device', 'Sync Now', 'Disconnect', 'Delete Account', 'Confirm Delete Account',
       'Devices', 'Activity', 'Show More', 'Refresh Devices', 'Revoke Session',
