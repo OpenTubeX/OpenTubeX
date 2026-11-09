@@ -277,44 +277,22 @@ test.describe('settings', () => {
     }, contentBounds.x + contentBounds.width)).toBe(true)
   })
 
-  test('disables the cross-tab mini player while automatic PiP on tab change is enabled', async ({ page }) => {
+  test('disables automatic PiP on tab change while videos keep playing in the mini player', async ({ page }) => {
     const playback = await goToSettingsSection(page, 'playback')
-    const miniPlayerToggle = playback.getByRole('checkbox', {
-      name: 'Keep a mini player on screen when switching tabs'
-    })
-    const automaticPipToggle = playback.getByRole('checkbox', {
-      name: 'When switching tabs',
-      exact: true
-    })
-    const automaticPipLabel = playback.locator('.pure-checkbox label')
+    const leavingVideo = playback.getByRole('combobox', { name: 'When leaving a video' })
+    // Its tooltip explains why it is disabled and joins its name.
+    const automaticPipToggle = playback.getByRole('checkbox', { name: /^When switching tabs/ })
+
+    await expect(leavingVideo).toHaveText('Keep playing in a mini player')
+    await expect(automaticPipToggle).toBeDisabled()
+
+    await leavingVideo.click()
+    await page.getByRole('option', { name: 'Stop playing', exact: true }).click()
+    await expect(automaticPipToggle).toBeEnabled()
+    await playback.locator('.pure-checkbox label')
       .filter({ hasText: 'When switching tabs' })
-
-    const keepPlayingToggle = playback.getByRole('checkbox', {
-      name: 'Keep playing when navigating away from a video'
-    })
-    await expect(keepPlayingToggle).toBeChecked()
-    await expect(miniPlayerToggle).toBeDisabled()
-    await expect(miniPlayerToggle).toBeChecked()
-    await playback.locator('label.switch-label')
-      .filter({ hasText: 'Keep playing when navigating away from a video' })
       .click()
-    await expect(keepPlayingToggle).not.toBeChecked()
-    await expect(miniPlayerToggle).toBeEnabled()
-    await expect(miniPlayerToggle).not.toBeChecked()
-    await playback.locator('label.switch-label')
-      .filter({ hasText: 'Keep a mini player on screen when switching tabs' })
-      .click()
-    await expect(miniPlayerToggle).toBeChecked()
-
-    await automaticPipLabel.click()
     await expect(automaticPipToggle).toBeChecked()
-    await expect(miniPlayerToggle).toBeDisabled()
-    await expect(miniPlayerToggle).toBeChecked()
-
-    await automaticPipLabel.click()
-    await expect(automaticPipToggle).not.toBeChecked()
-    await expect(miniPlayerToggle).toBeEnabled()
-    await expect(miniPlayerToggle).toBeChecked()
   })
 })
 

@@ -89,7 +89,7 @@ test.describe('lights off', { tag: '@scale' }, () => {
 
     await page.evaluate(async () => {
       const store = window.$store
-      await store.dispatch('updateScrollMiniPlayerEnabled', false)
+      await store.dispatch('updateScrollPlayerMode', 'off')
       window.scrollTo(0, 120)
     })
     await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -109,7 +109,7 @@ test.describe('lights off', { tag: '@scale' }, () => {
     })).toBe(true)
     await page.evaluate(async () => {
       const store = window.$store
-      await store.dispatch('updateScrollMiniPlayerEnabled', true)
+      await store.dispatch('updateScrollPlayerMode', 'mini')
       window.scrollTo(0, 0)
     })
     await expectHoleMatchesPlayer()

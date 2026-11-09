@@ -39,15 +39,34 @@ export function isFormerDefaultQuickSettings(value) {
     value.every((id, index) => id === FORMER_DEFAULT_QUICK_SETTINGS[index])
 }
 
+/** Former switches and the selects that replaced them. */
+const REPLACED_SETTING_IDS = new Map([
+  ['hideVideoDescription', 'videoDescriptionMode'],
+  ['scrollMiniPlayerEnabled', 'scrollPlayerMode'],
+])
+
 /**
- * Replaces the former Hide Video Description switch in lists of setting ids,
- * such as Quick Settings, with the Video Descriptions select.
+ * Replaces former switches in lists of setting ids, such as Quick Settings,
+ * with the selects that replaced them.
  * @param {unknown} ids
  */
-export function migrateVideoDescriptionSettingId(ids) {
+export function migrateSettingIds(ids) {
   return Array.isArray(ids)
-    ? [...new Set(ids.map(id => id === 'hideVideoDescription' ? 'videoDescriptionMode' : id))]
+    ? [...new Set(ids.map(id => REPLACED_SETTING_IDS.get(id) ?? id))]
     : ids
+}
+
+/** @param {unknown} ids */
+export function hasReplacedSettingId(ids) {
+  return Array.isArray(ids) && ids.some(id => REPLACED_SETTING_IDS.has(id))
+}
+
+/**
+ * The scroll player select that replaced the former mini player switch.
+ * @param {unknown} enabled
+ */
+export function scrollPlayerModeFromMiniPlayerSwitch(enabled) {
+  return enabled === false ? 'off' : 'mini'
 }
 
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
@@ -60,6 +79,7 @@ export async function migrateStoredSettings(datastore) {
         'currentLocale', 'externalPlayerCustomArgs', 'defaultTheatreMode', 'saveWatchedProgress',
         'watchedProgressSavingMode', 'screenshotAskPath', 'quickSettings',
         'hideVideoDescription', 'videoDescriptionMode', 'syncServerSettingsExcluded',
+        'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -139,10 +159,25 @@ export async function migrateStoredSettings(datastore) {
     }
     await datastore.removeAsync({ _id: 'hideVideoDescription' })
   }
+  // The mini player switch became the select that can also pin the player.
+  const scrollMiniPlayerEnabled = stored.get('scrollMiniPlayerEnabled')
+  if (scrollMiniPlayerEnabled) {
+    // Always save the mapped mode, since startup only maps the older
+    // Picture-in-Picture mode when neither setting is saved.
+    if (!stored.has('scrollPlayerMode')) {
+      await save('scrollPlayerMode', scrollPlayerModeFromMiniPlayerSwitch(scrollMiniPlayerEnabled.value))
+    }
+    await datastore.removeAsync({ _id: 'scrollMiniPlayerEnabled' })
+  }
+  // Keep Playing When Navigating Away now also decides whether switching tabs
+  // shows the mini player.
+  if (stored.has('scrollMiniPlayerOnAllTabs')) {
+    await datastore.removeAsync({ _id: 'scrollMiniPlayerOnAllTabs' })
+  }
   for (const key of ['quickSettings', 'syncServerSettingsExcluded']) {
     const ids = stored.get(key)?.value
-    if (Array.isArray(ids) && ids.includes('hideVideoDescription')) {
-      await save(key, migrateVideoDescriptionSettingId(ids))
+    if (hasReplacedSettingId(ids)) {
+      await save(key, migrateSettingIds(ids))
     }
   }
 

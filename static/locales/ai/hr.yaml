@@ -833,11 +833,19 @@ Settings:
       On Window Minimize: Pri minimiziranju prozora
       On Window Hide: Kada prozor izgubi fokus ili se prijeđe na drugi prozor
       Wayland Minimize Unsupported: Wayland aplikacijama ne dojavljuje minimiziranje prozora, pa ovaj okidač nije dostupan. Umjesto toga upotrijebite "Kada prozor izgubi fokus ili se prijeđe na drugi prozor", što obuhvaća i minimiziranje.
+      On Tab Change Mini Player: Pri promjeni kartice umjesto toga prikazuje se minireproduktor. Za korištenje ove opcije postavite „Pri napuštanju videozapisa” na „Zaustavi reprodukciju”.
     Scroll Mini Player:
       Scroll Mini Player: Minireproduktor pri pomicanju
-      When Scrolling Down: Zadrži minireproduktor na zaslonu pri pomicanju prema dolje
-      On All Tabs: Zadrži minireproduktor na zaslonu pri promjeni kartice
-      On Navigation: Nastavi reprodukciju pri napuštanju stranice videozapisa
+      Scroll Player Mode: Pri pomicanju prema dolje
+      Scroll Player Mode Tooltip: Player se prikvači samo dok zauzima najviše polovicu visine prozora. Inače, primjerice na telefonima u vodoravnom položaju ili u širokim prozorima, umjesto toga prikazuje se mini player.
+      Scroll Player Modes:
+        Mini: Prikaži minireproduktor
+        Pin: Prikvači player na vrh ako ima mjesta
+        Off: Pomiči sa stranicom
+      Leaving Video: Pri napuštanju videozapisa
+      Leaving Video Modes:
+        Keep Playing: Nastavi reprodukciju u minireproduktoru
+        Stop: Zaustavi reprodukciju
     Multiply Seek Interval by Playback Rate: Pomnoži interval premotavanja brzinom reprodukcije
     Show Playback Rate Adjusted Timestamp: Prikaži vremensku oznaku prilagođenu brzini reprodukcije
     Use YouTube-style Shorts: Upotrebljavaj Shorts u stilu YouTubea

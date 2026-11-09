@@ -839,11 +839,19 @@ Settings:
       On Window Minimize: Ao minimizar a xanela
       On Window Hide: Cando a xanela perde o foco ou se cambia a outra
       Wayland Minimize Unsupported: Wayland non informa as aplicacións cando se minimiza unha xanela, polo que este activador non está dispoñible. Usa no seu lugar «Cando a xanela perde o foco ou se cambia a outra», que tamén abrangue a minimización.
+      On Tab Change Mini Player: Ao cambiar de lapela amósase o minirreprodutor no seu lugar. Para usar isto, establece «Ao saír dun vídeo» en «Deter a reprodución».
     Scroll Mini Player:
       Scroll Mini Player: Minirreprodutor ao desprazarse
-      When Scrolling Down: Manter un minirreprodutor na pantalla ao desprazarse cara abaixo
-      On All Tabs: Manter un minirreprodutor na pantalla ao cambiar de lapela
-      On Navigation: Continuar a reprodución ao saír da páxina do vídeo
+      Scroll Player Mode: Ao desprazarse cara abaixo
+      Scroll Player Mode Tooltip: O reprodutor só se fixa mentres ocupe como máximo a metade da altura da xanela. Se non, como en teléfonos en horizontal ou en xanelas anchas, amósase o minirreprodutor.
+      Scroll Player Modes:
+        Mini: Amosar un minirreprodutor
+        Pin: Fixar o reprodutor arriba se hai espazo
+        Off: Desprazar coa páxina
+      Leaving Video: Ao saír dun vídeo
+      Leaving Video Modes:
+        Keep Playing: Continuar a reprodución nun minirreprodutor
+        Stop: Deter a reprodución
     Multiply Seek Interval by Playback Rate: Multiplicar o intervalo de salto pola velocidade de reprodución
     Show Playback Rate Adjusted Timestamp: Amosar o tempo axustado á velocidade de reprodución
     Use YouTube-style Shorts: Usar vídeos curtos ao estilo de YouTube

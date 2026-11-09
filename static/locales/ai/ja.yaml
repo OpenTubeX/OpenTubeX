@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: ウィンドウを最小化したとき
       On Window Hide: ウィンドウがフォーカスを失うか、別のウィンドウに切り替えたとき
       Wayland Minimize Unsupported: Waylandはウィンドウの最小化をアプリに通知しないため、この条件は利用できません。最小化も対象になる「ウィンドウがフォーカスを失うか、別のウィンドウに切り替えたとき」を使用してください。
+      On Tab Change Mini Player: タブを切り替えると、代わりにミニプレーヤーが表示されます。これを使うには、「動画を離れたとき」を「再生を停止」に設定してください。
     Scroll Mini Player:
       Scroll Mini Player: スクロール時のミニプレーヤー
-      When Scrolling Down: 下へスクロールしたときもミニプレーヤーを画面に表示
-      On All Tabs: タブを切り替えてもミニプレーヤーを画面に表示
-      On Navigation: 動画ページを離れても再生を続ける
+      Scroll Player Mode: 下へスクロールしたとき
+      Scroll Player Mode Tooltip: プレーヤーはウィンドウの高さの半分以下に収まる場合にのみ固定されます。それ以外の場合（横向きのスマートフォンや幅の広いウィンドウなど）は、代わりにミニプレーヤーが表示されます。
+      Scroll Player Modes:
+        Mini: ミニプレーヤーを表示
+        Pin: スペースがあればプレーヤーを上部に固定
+        Off: ページと一緒にスクロール
+      Leaving Video: 動画を離れたとき
+      Leaving Video Modes:
+        Keep Playing: ミニプレーヤーで再生を続ける
+        Stop: 再生を停止
     Multiply Seek Interval by Playback Rate: シーク間隔を再生速度に合わせる
     Show Playback Rate Adjusted Timestamp: 再生速度を反映した時刻を表示
     Use YouTube-style Shorts: YouTube形式のショート動画を使用

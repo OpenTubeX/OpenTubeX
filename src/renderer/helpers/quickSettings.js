@@ -129,6 +129,19 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     icon: ['fas', 'robot'],
   },
   {
+    id: 'scrollPlayerMode',
+    section: 'playback',
+    labelKey: 'Settings.Player Settings.Scroll Mini Player.Scroll Player Mode',
+    control: 'select',
+    values: ['mini', 'pin', 'off'],
+    optionLabelKeys: [
+      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Mini',
+      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Pin',
+      'Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Off',
+    ],
+    icon: ['fas', 'compress'],
+  },
+  {
     id: 'videoDescriptionMode',
     section: 'content',
     labelKey: 'Settings.Distraction Free Settings.Video Descriptions',
@@ -163,7 +176,6 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['musicVisualizer', 'Settings.Player Settings.Music Visualizer', 'playback', ['fas', 'music']],
   ['useDeArrowTitles', 'Settings.SponsorBlock Settings.UseDeArrowTitles', 'add-ons', ['fas', 'pen']],
   ['useDeArrowThumbnails', 'Settings.SponsorBlock Settings.UseDeArrowThumbnails', 'add-ons', ['fas', 'photo-film']],
-  ['scrollMiniPlayerEnabled', 'Settings.Player Settings.Scroll Mini Player.When Scrolling Down', 'playback', ['fas', 'compress']],
   ['ambientMode', 'Global.Ambient Mode', 'appearance', ['fas', 'palette']],
   ['hideLiveChat', 'Settings.Distraction Free Settings.Hide Live Chat', 'content', ['fas', 'comment']],
   ['hideLiveChatReplay', 'Settings.Distraction Free Settings.Hide Live Chat Replay', 'content', ['fas', 'comment']],

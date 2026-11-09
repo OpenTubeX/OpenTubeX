@@ -169,6 +169,17 @@ public class AndroidUiPlugin extends Plugin {
         });
     }
 
+    // Android draws the page scrollbar inside the WebView's padding, which the page ignores.
+    @PluginMethod
+    public void setPageScrollbarInsetTop(PluginCall call) {
+        int inset = Math.max(0, call.getInt("inset", 0));
+        getActivity().runOnUiThread(() -> {
+            android.webkit.WebView view = getBridge().getWebView();
+            view.setPadding(view.getPaddingLeft(), inset, view.getPaddingRight(), view.getPaddingBottom());
+            call.resolve();
+        });
+    }
+
     @PluginMethod
     public void setSystemBarsBackground(PluginCall call) {
         final int color;

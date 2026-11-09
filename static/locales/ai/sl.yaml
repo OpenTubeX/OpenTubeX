@@ -1034,11 +1034,19 @@ Settings:
       On Window Minimize: Ob pomanjšanju okna
       On Window Hide: Ko okno izgubi žarišče ali preklopite drugam
       Wayland Minimize Unsupported: Wayland aplikacijam ne sporoča pomanjšanja okna, zato ta sprožilec ni na voljo. Namesto tega uporabite »Ko okno izgubi žarišče ali preklopite drugam«, kar velja tudi za pomanjšanje.
+      On Tab Change Mini Player: Ob preklopu med zavihki se namesto tega prikaže mini predvajalnik. Če želite uporabiti to možnost, nastavite »Ob odhodu z videoposnetka« na »Ustavi predvajanje«.
     Scroll Mini Player:
       Scroll Mini Player: Mini predvajalnik med pomikanjem
-      When Scrolling Down: Med pomikanjem navzdol ohrani mini predvajalnik na zaslonu
-      On All Tabs: Med preklapljanjem zavihkov ohrani mini predvajalnik na zaslonu
-      On Navigation: Nadaljuj predvajanje ob odhodu s strani videoposnetka
+      Scroll Player Mode: Med pomikanjem navzdol
+      Scroll Player Mode Tooltip: Predvajalnik se pripne le, dokler zavzema največ polovico višine okna. Sicer, na primer na telefonih v ležeči postavitvi ali v širokih oknih, se namesto tega prikaže mini predvajalnik.
+      Scroll Player Modes:
+        Mini: Prikaži mini predvajalnik
+        Pin: Pripni predvajalnik na vrh, če je prostor
+        Off: Pomikaj se s stranjo
+      Leaving Video: Ob odhodu z videoposnetka
+      Leaving Video Modes:
+        Keep Playing: Nadaljuj predvajanje v mini predvajalniku
+        Stop: Ustavi predvajanje
     Scroll Volume Over Video Player: Spreminjaj glasnost s pomikanjem nad predvajalnikom videoposnetkov
     Scroll Playback Rate Over Video Player: Spreminjaj hitrost predvajanja s pomikanjem nad predvajalnikom videoposnetkov
     Skip by Scrolling Over Video Player: Preskakuj s pomikanjem nad predvajalnikom videoposnetkov

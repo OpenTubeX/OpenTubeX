@@ -816,11 +816,19 @@ Settings:
       On Window Minimize: When minimising the window
       On Window Hide: When the window loses focus or is switched away
       Wayland Minimize Unsupported: Wayland does not report window minimise to apps, so this trigger is unavailable. Use "When the window loses focus or is switched away" instead, which also covers minimising.
+      On Tab Change Mini Player: Switching tabs shows the mini player instead. To use this, set "When leaving a video" to "Stop playing".
     Scroll Mini Player:
       Scroll Mini Player: Scroll mini player
-      When Scrolling Down: Keep a mini player on screen when scrolling down
-      On All Tabs: Keep a mini player on screen when switching tabs
-      On Navigation: Keep playing when navigating away from a video
+      Scroll Player Mode: When scrolling down
+      Scroll Player Mode Tooltip: "The player is only pinned while it takes up at most half of the window's height. Otherwise, such as on phones in landscape or in wide windows, the mini player shows instead."
+      Scroll Player Modes:
+        Mini: Show a mini player
+        Pin: "Pin the player at the top if there's room"
+        Off: Scroll with the page
+      Leaving Video: When leaving a video
+      Leaving Video Modes:
+        Keep Playing: Keep playing in a mini player
+        Stop: Stop playing
     Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
     Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
     Use YouTube-style Shorts: Use YouTube-style Shorts

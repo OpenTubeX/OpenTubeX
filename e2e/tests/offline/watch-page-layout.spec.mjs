@@ -244,7 +244,7 @@ test('paints the toolbar\'s Save to dropdown above the cards below it with blurr
   // Scrolling the toolbar to the top docks the scroll mini player, and
   // scrolling back before the click undocks it. Either animation can pass
   // over the dropdown while its hit test runs.
-  await page.evaluate(() => window.$store.dispatch('updateScrollMiniPlayerEnabled', false))
+  await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   // Custom theme blurs give the cards and the toolbar backdrop filters,
@@ -281,7 +281,7 @@ test('paints the toolbar\'s Save to dropdown above the cards below it with blurr
 })
 
 test('opens the toolbar\'s Save to dropdown above the button without scrolling when only the space above fits it', { tag: '@scale' }, async ({ app, page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateScrollMiniPlayerEnabled', false))
+  await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
 

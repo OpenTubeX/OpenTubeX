@@ -22,7 +22,7 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
         HideRecommendedVideos: true, KeepPlayingOnNavigation: true,
-        ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone', UiScale: 100,
+        ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone', UiScale: 100,
         AiVideoSummaryMode: 'expanded',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))

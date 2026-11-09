@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Pencereyi küçültürken
       On Window Hide: Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde
       Wayland Minimize Unsupported: Wayland, pencerenin küçültüldüğünü uygulamalara bildirmediği için bu tetikleyici kullanılamaz. Bunun yerine küçültmeyi de kapsayan "Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde" seçeneğini kullanın.
+      On Tab Change Mini Player: Sekme değiştirmek bunun yerine mini oynatıcıyı gösterir. Bunu kullanmak için "Bir videodan ayrılırken" ayarını "Oynatmayı durdur" olarak belirleyin.
     Scroll Mini Player:
       Scroll Mini Player: Kaydırma mini oynatıcısı
-      When Scrolling Down: Aşağı kaydırırken mini oynatıcıyı ekranda tut
-      On All Tabs: Sekme değiştirirken mini oynatıcıyı ekranda tut
-      On Navigation: Video sayfasından ayrılırken oynatmaya devam et
+      Scroll Player Mode: Aşağı kaydırırken
+      Scroll Player Mode Tooltip: Oynatıcı yalnızca pencere yüksekliğinin en fazla yarısını kapladığı sürece sabitlenir. Aksi takdirde, örneğin yatay moddaki telefonlarda veya geniş pencerelerde, bunun yerine mini oynatıcı gösterilir.
+      Scroll Player Modes:
+        Mini: Mini oynatıcı göster
+        Pin: Yer varsa oynatıcıyı üste sabitle
+        Off: Sayfayla birlikte kaydır
+      Leaving Video: Bir videodan ayrılırken
+      Leaving Video Modes:
+        Keep Playing: Mini oynatıcıda oynatmaya devam et
+        Stop: Oynatmayı durdur
     Multiply Seek Interval by Playback Rate: Sarma Aralığını Oynatma Hızıyla Çarp
     Show Playback Rate Adjusted Timestamp: Oynatma Hızına Göre Ayarlanmış Zaman Damgasını Göster
     Use YouTube-style Shorts: YouTube Tarzı Kısa Videoları Kullan

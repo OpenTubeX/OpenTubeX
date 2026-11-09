@@ -4,7 +4,8 @@
     :class="{
       ambientWideLayout: theatrePossible && !useTheatreMode,
       theatreUnavailable: !theatrePossible,
-      shortsPlayer
+      shortsPlayer,
+      scrollPinnedPlayer
     }"
   >
     <Teleport to="body">

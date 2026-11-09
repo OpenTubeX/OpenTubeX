@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Quando si riduce la finestra a icona
       On Window Hide: Quando la finestra perde lo stato attivo o si passa a un'altra finestra
       Wayland Minimize Unsupported: Wayland non segnala alle app quando una finestra viene ridotta a icona, quindi questa condizione non è disponibile. Usa invece "Quando la finestra perde lo stato attivo o si passa a un'altra finestra", che comprende anche la riduzione a icona.
+      On Tab Change Mini Player: Cambiando scheda viene invece mostrato il mini lettore. Per usare questa opzione, imposta «Quando esci da un video» su «Interrompi la riproduzione».
     Scroll Mini Player:
       Scroll Mini Player: Mini lettore durante lo scorrimento
-      When Scrolling Down: Mantieni un mini lettore sullo schermo durante lo scorrimento verso il basso
-      On All Tabs: Mantieni un mini lettore sullo schermo quando si cambia scheda
-      On Navigation: Continua la riproduzione quando esci dalla pagina del video
+      Scroll Player Mode: Durante lo scorrimento verso il basso
+      Scroll Player Mode Tooltip: "Il lettore viene fissato solo finché occupa al massimo metà dell'altezza della finestra. Altrimenti, ad esempio sui telefoni in orizzontale o nelle finestre larghe, viene mostrato il mini lettore."
+      Scroll Player Modes:
+        Mini: Mostra un mini lettore
+        Pin: "Fissa il lettore in alto se c'è spazio"
+        Off: Scorri con la pagina
+      Leaving Video: Quando esci da un video
+      Leaving Video Modes:
+        Keep Playing: Continua la riproduzione in un mini lettore
+        Stop: Interrompi la riproduzione
     Multiply Seek Interval by Playback Rate: Moltiplica l'intervallo di avanzamento per la velocità di riproduzione
     Show Playback Rate Adjusted Timestamp: Mostra il tempo adattato alla velocità di riproduzione
     Use YouTube-style Shorts: Usa Shorts in stile YouTube

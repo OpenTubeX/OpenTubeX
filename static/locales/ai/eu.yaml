@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Leihoa minimizatzean
       On Window Hide: Leihoak fokua galtzean edo beste leiho batera aldatzean
       Wayland Minimize Unsupported: Waylandek ez die aplikazioei jakinarazten leihoa minimizatzen denean; beraz, abiarazle hau ez dago erabilgarri. Erabili "Leihoak fokua galtzean edo beste leiho batera aldatzean" aukera, minimizatzea ere barne hartzen baitu.
+      On Tab Change Mini Player: Fitxaz aldatzean minierreproduzigailua erakusten da horren ordez. Hau erabiltzeko, ezarri «Bideo batetik irtetean» aukera «Gelditu erreprodukzioa» gisa.
     Scroll Mini Player:
       Scroll Mini Player: Korritzeko minierreproduzigailua
-      When Scrolling Down: Mantendu minierreproduzigailua pantailan behera korritzean
-      On All Tabs: Mantendu minierreproduzigailua pantailan fitxaz aldatzean
-      On Navigation: Jarraitu erreproduzitzen bideoaren orritik irtetean
+      Scroll Player Mode: Behera korritzean
+      Scroll Player Mode Tooltip: Erreproduzigailua leihoaren altueraren erdia gehienez hartzen duen bitartean bakarrik ainguratzen da. Bestela, adibidez telefonoetan horizontalean edo leiho zabaletan, mini erreproduzigailua erakusten da horren ordez.
+      Scroll Player Modes:
+        Mini: Erakutsi minierreproduzigailua
+        Pin: Ainguratu erreproduzigailua goian, lekua badago
+        Off: Korritu orriarekin batera
+      Leaving Video: Bideo batetik irtetean
+      Leaving Video Modes:
+        Keep Playing: Jarraitu erreproduzitzen minierreproduzigailuan
+        Stop: Gelditu erreprodukzioa
     Multiply Seek Interval by Playback Rate: Biderkatu bilaketa-tartea erreprodukzio-abiadurarekin
     Show Playback Rate Adjusted Timestamp: Erakutsi erreprodukzio-abiadurara doitutako denbora-marka
     Use YouTube-style Shorts: Erabili YouTube estiloko Shorts bideoak

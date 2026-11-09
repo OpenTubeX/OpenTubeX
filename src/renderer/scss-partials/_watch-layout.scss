@@ -18,6 +18,27 @@
   grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / minmax(0, 1fr);
 }
 
+// A grid item sticks only within its own row, so a pinned player turns the
+// single column into a flex column, where the video area can stick across the
+// whole page. The player docks instead in layouts that keep the grid.
+@mixin pinned-player-column {
+  &:has(.scrollPinnedPlayer):not(.shortsPlayerActive) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    .videoArea {
+      position: sticky;
+      inset-block-start: var(--top-nav-sticky-offset, 60px);
+      // Above the info, sidebar and comments areas and their open dropdowns
+      z-index: 4;
+      // Hide the page scrolling behind the margins and the ambient glow
+      overflow: clip;
+      background-color: var(--bg-color);
+    }
+  }
+}
+
 // Include at the start of the page's .videoLayout rule.
 @mixin watch-layout-areas {
   @include dual-column-template;
@@ -154,12 +175,14 @@
 
   @container route (width <= 1050px) {
     @include single-column-template;
+    @include pinned-player-column;
   }
 
   // must come after the theater mode media queries so an absent sidebar
   // always collapses the layout to a single full-width column
   &.noSidebar {
     @include single-column-template;
+    @include pinned-player-column;
   }
 
   @container route (width >= 1051px) {

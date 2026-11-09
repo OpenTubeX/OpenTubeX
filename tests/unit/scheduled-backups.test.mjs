@@ -128,7 +128,7 @@ for (const currentSettings of [false, true]) {
     const current = {
       tabBarPosition: 'right', showProgressBarToast: true, hideLiveChatReplay: false,
       moveDownloadsToAppHeader: false, aiVideoSummaryMode: 'expanded', navigationItems: ['history'],
-      autoPictureInPictureTriggers: ['minimize'], scrollMiniPlayerEnabled: true, playlistThumbnailSize: 180,
+      autoPictureInPictureTriggers: ['minimize'], scrollPlayerMode: 'mini', playlistThumbnailSize: 180,
     }
     const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
     try {
@@ -144,14 +144,14 @@ for (const currentSettings of [false, true]) {
       tabBarPosition: 'left', showProgressBarToast: false, hideLiveChatReplay: true,
       moveDownloadsToAppHeader: true, aiVideoSummaryMode: 'hide',
       navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats'],
-      autoPictureInPictureTriggers: ['tab', 'minimize'], scrollMiniPlayerEnabled: false, playlistThumbnailSize: 240,
+      autoPictureInPictureTriggers: ['tab', 'minimize'], scrollPlayerMode: 'off', playlistThumbnailSize: 240,
     }
     for (const [key, value] of Object.entries(expected)) assert.deepEqual(backup.data.settings[key], value, key)
     for (const key of ['hideHome', 'hidePopularVideos', 'hideTrendingVideos']) {
       assert.equal(backup.data.settings[key], false, key)
     }
     for (const key of ['useVerticalTabBar', 'showSubscriptionRefreshToast', 'moveDownloadsToQuickSettings',
-      'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange']) {
+      'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange', 'scrollMiniPlayerEnabled']) {
       assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
     }
   })

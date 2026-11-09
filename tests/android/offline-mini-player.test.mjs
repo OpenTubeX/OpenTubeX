@@ -44,7 +44,7 @@ test('downloaded audio docks on scroll, navigation and swipe without an online c
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone',
+        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone',
         UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100,
         EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false,

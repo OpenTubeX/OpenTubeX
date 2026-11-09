@@ -111,6 +111,11 @@ body > .os-scrollbar {
   inset-inline-end: 0;
 }
 
+/* A pinned Watch page player covers the top of the page. */
+body > .os-scrollbar-vertical {
+  inset-block-start: var(--pinned-player-block-end, 0);
+}
+
 .os-scrollbar-track {
   position: relative;
   box-sizing: border-box;

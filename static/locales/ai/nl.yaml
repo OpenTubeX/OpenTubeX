@@ -839,11 +839,19 @@ Settings:
       On Window Minimize: Bij minimaliseren van venster
       On Window Hide: Wanneer het venster de focus verliest of je naar een ander venster gaat
       Wayland Minimize Unsupported: Wayland meldt het minimaliseren van vensters niet aan apps, waardoor deze trigger niet beschikbaar is. Gebruik in plaats daarvan "Wanneer het venster de focus verliest of je naar een ander venster gaat". Dit geldt ook voor minimaliseren.
+      On Tab Change Mini Player: Bij wisselen van tabblad verschijnt in plaats daarvan de minispeler. Stel ‘Bij het verlaten van een video’ in op ‘Afspelen stoppen’ om dit te gebruiken.
     Scroll Mini Player:
       Scroll Mini Player: Minispeler tijdens scrollen
-      When Scrolling Down: Minispeler in beeld houden tijdens omlaag scrollen
-      On All Tabs: Minispeler in beeld houden bij wisselen van tabblad
-      On Navigation: Blijven afspelen bij het verlaten van de videopagina
+      Scroll Player Mode: Bij omlaag scrollen
+      Scroll Player Mode Tooltip: De speler wordt alleen vastgezet zolang die hoogstens de helft van de vensterhoogte inneemt. Anders, zoals op telefoons in liggende stand of in brede vensters, wordt in plaats daarvan de minispeler getoond.
+      Scroll Player Modes:
+        Mini: Minispeler tonen
+        Pin: Speler bovenaan vastzetten als er ruimte is
+        Off: Meescrollen met de pagina
+      Leaving Video: Bij het verlaten van een video
+      Leaving Video Modes:
+        Keep Playing: Blijven afspelen in een minispeler
+        Stop: Afspelen stoppen
     Multiply Seek Interval by Playback Rate: Zoekinterval vermenigvuldigen met afspeelsnelheid
     Show Playback Rate Adjusted Timestamp: Tijdsaanduiding aangepast aan afspeelsnelheid tonen
     Use YouTube-style Shorts: Shorts in YouTube-stijl gebruiken

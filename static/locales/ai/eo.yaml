@@ -847,11 +847,19 @@ Settings:
       On Window Minimize: Kiam oni minimumigas la fenestron
       On Window Hide: Kiam la fenestro perdas fokuson aŭ oni ŝanĝas al alia
       Wayland Minimize Unsupported: Wayland ne raportas minimumigon de fenestroj al aplikaĵoj, do ĉi tiu ekigilo ne disponeblas. Uzu anstataŭe "Kiam la fenestro perdas fokuson aŭ oni ŝanĝas al alia", kiu ankaŭ kovras minimumigon.
+      On Tab Change Mini Player: Ŝanĝo de langeto anstataŭe montras la ludileton. Por uzi tion, agordu “Kiam oni forlasas videaĵon” al “Ĉesigi ludadon”.
     Scroll Mini Player:
       Scroll Mini Player: Rulumada ludileto
-      When Scrolling Down: Teni ludileton sur la ekrano dum rulumado malsupren
-      On All Tabs: Teni ludileton sur la ekrano dum ŝanĝo de langetoj
-      On Navigation: Daŭrigi ludadon kiam oni foriras de videaĵo
+      Scroll Player Mode: Dum rulumado malsupren
+      Scroll Player Mode Tooltip: La ludilo estas fiksita nur dum ĝi okupas maksimume duonon de la alteco de la fenestro. Alie, ekzemple ĉe telefonoj en horizontala orientiĝo aŭ en larĝaj fenestroj, anstataŭe aperas la miniludilo.
+      Scroll Player Modes:
+        Mini: Montri ludileton
+        Pin: Fiksi la ludilon supre, se estas spaco
+        Off: Rulumi kun la paĝo
+      Leaving Video: Kiam oni forlasas videaĵon
+      Leaving Video Modes:
+        Keep Playing: Daŭrigi ludadon en ludileto
+        Stop: Ĉesigi ludadon
     Multiply Seek Interval by Playback Rate: Multobligi saltintervalon per ludrapido
     Rotate Wide Videos to Landscape in Fullscreen: Turni larĝajn videaĵojn al horizontala orientiĝo en plenekrana reĝimo
     Swipe Up or Down to Enter or Exit Fullscreen: Ŝovi supren aŭ malsupren por eniri aŭ eliri el plenekrana reĝimo

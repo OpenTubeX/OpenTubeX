@@ -1024,11 +1024,19 @@ Settings:
       On Window Minimize: Sumažinant langą
       On Window Hide: Langui praradus aktyvumą arba perėjus į kitą langą
       Wayland Minimize Unsupported: Wayland nepraneša programoms apie lango sumažinimą, todėl šis paleidiklis nepasiekiamas. Vietoj jo naudokite „Langui praradus aktyvumą arba perėjus į kitą langą“, nes tai taip pat apima sumažinimą.
+      On Tab Change Mini Player: Perjungiant skirtukus vietoj to rodomas mini leistuvas. Norėdami tai naudoti, nustatykite „Išeinant iš vaizdo įrašo“ į „Sustabdyti atkūrimą“.
     Scroll Mini Player:
       Scroll Mini Player: Mini leistuvas slenkant
-      When Scrolling Down: Slenkant žemyn laikyti mini leistuvą ekrane
-      On All Tabs: Perjungiant skirtukus laikyti mini leistuvą ekrane
-      On Navigation: Tęsti atkūrimą išėjus iš vaizdo įrašo puslapio
+      Scroll Player Mode: Slenkant žemyn
+      Scroll Player Mode Tooltip: Grotuvas prisegamas tik tol, kol užima ne daugiau kaip pusę lango aukščio. Kitu atveju, pavyzdžiui, telefonuose gulsčiu režimu arba plačiuose languose, vietoj jo rodomas mini grotuvas.
+      Scroll Player Modes:
+        Mini: Rodyti mini leistuvą
+        Pin: Prisegti grotuvą viršuje, jei yra vietos
+        Off: Slinkti kartu su puslapiu
+      Leaving Video: Išeinant iš vaizdo įrašo
+      Leaving Video Modes:
+        Keep Playing: Tęsti atkūrimą mini leistuve
+        Stop: Sustabdyti atkūrimą
     Multiply Seek Interval by Playback Rate: Dauginti persukimo intervalą iš atkūrimo greičio
     Show Playback Rate Adjusted Timestamp: Rodyti pagal atkūrimo greitį pakoreguotą laiko žymą
     Use YouTube-style Shorts: Naudoti „YouTube“ stiliaus „Shorts“

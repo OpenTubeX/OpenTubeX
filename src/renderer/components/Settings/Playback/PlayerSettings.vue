@@ -528,30 +528,6 @@
         setting-key="rotateFullscreenToLandscape"
         @change="updateRotateFullscreenToLandscape"
       />
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
-        :compact="true"
-        :default-value="scrollMiniPlayerEnabled"
-        setting-key="scrollMiniPlayerEnabled"
-        @change="updateScrollMiniPlayerEnabled"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON || IS_CAPACITOR"
-        :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
-        :compact="true"
-        :default-value="scrollMiniPlayerOnAllTabs"
-        :disabled="autoPictureInPictureTriggers.includes('tab') || store.getters.getKeepPlayingOnNavigation"
-        setting-key="scrollMiniPlayerOnAllTabs"
-        @change="updateScrollMiniPlayerOnAllTabs"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON || IS_CAPACITOR"
-        :label="t('Settings.Player Settings.Scroll Mini Player.On Navigation')"
-        :compact="true"
-        :default-value="store.getters.getKeepPlayingOnNavigation"
-        setting-key="keepPlayingOnNavigation"
-        @change="store.dispatch('updateKeepPlayingOnNavigation', $event)"
-      />
     </div>
     <FtFlexBox
       v-if="IS_CAPACITOR"
@@ -574,9 +550,9 @@
         :title="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
         :labels="autoPictureInPictureTriggerLabels"
         :values="AUTO_PIP_TRIGGER_VALUES"
-        :disabled-values="supportsAutoPictureInPictureMinimize ? [] : ['minimize']"
+        :disabled-values="autoPictureInPictureDisabledTriggers"
         setting-key="autoPictureInPictureTriggers"
-        :tooltips="supportsAutoPictureInPictureMinimize ? {} : { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') }"
+        :tooltips="autoPictureInPictureTriggerTooltips"
       />
     </FtFlexBox>
     <FtFlexBox class="playerSelectGrid">
@@ -590,6 +566,28 @@
         :tooltip="t('Settings.Player Settings.Default Viewing Mode.Tooltip')"
         :icon="['fas', 'expand']"
         @change="updateDefaultViewingMode"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Player Settings.Scroll Mini Player.Scroll Player Mode')"
+        :value="store.getters.getScrollPlayerMode"
+        setting-key="scrollPlayerMode"
+        :select-names="scrollPlayerModeNames"
+        :select-values="SCROLL_PLAYER_MODE_VALUES"
+        :tooltip="t('Settings.Player Settings.Scroll Mini Player.Scroll Player Mode Tooltip')"
+        :icon="['fas', 'compress']"
+        @change="store.dispatch('updateScrollPlayerMode', $event)"
+      />
+      <FtSelect
+        v-if="USING_ELECTRON || IS_CAPACITOR"
+        size-to-content
+        :placeholder="t('Settings.Player Settings.Scroll Mini Player.Leaving Video')"
+        :value="store.getters.getKeepPlayingOnNavigation ? 'keep' : 'stop'"
+        setting-key="keepPlayingOnNavigation"
+        :select-names="leavingVideoNames"
+        :select-values="LEAVING_VIDEO_VALUES"
+        :icon="['fas', 'play']"
+        @change="store.dispatch('updateKeepPlayingOnNavigation', $event === 'keep')"
       />
     </FtFlexBox>
     <h4 class="groupTitle">
@@ -1222,6 +1220,21 @@ const autoPictureInPictureTriggerLabels = computed(() => [
   t('Settings.Player Settings.Auto Picture in Picture.On Window Hide')
 ])
 
+// Videos that keep playing in the mini player do not enter Picture-in-Picture on tab changes.
+const autoPictureInPictureDisabledTriggers = computed(() => [
+  ...(store.getters.getKeepPlayingOnNavigation && (USING_ELECTRON || IS_CAPACITOR) ? ['tab'] : []),
+  ...(supportsAutoPictureInPictureMinimize.value ? [] : ['minimize'])
+])
+
+const autoPictureInPictureTriggerTooltips = computed(() => ({
+  ...(autoPictureInPictureDisabledTriggers.value.includes('tab')
+    ? { tab: t('Settings.Player Settings.Auto Picture in Picture.On Tab Change Mini Player') }
+    : {}),
+  ...(supportsAutoPictureInPictureMinimize.value
+    ? {}
+    : { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') })
+}))
+
 /** @type {import('vue').WritableComputedRef<string[]>} */
 const autoPictureInPictureTriggers = computed({
   get: () => store.getters.getAutoPictureInPictureTriggers,
@@ -1234,25 +1247,20 @@ function updateMobileAutoPictureInPicture(value) {
   store.dispatch('updateMobileAutoPictureInPicture', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
+const SCROLL_PLAYER_MODE_VALUES = ['mini', 'pin', 'off']
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const scrollMiniPlayerOnAllTabs = computed(() => store.getters.getKeepPlayingOnNavigation || store.getters.getScrollMiniPlayerOnAllTabs)
+const scrollPlayerModeNames = computed(() => [
+  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Mini'),
+  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Pin'),
+  t('Settings.Player Settings.Scroll Mini Player.Scroll Player Modes.Off')
+])
 
-/**
- * @param {boolean} value
- */
-function updateScrollMiniPlayerEnabled(value) {
-  store.dispatch('updateScrollMiniPlayerEnabled', value)
-}
+const LEAVING_VIDEO_VALUES = ['keep', 'stop']
 
-/**
- * @param {boolean} value
- */
-function updateScrollMiniPlayerOnAllTabs(value) {
-  store.dispatch('updateScrollMiniPlayerOnAllTabs', value)
-}
+const leavingVideoNames = computed(() => [
+  t('Settings.Player Settings.Scroll Mini Player.Leaving Video Modes.Keep Playing'),
+  t('Settings.Player Settings.Scroll Mini Player.Leaving Video Modes.Stop')
+])
 
 const FORMAT_VALUES = ['dash', 'legacy', 'audio']
 

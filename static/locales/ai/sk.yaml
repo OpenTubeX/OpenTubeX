@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Pri minimalizovaní okna
       On Window Hide: Keď okno stratí zameranie alebo sa prepnete inam
       Wayland Minimize Unsupported: Wayland neoznamuje aplikáciám minimalizovanie okna, preto táto možnosť nie je dostupná. Použite možnosť „Keď okno stratí zameranie alebo sa prepnete inam“, ktorá zahŕňa aj minimalizovanie.
+      On Tab Change Mini Player: Pri prepnutí karty sa namiesto toho zobrazí miniatúrny prehrávač. Ak to chcete použiť, nastavte „Pri opustení videa“ na „Zastaviť prehrávanie“.
     Scroll Mini Player:
       Scroll Mini Player: Miniatúrny prehrávač pri posúvaní
-      When Scrolling Down: Pri posúvaní nadol ponechať miniatúrny prehrávač na obrazovke
-      On All Tabs: Pri prepínaní kariet ponechať miniatúrny prehrávač na obrazovke
-      On Navigation: Pokračovať v prehrávaní po opustení stránky videa
+      Scroll Player Mode: Pri posúvaní nadol
+      Scroll Player Mode Tooltip: Prehrávač sa pripne len vtedy, keď zaberá najviac polovicu výšky okna. Inak, napríklad na telefónoch na šírku alebo v širokých oknách, sa namiesto toho zobrazí miniprehrávač.
+      Scroll Player Modes:
+        Mini: Zobraziť miniatúrny prehrávač
+        Pin: Pripnúť prehrávač hore, ak je miesto
+        Off: Posúvať so stránkou
+      Leaving Video: Pri opustení videa
+      Leaving Video Modes:
+        Keep Playing: Pokračovať v prehrávaní v miniatúrnom prehrávači
+        Stop: Zastaviť prehrávanie
     Multiply Seek Interval by Playback Rate: Násobiť interval posunu rýchlosťou prehrávania
     Show Playback Rate Adjusted Timestamp: Zobraziť čas upravený podľa rýchlosti prehrávania
     Use YouTube-style Shorts: Použiť krátke videá v štýle YouTube Shorts

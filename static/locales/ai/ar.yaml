@@ -839,11 +839,19 @@ Settings:
       On Window Minimize: عند تصغير النافذة
       On Window Hide: عندما تفقد النافذة التركيز أو يتم تبديلها
       Wayland Minimize Unsupported: لا يُبلغ Wayland عن تصغير النافذة للتطبيقات، لذا فإن هذا المشغل غير متاح. استخدم "عندما تفقد النافذة التركيز أو يتم تبديلها" بدلاً من ذلك، والتي تغطي أيضًا عملية التصغير.
+      On Tab Change Mini Player: يؤدي تبديل علامات التبويب إلى إظهار المشغل الصغير بدلاً من ذلك. لاستخدام هذا، اضبط «عند مغادرة فيديو» على «إيقاف التشغيل».
     Scroll Mini Player:
       Scroll Mini Player: إبقاء المشغل المصغّر عند التمرير
-      When Scrolling Down: احتفظ بمشغل صغير على الشاشة عند التمرير لأسفل
-      On All Tabs: احتفظ بمشغل صغير على الشاشة عند التبديل بين علامات التبويب
-      On Navigation: متابعة التشغيل عند مغادرة صفحة الفيديو
+      Scroll Player Mode: عند التمرير لأسفل
+      Scroll Player Mode Tooltip: يُثبَّت المشغل فقط ما دام لا يشغل أكثر من نصف ارتفاع النافذة. وإلا، كما في الهواتف بالوضع الأفقي أو في النوافذ العريضة، يظهر المشغل المصغر بدلًا من ذلك.
+      Scroll Player Modes:
+        Mini: إظهار مشغل صغير
+        Pin: تثبيت المشغل في الأعلى إذا توفرت مساحة
+        Off: التمرير مع الصفحة
+      Leaving Video: عند مغادرة فيديو
+      Leaving Video Modes:
+        Keep Playing: متابعة التشغيل في مشغل صغير
+        Stop: إيقاف التشغيل
     Multiply Seek Interval by Playback Rate: اضرب الفاصل الزمني للبحث بمعدل التشغيل
     Show Playback Rate Adjusted Timestamp: عرض الطابع الزمني المعدل لمعدل التشغيل
     Use YouTube-style Shorts: استخدم فيديوهات قصيرة بأسلوب YouTube

@@ -17,6 +17,7 @@ import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import { watchNavigationKey } from '../../../tabs/TabContext'
 import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
 import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
+import { setAndroidPageScrollbarInsetTop } from '../../../helpers/androidUi'
 import {
   animateScrollMiniPlayerBounce,
   clampScrollMiniPlayerRect,
@@ -47,6 +48,7 @@ import {
   updateScrollMiniPlayerVolumeBarFill,
   ENTER_MINI_RATIO,
   EXIT_MINI_RATIO,
+  PINNED_PLAYER_MAX_VIEWPORT_RATIO,
   SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT,
 } from '../../../helpers/scrollMiniPlayer'
 import { createMobileMiniMorph } from './scrollMiniPlayerMorph'
@@ -57,6 +59,9 @@ const SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS = 400
 const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
 // A restore scroll that has not moved for this long was stopped by a touch.
 const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
+// Tabs each run this, so only the player that offset the page scrollbar resets it.
+let pageScrollbarStartOwner = null
+let pageScrollbarBlockEnd = 0
 
 /**
  * OpenTubeX's scroll mini-player integration. Keeping this composable outside the
@@ -85,8 +90,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const mobileMiniBarExpanded = ref(false)
   const mobileMiniBarCollapsed = computed(() => compactMobileMiniPlayer.value && !mobileMiniBarExpanded.value)
   const mobileMiniBarHeight = computed(() => compactMobileMiniPlayer.value ? (mobileMiniBarExpanded.value ? 112 : 64) : 108)
-  const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
-  const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation || store.getters.getScrollMiniPlayerOnAllTabs)
+  /** @type {import('vue').ComputedRef<'mini' | 'pin' | 'off'>} */
+  const scrollPlayerMode = computed(() => store.getters.getScrollPlayerMode)
+  const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation)
   const autoPictureInPictureOnTabChange = computed(
     () => !store.getters.getKeepPlayingOnNavigation &&
       !(watchNavigation?.detached.value && watchNavigation.tabPresented.value) &&
@@ -94,6 +100,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   )
   const scrollMiniPlayerActive = ref(false)
   const scrollMiniPlayerAnimating = ref(false)
+  // Whether the inline player is short enough to stay pinned above the page.
+  const scrollPinnedPlayerFits = ref(false)
   const scrollMiniPlaceholderHeight = ref(0)
   /** @type {import('vue').Ref<import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect>} */
   const scrollMiniPlayerRect = ref(getDefaultScrollMiniPlayerRect())
@@ -203,6 +211,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const mobileMiniBarOverlayStyle = ref(null)
   const mobileMiniBar = computed(() => Boolean(process.env.IS_CAPACITOR ||
     ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
+  // The Watch layout keeps a pinned player in view, so it never scrolls far
+  // enough to dock. Where the layout cannot pin it, the player docks instead.
+  const scrollPinnedPlayer = computed(() => scrollPlayerMode.value === 'pin' &&
+    scrollPinnedPlayerFits.value &&
+    isActiveTab.value &&
+    !playerSuspended.value &&
+    !fullWindowEnabled.value &&
+    !scrollMiniPlayerActive.value &&
+    !scrollMiniPlayerAnimating.value &&
+    !scrollMiniPlayerDragStyle.value)
   const mobileMiniBarCanDismiss = computed(() => Boolean(scrollMiniPlayerDragStyle.value) ||
     (scrollMiniPlayerActive.value && (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value))))
   let inlineDrag = null
@@ -638,7 +656,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!canUseScrollMiniPlayerBase()) return false
 
     if (isActiveTab.value) {
-      return scrollMiniPlayerEnabled.value && !hasCrossTabMiniPlayerOwner()
+      return scrollPlayerMode.value !== 'off' && !hasCrossTabMiniPlayerOwner()
     }
 
     return !autoPictureInPictureOnTabChange.value &&
@@ -1081,6 +1099,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // its existing layout so returning cannot start a dock/restore animation.
     if (isAndroidPipLayoutActive()) return
     if (inlineDrag) return
+    updateScrollPinnedPlayerFit()
     if (!isActiveTab.value) {
       refreshCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
     }
@@ -1127,6 +1146,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     } else if (ratio < ENTER_MINI_RATIO && !scrollMiniInlineHold && canActivateScrollMiniPlayer()) {
       activateScrollMiniPlayer(animateActivation)
     }
+  }
+
+  function updateScrollPinnedPlayerFit() {
+    // The docked player's size says nothing about the inline one, and leaving
+    // the old value keeps the page from pinning a player it just docked.
+    if (scrollPlayerMode.value !== 'pin' || !isActiveTab.value || scrollMiniPlayerActive.value) return
+    // The rendered height, since a wider than 16:9 player can fit when the estimate doesn't.
+    const height = container.value?.offsetHeight ?? 0
+    scrollPinnedPlayerFits.value = height >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT &&
+      height <= window.innerHeight * PINNED_PLAYER_MAX_VIEWPORT_RATIO
   }
 
   /**
@@ -1700,7 +1729,50 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   watch(compactMobileMiniPlayer, () => { mobileMiniBarExpanded.value = false })
   watch(mobileMiniBarHeight, () => nextTick(handleScrollMiniWindowResize))
 
-  watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
+  watch(scrollPlayerMode, () => updateScrollMiniPlayer())
+  // The pinned player covers the top of the page, so the page scrollbar starts below it.
+  let pinnedAreaObservers = []
+  function releasePageScrollbarStart() {
+    for (const observer of pinnedAreaObservers) observer.disconnect()
+    pinnedAreaObservers = []
+    if (pageScrollbarStartOwner !== container) return
+    pageScrollbarStartOwner = null
+    setPageScrollbarStart(0)
+  }
+  function setPageScrollbarStart(blockEnd) {
+    if (blockEnd === pageScrollbarBlockEnd) return
+    pageScrollbarBlockEnd = blockEnd
+    if (blockEnd === 0) {
+      document.documentElement.style.removeProperty('--pinned-player-block-end')
+    } else {
+      document.documentElement.style.setProperty('--pinned-player-block-end', `${blockEnd}px`)
+    }
+    // Android draws the page scrollbar natively.
+    setAndroidPageScrollbarInsetTop(blockEnd).catch(error => {
+      console.warn('Could not move the Android page scrollbar', error)
+    })
+  }
+  watch(scrollPinnedPlayer, pinned => {
+    releasePageScrollbarStart()
+    const area = pinned ? container.value?.closest('.videoArea') : null
+    if (!area) return
+    pageScrollbarStartOwner = container
+    const update = () => {
+      // Wide layouts keep the player in the page and dock it instead.
+      const style = getComputedStyle(area)
+      setPageScrollbarStart(style.position === 'sticky'
+        ? parseFloat(style.insetBlockStart) + area.getBoundingClientRect().height
+        : 0)
+    }
+    const resizeObserver = new ResizeObserver(update)
+    resizeObserver.observe(area)
+    // Opening a sidebar panel in theatre mode stops the pinning without resizing the player.
+    const layoutObserver = new MutationObserver(update)
+    const layout = area.closest('.videoLayout')
+    if (layout) layoutObserver.observe(layout, { attributes: true, attributeFilter: ['class'] })
+    pinnedAreaObservers = [resizeObserver, layoutObserver]
+  }, { flush: 'post' })
+  onBeforeUnmount(releasePageScrollbarStart)
   watch(() => watchNavigation?.detached.value, detached => {
     if (detached) fullWindowEnabled.value = false
   }, { flush: 'sync' })
@@ -1769,6 +1841,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniPlayerStyle,
     scrollMiniPlayerStashed,
     scrollMiniPlayerStashedSide,
+    scrollPinnedPlayer,
     scrollMiniPlayPauseVisible,
     scrollMiniResizeCorner,
     scrollMiniResizeHandleOnLightBg,

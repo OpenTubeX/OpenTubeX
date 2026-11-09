@@ -34,7 +34,7 @@ before(async () => {
   originalSettings = await page.evaluate(() => {
     const app = document.querySelector('#app').__vue_app__.config.globalProperties
     return { scale: app.$store.getters.getUiScale, auto: app.$store.getters.getMobileAutoPictureInPicture,
-      mini: app.$store.getters.getScrollMiniPlayerEnabled, animation: app.$store.getters.getAnimationSpeed,
+      mini: app.$store.getters.getScrollPlayerMode, animation: app.$store.getters.getAnimationSpeed,
       motion: app.$store.getters.getReducedMotion, route: app.$router.currentRoute.value.fullPath }
   })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/abcdefghijk'))
@@ -65,7 +65,7 @@ before(async () => {
     watch.activeFormat = 'legacy'
     watch.legacyFormats = [{ url: `data:video/webm;base64,${media}`, mimeType: 'video/webm',
       width: 640, height: 360, qualityLabel: '360p', fps: 30, localFile: true, localFileLabel: 'test' }]
-    app.config.globalProperties.$store.commit('setScrollMiniPlayerEnabled', true)
+    app.config.globalProperties.$store.commit('setScrollPlayerMode', 'mini')
   }, media.toString('base64'))
   await page.waitForFunction(() => document.querySelector('video')?.readyState >= 2)
   const skip = page.getByRole('button', { name: 'Skip', exact: true })
@@ -81,7 +81,7 @@ after(async () => {
         const app = document.querySelector('#app').__vue_app__.config.globalProperties
         app.$store.commit('setUiScale', settings.scale)
         app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
-        app.$store.commit('setScrollMiniPlayerEnabled', settings.mini)
+        app.$store.commit('setScrollPlayerMode', settings.mini)
         app.$store.commit('setAnimationSpeed', settings.animation)
         app.$store.commit('setReducedMotion', settings.motion)
         await app.$router.push(settings.route)
@@ -191,7 +191,7 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
     }, trigger)
     await page.evaluate(scroll => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setScrollMiniPlayerEnabled', !scroll)
+      store.commit('setScrollPlayerMode', scroll ? 'off' : 'mini')
       if (scroll) {
         // Stand in for a long description/comments section while retaining
         // the real Watch layout and its scroll viewport.
@@ -397,7 +397,7 @@ for (const scale of [100, 125]) {
   test(`native PiP uses its accepted crop when leaving during the scroll mini-player morph at ${scale}%`, { skip: !enabled }, async () => {
     await page.evaluate(async scale => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setScrollMiniPlayerEnabled', false)
+      store.commit('setScrollPlayerMode', 'off')
       store.commit('setUiScale', scale)
       store.commit('setMobileAutoPictureInPicture', true)
       // Widen the race so native entry consistently overlaps the morph.
@@ -421,7 +421,7 @@ for (const scale of [100, 125]) {
           if (event.active && event.transitioning) window.__pipAcceptedLayout = event.layout
         }
         window.addEventListener('opentubex:android-pip', window.__pipCaptureLayout)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollMiniPlayerEnabled', true)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollPlayerMode', 'mini')
         window.scrollTo(0, 1000)
       })
       await page.waitForSelector('[data-mobile-mini-morph]')
@@ -470,7 +470,7 @@ for (const scale of [100, 125]) {
         delete window.__pipAcceptedLayout
         document.querySelector('video')?.pause()
         document.querySelector('#pip-offscreen-content')?.remove()
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollMiniPlayerEnabled', false)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollPlayerMode', 'off')
         window.scrollTo(0, 0)
       })
     }

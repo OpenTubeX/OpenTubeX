@@ -839,11 +839,19 @@ Settings:
       On Window Minimize: Ao minimizar a janela
       On Window Hide: Quando a janela perde o foco ou se muda para outra janela
       Wayland Minimize Unsupported: O Wayland não comunica às aplicações quando uma janela é minimizada, pelo que este acionador não está disponível. Use «Quando a janela perde o foco ou se muda para outra janela», que também abrange a minimização.
+      On Tab Change Mini Player: Ao mudar de separador, é mostrado o minileitor. Para usar esta opção, defina “Ao sair de um vídeo” como “Parar a reprodução”.
     Scroll Mini Player:
       Scroll Mini Player: Minileitor ao deslocar
-      When Scrolling Down: Manter um minileitor no ecrã ao deslocar para baixo
-      On All Tabs: Manter um minileitor no ecrã ao mudar de separador
-      On Navigation: Continuar a reprodução ao sair da página do vídeo
+      Scroll Player Mode: Ao deslocar para baixo
+      Scroll Player Mode Tooltip: O leitor só é fixado enquanto ocupar no máximo metade da altura da janela. Caso contrário, como em telemóveis na horizontal ou em janelas largas, é mostrado o minileitor.
+      Scroll Player Modes:
+        Mini: Mostrar um minileitor
+        Pin: Fixar o leitor no topo se houver espaço
+        Off: Deslocar com a página
+      Leaving Video: Ao sair de um vídeo
+      Leaving Video Modes:
+        Keep Playing: Continuar a reprodução num minileitor
+        Stop: Parar a reprodução
     Multiply Seek Interval by Playback Rate: Multiplicar o intervalo de avanço pela velocidade de reprodução
     Show Playback Rate Adjusted Timestamp: Mostrar marca temporal ajustada à velocidade de reprodução
     Use YouTube-style Shorts: Usar Shorts ao estilo do YouTube

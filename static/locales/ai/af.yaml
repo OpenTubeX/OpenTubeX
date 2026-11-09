@@ -984,11 +984,19 @@ Settings:
       On Window Minimize: Wanneer die venster geminimaliseer word
       On Window Hide: Wanneer die venster fokus verloor of weggeskakel word
       Wayland Minimize Unsupported: Wayland rapporteer nie vensterminimalisering aan toepe nie, dus is hierdie sneller nie beskikbaar nie. Gebruik eerder "Wanneer die venster fokus verloor of weggeskakel word", wat ook minimalisering dek.
+      On Tab Change Mini Player: Om oortjies te wissel wys eerder die minispeler. Stel “Wanneer u ’n video verlaat” op “Stop speel” om dit te gebruik.
     Scroll Mini Player:
       Scroll Mini Player: Rol-minispeler
-      When Scrolling Down: Hou ’n minispeler op die skerm wanneer u afrol
-      On All Tabs: Hou ’n minispeler op die skerm wanneer u oortjies wissel
-      On Navigation: Hou aan speel wanneer u van ’n video weg navigeer
+      Scroll Player Mode: Wanneer u afrol
+      Scroll Player Mode Tooltip: Die speler word net vasgespeld solank dit hoogstens die helfte van die venster se hoogte beslaan. Andersins, soos op fone in landskap of in wye vensters, word eerder die minispeler gewys.
+      Scroll Player Modes:
+        Mini: Wys ’n minispeler
+        Pin: Speld die speler bo vas as daar plek is
+        Off: Rol saam met die bladsy
+      Leaving Video: Wanneer u ’n video verlaat
+      Leaving Video Modes:
+        Keep Playing: Speel aan in ’n minispeler
+        Stop: Stop speel
     Multiply Seek Interval by Playback Rate: Vermenigvuldig spoelinterval met afspeelspoed
     Rotate Wide Videos to Landscape in Fullscreen: Draai wye video’s na landskap in volskerm
     Swipe Up or Down to Enter or Exit Fullscreen: Swiep op of af om volskerm te betree of te verlaat

@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Az ablak kis méretűre állításakor
       On Window Hide: Amikor az ablak elveszti a fókuszt, vagy másik ablakra vált
       Wayland Minimize Unsupported: A Wayland nem jelzi az alkalmazásoknak az ablak kis méretűre állítását, ezért ez az eseményindító nem érhető el. Használja helyette az „Amikor az ablak elveszti a fókuszt, vagy másik ablakra vált” lehetőséget, amely a kis méretűre állítást is lefedi.
+      On Tab Change Mini Player: Lapváltáskor helyette a minilejátszó jelenik meg. A használatához állítsa a „Videó elhagyásakor” beállítást „Lejátszás leállítása” értékre.
     Scroll Mini Player:
       Scroll Mini Player: Görgetéskor megjelenő minilejátszó
-      When Scrolling Down: Minilejátszó a képernyőn lefelé görgetéskor
-      On All Tabs: Minilejátszó a képernyőn lapváltáskor
-      On Navigation: Lejátszás folytatása a videóoldal elhagyásakor
+      Scroll Player Mode: Lefelé görgetéskor
+      Scroll Player Mode Tooltip: A lejátszó csak akkor rögzül, ha legfeljebb az ablak magasságának felét foglalja el. Ellenkező esetben, például fekvő tájolású telefonokon vagy széles ablakokban, helyette a minilejátszó jelenik meg.
+      Scroll Player Modes:
+        Mini: Minilejátszó megjelenítése
+        Pin: Lejátszó rögzítése felül, ha van hely
+        Off: Görgetés az oldallal együtt
+      Leaving Video: Videó elhagyásakor
+      Leaving Video Modes:
+        Keep Playing: Lejátszás folytatása minilejátszóban
+        Stop: Lejátszás leállítása
     Multiply Seek Interval by Playback Rate: Keresési időköz szorzása a lejátszási sebességgel
     Show Playback Rate Adjusted Timestamp: Lejátszási sebességhez igazított időbélyeg megjelenítése
     Use YouTube-style Shorts: YouTube-stílusú Shorts használata

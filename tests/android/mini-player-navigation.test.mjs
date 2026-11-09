@@ -35,7 +35,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true,
+        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini',
         CapacitorLayoutMode: 'phone', UiScale: 100, HideComments: false,
         BackendPreference: 'invidious', BackendFallback: false,
         RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,

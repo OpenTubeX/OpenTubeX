@@ -828,11 +828,19 @@ Settings:
       On Window Minimize: Khi thu nhỏ cửa sổ
       On Window Hide: Khi cửa sổ mất lấy nét hoặc bị chuyển ra sau
       Wayland Minimize Unsupported: Wayland không thông báo cho ứng dụng khi cửa sổ được thu nhỏ, nên không dùng được điều kiện này. Hãy dùng "Khi cửa sổ mất lấy nét hoặc bị chuyển ra sau", điều kiện này cũng bao gồm việc thu nhỏ.
+      On Tab Change Mini Player: Khi chuyển thẻ, trình phát thu nhỏ sẽ hiện thay thế. Để dùng tùy chọn này, hãy đặt "Khi rời khỏi video" thành "Dừng phát".
     Scroll Mini Player:
       Scroll Mini Player: Trình phát thu nhỏ khi cuộn
-      When Scrolling Down: Giữ trình phát thu nhỏ trên màn hình khi cuộn xuống
-      On All Tabs: Giữ trình phát thu nhỏ trên màn hình khi chuyển thẻ
-      On Navigation: Tiếp tục phát khi rời khỏi trang video
+      Scroll Player Mode: Khi cuộn xuống
+      Scroll Player Mode Tooltip: Trình phát chỉ được ghim khi chiếm tối đa một nửa chiều cao cửa sổ. Nếu không, chẳng hạn trên điện thoại ở chế độ ngang hoặc trong cửa sổ rộng, trình phát mini sẽ hiển thị thay thế.
+      Scroll Player Modes:
+        Mini: Hiện trình phát thu nhỏ
+        Pin: Ghim trình phát ở trên cùng nếu còn chỗ
+        Off: Cuộn cùng trang
+      Leaving Video: Khi rời khỏi video
+      Leaving Video Modes:
+        Keep Playing: Tiếp tục phát trong trình phát thu nhỏ
+        Stop: Dừng phát
     Multiply Seek Interval by Playback Rate: Nhân khoảng tua với tốc độ phát
     Show Playback Rate Adjusted Timestamp: Hiện mốc thời gian đã điều chỉnh theo tốc độ phát
     Use YouTube-style Shorts: Dùng video ngắn kiểu YouTube

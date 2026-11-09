@@ -379,6 +379,16 @@ export function setAndroidPageScrollbarsHidden(hidden) {
   return AndroidUi?.setPageScrollbarsHidden({ hidden }) ?? Promise.resolve()
 }
 
+/**
+ * Starts Android's page scrollbar below a pinned player.
+ * @param {number} inset CSS pixels from the top of the page
+ */
+export function setAndroidPageScrollbarInsetTop(inset) {
+  // UI Scale zooms the viewport, which devicePixelRatio leaves out.
+  const scale = window.devicePixelRatio * (window.visualViewport?.scale ?? 1)
+  return AndroidUi?.setPageScrollbarInsetTop({ inset: Math.round(inset * scale) }) ?? Promise.resolve()
+}
+
 /** Colors native inset padding used by Android WebViews without edge-to-edge CSS. */
 export function setAndroidSystemBarsBackground(color, followSystem) {
   if (Capacitor.getPlatform() !== 'android') return Promise.resolve()

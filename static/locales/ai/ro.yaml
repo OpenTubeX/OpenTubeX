@@ -833,11 +833,19 @@ Settings:
       On Window Minimize: La minimizarea ferestrei
       On Window Hide: Când fereastra pierde focalizarea sau se trece la alta
       Wayland Minimize Unsupported: Wayland nu raportează aplicațiilor minimizarea ferestrelor, deci acest declanșator nu este disponibil. Folosiți în schimb „Când fereastra pierde focalizarea sau se trece la alta”, opțiune care acoperă și minimizarea.
+      On Tab Change Mini Player: La schimbarea filelor se afișează în schimb miniplayerul. Pentru a folosi această opțiune, setează „La părăsirea unui videoclip” la „Oprește redarea”.
     Scroll Mini Player:
       Scroll Mini Player: Miniplayer la derulare
-      When Scrolling Down: Păstrează un miniplayer pe ecran la derularea în jos
-      On All Tabs: Păstrează un miniplayer pe ecran la schimbarea filelor
-      On Navigation: Continuă redarea când părăsești pagina videoclipului
+      Scroll Player Mode: La derularea în jos
+      Scroll Player Mode Tooltip: Playerul este fixat doar cât timp ocupă cel mult jumătate din înălțimea ferestrei. Altfel, de exemplu pe telefoane în modul peisaj sau în ferestre late, se afișează în schimb mini playerul.
+      Scroll Player Modes:
+        Mini: Afișează un miniplayer
+        Pin: Fixează playerul sus dacă este loc
+        Off: Derulează odată cu pagina
+      Leaving Video: La părăsirea unui videoclip
+      Leaving Video Modes:
+        Keep Playing: Continuă redarea într-un miniplayer
+        Stop: Oprește redarea
     Multiply Seek Interval by Playback Rate: Înmulțește intervalul de salt cu viteza de redare
     Show Playback Rate Adjusted Timestamp: Afișează marcajul temporal ajustat la viteza de redare
     Use YouTube-style Shorts: Folosește videoclipuri Shorts în stil YouTube
