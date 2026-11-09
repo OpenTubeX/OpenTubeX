@@ -531,7 +531,8 @@ test('a blocked internet check neither stops reachable services nor keeps the ba
   await page.reload()
   const banner = page.locator('.connectionStatus')
   await expect(banner).toHaveText('Connection lost. Trying to reconnect…')
-  expect(await page.evaluate(() => fetch('https://wan.example/data').then(response => response.text()))).toBe('working')
+  // Cacheable requests prove nothing, so only one that bypasses the HTTP cache ends the outage
+  expect(await page.evaluate(() => fetch('https://wan.example/data', { cache: 'no-store' }).then(response => response.text()))).toBe('working')
   await expect(banner).toHaveText('Back online')
   await expect(banner).toBeHidden()
 })
