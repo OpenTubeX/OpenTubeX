@@ -134,8 +134,17 @@
   scale: 1;
 }
 
-.channelName {
+.channelText {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 0.25rem;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.channelName {
   color: inherit;
   font-size: 1.1rem;
   text-decoration: none;
@@ -150,6 +159,17 @@
   -webkit-box-orient: vertical;
   padding-block: 0;
   padding-inline: 4px;
+}
+
+.channelHandle {
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  padding-inline: 4px;
+  overflow: hidden;
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .unsubscribeContainer {

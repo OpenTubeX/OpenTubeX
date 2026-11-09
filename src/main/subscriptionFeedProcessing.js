@@ -19,11 +19,12 @@ export function processSubscriptionFeed({ format, data: serializedData, text, fe
     const suffix = { videos: '/videos', live: '/streams', posts: '/posts' }[feedType]
     const selected = channel.current_tab?.endpoint.metadata.url?.endsWith(suffix)
     if (feedType === 'posts') return { posts: selected ? parsers.parseLocalCommunityPosts(channel) : [] }
-    const { id = channelId, name, thumbnailUrl } = parsers.parseLocalChannelHeader(channel, true)
+    const { id = channelId, name, thumbnailUrl, handle } = parsers.parseLocalChannelHeader(channel, true)
     return {
       channelId: id,
       name,
       thumbnailUrl,
+      handle,
       videos: selected ? parsers.parseLocalChannelVideos(channel.videos, id, name) : [],
       needsUploadsPlaylist: feedType === 'videos' && !selected && name.endsWith('- Topic') && !!channel.metadata.music_artist_name,
       continuation: feedType === 'live' && selected ? getEmptyLiveContinuation(data) : null,

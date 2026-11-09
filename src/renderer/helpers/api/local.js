@@ -1435,11 +1435,11 @@ export async function getLocalChannelVideos(id, safetyMode = false, signal) {
           if (error.message !== 'The playlist does not exist.') throw error
         }
       }
-      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, videos: result.videos }
+      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, handle: result.handle, videos: result.videos }
     }
 
     const videosTab = new YT.Channel(null, response)
-    const { id: channelId = id, name, thumbnailUrl } = parseLocalChannelHeader(videosTab, true)
+    const { id: channelId = id, name, thumbnailUrl, handle } = parseLocalChannelHeader(videosTab, true)
 
     let videos
 
@@ -1469,6 +1469,7 @@ export async function getLocalChannelVideos(id, safetyMode = false, signal) {
     return {
       name,
       thumbnailUrl,
+      handle,
       videos
     }
   } catch (error) {
@@ -1515,11 +1516,11 @@ export async function getLocalChannelLiveStreams(id, signal) {
         result.videos = next.videos
         result.continuation = next.continuation
       }
-      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, videos: result.videos }
+      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, handle: result.handle, videos: result.videos }
     }
 
     let liveStreamsTab = new YT.Channel(innertube.actions, response)
-    const { id: channelId = id, name, thumbnailUrl } = parseLocalChannelHeader(liveStreamsTab, true)
+    const { id: channelId = id, name, thumbnailUrl, handle } = parseLocalChannelHeader(liveStreamsTab, true)
 
     let videos
 
@@ -1543,6 +1544,7 @@ export async function getLocalChannelLiveStreams(id, signal) {
     return {
       name,
       thumbnailUrl,
+      handle,
       videos
     }
   } catch (error) {

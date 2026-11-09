@@ -851,19 +851,19 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
-      let videos, name, thumbnailUrl
+      let videos, name, thumbnailUrl, handle
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
-          ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t, errorChannels))
         } else {
-          ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousScraper(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousScraper(channel, t, errorChannels))
         }
       } else {
         if (useRss) {
-          ({ videos, name, thumbnailUrl } = await getChannelVideosLocalRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalRSS(channel, t, errorChannels))
         } else {
-          ({ videos, name, thumbnailUrl } = await getChannelVideosLocalScraper(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalScraper(channel, t, errorChannels))
         }
       }
 
@@ -889,11 +889,12 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         notifySubscriptionChannelRefreshed('videos')
       }
 
-      if (name || thumbnailUrl) {
+      if (name || thumbnailUrl || handle) {
         subscriptionUpdates.push({
           channelId: channel.id,
           channelName: name,
-          channelThumbnailUrl: thumbnailUrl
+          channelThumbnailUrl: thumbnailUrl,
+          channelHandle: handle
         })
       }
     }
@@ -1055,19 +1056,19 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
-      let videos, name, thumbnailUrl
+      let videos, name, thumbnailUrl, handle
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
-          ({ videos, name, thumbnailUrl } = await getChannelLiveInvidiousRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidiousRSS(channel, t, errorChannels))
         } else {
-          ({ videos, name, thumbnailUrl } = await getChannelLiveInvidious(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidious(channel, t, errorChannels))
         }
       } else {
         if (useRss) {
-          ({ videos, name, thumbnailUrl } = await getChannelLiveLocalRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocalRSS(channel, t, errorChannels))
         } else {
-          ({ videos, name, thumbnailUrl } = await getChannelLiveLocal(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocal(channel, t, errorChannels))
         }
       }
 
@@ -1093,11 +1094,12 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
         notifySubscriptionChannelRefreshed('live')
       }
 
-      if (name || thumbnailUrl) {
+      if (name || thumbnailUrl || handle) {
         subscriptionUpdates.push({
           channelId: channel.id,
           channelName: name,
-          channelThumbnailUrl: thumbnailUrl
+          channelThumbnailUrl: thumbnailUrl,
+          channelHandle: handle
         })
       }
     }

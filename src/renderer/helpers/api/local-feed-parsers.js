@@ -1,6 +1,6 @@
 import { YTNodes, Utils, YT, Mixins, Misc } from 'youtubei.js'
 import Autolinker from 'autolinker'
-import { extractNumberFromString, calculatePublishedDate, escapeHTML, CHANNEL_HANDLE_REGEX } from '../feed-metadata.js'
+import { extractNumberFromString, calculatePublishedDate, escapeHTML, CHANNEL_HANDLE_REGEX, getChannelHandleFromUrl } from '../feed-metadata.js'
 import { isCollaborativeVideoAuthor, parseLocalCollaboratorItems } from '../video-collaborators.js'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
@@ -222,11 +222,14 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       }
     }
 
+    const handle = getChannelHandleFromUrl(channel.metadata?.vanity_channel_url)
+
     if (onlyIdNameThumbnail) {
       return {
         id,
         name,
-        thumbnailUrl
+        thumbnailUrl,
+        handle
       }
     }
 
@@ -234,6 +237,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       id,
       name,
       thumbnailUrl,
+      handle,
       bannerUrl,
       subscriberText,
       tags,

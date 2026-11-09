@@ -108,19 +108,29 @@
                 :icon="['fas', 'circle-user']"
               />
             </component>
-            <component
-              :is="enableChannelLinks ? 'router-link' : 'span'"
-              class="channelName"
-              :tabindex="enableChannelLinks ? null : -1"
-              :role="enableChannelLinks ? null : 'group'"
-              :aria-label="channel.name"
-              dir="auto"
-              :title="channel.name"
-              :draggable="canReorder ? 'false' : null"
-              :to="`/channel/${channel.id}`"
-            >
-              {{ channel.name }}
-            </component>
+            <div class="channelText">
+              <component
+                :is="enableChannelLinks ? 'router-link' : 'span'"
+                class="channelName"
+                :tabindex="enableChannelLinks ? null : -1"
+                :role="enableChannelLinks ? null : 'group'"
+                :aria-label="channel.name"
+                dir="auto"
+                :title="channel.name"
+                :draggable="canReorder ? 'false' : null"
+                :to="`/channel/${channel.id}`"
+              >
+                {{ channel.name }}
+              </component>
+              <span
+                v-if="channel.handle"
+                class="channelHandle"
+                dir="auto"
+                :title="channel.handle"
+              >
+                {{ channel.handle }}
+              </span>
+            </div>
             <div
               v-if="!hideUnsubscribeButton"
               class="unsubscribeContainer"
@@ -129,6 +139,7 @@
                 :channel-id="channel.id"
                 :channel-name="channel.name"
                 :channel-thumbnail="channel.thumbnail"
+                :channel-handle="channel.handle"
                 :open-dropdown-on-subscribe="false"
               />
             </div>
@@ -278,7 +289,7 @@ const channelList = computed(() => {
   const escapedQuery = query.value.replaceAll(/[$()*+.?[\\\]^{|}]/g, '\\$&')
   const re = new RegExp(escapedQuery, 'i')
   return subscribedChannels.value.filter(channel => {
-    return re.test(channel.name)
+    return re.test(channel.name) || (typeof channel.handle === 'string' && re.test(channel.handle))
   })
 })
 
@@ -515,10 +526,13 @@ function updateThumbnail(channel) {
     thumbnailRetryTimers.delete(timer)
     try {
       let channelThumbnailUrl
+      let channelHandle
       if (backendPreference.value === 'local') {
         const response = await getLocalChannel(channel.id)
         if (response.alert) return
-        channelThumbnailUrl = thumbnailURL(parseLocalChannelHeader(response).thumbnailUrl)
+        const header = parseLocalChannelHeader(response)
+        channelThumbnailUrl = thumbnailURL(header.thumbnailUrl)
+        channelHandle = header.handle
       } else {
         const response = await invidiousGetChannelInfo(channel.id)
         // Yattee servers can return channels without avatars
@@ -528,7 +542,8 @@ function updateThumbnail(channel) {
       store.dispatch('updateSubscriptionDetails', {
         channelThumbnailUrl,
         channelName: channel.name,
-        channelId: channel.id
+        channelId: channel.id,
+        channelHandle
       })
     } catch (error) {
       console.error('Failed to refresh the channel thumbnail', channel.id, error)

@@ -53,10 +53,18 @@
             </h1>
 
             <p
-              v-if="subCount !== null && !hideChannelSubscriptions"
-              class="subCount"
+              v-if="handle || showSubCount"
+              class="metadata"
             >
-              {{ $t('Global.Counts.Subscriber Count', { count: formattedSubCount }, subCount) }}
+              <span
+                v-if="handle"
+                class="handle"
+                dir="auto"
+              >{{ handle }}</span>
+              <span
+                v-if="showSubCount"
+                class="subCount"
+              >{{ $t('Global.Counts.Subscriber Count', { count: formattedSubCount }, subCount) }}</span>
             </p>
           </div>
         </div>
@@ -98,6 +106,7 @@
             :channel-id="id"
             :channel-name="name"
             :channel-thumbnail="thumbnailUrl"
+            :channel-handle="handle"
             :compact="compactSubscribe"
             @subscribed="subscribed"
           />
@@ -253,6 +262,10 @@ const props = defineProps({
     default: false
   },
   thumbnailUrl: {
+    type: String,
+    default: null
+  },
+  handle: {
     type: String,
     default: null
   },
@@ -501,6 +514,8 @@ const hideSharingActions = computed(() => {
 const hideUnsubscribeButton = computed(() => {
   return store.getters.getHideUnsubscribeButton
 })
+
+const showSubCount = computed(() => props.subCount !== null && !hideChannelSubscriptions.value)
 
 const formattedSubCount = computed(() => {
   if (hideChannelSubscriptions.value) {

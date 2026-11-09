@@ -133,6 +133,11 @@
                     dir="auto"
                   >
                     {{ channel.name }}
+                    <span
+                      v-if="channel.handle"
+                      class="channelHandle"
+                      dir="auto"
+                    >{{ channel.handle }}</span>
                   </p>
                 </component>
                 <FtIconButton
@@ -295,6 +300,11 @@
                   dir="auto"
                 >
                   {{ channel.name }}
+                  <span
+                    v-if="channel.handle"
+                    class="channelHandle"
+                    dir="auto"
+                  >{{ channel.handle }}</span>
                 </span>
                 <FtIcon
                   class="addSubscribedChannelIcon"
@@ -448,7 +458,7 @@ const videoPlaybackRateInterval = computed(() => store.getters.getVideoPlaybackR
 /** @type {import('vue').ComputedRef<number>} */
 const maxVideoPlaybackRate = computed(() => parseInt(store.getters.getMaxVideoPlaybackRate))
 
-/** @type {import('vue').ComputedRef<Map<string, { name: string, thumbnail: string }>>} */
+/** @type {import('vue').ComputedRef<Map<string, { name: string, thumbnail: string, handle?: string }>>} */
 const subscriptionsById = computed(() => store.getters.getSubscribedChannelsById)
 
 const backendOptions = computed(() => ({
@@ -549,6 +559,7 @@ const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensit
  *   id: string,
  *   name: string,
  *   thumbnail: string,
+ *   handle: string | null,
  *   preferences: {
  *     type: string,
  *     value: number | string | boolean,
@@ -605,6 +616,7 @@ const channelEntries = computed(() => {
       id: channelId,
       name: channel?.name || channelId,
       thumbnail: channel?.thumbnail ?? '',
+      handle: subscriptionsById.value.get(channelId)?.handle ?? null,
       preferences,
       addableOptions
     }
@@ -622,11 +634,20 @@ const availableSubscriptions = computed(() => {
   return Array.from(subscriptionsById.value, ([id, channel]) => ({
     id,
     name: channel.name || id,
-    thumbnail: channel.thumbnail ?? ''
+    thumbnail: channel.thumbnail ?? '',
+    handle: channel.handle ?? null
   }))
     .filter(({ id }) => !savedChannelIds.has(id))
     .sort((a, b) => collator.value.compare(a.name, b.name))
 })
+
+/**
+ * @param {{ id: string, name: string, handle: string | null }} channel
+ * @param {string} query lowercase
+ */
+function matchesChannelQuery({ id, name, handle }, query) {
+  return name.toLowerCase().includes(query) || id.toLowerCase().includes(query) || !!handle?.toLowerCase().includes(query)
+}
 
 const visibleAvailableSubscriptions = computed(() => {
   const query = addChannelSearchQuery.value.trim().toLowerCase()
@@ -635,9 +656,7 @@ const visibleAvailableSubscriptions = computed(() => {
     return availableSubscriptions.value
   }
 
-  return availableSubscriptions.value.filter(({ id, name }) => (
-    name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
-  ))
+  return availableSubscriptions.value.filter(channel => matchesChannelQuery(channel, query))
 })
 
 // Mount subscriptions in batches so the picker opens quickly with thousands of them.
@@ -656,9 +675,7 @@ const visibleChannelEntries = computed(() => {
     return channelEntries.value
   }
 
-  return channelEntries.value.filter(({ id, name }) => {
-    return name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
-  })
+  return channelEntries.value.filter(channel => matchesChannelQuery(channel, query))
 })
 
 // Mount editors in batches so large saved channel lists open quickly.

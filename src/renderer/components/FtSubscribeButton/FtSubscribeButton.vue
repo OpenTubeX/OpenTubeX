@@ -224,6 +224,7 @@ import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
+import { normalizeChannelHandle } from '../../helpers/feed-metadata'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
@@ -250,6 +251,10 @@ const props = defineProps({
     required: true
   },
   channelThumbnail: {
+    type: String,
+    default: null
+  },
+  channelHandle: {
     type: String,
     default: null
   },
@@ -287,6 +292,7 @@ const profileDropdownAnchor = `--subscription-${id}`
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
  * @property {string|undefined} subscriptions[].thumbnail
+ * @property {string|undefined} subscriptions[].handle
  * @property {string[]|undefined} subscriptions[].feedTypes
  * @property {number|null|undefined} subscriptions[].dailyVideoLimit
  * @property {boolean|undefined} subscriptions[].showMembersOnly
@@ -710,6 +716,10 @@ function handleSubscription(profile) {
     }
     if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
       channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
+    }
+    const handle = normalizeChannelHandle(props.channelHandle)
+    if (handle !== null) {
+      channel.handle = handle
     }
 
     store.dispatch('addChannelToProfiles', {
