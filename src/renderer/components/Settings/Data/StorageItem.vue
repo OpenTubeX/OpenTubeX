@@ -1,17 +1,15 @@
 <template>
-  <article class="storageItem">
-    <header class="storageItemHeader">
-      <div>
-        <h4>{{ title }}</h4>
-        <span
-          v-if="kind"
-          class="storageKind"
-        >{{ kind }}</span>
-      </div>
-      <strong
-        class="storageSize"
-      >{{ size }}</strong>
-    </header>
+  <article
+    class="storageItem"
+    :class="{ hasSetting: !!$slots.setting }"
+  >
+    <span
+      class="storageItemIcon"
+      aria-hidden="true"
+    >
+      <FtIcon :icon="icon" />
+    </span>
+    <h4>{{ title }}</h4>
     <p class="storageDescription">
       {{ description }}
     </p>
@@ -25,8 +23,17 @@
       />
       <code>{{ location }}</code>
     </p>
-    <div class="storageActions">
-      <slot />
+    <strong class="storageSize">{{ size }}</strong>
+    <div class="storageControls">
+      <div
+        v-if="$slots.setting"
+        class="storageSettingControl"
+      >
+        <slot name="setting" />
+      </div>
+      <div class="storageActions">
+        <slot />
+      </div>
     </div>
   </article>
 </template>
@@ -35,8 +42,8 @@
 import { FtIcon } from '@opentubex/icons'
 
 defineProps({
+  icon: { type: Array, required: true },
   title: { type: String, required: true },
-  kind: { type: String, default: '' },
   size: { type: String, required: true },
   description: { type: String, required: true },
   location: { type: String, default: '' },

@@ -12,57 +12,41 @@
         class="storageBreakdown"
         :aria-label="chartAriaLabel"
       >
-        <div class="storageDonut">
-          <svg
-            class="storageDonutChart"
-            viewBox="0 0 42 42"
-          >
-            <circle
-              class="storageDonutTrack"
-              cx="21"
-              cy="21"
-              r="15.9155"
-              pathLength="100"
-            />
-            <circle
-              v-for="item in chartSegments"
-              :key="item.key"
-              class="storageDonutSegment"
-              :data-chart-segment="item.key"
-              cx="21"
-              cy="21"
-              r="15.9155"
-              pathLength="100"
-              :stroke="item.color"
-              :stroke-dasharray="`${item.portion} ${100 - item.portion}`"
-              :stroke-dashoffset="-item.start"
-              role="img"
-              tabindex="0"
-              :aria-label="item.tooltip"
-              @mouseenter="hoveredChartKey = item.key"
-              @mouseleave="hoveredChartKey = null"
-              @focus="focusedChartKey = item.key"
-              @blur="focusedChartKey = null"
-            />
-          </svg>
-          <div class="storageDonutCenter">
-            <span>{{ t('Settings.Storage Settings.Shown Total') }}</span>
-            <strong>{{ chartTotalText }}</strong>
-          </div>
-          <div
-            v-if="activeChartItem"
-            class="storageDonutTooltip"
-            role="tooltip"
-          >
-            <strong>{{ activeChartItem.label }}</strong>
-            <span>{{ activeChartItem.details }}</span>
-          </div>
+        <div class="storageTotal">
+          <span>{{ t('Settings.Storage Settings.Shown Total') }}</span>
+          <strong>{{ chartTotalText }}</strong>
+        </div>
+        <div
+          class="storageBar"
+          :class="{ empty: chartSegments.length === 0 }"
+        >
+          <span
+            v-for="item in chartSegments"
+            :key="item.key"
+            class="storageBarSegment"
+            :class="{ active: item.key === activeChartKey }"
+            :data-chart-segment="item.key"
+            :style="{ backgroundColor: item.color, flexGrow: item.bytes }"
+            role="img"
+            tabindex="0"
+            :aria-label="item.ariaLabel"
+            @mouseenter="hoveredChartKey = item.key"
+            @mouseleave="hoveredChartKey = null"
+            @focus="focusedChartKey = item.key"
+            @blur="focusedChartKey = null"
+          />
         </div>
         <figcaption class="storageBreakdownDetails">
           <ul>
             <li
               v-for="item in chartItems"
               :key="item.key"
+              :class="{ active: item.key === activeChartKey }"
+              :data-chart-item="item.key"
+              @mouseenter="hoveredChartKey = item.key"
+              @mouseleave="hoveredChartKey = null"
+              @focusin="focusedChartKey = item.key"
+              @focusout="focusedChartKey = null"
             >
               <span
                 class="storageLegendMarker"
@@ -77,8 +61,10 @@
                   :tooltip="item.hint"
                 />
               </span>
-              <strong>{{ item.size }}</strong>
-              <span class="storageLegendPercentage">{{ item.percentage }}</span>
+              <span class="storageLegendValue">
+                <strong>{{ item.size }}</strong>
+                <span class="storageLegendPercentage">{{ item.percentage }}</span>
+              </span>
             </li>
           </ul>
         </figcaption>
@@ -90,6 +76,7 @@
       :title="t('Settings.Download Settings.Download Settings')"
     >
       <StorageItem
+        :icon="['fas', 'download']"
         :title="t('Settings.Storage Settings.Downloaded Media')"
         :size="downloadedMediaText"
         :description="t('Settings.Storage Settings.Downloaded Media Description')"
@@ -103,6 +90,7 @@
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'file-arrow-down']"
         :title="t('Settings.Storage Settings.Download History Records')"
         :size="sizeText('downloadRecords')"
         :description="t('Settings.Storage Settings.Download History Records Description', {
@@ -113,6 +101,7 @@
         <FtButton
           :label="t('Settings.Storage Settings.Clear Download History Records')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="finishedDownloads.length === 0"
           @click="requestCleanup('download-records')"
@@ -122,6 +111,7 @@
 
     <FtSettingsSection :title="t('Settings.Storage Settings.Replaceable Caches')">
       <StorageItem
+        :icon="['fas', 'rss']"
         :title="t('Settings.Storage Settings.Subscription Feed Cache')"
         :size="storedDataSizeText('subscriptionCache')"
         :description="t('Settings.Storage Settings.Subscription Feed Cache Description')"
@@ -130,12 +120,14 @@
         <FtButton
           :label="t('Settings.Storage Settings.Clear Subscription Feed Cache')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="isUsageEmpty('subscriptionCache')"
           @click="requestCleanup('subscription-cache')"
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'memory']"
         :title="t('Settings.Storage Settings.Session Search Cache')"
         :size="t('Settings.Storage Settings.In Memory')"
         :description="t('Settings.Storage Settings.Session Search Cache Description', {
@@ -145,6 +137,7 @@
         <FtButton
           :label="t('Settings.Storage Settings.Clear Session Search Cache')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="sessionSearchCount === 0"
           @click="requestCleanup('session-search')"
@@ -152,6 +145,7 @@
       </StorageItem>
       <StorageItem
         v-if="IS_CAPACITOR"
+        :icon="['fas', 'globe']"
         :title="t('Settings.Storage Settings.Browser Caches')"
         :size="sizeText('androidCache')"
         :description="t('Settings.Storage Settings.Browser Caches Hint')"
@@ -159,6 +153,7 @@
         <FtButton
           :label="t('Settings.Storage Settings.Clear Cache')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="isUsageEmpty('androidCache')"
           @click="requestCleanup('android-cache')"
@@ -166,6 +161,7 @@
       </StorageItem>
       <template v-if="USING_ELECTRON">
         <StorageItem
+          :icon="['fas', 'network-wired']"
           :title="t('Settings.Storage Settings.HTTP Cache')"
           :size="sizeText('httpCache')"
           :description="t('Settings.Storage Settings.HTTP Cache Description')"
@@ -174,6 +170,7 @@
           <FtButton
             :label="t('Settings.Storage Settings.Clear HTTP Cache')"
             theme="destructive"
+            variant="outlined"
             :icon="['fas', 'trash']"
             :disabled="isUsageEmpty('httpCache')"
             @click="requestCleanup('http-cache')"
@@ -182,6 +179,7 @@
       </template>
       <StorageItem
         v-if="SUPPORTS_STORAGE_USAGE"
+        :icon="['fas', 'images']"
         :title="t('Settings.Storage Settings.Tab Image Cache')"
         :size="sizeText('tabPreviews')"
         :description="t('Settings.Storage Settings.Tab Image Cache Description')"
@@ -191,6 +189,7 @@
         <FtButton
           :label="t('Settings.Storage Settings.Clear Tab Image Cache')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="isUsageEmpty('tabPreviews')"
           @click="requestCleanup('tab-previews')"
@@ -198,25 +197,29 @@
       </StorageItem>
       <template v-if="USING_ELECTRON">
         <StorageItem
+          :icon="['fas', 'circle-play']"
           :title="t('Settings.Storage Settings.Playback Caches')"
           :size="playbackCachesText"
           :description="t('Settings.Storage Settings.Playback Caches Description')"
           location="yt-dlp-playback-cache.json, player_cache/"
         >
-          <FtSlider
-            :label="t('Settings.Storage Settings.Playback URL Cache Entry Size')"
-            :tooltip="t('Settings.Storage Settings.Playback URL Cache Entry Size Tooltip')"
-            :default-value="ytDlpPlaybackCacheMaxEntrySize"
-            setting-key="ytDlpPlaybackCacheMaxEntrySize"
-            :min-value="MIN_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
-            :max-value="MAX_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
-            :step="1"
-            value-extension=" MB"
-            @change="updateYtDlpPlaybackCacheMaxEntrySize"
-          />
+          <template #setting>
+            <FtSlider
+              :label="t('Settings.Storage Settings.Playback URL Cache Entry Size')"
+              :tooltip="t('Settings.Storage Settings.Playback URL Cache Entry Size Tooltip')"
+              :default-value="ytDlpPlaybackCacheMaxEntrySize"
+              setting-key="ytDlpPlaybackCacheMaxEntrySize"
+              :min-value="MIN_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
+              :max-value="MAX_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB"
+              :step="1"
+              value-extension=" MB"
+              @change="updateYtDlpPlaybackCacheMaxEntrySize"
+            />
+          </template>
           <FtButton
             :label="t('Settings.Storage Settings.Clear Playback Caches')"
             theme="destructive"
+            variant="outlined"
             :icon="['fas', 'trash']"
             :disabled="isUsageEmpty('ytDlpPlayback', 'playerCache')"
             @click="requestCleanup('playback-caches')"
@@ -228,62 +231,72 @@
     <FtSettingsSection :title="t('Settings.Storage Settings.History Data')">
       <StorageItem
         v-if="USING_ELECTRON"
+        :icon="['fas', 'film']"
         :title="t('Settings.Privacy Settings.Cache Video Metadata')"
         :size="sizeText('videoMetadata')"
         :description="t('Settings.Storage Settings.Video Metadata Description')"
         location="video-metadata-cache.sqlite"
       >
-        <FtToggleSwitch
-          :label="t('Settings.Privacy Settings.Cache Video Metadata')"
-          :tooltip="t('Settings.Privacy Settings.Cache Video Metadata Tooltip')"
-          compact
-          :default-value="enableVideoMetadataCache"
-          setting-key="enableVideoMetadataCache"
-          @change="updateEnableVideoMetadataCache"
-        />
+        <template #setting>
+          <FtToggleSwitch
+            :label="t('Settings.Privacy Settings.Cache Video Metadata')"
+            :tooltip="t('Settings.Privacy Settings.Cache Video Metadata Tooltip')"
+            compact
+            :default-value="enableVideoMetadataCache"
+            setting-key="enableVideoMetadataCache"
+            @change="updateEnableVideoMetadataCache"
+          />
+        </template>
         <FtButton
           :label="t('Settings.Privacy Settings.Clear Video Metadata Cache')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           :disabled="isUsageEmpty('videoMetadata')"
           @click="requestCleanup('video-metadata')"
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'clock-rotate-left']"
         :title="t('Settings.Storage Settings.Watch History')"
         :size="storedDataSizeText('history', 'watchStats')"
         :description="t('Settings.Storage Settings.Watch History Description')"
         :location="storedDataLocation('history.sqlite, watch-stats.sqlite')"
       >
-        <FtInput
-          :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
-          :icon="['fas', 'clock']"
-          :label="t('Settings.Privacy Settings.Automatic History Retention')"
-          input-type="number"
-          :value="historyRetentionDaysInput"
-          setting-key="historyRetentionDays"
-          :show-label="true"
-          :allow-action-button-when-empty="true"
-          :force-action-button-icon-name="['fas', 'check']"
-          :tooltip="t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
-          :disabled="!rememberHistory"
-          @input="historyRetentionDaysInput = $event"
-          @click="saveHistoryRetention"
-        />
+        <template #setting>
+          <FtInput
+            :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+            :icon="['fas', 'clock']"
+            :label="t('Settings.Privacy Settings.Automatic History Retention')"
+            input-type="number"
+            :value="historyRetentionDaysInput"
+            setting-key="historyRetentionDays"
+            :show-label="true"
+            :allow-action-button-when-empty="true"
+            :force-action-button-icon-name="['fas', 'check']"
+            :tooltip="t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
+            :disabled="!rememberHistory"
+            @input="historyRetentionDaysInput = $event"
+            @click="saveHistoryRetention"
+          />
+        </template>
         <FtButton
           :label="t('Settings.Privacy Settings.Remove Watch History')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           @click="requestCleanup('watch-history')"
         />
         <FtButton
           :label="t('Settings.Storage Settings.Clear Watch Statistics')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           @click="requestCleanup('watch-statistics')"
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'magnifying-glass']"
         :title="t('Settings.Storage Settings.Search History')"
         :size="storedDataSizeText('searchHistory')"
         :description="t('Settings.Storage Settings.Search History Description')"
@@ -292,6 +305,7 @@
         <FtButton
           :label="t('Settings.Storage Settings.Delete Search History')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           @click="requestCleanup('search-history')"
         />
@@ -300,6 +314,7 @@
 
     <FtSettingsSection :title="t('Settings.Storage Settings.Other User Data')">
       <StorageItem
+        :icon="['fas', 'users']"
         :title="t('Settings.Storage Settings.Subscriptions And Profiles')"
         :size="storedDataSizeText('profiles')"
         :description="t('Settings.Storage Settings.Subscriptions And Profiles Description')"
@@ -308,11 +323,13 @@
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Subscriptions / Profiles')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           @click="requestCleanup('subscriptions-profiles')"
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'bookmark']"
         :title="t('Playlists')"
         :size="storedDataSizeText('playlists')"
         :description="t('Settings.Storage Settings.Playlists Description')"
@@ -321,11 +338,13 @@
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Playlists')"
           theme="destructive"
+          variant="outlined"
           :icon="['fas', 'trash']"
           @click="requestCleanup('playlists')"
         />
       </StorageItem>
       <StorageItem
+        :icon="['fas', 'gear']"
         :title="t('Settings.Storage Settings.Settings And Sessions')"
         :size="storedDataSizeText('settings', 'tabSessions', 'liveReminders')"
         :description="t('Settings.Storage Settings.Settings And Sessions Description')"
@@ -546,24 +565,11 @@ const chartItems = computed(() => chartCategories.value.map(item => {
     ...item,
     size,
     percentage,
-    details: [size, percentage].filter(Boolean).join(' · '),
-    tooltip: [item.label, size, percentage].filter(Boolean).join(', ')
+    ariaLabel: [item.label, size, percentage].filter(Boolean).join(', ')
   }
 }).filter(item => !hasLoadedUsage.value || item.bytes > 0 || !item.exact))
-const chartSegments = computed(() => {
-  let start = 0
-  return chartItems.value
-    .filter(item => item.bytes > 0)
-    .map(item => {
-      const portion = item.bytes / chartTotalBytes.value * 100
-      const segment = { ...item, portion, start }
-      start += portion
-      return segment
-    })
-})
-const activeChartItem = computed(() => chartItems.value.find(item => (
-  item.key === (hoveredChartKey.value ?? focusedChartKey.value)
-)) ?? null)
+const chartSegments = computed(() => chartItems.value.filter(item => item.bytes > 0))
+const activeChartKey = computed(() => hoveredChartKey.value ?? focusedChartKey.value)
 const chartTotalIsExact = computed(() => chartCategories.value.every(item => item.exact))
 const chartTotalText = computed(() => hasLoadedUsage.value
   ? chartTotalIsExact.value

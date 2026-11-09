@@ -81,7 +81,7 @@ test('keeps unavailable storage categories visible and marks the total as partia
 
   const storage = await goToSettingsSection(page, 'storage')
   const breakdown = storage.locator('.storageBreakdown')
-  await expect(breakdown.locator('.storageDonutCenter')).toContainText('At least 1 KiB')
+  await expect(breakdown.locator('.storageTotal')).toContainText('At least 1 KiB')
   await expect(breakdown.locator('li')).toHaveText([
     'Application cachesAt least 1 KiB100%',
     'Browser cachesExact size unavailable',
@@ -161,7 +161,6 @@ test('moves storage controls into one searchable category', async ({ app, attach
   ))).toBe(5)
   await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
   await expect(storage.getByRole('checkbox', { name: 'Replace HTTP Cache' })).toHaveCount(0)
-  await expect(storage.locator('.storageKind')).toHaveCount(0)
   await expect(storage.locator('.storageLocation').filter({ hasText: 'downloads.json' })
     .locator('[data-icon="file-lines"]')).toBeVisible()
   await expect(storage.locator('.storageLocation').filter({ hasText: 'subscription-cache.sqlite' })
@@ -170,15 +169,10 @@ test('moves storage controls into one searchable category', async ({ app, attach
     .locator('[data-icon="folder-open"]')).toBeVisible()
   await expect(storage.getByText('Measured profile data')).toHaveCount(0)
   await expect(storage.getByRole('button', { name: 'Refresh sizes' })).toHaveCount(0)
-  const cacheGrid = storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..')
-  await expect(cacheGrid).toHaveCSS(
-    'grid-template-columns',
-    /\d+(\.\d+)?px \d+(\.\d+)?px/
-  )
   const breakdown = storage.locator('.storageBreakdown')
   await expect(storage.getByRole('heading', { name: 'Storage breakdown' })).toHaveCount(0)
   await expect(breakdown).toHaveAttribute('aria-label', /Storage breakdown/)
-  await expect(breakdown.locator('.storageDonutCenter')).toContainText('95 MiB')
+  await expect(breakdown.locator('.storageTotal')).toContainText('95 MiB')
   await expect(breakdown.locator('li')).toHaveText([
     'Tracked downloaded media20 MiB21.1%',
     'Application caches10 MiB10.5%',
@@ -187,22 +181,8 @@ test('moves storage controls into one searchable category', async ({ app, attach
     'Browser runtime data5 MiB5.3%',
     'Other profile files10 MiB10.5%'
   ])
-  await expect(breakdown.locator('.storageDonutSegment')).toHaveCount(6)
+  await expect(breakdown.locator('.storageBarSegment')).toHaveCount(6)
   await attachScreenshot('storage settings overview')
-
-  const cacheSegment = breakdown.locator('[data-chart-segment="browser-caches"]')
-  await breakdown.scrollIntoViewIfNeeded()
-  const chartBox = await breakdown.locator('.storageDonutChart').boundingBox()
-  await page.mouse.move(
-    chartBox.x + chartBox.width * 0.8,
-    chartBox.y + chartBox.height * 0.73
-  )
-  await expect(breakdown.locator('.storageDonutTooltip')).toHaveText(
-    'Browser caches15 MiB · 15.8%'
-  )
-  await attachScreenshot('storage chart tooltip')
-  await cacheSegment.focus()
-  await expect(breakdown.locator('.storageDonutTooltip')).toBeVisible()
 
   const otherFiles = breakdown.locator('li').filter({ hasText: 'Other profile files' })
   await otherFiles.getByRole('button').focus()
@@ -315,11 +295,11 @@ test('shows the page before asynchronous size calculation finishes', async ({ ap
 
   const storage = await goToSettingsSection(page, 'storage')
   const breakdown = storage.locator('.storageBreakdown')
-  await expect(breakdown.locator('.storageDonutCenter')).toContainText('Calculating…')
+  await expect(breakdown.locator('.storageTotal')).toContainText('Calculating…')
   await app.electronApp.evaluate(() => globalThis.__releaseStorageUsage())
-  await expect(breakdown.locator('.storageDonutCenter')).toContainText('0 B')
+  await expect(breakdown.locator('.storageTotal')).toContainText('0 B')
   await expect(breakdown.locator('li')).toHaveCount(0)
-  await expect(breakdown.locator('.storageDonutSegment')).toHaveCount(0)
+  await expect(breakdown.locator('.storageBarSegment')).toHaveCount(0)
   for (const buttonName of [
     'Clear subscription and feed cache',
     'Clear session search cache',
@@ -518,15 +498,8 @@ test.describe('compact storage settings', () => {
 
   test('fits a narrow settings window without horizontal scrolling', async ({ app, attachScreenshot, page }) => {
     await setWindowSize(app, page, { width: 620, height: 720 })
-    const storage = await goToSettingsSection(page, 'storage')
+    await goToSettingsSection(page, 'storage')
     const content = page.locator('.settingsContent')
-    const cacheGrid = storage.getByRole('heading', { name: 'Replaceable caches' }).locator('..')
-
-    await expect(storage.locator('.storageBreakdown')).toHaveCSS(
-      'grid-template-columns',
-      /\d+(\.\d+)?px \d+(\.\d+)?px/
-    )
-    await expect(cacheGrid).toHaveCSS('grid-template-columns', /^\d+(\.\d+)?px$/)
     expect(await content.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
     await attachScreenshot('compact dark storage settings')
   })
