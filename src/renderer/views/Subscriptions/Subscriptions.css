@@ -534,13 +534,13 @@
 
 @media only screen and (width <= 480px) {
   .tabs .subscriptionIcon,
-  .tabs .tabIcon:not(.loading),
-  .newFeedTabs .subscriptionIcon {
+  .newFeedTabs .subscriptionIcon,
+  .tabIcon:not(.loading) {
     display: none;
   }
 
   /* Without icons, the spinner sits in a corner so labels keep their space. */
-  .tabs .tabIcon.loading {
+  .tabIcon.loading {
     position: absolute;
     inset-block-start: 2px;
     inset-inline-end: 2px;
