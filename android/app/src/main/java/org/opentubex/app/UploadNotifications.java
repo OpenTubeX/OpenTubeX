@@ -49,6 +49,7 @@ final class UploadNotifications {
     static final String ACTION_QUEUED = "org.opentubex.app.action.UPLOAD_NOTIFICATIONS_QUEUED";
     // Matches the in-app notification history limit.
     private static final int SHOWN_LIMIT = 100;
+    private static final long[] THUMBNAIL_RETRY_DELAYS_MILLIS = { 2000, 5000 };
     // Loads notification thumbnails one at a time; the thread ends when idle.
     private static final ThreadPoolExecutor THUMBNAILS = new ThreadPoolExecutor(0, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     private static final String TAG = "new-upload";
@@ -554,10 +555,10 @@ final class UploadNotifications {
         // Show the notification right away and add the thumbnail once it loads.
         THUMBNAILS.execute(() -> {
             Bitmap image = AndroidMediaArtwork.loadBlocking(thumbnail);
-            if (image == null) {
-                // Proxies can fail a connection now and then; retry once shortly after.
+            // Proxies and networks can fail a connection now and then; retry, waiting longer the second time.
+            for (int attempt = 0; image == null && attempt < THUMBNAIL_RETRY_DELAYS_MILLIS.length; attempt++) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(THUMBNAIL_RETRY_DELAYS_MILLIS[attempt]);
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                     return;

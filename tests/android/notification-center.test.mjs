@@ -61,7 +61,8 @@ test('notifications appear in the app while it is visible and in the system othe
   const run = Date.now().toString(36)
   // Real videos, so their thumbnails load. Disabling notifications afterwards resets the known uploads.
   const [seed, visible, hidden] = ['jNQXAC9IVRw', 'dQw4w9WgXcQ', '9bZkp7q19f0']
-  const stream = `stream${run}`.slice(0, 11).padEnd(11, '0')
+  // Unique per run, since the dismissals of earlier runs persist and would mark this reminder read.
+  const stream = `st${run}`.slice(0, 11).padEnd(11, '0')
   let browser, page
   try {
     grantNotifications()
@@ -112,7 +113,7 @@ test('notifications appear in the app while it is visible and in the system othe
       .match(/Hist[^\n]*org\.opentubex\.app\.dev\/org\.opentubex\.app\.MainActivity[\s\S]*?state=(\w+)/)?.[1], { timeout: 15_000 }).toBe('STOPPED')
     await observe([hidden, visible, seed])
     await expect.poll(systemNotifications).toMatch(new RegExp(`Upload ${hidden}`))
-    // The thumbnail is added once it loads, which takes up to two attempts of 10 seconds each.
+    // The thumbnail is added once it loads, which takes up to three attempts of 10 seconds each.
     await expect.poll(() => /android\.picture=/.test(systemNotifications()), { timeout: 60_000 }).toBe(true)
     // The system also shows reminders without the app.
     await page.evaluate(stream => localStorage.setItem('opentubex-capacitor-live-reminders', JSON.stringify([{
