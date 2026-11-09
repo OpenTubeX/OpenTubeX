@@ -117,6 +117,10 @@ class History {
     return dbHistory(DBActions.GENERAL.OVERWRITE, records, { inWorker: true })
   }
 
+  static async mergeBackup(records) {
+    return JSON.parse(await dbHistory(DBActions.HISTORY.MERGE_BACKUP, records, { inWorker: true }))
+  }
+
   static applySyncChanges(changes, assertActive) {
     // Large object graphs also block while crossing Electron's context bridge.
     return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes, { inWorker: true, beforeSend: assertActive })

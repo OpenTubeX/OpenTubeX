@@ -146,6 +146,21 @@ const actions = {
     }
   },
 
+  /**
+   * @param {any} param0
+   * @param {object[]} records restored from a backup
+   */
+  async mergeHistoryBackup({ commit }, records) {
+    try {
+      const updates = await DBHistoryHandlers.mergeBackup(records)
+      commit('applyHistorySyncChanges', { insertions: [], updates, deletions: [] })
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   async applyHistorySyncChanges({ commit }, changes) {
     const migratedChanges = {
       insertions: changes.insertions.map(migrateLegacyHistoryRecord),

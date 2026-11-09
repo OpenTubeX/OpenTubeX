@@ -3163,6 +3163,19 @@ function runApp() {
           )
           return null
 
+        case DBActions.HISTORY.MERGE_BACKUP: {
+          if (typeof data === 'string') data = JSON.parse(data)
+          const updates = await baseHandlers.history.mergeBackup(data)
+          const changes = { insertions: [], updates, deletions: [] }
+          syncOtherWindows(
+            IpcChannels.SYNC_HISTORY,
+            event,
+            { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data: changes }
+          )
+          // Strings cross IPC and the context bridge far faster than records.
+          return JSON.stringify(updates)
+        }
+
         case DBActions.HISTORY.APPLY_SYNC_CHANGES: {
           if (typeof data === 'string') data = JSON.parse(data)
           // Other windows must keep stored records that were newer than the sync.

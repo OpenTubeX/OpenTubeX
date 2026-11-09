@@ -370,7 +370,7 @@ import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../..
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile } from '../../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, mergeBackupPlaylist, mergeBackupProfile } from '../../../helpers/unifiedBackup'
 import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
@@ -533,12 +533,8 @@ async function importUnifiedBackup() {
         currentPlaylists.set(playlist._id, merged)
       }
     }
-    if (selected.has('history')) {
-      const records = new Map((await DBHistoryHandlers.find()).map(record => [record.videoId, record]))
-      for (const imported of data.history) {
-        records.set(imported.videoId, mergeBackupHistoryRecord(records.get(imported.videoId), imported))
-      }
-      if (await store.dispatch('overwriteHistory', records) !== true) throw new Error('Could not restore history')
+    if (selected.has('history') && await store.dispatch('mergeHistoryBackup', data.history) !== true) {
+      throw new Error('Could not restore history')
     }
     if (selected.has('searchHistory')) {
       const entries = mergeSearchHistoryEntries(await DBSearchHistoryHandlers.find(), data.searchHistory)

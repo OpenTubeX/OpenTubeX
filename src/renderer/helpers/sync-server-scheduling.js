@@ -32,6 +32,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['mergeSubscriptionSeenPosts', 'history'],
   ['mergeRssFeedSeenItems', 'history'],
   ['overwriteHistory', 'history'],
+  ['mergeHistoryBackup', 'history'],
   ['removeAllHistory', 'history'],
   ['removeAllPlaylists', 'playlists'],
   ['removeAllVideos', 'playlists'],
