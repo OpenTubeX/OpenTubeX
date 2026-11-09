@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: Extra yt-dlp-argumenten
     Concurrent Downloads: Gelijktijdige downloads
     Bandwidth Limit: Bandbreedtelimiet (KiB/s)
-    Choose Download Folder: Downloadmap kiezen
     Download Templates: Downloadsjablonen
     Manage Download Templates: Downloadsjablonen beheren ({templateCount})
     New Template: Nieuw sjabloon
@@ -2542,6 +2541,8 @@ Tray Icon:
   Follow App Theme: "Appthema volgen"
 
 Form Inputs:
+  Browse: "Bladeren"
+  Use Default Path: "Standaard gebruiken"
   Enter Password Hint: "Voer je wachtwoord in"
   Choose Password Hint: "Kies een wachtwoord"
   Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
@@ -2561,7 +2562,6 @@ Form Inputs:
   Any Age: Elke ouderdom
   Included Terms Example: bijv. uitleg, recensie
   Excluded Terms Example: bijv. trailer, voorvertoning
-  Download Folder Hint: Laat leeg om je downloadmap te gebruiken
   Global Arguments Hint: Optionele argumenten voor elke download
   Unlimited Hint: 0 voor onbeperkt
   Add Argument: Voeg een argument toe

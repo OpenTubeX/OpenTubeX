@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: 附加 yt-dlp 参数
     Concurrent Downloads: 并发下载数
     Bandwidth Limit: 带宽限制 (KiB/s)
-    Choose Download Folder: 选择下载文件夹
     Download Templates: 下载模板
     Manage Download Templates: 管理下载模板（{templateCount}）
     New Template: 新建模板
@@ -2468,6 +2467,8 @@ Tray Icon:
   Follow App Theme: "跟随应用主题"
 
 Form Inputs:
+  Browse: "浏览"
+  Use Default Path: "使用默认值"
   Enter Password Hint: "输入你的密码"
   Choose Password Hint: "设置密码"
   Confirm Password Hint: "再次输入新密码"
@@ -2487,7 +2488,6 @@ Form Inputs:
   Any Age: 不限发布时间
   Included Terms Example: 例如：教程, 评测
   Excluded Terms Example: 例如：预告片, 预览
-  Download Folder Hint: 留空以使用下载文件夹
   Global Arguments Hint: 所有下载的可选参数
   Unlimited Hint: 0 表示不限速
   Add Argument: 添加参数

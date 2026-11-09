@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ekstra yt-dlp-argumenter
     Concurrent Downloads: Samtidige nedlastinger
     Bandwidth Limit: Båndbreddegrense (KiB/s)
-    Choose Download Folder: Velg nedlastingsmappe
     Download Templates: Nedlastingsmaler
     Manage Download Templates: Administrer nedlastingsmaler ({templateCount})
     New Template: Ny mal
@@ -2475,6 +2474,8 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
+  Browse: "Bla gjennom"
+  Use Default Path: "Bruk standard"
   Enter Password Hint: "Skriv inn passordet ditt"
   Choose Password Hint: "Velg et passord"
   Confirm Password Hint: "Gjenta det nye passordet ditt"
@@ -2494,7 +2495,6 @@ Form Inputs:
   Any Age: Uansett alder
   Included Terms Example: f.eks. veiledning, anmeldelse
   Excluded Terms Example: f.eks. trailer, forhåndsvisning
-  Download Folder Hint: La stå tomt for å bruke Nedlastinger-mappen
   Global Arguments Hint: Valgfrie argumenter for hver nedlasting
   Unlimited Hint: 0 for ubegrenset
   Add Argument: Legg til et argument

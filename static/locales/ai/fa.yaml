@@ -965,7 +965,6 @@ Settings:
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
     Concurrent Downloads: بارگیری‌های هم‌زمان
     Bandwidth Limit: محدودیت پهنای باند (KiB/s)
-    Choose Download Folder: انتخاب پوشهٔ بارگیری
     Download Templates: الگوهای بارگیری
     Manage Download Templates: مدیریت الگوهای بارگیری ({templateCount})
     New Template: الگوی جدید
@@ -2576,6 +2575,8 @@ Tray Icon:
   Follow App Theme: "پیروی از زمینهٔ برنامه"
 
 Form Inputs:
+  Browse: "مرور"
+  Use Default Path: "استفاده از پیش‌فرض"
   Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
   Choose Password Hint: "یک گذرواژه انتخاب کنید"
   Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
@@ -2595,7 +2596,6 @@ Form Inputs:
   Any Age: هر قدمتی
   Included Terms Example: مثلاً آموزش, بررسی
   Excluded Terms Example: مثلاً تریلر, پیش‌نمایش
-  Download Folder Hint: برای استفاده از پوشهٔ بارگیری‌ها خالی بگذارید
   Global Arguments Hint: آرگومان‌های اختیاری برای هر بارگیری
   Unlimited Hint: 0 برای نامحدود
   Add Argument: افزودن آرگومان

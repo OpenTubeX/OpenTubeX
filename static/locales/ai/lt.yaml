@@ -1131,7 +1131,6 @@ Settings:
     Global Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
     Concurrent Downloads: Vienalaikiai atsisiuntimai
     Bandwidth Limit: Pralaidumo riba (KiB/s)
-    Choose Download Folder: Pasirinkti atsisiuntimų aplanką
     Download Templates: Atsisiuntimo šablonai
     Manage Download Templates: Tvarkyti atsisiuntimo šablonus ({templateCount})
     New Template: Naujas šablonas
@@ -2984,6 +2983,8 @@ Tray Icon:
   Follow App Theme: "Naudoti programos apipavidalinimą"
 
 Form Inputs:
+  Browse: "Naršyti"
+  Use Default Path: "Naudoti numatytąjį"
   Enter Password Hint: "Įveskite savo slaptažodį"
   Choose Password Hint: "Pasirinkite slaptažodį"
   Confirm Password Hint: "Pakartokite naują slaptažodį"
@@ -3003,7 +3004,6 @@ Form Inputs:
   Any Age: Bet kokio senumo
   Included Terms Example: pvz. pamoka, apžvalga
   Excluded Terms Example: pvz. anonsas, peržiūra
-  Download Folder Hint: Palikite tuščią, kad būtų naudojamas atsisiuntimų aplankas
   Global Arguments Hint: Pasirinktiniai argumentai kiekvienam atsisiuntimui
   Unlimited Hint: 0 – neribota
   Add Argument: Pridėkite argumentą

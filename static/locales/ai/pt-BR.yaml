@@ -897,7 +897,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
     Concurrent Downloads: Downloads simultâneas
     Bandwidth Limit: Limite de largura de banda (KiB/s)
-    Choose Download Folder: Escolher pasta de downloads
     Download Templates: Modelos de download
     Manage Download Templates: Gerenciar modelos de download ({templateCount})
     New Template: Novo modelo
@@ -2438,6 +2437,8 @@ Tray Icon:
   Follow App Theme: "Seguir o tema do aplicativo"
 
 Form Inputs:
+  Browse: "Procurar"
+  Use Default Path: "Usar padrão"
   Enter Password Hint: "Digite sua senha"
   Choose Password Hint: "Escolha uma senha"
   Confirm Password Hint: "Repita sua nova senha"
@@ -2457,7 +2458,6 @@ Form Inputs:
   Any Age: Qualquer idade
   Included Terms Example: por ex. tutorial, análise
   Excluded Terms Example: por ex. trailer, prévia
-  Download Folder Hint: Deixe em branco para usar a pasta Downloads
   Global Arguments Hint: Argumentos opcionais para cada download
   Unlimited Hint: 0 para ilimitado
   Add Argument: Adicione um argumento

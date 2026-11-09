@@ -36,20 +36,15 @@
             :icon="['fas', 'download']"
             @change="updateYtDlpChannel"
           />
-          <FtInput
+          <FtPathPicker
             v-else-if="!IS_IOS"
             class="externalSoftwarePath"
-            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.yt-dlp Executable Path')"
-            placeholder="/path/to/yt-dlp"
-            :show-action-button="true"
-            :allow-action-button-when-empty="true"
-            :force-action-button-icon-name="['fas', 'folder-open']"
-            :show-label="true"
+            placeholder="yt-dlp"
             :value="ytDlpPath"
             :tooltip="t('Tooltips.External Software Settings.yt-dlp Executable Path')"
-            @input="updateYtDlpPath"
-            @click="chooseExecutablePath('yt-dlp')"
+            @browse="ytDlp.chooseExecutable('ytDlpPath')"
+            @clear="store.dispatch('updateYtDlpPath', '')"
           />
         </div>
         <div class="externalSoftwareToolStatus">
@@ -115,20 +110,15 @@
             :tooltip="t('Tooltips.External Software Settings.FFmpeg Source')"
             @change="updateYtDlpFfmpegSource"
           />
-          <FtInput
+          <FtPathPicker
             v-if="ytDlpFfmpegSource === 'system'"
             class="externalSoftwarePath"
-            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.FFmpeg Executable Path')"
-            placeholder="/path/to/ffmpeg"
-            :show-action-button="true"
-            :allow-action-button-when-empty="true"
-            :force-action-button-icon-name="['fas', 'folder-open']"
-            :show-label="true"
+            placeholder="ffmpeg"
             :value="ytDlpFfmpegPath"
             :tooltip="t('Tooltips.External Software Settings.FFmpeg Executable Path')"
-            @input="updateYtDlpFfmpegPath"
-            @click="chooseExecutablePath('ffmpeg')"
+            @browse="ytDlp.chooseExecutable('ytDlpFfmpegPath')"
+            @clear="store.dispatch('updateYtDlpFfmpegPath', '')"
           />
         </div>
         <div class="externalSoftwareToolStatus">
@@ -364,6 +354,7 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -539,12 +530,8 @@ async function refreshSystemBinariesInfo() {
   const ytDlpSystemPath = ytDlpPath.value
   const ffmpegSystemPath = ytDlpFfmpegPath.value
 
-  const info = await getBinariesInfo({
-    ytDlpSource: 'system',
-    ytDlpPath: ytDlpSystemPath,
-    ffmpegSource: 'system',
-    ffmpegPath: ffmpegSystemPath
-  })
+  // The main process probes the saved paths that these values mirror.
+  const info = await getBinariesInfo({ ytDlpSource: 'system', ffmpegSource: 'system' })
 
   if (requestId === systemInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.system = { path: ytDlpSystemPath, info: info.ytDlp }
@@ -568,12 +555,7 @@ async function refreshManagedBinariesInfo() {
     binariesInfoCache.value.ffprobe.managed = null
   }
 
-  const info = await getBinariesInfo({
-    ytDlpSource: 'managed',
-    ytDlpPath: '',
-    ffmpegSource: 'managed',
-    ffmpegPath: ''
-  })
+  const info = await getBinariesInfo({ ytDlpSource: 'managed', ffmpegSource: 'managed' })
 
   if (requestId === managedInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.managed = info.ytDlp
@@ -675,13 +657,6 @@ function updateYtDlpChannel(value) {
 }
 
 /**
- * @param {string} value
- */
-function updateYtDlpPath(value) {
-  store.dispatch('updateYtDlpPath', value)
-}
-
-/**
  * @param {'none' | 'file' | 'browser'} value
  */
 function updateYtDlpPlaybackAuthMode(value) {
@@ -721,13 +696,6 @@ function updateYtDlpPlaybackAlwaysUseCookies(value) {
  */
 function updateYtDlpFfmpegSource(value) {
   store.dispatch('updateYtDlpFfmpegSource', value)
-}
-
-/**
- * @param {string} value
- */
-function updateYtDlpFfmpegPath(value) {
-  store.dispatch('updateYtDlpFfmpegPath', value)
 }
 
 /**
@@ -799,18 +767,6 @@ async function downloadBinary(binary) {
     } finally {
       inProgress.value = false
     }
-  }
-}
-
-/**
- * @param {'yt-dlp' | 'ffmpeg'} binary
- */
-async function chooseExecutablePath(binary) {
-  const currentPath = binary === 'yt-dlp' ? ytDlpPath.value : ytDlpFfmpegPath.value
-  const path = await ytDlp.ytDlpChooseExecutable(currentPath)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch(binary === 'yt-dlp' ? 'updateYtDlpPath' : 'updateYtDlpFfmpegPath', path)
   }
 }
 

@@ -659,19 +659,20 @@ export default {
   },
 
   /**
-   * @param {string | undefined} currentPath
+   * Picks and saves the download folder.
    * @returns {Promise<string | undefined>}
    */
-  ytDlpChooseDownloadFolder: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, currentPath)
+  ytDlpChooseDownloadFolder: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER)
   },
 
   /**
-   * @param {string} currentPath
+   * Picks and saves an executable path setting.
+   * @param {'externalPlayerExecutable' | 'ytDlpFfmpegPath' | 'ytDlpPath'} settingId
    * @returns {Promise<string | undefined>}
    */
-  ytDlpChooseExecutable: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, currentPath)
+  chooseExecutable: (settingId) => {
+    return ipcRenderer.invoke(IpcChannels.CHOOSE_EXECUTABLE, settingId)
   },
 
   ytDlpChooseCookies: (currentPath) => {
@@ -683,11 +684,10 @@ export default {
   },
 
   /**
+   * System sources use the saved paths.
    * @param {{
    *   ytDlpSource: 'system' | 'managed',
-   *   ytDlpPath: string,
-   *   ffmpegSource: 'system' | 'managed',
-   *   ffmpegPath: string
+   *   ffmpegSource: 'system' | 'managed'
    * } | undefined} [options]
    * @returns {Promise<{
    *   ytDlp: import('../main/ytDlp').YtDlpInfo,

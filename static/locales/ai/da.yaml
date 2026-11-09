@@ -953,7 +953,6 @@ Settings:
     Global Additional yt-dlp Arguments: Yderligere yt-dlp-argumenter
     Concurrent Downloads: Samtidige downloads
     Bandwidth Limit: Båndbreddegrænse (KiB/s)
-    Choose Download Folder: Vælg downloadmappe
     Download Templates: Downloadskabeloner
     Manage Download Templates: Administrer downloadskabeloner ({templateCount})
     New Template: Ny skabelon
@@ -2567,6 +2566,8 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
+  Browse: "Gennemse"
+  Use Default Path: "Brug standard"
   Enter Password Hint: "Indtast din adgangskode"
   Choose Password Hint: "Vælg en adgangskode"
   Confirm Password Hint: "Gentag din nye adgangskode"
@@ -2586,7 +2587,6 @@ Form Inputs:
   Any Age: Enhver alder
   Included Terms Example: f.eks. vejledning, anmeldelse
   Excluded Terms Example: f.eks. trailer, forhåndsvisning
-  Download Folder Hint: Lad stå tomt for at bruge mappen Downloads
   Global Arguments Hint: Valgfrie argumenter til hver download
   Unlimited Hint: 0 for ubegrænset
   Add Argument: Tilføj et argument

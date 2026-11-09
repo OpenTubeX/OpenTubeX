@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Допълнителни аргументи на yt-dlp
     Concurrent Downloads: Едновременни изтегляния
     Bandwidth Limit: Ограничение на пропускателната способност (KiB/s)
-    Choose Download Folder: Избор на папка за изтегляния
     Download Templates: Шаблони за изтегляне
     Manage Download Templates: Управление на шаблоните за изтегляне ({templateCount})
     New Template: Нов шаблон
@@ -2506,6 +2505,8 @@ Tray Icon:
   Follow App Theme: "Следване на темата на приложението"
 
 Form Inputs:
+  Browse: "Преглед"
+  Use Default Path: "Използване по подразбиране"
   Enter Password Hint: "Въведете паролата си"
   Choose Password Hint: "Изберете парола"
   Confirm Password Hint: "Повторете новата си парола"
@@ -2525,7 +2526,6 @@ Form Inputs:
   Any Age: Без ограничение за възрастта
   Included Terms Example: напр. урок, ревю
   Excluded Terms Example: напр. трейлър, преглед
-  Download Folder Hint: Оставете празно, за да използвате папката за изтегляния
   Global Arguments Hint: Незадължителни аргументи за всяко изтегляне
   Unlimited Hint: 0 за неограничено
   Add Argument: Добавете аргумент

@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: 追加のyt-dlp引数
     Concurrent Downloads: 同時ダウンロード数
     Bandwidth Limit: 帯域幅の上限 (KiB/s)
-    Choose Download Folder: ダウンロードフォルダーを選択
     Download Templates: ダウンロードテンプレート
     Manage Download Templates: ダウンロードテンプレートを管理（{templateCount}件）
     New Template: 新しいテンプレート
@@ -2468,6 +2467,8 @@ Tray Icon:
   Follow App Theme: "アプリのテーマに合わせる"
 
 Form Inputs:
+  Browse: "参照"
+  Use Default Path: "デフォルトを使用"
   Enter Password Hint: "パスワードを入力"
   Choose Password Hint: "パスワードを設定"
   Confirm Password Hint: "新しいパスワードをもう一度入力"
@@ -2487,7 +2488,6 @@ Form Inputs:
   Any Age: 公開時期を問わない
   Included Terms Example: "例: 解説, レビュー"
   Excluded Terms Example: "例: 予告編, プレビュー"
-  Download Folder Hint: 空欄にするとダウンロードフォルダーを使用
   Global Arguments Hint: すべてのダウンロードに追加する任意の引数
   Unlimited Hint: 0で無制限
   Add Argument: 引数を追加

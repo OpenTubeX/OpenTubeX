@@ -930,7 +930,6 @@ Settings:
     Global Additional yt-dlp Arguments: Viðbótarviðföng yt-dlp
     Concurrent Downloads: Samtímis niðurhöl
     Bandwidth Limit: Bandbreiddarmörk (KiB/s)
-    Choose Download Folder: Velja niðurhalsmöppu
     Download Templates: Niðurhalssniðmát
     Manage Download Templates: Stjórna niðurhalssniðmátum ({templateCount})
     New Template: Nýtt sniðmát
@@ -2491,6 +2490,8 @@ Tray Icon:
   Follow App Theme: "Fylgja þema forritsins"
 
 Form Inputs:
+  Browse: "Fletta"
+  Use Default Path: "Nota sjálfgefið"
   Enter Password Hint: "Sláðu inn lykilorðið þitt"
   Choose Password Hint: "Veldu lykilorð"
   Confirm Password Hint: "Endurtaktu nýja lykilorðið þitt"
@@ -2510,7 +2511,6 @@ Form Inputs:
   Any Age: Hvaða aldur sem er
   Included Terms Example: t.d. leiðbeiningar, umsögn
   Excluded Terms Example: t.d. stikla, forskoðun
-  Download Folder Hint: Skildu eftir autt til að nota niðurhalsmöppuna
   Global Arguments Hint: Valfrjáls viðföng fyrir hvert niðurhal
   Unlimited Hint: 0 fyrir ótakmarkað
   Add Argument: Bæta við viðfangi

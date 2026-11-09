@@ -1,15 +1,18 @@
 import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo } from '../../helpers/app.mjs'
 
-async function configureQueue(page, values) {
+const PICKER_PATHS = ['ytDlpPath', 'ytDlpDownloadFolderPath']
+
+async function configureQueue(app, page, values) {
+  await choosePickerPaths(app, page, Object.fromEntries(Object.entries(values).filter(([key]) => PICKER_PATHS.includes(key))))
   await page.evaluate(async (settings) => {
     const store = window.$store
     for (const [key, value] of Object.entries(settings)) {
       await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
     }
-  }, values)
+  }, Object.fromEntries(Object.entries(values).filter(([key]) => !PICKER_PATHS.includes(key))))
   await page.bringToFront()
   await page.locator('body').click({ position: { x: 1, y: 1 } })
 }
@@ -49,7 +52,7 @@ test('shares one yt-dlp version probe across concurrent downloads and keeps cust
     `printf '%s\\n' "$@" -- >> '${argumentsFile}'`,
   ].join('\n'))
   await chmod(executable, 0o755)
-  await configureQueue(page, {
+  await configureQueue(app, page, {
     ytDlpPath: executable,
     ytDlpDownloadFolderPath: app.userDataDir,
     ytDlpMaxConcurrentDownloads: 3,
@@ -88,7 +91,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
     `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
   ].join('\n'))
   await chmod(executable, 0o755)
-  await configureQueue(page, {
+  await configureQueue(app, page, {
     ytDlpPath: executable,
     ytDlpDownloadFolderPath: app.userDataDir,
     ytDlpMaxConcurrentDownloads: 1,
@@ -187,7 +190,7 @@ test('clears pause-all after every download is individually resumed', async ({ a
     `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
   ].join('\n'))
   await chmod(executable, 0o755)
-  await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
+  await configureQueue(app, page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
 
   const [active, pending] = await submitDownloads(page, [
     { videoId: 'rrrrrrrrrrr', title: 'Individually resumed active download', mode: 'video' },
@@ -237,7 +240,7 @@ test('keeps the unsupported active-pause fallback resumable', async ({ app, page
     `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
   ].join('\n'))
   await chmod(executable, 0o755)
-  await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
+  await configureQueue(app, page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
 
   const originalPlatform = await app.electronApp.evaluate(() => process.platform)
   async function pauseWithoutProcessSupport(id) {
@@ -326,7 +329,7 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
   ].join('\n'))
   await chmod(executable, 0o755)
 
-  await configureQueue(page, {
+  await configureQueue(app, page, {
     ytDlpPath: executable,
     ytDlpMaxConcurrentDownloads: 1,
   })
@@ -398,7 +401,7 @@ test('checks destination space before starting a download', async ({ app, page }
     `while [ ! -f "${app.userDataDir}/release-$id" ]; do sleep 0.05; done`,
   ].join('\n'))
   await chmod(executable, 0o755)
-  await configureQueue(page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
+  await configureQueue(app, page, { ytDlpPath: executable, ytDlpMaxConcurrentDownloads: 1 })
 
   const [oversized] = await submitDownloads(page, [{
     videoId: 'ggggggggggg',
@@ -425,7 +428,7 @@ test('honors the download cookie preference and Always override', async ({ app, 
   await writeFile(cookies, '# Netscape HTTP Cookie File\n')
   await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > '${argumentsFile}'\n`)
   await chmod(executable, 0o755)
-  await configureQueue(page, {
+  await configureQueue(app, page, {
     enableDownloads: true,
     ytDlpSource: 'system',
     ytDlpPath: executable,
@@ -434,7 +437,7 @@ test('honors the download cookie preference and Always override', async ({ app, 
     ytDlpPlaybackCookiesPath: cookies
   })
   for (const [enabled, always, mode] of [[false, false, 'file'], [false, true, 'file'], [false, false, 'file'], [true, false, 'file'], [true, true, 'none']]) {
-    await configureQueue(page, { ytDlpDownloadUseCookies: enabled, ytDlpPlaybackAlwaysUseCookies: always, ytDlpPlaybackAuthMode: mode })
+    await configureQueue(app, page, { ytDlpDownloadUseCookies: enabled, ytDlpPlaybackAlwaysUseCookies: always, ytDlpPlaybackAuthMode: mode })
     await writeFile(argumentsFile, '')
     await submitDownloads(page, [{ videoId: 'iiiiiiiiiii', title: 'Cookie download', mode: 'video' }])
     await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
@@ -442,12 +445,12 @@ test('honors the download cookie preference and Always override', async ({ app, 
     expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
     if ((enabled || always) && mode === 'file') expect(args[args.indexOf('--cookies') + 1]).toBe(cookies)
   }
-  await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: true })
+  await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: true })
   await writeFile(argumentsFile, '')
   await submitDownloads(page, [{ externalUrl: 'http://example.org/video.mp4', title: 'External download', mode: 'video' }])
   await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('http://example.org/video.mp4')).toBe(true)
   expect((await readFile(argumentsFile, 'utf8')).trim().split('\n')).not.toContain('--cookies')
-  await configureQueue(page, { ytDlpPlaybackAuthMode: 'browser', ytDlpPlaybackCookiesBrowser: 'firefox' })
+  await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'browser', ytDlpPlaybackCookiesBrowser: 'firefox' })
   await writeFile(argumentsFile, '')
   await submitDownloads(page, [{ externalUrl: 'https://example.org/video.mp4', title: 'External browser download', mode: 'video' }])
   await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://example.org/video.mp4')).toBe(true)

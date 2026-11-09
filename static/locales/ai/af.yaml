@@ -1107,7 +1107,6 @@ Settings:
     Global Additional yt-dlp Arguments: Bykomende yt-dlp-argumente
     Concurrent Downloads: Gelyktydige aflaaie
     Bandwidth Limit: Bandwydtelimiet (KiB/s)
-    Choose Download Folder: Kies aflaaivouer
     Download Templates: Aflaaisjablone
     Manage Download Templates: Bestuur aflaaisjablone ({templateCount})
     New Template: Nuwe sjabloon
@@ -2732,6 +2731,8 @@ Tray Icon:
   Title: Stelselbakikoon
   Follow App Theme: Volg toeptema
 Form Inputs:
+  Browse: "Blaai"
+  Use Default Path: "Gebruik verstek"
   Enter Password Hint: Voer u wagwoord in
   Choose Password Hint: Kies ’n wagwoord
   Confirm Password Hint: Herhaal u nuwe wagwoord
@@ -2751,7 +2752,6 @@ Form Inputs:
   Any Age: Enige ouderdom
   Included Terms Example: bv. tutoriaal, resensie
   Excluded Terms Example: bv. lokprent, voorskou
-  Download Folder Hint: Laat leeg om u Aflaaie-vouer te gebruik
   Global Arguments Hint: Opsionele argumente vir elke aflaai
   Unlimited Hint: 0 vir onbeperk
   Add Argument: Voeg ’n argument by

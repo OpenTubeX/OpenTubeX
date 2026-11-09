@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
     Concurrent Downloads: Istodobna preuzimanja
     Bandwidth Limit: Ograničenje propusnosti (KiB/s)
-    Choose Download Folder: Odaberi mapu za preuzimanja
     Download Templates: Predlošci za preuzimanje
     Manage Download Templates: Upravljaj predlošcima za preuzimanje ({templateCount})
     New Template: Novi predložak
@@ -2510,6 +2509,8 @@ Tray Icon:
   Follow App Theme: "Prati temu aplikacije"
 
 Form Inputs:
+  Browse: "Pregledaj"
+  Use Default Path: "Koristi zadano"
   Enter Password Hint: "Unesite svoju lozinku"
   Choose Password Hint: "Odaberite lozinku"
   Confirm Password Hint: "Ponovite novu lozinku"
@@ -2529,7 +2530,6 @@ Form Inputs:
   Any Age: Bilo koja starost
   Included Terms Example: npr. vodič, recenzija
   Excluded Terms Example: npr. najava, pregled
-  Download Folder Hint: Ostavite prazno za korištenje mape Preuzimanja
   Global Arguments Hint: Neobavezni argumenti za svako preuzimanje
   Unlimited Hint: 0 za neograničeno
   Add Argument: Dodajte argument

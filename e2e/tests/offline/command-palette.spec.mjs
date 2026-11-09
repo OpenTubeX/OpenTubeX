@@ -1,4 +1,4 @@
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
@@ -459,7 +459,8 @@ test.describe('local video commands', () => {
     const executable = path.join(app.userDataDir, 'capture-player-arguments.mjs')
     const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
     await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
-    await page.evaluate(async ({ video, executable, capturedArguments, nodePath }) => {
+    await choosePickerPaths(app, page, { externalPlayerExecutable: process.execPath })
+    await page.evaluate(async ({ video, executable, capturedArguments }) => {
       const store = window.$store
       store.commit('upsertToHistoryCache', {
         ...video,
@@ -472,9 +473,8 @@ test.describe('local video commands', () => {
       await store.dispatch('updateDefaultViewingMode', 'external_player')
       await store.dispatch('updateDefaultPlayback', 1.5)
       await store.dispatch('updateWatchedProgressSavingMode', 'auto')
-      await store.dispatch('updateExternalPlayerExecutable', nodePath)
       await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
-    }, { video, executable, capturedArguments, nodePath: process.execPath })
+    }, { video, executable, capturedArguments })
     const previousUrl = page.url()
     await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
     await page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')

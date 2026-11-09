@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumente suplimentare yt-dlp
     Concurrent Downloads: Descărcări simultane
     Bandwidth Limit: Limită de lățime de bandă (KiB/s)
-    Choose Download Folder: Alege folderul pentru descărcări
     Download Templates: Șabloane de descărcare
     Manage Download Templates: Gestionează șabloanele de descărcare ({templateCount})
     New Template: Șablon nou
@@ -2530,6 +2529,8 @@ Tray Icon:
   Follow App Theme: "Urmează tema aplicației"
 
 Form Inputs:
+  Browse: "Răsfoiește"
+  Use Default Path: "Folosește implicit"
   Enter Password Hint: "Introdu parola ta"
   Choose Password Hint: "Alege o parolă"
   Confirm Password Hint: "Repetă noua parolă"
@@ -2549,7 +2550,6 @@ Form Inputs:
   Any Age: Orice vechime
   Included Terms Example: de ex. tutorial, recenzie
   Excluded Terms Example: de ex. trailer, previzualizare
-  Download Folder Hint: Lasă gol pentru a folosi dosarul Descărcări
   Global Arguments Hint: Argumente opționale pentru fiecare descărcare
   Unlimited Hint: 0 pentru nelimitat
   Add Argument: Adaugă un argument

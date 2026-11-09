@@ -1181,7 +1181,6 @@ Settings:
     Global Additional yt-dlp Arguments: Arguments addicionals de yt-dlp
     Concurrent Downloads: Baixades simultànies
     Bandwidth Limit: Límit d'amplada de banda (KiB/s)
-    Choose Download Folder: Tria la carpeta de baixades
     Download Templates: Plantilles de baixada
     Manage Download Templates: Gestiona les plantilles de baixada ({templateCount})
     New Template: Plantilla nova
@@ -3128,6 +3127,8 @@ Tray Icon:
   Follow App Theme: "Segueix el tema de l’aplicació"
 
 Form Inputs:
+  Browse: "Navega"
+  Use Default Path: "Utilitza el valor per defecte"
   Enter Password Hint: "Introduïu la vostra contrasenya"
   Choose Password Hint: "Trieu una contrasenya"
   Confirm Password Hint: "Repetiu la vostra contrasenya nova"
@@ -3147,7 +3148,6 @@ Form Inputs:
   Any Age: Qualsevol antiguitat
   Included Terms Example: p. ex. tutorial, ressenya
   Excluded Terms Example: p. ex. tràiler, avanç
-  Download Folder Hint: Deixeu-ho buit per utilitzar la carpeta de baixades
   Global Arguments Hint: Arguments opcionals per a cada baixada
   Unlimited Hint: 0 per a il·limitat
   Add Argument: Afegiu un argument

@@ -964,7 +964,6 @@ Settings:
     Global Additional yt-dlp Arguments: Aldonaj argumentoj por yt-dlp
     Concurrent Downloads: Samtempaj elŝutoj
     Bandwidth Limit: Kapacita limo (KiB/s)
-    Choose Download Folder: Elekti elŝutan dosierujon
     Download Templates: Elŝutaj ŝablonoj
     Manage Download Templates: Administri elŝutajn ŝablonojn ({templateCount})
     New Template: Nova ŝablono
@@ -2519,6 +2518,8 @@ Tray Icon:
   Title: Taskopleta piktogramo
   Follow App Theme: Sekvi la etoson de la aplikaĵo
 Form Inputs:
+  Browse: "Foliumi"
+  Use Default Path: "Uzi la defaŭlton"
   Enter Password Hint: Enigu vian pasvorton
   Choose Password Hint: Elektu pasvorton
   Confirm Password Hint: Ripetu vian novan pasvorton
@@ -2538,7 +2539,6 @@ Form Inputs:
   Any Age: Ajna aĝo
   Included Terms Example: ekz. lernilo, recenzo
   Excluded Terms Example: ekz. antaŭfilmo, antaŭrigardo
-  Download Folder Hint: Lasu malplena por uzi vian elŝutan dosierujon
   Global Arguments Hint: Nedevigaj argumentoj por ĉiu elŝuto
   Unlimited Hint: 0 por senlima
   Add Argument: Aldoni argumenton

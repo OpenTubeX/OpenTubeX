@@ -930,7 +930,6 @@ Settings:
     Global Additional yt-dlp Arguments: Əlavə yt-dlp arqumentləri
     Concurrent Downloads: Eyni vaxtda endirmələr
     Bandwidth Limit: Ötürmə sürəti limiti (KiB/s)
-    Choose Download Folder: Endirmə qovluğunu seç
     Download Templates: Endirmə şablonları
     Manage Download Templates: Endirmə şablonlarını idarə et ({templateCount})
     New Template: Yeni şablon
@@ -2478,6 +2477,8 @@ Tray Icon:
   Follow App Theme: "Tətbiqin mövzusunu izlə"
 
 Form Inputs:
+  Browse: "Gözdən keçir"
+  Use Default Path: "Defoltdan istifadə et"
   Enter Password Hint: "Şifrənizi daxil edin"
   Choose Password Hint: "Şifrə seçin"
   Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
@@ -2497,7 +2498,6 @@ Form Inputs:
   Any Age: İstənilən yaş
   Included Terms Example: məs. təlimat, icmal
   Excluded Terms Example: məs. treyler, önizləmə
-  Download Folder Hint: Yükləmələr qovluğunu istifadə etmək üçün boş saxlayın
   Global Arguments Hint: Hər yükləmə üçün əlavə arqumentlər
   Unlimited Hint: Limitsiz üçün 0
   Add Argument: Arqument əlavə edin

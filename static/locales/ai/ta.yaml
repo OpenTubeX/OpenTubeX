@@ -949,7 +949,6 @@ Settings:
     Global Additional yt-dlp Arguments: கூடுதல் yt-dlp வாதங்கள்
     Concurrent Downloads: ஒரேநேரப் பதிவிறக்கங்கள்
     Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s)
-    Choose Download Folder: பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடு
     Download Templates: பதிவிறக்க வார்ப்புருக்கள்
     Manage Download Templates: பதிவிறக்க வார்ப்புருக்களை நிர்வகி ({templateCount})
     New Template: புதிய வார்ப்புரு
@@ -2543,6 +2542,8 @@ Tray Icon:
   Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
 
 Form Inputs:
+  Browse: "உலாவு"
+  Use Default Path: "இயல்புநிலையைப் பயன்படுத்து"
   Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
   Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
   Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
@@ -2562,7 +2563,6 @@ Form Inputs:
   Any Age: எந்த வயதும்
   Included Terms Example: எ.கா. பயிற்சி, விமர்சனம்
   Excluded Terms Example: எ.கா. முன்னோட்டம், அறிமுகம்
-  Download Folder Hint: பதிவிறக்கக் கோப்புறையைப் பயன்படுத்த காலியாக விடவும்
   Global Arguments Hint: ஒவ்வொரு பதிவிறக்கத்திற்கும் விருப்ப வாதங்கள்
   Unlimited Hint: வரம்பற்றதற்கு 0
   Add Argument: ஒரு வாதத்தைச் சேர்க்கவும்

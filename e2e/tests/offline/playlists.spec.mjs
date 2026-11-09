@@ -2,7 +2,7 @@ import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
-import { chooseSelectOption, test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { choosePickerPaths, chooseSelectOption, test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
@@ -306,7 +306,7 @@ test.describe('seeded playlists', () => {
       body: '#EXTM3U\n',
     }))
     await dispatchStoreAction(page, 'updateYtDlpSource', 'system')
-    await dispatchStoreAction(page, 'updateYtDlpPath', executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
     await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 32)
 
     await goTo(page, 'userplaylists')

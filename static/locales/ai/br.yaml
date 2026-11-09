@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Arventennoù ouzhpenn yt-dlp
     Concurrent Downloads: "Pellgargadennoù war un dro"
     Bandwidth Limit: Bevenn ledander-bann (KiB/s)
-    Choose Download Folder: "Dibab un teuliad pellgargañ"
     Download Templates: "Patromoù pellgargañ"
     Manage Download Templates: "Merañ ar patromoù pellgargañ ({templateCount})"
     New Template: "Patrom nevez"
@@ -2477,6 +2476,8 @@ Tray Icon:
   Follow App Theme: "Heuliañ neuz an arload"
 
 Form Inputs:
+  Browse: "Furchal"
+  Use Default Path: "Implijout an hini dre ziouer"
   Enter Password Hint: "Enlakait ho ker-tremen"
   Choose Password Hint: "Dibabit ur ger-tremen"
   Confirm Password Hint: "Adskrivit ho ker-tremen nevez"
@@ -2496,7 +2497,6 @@ Form Inputs:
   Any Age: Oad forzh pe hini
   Included Terms Example: da skouer kentel, selladenn
   Excluded Terms Example: da skouer tañva, rakwel
-  Download Folder Hint: Lezit goullo evit implijout ho teuliad Pellgargadennoù
   Global Arguments Hint: Arventennoù diret evit pep pellgargadenn
   Unlimited Hint: 0 evit didermenet
   Add Argument: Ouzhpennañ un arventenn

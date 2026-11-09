@@ -1473,12 +1473,7 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
   const automaticUpdates = updateMode === 'automatic'
   let missingManagedBinaries = missingBinaries
   if (!automaticUpdates && missingBinaries.length > 0) {
-    const managedInfo = await ytDlp.ytDlpGetInfo({
-      ytDlpSource: 'managed',
-      ytDlpPath: '',
-      ffmpegSource: 'managed',
-      ffmpegPath: ''
-    })
+    const managedInfo = await ytDlp.ytDlpGetInfo({ ytDlpSource: 'managed', ffmpegSource: 'managed' })
     if (managedInfo !== null) {
       missingManagedBinaries = missingBinaries.filter(binary => {
         if (binary === 'yt-dlp') {

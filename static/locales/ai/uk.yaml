@@ -939,7 +939,6 @@ Settings:
     Global Additional yt-dlp Arguments: Додаткові аргументи yt-dlp
     Concurrent Downloads: Одночасні завантаження
     Bandwidth Limit: Обмеження пропускної здатності (KiB/s)
-    Choose Download Folder: Вибрати папку завантажень
     Download Templates: Шаблони завантаження
     Manage Download Templates: Керувати шаблонами завантаження ({templateCount})
     New Template: Новий шаблон
@@ -2525,6 +2524,8 @@ Tray Icon:
   Follow App Theme: "Використовувати тему застосунку"
 
 Form Inputs:
+  Browse: "Огляд"
+  Use Default Path: "Використати типове"
   Enter Password Hint: "Введіть свій пароль"
   Choose Password Hint: "Виберіть пароль"
   Confirm Password Hint: "Повторіть новий пароль"
@@ -2544,7 +2545,6 @@ Form Inputs:
   Any Age: Будь-який вік
   Included Terms Example: напр. інструкція, огляд
   Excluded Terms Example: напр. трейлер, анонс
-  Download Folder Hint: Залиште порожнім, щоб використовувати теку завантажень
   Global Arguments Hint: Необов’язкові аргументи для кожного завантаження
   Unlimited Hint: 0 — без обмежень
   Add Argument: Додати аргумент

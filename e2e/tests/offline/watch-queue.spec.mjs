@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -350,13 +350,13 @@ test('removes a queued video that a click opens in the default external player',
   const executable = path.join(app.userDataDir, 'capture-player-arguments.mjs')
   const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
   await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
-  await page.evaluate(async ({ executable, capturedArguments, nodePath }) => {
+  await choosePickerPaths(app, page, { externalPlayerExecutable: process.execPath })
+  await page.evaluate(async ({ executable, capturedArguments }) => {
     const store = window.$store
     await store.dispatch('updateExternalPlayer', 'mpv')
     await store.dispatch('updateDefaultViewingMode', 'external_player')
-    await store.dispatch('updateExternalPlayerExecutable', nodePath)
     await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
-  }, { executable, capturedArguments, nodePath: process.execPath })
+  }, { executable, capturedArguments })
 
   await queue.locator('.queueItem a.title').filter({ hasText: 'External player video' }).click()
   await expect.poll(async () => {

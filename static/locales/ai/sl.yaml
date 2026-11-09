@@ -1148,7 +1148,6 @@ Settings:
     Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
     Concurrent Downloads: Sočasni prenosi
     Bandwidth Limit: Omejitev pasovne širine (KiB/s)
-    Choose Download Folder: Izberi mapo za prenose
     Download Templates: Predloge za prenos
     Manage Download Templates: Upravljaj predloge za prenos ({templateCount})
     New Template: Nova predloga
@@ -3079,6 +3078,8 @@ Tray Icon:
   Follow App Theme: "Sledi temi aplikacije"
 
 Form Inputs:
+  Browse: "Prebrskaj"
+  Use Default Path: "Uporabi privzeto"
   Enter Password Hint: "Vnesite svoje geslo"
   Choose Password Hint: "Izberite geslo"
   Confirm Password Hint: "Ponovite novo geslo"
@@ -3098,7 +3099,6 @@ Form Inputs:
   Any Age: Poljubna starost
   Included Terms Example: npr. vodič, recenzija
   Excluded Terms Example: npr. napovednik, predogled
-  Download Folder Hint: Pustite prazno za uporabo mape Prenosi
   Global Arguments Hint: Izbirni argumenti za vsak prenos
   Unlimited Hint: 0 za neomejeno
   Add Argument: Dodajte argument

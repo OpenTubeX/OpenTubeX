@@ -988,7 +988,6 @@ Settings:
     Global Additional yt-dlp Arguments: اضافی yt-dlp آرگیومینٹس
     Concurrent Downloads: بیک وقت ڈاؤن لوڈز
     Bandwidth Limit: بینڈوڈتھ کی حد (KiB/s)
-    Choose Download Folder: ڈاؤن لوڈ فولڈر منتخب کریں
     Download Templates: ڈاؤن لوڈ ٹیمپلیٹس
     Manage Download Templates: ڈاؤن لوڈ ٹیمپلیٹس کا انتظام کریں ({templateCount})
     New Template: نیا ٹیمپلیٹ
@@ -2589,6 +2588,8 @@ Tray Icon:
   Title: ٹرے آئیکن
   Follow App Theme: ایپ کی تھیم کی پیروی کریں
 Form Inputs:
+  Browse: "براؤز کریں"
+  Use Default Path: "طے شدہ استعمال کریں"
   Enter Password Hint: اپنا پاس ورڈ درج کریں
   Choose Password Hint: پاس ورڈ منتخب کریں
   Confirm Password Hint: اپنا نیا پاس ورڈ دوبارہ درج کریں
@@ -2608,7 +2609,6 @@ Form Inputs:
   Any Age: کوئی بھی عمر
   Included Terms Example: مثلاً ٹیوٹوریل، ریویو
   Excluded Terms Example: مثلاً ٹریلر، پیش نظارہ
-  Download Folder Hint: اپنا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں
   Global Arguments Hint: ہر ڈاؤن لوڈ کے لیے اختیاری آرگیومینٹس
   Unlimited Hint: لامحدود کے لیے 0
   Add Argument: آرگیومینٹ شامل کریں

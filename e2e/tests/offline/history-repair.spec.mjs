@@ -1,6 +1,6 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect, goTo } from '../../helpers/app.mjs'
 
 const timeWatched = Date.now() - 1000
 const original = {
@@ -431,10 +431,7 @@ test.describe('authenticated history metadata', () => {
       `printf '%s' '${JSON.stringify(metadata)}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await page.evaluate(async executable => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpPath', executable)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Repair History', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: 'Repair History' })
@@ -488,9 +485,7 @@ test.describe('native cookie repair cancellation', () => {
     const pidFile = path.join(app.userDataDir, 'history-pid.txt')
     await writeFile(executable, `#!/bin/sh\nprintf '%s' "$$" > '${pidFile}'\nexec sleep 30\n`)
     await chmod(executable, 0o755)
-    await page.evaluate(async executable => {
-      await window.$store.dispatch('updateYtDlpPath', executable)
-    }, executable)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Repair History', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: 'Repair History' })

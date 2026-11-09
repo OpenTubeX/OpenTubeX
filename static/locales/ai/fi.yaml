@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ylimääräiset yt-dlp-argumentit
     Concurrent Downloads: Samanaikaiset lataukset
     Bandwidth Limit: Kaistanleveysrajoitus (KiB/s)
-    Choose Download Folder: Valitse latauskansio
     Download Templates: Latausmallit
     Manage Download Templates: Hallitse latausmalleja ({templateCount})
     New Template: Uusi malli
@@ -2531,6 +2530,8 @@ Tray Icon:
   Follow App Theme: "Seuraa sovelluksen teemaa"
 
 Form Inputs:
+  Browse: "Selaa"
+  Use Default Path: "Käytä oletusta"
   Enter Password Hint: "Anna salasanasi"
   Choose Password Hint: "Valitse salasana"
   Confirm Password Hint: "Toista uusi salasanasi"
@@ -2550,7 +2551,6 @@ Form Inputs:
   Any Age: Mikä tahansa ikä
   Included Terms Example: esim. ohje, arvostelu
   Excluded Terms Example: esim. traileri, esikatselu
-  Download Folder Hint: Jätä tyhjäksi käyttääksesi Lataukset-kansiota
   Global Arguments Hint: Valinnaiset argumentit jokaiselle lataukselle
   Unlimited Hint: 0 tarkoittaa rajoittamatonta
   Add Argument: Lisää argumentti

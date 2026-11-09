@@ -939,7 +939,6 @@ Settings:
     Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
     Concurrent Downloads: التنزيلات المتزامنة
     Bandwidth Limit: حد النطاق الترددي (KiB/s)
-    Choose Download Folder: اختر مجلد التنزيل
     Download Templates: قوالب التنزيل
     Manage Download Templates: إدارة تنزيل القوالب ({templateCount})
     New Template: قالب جديد
@@ -2510,6 +2509,8 @@ Tray Icon:
   Follow App Theme: "اتباع سمة التطبيق"
 
 Form Inputs:
+  Browse: "استعراض"
+  Use Default Path: "استخدام الافتراضي"
   Enter Password Hint: "أدخل كلمة مرورك"
   Choose Password Hint: "اختر كلمة مرور"
   Confirm Password Hint: "كرر كلمة مرورك الجديدة"
@@ -2529,7 +2530,6 @@ Form Inputs:
   Any Age: أي عمر
   Included Terms Example: مثلًا شرح, مراجعة
   Excluded Terms Example: مثلًا إعلان, معاينة
-  Download Folder Hint: اتركه فارغًا لاستخدام مجلد التنزيلات
   Global Arguments Hint: وسيطات اختيارية لكل تنزيل
   Unlimited Hint: 0 لعدم التقييد
   Add Argument: أضف وسيطة

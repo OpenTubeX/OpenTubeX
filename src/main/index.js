@@ -95,6 +95,7 @@ import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
 import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
 import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
+import { canRendererWriteSetting } from './settingWriteGuard'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
@@ -2751,7 +2752,7 @@ function runApp() {
     return (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
   }
 
-  setupYtDlpIpc()
+  setupYtDlpIpc({ updateSettingFromMain })
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
 
@@ -2934,8 +2935,8 @@ function runApp() {
           return await baseHandlers.settings.find()
 
         case DBActions.GENERAL.UPSERT:
-          // Destinations require a native folder picker. Backup status is written by the scheduler.
-          if (['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus'].includes(data._id)) {
+          // Destinations and executables require a native picker. Backup status is written by the scheduler.
+          if (!canRendererWriteSetting(data._id, data.value)) {
             return null
           }
 

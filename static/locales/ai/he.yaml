@@ -943,7 +943,6 @@ Settings:
     Global Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
     Concurrent Downloads: הורדות במקביל
     Bandwidth Limit: מגבלת רוחב פס (KiB/s)
-    Choose Download Folder: בחירת תיקיית הורדות
     Download Templates: תבניות הורדה
     Manage Download Templates: ניהול תבניות הורדה ({templateCount})
     New Template: תבנית חדשה
@@ -2533,6 +2532,8 @@ Tray Icon:
   Follow App Theme: "התאמה לערכת הנושא של היישום"
 
 Form Inputs:
+  Browse: "עיון"
+  Use Default Path: "שימוש בברירת המחדל"
   Enter Password Hint: "הזן את הסיסמה שלך"
   Choose Password Hint: "בחר סיסמה"
   Confirm Password Hint: "הזן שוב את הסיסמה החדשה שלך"
@@ -2552,7 +2553,6 @@ Form Inputs:
   Any Age: כל גיל
   Included Terms Example: למשל מדריך, סקירה
   Excluded Terms Example: למשל קדימון, תצוגה מקדימה
-  Download Folder Hint: השאר ריק כדי להשתמש בתיקיית ההורדות
   Global Arguments Hint: ארגומנטים אופציונליים לכל הורדה
   Unlimited Hint: 0 ללא הגבלה
   Add Argument: הוסף ארגומנט

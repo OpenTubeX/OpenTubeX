@@ -1110,7 +1110,6 @@ Settings:
     Global Additional yt-dlp Arguments: 추가 yt-dlp 인수
     Concurrent Downloads: 동시 다운로드 수
     Bandwidth Limit: 대역폭 제한 (KiB/s)
-    Choose Download Folder: 다운로드 폴더 선택
     Download Templates: 다운로드 템플릿
     Manage Download Templates: '다운로드 템플릿 관리 ({templateCount})'
     New Template: 새 템플릿
@@ -2938,6 +2937,8 @@ Tray Icon:
   Follow App Theme: "앱 테마 따르기"
 
 Form Inputs:
+  Browse: "찾아보기"
+  Use Default Path: "기본값 사용"
   Enter Password Hint: "비밀번호를 입력하세요"
   Choose Password Hint: "비밀번호를 설정하세요"
   Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
@@ -2957,7 +2958,6 @@ Form Inputs:
   Any Age: 게시 시기 무관
   Included Terms Example: "예: 튜토리얼, 리뷰"
   Excluded Terms Example: "예: 예고편, 미리보기"
-  Download Folder Hint: 비워 두면 다운로드 폴더 사용
   Global Arguments Hint: 모든 다운로드에 사용할 선택적 인수
   Unlimited Hint: 0은 무제한
   Add Argument: 인수 추가

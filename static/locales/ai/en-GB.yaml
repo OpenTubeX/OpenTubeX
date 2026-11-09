@@ -916,7 +916,6 @@ Settings:
     Global Additional yt-dlp Arguments: Additional yt-dlp arguments
     Concurrent Downloads: Concurrent downloads
     Bandwidth Limit: Bandwidth limit (KiB/s)
-    Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: Manage Download Templates ({templateCount})
     New Template: New Template
@@ -2469,6 +2468,8 @@ Tray Icon:
   Follow App Theme: "Follow app theme"
 
 Form Inputs:
+  Browse: "Browse"
+  Use Default Path: "Use default"
   Enter Password Hint: "Enter your password"
   Choose Password Hint: "Choose a password"
   Confirm Password Hint: "Repeat your new password"
@@ -2488,7 +2489,6 @@ Form Inputs:
   Any Age: Any age
   Included Terms Example: e.g. tutorial, review
   Excluded Terms Example: e.g. trailer, preview
-  Download Folder Hint: Leave blank to use your Downloads folder
   Global Arguments Hint: Optional arguments for every download
   Unlimited Hint: 0 for unlimited
   Add Argument: Add an argument

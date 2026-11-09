@@ -931,7 +931,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol
     Concurrent Downloads: Lawrlwythiadau cydamserol
     Bandwidth Limit: Terfyn lled band (KiB/s)
-    Choose Download Folder: Dewis ffolder lawrlwytho
     Download Templates: Templedi lawrlwytho
     Manage Download Templates: Rheoli templedi lawrlwytho ({templateCount})
     New Template: Templed newydd
@@ -2508,6 +2507,8 @@ Tray Icon:
   Follow App Theme: "Dilyn thema’r ap"
 
 Form Inputs:
+  Browse: "Pori"
+  Use Default Path: "Defnyddio’r rhagosodiad"
   Enter Password Hint: "Rhowch eich cyfrinair"
   Choose Password Hint: "Dewiswch gyfrinair"
   Confirm Password Hint: "Ailadroddwch eich cyfrinair newydd"
@@ -2527,7 +2528,6 @@ Form Inputs:
   Any Age: Unrhyw oedran
   Included Terms Example: e.e. tiwtorial, adolygiad
   Excluded Terms Example: e.e. trelar, rhagolwg
-  Download Folder Hint: Gadewch yn wag i ddefnyddio eich ffolder Lawrlwythiadau
   Global Arguments Hint: Ymresymiadau dewisol ar gyfer pob lawrlwythiad
   Unlimited Hint: 0 am ddiderfyn
   Add Argument: Ychwanegu ymresymiad

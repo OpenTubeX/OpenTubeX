@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: További yt-dlp argumentumok
     Concurrent Downloads: Egyidejű letöltések
     Bandwidth Limit: Sávszélességkorlát (KiB/s)
-    Choose Download Folder: Letöltési mappa kiválasztása
     Download Templates: Letöltési sablonok
     Manage Download Templates: Letöltési sablonok kezelése ({templateCount})
     New Template: Új sablon
@@ -2469,6 +2468,8 @@ Tray Icon:
   Follow App Theme: "Alkalmazástéma követése"
 
 Form Inputs:
+  Browse: "Tallózás"
+  Use Default Path: "Alapértelmezett használata"
   Enter Password Hint: "Add meg a jelszavad"
   Choose Password Hint: "Válassz jelszót"
   Confirm Password Hint: "Ismételd meg az új jelszavad"
@@ -2488,7 +2489,6 @@ Form Inputs:
   Any Age: Bármilyen korú
   Included Terms Example: pl. útmutató, értékelés
   Excluded Terms Example: pl. előzetes, bemutató
-  Download Folder Hint: Hagyja üresen a Letöltések mappa használatához
   Global Arguments Hint: Opcionális argumentumok minden letöltéshez
   Unlimited Hint: 0 a korlátlanhoz
   Add Argument: Argumentum hozzáadása

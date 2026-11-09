@@ -5,6 +5,8 @@ import { createReadStream } from 'node:fs'
 import { Readable } from 'node:stream'
 
 import { DOWNLOADED_MEDIA_MIME_TYPES, IpcChannels } from '../constants'
+import { settings } from '../datastores/handlers/base'
+import { EXECUTABLE_PATH_SETTINGS } from './settingWriteGuard'
 import { getSubscriptionAutoRefreshOwner } from './subscriptionAutoRefresh'
 import { isOpenTubeXUrl } from './utils'
 import {
@@ -111,8 +113,34 @@ export async function handleDownloadMediaRequest(request) {
 /**
  * Registers the yt-dlp handlers for downloads, metadata, the playback cache,
  * binary updates and the settings file pickers.
+ * @param {object} options
+ * @param {(settingKey: string, value: unknown) => Promise<unknown>} options.updateSettingFromMain
  */
-export function setupYtDlpIpc() {
+export function setupYtDlpIpc({ updateSettingFromMain }) {
+  /**
+   * Shows a native picker and saves the chosen path to the setting.
+   * @param {import('electron').WebContents} webContents
+   * @param {string} settingId
+   * @param {string} fallbackPath
+   * @param {import('electron').OpenDialogOptions} dialogOptions
+   * @returns {Promise<string | undefined>}
+   */
+  async function choosePathSetting(webContents, settingId, fallbackPath, dialogOptions) {
+    const currentPath = (await settings._findOne(settingId))?.value
+    const options = { ...dialogOptions, defaultPath: typeof currentPath === 'string' && currentPath !== '' ? currentPath : fallbackPath }
+    const window = BrowserWindow.fromWebContents(webContents)
+    const result = window
+      ? await dialog.showOpenDialog(window, options)
+      : await dialog.showOpenDialog(options)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return undefined
+    }
+
+    await updateSettingFromMain(settingId, result.filePaths[0])
+    return result.filePaths[0]
+  }
+
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, (event, payload, retryDownloadId) => {
     const subscriptionAutoRefreshOwner = getSubscriptionAutoRefreshOwner()
     const automaticDownloadAuthorized = subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
@@ -144,16 +172,11 @@ export function setupYtDlpIpc() {
   ipcMain.handle(IpcChannels.YT_DLP_CHECK_BINARY_UPDATE, handleYtDlpCheckBinaryUpdate)
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD_BINARY, handleYtDlpDownloadBinary)
 
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
+  // Picked paths are saved here instead of by the renderer, which may only
+  // reset them (see settingWriteGuard.js).
+  ipcMain.handle(IpcChannels.CHOOSE_EXECUTABLE, async (event, settingId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !EXECUTABLE_PATH_SETTINGS.includes(settingId)) {
       return
-    }
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('home')
     }
 
     /** @type {import('electron').FileFilter[]} */
@@ -164,22 +187,7 @@ export function setupYtDlpIpc() {
         ]
       : [{ name: 'All Files', extensions: ['*'] }]
 
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openFile'],
-      filters
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
+    return await choosePathSetting(event.sender, settingId, app.getPath('home'), { properties: ['openFile'], filters })
   })
 
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_COOKIES, async (event, currentPath) => {
@@ -244,32 +252,11 @@ export function setupYtDlpIpc() {
     return result.filePaths[0]
   })
 
-  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
+  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('downloads')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openDirectory']
-    }
-
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const result = window
-      ? await dialog.showOpenDialog(window, dialogOptions)
-      : await dialog.showOpenDialog(dialogOptions)
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return undefined
-    }
-
-    return result.filePaths[0]
+    return await choosePathSetting(event.sender, 'ytDlpDownloadFolderPath', app.getPath('downloads'), { properties: ['openDirectory'] })
   })
 }

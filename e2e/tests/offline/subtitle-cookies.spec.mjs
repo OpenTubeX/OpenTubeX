@@ -1,7 +1,7 @@
 import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { choosePickerPaths, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -34,13 +34,13 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
     'fi',
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.evaluate(async (executable) => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/tmp/test-profile')
-  }, executable)
+  })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBeNull()
   await expect(readFile(capturedArgs)).rejects.toThrow()
 

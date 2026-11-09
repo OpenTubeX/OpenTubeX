@@ -1627,7 +1627,6 @@ Settings:
     Global Additional yt-dlp Arguments: Zusätzliche yt-dlp-Argumente
     Concurrent Downloads: Parallele Downloads
     Bandwidth Limit: Bandbreitenlimit (KiB/s)
-    Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
     External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
     Enable Downloads: Downloads aktivieren
@@ -3729,6 +3728,8 @@ SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
 
 Form Inputs:
+  Browse: "Durchsuchen"
+  Use Default Path: "Standard verwenden"
   Enter Password Hint: "Gib dein Passwort ein"
   Choose Password Hint: "Wähle ein Passwort"
   Confirm Password Hint: "Wiederhole dein neues Passwort"
@@ -3748,7 +3749,6 @@ Form Inputs:
   Any Age: Beliebiges Alter
   Included Terms Example: z. B. Anleitung, Rezension
   Excluded Terms Example: z. B. Trailer, Vorschau
-  Download Folder Hint: Leer lassen, um deinen Downloads-Ordner zu verwenden
   Global Arguments Hint: Optionale Argumente für jeden Download
   Unlimited Hint: 0 für unbegrenzt
   Add Argument: Argument hinzufügen

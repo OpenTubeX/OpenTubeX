@@ -933,7 +933,6 @@ Settings:
     Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
     Concurrent Downloads: Ταυτόχρονες λήψεις
     Bandwidth Limit: Όριο εύρους ζώνης (KiB/s)
-    Choose Download Folder: Επιλογή φακέλου λήψεων
     Download Templates: Πρότυπα λήψεων
     Manage Download Templates: Διαχείριση προτύπων λήψεων ({templateCount})
     New Template: Νέο πρότυπο
@@ -2508,6 +2507,8 @@ Tray Icon:
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
 
 Form Inputs:
+  Browse: "Περιήγηση"
+  Use Default Path: "Χρήση προεπιλογής"
   Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
   Choose Password Hint: "Επιλέξτε έναν κωδικό"
   Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
@@ -2527,7 +2528,6 @@ Form Inputs:
   Any Age: Οποιαδήποτε ηλικία
   Included Terms Example: π.χ. οδηγός, κριτική
   Excluded Terms Example: π.χ. τρέιλερ, προεπισκόπηση
-  Download Folder Hint: Αφήστε κενό για χρήση του φακέλου λήψεων
   Global Arguments Hint: Προαιρετικά ορίσματα για κάθε λήψη
   Unlimited Hint: 0 για απεριόριστο
   Add Argument: Προσθέστε ένα όρισμα

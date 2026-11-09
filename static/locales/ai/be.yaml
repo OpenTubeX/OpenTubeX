@@ -963,7 +963,6 @@ Settings:
     Global Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
     Concurrent Downloads: Адначасовыя спампоўванні
     Bandwidth Limit: Абмежаванне прапускной здольнасці (KiB/s)
-    Choose Download Folder: Выбраць папку спампоўванняў
     Download Templates: Шаблоны спампоўвання
     Manage Download Templates: Кіраванне шаблонамі спампоўвання ({templateCount})
     New Template: Новы шаблон
@@ -2581,6 +2580,8 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Browse: "Агляд"
+  Use Default Path: "Выкарыстоўваць прадвызначанае"
   Enter Password Hint: "Увядзіце свой пароль"
   Choose Password Hint: "Выберыце пароль"
   Confirm Password Hint: "Паўтарыце новы пароль"
@@ -2600,7 +2601,6 @@ Form Inputs:
   Any Age: Любы ўзрост
   Included Terms Example: напр. інструкцыя, агляд
   Excluded Terms Example: напр. трэйлер, анонс
-  Download Folder Hint: Пакіньце пустым, каб выкарыстоўваць папку спамповак
   Global Arguments Hint: Неабавязковыя аргументы для кожнага спампоўвання
   Unlimited Hint: 0 — без абмежавання
   Add Argument: Дадаць аргумент

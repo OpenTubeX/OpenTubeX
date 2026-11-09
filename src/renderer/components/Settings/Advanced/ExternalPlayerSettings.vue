@@ -37,15 +37,13 @@
       <FtFlexBox
         class="settingsFlexStart460px"
       >
-        <FtInput
-          :icon="['fas', 'folder-open']"
+        <FtPathPicker
           :label="$t('Settings.External Player Settings.Custom External Player Executable')"
-          placeholder="/path/to/player"
-          :show-action-button="false"
-          :show-label="true"
+          :placeholder="defaultExecutable"
           :value="externalPlayerExecutable"
           :tooltip="$t('Tooltips.External Player Settings.Custom External Player Executable')"
-          @input="updateExternalPlayerExecutable"
+          @browse="chooseExternalPlayerExecutable"
+          @clear="store.dispatch('updateExternalPlayerExecutable', '')"
         />
       </FtFlexBox>
       <FtFlexBox>
@@ -70,7 +68,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
-import FtInput from '../../FtInput/FtInput.vue'
+import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInputTags from '../../FtInputTags/FtInputTags.vue'
@@ -96,6 +94,9 @@ const externalPlayerValues = computed(() => store.getters.getExternalPlayerValue
 
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayerExecutable = computed(() => store.getters.getExternalPlayerExecutable)
+
+/** @type {import('vue').ComputedRef<string>} */
+const defaultExecutable = computed(() => store.getters.getExternalPlayerCmdArguments[externalPlayer.value]?.defaultExecutable ?? '')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const externalPlayerIgnoreWarnings = computed(() => store.getters.getExternalPlayerIgnoreWarnings)
@@ -143,11 +144,8 @@ function updateExternalPlayerIgnoreDefaultArgs(value) {
   store.dispatch('updateExternalPlayerIgnoreDefaultArgs', value)
 }
 
-/**
- * @param {string} value
- */
-function updateExternalPlayerExecutable(value) {
-  store.dispatch('updateExternalPlayerExecutable', value)
+function chooseExternalPlayerExecutable() {
+  window.ftElectron.chooseExecutable('externalPlayerExecutable')
 }
 
 /**

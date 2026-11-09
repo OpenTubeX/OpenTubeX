@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
     Concurrent Downloads: Samaaegsed allalaadimised
     Bandwidth Limit: Ribalaiuse piirang (KiB/s)
-    Choose Download Folder: Vali allalaadimiskaust
     Download Templates: Allalaadimismallid
     Manage Download Templates: Halda allalaadimismalle ({templateCount})
     New Template: Uus mall
@@ -2471,6 +2470,8 @@ Tray Icon:
   Follow App Theme: "Järgi rakenduse teemat"
 
 Form Inputs:
+  Browse: "Sirvi"
+  Use Default Path: "Kasuta vaikimisi"
   Enter Password Hint: "Sisesta oma parool"
   Choose Password Hint: "Vali parool"
   Confirm Password Hint: "Korda oma uut parooli"
@@ -2490,7 +2491,6 @@ Form Inputs:
   Any Age: Mis tahes vanus
   Included Terms Example: nt õpetus, arvustus
   Excluded Terms Example: nt treiler, eelvaade
-  Download Folder Hint: Jäta tühjaks, et kasutada allalaadimiste kausta
   Global Arguments Hint: Valikulised argumendid igale allalaadimisele
   Unlimited Hint: 0 tähendab piiramatut
   Add Argument: Lisa argument

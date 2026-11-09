@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: yt-dlp argumentu gehigarriak
     Concurrent Downloads: Aldibereko deskargak
     Bandwidth Limit: Banda-zabaleraren muga (KiB/s)
-    Choose Download Folder: Aukeratu deskargen karpeta
     Download Templates: Deskarga-txantiloiak
     Manage Download Templates: Kudeatu deskarga-txantiloiak ({templateCount})
     New Template: Txantiloi berria
@@ -2478,6 +2477,8 @@ Tray Icon:
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
 
 Form Inputs:
+  Browse: "Arakatu"
+  Use Default Path: "Erabili lehenetsia"
   Enter Password Hint: "Sartu zure pasahitza"
   Choose Password Hint: "Aukeratu pasahitz bat"
   Confirm Password Hint: "Errepikatu zure pasahitz berria"
@@ -2497,7 +2498,6 @@ Form Inputs:
   Any Age: Edozein antzinatasun
   Included Terms Example: adib. tutoriala, iritzia
   Excluded Terms Example: adib. trailerra, aurrerapena
-  Download Folder Hint: Utzi hutsik Deskargak karpeta erabiltzeko
   Global Arguments Hint: Aukerako argumentuak deskarga guztietarako
   Unlimited Hint: 0 mugarik ez izateko
   Add Argument: Gehitu argumentu bat

@@ -640,9 +640,8 @@ const downloadFolderDisplay = computed(() => displayAndroidPath(downloadFolderPa
   ? t('Downloads.Folder Required')
   : t('Downloads.System Downloads Folder')))
 
-async function chooseDownloadFolder() {
-  const path = await ytDlp.ytDlpChooseDownloadFolder(downloadFolderPath.value)
-  if (typeof path === 'string' && path.length > 0) store.dispatch('updateYtDlpDownloadFolderPath', path)
+function chooseDownloadFolder() {
+  return ytDlp.ytDlpChooseDownloadFolder()
 }
 async function startDownload() {
   const result = await ytDlp.ytDlpDownload({

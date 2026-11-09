@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Ek yt-dlp argümanları
     Concurrent Downloads: Eş Zamanlı İndirmeler
     Bandwidth Limit: Bant genişliği sınırı (KiB/s)
-    Choose Download Folder: İndirme Klasörü Seç
     Download Templates: İndirme Şablonları
     Manage Download Templates: 'İndirme Şablonlarını Yönet ({templateCount})'
     New Template: Yeni Şablon
@@ -2469,6 +2468,8 @@ Tray Icon:
   Follow App Theme: "Uygulama temasını izle"
 
 Form Inputs:
+  Browse: "Göz at"
+  Use Default Path: "Varsayılanı kullan"
   Enter Password Hint: "Parolanızı girin"
   Choose Password Hint: "Bir parola seçin"
   Confirm Password Hint: "Yeni parolanızı tekrarlayın"
@@ -2488,7 +2489,6 @@ Form Inputs:
   Any Age: Herhangi bir yaş
   Included Terms Example: örn. eğitim, inceleme
   Excluded Terms Example: örn. fragman, önizleme
-  Download Folder Hint: İndirilenler klasörünü kullanmak için boş bırakın
   Global Arguments Hint: Her indirme için isteğe bağlı argümanlar
   Unlimited Hint: Sınırsız için 0
   Add Argument: Argüman ekleyin

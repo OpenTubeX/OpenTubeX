@@ -931,7 +931,6 @@ Settings:
     Global Additional yt-dlp Arguments: Argumen tambahan yt-dlp
     Concurrent Downloads: Unduhan serentak
     Bandwidth Limit: Batas lebar pita (KiB/s)
-    Choose Download Folder: Pilih Folder Unduhan
     Download Templates: Templat Unduhan
     Manage Download Templates: Kelola Templat Unduhan ({templateCount})
     New Template: Templat Baru
@@ -2493,6 +2492,8 @@ Tray Icon:
   Follow App Theme: "Ikuti tema aplikasi"
 
 Form Inputs:
+  Browse: "Telusuri"
+  Use Default Path: "Gunakan bawaan"
   Enter Password Hint: "Masukkan kata sandi Anda"
   Choose Password Hint: "Pilih kata sandi"
   Confirm Password Hint: "Ulangi kata sandi baru Anda"
@@ -2512,7 +2513,6 @@ Form Inputs:
   Any Age: Usia berapa pun
   Included Terms Example: mis. tutorial, ulasan
   Excluded Terms Example: mis. cuplikan, pratinjau
-  Download Folder Hint: Biarkan kosong untuk memakai folder Unduhan
   Global Arguments Hint: Argumen opsional untuk setiap unduhan
   Unlimited Hint: 0 untuk tanpa batas
   Add Argument: Tambahkan argumen

@@ -928,7 +928,6 @@ Settings:
     Global Additional yt-dlp Arguments: Další argumenty yt-dlp
     Concurrent Downloads: Souběžná stahování
     Bandwidth Limit: Omezení přenosové rychlosti (KiB/s)
-    Choose Download Folder: Vybrat složku pro stahování
     Download Templates: Šablony stahování
     Manage Download Templates: Spravovat šablony stahování ({templateCount})
     New Template: Nová šablona
@@ -2468,6 +2467,8 @@ Tray Icon:
   Follow App Theme: "Použít motiv aplikace"
 
 Form Inputs:
+  Browse: "Procházet"
+  Use Default Path: "Použít výchozí"
   Enter Password Hint: "Zadejte své heslo"
   Choose Password Hint: "Zvolte heslo"
   Confirm Password Hint: "Zopakujte nové heslo"
@@ -2487,7 +2488,6 @@ Form Inputs:
   Any Age: Libovolné stáří
   Included Terms Example: např. návod, recenze
   Excluded Terms Example: např. trailer, ukázka
-  Download Folder Hint: Ponechte prázdné pro použití složky Stažené soubory
   Global Arguments Hint: Volitelné argumenty pro každé stahování
   Unlimited Hint: 0 pro neomezenou rychlost
   Add Argument: Přidejte argument
