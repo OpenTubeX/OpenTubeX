@@ -44,6 +44,7 @@ updates:
       - dependency-name: "@fontsource-variable/plus-jakarta-sans"
       - dependency-name: "@fontsource-variable/source-sans-3"
       - dependency-name: "@hpke/core"
+      - dependency-name: "@hpke/dhkem-x25519"
       - dependency-name: "@iconify-json/material-symbols"
       - dependency-name: "@iconify-json/ri"
       - dependency-name: "@iconify-json/simple-icons"

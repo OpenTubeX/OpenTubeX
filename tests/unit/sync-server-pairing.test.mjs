@@ -3,9 +3,10 @@ import test from 'node:test'
 import {
   Aes256Gcm,
   CipherSuite,
-  DhkemX25519HkdfSha256,
+  DhkemX25519HkdfSha256 as WebCryptoDhkemX25519HkdfSha256,
   HkdfSha256,
 } from '@hpke/core'
+import { DhkemX25519HkdfSha256 } from '@hpke/dhkem-x25519'
 import {
   bindPairingRequestToAccount,
   createPairingInvite,
@@ -91,34 +92,99 @@ test('transfers account authorization and the privacy key with HPKE PSK authenti
   assert.doesNotMatch(payload, /sync-user|header\.payload/)
 })
 
+const VECTOR_RECIPIENT_IKM = Uint8Array.from(Buffer.from(
+  'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8',
+  'base64url'
+))
+const VECTOR_APPROVING_DEVICE_ID = 'QEFCQ0RFRkdISUpLTE1OTw'
+const VECTOR_REQUEST = {
+  version: 1,
+  origin: ORIGIN,
+  sessionId: 'ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8',
+  recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+  recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+  recipientDeviceName: 'Vector laptop',
+  pairingSecret: 'oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8',
+  accountId: ACCOUNT_ID,
+}
+
 test('decrypts the published protocol v1 interoperability vector', async () => {
-  const suite = new CipherSuite({
-    kem: new DhkemX25519HkdfSha256(),
-    kdf: new HkdfSha256(),
-    aead: new Aes256Gcm(),
-  })
-  const recipientIkm = Uint8Array.from(Buffer.from(
-    'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8',
-    'base64url'
-  ))
-  const recipientKeyPair = await suite.kem.deriveKeyPair(recipientIkm)
-  const request = {
-    version: 1,
-    origin: ORIGIN,
-    sessionId: 'ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8',
-    recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
-    recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
-    recipientDeviceName: 'Vector laptop',
-    pairingSecret: 'oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8',
-    accountId: ACCOUNT_ID,
-  }
+  const kem = new DhkemX25519HkdfSha256()
+  const recipientKeyPair = await kem.deriveKeyPair(VECTOR_RECIPIENT_IKM)
+  const publicKey = new Uint8Array(await kem.serializePublicKey(recipientKeyPair.publicKey))
+  assert.equal(Buffer.from(publicKey).toString('base64url'), VECTOR_REQUEST.recipientPublicKey)
 
   assert.deepEqual(await decryptPairingKey(
-    request,
-    'QEFCQ0RFRkdISUpLTE1OTw',
+    VECTOR_REQUEST,
+    VECTOR_APPROVING_DEVICE_ID,
     recipientKeyPair.privateKey,
     VECTOR_PAYLOAD
   ), TRANSFER)
+})
+
+test('sends a key that devices using Web Crypto X25519 can open', async () => {
+  // Earlier versions generate the recipient key with Web Crypto.
+  const suite = new CipherSuite({
+    kem: new WebCryptoDhkemX25519HkdfSha256(),
+    kdf: new HkdfSha256(),
+    aead: new Aes256Gcm(),
+  })
+  const recipientKeyPair = await suite.kem.deriveKeyPair(VECTOR_RECIPIENT_IKM)
+  const payload = Buffer.from(
+    await encryptPairingKey(VECTOR_REQUEST, VECTOR_APPROVING_DEVICE_ID, TRANSFER),
+    'base64url'
+  )
+  const recipient = await suite.createRecipientContext({
+    recipientKey: recipientKeyPair.privateKey,
+    enc: payload.subarray(1, 33),
+    info: new TextEncoder().encode('OpenTubeX key pairing v1'),
+    psk: {
+      id: new TextEncoder().encode(VECTOR_REQUEST.sessionId),
+      key: Buffer.from(VECTOR_REQUEST.pairingSecret, 'base64url'),
+    },
+  })
+  const { version, origin, accountId, sessionId, recipientPublicKey, recipientDeviceId } = VECTOR_REQUEST
+  const plaintext = await recipient.open(payload.subarray(33), new TextEncoder().encode(JSON.stringify({
+    version,
+    origin,
+    accountId,
+    sessionId,
+    recipientPublicKey,
+    recipientDeviceId,
+    approvingDeviceId: VECTOR_APPROVING_DEVICE_ID,
+  })))
+
+  assert.deepEqual(JSON.parse(new TextDecoder().decode(plaintext)), {
+    version: 1,
+    username: TRANSFER.username,
+    token: TRANSFER.token,
+    privacyKey: Buffer.from(PRIVACY.key, 'base64').toString('base64url'),
+    privacySalt: Buffer.from(PRIVACY.salt, 'base64').toString('base64url'),
+    privacyFormat: 1,
+    verificationCode: TRANSFER.verificationCode,
+  })
+})
+
+test('pairs on WebViews without Web Crypto X25519', async (t) => {
+  // Android WebViews before Chromium 133 reject X25519 as an unknown algorithm.
+  for (const method of ['generateKey', 'importKey', 'deriveBits']) {
+    const original = crypto.subtle[method].bind(crypto.subtle)
+    t.mock.method(crypto.subtle, method, (...args) => {
+      const algorithm = method === 'importKey' ? args[2] : args[0]
+      if (algorithm?.name === 'X25519' || algorithm === 'X25519') {
+        return Promise.reject(new DOMException('Algorithm: Unrecognized name', 'NotSupportedError'))
+      }
+      return original(...args)
+    })
+  }
+
+  const { recipient, request } = await pairingRequest()
+  const approvingDeviceId = randomPairingDeviceId()
+  const payload = await encryptPairingKey(request, approvingDeviceId, TRANSFER)
+  assert.deepEqual(
+    await decryptPairingKey(request, approvingDeviceId, recipient.recipientKey, payload),
+    TRANSFER
+  )
 })
 
 test('binds the encrypted key to the server, account, session, and both devices', async () => {
