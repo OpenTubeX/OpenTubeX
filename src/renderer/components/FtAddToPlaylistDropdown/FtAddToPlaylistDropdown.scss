@@ -57,7 +57,7 @@
 
   &.blur {
     clip-path: inset(0 round var(--shape-corner-extra-small));
-    filter: blur(5px);
+    filter: blur(5px) var(--content-filter,);
   }
 }
 

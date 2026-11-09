@@ -116,7 +116,7 @@ async function selectImage(event) {
 
 .thumbnailPreview.blur {
   clip-path: inset(0 round var(--shape-corner-medium));
-  filter: blur(20px);
+  filter: blur(20px) var(--content-filter,);
 }
 
 .imageInput {

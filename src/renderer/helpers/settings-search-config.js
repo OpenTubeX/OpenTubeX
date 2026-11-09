@@ -320,6 +320,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   'digital-wellbeing': {
     '': [
       'Grayscale',
+      'Apply Grayscale To',
       'Daily Watch Time Limit',
       'Count Watch Time From',
       'Daily Shorts Limit',

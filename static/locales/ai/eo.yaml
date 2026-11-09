@@ -1179,10 +1179,13 @@ Settings:
       Count Watch Time From: Kalkuli spekttempon de
       Break Reminder Action: Kiam estas tempo por paŭzo
       Grayscale: Grizskalo
+      Apply Grayscale To: "Apliki grizskalon al"
       'Off': 'Malŝaltita'
       Always: Ĉiam
       During Bedtime: Dum dormotempo
       After the Daily Limit: Post la ĉiutaga limo
+      Whole App: "Tuta aplikaĵo"
+      Videos and Images: "Videaĵoj kaj bildoj"
       Daily Watch Time Limit: Ĉiutaga limo de spekttempo
       Daily Shorts Limit: Ĉiutaga limo de videaĵetoj
       When a Limit Is Reached: Kiam limo estas atingita
@@ -2243,7 +2246,8 @@ Tooltips:
     Hide Playlist Stats: Kaŝas la nombron de videoj, la nombron de spektoj, la daton de la lasta ĝisdatigo kaj la tutan daŭron en ludlistaj paĝoj.
     Count Watch Time From: Ĉiuj aparatoj kalkulas ĉiun aparaton, kiu sinkronigas spektajn statistikojn. Ĉi tiu aparato kalkulas nur tion, kion vi spektas ĉi tie.
     When a Limit Is Reached: Paŭzigi ludadon ebligas al vi aldoni 15 minutojn aŭ ignori la limon por hodiaŭ. Kun agorda pasvorto, vi povas altigi limon nur en la agordoj.
-    Grayscale: Montras la tutan aplikaĵon, inkluzive de videaĵoj, en grizaj nuancoj, por ke ĝi altiru malpli da atento. Dum dormotempo sekvas la horaron de la memorigo pri dormotempo.
+    Grayscale: "Montras la aplikaĵon en grizaj nuancoj, por ke ĝi altiru malpli da atento. Dum dormotempo sekvas la horaron de la memorigo pri dormotempo."
+    Apply Grayscale To: "Videaĵoj kaj bildoj tenas la fasadon kolora kaj grizigas enhavon kiel videaĵojn, miniaturojn kaj profilbildojn."
     Daily Watch Time Limit: Kalkulas tion, kion vi spektis hodiaŭ en ĉiuj aparatoj, kiuj sinkronigas spektajn statistikojn, inkluzive de videaĵetoj.
     Daily Shorts Limit: Kalkulas la videaĵetojn, kiujn vi spektis en ĉi tiu aparato hodiaŭ.
     Take a Break Reminder: Paŭzigas la videaĵon post tiom da spektado. Paŭzo de 10 minutoj aŭ pli rekomencigas la kalkulon.

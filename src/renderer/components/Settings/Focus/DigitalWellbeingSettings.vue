@@ -17,6 +17,18 @@
       />
       <FtSelect
         size-to-content
+        :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Apply Grayscale To')"
+        :value="store.getters.getGrayscaleScope"
+        setting-key="grayscaleScope"
+        :select-names="grayscaleScopeNames"
+        :select-values="GRAYSCALE_SCOPES"
+        :disabled="store.getters.getGrayscaleMode === 'off'"
+        :tooltip="t('Tooltips.Distraction Free Settings.Apply Grayscale To')"
+        :icon="['fas', 'images']"
+        @change="store.dispatch('updateGrayscaleScope', $event)"
+      />
+      <FtSelect
+        size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Daily Watch Time Limit')"
         :value="String(store.getters.getDailyWatchTimeLimit)"
         setting-key="dailyWatchTimeLimit"
@@ -172,6 +184,7 @@ const uploadNotificationsAvailable = computed(() => uploadNotificationsSupported
 const { locale, t } = useI18n()
 
 const GRAYSCALE_MODES = ['off', 'always', 'bedtime', 'limit']
+const GRAYSCALE_SCOPES = ['app', 'content']
 const DAILY_LIMIT_ACTIONS = ['remind', 'pause']
 const LIMIT_DEVICES = ['all', 'local']
 const BEDTIME_TIMES = Array.from({ length: 48 }, (_, index) =>
@@ -182,6 +195,10 @@ const grayscaleModeNames = computed(() => [
   t('Settings.Distraction Free Settings.Digital Wellbeing.Always'),
   t('Settings.Distraction Free Settings.Digital Wellbeing.During Bedtime'),
   t('Settings.Distraction Free Settings.Digital Wellbeing.After the Daily Limit'),
+])
+const grayscaleScopeNames = computed(() => [
+  t('Settings.Distraction Free Settings.Digital Wellbeing.Whole App'),
+  t('Settings.Distraction Free Settings.Digital Wellbeing.Videos and Images'),
 ])
 const dailyLimitActionNames = computed(() => [
   t('Settings.Distraction Free Settings.Digital Wellbeing.Remind Me'),

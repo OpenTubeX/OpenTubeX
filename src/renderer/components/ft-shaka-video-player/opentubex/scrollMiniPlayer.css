@@ -68,7 +68,7 @@
   width: 108%;
   height: 114%;
   opacity: 0.42;
-  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
+  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05) var(--content-filter,);
   pointer-events: none;
 }
 
@@ -79,7 +79,7 @@
   width: 108%;
   height: 137%;
   opacity: 0.2;
-  filter: blur(clamp(32px, 5vw, 72px)) saturate(1.02);
+  filter: blur(clamp(32px, 5vw, 72px)) saturate(1.02) var(--content-filter,);
   pointer-events: none;
 }
 

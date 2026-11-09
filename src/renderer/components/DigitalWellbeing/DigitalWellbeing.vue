@@ -96,8 +96,12 @@ const grayscale = computed(() => {
     default: return false
   }
 })
-watchEffect(() => document.documentElement.classList.toggle('grayscale', grayscale.value))
-onBeforeUnmount(() => document.documentElement.classList.remove('grayscale'))
+watchEffect(() => {
+  const contentOnly = store.getters.getGrayscaleScope === 'content'
+  document.documentElement.classList.toggle('grayscale', grayscale.value && !contentOnly)
+  document.documentElement.classList.toggle('grayscaleContent', grayscale.value && contentOnly)
+})
+onBeforeUnmount(() => document.documentElement.classList.remove('grayscale', 'grayscaleContent'))
 
 /**
  * @param {'watch' | 'shorts'} kind

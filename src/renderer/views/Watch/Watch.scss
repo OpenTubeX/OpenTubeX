@@ -15,7 +15,7 @@
   .videoThumbnail {
     block-size: 100%;
     object-fit: cover;
-    filter: brightness(0.55);
+    filter: brightness(0.55) var(--content-filter,);
   }
 }
 
@@ -180,7 +180,7 @@
         .videoThumbnail {
           block-size: 100%;
           object-fit: cover;
-          filter: brightness(0.55);
+          filter: brightness(0.55) var(--content-filter,);
         }
       }
 
@@ -794,7 +794,7 @@
       inline-size: 100%;
       block-size: 100%;
       object-fit: cover;
-      filter: brightness(0.55);
+      filter: brightness(0.55) var(--content-filter,);
     }
 
     .shortsNextPreview {
@@ -822,7 +822,7 @@
       background-position: center;
       background-size: cover;
       content: '';
-      filter: blur(12px);
+      filter: blur(12px) var(--content-filter,);
       transform: scale(1.1);
     }
 

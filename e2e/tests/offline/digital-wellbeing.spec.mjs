@@ -274,10 +274,88 @@ test.describe('grayscale', () => {
     await expect(page.getByRole('tab', { name: 'Digital Wellbeing' })).toHaveAttribute('aria-selected', 'true')
     await attachScreenshot('digital wellbeing settings')
 
-    const grayscale = wellbeingSettings.getByRole('combobox', { name: 'Grayscale' })
+    const grayscale = wellbeingSettings.getByRole('combobox', { name: 'Grayscale', exact: true })
     await grayscale.click()
     await page.getByRole('option', { name: 'Off' }).click()
     await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
+  })
+
+  test.describe('videos and images only', () => {
+    const videoId = 'abcdefghijk'
+    test.use({
+      seed: {
+        settings: { animationSpeed: 0, grayscaleMode: 'always', grayscaleScope: 'content' },
+        history: [{
+          _id: videoId,
+          videoId,
+          title: 'Colorful video',
+          author: 'Test Channel',
+          authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+          published: Date.now() - 86400000,
+          lengthSeconds: 60,
+          watchProgress: 0,
+          timeWatched: Date.now(),
+          isWatched: false,
+          isLive: false,
+          type: 'video'
+        }]
+      }
+    })
+
+    test('grays content and keeps the interface and the user\'s own images in color', async ({ app, page, attachScreenshot }) => {
+      await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => route.fulfill({
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="rgb(255,0,0)"/></svg>'
+      }))
+      await goTo(page, 'history')
+      const root = page.locator('html')
+      await expect(root).toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
+      await expect(root).not.toHaveClass(/(^|\s)grayscale(\s|$)/)
+      expect(await root.evaluate(element => getComputedStyle(element).filter)).toBe('none')
+
+      const thumbnail = page.locator('.ft-list-video .thumbnailImage').first()
+      await expect.poll(() => thumbnail.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+      expect(await thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('grayscale(1)')
+      const [[red, green, blue]] = await sampleColors(app, thumbnail, [[20, 20]])
+      expect(Math.max(red, green, blue) - Math.min(red, green, blue)).toBeLessThanOrEqual(2)
+      await attachScreenshot('videos and images only')
+
+      // Blurred thumbnails keep their blur and turn gray too.
+      await page.evaluate(() => window.$store.dispatch('updateBlurThumbnails', true))
+      await expect.poll(() => thumbnail.evaluate(element => getComputedStyle(element).filter)).toBe('blur(20px) grayscale(1)')
+
+      // Interface elements and images the user picked keep their colors.
+      await page.evaluate(() => {
+        const probe = document.createElement('div')
+        probe.className = 'grayscaleProbe'
+        probe.style.cssText = 'position: fixed; inset: 0 auto auto 0; z-index: 9999; width: 120px; height: 120px'
+        probe.innerHTML = '<div style="width: 60px; height: 60px; background: rgb(255, 0, 0)"></div>' +
+          '<img class="profileIconImage" width="60" height="60" alt="" src="data:image/svg+xml,' +
+          encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="rgb(255,0,0)"/></svg>') + '">'
+        document.body.append(probe)
+      })
+      const probe = page.locator('.grayscaleProbe')
+      await expect.poll(() => probe.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+      expect(await probe.locator('img').evaluate(element => getComputedStyle(element).filter)).toBe('none')
+      for (const [r, g, b] of await sampleColors(app, probe, [[30, 30], [30, 90]])) {
+        expect(r - Math.max(g, b)).toBeGreaterThan(200)
+      }
+      await page.evaluate(() => document.querySelector('.grayscaleProbe').remove())
+
+      const wellbeingSettings = await goToSettingsSection(page, 'wellbeing')
+      const scope = wellbeingSettings.getByRole('combobox', { name: 'Apply Grayscale To' })
+      await expect(scope).toBeEnabled()
+      await scope.click()
+      await page.getByRole('option', { name: 'Whole App' }).click()
+      await expect(root).toHaveClass(/(^|\s)grayscale(\s|$)/)
+      await expect(root).not.toHaveClass(/(^|\s)grayscaleContent(\s|$)/)
+
+      const grayscale = wellbeingSettings.getByRole('combobox', { name: 'Grayscale', exact: true })
+      await grayscale.click()
+      await page.getByRole('option', { name: 'Off' }).click()
+      await expect(root).not.toHaveClass(/(^|\s)grayscale(Content)?(\s|$)/)
+      await expect(scope).toBeDisabled()
+    })
   })
 
   // Top-layer elements render outside the root element, so its filter does not reach them.

@@ -285,7 +285,7 @@
 }
 
 .mediaThumbnail .blur {
-  filter: blur(12px);
+  filter: blur(12px) var(--content-filter,);
   scale: 1.1;
 }
 

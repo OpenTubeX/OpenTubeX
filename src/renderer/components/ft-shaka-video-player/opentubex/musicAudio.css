@@ -27,7 +27,7 @@
 .musicAudioBackdrop {
   object-fit: cover;
   opacity: 0.42;
-  filter: blur(30px) saturate(1.15);
+  filter: blur(30px) saturate(1.15) var(--content-filter,);
   transform: scale(1.14);
 }
 
