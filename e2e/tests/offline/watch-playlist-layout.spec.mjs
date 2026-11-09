@@ -70,7 +70,9 @@ async function openPlaylist(app, page, beforeOpen = null) {
   await goTo(page, 'userplaylists')
   await page.getByText('Layout test playlist', { exact: true }).click()
   await page.getByText('Playlist video 1', { exact: true }).click()
-  await waitForPlayback(page)
+  // Ending the 30-second demo on a slow run would advance the playlist to
+  // another video, which recenters, rebuilds and can close the playlist.
+  await (await waitForPlayback(page)).evaluate(video => video.pause())
   await expect(page.locator('.watchVideoPlaylist .playlistItem')).toHaveCount(videos.length)
   return watchViewHandle(page)
 }
@@ -92,7 +94,6 @@ test.describe('SponsorBlock video labels', () => {
 
   test('open their category in a prompt by click and keyboard without opening the video', async ({ app, page }) => {
     await openPlaylist(app, page, mockFullVideoLabels(page))
-    await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
     const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
     const label = panel.locator('.playlistItem').nth(1).getByRole('button', { name: 'Exclusive Access', exact: true })
     const prompt = page.getByRole('dialog', { name: 'Exclusive Access · Full Video' })
@@ -205,8 +206,6 @@ test('playlist row menu adds, moves and removes videos while thumbnail shortcuts
 
 test('playlist thumbnails remove videos with one click or tap, and phones from the long-press menu', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
   await openPlaylist(app, page)
-  // Ending the 30-second demo would advance the playlist and rebuild its rows.
-  await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
   const storedTitles = () => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.map(video => video.title))
   const rowOf = (scope, title) => scope.locator('.playlistItem').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
   const removeButton = row => row.locator('.videoThumbnail').getByRole('button', { name: 'Remove from playlist', exact: true })
@@ -504,7 +503,6 @@ test('playlist saves retain available view counts across restart', async ({ app,
 
 test('fullscreen save controls retain available view counts', async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
-  await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
   await page.evaluate(async () => {
     await window.$store.dispatch('addPlaylist', { _id: 'action-counts', playlistName: 'Action counts', videos: [] })
     await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'action-counts')
@@ -528,10 +526,8 @@ test('fullscreen save controls retain available view counts', async ({ app, page
 })
 
 test('landscape fullscreen playlist shows more videos and keeps controls outside the scroller', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+  // openPlaylist pauses the video, so the player keeps its controls shown.
   await openPlaylist(app, page)
-  // A slow run must not reach the end of the 30-second demo video, and the
-  // player keeps its controls shown while paused.
-  await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 960, height: 440 })
   await page.setViewportSize({ width: Math.round(960 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
   await setPlayerFullscreen(page, true)
