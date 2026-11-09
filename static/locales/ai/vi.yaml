@@ -2333,6 +2333,7 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  File Name Template Invalid: 'Hãy dùng đường dẫn tương đối bên trong thư mục tải xuống, không có "..", "~", "$", "%" hoặc tiền tố như "thumbnail:".'
   Search Completed: "Tìm tệp tải xuống đã hoàn tất theo tiêu đề hoặc kênh"
   Format: "Định dạng"
   All Formats: "Tất cả định dạng"

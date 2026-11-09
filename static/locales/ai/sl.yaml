@@ -2927,6 +2927,7 @@ CommandPalette:
     Download Finished: Ta prenos se ne izvaja več
     Video: Najprej odprite videoposnetek
 Downloads:
+  File Name Template Invalid: 'Uporabite relativno pot znotraj mape za prenose brez "..", "~", "$", "%" ali predpone, kot je "thumbnail:".'
   Search Completed: "Poišči dokončane prenose po naslovu ali kanalu"
   Format: "Oblika"
   All Formats: "Vse oblike"

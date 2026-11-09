@@ -2354,6 +2354,7 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  File Name Template Invalid: 'Defnyddiwch lwybr cymharol y tu mewn i’r ffolder llwytho i lawr heb "..", "~", "$", "%" na rhagddodiad fel "thumbnail:".'
   Search Completed: "Chwilio lawrlwythiadau wedi’u cwblhau yn ôl teitl neu sianel"
   Format: "Fformat"
   All Formats: "Pob fformat"

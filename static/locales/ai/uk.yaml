@@ -2369,6 +2369,7 @@ CommandPalette:
     Download Finished: Це завантаження вже не виконується
     Video: Спочатку відкрийте відео
 Downloads:
+  File Name Template Invalid: 'Використовуйте відносний шлях у теці завантажень без "..", "~", "$", "%" або префікса на кшталт "thumbnail:".'
   Search Completed: "Пошук завершених завантажень за назвою або каналом"
   Format: "Формат"
   All Formats: "Усі формати"

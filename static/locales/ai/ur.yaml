@@ -2444,6 +2444,7 @@ CommandPalette:
     Download Finished: یہ ڈاؤن لوڈ اب نہیں چل رہا
     Video: پہلے کوئی ویڈیو کھولیں
 Downloads:
+  File Name Template Invalid: 'ڈاؤن لوڈ فولڈر کے اندر ایک نسبتی راستہ استعمال کریں، جس میں ".."، "~"، "$"، "%" یا "thumbnail:" جیسا سابقہ نہ ہو۔'
   Add Download: ڈاؤن لوڈ شامل کریں
   Search Completed: مکمل ڈاؤن لوڈز کو عنوان یا چینل کے لحاظ سے تلاش کریں
   Format: فارمیٹ

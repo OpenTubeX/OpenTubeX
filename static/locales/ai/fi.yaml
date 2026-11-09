@@ -2375,6 +2375,7 @@ CommandPalette:
     Download Finished: Tämä lataus ei ole enää käynnissä
     Video: Avaa ensin video
 Downloads:
+  File Name Template Invalid: 'Käytä latauskansion sisäistä suhteellista polkua ilman merkkejä "..", "~", "$", "%" tai etuliitettä kuten "thumbnail:".'
   Search Completed: "Hae valmiita latauksia otsikon tai kanavan perusteella"
   Format: "Muoto"
   All Formats: "Kaikki muodot"

@@ -2339,6 +2339,7 @@ CommandPalette:
     Download Finished: Þetta niðurhal er ekki lengur í gangi
     Video: Opnaðu myndband fyrst
 Downloads:
+  File Name Template Invalid: 'Notaðu afstæða slóð innan niðurhalsmöppunnar án "..", "~", "$", "%" eða forskeytis eins og "thumbnail:".'
   Search Completed: "Leita að loknu niðurhali eftir titli eða rás"
   Format: "Snið"
   All Formats: "Öll snið"

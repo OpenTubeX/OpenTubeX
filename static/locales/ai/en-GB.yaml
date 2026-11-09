@@ -2315,6 +2315,7 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'
   Search Completed: "Search completed downloads by title or channel"
   Format: "Format"
   All Formats: "All formats"

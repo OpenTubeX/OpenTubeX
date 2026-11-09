@@ -2378,6 +2378,7 @@ CommandPalette:
     Download Finished: Esta descarga xa non está en curso
     Video: Abre primeiro un vídeo
 Downloads:
+  File Name Template Invalid: 'Usa unha ruta relativa dentro do cartafol de descargas sen "..", "~", "$", "%" nin un prefixo como "thumbnail:".'
   Search Completed: "Buscar descargas rematadas por título ou canle"
   Format: "Formato"
   All Formats: "Todos os formatos"

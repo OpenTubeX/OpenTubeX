@@ -2420,6 +2420,7 @@ CommandPalette:
     Download Finished: این بارگیری دیگر در حال اجرا نیست
     Video: ابتدا ویدیویی باز کنید
 Downloads:
+  File Name Template Invalid: 'از یک مسیر نسبی درون پوشهٔ بارگیری بدون ".."، "~"، "$"، "%" یا پیشوندی مانند "thumbnail:" استفاده کنید.'
   Search Completed: "جستجوی دانلودهای تکمیل‌شده بر اساس عنوان یا کانال"
   Format: "قالب"
   All Formats: "همهٔ قالب‌ها"

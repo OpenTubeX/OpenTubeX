@@ -1511,6 +1511,7 @@ CommandPalette:
     Download Finished: To pobieranie nie jest już uruchomione
     Video: Najpierw otwórz film
 Downloads:
+  File Name Template Invalid: 'Użyj ścieżki względnej w folderze pobierania bez "..", "~", "$", "%" ani prefiksu takiego jak "thumbnail:".'
   Search Completed: "Szukaj ukończonych pobrań według tytułu lub kanału"
   Format: "Format"
   All Formats: "Wszystkie formaty"

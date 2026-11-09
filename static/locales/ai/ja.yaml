@@ -2316,6 +2316,7 @@ CommandPalette:
     Download Finished: このダウンロードはすでに終了しています
     Video: 先に動画を開いてください
 Downloads:
+  File Name Template Invalid: 'ダウンロードフォルダー内の相対パスを使用してください。".."、"~"、"$"、"%"、"thumbnail:" のような接頭辞は使用できません。'
   Search Completed: "完了したダウンロードをタイトルまたはチャンネルで検索"
   Format: "形式"
   All Formats: "すべての形式"

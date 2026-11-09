@@ -2386,6 +2386,7 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  File Name Template Invalid: 'Gebruik een relatief pad binnen de downloadmap zonder "..", "~", "$", "%" of een voorvoegsel zoals "thumbnail:".'
   Search Completed: "Voltooide downloads zoeken op titel of kanaal"
   Format: "Formaat"
   All Formats: "Alle formaten"

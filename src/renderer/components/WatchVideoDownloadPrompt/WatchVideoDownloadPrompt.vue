@@ -96,7 +96,7 @@
           </section>
 
           <details
-            :open="!phoneLayout"
+            :open="!phoneLayout || filenameTemplateInvalid"
             class="advancedDownloadOptions"
           >
             <summary>{{ t('Settings.Categories.Advanced') }}</summary>
@@ -104,10 +104,13 @@
             <section class="optionSection">
               <FtInput
                 class="fullWidth"
+                :class="{ invalidTemplate: filenameTemplateInvalid }"
                 :icon="['fas', 'file-lines']"
                 :label="t('Downloads.File Name Template')"
                 placeholder="{title}.{ext}"
                 :tooltip="fileNameTemplateHelp"
+                :invalid="filenameTemplateInvalid"
+                :supporting-text="filenameTemplateInvalid ? t('Downloads.File Name Template Invalid') : ''"
                 :show-action-button="false"
                 :show-label="true"
                 :value="options.filenameTemplate"
@@ -313,7 +316,7 @@
             v-if="activeDownload === null"
             :label="t('Downloads.Download')"
             :icon="['fas', 'download']"
-            :disabled="downloadFolderRequired"
+            :disabled="downloadFolderRequired || filenameTemplateInvalid"
             @click="startDownload"
           />
           <FtButton
@@ -365,7 +368,7 @@
           :label="t('Downloads.Save Template')"
           :icon="['fas', 'save']"
           theme="primary"
-          :disabled="newTemplateName.trim() === ''"
+          :disabled="newTemplateName.trim() === '' || filenameTemplateInvalid"
           @click="saveTemplate"
         />
         <FtButton
@@ -402,6 +405,7 @@ import store from '../../store/index'
 import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
+import { isSafeDownloadFilenameTemplate } from '../../../ytDlpArguments'
 
 const props = defineProps({
   videoId: { type: String, default: '' },
@@ -499,6 +503,7 @@ const codecValues = computed(() => {
     ? ['', 'h264', 'h265', 'vp9', 'av1']
     : ['', 'mp3', 'm4a', 'opus', 'flac']
 })
+const filenameTemplateInvalid = computed(() => !isSafeDownloadFilenameTemplate(options.filenameTemplate))
 const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help', {
   title: '{title}',
   author: '{author}',
@@ -588,7 +593,7 @@ function setSelectedCodec(value) {
 }
 function saveTemplate() {
   const name = newTemplateName.value.trim()
-  if (name === '') return
+  if (name === '' || filenameTemplateInvalid.value) return
   const templates = customTemplates.value.filter(template => template.name !== name)
   templates.push({ name, options: { ...options } })
   const value = `template:${name}`

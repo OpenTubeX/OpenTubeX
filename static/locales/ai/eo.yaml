@@ -2374,6 +2374,7 @@ CommandPalette:
     Download Finished: Ĉi tiu elŝuto ne plu ruliĝas
     Video: Unue malfermu videaĵon
 Downloads:
+  File Name Template Invalid: 'Uzu relativan vojon ene de la elŝuta dosierujo sen "..", "~", "$", "%" aŭ prefikso kiel "thumbnail:".'
   Add Download: Aldoni elŝuton
   Search Completed: Serĉi finitajn elŝutojn laŭ titolo aŭ kanalo
   Format: Formo

@@ -2377,6 +2377,7 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  File Name Template Invalid: 'יש להשתמש בנתיב יחסי בתוך תיקיית ההורדות ללא "..", "~", "$", "%" או קידומת כמו "thumbnail:".'
   Search Completed: "חיפוש הורדות שהושלמו לפי כותרת או ערוץ"
   Format: "פורמט"
   All Formats: "כל הפורמטים"

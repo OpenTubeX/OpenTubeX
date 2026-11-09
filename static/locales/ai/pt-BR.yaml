@@ -2286,6 +2286,7 @@ CommandPalette:
     Download Finished: Este download não está mais em andamento
     Video: Abra primeiro um vídeo
 Downloads:
+  File Name Template Invalid: 'Use um caminho relativo dentro da pasta de downloads sem "..", "~", "$", "%" ou um prefixo como "thumbnail:".'
   Search Completed: "Pesquisar downloads concluídos por título ou canal"
   Format: "Formato"
   All Formats: "Todos os formatos"

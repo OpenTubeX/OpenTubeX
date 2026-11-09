@@ -143,6 +143,27 @@ function automaticTitleRegex(includedTerms, excludedTerms) {
   return `(?i)^${include}${exclude}.*$`
 }
 
+// yt-dlp reads `TYPES:` before an output template as the files it applies to,
+// such as `thumbnail:/absolute/path`.
+const OUTPUT_TEMPLATE_TYPES = 'chapter|subtitle|thumbnail|description|annotation|infojson|link|pl_video|pl_thumbnail|pl_description|pl_infojson'
+const OUTPUT_TEMPLATE_TYPE_PREFIX = new RegExp(`^(?:${OUTPUT_TEMPLATE_TYPES})(?:,(?:${OUTPUT_TEMPLATE_TYPES}))*:`, 'i')
+/**
+ * Whether a download filename template is a relative path that stays in the
+ * download folder. yt-dlp ignores `--paths` for absolute templates and expands
+ * `~` and environment variables, so those, drive letters and `..` segments are
+ * refused. `%` is refused as well because raw `%(...)` fields with literal
+ * defaults can expand to `..`; templates use the `{field}` placeholders.
+ * @param {unknown} template
+ */
+export function isSafeDownloadFilenameTemplate(template) {
+  // Anything else falls back to the default template.
+  if (typeof template !== 'string') return true
+  const value = template.trim()
+  return !/^(?:[/\\~]|[a-z]:)/i.test(value) &&
+    !/[$%]/.test(value) &&
+    !OUTPUT_TEMPLATE_TYPE_PREFIX.test(value) &&
+    !value.split(/[/\\]/).some(segment => /^\s*\.{2,}\s*$/.test(segment))
+}
 export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (!payload || !['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) throw new Error('invalid-download')
   const videoIds = payload.videoIds ?? []
@@ -159,6 +180,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   const customArgs = splitArguments(payload.customArgs || '')
   const globalCustomArgs = splitArguments(globalArguments)
   if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) throw new Error('unsupported-custom-argument')
+  if (!isSafeDownloadFilenameTemplate(payload.filenameTemplate)) throw new Error('invalid-filename-template')
   const args = [...globalCustomArgs]
   if (!isRemotePlaylist) args.push('--no-playlist')
   let outputTemplate = typeof payload.filenameTemplate === 'string' && payload.filenameTemplate.trim() !== ''

@@ -2411,6 +2411,7 @@ CommandPalette:
     Download Finished: Denne download kører ikke længere
     Video: Åbn en video først
 Downloads:
+  File Name Template Invalid: 'Brug en relativ sti i downloadmappen uden "..", "~", "$", "%" eller et præfiks som "thumbnail:".'
   Search Completed: "Søg i fuldførte downloads efter titel eller kanal"
   Format: "Format"
   All Formats: "Alle formater"

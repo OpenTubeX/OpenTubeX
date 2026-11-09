@@ -375,3 +375,8 @@
     white-space: nowrap;
   }
 }
+
+.invalidTemplate {
+  --primary-color: var(--red-500);
+  --secondary-text-color: var(--red-500);
+}

@@ -2782,6 +2782,7 @@ CommandPalette:
     Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
     Video: 먼저 동영상을 여세요
 Downloads:
+  File Name Template Invalid: '다운로드 폴더 안의 상대 경로를 사용하세요. "..", "~", "$", "%" 또는 "thumbnail:" 같은 접두사는 사용할 수 없습니다.'
   Search Completed: "제목 또는 채널로 완료된 다운로드 검색"
   Format: "형식"
   All Formats: "모든 형식"

@@ -2341,6 +2341,7 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  File Name Template Invalid: 'Gunakan jalur relatif di dalam folder unduhan tanpa "..", "~", "$", "%", atau awalan seperti "thumbnail:".'
   Search Completed: "Cari unduhan selesai berdasarkan judul atau kanal"
   Format: "Format"
   All Formats: "Semua format"

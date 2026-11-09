@@ -2319,6 +2319,7 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  File Name Template Invalid: 'Kasuta allalaadimiskaustas suhtelist teed ilma "..", "~", "$", "%" või eesliiteta nagu "thumbnail:".'
   Search Completed: "Otsi lõpetatud allalaadimisi pealkirja või kanali järgi"
   Format: "Vorming"
   All Formats: "Kõik vormingud"

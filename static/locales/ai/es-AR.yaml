@@ -2890,6 +2890,7 @@ CommandPalette:
     Download Finished: Esta descarga ya no está en curso
     Video: Abre primero un video
 Downloads:
+  File Name Template Invalid: 'Usa una ruta relativa dentro de la carpeta de descargas sin "..", "~", "$", "%" ni un prefijo como "thumbnail:".'
   Search Completed: "Buscar descargas completadas por título o canal"
   Format: "Formato"
   All Formats: "Todos los formatos"

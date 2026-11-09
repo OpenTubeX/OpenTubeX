@@ -2354,6 +2354,7 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  File Name Template Invalid: 'Χρησιμοποιήστε μια σχετική διαδρομή μέσα στον φάκελο λήψεων χωρίς "..", "~", "$", "%" ή πρόθεμα όπως "thumbnail:".'
   Search Completed: "Αναζήτηση ολοκληρωμένων λήψεων κατά τίτλο ή κανάλι"
   Format: "Μορφή"
   All Formats: "Όλες οι μορφές"

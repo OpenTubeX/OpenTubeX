@@ -2978,6 +2978,7 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  File Name Template Invalid: 'Utilitzeu un camí relatiu dins de la carpeta de baixades sense "..", "~", "$", "%" ni un prefix com ara "thumbnail:".'
   Search Completed: "Cerca les baixades completades per títol o canal"
   Format: "Format"
   All Formats: "Tots els formats"

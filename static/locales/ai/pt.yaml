@@ -2317,6 +2317,7 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  File Name Template Invalid: 'Utilize um caminho relativo dentro da pasta de transferências sem "..", "~", "$", "%" nem um prefixo como "thumbnail:".'
   Search Completed: "Pesquisar transferências concluídas por título ou canal"
   Format: "Formato"
   All Formats: "Todos os formatos"

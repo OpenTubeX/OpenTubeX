@@ -2317,6 +2317,7 @@ CommandPalette:
     Download Finished: Ez a letöltés már nem fut
     Video: Előbb nyisson meg egy videót
 Downloads:
+  File Name Template Invalid: 'Használjon a letöltési mappán belüli relatív útvonalat "..", "~", "$", "%" vagy például "thumbnail:" előtag nélkül.'
   Search Completed: "Befejezett letöltések keresése cím vagy csatorna alapján"
   Format: "Formátum"
   All Formats: "Minden formátum"

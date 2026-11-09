@@ -3509,6 +3509,7 @@ CommandPalette:
     Download Finished: Dieser Download läuft nicht mehr
     Video: Öffne zuerst ein Video
 Downloads:
+  File Name Template Invalid: 'Verwende einen relativen Pfad im Download-Ordner ohne „..“, „~“, „$“, „%“ oder ein Präfix wie „thumbnail:“.'
   Add Download: Download hinzufügen
   Search Completed: Abgeschlossene Downloads nach Titel oder Kanal durchsuchen
   Format: Format

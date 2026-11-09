@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildYtDlpDownloadArguments, jsRuntimeArguments, playbackImpersonationArguments } from '../../src/ytDlpArguments.js'
+import { buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
@@ -99,6 +99,21 @@ test('custom arguments cannot write files, load inputs or replace yt-dlp', () =>
     '-U', '-xU', '--update', '--update-to evil/yt-dlp@latest', '--write-pages', '--write-pa', '--load-pages', '--load-p']) {
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs }), /unsupported-custom-argument/, customArgs)
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video' }, customArgs), /unsupported-custom-argument/, customArgs)
+  }
+})
+
+test('filename templates cannot leave the download folder', () => {
+  // yt-dlp ignores --paths for absolute templates, expands ~ and environment
+  // variables, and reads `TYPES:` as the files a template applies to.
+  for (const filenameTemplate of ['/tmp/{title}', '\\\\server\\share\\{title}', 'C:\\Users\\{title}', 'c:{title}', '~/{title}',
+    '../{title}', 'Music/../../{title}', 'Music\\..\\{title}', ' .. /{title}', '$HOME/{title}', '${HOME}/{title}',
+    '%USERPROFILE%\\{title}', '%(uploader|..)s/{title}', 'thumbnail:/tmp/x', 'Subtitle,thumbnail:x', 'pl_infojson:../x']) {
+    assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video', filenameTemplate }), /invalid-filename-template/, filenameTemplate)
+    assert.equal(isSafeDownloadFilenameTemplate(filenameTemplate), false, filenameTemplate)
+  }
+  for (const filenameTemplate of ['{playlist}/{playlist_index} - {title}.{ext}', 'Music/{author}...{title}', 'Chapter 1: {title}', '']) {
+    const args = buildYtDlpDownloadArguments({ videoId, mode: 'video', filenameTemplate }).args
+    assert.ok(!args[args.indexOf('--output') + 1].startsWith('/'), filenameTemplate)
   }
 })
 

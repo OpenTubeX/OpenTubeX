@@ -2350,6 +2350,7 @@ CommandPalette:
     Download Finished: Това изтегляне вече не се изпълнява
     Video: Първо отворете видеоклип
 Downloads:
+  File Name Template Invalid: 'Използвайте относителен път в папката за изтегляне без "..", "~", "$", "%" или префикс като "thumbnail:".'
   Search Completed: "Търсене в завършените изтегляния по заглавие или канал"
   Format: "Формат"
   All Formats: "Всички формати"

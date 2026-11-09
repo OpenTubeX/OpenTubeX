@@ -1,6 +1,7 @@
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, splitArguments, isYtDlpMediaUrl,
+  isSafeDownloadFilenameTemplate,
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -31,6 +32,12 @@ import {
 } from './ytDlpBinaries'
 import { pushYtDlpPlaybackAuthenticationArguments } from './ytDlpPlayback'
 import { authorizeAutomaticDownload, showAutomaticDownloadNotification } from './ytDlpAutomaticDownloads'
+
+// yt-dlp sanitizes slashes in template fields but keeps a value of exactly `.`
+// or `..`, so a directory named after an uploader or playlist called `..` would
+// leave the download folder. This must follow the custom arguments, because a
+// later `--parse-metadata` could set the fields again.
+const DOT_FIELD_ARGUMENTS = ['--replace-in-metadata', 'title,uploader,id,playlist_title,ext', '^\\.{1,2}$', '_']
 
 const execFileAsync = promisify(execFile)
 
@@ -410,6 +417,9 @@ async function startYtDlpDownload(
   if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) {
     return { error: 'unsupported-custom-argument' }
   }
+  if (!isSafeDownloadFilenameTemplate(payload.filenameTemplate)) {
+    return { error: 'invalid-filename-template' }
+  }
 
   if (payload.videoIds !== undefined && (!Array.isArray(payload.videoIds) ||
     payload.videoIds.some(videoId => typeof videoId !== 'string' || !ID_REGEX.test(videoId)))) {
@@ -577,7 +587,7 @@ async function startYtDlpDownload(
       return { id }
     }
   }
-  args.push('--paths', `temp:${temporaryDownloadFolder}`)
+  args.push('--paths', `temp:${temporaryDownloadFolder}`, ...DOT_FIELD_ARGUMENTS)
 
   try {
     const fileSystem = await statfs(downloadFolder)

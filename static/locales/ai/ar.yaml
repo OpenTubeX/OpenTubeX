@@ -2354,6 +2354,7 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  File Name Template Invalid: 'استخدم مسارًا نسبيًا داخل مجلد التنزيل بدون ".." أو "~" أو "$" أو "%" أو بادئة مثل "thumbnail:".'
   Search Completed: "ابحث في التنزيلات المكتملة حسب العنوان أو القناة"
   Format: "الصيغة"
   All Formats: "كل الصيغ"

@@ -2316,6 +2316,7 @@ CommandPalette:
     Download Finished: Toto stahování již neprobíhá
     Video: Nejprve otevřete video
 Downloads:
+  File Name Template Invalid: 'Použijte relativní cestu uvnitř složky stahování bez "..", "~", "$", "%" nebo předpony jako "thumbnail:".'
   Search Completed: "Hledat dokončená stahování podle názvu nebo kanálu"
   Format: "Formát"
   All Formats: "Všechny formáty"

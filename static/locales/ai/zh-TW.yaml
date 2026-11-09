@@ -2323,6 +2323,7 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  File Name Template Invalid: '請使用下載資料夾內的相對路徑，不得包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前綴。'
   Search Completed: "依標題或頻道搜尋已完成的下載"
   Format: "格式"
   All Formats: "所有格式"
