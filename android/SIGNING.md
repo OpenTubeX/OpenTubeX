@@ -1,6 +1,8 @@
 # Android signing
 
-Debug and nightly APKs use `nightly.keystore`. Its credentials are public by design. These builds use separate application IDs so they cannot update the production `org.opentubex.app` package or access its private data. This key must never sign the production package.
+Gradle signs debug and nightly APKs with `nightly.keystore`. Its credentials are public by design, so local builds stay installable. These builds use separate application IDs so they cannot update the production `org.opentubex.app` package or access its private data. This key must never sign the production package.
+
+Published nightlies are re-signed with a private nightly key, so nobody else can publish an update for them. See [Nightly signing](#nightly-signing).
 
 | Build | Command from `android/` | Application ID | Launcher name |
 | --- | --- | --- | --- |
@@ -9,7 +11,7 @@ Debug and nightly APKs use `nightly.keystore`. Its credentials are public by des
 
 CI explicitly selects the nightly identity. Local builds default to Dev even when version environment variables are set, so F-Droid and Obtainium cannot replace a local test build with a published nightly. Dev uses a cyan flask badge; Nightly keeps its amber wrench. Both include monochrome themed icons. Local debug APKs are written to `app/build/outputs/apk/debug/app-debug.apk`; nightly APKs use `app/build/outputs/apk/nightly/`.
 
-CI builds `:app:assembleNightly -PsplitApks` for nightlies and `:app:assembleRelease -PsplitApks` for official releases. F-Droid builds the nightly variant from the stable release tag to update existing nightly installations with their original app ID and key. Both shrink unused bytecode while keeping app and Capacitor runtime entry points, without optimization, obfuscation or resource shrinking. Architecture splits and removal of the unused QuickJS static archive still reduce download sizes. The builds produce standalone ARM64, ARMv7, x86, x86_64 and universal APKs. Each APK has its own version code, which F-Droid requires: ten times the base code, plus 1 for ARMv7, 2 for x86, 3 for ARM64 and 4 for x86_64. The universal APK adds nothing, and devices that run both 32-bit and 64-bit code prefer the 64-bit APK. Local debug builds produce one APK.
+CI builds `:app:assembleNightly -PsplitApks` for nightlies and `:app:assembleRelease -PsplitApks` for official releases. F-Droid builds the nightly variant from the stable release tag and signs it with the nightly key, so existing nightly installations receive it. Both shrink unused bytecode while keeping app and Capacitor runtime entry points, without optimization, obfuscation or resource shrinking. Architecture splits and removal of the unused QuickJS static archive still reduce download sizes. The builds produce standalone ARM64, ARMv7, x86, x86_64 and universal APKs. Each APK has its own version code, which F-Droid requires: ten times the base code, plus 1 for ARMv7, 2 for x86, 3 for ARM64 and 4 for x86_64. The universal APK adds nothing, and devices that run both 32-bit and 64-bit code prefer the 64-bit APK. Local debug builds produce one APK.
 
 Base version codes use twice the Git commit count for nightlies and add one for stable releases. This lets stable code update a nightly built from the same commit, while the next commit's nightly can update the promoted package. Nightly CI passes the base code in `ANDROID_VERSION_CODE`. Stable releases read it from `app/version.properties`, which the Create Draft Release workflow sets in the release commit and the release workflow checks against the commit count, so F-Droid can rebuild the release from its tag. Without `ANDROID_VERSION_NAME`, the version name comes from `package.json`.
 
@@ -49,11 +51,30 @@ GitHub Actions stores the same material in these repository secrets:
 
 The private keystore and its password are permanent release assets. Losing either one prevents publishing updates that install over existing OpenTubeX Android releases. Keep at least two encrypted backups in separate locations and test recovery before the first public release.
 
+## Nightly signing
+
+Nightlies used to be published with the public `nightly.keystore`, so anyone could sign an APK that updates them. CI now re-signs every published nightly APK with `_scripts/sign-nightly-apks.sh`. It signs with the private nightly key using APK Signature Scheme v3 key rotation, linked from the public key by the committed `nightly.lineage`:
+
+- Android 9 and later install the update over a publicly signed nightly, keep its data, and then reject APKs signed only with the public key. Through the lineage, the public key keeps the installed-data and permission capabilities, which are needed to update the existing installation and the signature permission it declares. It has no rollback, auth or shared UID capabilities.
+- Android 8 does not support v3, so it keeps verifying the public key's v2 signature and stays exposed.
+- Devices that installed an attacker's rotation from the public key before the first privately signed nightly must reinstall OpenTubeX Nightly.
+
+The private key's alias is `opentubex-android-nightly` and its certificate SHA-256 digest is `ae70934782cd4f6183777e3fbabcfe4cdcb6a51b404afff727c90c49e6907b5a`. The script fails if the APK's v3 signer has another digest. It reads the key from these environment variables:
+
+- `ANDROID_NIGHTLY_KEYSTORE`: absolute path to the private PKCS #12 keystore
+- `ANDROID_NIGHTLY_STORE_PASSWORD`: keystore password
+
+GitHub Actions stores the keystore in the `ANDROID_NIGHTLY_KEYSTORE_BASE64` and `ANDROID_NIGHTLY_KEYSTORE_PASSWORD` secrets, both here and in `OpenTubeX/fdroid`, which re-signs the stable code it builds for nightly installations. Stock fdroidserver skips APKs whose v2 and v3 certificates differ, so `OpenTubeX/fdroid` indexes nightlies through its `scripts/fdroid.py`, which lists the public certificate as the signer. F-Droid clients read that oldest certificate from rotated installations. Fork builds without the secrets keep the public signature. Like the release key, the private nightly key and its password are permanent: losing them prevents publishing updates that install over existing nightlies, so keep encrypted backups.
+
+Do not regenerate `nightly.lineage`. To rotate again, extend it with `apksigner rotate --in nightly.lineage`, so devices that already trust the private key accept the next one.
+
 APK signature fingerprints can be checked with:
 
 ```sh
-keytool -printcert -jarfile app-release.apk
+"$ANDROID_HOME"/build-tools/<version>/apksigner verify --verbose --print-certs app-release.apk
 ```
+
+`keytool -printcert -jarfile` shows nothing, because these APKs have no v1 signature.
 
 ## F-Droid reproducible builds
 

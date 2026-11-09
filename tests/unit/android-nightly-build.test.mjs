@@ -164,7 +164,7 @@ test('stable releases build only production APKs and sort between nightlies by v
   assert.match(stale.stderr, new RegExp(`must contain versionCode=${stableCode}`))
 
   const nightlyWorkflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
-  const nightlyBuild = nightlyWorkflow.jobs.android.steps.find(step => step.name === 'Build signed Android APKs')
+  const nightlyBuild = nightlyWorkflow.jobs.android.steps.find(step => step.name === 'Build Android APKs')
   for (const commitCount of [12345, 12346]) {
     await writeFile(join(directory, 'git'), `#!/bin/sh\necho ${commitCount}\n`)
     await writeFile(join(directory, 'gradle.log'), '')
@@ -198,6 +198,44 @@ test('stable releases build only production APKs and sort between nightlies by v
     assert.ok(commitCount === 12345 ? nightlyCode < stableCode : nightlyCode > stableCode,
       'Stable promotion must update the same-commit nightly and accept the next nightly update')
   }
+})
+
+test('official nightlies require the private nightly signing key', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'android-nightly-signing-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  await mkdir(join(directory, '_scripts'))
+  await writeFile(join(directory, '_scripts/sign-nightly-apks.sh'),
+    '#!/bin/sh\nprintf "%s %s\\n" "$(cat "$ANDROID_NIGHTLY_KEYSTORE")" "$*" > signing.log\n')
+  await chmod(join(directory, '_scripts/sign-nightly-apks.sh'), 0o755)
+  for (const name of ['android-apks', 'android-lite-apks']) {
+    await mkdir(join(directory, name))
+    await writeFile(join(directory, name, `${name}.apk`), '')
+  }
+  const workflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
+  const sign = workflow.jobs.android.steps.find(step => step.name === 'Sign Android APKs with the nightly key')
+  const keystore = join(directory, 'nightly-release.keystore')
+  const run = (repository, secrets) => spawnSync('bash', ['-c', sign.run], {
+    cwd: directory,
+    env: {
+      ...process.env,
+      GITHUB_REPOSITORY: repository,
+      ANDROID_NIGHTLY_KEYSTORE_BASE64: secrets ? Buffer.from('fixture').toString('base64') : '',
+      ANDROID_NIGHTLY_STORE_PASSWORD: secrets ? 'fixture' : '',
+      ANDROID_NIGHTLY_KEYSTORE: keystore
+    },
+    encoding: 'utf8'
+  })
+
+  const unsigned = run('OpenTubeX/OpenTubeX', false)
+  assert.notEqual(unsigned.status, 0)
+  assert.match(unsigned.stderr, /signing secrets are not configured/)
+  assert.equal(run('someone/OpenTubeX', false).status, 0)
+
+  const signed = run('OpenTubeX/OpenTubeX', true)
+  assert.equal(signed.status, 0, signed.stderr)
+  assert.equal(await readFile(join(directory, 'signing.log'), 'utf8'),
+    'fixture android-apks/android-apks.apk android-lite-apks/android-lite-apks.apk\n')
+  await assert.rejects(readFile(keystore))
 })
 
 test('stable releases attach only production APKs', async (t) => {
