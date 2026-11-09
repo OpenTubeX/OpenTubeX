@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Ógild sérsniðin þemaskrá
       Colors:
         Watched thumbnail overlay: "Yfirlag á smámyndir áhorfðra myndskeiða"
+        Thumbnail badge background: "Bakgrunnur merkja á smámyndum"
         Main text: Aðaltexti
         Secondary text: Aukatexti
         Subtle text: Daufur texti

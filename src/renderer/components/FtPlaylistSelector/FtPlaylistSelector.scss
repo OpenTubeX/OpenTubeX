@@ -45,8 +45,8 @@
       }
 
       .background {
-        background-color: var(--bg-color);
-        opacity: 0.9;
+        background-color: var(--thumbnail-badge-bg-color);
+        backdrop-filter: var(--thumbnail-badge-blur);
       }
 
       .inner {

@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Geçersiz özel tema dosyası
       Colors:
         Watched thumbnail overlay: "İzlenen video küçük resmi kaplaması"
+        Thumbnail badge background: "Küçük resim rozetlerinin arka planı"
         Main text: Ana metin
         Secondary text: İkincil metin
         Subtle text: Soluk metin

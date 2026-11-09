@@ -805,6 +805,7 @@ Settings:
       Invalid Theme File: Neveljavna datoteka s temo po meri
       Colors:
         Watched thumbnail overlay: "Prekrivanje sličic ogledanih videoposnetkov"
+        Thumbnail badge background: "Ozadje oznak na sličicah"
         Main text: Glavno besedilo
         Secondary text: Sekundarno besedilo
         Subtle text: Pridušeno besedilo

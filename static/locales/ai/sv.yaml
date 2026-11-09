@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Ogiltig fil för eget tema
       Colors:
         Watched thumbnail overlay: "Överlägg på miniatyrbilder för sedda videor"
+        Thumbnail badge background: "Bakgrund för märken på miniatyrbilder"
         Main text: Primär text
         Secondary text: Sekundär text
         Subtle text: Diskret text

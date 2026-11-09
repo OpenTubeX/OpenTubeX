@@ -11,6 +11,8 @@ import { mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry
 test('theme sync does not echo colors filled in while loading a received theme', () => {
   const theme = structuredClone({ ...DEFAULT_CUSTOM_THEME, id: 'discussion-1196', name: 'D3SOX' })
   delete theme.colors.watchedThumbnailOverlay
+  delete theme.colors.thumbnailBadgeBackground
+  delete theme.blurs.thumbnailBadgeBackground
   const received = { key: 'customThemes', value: [theme], updatedAt: 10 }
   const entry = mergeSettingEntry({
     key: 'customThemes', value: normalizeCustomThemes(received.value),
@@ -36,6 +38,8 @@ test('equivalent theme snapshots with the same edit time keep the server represe
   const themes = normalizeCustomThemes([{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1' }])
   const withoutDefaults = structuredClone(themes)
   delete withoutDefaults[0].colors.watchedThumbnailOverlay
+  delete withoutDefaults[0].colors.thumbnailBadgeBackground
+  delete withoutDefaults[0].blurs.thumbnailBadgeBackground
   for (const [saved, remote] of [[withoutDefaults, themes], [themes, withoutDefaults]]) {
     const remoteEntry = { key: 'customThemes', value: remote, updatedAt: 10 }
     const entry = mergeSettingEntry({
@@ -60,6 +64,7 @@ for (const [change, edit] of [
   ['rename', themes => { themes[0].name = 'Renamed' }],
   ['color', themes => { themes[0].colors.primaryText = '#123456' }],
   ['custom overlay', themes => { themes[0].colors.watchedThumbnailOverlay = '#abcdef80' }],
+  ['custom badge background', themes => { themes[0].colors.thumbnailBadgeBackground = '#abcdef80' }],
   ['blur', themes => { themes[0].blurs.cardBackground = 20 }],
   ['addition', themes => { themes.push({ ...structuredClone(themes[0]), id: 'added' }) }],
   ['deletion', themes => { themes.pop() }],

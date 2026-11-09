@@ -674,6 +674,7 @@ Settings:
       Invalid Theme File: Μη έγκυρο αρχείο προσαρμοσμένου θέματος
       Colors:
         Watched thumbnail overlay: "Επικάλυψη μικρογραφιών προβεβλημένων βίντεο"
+        Thumbnail badge background: "Φόντο σημάνσεων μικρογραφιών"
         Main text: Κύριο κείμενο
         Secondary text: Δευτερεύον κείμενο
         Subtle text: Διακριτικό κείμενο

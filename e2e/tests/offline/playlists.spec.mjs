@@ -136,6 +136,21 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
   })
 
+  test('paints the playlist card video count panel above the thumbnail', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+
+    const background = page.locator('.ft-list-video', {
+      has: page.getByRole('link', { name: 'My seeded playlist', exact: true })
+    }).locator('.videoCountContainer .background')
+    // The panel ignores the pointer, so let hit testing find its background
+    // under the count.
+    expect(await background.evaluate(element => {
+      element.style.pointerEvents = 'auto'
+      const { x, y, width, height } = element.getBoundingClientRect()
+      return document.elementFromPoint(x + width / 2, y + height / 2) === element
+    })).toBe(true)
+  })
+
   test('updates a playlist card video count while the list remains open', async ({ page }) => {
     await goTo(page, 'userplaylists')
 

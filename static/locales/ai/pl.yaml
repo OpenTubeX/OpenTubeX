@@ -369,6 +369,7 @@ Settings:
       Unable to Share: Nie udało się udostępnić własnego motywu
       Colors:
         Watched thumbnail overlay: "Nakładka na miniatury obejrzanych filmów"
+        Thumbnail badge background: "Tło etykiet na miniaturach"
         Logo hover: Logo po najechaniu
         Logo pressed: Logo po naciśnięciu
         Page background: Tło strony

@@ -678,6 +678,7 @@ Settings:
       Invalid Theme File: Неприпустимий файл власної теми
       Colors:
         Watched thumbnail overlay: "Накладання на мініатюри переглянутих відео"
+        Thumbnail badge background: "Фон значків на мініатюрах"
         Main text: Основний текст
         Secondary text: Другорядний текст
         Subtle text: Приглушений текст

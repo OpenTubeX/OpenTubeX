@@ -646,6 +646,7 @@ Settings:
       Invalid Theme File: Недопустимый файл пользовательской темы
       Colors:
         Watched thumbnail overlay: "Наложение на миниатюры просмотренных видео"
+        Thumbnail badge background: "Фон значков на миниатюрах"
         Main text: Основной текст
         Secondary text: Вторичный текст
         Subtle text: Приглушённый текст

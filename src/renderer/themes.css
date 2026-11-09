@@ -68,6 +68,8 @@ body {
   /* Themes whose page background matches the tab strip set a visible fill. */
   --inactive-tab-color: var(--bg-color);
   --watched-thumbnail-overlay-color: rgb(from var(--bg-color) r g b / 70%);
+  --thumbnail-badge-bg-color: color-mix(in srgb, var(--card-bg-color) 85%, transparent);
+  --thumbnail-badge-blur: var(--card-bg-blur, none);
   --dropdown-item-hover-color: var(--scrollbar-color-hover);
   --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
   --selection-background-color: var(--primary-color);

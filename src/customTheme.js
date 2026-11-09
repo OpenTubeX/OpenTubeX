@@ -19,6 +19,7 @@ export const CUSTOM_THEME_COLORS = Object.freeze([
   ['cardBackground', '--card-bg-color', 'Card background'],
   ['secondaryCardBackground', '--secondary-card-bg-color', 'Secondary card background'],
   ['watchedThumbnailOverlay', '--watched-thumbnail-overlay-color', 'Watched thumbnail overlay'],
+  ['thumbnailBadgeBackground', '--thumbnail-badge-bg-color', 'Thumbnail badge background'],
   ['favoriteIcon', '--favorite-icon-color', 'Favorite icon'],
   ['error', '--red-500', 'Error color'],
   ['scrollbar', '--scrollbar-color', 'Scrollbar thumb'],
@@ -77,6 +78,7 @@ export const CUSTOM_THEME_BLURS = Object.freeze([
   ['searchBar', '--search-bar-blur'],
   ['settingsSearchBar', '--settings-search-bar-blur'],
   ['primaryInput', '--primary-input-blur'],
+  ['thumbnailBadgeBackground', '--thumbnail-badge-blur'],
 ])
 
 const DEFAULT_CUSTOM_THEME_BLURS = Object.freeze(
@@ -109,6 +111,7 @@ export const DEFAULT_CUSTOM_THEME = Object.freeze({
     cardBackground: '#242424',
     secondaryCardBackground: '#181818',
     watchedThumbnailOverlay: '#121212b3',
+    thumbnailBadgeBackground: '#242424d9',
     favoriteIcon: '#6eaa73',
     error: '#f44336',
     scrollbar: '#515151',
@@ -183,6 +186,7 @@ export function normalizeCustomTheme(value) {
   for (const [key] of CUSTOM_THEME_COLORS) {
     const color = value.colors?.[key] ??
       (key === 'watchedThumbnailOverlay' ? deriveWatchedThumbnailOverlayColor(value.colors?.background) : undefined) ??
+      (key === 'thumbnailBadgeBackground' ? deriveThumbnailBadgeColor(value.colors?.cardBackground) : undefined) ??
       (key === 'scrollbarActive' ? deriveScrollbarActiveColor(value.colors?.scrollbarHover) : undefined) ??
       value.colors?.[LEGACY_CUSTOM_THEME_COLOR_FALLBACKS[key]]
     if (typeof color !== 'string' || !HEX_COLOR_PATTERN.test(color)) {
@@ -192,7 +196,10 @@ export function normalizeCustomTheme(value) {
   }
 
   const blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => {
-    const blur = value.blurs?.[key]
+    const blur = value.blurs?.[key] ??
+      (key === 'thumbnailBadgeBackground'
+        ? deriveThumbnailBadgeBlur(colors.cardBackground, value.blurs?.cardBackground)
+        : undefined)
     return [key, typeof blur === 'number' && Number.isFinite(blur)
       ? Math.round(Math.min(40, Math.max(0, blur)))
       : 0]
@@ -231,10 +238,16 @@ export async function customThemeContentHash(value) {
   const theme = normalizeCustomTheme(value)
   delete theme.id
   delete theme.discussionThemeHash
-  // Keep existing community fingerprints when the new overlay only supplies
-  // the default appearance. Customized overlays still count as source edits.
+  // Keep existing community fingerprints when newer colors only supply the
+  // default appearance. Customized values still count as source edits.
   if (theme.colors.watchedThumbnailOverlay === deriveWatchedThumbnailOverlayColor(theme.colors.background)) {
     delete theme.colors.watchedThumbnailOverlay
+  }
+  if (theme.colors.thumbnailBadgeBackground === deriveThumbnailBadgeColor(theme.colors.cardBackground)) {
+    delete theme.colors.thumbnailBadgeBackground
+  }
+  if (theme.blurs.thumbnailBadgeBackground === deriveThumbnailBadgeBlur(theme.colors.cardBackground, theme.blurs.cardBackground)) {
+    delete theme.blurs.thumbnailBadgeBackground
   }
   const content = new TextEncoder().encode(JSON.stringify(theme))
   const hash = await globalThis.crypto.subtle.digest('SHA-256', content)
@@ -257,6 +270,23 @@ function deriveWatchedThumbnailOverlayColor(background) {
   if (typeof background !== 'string' || !HEX_COLOR_PATTERN.test(background)) return undefined
 
   return `${background.slice(0, 7)}b3`
+}
+
+// Badges used to show the card background at 85% opacity.
+function deriveThumbnailBadgeColor(cardBackground) {
+  if (typeof cardBackground !== 'string' || !HEX_COLOR_PATTERN.test(cardBackground)) return undefined
+
+  const rgb = hexColorToRgbComponents(cardBackground).split(' ').map(Number)
+  return formatHexColor(rgb, Math.round(hexColorAlpha(cardBackground) * 0.85))
+}
+
+// Badges used the card blur, which only applies to a transparent card.
+function deriveThumbnailBadgeBlur(cardBackground, cardBlur) {
+  return hexColorAlpha(cardBackground) < 255 ? cardBlur : 0
+}
+
+function hexColorAlpha(color) {
+  return color.length === 9 ? Number.parseInt(color.slice(7, 9), 16) : 255
 }
 
 function formatHexColor(rgb, alpha) {
@@ -293,8 +323,7 @@ export function cssColorToHex(color) {
 }
 
 export function customThemeBackdropBlur(color, strength) {
-  const alpha = color.length === 9 ? Number.parseInt(color.slice(7, 9), 16) : 255
-  return alpha < 255 && strength > 0 ? `blur(${strength}px)` : 'none'
+  return hexColorAlpha(color) < 255 && strength > 0 ? `blur(${strength}px)` : 'none'
 }
 
 export function customThemeValue(id) {

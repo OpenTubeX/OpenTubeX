@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Fichier de thème personnalisé non valide
       Colors:
         Watched thumbnail overlay: "Superposition des miniatures des vidéos vues"
+        Thumbnail badge background: "Arrière-plan des badges des miniatures"
         Main text: Texte principal
         Secondary text: Texte secondaire
         Subtle text: Texte discret

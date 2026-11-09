@@ -172,11 +172,14 @@ $grid-mode-grab-bar-padding: 1em;
     .videoWatched,
     .playlistIndexBadge,
     .videoDuration {
+      // Paint above the positioned thumbnail link.
+      position: relative;
+      background-color: var(--thumbnail-badge-bg-color);
+      backdrop-filter: var(--thumbnail-badge-blur);
       border-radius: var(--shape-corner-small);
       color: var(--primary-text-color);
       font-size: 15px;
       line-height: 1.2;
-      opacity: $thumbnail-overlay-opacity;
       padding-block: 3px;
       padding-inline: 4px;
       pointer-events: none;
@@ -184,7 +187,6 @@ $grid-mode-grab-bar-padding: 1em;
 
     .videoWatched {
       place-self: flex-start start;
-      background-color: var(--bg-color);
 
       @include is-watch-playlist-item {
         font-size: 12px;
@@ -196,16 +198,12 @@ $grid-mode-grab-bar-padding: 1em;
 
     .playlistIndexBadge {
       place-self: start start;
-      background-color: var(--card-bg-color);
-      backdrop-filter: var(--card-bg-blur, none);
       margin: 4px;
       font-size: 12px;
     }
 
     .videoDuration {
       place-self: flex-end end;
-      background-color: var(--card-bg-color);
-      backdrop-filter: var(--card-bg-blur, none);
       margin-block: 0 4px;
       margin-inline: 0 4px;
 
@@ -262,8 +260,9 @@ $grid-mode-grab-bar-padding: 1em;
       pointer-events: none;
 
       .background {
-        background-color: var(--bg-color);
-        opacity: 0.9;
+        position: relative;
+        background-color: var(--thumbnail-badge-bg-color);
+        backdrop-filter: var(--thumbnail-badge-blur);
       }
 
       .inner {

@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Tệp chủ đề tùy chỉnh không hợp lệ
       Colors:
         Watched thumbnail overlay: "Lớp phủ hình thu nhỏ của video đã xem"
+        Thumbnail badge background: "Nền của nhãn trên hình thu nhỏ"
         Main text: Văn bản chính
         Secondary text: Văn bản phụ
         Subtle text: Văn bản mờ

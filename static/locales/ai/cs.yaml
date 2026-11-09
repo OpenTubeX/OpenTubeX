@@ -673,6 +673,7 @@ Settings:
       Invalid Theme File: Neplatný soubor vlastního motivu
       Colors:
         Watched thumbnail overlay: "Překryv náhledů zhlédnutých videí"
+        Thumbnail badge background: "Pozadí štítků na náhledech"
         Main text: Hlavní text
         Secondary text: Vedlejší text
         Subtle text: Tlumený text

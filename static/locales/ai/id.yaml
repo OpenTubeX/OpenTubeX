@@ -674,6 +674,7 @@ Settings:
       Invalid Theme File: Berkas tema khusus tidak valid
       Colors:
         Watched thumbnail overlay: "Lapisan gambar mini video yang ditonton"
+        Thumbnail badge background: "Latar lencana gambar mini"
         Main text: Teks utama
         Secondary text: Teks sekunder
         Subtle text: Teks samar

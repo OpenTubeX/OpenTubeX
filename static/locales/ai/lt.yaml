@@ -795,6 +795,7 @@ Settings:
       Invalid Theme File: Netinkamas pasirinktinės temos failas
       Colors:
         Watched thumbnail overlay: "Peržiūrėtų vaizdo įrašų miniatiūrų perdanga"
+        Thumbnail badge background: "Miniatiūrų ženklelių fonas"
         Main text: Pagrindinis tekstas
         Secondary text: Antrinis tekstas
         Subtle text: Neryškus tekstas

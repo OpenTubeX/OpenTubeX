@@ -678,6 +678,7 @@ Settings:
       Invalid Theme File: ملف السمة المخصصة غير صالح
       Colors:
         Watched thumbnail overlay: "تراكب الصور المصغّرة للفيديوهات المُشاهَدة"
+        Thumbnail badge background: "خلفية شارات الصور المصغّرة"
         Main text: النص الرئيسي
         Secondary text: النص الثانوي
         Subtle text: نص دقيق

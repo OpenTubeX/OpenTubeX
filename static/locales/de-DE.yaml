@@ -894,6 +894,7 @@ Settings:
       Invalid Theme File: Ungültige Datei für ein benutzerdefiniertes Design
       Colors:
         Watched thumbnail overlay: "Überlagerung für angesehene Vorschaubilder"
+        Thumbnail badge background: "Hintergrund der Hinweise auf Vorschaubildern"
         Main text: Haupttext
         Secondary text: Sekundärtext
         Subtle text: Dezenter Text
