@@ -441,8 +441,8 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const playbackSection = await goToSettingsSection(page, 'playback')
     const sliders = playbackSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(6)
-    await expect(sliders.nth(5)).toContainText(/Max video playback rate/i)
+    await expect(sliders).toHaveCount(8)
+    await expect(sliders.nth(7)).toContainText(/Max video playback rate/i)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { x, y, width } = element.getBoundingClientRect()
@@ -453,7 +453,7 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([2, 2, 2])
+    expect([...rowSizes.values()]).toEqual([2, 2, 2, 2])
     for (const y of rowSizes.keys()) {
       expect(new Set(boxes.filter(box => box.y === y).map(({ width }) => width)).size).toBe(1)
     }
