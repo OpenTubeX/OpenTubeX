@@ -869,10 +869,9 @@ async function mergeSubscriptions(client, store, previousIds, options) {
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
-  const readLocalBookmarks = () => (Array.isArray(store.state.settings.playlistBookmarks)
+  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
     ? store.state.settings.playlistBookmarks
     : []).filter(isValidPlaylistBookmark)
-  const localBookmarks = readLocalBookmarks()
   const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
   const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
@@ -898,15 +897,16 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
   const removedIds = new Set(Array.from(localById.keys()).filter(id => !mergedIds.has(id)))
 
   if (addedIds.length > 0 || removedIds.size > 0) {
-    // Apply the merge to the current list, so bookmarks saved or removed while
-    // the server was busy survive, and the next sync syncs them.
-    const currentBookmarks = readLocalBookmarks()
-    const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
-    const nextBookmarks = [
-      ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
-      ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
-    ]
-    const saved = await store.dispatch('replacePlaylistBookmarks', nextBookmarks)
+    // Apply the merge to the saved list as part of the write, so bookmarks
+    // saved or removed meanwhile survive, and the next sync syncs them.
+    const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => {
+      const currentBookmarks = savedBookmarks.filter(isValidPlaylistBookmark)
+      const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
+      return [
+        ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
+        ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
+      ]
+    })
     if (!saved) throw new Error('Could not save synced playlist bookmarks')
   }
 

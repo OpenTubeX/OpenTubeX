@@ -595,15 +595,30 @@ async function updateValidatedSetting(commit, settings, settingId, value) {
   }
 }
 
-async function persistPlaylistBookmarks(commit, bookmarks) {
-  try {
+let pendingPlaylistBookmarkUpdate = Promise.resolve()
+
+/**
+ * Applies `update` to the saved bookmarks. Every bookmark write, including
+ * sync's, reads and writes inside one lock shared by all windows, so
+ * concurrent edits build on each other instead of overwriting each other.
+ * @param {Function} commit
+ * @param {(bookmarks: any[]) => any[]} update
+ */
+function updateSavedPlaylistBookmarks(commit, update) {
+  const persist = async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = (await DBSettingHandlers.find()).find(setting => setting._id === 'playlistBookmarks')?.value
+    const bookmarks = update(Array.isArray(saved) ? saved : [])
     await DBSettingHandlers.upsert('playlistBookmarks', bookmarks)
     commit('setPlaylistBookmarks', bookmarks)
-    return true
-  } catch (error) {
+  }
+  const updated = typeof navigator !== 'undefined' && navigator.locks
+    ? navigator.locks.request('opentubex-playlist-bookmarks', persist)
+    : (pendingPlaylistBookmarkUpdate = pendingPlaylistBookmarkUpdate.catch(() => {}).then(persist))
+  return updated.then(() => true, error => {
     console.error(error)
     return false
-  }
+  })
 }
 
 const updateOptimisticSetting = createOptimisticSettingUpdater()
@@ -805,19 +820,17 @@ const customActions = {
     return pendingAutomaticDownloadRuleUpdate
   },
 
-  savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
-    const bookmarks = getters.getPlaylistBookmarks
-      .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)
-    bookmarks.push(bookmark)
+  savePlaylistBookmark: ({ commit }, bookmark) => updateSavedPlaylistBookmarks(commit, bookmarks => [
+    ...bookmarks.filter(entry => entry?.playlist?.id !== bookmark.playlist.id),
+    bookmark,
+  ]),
 
-    return persistPlaylistBookmarks(commit, bookmarks)
-  },
-
-  removePlaylistBookmark: async ({ commit, getters, state }, playlistId) => {
-    const bookmarks = getters.getPlaylistBookmarks
-      .filter(bookmark => bookmark?.playlist?.id !== playlistId)
-
-    if (!await persistPlaylistBookmarks(commit, bookmarks)) return false
+  removePlaylistBookmark: async ({ commit, state }, playlistId) => {
+    const removed = await updateSavedPlaylistBookmarks(
+      commit,
+      bookmarks => bookmarks.filter(bookmark => bookmark?.playlist?.id !== playlistId)
+    )
+    if (!removed) return false
     // Saving the playlist again should not bring back an old pin.
     if (state.userPlaylistsPinnedIds.includes(playlistId)) {
       await updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', state.userPlaylistsPinnedIds.filter(id => id !== playlistId))
@@ -825,9 +838,11 @@ const customActions = {
     return true
   },
 
-  replacePlaylistBookmarks: async ({ commit }, bookmarks) => {
-    return persistPlaylistBookmarks(commit, bookmarks)
-  },
+  // Takes the new list (imports, resets) or a function that derives it from the saved one (sync).
+  updatePlaylistBookmarks: ({ commit }, update) => updateSavedPlaylistBookmarks(
+    commit,
+    typeof update === 'function' ? update : () => update
+  ),
 
   updatePreferredCaptionLocale: ({ commit, state }, value) => updateValidatedSetting(
     commit,

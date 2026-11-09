@@ -208,8 +208,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     dispatch: async (action, value) => {
       dispatched.push([action, value])
-      if (action === 'replacePlaylistBookmarks') {
-        settings.playlistBookmarks = value
+      if (action === 'updatePlaylistBookmarks') {
+        settings.playlistBookmarks = value(settings.playlistBookmarks)
         return true
       }
       if (action === 'updateProfileSubscriptionsFromSync') {
