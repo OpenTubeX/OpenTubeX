@@ -1036,6 +1036,7 @@ Settings:
     Browser for Cookies: Selain, josta evästeet haetaan
     Browser Profile: Selainprofiili (valinnainen)
     Browser Profile Placeholder: Profiilin nimi tai polku
+    Browser Profile Invalid: "Kirjoita profiilin nimi tai valitse profiilikansio kansiopainikkeella."
     Select Browser: Valitse selain
     Always Use Cookies: Käytä evästeitä aina
     Restricted Playback Authentication Hint: OpenTubeX välittää nämä evästeet oletuksena yt-dlp:lle vasta, kun valitset ikärajoitetun tai vain jäsenille tarkoitetun videon kohdalla "Yritä määritetyillä evästeillä".

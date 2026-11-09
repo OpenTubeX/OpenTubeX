@@ -1024,6 +1024,7 @@ Settings:
     Browser for Cookies: Porwr ar gyfer cwcis
     Browser Profile: Proffil porwr (dewisol)
     Browser Profile Placeholder: Enw neu lwybr proffil
+    Browser Profile Invalid: "Rhowch enw proffil, neu dewiswch ffolder proffil gyda’r botwm ffolder."
     Select Browser: Dewis porwr
     Always Use Cookies: Defnyddio cwcis bob amser
     Restricted Playback Authentication Hint: Yn ddiofyn, dim ond ar ôl i chi ddewis "Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu" ar fideo sydd â chyfyngiad oedran neu sydd i aelodau yn unig y bydd OpenTubeX yn trosglwyddo'r cwcis hyn i yt-dlp.

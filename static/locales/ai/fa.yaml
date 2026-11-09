@@ -1058,6 +1058,7 @@ Settings:
     Browser for Cookies: مرورگر کوکی‌ها
     Browser Profile: نمایهٔ مرورگر (اختیاری)
     Browser Profile Placeholder: نام یا مسیر نمایه
+    Browser Profile Invalid: "نام نمایه را وارد کنید یا با دکمهٔ پوشه، پوشهٔ نمایه را انتخاب کنید."
     Select Browser: انتخاب مرورگر
     Always Use Cookies: همیشه از کوکی‌ها استفاده شود
     Restricted Playback Authentication Hint: OpenTubeX به‌طور پیش‌فرض تنها پس از انتخاب «تلاش با کوکی‌های تنظیم‌شده» برای ویدیوی دارای محدودیت سنی یا ویژهٔ اعضا، این کوکی‌ها را به yt-dlp می‌فرستد.

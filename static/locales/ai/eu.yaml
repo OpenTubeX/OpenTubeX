@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookieetarako arakatzailea
     Browser Profile: Arakatzailearen profila (aukerakoa)
     Browser Profile Placeholder: Profilaren izena edo bide-izena
+    Browser Profile Invalid: "Idatzi profil-izen bat, edo aukeratu profil-karpeta bat karpeta-botoiarekin."
     Select Browser: Hautatu arakatzailea
     Always Use Cookies: Erabili beti cookieak
     Restricted Playback Authentication Hint: Modu lehenetsian, OpenTubeX aplikazioak cookie hauek yt-dlp-ri ematen dizkio soilik adin-muga duen edo kideentzat den bideo batean "Saiatu konfiguratutako cookieekin" aukeratu ondoren.

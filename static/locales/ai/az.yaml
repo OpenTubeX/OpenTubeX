@@ -1023,6 +1023,7 @@ Settings:
     Browser for Cookies: Kukilər üçün brauzer
     Browser Profile: Brauzer profili (istəyə bağlı)
     Browser Profile Placeholder: Profil adı və ya yolu
+    Browser Profile Invalid: "Profil adını daxil edin və ya qovluq düyməsi ilə profil qovluğunu seçin."
     Select Browser: Brauzer seçin
     Always Use Cookies: Həmişə kukilərdən istifadə et
     Restricted Playback Authentication Hint: Varsayılan olaraq, OpenTubeX bu kukiləri yalnız yaş məhdudiyyətli və ya üzvlərə məxsus videoda “Tənzimlənmiş kukilərlə sına” seçdikdən sonra yt-dlp proqramına ötürür.

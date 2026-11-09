@@ -1200,6 +1200,7 @@ Settings:
     Browser for Cookies: Blaaier vir koekies
     Browser Profile: Blaaierprofiel (opsioneel)
     Browser Profile Placeholder: Profielnaam of pad
+    Browser Profile Invalid: "Voer ’n profielnaam in, of kies ’n profielgids met die gidsknoppie."
     Select Browser: Kies ’n blaaier
     Always Use Cookies: Gebruik altyd koekies
     Restricted Playback Authentication Hint: By verstek gee OpenTubeX hierdie koekies slegs aan yt-dlp deur nadat u "Probeer met opgestelde koekies" op ’n video met ouderdomsbeperking of vir slegs lede kies.

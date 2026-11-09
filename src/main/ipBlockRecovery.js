@@ -1,53 +1,15 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import path from 'path'
 import cp from 'child_process'
 import asyncFs from 'fs/promises'
 
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
+import { choosePathSetting } from './pathSettingPicker'
 import { isOpenTubeXUrl } from './utils'
 
 /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
 let ipBlockRecoveryScriptPromise = null
-
-/**
- * @param {import('electron').WebContents} webContents
- * @param {string | undefined} [currentPath]
- * @returns {Promise<string | undefined>}
- */
-async function chooseIpBlockRecoveryScript(webContents, currentPath) {
-  if (typeof currentPath !== 'string' || currentPath.length === 0) {
-    currentPath = app.getPath('home')
-  }
-
-  /** @type {import('electron').FileFilter[]} */
-  const filters = process.platform === 'win32'
-    ? [
-        { name: 'Windows Script Files', extensions: ['bat', 'ps1', 'vbs'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
-    : [
-        { name: 'Shell Script Files', extensions: ['sh'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
-
-  const dialogOptions = {
-    defaultPath: currentPath,
-    properties: ['openFile'],
-    filters
-  }
-
-  const window = BrowserWindow.fromWebContents(webContents)
-  const result = window
-    ? await dialog.showOpenDialog(window, dialogOptions)
-    : await dialog.showOpenDialog(dialogOptions)
-
-  if (result.canceled || result.filePaths.length === 0) {
-    return undefined
-  }
-
-  return result.filePaths[0]
-}
 
 /**
  * @param {string} scriptPath
@@ -178,17 +140,33 @@ export function getIpBlockRecoveryScriptRun() {
 /**
  * Registers the handlers that choose and run the user's IP block recovery
  * script. A new run starts only once the previous one has cooled down.
+ * @param {object} options
+ * @param {(settingKey: string, value: unknown) => Promise<unknown>} options.updateSettingFromMain
  */
-export function setupIpBlockRecoveryIpc() {
-  ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event, currentPath) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      (currentPath != null && typeof currentPath !== 'string')
-    ) {
+export function setupIpBlockRecoveryIpc({ updateSettingFromMain }) {
+  ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
-    return await chooseIpBlockRecoveryScript(event.sender, currentPath)
+    /** @type {import('electron').FileFilter[]} */
+    const filters = process.platform === 'win32'
+      ? [
+          { name: 'Windows Script Files', extensions: ['bat', 'ps1', 'vbs'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      : [
+          { name: 'Shell Script Files', extensions: ['sh'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+
+    return await choosePathSetting({
+      webContents: event.sender,
+      settingId: 'videoIpBlockScriptPath',
+      fallbackPath: app.getPath('home'),
+      dialogOptions: { properties: ['openFile'], filters },
+      updateSettingFromMain
+    })
   })
 
   ipcMain.handle(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT, (event, scriptPath) => {

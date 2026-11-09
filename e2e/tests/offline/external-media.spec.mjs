@@ -1510,13 +1510,12 @@ test('retries failed external playback with configured cookies', async ({ app, p
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
-  await choosePickerPaths(app, page, { ytDlpPath: executable })
-  await page.evaluate(async cookies => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
-  }, cookiePath)
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -1539,13 +1538,12 @@ test('offers cookie retry only after an unauthenticated external extraction', as
     'exit 1'
   ].join('\n'))
   await chmod(executable, 0o755)
-  await choosePickerPaths(app, page, { ytDlpPath: executable })
-  await page.evaluate(async cookies => {
+  await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+  await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
-  }, cookiePath)
+  })
 
   await page.locator(sel.searchInput).fill('https://videos.example.test/unavailable')
   await page.locator(sel.searchInput).press('Enter')
@@ -2327,14 +2325,13 @@ test('uses configured playback cookies for external streams', async ({ app, page
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
-    await page.evaluate(async cookiesPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', cookiesPath)
       await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
-    }, cookiePath)
+    })
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
     await page.locator(sel.searchInput).press('Enter')
@@ -2379,14 +2376,13 @@ test('deduplicates cookies separately for parent and subdomain streams', async (
       `printf '%s\\n' '${response}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
-    await page.evaluate(async cookiesPath => {
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: cookiePath })
+    await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpSource', 'system')
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', cookiesPath)
       await window.ftElectron.ytDlpGetPlaybackInfo('https://media.example.test/video', true, true)
-    }, cookiePath)
+    })
 
     for (const url of streamUrls) {
       expect(await page.evaluate(async streamUrl => (await fetch(streamUrl)).status, url), url).toBe(200)

@@ -2621,7 +2621,7 @@ function runApp() {
     return true
   })
 
-  setupIpBlockRecoveryIpc()
+  setupIpBlockRecoveryIpc({ updateSettingFromMain })
 
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()

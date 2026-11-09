@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { choosePickerPaths, test, expect, goTo } from '../../helpers/app.mjs'
 
-const PICKER_PATHS = ['ytDlpPath', 'ytDlpDownloadFolderPath']
+const PICKER_PATHS = ['ytDlpPath', 'ytDlpDownloadFolderPath', 'ytDlpPlaybackCookiesPath']
 
 async function configureQueue(app, page, values) {
   await choosePickerPaths(app, page, Object.fromEntries(Object.entries(values).filter(([key]) => PICKER_PATHS.includes(key))))

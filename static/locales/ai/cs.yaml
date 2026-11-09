@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Prohlížeč pro cookies
     Browser Profile: Profil prohlížeče (volitelné)
     Browser Profile Placeholder: Název profilu nebo cesta
+    Browser Profile Invalid: "Zadejte název profilu nebo vyberte složku profilu tlačítkem složky."
     Select Browser: Vyberte prohlížeč
     Always Use Cookies: Vždy používat cookies
     Restricted Playback Authentication Hint: OpenTubeX ve výchozím nastavení předá tyto cookies nástroji yt-dlp až poté, co u videa s věkovým omezením nebo pouze pro členy zvolíte „Zkusit s nastavenými cookies“.

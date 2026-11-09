@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookie 所在浏览器
     Browser Profile: 浏览器配置文件（可选）
     Browser Profile Placeholder: 配置文件名称或路径
+    Browser Profile Invalid: "请输入配置文件名称，或使用文件夹按钮选择配置文件文件夹。"
     Select Browser: 选择浏览器
     Always Use Cookies: 始终使用 Cookie
     Restricted Playback Authentication Hint: 默认情况下，只有在受年龄限制或仅限会员观看的视频上选择“使用已配置的 Cookie 重试”后，OpenTubeX 才会将这些 Cookie 传递给 yt-dlp。

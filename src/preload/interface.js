@@ -492,11 +492,11 @@ export default {
   },
 
   /**
-   * @param {string} currentPath
+   * Picks and saves the IP block recovery script.
    * @returns {Promise<string | undefined>}
    */
-  chooseIpBlockRecoveryScript: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, currentPath)
+  chooseIpBlockRecoveryScript: () => {
+    return ipcRenderer.invoke(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT)
   },
 
   /**
@@ -675,12 +675,20 @@ export default {
     return ipcRenderer.invoke(IpcChannels.CHOOSE_EXECUTABLE, settingId)
   },
 
-  ytDlpChooseCookies: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_COOKIES, currentPath)
+  /**
+   * Picks and saves the yt-dlp cookie file.
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseCookies: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_COOKIES)
   },
 
-  ytDlpChooseBrowserProfile: (currentPath) => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, currentPath)
+  /**
+   * Picks and saves the browser profile folder for yt-dlp cookies.
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseBrowserProfile: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE)
   },
 
   /**

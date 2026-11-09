@@ -1203,6 +1203,7 @@ Settings:
     Browser for Cookies: 쿠키를 가져올 브라우저
     Browser Profile: 브라우저 프로필 (선택 사항)
     Browser Profile Placeholder: 프로필 이름 또는 경로
+    Browser Profile Invalid: "프로필 이름을 입력하거나 폴더 버튼으로 프로필 폴더를 선택하세요."
     Select Browser: 브라우저 선택
     Always Use Cookies: 항상 쿠키 사용
     Restricted Playback Authentication Hint: 기본적으로 OpenTubeX는 연령 제한 또는 회원 전용 동영상에서 "설정된 쿠키로 시도"를 선택한 경우에만 이 쿠키를 yt-dlp에 전달합니다.

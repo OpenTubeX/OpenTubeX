@@ -79,14 +79,12 @@ function sendResponse() {
 setTimeout(sendResponse, ${responseDelay})
 `)
   await chmod(executable, 0o755)
-  await choosePickerPaths(app, app.page, { ytDlpPath: executable })
+  await choosePickerPaths(app, app.page, { ytDlpPath: executable, ytDlpPlaybackCookiesPath: '/fixture/cookies.txt', ytDlpPlaybackCookiesBrowserProfile: '/fixture/profile' })
   await app.page.evaluate(async mode => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPlaybackAuthMode', mode)
-    await store.dispatch('updateYtDlpPlaybackCookiesPath', '/fixture/cookies.txt')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-    await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/fixture/profile')
   }, mode)
   return { log, response, playlistResponse, pendingResponse }
 }

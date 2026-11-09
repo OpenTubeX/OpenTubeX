@@ -1044,6 +1044,7 @@ Settings:
     Browser for Cookies: Прегледач за колачиће
     Browser Profile: Профил прегледача (необавезно)
     Browser Profile Placeholder: Назив профила или путања
+    Browser Profile Invalid: "Унесите име профила или изаберите фасциклу профила дугметом за фасциклу."
     Select Browser: Изабери прегледач
     Always Use Cookies: Увек користи колачиће
     Restricted Playback Authentication Hint: OpenTubeX подразумевано прослеђује ове колачиће програму yt-dlp тек када за видео-снимак са старосним ограничењем или само за чланове изаберете „Покушај са подешеним колачићима“.

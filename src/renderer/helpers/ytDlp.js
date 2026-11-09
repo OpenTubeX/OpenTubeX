@@ -129,7 +129,11 @@ const capacitor = {
     if (path) await store.dispatch('updateYtDlpDownloadFolderPath', path)
     return path
   },
-  ytDlpChooseCookies: () => native.chooseCookies().then(result => result.path),
+  async ytDlpChooseCookies() {
+    const { path } = await native.chooseCookies()
+    if (path) await store.dispatch('updateYtDlpPlaybackCookiesPath', path)
+    return path
+  },
   ytDlpCreateSession: labels => native.createSession(labels).then(result => result.path),
   ytDlpGetInfo: () => native.info(),
   ytDlpCheckBinaryUpdate: binary => native.checkUpdate({ binary, channel: configuration().channel }),

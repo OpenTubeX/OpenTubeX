@@ -1026,6 +1026,7 @@ Settings:
     Browser for Cookies: Preglednik za kolačiće
     Browser Profile: Profil preglednika (neobavezno)
     Browser Profile Placeholder: Naziv profila ili putanja
+    Browser Profile Invalid: "Unesite naziv profila ili odaberite mapu profila gumbom za mapu."
     Select Browser: Odaberi preglednik
     Always Use Cookies: Uvijek upotrebljavaj kolačiće
     Restricted Playback Authentication Hint: OpenTubeX prema zadanim postavkama prosljeđuje ove kolačiće alatu yt-dlp tek nakon što odaberete "Pokušaj s postavljenim kolačićima" na videozapisu s dobnim ograničenjem ili samo za članove.

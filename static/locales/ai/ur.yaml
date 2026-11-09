@@ -1081,6 +1081,7 @@ Settings:
     Browser for Cookies: کوکیز کے لیے براؤزر
     Browser Profile: براؤزر پروفائل (اختیاری)
     Browser Profile Placeholder: پروفائل کا نام یا راستہ
+    Browser Profile Invalid: "پروفائل کا نام درج کریں، یا فولڈر بٹن سے پروفائل فولڈر منتخب کریں۔"
     Select Browser: براؤزر منتخب کریں
     Always Use Cookies: ہمیشہ کوکیز استعمال کریں
     Restricted Playback Authentication Hint: ڈیفالٹ کے طور پر، OpenTubeX یہ کوکیز yt-dlp کو صرف تب دیتا ہے جب آپ عمر کی پابندی والی یا صرف ممبران کے لیے ویڈیو پر "ترتیب دی گئی کوکیز کے ساتھ آزمائیں" منتخب کرتے ہیں۔

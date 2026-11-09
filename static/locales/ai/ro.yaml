@@ -1026,6 +1026,7 @@ Settings:
     Browser for Cookies: Browser pentru cookie-uri
     Browser Profile: Profil de browser (opțional)
     Browser Profile Placeholder: Numele sau calea profilului
+    Browser Profile Invalid: "Introdu un nume de profil sau alege un dosar de profil cu butonul de dosar."
     Select Browser: Selectați un browser
     Always Use Cookies: Folosește întotdeauna cookie-urile
     Restricted Playback Authentication Hint: În mod implicit, OpenTubeX transmite aceste cookie-uri către yt-dlp numai după ce alegeți „Încearcă folosind cookie-urile configurate” pentru un videoclip cu restricție de vârstă sau destinat exclusiv membrilor.

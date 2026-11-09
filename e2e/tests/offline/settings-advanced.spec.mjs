@@ -197,7 +197,11 @@ test.describe('settings', () => {
     await chooseSelectOption(browser, 'firefox')
 
     const profile = authentication.getByPlaceholder('Profile name or path')
+    // Profile folders come only from the folder picker.
     await profile.fill('/tmp/firefox-profile')
+    await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toBeVisible()
+    await profile.fill('default-release')
+    await expect(authentication.getByText('Enter a profile name, or choose a profile folder with the folder button.')).toHaveCount(0)
     await alwaysUseCookies.locator('..').locator('label.switch-label').click()
     await expect(alwaysUseCookies).toBeChecked()
     await expect(downloadCookies).toBeChecked()
@@ -253,7 +257,7 @@ test.describe('settings', () => {
     }).toEqual({
       mode: 'browser',
       browser: 'firefox',
-      profile: '/tmp/firefox-profile',
+      profile: 'default-release',
       alwaysUse: true
     })
     await attachScreenshot('subtitle cookie settings')

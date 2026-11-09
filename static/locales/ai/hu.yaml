@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Sütikhez használt böngésző
     Browser Profile: Böngészőprofil (nem kötelező)
     Browser Profile Placeholder: Profil neve vagy elérési útja
+    Browser Profile Invalid: "Adjon meg egy profilnevet, vagy válasszon profilmappát a mappa gombbal."
     Select Browser: Böngésző kiválasztása
     Always Use Cookies: Sütik használata mindig
     Restricted Playback Authentication Hint: Az OpenTubeX alapértelmezés szerint csak akkor adja át ezeket a sütiket az yt-dlp programnak, ha egy korhatáros vagy csak tagoknak szóló videónál a „Próbálkozás a beállított sütikkel” lehetőséget választja.

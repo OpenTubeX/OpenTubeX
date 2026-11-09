@@ -442,12 +442,11 @@ test.describe('video downloads', () => {
       'printf \'%s\\n\' \'{"formats":[{"format_id":"140"}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpPlaybackCookiesBrowserProfile: '/tmp/restricted-profile' })
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
-      await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/tmp/restricted-profile')
     })
 
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
@@ -465,10 +464,10 @@ test.describe('video downloads', () => {
     expect(cookiesIndex).toBeGreaterThanOrEqual(0)
     expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')
 
+    await choosePickerPaths(app, page, { ytDlpPlaybackCookiesPath: '/tmp/restricted-cookies.txt' })
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/restricted-cookies.txt')
     })
     await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee', false, true))
     passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')

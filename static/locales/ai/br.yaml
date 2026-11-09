@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: "Merdeer evit an toupinoù"
     Browser Profile: "Profil ar merdeer (diret)"
     Browser Profile Placeholder: "Anv pe hent ar profil"
+    Browser Profile Invalid: "Enankit anv ur profil, pe dibabit un teuliad profil gant ar bouton teuliad."
     Select Browser: "Dibab ur merdeer"
     Always Use Cookies: "Implijout an toupinoù bepred"
     Restricted Playback Authentication Hint: "Dre ziouer, OpenTubeX ne dremen an toupinoù-mañ da yt-dlp nemet goude ma tibabit «Klask gant an toupinoù kefluniet» war ur video bevennet diouzh an oad pe miret d'an izili."

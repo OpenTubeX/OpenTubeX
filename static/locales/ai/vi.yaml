@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Trình duyệt lấy cookie
     Browser Profile: Hồ sơ trình duyệt (không bắt buộc)
     Browser Profile Placeholder: Tên hoặc đường dẫn hồ sơ
+    Browser Profile Invalid: "Nhập tên hồ sơ hoặc chọn thư mục hồ sơ bằng nút thư mục."
     Select Browser: Chọn trình duyệt
     Always Use Cookies: Luôn dùng cookie
     Restricted Playback Authentication Hint: Theo mặc định, OpenTubeX chỉ chuyển các cookie này cho yt-dlp sau khi bạn chọn "Thử bằng cookie đã thiết lập" trên video giới hạn độ tuổi hoặc chỉ dành cho hội viên.

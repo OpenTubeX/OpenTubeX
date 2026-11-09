@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Cookieを取得するブラウザー
     Browser Profile: ブラウザープロフィール（任意）
     Browser Profile Placeholder: プロフィール名またはパス
+    Browser Profile Invalid: "プロファイル名を入力するか、フォルダーボタンでプロファイルフォルダーを選択してください。"
     Select Browser: ブラウザーを選択
     Always Use Cookies: 常にCookieを使用
     Restricted Playback Authentication Hint: 既定では、年齢制限またはメンバー限定の動画で「設定済みのCookieを使用して再試行」を選んだ後にのみ、これらのCookieをyt-dlpへ渡します。

@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Navigateur pour les cookies
     Browser Profile: Profil du navigateur (facultatif)
     Browser Profile Placeholder: Nom ou chemin du profil
+    Browser Profile Invalid: "Saisissez un nom de profil ou choisissez un dossier de profil avec le bouton de dossier."
     Select Browser: Sélectionner un navigateur
     Always Use Cookies: Toujours utiliser les cookies
     Restricted Playback Authentication Hint: Par défaut, OpenTubeX ne transmet ces cookies à yt-dlp qu’après que vous avez choisi « Essayer avec les cookies configurés » sur une vidéo soumise à une limite d’âge ou réservée aux membres.

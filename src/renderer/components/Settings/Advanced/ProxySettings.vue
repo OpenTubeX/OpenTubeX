@@ -121,18 +121,12 @@
       v-if="!IS_CAPACITOR"
       class="settingsFlexStart500px"
     >
-      <FtInput
-        :icon="['fas', 'folder-open']"
+      <FtPathPicker
         :label="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
-        placeholder="/path/to/script"
-        :show-action-button="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'folder-open']"
-        show-label
         :value="videoIpBlockScriptPath"
         :tooltip="$t('Tooltips.Proxy Settings.IP Block Recovery Script Path')"
-        @input="handleUpdateVideoIpBlockScriptPath"
-        @click="handlePickVideoIpBlockRecoveryScriptPath"
+        @browse="handlePickVideoIpBlockRecoveryScriptPath"
+        @clear="store.dispatch('updateVideoIpBlockScriptPath', '')"
       />
     </FtFlexBox>
   </FtSettingsSection>
@@ -148,6 +142,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtPathPicker from '../../FtPathPicker/FtPathPicker.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 
@@ -306,23 +301,13 @@ function handleUpdateProxyPassword(value) {
   store.dispatch('updateProxyPassword', value)
 }
 
-/**
- * @param {string} value
- */
-function handleUpdateVideoIpBlockScriptPath(value) {
-  store.dispatch('updateVideoIpBlockScriptPath', value)
-}
-
 async function handlePickVideoIpBlockRecoveryScriptPath() {
   if (!process.env.IS_ELECTRON || typeof window.ftElectron?.chooseIpBlockRecoveryScript !== 'function') {
     return
   }
 
   try {
-    const scriptPath = await window.ftElectron.chooseIpBlockRecoveryScript(videoIpBlockScriptPath.value)
-    if (typeof scriptPath === 'string' && scriptPath.length > 0) {
-      store.dispatch('updateVideoIpBlockScriptPath', scriptPath)
-    }
+    await window.ftElectron.chooseIpBlockRecoveryScript()
   } catch (error) {
     console.error('Failed to select IP block recovery script:', error)
     showToast({

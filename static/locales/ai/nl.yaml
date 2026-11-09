@@ -1036,6 +1036,7 @@ Settings:
     Browser for Cookies: Browser voor cookies
     Browser Profile: Browserprofiel (optioneel)
     Browser Profile Placeholder: Profielnaam of pad
+    Browser Profile Invalid: "Voer een profielnaam in of kies een profielmap met de mapknop."
     Select Browser: Selecteer een browser
     Always Use Cookies: Cookies altijd gebruiken
     Restricted Playback Authentication Hint: OpenTubeX geeft deze cookies standaard pas aan yt-dlp door nadat je bij een video met een leeftijdsbeperking of een video voor leden hebt gekozen voor "Proberen met ingestelde cookies".

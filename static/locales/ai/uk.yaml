@@ -1032,6 +1032,7 @@ Settings:
     Browser for Cookies: Браузер для файлів cookie
     Browser Profile: Профіль браузера (необов’язково)
     Browser Profile Placeholder: Назва профілю або шлях
+    Browser Profile Invalid: "Введіть назву профілю або виберіть теку профілю кнопкою теки."
     Select Browser: Вибрати браузер
     Always Use Cookies: Завжди використовувати файли cookie
     Restricted Playback Authentication Hint: Типово OpenTubeX передає ці файли cookie до yt-dlp лише після вибору дії «Спробувати з налаштованими файлами cookie» для відео з віковими обмеженнями або лише для учасників.

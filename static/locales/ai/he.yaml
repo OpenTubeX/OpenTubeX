@@ -1036,6 +1036,7 @@ Settings:
     Browser for Cookies: דפדפן לעוגיות
     Browser Profile: פרופיל דפדפן (לא חובה)
     Browser Profile Placeholder: שם הפרופיל או הנתיב
+    Browser Profile Invalid: "יש להזין שם פרופיל, או לבחור תיקיית פרופיל באמצעות כפתור התיקייה."
     Select Browser: בחירת דפדפן
     Always Use Cookies: להשתמש תמיד בעוגיות
     Restricted Playback Authentication Hint: כברירת מחדל, OpenTubeX מעביר את העוגיות האלה ל-yt-dlp רק לאחר בחירה באפשרות "לנסות עם העוגיות שהוגדרו" בסרטון שמוגבל לפי גיל או לחברים בלבד.

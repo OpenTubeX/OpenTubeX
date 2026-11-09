@@ -578,7 +578,7 @@ export async function attachScreenshot(testInfo, page, name) {
  * src/main/settingWriteGuard.js) by answering the next picker.
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
- * @param {Partial<Record<'externalPlayerExecutable' | 'ytDlpDownloadFolderPath' | 'ytDlpFfmpegPath' | 'ytDlpPath', string>>} paths
+ * @param {Partial<Record<'externalPlayerExecutable' | 'videoIpBlockScriptPath' | 'ytDlpDownloadFolderPath' | 'ytDlpFfmpegPath' | 'ytDlpPath' | 'ytDlpPlaybackCookiesBrowserProfile' | 'ytDlpPlaybackCookiesPath', string>>} paths
  */
 export async function choosePickerPaths({ electronApp }, page, paths) {
   for (const [settingId, filePath] of Object.entries(paths)) {
@@ -589,9 +589,15 @@ export async function choosePickerPaths({ electronApp }, page, paths) {
         return { canceled: false, filePaths: [filePath] }
       }
     }, filePath)
-    const chosen = await page.evaluate(settingId => settingId === 'ytDlpDownloadFolderPath'
-      ? window.ftElectron.ytDlpChooseDownloadFolder()
-      : window.ftElectron.chooseExecutable(settingId), settingId)
+    const chosen = await page.evaluate(settingId => {
+      const pickers = {
+        videoIpBlockScriptPath: window.ftElectron.chooseIpBlockRecoveryScript,
+        ytDlpDownloadFolderPath: window.ftElectron.ytDlpChooseDownloadFolder,
+        ytDlpPlaybackCookiesBrowserProfile: window.ftElectron.ytDlpChooseBrowserProfile,
+        ytDlpPlaybackCookiesPath: window.ftElectron.ytDlpChooseCookies,
+      }
+      return pickers[settingId]?.() ?? window.ftElectron.chooseExecutable(settingId)
+    }, settingId)
     expect(chosen).toBe(filePath)
   }
 }

@@ -1046,6 +1046,7 @@ Settings:
     Browser for Cookies: Browser til cookies
     Browser Profile: Browserprofil (valgfri)
     Browser Profile Placeholder: Profilnavn eller sti
+    Browser Profile Invalid: "Angiv et profilnavn, eller vælg en profilmappe med mappeknappen."
     Select Browser: Vælg en browser
     Always Use Cookies: Brug altid cookies
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX først disse cookies til yt-dlp, når du vælger "Prøv med konfigurerede cookies" på en aldersbegrænset video eller en video kun for medlemmer.

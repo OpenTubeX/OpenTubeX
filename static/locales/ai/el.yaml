@@ -1026,6 +1026,7 @@ Settings:
     Browser for Cookies: Πρόγραμμα περιήγησης για cookie
     Browser Profile: Προφίλ προγράμματος περιήγησης (προαιρετικό)
     Browser Profile Placeholder: Όνομα ή διαδρομή προφίλ
+    Browser Profile Invalid: "Εισαγάγετε ένα όνομα προφίλ ή επιλέξτε φάκελο προφίλ με το κουμπί φακέλου."
     Select Browser: Επιλογή προγράμματος περιήγησης
     Always Use Cookies: Μόνιμη χρήση cookie
     Restricted Playback Authentication Hint: Από προεπιλογή, το OpenTubeX διαβιβάζει αυτά τα cookie στο yt-dlp μόνο αφού επιλέξετε «Δοκιμή με τα ρυθμισμένα cookie» σε βίντεο με περιορισμό ηλικίας ή μόνο για μέλη.

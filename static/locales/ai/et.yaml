@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Küpsiste brauser
     Browser Profile: Brauseriprofiil (valikuline)
     Browser Profile Placeholder: Profiili nimi või asukoht
+    Browser Profile Invalid: "Sisesta profiili nimi või vali kaustanupuga profiilikaust."
     Select Browser: Vali brauser
     Always Use Cookies: Kasuta alati küpsiseid
     Restricted Playback Authentication Hint: Vaikimisi edastab OpenTubeX need küpsised yt-dlp-le alles siis, kui valid vanusepiiranguga või ainult liikmetele mõeldud video juures "Proovi seadistatud küpsistega".

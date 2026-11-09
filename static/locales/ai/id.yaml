@@ -1024,6 +1024,7 @@ Settings:
     Browser for Cookies: Peramban untuk Kuki
     Browser Profile: Profil Peramban (Opsional)
     Browser Profile Placeholder: Nama atau jalur profil
+    Browser Profile Invalid: "Masukkan nama profil, atau pilih folder profil dengan tombol folder."
     Select Browser: Pilih peramban
     Always Use Cookies: Selalu Gunakan Kuki
     Restricted Playback Authentication Hint: Secara bawaan, OpenTubeX hanya meneruskan kuki ini ke yt-dlp setelah Anda memilih "Coba dengan kuki yang telah dikonfigurasi" pada video dengan batasan usia atau khusus anggota.

@@ -1241,6 +1241,7 @@ Settings:
     Browser for Cookies: Brskalnik za piškotke
     Browser Profile: Profil brskalnika (neobvezno)
     Browser Profile Placeholder: Ime profila ali pot
+    Browser Profile Invalid: "Vnesite ime profila ali z gumbom za mapo izberite mapo profila."
     Select Browser: Izberi brskalnik
     Always Use Cookies: Vedno uporabi piškotke
     Restricted Playback Authentication Hint: OpenTubeX te piškotke privzeto posreduje orodju yt-dlp šele, ko pri starostno omejenem videoposnetku ali videoposnetku samo za člane izberete »Poskusi z nastavljenimi piškotki«.

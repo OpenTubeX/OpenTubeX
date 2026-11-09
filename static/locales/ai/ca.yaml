@@ -1274,6 +1274,7 @@ Settings:
     Browser for Cookies: Navegador de les galetes
     Browser Profile: Perfil del navegador (opcional)
     Browser Profile Placeholder: Nom o camí del perfil
+    Browser Profile Invalid: "Introduïu un nom de perfil o trieu una carpeta de perfil amb el botó de carpeta."
     Select Browser: Seleccioneu un navegador
     Always Use Cookies: Utilitza sempre les galetes
     Restricted Playback Authentication Hint: De manera predeterminada, l'OpenTubeX només passa aquestes galetes a yt-dlp després que trieu "Prova-ho amb les galetes configurades" en un vídeo restringit per edat o només per a membres.

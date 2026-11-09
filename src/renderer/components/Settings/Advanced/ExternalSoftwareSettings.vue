@@ -261,21 +261,14 @@
         v-if="ytDlpPlaybackAuthMode !== 'none'"
         class="restrictedPlaybackAuthControl restrictedPlaybackAuthDetail"
       >
-        <FtInput
+        <FtPathPicker
           v-if="ytDlpPlaybackAuthMode === 'file'"
           :label="t('Settings.External Software Settings.Cookie File')"
-          placeholder="/path/to/cookies.txt"
-          :action-button-label="t('Settings.External Software Settings.Cookie File')"
-          :show-action-button="true"
-          :allow-action-button-when-empty="true"
-          :force-action-button-icon-name="['fas', 'folder-open']"
           :icon="['fas', 'file-lines']"
-          :show-label="true"
           :value="ytDlpPlaybackCookiesPath"
-          setting-key="ytDlpPlaybackCookiesPath"
           :tooltip="t('Tooltips.External Software Settings.Cookie File')"
-          @input="updateYtDlpPlaybackCookiesPath"
-          @click="chooseCookiesPath"
+          @browse="ytDlp.ytDlpChooseCookies()"
+          @clear="store.dispatch('updateYtDlpPlaybackCookiesPath', '')"
         />
         <FtSelect
           v-else
@@ -296,18 +289,22 @@
       class="restrictedPlaybackBrowserProfile"
     >
       <FtInput
+        :class="{ invalidBrowserProfile: browserProfileInvalid }"
         :label="t('Settings.External Software Settings.Browser Profile')"
         :placeholder="t('Settings.External Software Settings.Browser Profile Placeholder')"
         :show-action-button="true"
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'folder-open']"
+        :action-button-label="t('Form Inputs.Browse')"
         :icon="['fas', 'folder-open']"
         :show-label="true"
+        :invalid="browserProfileInvalid"
+        :supporting-text="browserProfileInvalid ? t('Settings.External Software Settings.Browser Profile Invalid') : ''"
         :value="ytDlpPlaybackCookiesBrowserProfile"
         setting-key="ytDlpPlaybackCookiesBrowserProfile"
         :tooltip="t('Tooltips.External Software Settings.Browser Profile')"
         @input="updateYtDlpPlaybackCookiesBrowserProfile"
-        @click="chooseBrowserProfilePath"
+        @click="ytDlp.ytDlpChooseBrowserProfile()"
       />
     </FtFlexBox>
     <FtFlexBox>
@@ -347,6 +344,7 @@
 <script setup>
 import { ytDlp } from '../../../helpers/ytDlp'
 import { managedToolErrorMessage } from '../../../helpers/managedToolErrors'
+import { isBrowserProfileName } from '../../../../main/settingWriteGuard'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -666,22 +664,20 @@ function updateYtDlpPlaybackAuthMode(value) {
 /**
  * @param {string} value
  */
-function updateYtDlpPlaybackCookiesPath(value) {
-  store.dispatch('updateYtDlpPlaybackCookiesPath', value)
-}
-
-/**
- * @param {string} value
- */
 function updateYtDlpPlaybackCookiesBrowser(value) {
   store.dispatch('updateYtDlpPlaybackCookiesBrowser', value)
 }
 
+const browserProfileInvalid = ref(false)
+watch(ytDlpPlaybackCookiesBrowserProfile, () => { browserProfileInvalid.value = false })
+
 /**
+ * Paths come only from the folder picker, which saves them in the main process.
  * @param {string} value
  */
 function updateYtDlpPlaybackCookiesBrowserProfile(value) {
-  store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
+  browserProfileInvalid.value = !isBrowserProfileName(value)
+  if (!browserProfileInvalid.value) store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', value)
 }
 
 /**
@@ -787,22 +783,6 @@ async function createYouTubeSession() {
     showToast({ message: t('Settings.External Software Settings.YouTube session failed'), icon: ['fas', 'circle-exclamation'] })
   } finally {
     creatingSession.value = false
-  }
-}
-
-async function chooseCookiesPath() {
-  const path = await ytDlp.ytDlpChooseCookies(ytDlpPlaybackCookiesPath.value)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch('updateYtDlpPlaybackCookiesPath', path)
-  }
-}
-
-async function chooseBrowserProfilePath() {
-  const path = await ytDlp.ytDlpChooseBrowserProfile(ytDlpPlaybackCookiesBrowserProfile.value)
-
-  if (typeof path === 'string' && path.length > 0) {
-    store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', path)
   }
 }
 </script>
@@ -927,6 +907,11 @@ async function chooseBrowserProfilePath() {
 
 .restrictedPlaybackBrowserProfile {
   margin-block-start: 14px;
+}
+
+.invalidBrowserProfile {
+  --primary-color: var(--red-500);
+  --secondary-text-color: var(--red-500);
 }
 
 .restrictedPlaybackBrowserProfile > :deep(.ft-input-component) {

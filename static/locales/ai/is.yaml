@@ -1023,6 +1023,7 @@ Settings:
     Browser for Cookies: Vafri fyrir vafrakökur
     Browser Profile: Notandasnið vafra (valfrjálst)
     Browser Profile Placeholder: Heiti eða slóð notandasniðs
+    Browser Profile Invalid: "Sláðu inn heiti prófíls eða veldu prófílmöppu með möppuhnappnum."
     Select Browser: Velja vafra
     Always Use Cookies: Nota alltaf vafrakökur
     Restricted Playback Authentication Hint: Sjálfgefið sendir OpenTubeX þessar vafrakökur aðeins til yt-dlp eftir að þú velur "Reyna með stilltum vafrakökum" fyrir aldurstakmarkað myndband eða myndband sem aðeins er fyrir meðlimi.

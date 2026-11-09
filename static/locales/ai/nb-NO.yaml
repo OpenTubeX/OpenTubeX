@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Nettleser for informasjonskapsler
     Browser Profile: Nettleserprofil (valgfritt)
     Browser Profile Placeholder: Profilnavn eller bane
+    Browser Profile Invalid: "Skriv inn et profilnavn, eller velg en profilmappe med mappeknappen."
     Select Browser: Velg en nettleser
     Always Use Cookies: Bruk alltid informasjonskapsler
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX disse informasjonskapslene til yt-dlp først når du velger «Prøv med konfigurerte informasjonskapsler» på en aldersbegrenset video eller en video kun for medlemmer.

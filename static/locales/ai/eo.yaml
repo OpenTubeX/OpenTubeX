@@ -1057,6 +1057,7 @@ Settings:
     Browser for Cookies: Retumilo por kuketoj
     Browser Profile: Retumila profilo (nedeviga)
     Browser Profile Placeholder: Profilnomo aŭ vojo
+    Browser Profile Invalid: "Enigu profilan nomon, aŭ elektu profilan dosierujon per la dosieruja butono."
     Select Browser: Elektu retumilon
     Always Use Cookies: Ĉiam uzi kuketojn
     Restricted Playback Authentication Hint: Defaŭlte, OpenTubeX nur donas ĉi tiujn kuketojn al yt-dlp post kiam vi elektas "Provi kun agorditaj kuketoj" ĉe aĝolimigita aŭ nur-membra videaĵo.

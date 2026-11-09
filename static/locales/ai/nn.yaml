@@ -1122,6 +1122,7 @@ Settings:
     Browser for Cookies: Nettlesar for informasjonskapslar
     Browser Profile: Nettlesarprofil (valfritt)
     Browser Profile Placeholder: Profilnamn eller stig
+    Browser Profile Invalid: "Skriv inn eit profilnamn, eller vel ei profilmappe med mappeknappen."
     Select Browser: Vel ein nettlesar
     Always Use Cookies: Bruk alltid informasjonskapslar
     Restricted Playback Authentication Hint: Som standard sender OpenTubeX berre desse informasjonskapslane til yt-dlp etter at du har valt "Prøv med dei valde informasjonskapslane" på ein aldersavgrensa video eller ein video berre for medlemer.

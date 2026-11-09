@@ -1021,6 +1021,7 @@ Settings:
     Browser for Cookies: Çerezlerin Alınacağı Tarayıcı
     Browser Profile: Tarayıcı Profili (İsteğe Bağlı)
     Browser Profile Placeholder: Profil adı veya yolu
+    Browser Profile Invalid: "Bir profil adı girin veya klasör düğmesiyle bir profil klasörü seçin."
     Select Browser: Bir tarayıcı seçin
     Always Use Cookies: Çerezleri Her Zaman Kullan
     Restricted Playback Authentication Hint: OpenTubeX varsayılan olarak bu çerezleri yt-dlp'ye yalnızca yaş kısıtlamalı veya üyelere özel bir videoda "Yapılandırılmış çerezlerle dene" seçeneğini seçtikten sonra gönderir.

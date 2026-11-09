@@ -1032,6 +1032,7 @@ Settings:
     Browser for Cookies: متصفح لملفات تعريف الارتباط
     Browser Profile: ملف تعريف المتصفح (اختياري)
     Browser Profile Placeholder: اسم الملف الشخصي أو المسار
+    Browser Profile Invalid: "أدخل اسم ملف تعريف، أو اختر مجلد ملف التعريف باستخدام زر المجلد."
     Select Browser: حدد متصفحًا
     Always Use Cookies: استخدم ملفات تعريف الارتباط دائمًا
     Restricted Playback Authentication Hint: افتراضيًا، يقوم OpenTubeX بتمرير ملفات تعريف الارتباط هذه إلى yt-dlp فقط بعد اختيار "تجربة باستخدام ملفات تعريف الارتباط التي تم تكوينها" في مقطع فيديو مقيد بالفئة العمرية أو للأعضاء فقط.

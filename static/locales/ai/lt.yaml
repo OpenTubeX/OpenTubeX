@@ -1224,6 +1224,7 @@ Settings:
     Browser for Cookies: Slapukų naršyklė
     Browser Profile: Naršyklės profilis (nebūtina)
     Browser Profile Placeholder: Profilio pavadinimas arba kelias
+    Browser Profile Invalid: "Įveskite profilio pavadinimą arba aplanko mygtuku pasirinkite profilio aplanką."
     Select Browser: Pasirinkti naršyklę
     Always Use Cookies: Visada naudoti slapukus
     Restricted Playback Authentication Hint: Pagal numatytuosius nustatymus OpenTubeX perduoda šiuos slapukus yt-dlp tik tada, kai ribojamo pagal amžių arba tik nariams skirto vaizdo įrašo puslapyje pasirenkate „Bandyti naudojant sukonfigūruotus slapukus“.

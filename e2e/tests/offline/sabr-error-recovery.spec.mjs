@@ -1,4 +1,4 @@
-import { goTo, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { choosePickerPaths, goTo, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 import {
@@ -293,13 +293,13 @@ for (const defaultEngine of ['yt-dlp']) {
   test(`disabled playback-engine fallback leaves authenticated retry manual with ${defaultEngine} as default`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
+    await choosePickerPaths(app, page, { ytDlpPlaybackCookiesPath: '/tmp/test-cookies.txt' })
     const watchView = await watchViewHandle(page)
     const result = await watchView.evaluate(async (view, selectedEngine) => {
       await view.$store.dispatch('updatePlaybackEngineFallback', false)
       await view.$store.dispatch('updateVideoPlaybackEngine', selectedEngine)
       view.playbackEngineFallbackTarget = 'built-in'
       await view.$store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
-      await view.$store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/test-cookies.txt')
       let cacheAttempts = 0
       view.tryCachedRestrictedPlayback = async () => { cacheAttempts++ }
       view.setRestrictedPlaybackError('age')
