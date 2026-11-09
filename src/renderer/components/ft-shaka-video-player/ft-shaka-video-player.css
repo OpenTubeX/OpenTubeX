@@ -45,41 +45,57 @@
   border-radius: var(--inline-player-radius);
 }
 
-/* Shaka sizes its center button as a percentage of the player width, which
-   becomes enormous in a wide desktop or fullscreen player. */
-.ftVideoPlayer :deep(.shaka-big-buttons-container > button) {
-  inline-size: clamp(48px, 12.5%, var(--center-play-button-max-size, 80px));
-}
+/* Shaka sizes its center buttons as a percentage of the player width, which
+   becomes enormous in a wide desktop or fullscreen player. The outer columns
+   keep play/pause centered when only one adjacent video is available. Track
+   percentages resolve against the player width. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container) {
+  --center-play-button-size: clamp(48px, 12.5%, 80px);
+  --center-skip-button-size: clamp(40px, 10%, 64px);
 
-.capacitorTabs .ftVideoPlayer {
-  --center-play-button-max-size: 64px;
-}
-
-/* Keep play/pause centered even when only one adjacent video is available. */
-:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-big-buttons-container) {
   display: grid;
-  grid-template-columns: 48px 64px 48px;
-  column-gap: 8px;
-  place-content: center;
+  grid-template-columns:
+    1fr var(--center-skip-button-size) var(--center-play-button-size)
+    var(--center-skip-button-size) 1fr;
+  column-gap: clamp(8px, 3%, 32px);
+  place-content: center stretch;
+  align-items: center;
 }
 
-:global(.capacitorTabs .shaka-big-buttons-container > .skip-previous-button) {
-  grid-column: 1;
+.ftVideoPlayer :deep(.shaka-big-buttons-container > button) {
+  inline-size: 100%;
+
+  /* Without Shaka's dark circle, the video stays visible around the icons. */
+  background-color: transparent;
+  box-shadow: none;
 }
 
-:global(.capacitorTabs .shaka-big-buttons-container > .shaka-play-button.shaka-tooltip) {
+.ftVideoPlayer :deep(.shaka-big-buttons-container > button:not([disabled]):hover) {
+  background-color: transparent;
+}
+
+/* Keeps the icons legible over bright video. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container .shaka-ui-icon) {
+  filter: drop-shadow(0 0 6px rgb(0 0 0 / 60%));
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .skip-previous-button) {
   grid-column: 2;
-  inline-size: 64px;
-  block-size: 64px;
 }
 
-:global(.capacitorTabs .shaka-big-buttons-container > .skip-next-button) {
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .shaka-play-button) {
   grid-column: 3;
 }
 
-:global(.capacitorTabs .shaka-big-buttons-container > .ft-shaka-skip-button) {
-  inline-size: 48px;
-  block-size: 48px;
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .skip-next-button) {
+  grid-column: 4;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .shaka-big-buttons-container) {
+  --center-play-button-size: 64px;
+  --center-skip-button-size: 48px;
+
+  column-gap: 8px;
 }
 
 /* Transparent center buttons must let surface taps and speed holds through. */

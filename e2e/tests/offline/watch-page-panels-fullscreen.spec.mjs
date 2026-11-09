@@ -967,7 +967,7 @@ test.describe('fullscreen playlist dock', () => {
 
     for (let index = 1; index <= 9; index++) {
       const previousPlayer = await player.elementHandle()
-      await player.locator('.skip-next-button').click({ force: true })
+      await player.locator('.shaka-controls-button-panel > .skip-next-button').click({ force: true })
       await expect(page).toHaveURL(new RegExp(
         `#\\/watch\\/playlist${String(index).padStart(3, '0')}\\?.*playlistId=${FULLSCREEN_PLAYLIST_ID}`
       ))

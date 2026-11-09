@@ -91,9 +91,7 @@
 
 .previewBigPlay {
   align-items: center;
-  background-color: rgb(0 0 0 / 50%);
   block-size: calc(80 * var(--u));
-  border-radius: 50%;
   display: flex;
   inline-size: calc(80 * var(--u));
   inset: 0;
@@ -103,8 +101,9 @@
 }
 
 .previewBigPlay .previewIcon {
-  block-size: 60%;
-  inline-size: 60%;
+  block-size: 75%;
+  filter: drop-shadow(0 0 calc(6 * var(--u)) rgb(0 0 0 / 60%));
+  inline-size: 75%;
 }
 
 .previewControls {
