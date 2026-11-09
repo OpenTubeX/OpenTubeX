@@ -150,12 +150,25 @@ final class SubscriptionRefreshResultStore {
     }
 
     static synchronized boolean acknowledge(Context context, String id) throws IOException, JSONException {
+        return acknowledge(context, id, false);
+    }
+
+    /**
+     * @param forgetFingerprint whether the app skipped this result, so that the
+     *     next refresh queues the feed again even if it is unchanged
+     */
+    static synchronized boolean acknowledge(Context context, String id, boolean forgetFingerprint)
+        throws IOException, JSONException {
         if (id == null) return false;
         SubscriptionRefreshResultIndex pending = index(context);
         File file = pending.get(id);
         // Replacing a slot removes its old ID, so an old acknowledgement cannot
         // delete the replacement. All writes and acknowledgements hold this lock.
         if (file == null) return true;
+        if (forgetFingerprint) {
+            File fingerprint = new File(file.getParentFile(), file.getName().replaceFirst("\\.json$", ".fingerprint"));
+            if (!fingerprint.delete() && fingerprint.exists()) return false;
+        }
         if (!file.delete() && file.exists()) return false;
         pending.remove(file);
         return true;

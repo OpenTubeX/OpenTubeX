@@ -336,7 +336,11 @@ public class SubscriptionRefreshPlugin extends Plugin {
         }
         try {
             JSObject response = new JSObject();
-            response.put("removed", SubscriptionRefreshResultStore.acknowledge(getContext(), id));
+            response.put("removed", SubscriptionRefreshResultStore.acknowledge(
+                getContext(),
+                id,
+                Boolean.TRUE.equals(call.getBoolean("forgetFingerprint", false))
+            ));
             call.resolve(response);
         } catch (Exception error) {
             call.reject("Unable to acknowledge pending subscription refresh data", error);
