@@ -2441,3 +2441,26 @@ test('a replaced OIDC sign-in leaves the newer one waiting', async () => {
   assert.equal(dispatched.at(-1)[0], 'authenticateSyncServer')
   assert.equal(dispatched.at(-1)[1].token, 'a.b.c')
 })
+
+test('OIDC deletion does not take a revoked session as proof of deletion', async () => {
+  let callbackSent = false
+  const { actions, context, dispatched, settings } = fixture({}, {
+    respond: (url) => {
+      const { pathname } = new URL(url)
+      if (pathname === '/health') return { capabilities: { account_sessions: 1 } }
+      if (pathname === '/v1/account/oidc/delete') return { authorization_url: 'https://auth.example/authorize' }
+      if (callbackSent && pathname === '/v1/account/sessions') {
+        return new Response('invalid or missing authentication token', { status: 401 })
+      }
+    },
+    openExternalLink: async () => {
+      setTimeout(() => {
+        callbackSent = true
+        actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc')
+      })
+    },
+  })
+  await assert.rejects(actions.deleteSyncServerOidcAccount(context), error => error.status === 401)
+  assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), false)
+  assert.equal(settings.syncServerToken, 'saved-token')
+})

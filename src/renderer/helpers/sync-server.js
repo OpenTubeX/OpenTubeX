@@ -21,6 +21,7 @@ import {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
   syncServerResponseErrorMessage,
@@ -90,6 +91,7 @@ export {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
 }

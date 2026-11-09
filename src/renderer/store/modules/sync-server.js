@@ -15,6 +15,7 @@ import {
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   getSavedOtherDeviceSessions,
   isExpiredSessionReauthentication,
+  isAccountDeletedError,
   isSessionExpiredError,
   normalizeSyncServerUrl,
   syncHistory,
@@ -1718,8 +1719,9 @@ const actions = {
     }
     await runOidcFlow(commit, 'delete', authorizationUrl)
 
-    // The callback carries no proof, but the deleted account's token stops
-    // working. A sync may have noticed that first and disconnected already.
+    // The callback carries no proof, but the server reports the deleted
+    // account. A 401 only means the session ended, for example because another
+    // device signed this one out. A sync may have disconnected already.
     client = trackSyncClient(new SyncServerClient(url, token))
     try {
       try {
@@ -1727,7 +1729,7 @@ const actions = {
           ? client.getAccountSessions()
           : client.getSubscriptions())
       } catch (error) {
-        if (!isSessionExpiredError(error)) throw error
+        if (!isAccountDeletedError(error)) throw error
         assertSyncEnabled(rootState, client)
         if (rootState.settings.syncServerToken === token) await dispatch('disconnectSyncServer')
         return
