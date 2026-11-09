@@ -261,8 +261,12 @@ kbd {
   white-space: nowrap;
 }
 
+/* Animates the dim and blur rather than opacity, like FtPrompt. */
 @keyframes command-palette-backdrop-enter {
-  from { opacity: 0; }
+  from {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
 }
 
 /* Spring curves exceed 1, which only clamps opacity. */
@@ -283,12 +287,15 @@ kbd {
 }
 
 @keyframes command-palette-backdrop-leave {
-  to { opacity: 0; }
+  to {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
 }
 
-/* The backdrop fades the palette with it; fading both would compound. */
 @keyframes command-palette-leave {
   to {
+    opacity: 0;
     transform: translateY(-8px) scale(0.985);
   }
 }

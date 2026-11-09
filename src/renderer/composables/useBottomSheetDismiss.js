@@ -4,6 +4,10 @@ import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
 
 const BACK_PREVIEW_DURATION = 180
+// Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
+// the page, which flickers on Android. Animate the dim and blur instead; the
+// keyframes it omits resolve to the backdrop's own style.
+const HIDDEN_BACKDROP = { backgroundColor: 'transparent', backdropFilter: 'blur(0)' }
 
 // Shared by navigation and context sheets. Native upward scrolling remains
 // available; downward pulls only take over at the top of the touched scrollport.
@@ -31,7 +35,7 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
           const timing = { duration: BACK_PREVIEW_DURATION, fill: 'both' }
           backPreview = [
             element.animate([{ transform }, { transform: 'translateY(100%)' }], timing),
-            element.parentElement.animate([{ opacity: 1 }, { opacity: 0 }], timing)
+            element.parentElement.animate([HIDDEN_BACKDROP], timing)
           ].map(animation => {
             applyAnimationSpeed(animation)
             animation.pause()
@@ -193,7 +197,7 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
     const animation = sheetAnimation = animate(element, leaving
       ? [{ transform }, { transform: 'translateY(100%)' }]
       : [{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], leaving ? 140 : 220)
-    animate(backdrop, [{ opacity: leaving ? 1 : 0 }, { opacity: leaving ? 0 : 1 }], leaving ? 140 : 220)
+    animate(backdrop, [{ ...HIDDEN_BACKDROP, offset: leaving ? 1 : 0 }], leaving ? 140 : 220)
     animation.finished.then(done, done)
   }
 

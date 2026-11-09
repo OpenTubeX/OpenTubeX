@@ -53,6 +53,19 @@ for (const modal of modals) {
     await expect.poll(() => page.evaluate(() => window.__modalLeave?.names ?? []))
       .toEqual(modal.animations.map(name => expect.stringMatching(new RegExp(`^${name}`))))
 
+    // Fading the backdrop's opacity would crossfade a sharp and a blurred copy
+    // of the page, which flickers on Android, so the blur itself recedes.
+    const midway = await backdrop.evaluate(element => {
+      window.__modalLeave.animations.forEach(animation => {
+        animation.currentTime = Number(animation.effect.getComputedTiming().duration) / 2
+      })
+      const style = getComputedStyle(element)
+      return { opacity: style.opacity, blur: Number(style.backdropFilter.match(/^blur\(([\d.]+)px\)$/)?.[1]) }
+    })
+    expect(midway.opacity).toBe('1')
+    expect(midway.blur).toBeGreaterThan(0)
+    expect(midway.blur).toBeLessThan(2)
+
     // The closing modal lets input through to the page it uncovers.
     await expect(backdrop).toHaveAttribute('inert')
     await expect(backdrop).toHaveCSS('pointer-events', 'none')
