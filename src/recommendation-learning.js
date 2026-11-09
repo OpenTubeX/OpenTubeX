@@ -23,7 +23,7 @@ export function recommendationVideo(video) {
 /** Apply an idempotent observation; callers serialize writes per datastore. */
 export function updateRecommendationRecord(previous, event, now = Date.now()) {
   const video = recommendationVideo(event?.video)
-  if (!video || !['impression', 'click', 'watch', 'positive', 'dismiss', 'blockChannel'].includes(event.type)) return previous
+  if (!video || !['impression', 'click', 'watch', 'positive', 'dismiss', 'blockChannel', 'clearFeedback'].includes(event.type)) return previous
   // Cards often omit metadata available during playback. Keep that evidence.
   for (const key of ['title', 'authorId', 'author', 'description', 'lengthSeconds', 'published']) {
     if (!video[key] && previous?.[key]) video[key] = previous[key]
@@ -55,6 +55,10 @@ export function updateRecommendationRecord(previous, event, now = Date.now()) {
     record.impressions = [...(previous?.impressions ?? []), now].slice(-12)
   } else if (event.type === 'click') {
     record.clickedAt = now
+  } else if (event.type === 'clearFeedback') {
+    if (!previous?.feedback) return previous
+    delete record.feedback
+    delete record.feedbackAt
   } else {
     record.feedback = event.type
     record.feedbackAt = now

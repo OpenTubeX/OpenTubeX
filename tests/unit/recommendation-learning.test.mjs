@@ -49,7 +49,7 @@ test('removing a history video removes its learned contribution and invalidates 
   assert.deepEqual(state.records.map(record => record.videoId), ['retained'])
   assert.equal((await store.record({ type: 'click', video, epoch })).stale, true)
 })
-test('feedback and exposure survive a datastore reopen', async () => {
+test('feedback, its clearing, and exposure survive a datastore reopen', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'otx-recommendations-'))
   try {
     const filename = join(directory, 'recommendations.db')
@@ -62,6 +62,12 @@ test('feedback and exposure survive a datastore reopen', async () => {
     assert.equal(state.records[0].feedback, 'dismiss')
     assert.equal(state.records[0].impressions.length, 1)
     assert.equal(state.epoch, epoch)
+    // Clearing feedback keeps the other evidence, also after another reopen.
+    await reopened.record({ type: 'clearFeedback', video, epoch })
+    const [cleared] = (await createRecommendationStore(new Datastore({ filename, autoload: true })).find()).records
+    assert.equal(cleared.feedback, undefined)
+    assert.equal(cleared.feedbackAt, undefined)
+    assert.equal(cleared.impressions.length, 1)
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
 test('prunes old and excess learning records without deleting the schema record', async () => {

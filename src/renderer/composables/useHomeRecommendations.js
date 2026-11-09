@@ -284,7 +284,11 @@ export function useHomeRecommendations(visible) {
   async function feedback(video, type) {
     try {
       await store.dispatch('recordRecommendationEvent', { video, type })
-    } catch { hasError.value = true }
+      return true
+    } catch {
+      hasError.value = true
+      return false
+    }
   }
   function recordImpression(video, visible, entry) {
     if (!visible || !presented.value || !enabled.value || entry?.target.closest('[aria-hidden="true"]')) return
