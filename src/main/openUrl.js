@@ -25,6 +25,11 @@ export function getDirectOpenUrl(url, rootAppUrl) {
     return url
   }
 
+  // The renderer resolves other sites, so e.g. facebook.com/watch is not mistaken for YouTube
+  if (!isYouTubeHostname(parsed.hostname)) {
+    return null
+  }
+
   const videoParams = getDirectVideoParams(parsed)
   if (videoParams.videoId) {
     return createAppRouteUrl(rootAppUrl, `/watch/${videoParams.videoId}`, {
@@ -65,6 +70,16 @@ export function getDirectOpenUrl(url, rootAppUrl) {
   }
 
   return null
+}
+
+/**
+ * @param {string} hostname
+ * @returns {boolean}
+ */
+function isYouTubeHostname(hostname) {
+  hostname = hostname.toLowerCase().replace(/\.$/, '')
+  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
+    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
 }
 
 /**
