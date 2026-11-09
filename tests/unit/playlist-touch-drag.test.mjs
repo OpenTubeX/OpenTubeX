@@ -44,13 +44,25 @@ function createDrag() {
     cancelAnimationFrame(id) { frames.delete(id) }
   })
   const event = type => ({
-    type, pointerId: 4, pointerType: 'touch', isPrimary: true, button: 0,
-    currentTarget: rows[0], target: { closest: () => ({}) }, clientX: 400, clientY: 400,
-    preventDefault() {}, stopPropagation() {}
+    type,
+    pointerId: 4,
+    pointerType: 'touch',
+    isPrimary: true,
+    button: 0,
+    currentTarget: rows[0],
+    target: { closest: () => ({}) },
+    clientX: 400,
+    clientY: 400,
+    preventDefault() {},
+    stopPropagation() {}
   })
   api.startPointerDrag(event('pointerdown'), { videoId: 'video-0', playlistItemId: 'item-0' })
   return {
-    api, moves, frames, listeners, cleanup,
+    api,
+    moves,
+    frames,
+    listeners,
+    cleanup,
     move(index, at) { target = rows[index]; time = at; listeners.get('pointermove')(event('pointermove')) },
     end(type = 'pointerup') { listeners.get(type)(event(type)) },
     frame(at) {

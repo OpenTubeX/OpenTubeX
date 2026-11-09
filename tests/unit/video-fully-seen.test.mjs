@@ -18,9 +18,16 @@ function mark({ fullySeen = false, entry, allowed = true, length = 120 } = {}) {
     t: key => key
   }
   for (const [key, value] of Object.entries({
-    id: 'video', title: 'Title', channelName: 'Channel', channelId: 'channel',
-    published: 123, description: '', viewCount: 42, lengthSeconds: length,
-    isMembersOnly: false, toastThumbnail: ''
+    id: 'video',
+    title: 'Title',
+    channelName: 'Channel',
+    channelId: 'channel',
+    published: 123,
+    description: '',
+    viewCount: 42,
+    lengthSeconds: length,
+    isMembersOnly: false,
+    toastThumbnail: ''
   })) context[key] = { value }
   vm.runInNewContext(handler + '\nmarkAsWatched(' + fullySeen + ')', context)
   return updates

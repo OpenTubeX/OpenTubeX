@@ -167,8 +167,10 @@ for (const [filename, title] of [
       assert.deepEqual(errors, [])
       assert.equal(metadata.size, 1)
       assert.deepEqual(metadata.get(`${root}/${filename}`), {
-        playlistName: title, description: 'Description',
-        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+        playlistName: title,
+        description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'),
+        lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
       })
     })
   }
@@ -289,8 +291,10 @@ for (const [schema, badMetadata] of [
       const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob([archive]))
       assert.equal(metadata.size, 2)
       assert.deepEqual(metadata.get('Good account/playlists/Good_List-videos.csv'), {
-        playlistName: 'Good/List', description: 'Description',
-        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+        playlistName: 'Good/List',
+        description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'),
+        lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
       })
       assert.equal(metadata.get('Good account/playlists/Empty-videos.csv').playlistName, 'Empty')
       assert.equal(errors.length, 1)
@@ -302,8 +306,10 @@ for (const [schema, badMetadata] of [
 test('parses reordered metadata columns, BOM, CRLF and quoted multiline descriptions', () => {
   const content = '\uFEFFPlaylist Description (Original),Playlist Title (Original),Playlist ID,Playlist Update Timestamp,Playlist Create Timestamp\r\n"First, second\r\nSay ""hello""","A/B-videos",PLexample,2025-02-01T00:00:00Z,2024-01-01T00:00:00Z\r\n'
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content), [{
-    playlistName: 'A/B-videos', description: 'First, second\r\nSay "hello"',
-    createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
+    playlistName: 'A/B-videos',
+    description: 'First, second\r\nSay "hello"',
+    createdAt: Date.parse('2024-01-01T00:00:00Z'),
+    lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
   }])
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv('Playlist ID,Playlist Title (Original)\nPLempty,Empty'), [{ playlistName: 'Empty' }])
 })
@@ -535,12 +541,12 @@ test('numbers picked playlists that share a title and reports unusable files', a
     new File([videos], 'Mix-videos.csv'),
     new File([videos], 'Mix.csv'),
     new File(['not a playlist'], 'notes.csv'),
-  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  ], async playlist => playlists.push(playlist.playlistName), (_error, filename) => errors.push(filename))
   assert.deepEqual(playlists, ['Mix', 'Mix (2)'])
   assert.deepEqual(errors, ['notes.csv'])
 
   errors.length = 0
-  await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (error, filename) => errors.push(filename))
+  await forEachTakeoutPlaylistFile([new File([`${metadataHeader}\n${playlistId},Mix,,,\n`], 'playlists.csv')], async () => assert.fail(), (_error, filename) => errors.push(filename))
   assert.deepEqual(errors, ['playlists.csv'])
 })
 
@@ -559,7 +565,7 @@ test('imports the readable picked playlist CSVs when another cannot be read', as
   await forEachTakeoutPlaylistFile([
     { name: 'Gone-videos.csv', text: async () => { throw new Error('NotReadableError') } },
     new File(['Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'], 'Kept-videos.csv'),
-  ], async playlist => playlists.push(playlist.playlistName), (error, filename) => errors.push(filename))
+  ], async playlist => playlists.push(playlist.playlistName), (_error, filename) => errors.push(filename))
   assert.deepEqual(playlists, ['Kept'])
   assert.deepEqual(errors, ['Gone-videos.csv'])
 })

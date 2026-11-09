@@ -52,7 +52,12 @@ for (const [tab, field, cacheKey, update, mark] of [
       ]
       await Cache[update]('channel', [old], new Date(1000))
       const context = vm.createContext({
-        console, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+        console,
+        toRaw,
+        ...seenData,
+        ...feedState,
+        applySubscriptionSeenVideosToCache,
+        applySubscriptionSeenPostsToCache,
         DBSubscriptionCacheHandlers: Cache,
       })
       vm.runInContext(moduleSource, context)
@@ -81,8 +86,12 @@ for (const [tab, field, cacheKey, update, mark] of [
         : actions[mark](actionContext, 'displayed'))
       assert.equal(old.isNewInSubscriptionFeed, false, 'feed cards retaining the original object must update too')
       // A delayed refresh reply must not restore the dismissed card.
-      const mutation = { videos: 'updateVideoCacheByChannel', shorts: 'updateShortsCacheByChannel',
-        live: 'updateLiveCacheByChannel', posts: 'updatePostsCacheByChannel' }[tab]
+      const mutation = {
+        videos: 'updateVideoCacheByChannel',
+        shorts: 'updateShortsCacheByChannel',
+        live: 'updateLiveCacheByChannel',
+        posts: 'updatePostsCacheByChannel'
+      }[tab]
       mutations[mutation](state, { channelId: 'channel', entries: fresh, timestamp: new Date(2000) })
       const saved = (await Cache.find())[0]
       assert.deepEqual(saved[field].map(entry => entry.isNewInSubscriptionFeed), [false, true])
@@ -271,7 +280,12 @@ test('loading persisted video caches supplies feed markers without changing know
 test('clearing cached channels lets closed-app refreshes queue their unchanged feeds again', async () => {
   const forgotten = []
   const context = vm.createContext({
-    console, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+    console,
+    toRaw,
+    ...seenData,
+    ...feedState,
+    applySubscriptionSeenVideosToCache,
+    applySubscriptionSeenPostsToCache,
     DBSubscriptionCacheHandlers: { deleteMultipleChannels: async () => {}, deleteAll: async () => {} },
     forgetAndroidSubscriptionRefreshFingerprints: async channelIds => { forgotten.push(channelIds) },
   })
@@ -286,7 +300,12 @@ test('a failed closed-app fingerprint reset keeps the cache so clearing it can b
   const deleted = []
   const commits = []
   const context = vm.createContext({
-    console: { ...console, error() {} }, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+    console: { ...console, error() {} },
+    toRaw,
+    ...seenData,
+    ...feedState,
+    applySubscriptionSeenVideosToCache,
+    applySubscriptionSeenPostsToCache,
     DBSubscriptionCacheHandlers: {
       deleteMultipleChannels: async channelIds => { deleted.push(channelIds) },
       deleteAll: async () => { deleted.push('all') },
@@ -444,7 +463,12 @@ for (const profilesLoaded of [false, true]) {
   test(`loading the cache ${profilesLoaded ? 'removes' : 'keeps'} unsubscribed channels when profiles ${profilesLoaded ? 'loaded' : 'failed to load'}`, async () => {
     const entry = { _id: 'channel', videos: [{ videoId: 'video' }], videosTimestamp: new Date(1000) }
     const context = vm.createContext({
-      console: { error() {} }, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+      console: { error() {} },
+      toRaw,
+      ...seenData,
+      ...feedState,
+      applySubscriptionSeenVideosToCache,
+      applySubscriptionSeenPostsToCache,
       DBSubscriptionCacheHandlers: { find: async () => [entry] },
     })
     vm.runInContext(moduleSource, context)

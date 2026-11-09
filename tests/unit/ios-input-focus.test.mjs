@@ -39,15 +39,19 @@ test('outside touch survives scrollbar focus restoration without focus events', 
   }
   document.activeElement = input
   const context = vm.createContext({
-    document, inputRef: { value: input }, inputData: { value: '' },
+    document,
+    inputRef: { value: input },
+    inputData: { value: '' },
     searchState: { isPointerInList: false, showOptions: true },
-    process: { env: { IS_IOS: true } }, emit() {},
-    onMounted: fn => fn(), onBeforeUnmount: fn => { cleanup = fn },
+    process: { env: { IS_IOS: true } },
+    emit() {},
+    onMounted: fn => fn(),
+    onBeforeUnmount: fn => { cleanup = fn },
   })
   const focus = source.match(/function handleFocus\(\) \{[\s\S]*?\n\}/)[0]
   const blur = source.match(/function handleInputBlur\(\) \{[\s\S]*?\n\}/)[0]
-  const mounted = source.match(/onMounted\(\(\) => \{\n  if \(process.env.IS_IOS\)[\s\S]*?\n\}\)/)?.[0] ?? ''
-  const unmounted = source.match(/onBeforeUnmount\(\(\) => \{\n  if \(process.env.IS_IOS\)[\s\S]*?\n\}\)/)[0]
+  const mounted = source.match(/onMounted\(\(\) => \{\n {2}if \(process.env.IS_IOS\)[\s\S]*?\n\}\)/)?.[0] ?? ''
+  const unmounted = source.match(/onBeforeUnmount\(\(\) => \{\n {2}if \(process.env.IS_IOS\)[\s\S]*?\n\}\)/)[0]
   vm.runInContext([handler, focus, blur, mounted, unmounted].join('\n'), context)
   context.handleFocus()
   // OverlayScrollbars can restore activeElement while suppressing focus events.

@@ -19,10 +19,15 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        HideRecommendedVideos: true, KeepPlayingOnNavigation: true,
-        ScrollPlayerMode: 'mini', CapacitorLayoutMode: 'phone', UiScale: 100,
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        HideRecommendedVideos: true,
+        KeepPlayingOnNavigation: true,
+        ScrollPlayerMode: 'mini',
+        CapacitorLayoutMode: 'phone',
+        UiScale: 100,
         AiVideoSummaryMode: 'expanded',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
@@ -30,7 +35,8 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__watchScrollFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__watchScrollFetch(url, options) : Promise.reject(new Error('Watch scroll test'))
+        ? window.__watchScrollFetch(url, options)
+        : Promise.reject(new Error('Watch scroll test'))
       location.hash = '#/history'
       return { route, settings }
     })
@@ -57,13 +63,28 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       const view = component.proxy
       view.videoLoadGeneration++
       Object.assign(view, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'Watch page scroll regression', channelName: 'Test channel', videoLengthSeconds: 60,
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: true,
+        activeFormat: 'legacy',
+        videoTitle: 'Watch page scroll regression',
+        channelName: 'Test channel',
+        videoLengthSeconds: 60,
         videoDescription: 'The page ends after this video’s details.',
         videoSummary: ['A detailed summary of the video. '.repeat(18)],
-        legacyFormats: [{ itag: 0, mimeType: 'video/webm', qualityLabel: 'Test', localFile: true,
-          width: 320, height: 180, bitrate: 0, url: `data:video/webm;base64,${media}` }],
+        legacyFormats: [{
+          itag: 0,
+          mimeType: 'video/webm',
+          qualityLabel: 'Test',
+          localFile: true,
+          width: 320,
+          height: 180,
+          bitrate: 0,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const video = page.locator('.ftVideoPlayer video')
@@ -82,15 +103,17 @@ test('Android excludes the hidden browsing page from the watch scroll range', {
       await page.screenshot({ path: process.env.ANDROID_WATCH_SCROLL_SCREENSHOT })
     }
   } finally {
-    if (saved) await page.evaluate(({ settings, route }) => {
-      document.querySelector('video')?.pause()
-      document.querySelector('#watch-scroll-history-fixture')?.remove()
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(settings)) store.commit('set' + key, value)
-      window.fetch = window.__watchScrollFetch
-      delete window.__watchScrollFetch
-      location.hash = route
-    }, saved)
+    if (saved) {
+      await page.evaluate(({ settings, route }) => {
+        document.querySelector('video')?.pause()
+        document.querySelector('#watch-scroll-history-fixture')?.remove()
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const [key, value] of Object.entries(settings)) store.commit('set' + key, value)
+        window.fetch = window.__watchScrollFetch
+        delete window.__watchScrollFetch
+        location.hash = route
+      }, saved)
+    }
     await watch?.dispose()
     await browser.close()
   }

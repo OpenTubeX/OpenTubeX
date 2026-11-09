@@ -43,7 +43,11 @@ async function createVisualizer() {
     async close() { this.state = 'closed' }
   }
   const useMusicVisualizer = vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replace('export ', '')}; useMusicVisualizer`, {
-    document, window: { devicePixelRatio: 1 }, AudioContext, Uint8Array, console,
+    document,
+    window: { devicePixelRatio: 1 },
+    AudioContext,
+    Uint8Array,
+    console,
     isAppHidden: () => hidden,
     ref: value => ({ value }),
     watch: (target, callback) => watchers.set(target, callback),
@@ -59,7 +63,10 @@ async function createVisualizer() {
   mount()
   await setImmediate()
   return {
-    captures, contexts, frames, video,
+    captures,
+    contexts,
+    frames,
+    video,
     async setHidden(value) { hidden = value; document.dispatchEvent(new Event('visibilitychange')); await setImmediate() },
     async setPaused(value) { video.value.paused = value; video.value.dispatchEvent(new Event(value ? 'pause' : 'play')); await setImmediate() },
     async setActive(value) { active.value = value; watchers.get(active)(value); await setImmediate() },

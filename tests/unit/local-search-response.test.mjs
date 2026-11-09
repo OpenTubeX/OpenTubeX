@@ -10,25 +10,37 @@ const context = vm.createContext({ parseListItem: item => item })
 vm.runInContext(`${source.slice(start, source.indexOf('/**', start))}\nglobalThis.normalize = handleSearchResponse`, context)
 
 function searchResponse(items) {
-  return new YT.Search({}, { data: {
-    contents: { twoColumnSearchResultsRenderer: {
-      primaryContents: { sectionListRenderer: { contents: [
-        { itemSectionRenderer: { contents: items } }
-      ] } }
-    } }
-  } })
+  return new YT.Search({}, {
+    data: {
+      contents: {
+        twoColumnSearchResultsRenderer: {
+          primaryContents: {
+            sectionListRenderer: {
+              contents: [
+                { itemSectionRenderer: { contents: items } }
+              ]
+            }
+          }
+        }
+      }
+    }
+  })
 }
 
 test('preserves YouTube age-confirmation search notices through the real parser', () => {
-  const response = searchResponse([{ backgroundPromoRenderer: {
-    title: { runs: [{ text: 'Confirm your age' }] },
-    bodyText: { runs: [{ text: 'These results may be inappropriate for some users.' }] },
-    icon: { iconType: 'EMPTY_SEARCH' },
-    ctaButton: { buttonRenderer: {
-      text: { runs: [{ text: 'Sign in' }] },
-      navigationEndpoint: { signInEndpoint: { hack: true } }
-    } }
-  } }])
+  const response = searchResponse([{
+    backgroundPromoRenderer: {
+      title: { runs: [{ text: 'Confirm your age' }] },
+      bodyText: { runs: [{ text: 'These results may be inappropriate for some users.' }] },
+      icon: { iconType: 'EMPTY_SEARCH' },
+      ctaButton: {
+        buttonRenderer: {
+          text: { runs: [{ text: 'Sign in' }] },
+          navigationEndpoint: { signInEndpoint: { hack: true } }
+        }
+      }
+    }
+  }])
   const result = context.normalize(response)
   assert.equal(result.results.length, 0)
   assert.equal(result.continuationData, null)
@@ -38,11 +50,13 @@ test('preserves YouTube age-confirmation search notices through the real parser'
 })
 
 test('identifies a localized sign-in notice without matching English text', () => {
-  const result = context.normalize(searchResponse([{ backgroundPromoRenderer: {
-    title: { simpleText: 'Bestätige dein Alter' },
-    bodyText: { simpleText: 'Diese Ergebnisse sind möglicherweise unangemessen.' },
-    ctaButton: { buttonRenderer: { navigationEndpoint: { signInEndpoint: {} } } }
-  } }]))
+  const result = context.normalize(searchResponse([{
+    backgroundPromoRenderer: {
+      title: { simpleText: 'Bestätige dein Alter' },
+      bodyText: { simpleText: 'Diese Ergebnisse sind möglicherweise unangemessen.' },
+      ctaButton: { buttonRenderer: { navigationEndpoint: { signInEndpoint: {} } } }
+    }
+  }]))
   assert.equal(result.searchNotice.title, 'Bestätige dein Alter')
   assert.equal(result.searchNotice.requiresAuthentication, true)
 })
@@ -54,8 +68,10 @@ test('keeps genuine empty searches separate from authentication notices', () => 
 })
 
 test('does not offer authentication for unrelated YouTube search notices', () => {
-  const result = context.normalize(searchResponse([{ backgroundPromoRenderer: {
-    title: { simpleText: 'No results found' }, bodyText: { simpleText: 'Try a different search.' }
-  } }]))
+  const result = context.normalize(searchResponse([{
+    backgroundPromoRenderer: {
+      title: { simpleText: 'No results found' }, bodyText: { simpleText: 'Try a different search.' }
+    }
+  }]))
   assert.equal(result.searchNotice.requiresAuthentication, false)
 })

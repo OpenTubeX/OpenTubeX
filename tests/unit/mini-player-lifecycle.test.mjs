@@ -30,8 +30,18 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   video.value.getBoundingClientRect = () => ({ ...rect })
   const classes = new Set()
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
-    ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
-    nextTick() {}, onMounted: callback => mounted.push(callback), onBeforeUnmount: callback => unmounting.push(callback), window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
+    ...coordinator,
+    computed,
+    ref,
+    watch,
+    inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }),
+    watchNavigationKey: Symbol('watchNavigationKey'),
+    nextTick() {},
+    onMounted: callback => mounted.push(callback),
+    onBeforeUnmount: callback => unmounting.push(callback),
+    window,
+    clearTimeout,
+    process: { env: { IS_CAPACITOR: android } },
     document: { querySelector: () => null, body: { classList: { remove() {}, contains: name => classes.has(name) } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollPlayerMode: inlineVisible ? 'mini' : 'off' }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
@@ -41,23 +51,31 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     parseScrollMiniPlayerSavedRect: () => null,
     setSavedScrollMiniPlayerRect() {},
     getViewportInsets: () => ({ left: 0, right: 0, top: 0, bottom: 0 }),
-    getViewportWidth: () => window.innerWidth, MARGIN: 16,
+    getViewportWidth: () => window.innerWidth,
+    MARGIN: 16,
     clampScrollMiniPlayerRect: value => ({ ...value }),
     pickScrollMiniVerticalAnchor: () => null,
     getScrollMiniVerticalAnchor: () => ({}),
     getResizeHandleCorner: () => 'bottom-right',
     updateScrollMiniPlayerVolumeBarFill() {},
     getScrollMiniInlineLayoutHeight: () => 202,
-    getAnchorVisibleRatio: () => 1, EXIT_MINI_RATIO: 0.5,
+    getAnchorVisibleRatio: () => 1,
+    EXIT_MINI_RATIO: 0.5,
     SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT: 100,
     isReducedMotionEnabled: () => !inlineVisible,
     performance: { now: () => 0 }
   })
   const player = scope.run(() => create({
     container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, querySelectorAll: () => [], getBoundingClientRect: () => ({ ...rect }) } : null),
-    fullWindowEnabled: ref(false), getUi: () => null, getSeekRange: () => seekRange,
-    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format, videoId: 'video' }),
-    video, mobileMiniBarOverlay: ref(null)
+    fullWindowEnabled: ref(false),
+    getUi: () => null,
+    getSeekRange: () => seekRange,
+    isActiveTab,
+    isPlayerSuspended,
+    pictureInPictureActive: ref(false),
+    props: reactive({ format, videoId: 'video' }),
+    video,
+    mobileMiniBarOverlay: ref(null)
   }))
   for (const callback of mounted) callback()
   player.scrollMiniPlayerActive.value = true
@@ -125,14 +143,26 @@ test('the ended event keeps an eligible detached mini player and reveals replay'
   const handler = playerSource.slice(playerSource.indexOf('    function handleEnded() {'), playerSource.indexOf('    function handleSeeking() {'))
   const noop = () => {}
   vm.runInNewContext(`${handler}; handleEnded()`, {
-    ...player, clearSabrBackoffTimer: noop, abRepeatEnabled: ref(false), shortsNavigationSuspended: ref(false),
-    setShowUiOnPaused: noop, shortsPaused: ref(false), playbackEnded: ref(false), autoplayCanceled: ref(false),
-    syncPlayPauseControlIcons: noop, isCapacitorMobilePlayer: () => false,
+    ...player,
+    clearSabrBackoffTimer: noop,
+    abRepeatEnabled: ref(false),
+    shortsNavigationSuspended: ref(false),
+    setShowUiOnPaused: noop,
+    shortsPaused: ref(false),
+    playbackEnded: ref(false),
+    autoplayCanceled: ref(false),
+    syncPlayPauseControlIcons: noop,
+    isCapacitorMobilePlayer: () => false,
     sleepTimer: { pauseCountdown: noop, consumeEndOfVideo: () => false },
-    pauseSponsorBlockHighlightLabelCountdown: noop, cancelSponsorBlockSkipSchedule: noop,
-    promptSponsorBlockSegments: ref([]), clearAbRepeatBoundarySchedule: noop,
-    tabMediaCoordinator: { setPlaybackState: noop }, mediaTabId: 'tab',
-    process: { env: { IS_ELECTRON: false } }, updateAutoPip: noop, emit: noop,
+    pauseSponsorBlockHighlightLabelCountdown: noop,
+    cancelSponsorBlockSkipSchedule: noop,
+    promptSponsorBlockSegments: ref([]),
+    clearAbRepeatBoundarySchedule: noop,
+    tabMediaCoordinator: { setPlaybackState: noop },
+    mediaTabId: 'tab',
+    process: { env: { IS_ELECTRON: false } },
+    updateAutoPip: noop,
+    emit: noop,
   })
   assert.equal(player.scrollMiniPlayerActive.value, true)
   assert.equal(player.scrollMiniPlayPauseVisible.value, true)

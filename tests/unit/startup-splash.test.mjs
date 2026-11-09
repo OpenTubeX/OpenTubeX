@@ -10,10 +10,12 @@ test('the initial splash uses native appearance without the renderer', async () 
   let presented = false
   let paint
   const context = {
-    window: { ftElectron: {
-      startupAppearance: { background: '#1e1e2e', dark: true },
-      startupSplashReady: () => { presented = true }
-    } },
+    window: {
+      ftElectron: {
+        startupAppearance: { background: '#1e1e2e', dark: true },
+        startupSplashReady: () => { presented = true }
+      }
+    },
     requestAnimationFrame: callback => { paint = callback },
     document: {
       documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } }
@@ -34,10 +36,12 @@ for (const hideSplash of [true, false]) {
     let inert = true
     let presented = false
     vm.runInNewContext(script, {
-      window: { ftElectron: {
-        startupAppearance: { hideSplash },
-        startupSplashReady: () => { presented = true }
-      } },
+      window: {
+        ftElectron: {
+          startupAppearance: { hideSplash },
+          startupSplashReady: () => { presented = true }
+        }
+      },
       document: {
         documentElement: {},
         getElementById: id => id === 'startup-splash'
@@ -60,14 +64,16 @@ test('mobile startup uses cached appearance and can hide the splash before loadi
     let inert = true
     vm.runInNewContext(script, {
       window: { matchMedia: () => ({ matches: false }) },
-      localStorage: { getItem: key => {
-        assert.equal(key, 'opentubex-startup-appearance')
-        return JSON.stringify({
-          light: { background: '#f1f1f1', dark: false },
-          dark: { background: '#0f0f0f', dark: true },
-          hideSplash
-        })
-      } },
+      localStorage: {
+        getItem: key => {
+          assert.equal(key, 'opentubex-startup-appearance')
+          return JSON.stringify({
+            light: { background: '#f1f1f1', dark: false },
+            dark: { background: '#0f0f0f', dark: true },
+            hideSplash
+          })
+        }
+      },
       document: {
         documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } },
         getElementById: id => id === 'startup-splash'
@@ -103,12 +109,15 @@ test('mobile appearance cache preserves colors and the visibility preference', (
   let saved
   const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
   try {
-    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
-      setItem(key, value) {
-        assert.equal(key, 'opentubex-startup-appearance')
-        saved = JSON.parse(value)
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        setItem(key, value) {
+          assert.equal(key, 'opentubex-startup-appearance')
+          saved = JSON.parse(value)
+        }
       }
-    } })
+    })
     cacheStartupAppearance(appearance)
     assert.deepEqual(saved, appearance)
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('unavailable') } })
@@ -127,14 +136,21 @@ test('Capacitor waits for data, tab presentation, and route content before revea
   let releaseRoute
   const routeReady = new Promise(resolve => { releaseRoute = resolve })
   vm.runInNewContext(watcher, {
-    isElectron: false, isCapacitor: true, usesLogicalTabs: true,
-    dataReady: {}, presentedTabId: {},
-    store: {}, router: { resolve: fullPath => fullPath },
+    isElectron: false,
+    isCapacitor: true,
+    usesLogicalTabs: true,
+    dataReady: {},
+    presentedTabId: {},
+    store: {},
+    router: { resolve: fullPath => fullPath },
     document: { getElementById: () => ({}) },
     watch: (_, handler) => { callback = handler },
     preloadResolvedRoute: () => routeReady,
     revealStartupSplash: () => { reveals++ },
-    nextTick: async () => {}, setTimeout, clearTimeout, console
+    nextTick: async () => {},
+    setTimeout,
+    clearTimeout,
+    console
   })
   await callback([false, 'tab', 'loaded', '/history'], null, () => {})
   await callback([true, null, 'loading', '/history'], null, () => {})

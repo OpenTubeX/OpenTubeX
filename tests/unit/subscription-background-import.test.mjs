@@ -134,12 +134,17 @@ test('background playlist imports restore missing authors and keep explicit byli
   hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
   hooks.enrichSubscriptionShortDates = async entries => entries.map(entry => ({ ...entry, published: 123456 }))
   await importChannelResult(t, {
-    channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
-    payload: { backgroundFormat: 'entries', entries: [
-      { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
-      { videoId: 'absent', author: '', authorId: '' },
-      { videoId: 'explicit', author: 'Explicit creator', authorId: 'UCexplicit' }
-    ] }
+    channelId: 'UCchannel',
+    feedType: 'shorts',
+    timestamp: Date.now(),
+    payload: {
+      backgroundFormat: 'entries',
+      entries: [
+        { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
+        { videoId: 'absent', author: '', authorId: '' },
+        { videoId: 'explicit', author: 'Explicit creator', authorId: 'UCexplicit' }
+      ]
+    }
   })
   assert.equal(saved[0].author, 'Subscribed creator')
   assert.equal(saved[0].authorId, 'UCchannel')
@@ -169,11 +174,16 @@ test('background Yattee Shorts are dated through the server instead of YouTube',
   hooks.enrichSubscriptionShortDates = async () => { throw new Error('YouTube must not be contacted') }
   hooks.invidiousGetVideoInformation = async videoId => { lookups.push(videoId); return { published: 2 } }
   await importChannelResult(t, {
-    channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
-    payload: { backgroundFormat: 'entries', entries: [
-      { videoId: 'known', author: 'Subscribed creator', authorId: 'UCchannel' },
-      { videoId: 'new', author: 'Subscribed creator', authorId: 'UCchannel' }
-    ] }
+    channelId: 'UCchannel',
+    feedType: 'shorts',
+    timestamp: Date.now(),
+    payload: {
+      backgroundFormat: 'entries',
+      entries: [
+        { videoId: 'known', author: 'Subscribed creator', authorId: 'UCchannel' },
+        { videoId: 'new', author: 'Subscribed creator', authorId: 'UCchannel' }
+      ]
+    }
   })
   assert.deepEqual(saved.map(video => video.published), [1000, 2000])
   assert.deepEqual(lookups, ['new'])
@@ -185,12 +195,14 @@ test('separate Electron renderers serialize background result imports', async t 
   let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
   let queue = Promise.resolve()
-  navigator.locks = { request(name, callback) {
-    assert.equal(name, 'opentubex-background-subscription-import')
-    const result = queue.then(callback)
-    queue = result.catch(() => {})
-    return result
-  } }
+  navigator.locks = {
+    request(name, callback) {
+      assert.equal(name, 'opentubex-background-subscription-import')
+      const result = queue.then(callback)
+      queue = result.catch(() => {})
+      return result
+    }
+  }
   electronWindow()
   hooks.store = createStore()
   start(t, electron, { env: { IS_ELECTRON: 'true' } })

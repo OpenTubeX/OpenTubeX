@@ -41,10 +41,12 @@ test('rejects missing and non-HTTPS Android live manifests', () => {
 
 test('reads the Android DASH fallback for recently ended streams independently of HLS', () => {
   assert.equal(getAndroidLiveDashManifestUrl({
-    data: { streamingData: {
-      hlsManifestUrl: 'https://example.com/manifest_duration/30/live.m3u8',
-      dashManifestUrl: 'https://example.com/post-live.mpd'
-    } }
+    data: {
+      streamingData: {
+        hlsManifestUrl: 'https://example.com/manifest_duration/30/live.m3u8',
+        dashManifestUrl: 'https://example.com/post-live.mpd'
+      }
+    }
   }), 'https://example.com/post-live.mpd')
 })
 

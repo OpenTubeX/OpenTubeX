@@ -15,10 +15,12 @@ async function helper(name, exports, ios = true) {
     process: { env: { IS_CAPACITOR: true, IS_IOS: ios } },
     registerPlugin: name => {
       registrations.push(name)
-      return new Proxy({}, { get: (_, method) => async options => {
-        calls.push({ name, method, options })
-        return { remove() {}, attached: true }
-      } })
+      return new Proxy({}, {
+        get: (_, method) => async options => {
+          calls.push({ name, method, options })
+          return { remove() {}, attached: true }
+        }
+      })
     },
     ref: value => ({ value }),
     normalizeSystemAccentColor,
@@ -59,7 +61,7 @@ test('unsupported iOS proxy configuration rejects instead of pretending it appli
 
 test('iOS pauses on app hiding when background playback is disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const handler = source.match(/function handleMobileAdjustmentsVisibility\(\) \{[\s\S]*?\n    \}/)?.[0]
+  const handler = source.match(/function handleMobileAdjustmentsVisibility\(\) \{[\s\S]*?\n {4}\}/)?.[0]
   assert.ok(handler)
   for (const [ios, hidden, continuePlaying, expectedPauses] of [
     [true, true, false, 1], [true, true, true, 0],
@@ -106,9 +108,9 @@ test('iOS ignores imported silence skipping preferences while other platforms re
 
 test('iOS rotation fullscreen stays off during PiP and background transitions', async () => {
   const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n    \}\)/)?.[0] ?? ''
-  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n    \}(?:, \{ flush: 'sync' \})?\)/)?.[0]
-  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n          fullScreenElement/)?.[1]
+  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n {4}\}\)/)?.[0] ?? ''
+  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n {4}\}(?:, \{ flush: 'sync' \})?\)/)?.[0]
+  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n {10}fullScreenElement/)?.[1]
   assert.ok(rotationWatch)
   assert.ok(initialConfig)
   for (const platform of ['ios', 'android', 'desktop']) {
@@ -121,7 +123,8 @@ test('iOS rotation fullscreen stays off during PiP and background transitions', 
       enterFullscreenOnDisplayRotate: preference,
       pictureInPictureActive: pip,
       mobileAdjustmentsVisible: visible,
-      computed, watch,
+      computed,
+      watch,
       configurePlayerControls: configure => configure(),
       ui: { configure: options => { enabled = options.enableFullscreenOnRotation } },
     })

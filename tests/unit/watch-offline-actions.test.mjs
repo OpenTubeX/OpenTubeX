@@ -12,9 +12,15 @@ test('offline reloadCommentData preserves loaded comments without starting a req
   const sortNewest = ref(false)
   let requests = 0
   const run = vm.runInNewContext(`${source.slice(start, end)}\nreloadCommentData`, {
-    props: { offline: true }, commentData, sortNewest, nextPageToken: ref('continuation'),
-    localCommentsInstance: {}, replyTokens: new Map(),
-    closeCommentMenus() {}, resetCommentsScroll() {}, getCommentData() { requests++ },
+    props: { offline: true },
+    commentData,
+    sortNewest,
+    nextPageToken: ref('continuation'),
+    localCommentsInstance: {},
+    replyTokens: new Map(),
+    closeCommentMenus() {},
+    resetCommentsScroll() {},
+    getCommentData() { requests++ },
   })
   run('newest')
   assert.equal(commentData.value[0]?.id, 'loaded-comment')
@@ -31,8 +37,10 @@ test('changing videos clears the previous video SponsorBlock segments', async ()
   })
   const watch = {
     sponsorBlockInfoSegments: [{ uuid: 'previous-video' }],
-    playlistScrollPositions: {}, tabRoute: { query: {} },
-    clearLiveReminderStartTimer() {}, updateTitle() {},
+    playlistScrollPositions: {},
+    tabRoute: { query: {} },
+    clearLiveReminderStartTimer() {},
+    updateTitle() {},
   }
   reset.call(watch)
   assert.equal(watch.sponsorBlockInfoSegments.length, 0)
@@ -47,10 +55,14 @@ test('offline replay seeks preserve messages and resume at the latest position o
   const seeks = []
   const props = { offline: true }
   const context = {
-    props, pendingReplaySeekSeconds: null, isReplay: ref(true),
+    props,
+    pendingReplaySeekSeconds: null,
+    isReplay: ref(true),
     liveChatInstance: { seekTo(position) { seeks.push(position) } },
     watch: (_source, handler) => { callback = handler },
-    clearChat() { clears++ }, releaseReplayComments() {}, requestMoreReplayComments() {},
+    clearChat() { clears++ },
+    releaseReplayComments() {},
+    requestMoreReplayComments() {},
   }
   vm.runInNewContext(source.slice(start, end), context)
   const seek = { seconds: 120 }
@@ -91,7 +103,9 @@ test('reconnecting preserves a manually selected caption when the preference did
   const props = { offline: true, preferredCaptionIndex: 0 }
   const selectedCaptionIndex = ref('1')
   vm.runInNewContext(source.slice(start, end), {
-    props, selectedCaptionIndex, appliedPreferredCaptionIndex: 0,
+    props,
+    selectedCaptionIndex,
+    appliedPreferredCaptionIndex: 0,
     watch: (_sources, handler) => { callback = handler },
   })
   callback([0, true])

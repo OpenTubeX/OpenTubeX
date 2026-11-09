@@ -8,12 +8,14 @@ test('video clock updates do not republish unchanged media controls', t => {
   const calls = { handlers: 0, metadata: 0, playback: 0, ipc: 0, positions: [] }
   Object.defineProperty(globalThis, 'navigator', {
     configurable: true,
-    value: { mediaSession: {
-      set metadata(value) { calls.metadata++ },
-      set playbackState(value) { calls.playback++ },
-      setActionHandler() { calls.handlers++ },
-      setPositionState(state) { calls.positions.push(state) },
-    } },
+    value: {
+      mediaSession: {
+        set metadata(value) { calls.metadata++ },
+        set playbackState(value) { calls.playback++ },
+        setActionHandler() { calls.handlers++ },
+        setPositionState(state) { calls.positions.push(state) },
+      }
+    },
   })
   Object.defineProperty(globalThis, 'window', {
     configurable: true,

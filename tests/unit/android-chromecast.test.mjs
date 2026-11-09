@@ -44,8 +44,14 @@ function nativeFixture() {
       }
       if (payload.type === 'LOAD') {
         if (rejectLoad) throw new Error('Cast LOAD_FAILED')
-        media = { mediaSessionId: 7, currentTime: payload.currentTime, playerState: payload.autoplay ? 'PLAYING' : 'PAUSED',
-          activeTrackIds: payload.activeTrackIds, playbackRate: payload.playbackRate, media: { ...payload.media, duration: 120 } }
+        media = {
+          mediaSessionId: 7,
+          currentTime: payload.currentTime,
+          playerState: payload.autoplay ? 'PLAYING' : 'PAUSED',
+          activeTrackIds: payload.activeTrackIds,
+          playbackRate: payload.playbackRate,
+          media: { ...payload.media, duration: 120 }
+        }
       }
       if (payload.type === 'PAUSE') media.playerState = 'PAUSED'
       if (payload.type === 'PLAY') media.playerState = 'PLAYING'
@@ -56,7 +62,10 @@ function nativeFixture() {
     }
   }
   return {
-    native, calls, resources, completed,
+    native,
+    calls,
+    resources,
+    completed,
     failLoad() { rejectLoad = true },
     get closed() { return closed },
     async event(name, value) { await Promise.all([...listeners.get(name) ?? []].map(listener => listener({ castId: nativeId, ...value }))) },
@@ -64,9 +73,14 @@ function nativeFixture() {
   }
 }
 const handoff = {
-  deviceId: 'tv', title: 'Android Cast test', startSeconds: 12, paused: false, playbackRate: 1.5,
+  deviceId: 'tv',
+  title: 'Android Cast test',
+  startSeconds: 12,
+  paused: false,
+  playbackRate: 1.5,
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
-  captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0ACaption', label: 'English', language: 'en' }], captionIndex: 0
+  captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0ACaption', label: 'English', language: 'en' }],
+  captionIndex: 0
 }
 
 test('Android retains native authentication and receiver error codes', async () => {
@@ -112,12 +126,22 @@ test('Android registers signed HLS directory URLs directly', async t => {
   assert.equal(root.candidates[0].suffix, 'media')
   const load = fixture.calls.find(([name, options]) => name === 'send' && options.payload.type === 'LOAD')[1].payload
   assert.ok(load.media.contentId.endsWith('/media'), 'Only receiver reload directives belong in the relay query')
-  await fixture.event('castManifest', { resourceId: root.id, requestId: 'directory', url, contentType,
-    body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nvariant/?token=c%2Fd\n' })
+  await fixture.event('castManifest', {
+    resourceId: root.id,
+    requestId: 'directory',
+    url,
+    contentType,
+    body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nvariant/?token=c%2Fd\n'
+  })
   const variant = fixture.resources.find(resource => resource.candidates[0].url === 'https://media.test/live/variant/?token=c%2Fd')
   assert.ok(variant)
-  await fixture.event('castManifest', { resourceId: variant.id, requestId: 'variant', url: variant.candidates[0].url, contentType: variant.contentType,
-    body: '#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n../segment/?sig=e%2Ff\n' })
+  await fixture.event('castManifest', {
+    resourceId: variant.id,
+    requestId: 'variant',
+    url: variant.candidates[0].url,
+    contentType: variant.contentType,
+    body: '#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n../segment/?sig=e%2Ff\n'
+  })
   for (const source of ['https://media.test/live/variant/?token=c%2Fd', 'https://media.test/live/segment/?sig=e%2Ff']) {
     const child = fixture.resources.find(resource => resource.candidates[0].url === source)
     assert.ok(child, 'Signed HLS child URLs must also stay intact')
@@ -164,8 +188,13 @@ test('Android preserves DASH directory bases with queries and fragments', async 
   const result = await api.start(() => handoff)
   t.after(() => api.stop(result.castId))
   for (const base of ['https://media.test/vod/?token=a%2Fb', 'https://media.test/vod/#period']) {
-    await fixture.event('castManifest', { requestId: 'directory', resourceId: 0, url: 'https://media.test/manifest.mpd', contentType: 'application/dash+xml',
-      body: `<MPD><BaseURL>${base}</BaseURL><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
+    await fixture.event('castManifest', {
+      requestId: 'directory',
+      resourceId: 0,
+      url: 'https://media.test/manifest.mpd',
+      contentType: 'application/dash+xml',
+      body: `<MPD><BaseURL>${base}</BaseURL><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>`
+    })
     const relayBase = fixture.completed.at(-1).body.match(/<BaseURL>([^<]+)<\/BaseURL>/)[1]
     const parsed = new URL(relayBase)
     const directory = fixture.resources.find(resource => resource.id === Number(parsed.pathname.split('/')[2]))
@@ -181,8 +210,13 @@ test('Android preserves DASH placeholders in segment query strings', async t => 
   await api.discover()
   const result = await api.start(() => handoff)
   t.after(() => api.stop(result.castId))
-  await fixture.event('castManifest', { requestId: 'query-template', resourceId: 0, url: 'https://media.test/live/manifest.mpd',
-    contentType: 'application/dash+xml', body: '<MPD><Period><AdaptationSet><Representation id="video"><SegmentTemplate media="segment.mp4?number=$Number$&amp;time=$Time$"/></Representation></AdaptationSet></Period></MPD>' })
+  await fixture.event('castManifest', {
+    requestId: 'query-template',
+    resourceId: 0,
+    url: 'https://media.test/live/manifest.mpd',
+    contentType: 'application/dash+xml',
+    body: '<MPD><Period><AdaptationSet><Representation id="video"><SegmentTemplate media="segment.mp4?number=$Number$&amp;time=$Time$"/></Representation></AdaptationSet></Period></MPD>'
+  })
   assert.match(fixture.completed.at(-1).body, /\/segment\.mp4\?number=\$Number\$&amp;time=\$Time\$/)
   assert.ok(fixture.resources.some(resource => resource.candidates.some(candidate =>
     candidate.template && candidate.url === 'https://media.test/live/' && candidate.suffix === 'segment.mp4?number=$Number$&time=$Time$')))
@@ -197,12 +231,15 @@ for (const format of ['hls', 'dash']) {
     await api.discover()
     const result = await api.start(() => handoff)
     t.after(() => api.stop(result.castId))
-    const update = index => fixture.event('castManifest', { requestId: `refresh-${index}`, resourceId: 0,
+    const update = index => fixture.event('castManifest', {
+      requestId: `refresh-${index}`,
+      resourceId: 0,
       url: `https://media.test/manifest.${format === 'hls' ? 'm3u8' : 'mpd'}`,
       contentType: format === 'hls' ? 'application/x-mpegurl' : 'application/dash+xml',
       body: format === 'hls'
         ? `#EXTM3U\n#EXT-X-TARGETDURATION:150\n#EXTINF:150,\nsegment-${index}.ts`
-        : `<MPD type="dynamic" timeShiftBufferDepth="PT6M" maxSegmentDuration="PT30S" minimumUpdatePeriod="PT30S"><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment-${index}.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
+        : `<MPD type="dynamic" timeShiftBufferDepth="PT6M" maxSegmentDuration="PT30S" minimumUpdatePeriod="PT30S"><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment-${index}.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>`
+    })
     await update(0)
     const first = fixture.resources.find(resource => resource.candidates[0].url.includes('segment-0.'))
     now = 1000
@@ -241,9 +278,13 @@ test('Android drops invalid atomic batches and retries their removals on a valid
     }
     await register(options)
   })
-  const update = (requestId, segments) => fixture.event('castManifest', { requestId, resourceId: 0,
-    url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl',
-    body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n') })
+  const update = (requestId, segments) => fixture.event('castManifest', {
+    requestId,
+    resourceId: 0,
+    url: 'https://media.test/live.m3u8',
+    contentType: 'application/x-mpegurl',
+    body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n')
+  })
   await update('original', ['original.ts'])
   const original = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/original.ts'))
   now = 1000
@@ -286,9 +327,13 @@ for (const shared of [false, true]) {
       }
       await register(options)
     })
-    const update = (requestId, segments) => fixture.event('castManifest', { requestId, resourceId: 0,
-      url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl',
-      body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n') })
+    const update = (requestId, segments) => fixture.event('castManifest', {
+      requestId,
+      resourceId: 0,
+      url: 'https://media.test/live.m3u8',
+      contentType: 'application/x-mpegurl',
+      body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n')
+    })
     const invalid = update('invalid', ['valid.ts', 'x'.repeat(16_001) + '.ts'])
     await started.promise
     const queued = update('queued', shared ? ['valid.ts', 'independent.ts'] : ['independent.ts'])
@@ -384,13 +429,23 @@ test('Android rewrites DASH templates and HLS child playlists before replying to
   const result = await api.start(() => handoff)
   t.after(() => api.stop(result.castId))
   const root = fixture.resources.find(resource => resource.contentType === 'application/dash+xml')
-  await fixture.event('castManifest', { requestId: 'dash', resourceId: root.id, url: 'https://media.test/manifest.mpd',
-    contentType: 'application/dash+xml', body: '<MPD><Period><AdaptationSet><Representation id="video"><SegmentTemplate media="parts/$Number$.m4s" initialization="init.mp4"/></Representation></AdaptationSet></Period></MPD>' })
+  await fixture.event('castManifest', {
+    requestId: 'dash',
+    resourceId: root.id,
+    url: 'https://media.test/manifest.mpd',
+    contentType: 'application/dash+xml',
+    body: '<MPD><Period><AdaptationSet><Representation id="video"><SegmentTemplate media="parts/$Number$.m4s" initialization="init.mp4"/></Representation></AdaptationSet></Period></MPD>'
+  })
   assert.match(fixture.completed[0].body, /http:\/\/192\.168\.1\.2:8000\/[^/]+\/\d+\/\$Number\$\.m4s/)
   const template = fixture.resources.find(resource => resource.candidates[0].template)
   assert.equal(template.candidates[0].url, 'https://media.test/parts/')
-  await fixture.event('castManifest', { requestId: 'hls', resourceId: root.id, url: 'https://media.test/master.m3u8',
-    contentType: 'application/x-mpegurl', body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nvideo.m3u8' })
+  await fixture.event('castManifest', {
+    requestId: 'hls',
+    resourceId: root.id,
+    url: 'https://media.test/master.m3u8',
+    contentType: 'application/x-mpegurl',
+    body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nvideo.m3u8'
+  })
   assert.match(fixture.completed[1].body, /http:\/\/192\.168\.1\.2:8000\//)
   assert.ok(fixture.resources.some(resource => resource.contentType === 'application/x-mpegurl' && resource.candidates[0].url === 'https://media.test/video.m3u8'))
 })
@@ -437,8 +492,14 @@ function fcastNativeFixture({ onPlay = fixture => fixture.packet(6, { generation
   return fixture
 }
 
-const fcastHandoff = { deviceId: 'Living Room', title: 'Android FCast test', startSeconds: 12, paused: false, playbackRate: 1,
-  source: { url: 'https://media.test/manifest.mpd', contentType: 'application/dash+xml' } }
+const fcastHandoff = {
+  deviceId: 'Living Room',
+  title: 'Android FCast test',
+  startSeconds: 12,
+  paused: false,
+  playbackRate: 1,
+  source: { url: 'https://media.test/manifest.mpd', contentType: 'application/dash+xml' }
+}
 
 test('Android FCast plays through the native Cast relay and controls the receiver', async () => {
   const fixture = fcastNativeFixture()

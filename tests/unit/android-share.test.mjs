@@ -22,10 +22,12 @@ function createShareActions(props = {}, userPlaylist = null) {
     useTemplateRef: () => ({ value: { hideDropdown: () => calls.push('close') } }),
     useI18n: () => ({ t: key => key }),
     defineProps: () => ({ shareTargetType: 'Video', id: 'video123', playlistId: '', getTimestamp: () => 42, ...props }),
-    store: { getters: {
-      getCurrentInvidiousInstanceUrl: 'https://invidious.example',
-      getPlaylist: () => userPlaylist,
-    } },
+    store: {
+      getters: {
+        getCurrentInvidiousInstanceUrl: 'https://invidious.example',
+        getPlaylist: () => userPlaylist,
+      }
+    },
     appendTimestamp,
     getInvidiousVideoUrl,
     getYoutubeVideoShareUrl,

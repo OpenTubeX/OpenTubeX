@@ -15,8 +15,10 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
   const attributes = new Set()
   const properties = new Map()
   const player = {
-    setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
-    addEventListener() {}, removeEventListener() {},
+    setAttribute: name => attributes.add(name),
+    removeAttribute: name => attributes.delete(name),
+    addEventListener() {},
+    removeEventListener() {},
     getBoundingClientRect: () => rect,
   }
   const video = Object.assign(new EventTarget(), {
@@ -29,7 +31,8 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
     updatePictureInPictureSourceRect: async options => calls.push(['bounds', structuredClone(options)]),
   }
   const document = Object.assign(new EventTarget(), {
-    hidden: false, hasFocus: () => true,
+    hidden: false,
+    hasFocus: () => true,
     body: { classList: { contains: name => classes.has(name), toggle: (name, on) => on ? classes.add(name) : classes.delete(name) } },
     querySelectorAll: () => [],
     documentElement: {
@@ -38,7 +41,10 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
     },
   })
   const window = {
-    innerWidth: 480, innerHeight: 800, outerWidth: 480, outerHeight: 800,
+    innerWidth: 480,
+    innerHeight: 800,
+    outerWidth: 480,
+    outerHeight: 800,
     visualViewport: Object.assign(new EventTarget(), { scale: 1 }),
     dispatchEvent: event => {
       if (event.type === 'opentubex:android-pip') api.setAndroidPictureInPictureDocumentState(event.active, event)
@@ -56,8 +62,13 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
     },
   }
   const context = {
-    document, window, console, Event, process: { env: { IS_CAPACITOR: true } },
-    registerPlugin: () => plugin, getComputedStyle: () => ({ objectFit: fit }),
+    document,
+    window,
+    console,
+    Event,
+    process: { env: { IS_CAPACITOR: true } },
+    registerPlugin: () => plugin,
+    getComputedStyle: () => ({ objectFit: fit }),
     ResizeObserver: class {
       constructor(callback) { resized = callback }
       observe() {} disconnect() { resized = null }
@@ -75,9 +86,24 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
       if (frames.delete(id)) callback()
     }
   }
-  return { ...api, video, calls, rect, classes, rootClasses, attributes, properties, window, document, plugin,
-    resize: () => resized?.(), listeners, step, flush: () => { while (frames.size) step() },
-    expire: () => { for (const callback of [...timers.values()]) callback() } }
+  return {
+    ...api,
+    video,
+    calls,
+    rect,
+    classes,
+    rootClasses,
+    attributes,
+    properties,
+    window,
+    document,
+    plugin,
+    resize: () => resized?.(),
+    listeners,
+    step,
+    flush: () => { while (frames.size) step() },
+    expire: () => { for (const callback of [...timers.values()]) callback() }
+  }
 }
 
 test('manual PiP keeps the live source layout until the native mode callback, and restores without motion', async () => {
@@ -103,8 +129,10 @@ test('manual Android PiP captures visible content bounds while preserving the en
   const entered = r.enterAndroidPictureInPicture(r.video)
   assert.equal(r.calls.length, 0, 'paint the video-only page before native entry')
   assert.deepEqual(Object.fromEntries(r.properties), {
-    '--android-pip-source-left': '12px', '--android-pip-source-top': '60px',
-    '--android-pip-source-width': '400px', '--android-pip-source-height': '300px',
+    '--android-pip-source-left': '12px',
+    '--android-pip-source-top': '60px',
+    '--android-pip-source-width': '400px',
+    '--android-pip-source-height': '300px',
     '--android-pip-video-fit': 'contain',
   }, 'freeze the video box before native insets can move it')
   r.flush()

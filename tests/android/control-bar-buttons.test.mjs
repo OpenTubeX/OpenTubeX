@@ -17,8 +17,11 @@ test('Android places the compact controls on the control bar, in the player menu
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        CurrentLocale: 'en-US', VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,
+        CurrentLocale: 'en-US',
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       saved.ControlBarButtons = structuredClone(store.getters.getControlBarButtons)
@@ -27,7 +30,8 @@ test('Android places the compact controls on the control bar, in the player menu
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__controlBarFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__controlBarFetch(url, options) : Promise.reject(new Error('Offline control bar test'))
+        ? window.__controlBarFetch(url, options)
+        : Promise.reject(new Error('Offline control bar test'))
       document.querySelector('.tutorialOverlay')?.remove()
       return saved
     })
@@ -66,8 +70,7 @@ test('Android places the compact controls on the control bar, in the player menu
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     const watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -75,11 +78,25 @@ test('Android places the compact controls on the control bar, in the player menu
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'Control bar test', videoLengthSeconds: 30,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 640, height: 360, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: true,
+        activeFormat: 'legacy',
+        videoTitle: 'Control bar test',
+        videoLengthSeconds: 30,
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 640,
+          height: 360,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     await watch.dispose()

@@ -47,9 +47,13 @@ function createOrganizer () {
     presentedTabId: { value: tab.id },
     CSS: { escape: value => value },
     createOrganizerSwipeAnimation: () => {
-      const animation = { progress: null, committed: null,
+      const animation = {
+        progress: null,
+        committed: null,
         update (value) { this.progress = value },
-        async finish (commit) { this.committed = commit }, dispose () {} }
+        async finish (commit) { this.committed = commit },
+        dispose () {}
+      }
       animations.push(animation)
       return animation
     },

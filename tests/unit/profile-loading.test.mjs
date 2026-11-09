@@ -9,8 +9,11 @@ import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js
 const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
 const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const mainProfile = {
-  _id: 'allChannels', name: 'All Channels', bgColor: '#558B2F',
-  icon: null, subscriptions: [{ id: 'channel' }]
+  _id: 'allChannels',
+  name: 'All Channels',
+  bgColor: '#558B2F',
+  icon: null,
+  subscriptions: [{ id: 'channel' }]
 }
 const secondProfile = { _id: 'second', name: 'Second', icon: { type: 'initial' }, subscriptions: [] }
 
@@ -19,7 +22,9 @@ async function fixture(main = mainProfile) {
   await db.profiles.insertAsync([main, secondProfile])
   const errors = []
   const globals = {
-    MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
+    MAIN_PROFILE_ID: 'allChannels',
+    THEME_BG_COLOR: '#000000',
+    THEME_TEXT_COLOR: '#ffffff',
     DEFAULT_PROFILE_ICON,
     console: { error: error => errors.push(error) }
   }
@@ -33,7 +38,9 @@ async function fixture(main = mainProfile) {
     .replace('export default {', 'globalThis.profileModule = {'), context)
   const module = context.profileModule
   return {
-    db, module, errors,
+    db,
+    module,
+    errors,
     load: () => module.actions.grabAllProfiles({
       rootState: { settings: { defaultProfile: 'second' } },
       state: module.state,

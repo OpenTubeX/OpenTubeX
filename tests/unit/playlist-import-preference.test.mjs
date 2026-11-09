@@ -16,7 +16,8 @@ for (const [preference, existing] of [[undefined, true], [false, true], [true, f
     const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
       allPlaylists: { value: existing ? [current] : [] },
       pickFilesWithPicker: async () => [{ name: 'playlist.db', text: async () => JSON.stringify(imported) }],
-      IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
+      IMPORT_DIRECTORY_ID: 'import',
+      START_IN_DIRECTORY: 'documents',
       parseImportedLineDelimitedJson: data => [JSON.parse(data)],
       normalizeImportedPlaylistThumbnail: async () => {},
       isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
@@ -40,7 +41,9 @@ for (const [preference, existing] of [[undefined, true], [false, true], [true, f
 for (const addVideosToTop of [false, true]) {
   test(`Takeout merges retain existing duplicates and insert only new entries with top insertion ${addVideosToTop}`, async () => {
     const current = {
-      _id: 'custom', playlistName: 'My playlist', addVideosToTop,
+      _id: 'custom',
+      playlistName: 'My playlist',
+      addVideosToTop,
       videos: [{ videoId: 'existing', timeAdded: 1, playlistItemId: 'first' }, { videoId: 'existing', timeAdded: 1, playlistItemId: 'duplicate' }],
     }
     let saved
@@ -67,7 +70,8 @@ test('playlist import applies each picked database file to the previous file\'s 
   const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
     allPlaylists: playlists,
     pickFilesWithPicker: async () => [file('first'), file('second')],
-    IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
+    IMPORT_DIRECTORY_ID: 'import',
+    START_IN_DIRECTORY: 'documents',
     parseImportedLineDelimitedJson: data => [JSON.parse(data)],
     normalizeImportedPlaylistThumbnail: async () => {},
     isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
@@ -97,7 +101,8 @@ test('playlist import reports a malformed database file and continues with the n
       { name: 'broken.db', text: async () => '[not json]' },
       { name: 'valid.db', text: async () => JSON.stringify({ playlistName: 'Valid', videos: [] }) },
     ],
-    IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents',
+    IMPORT_DIRECTORY_ID: 'import',
+    START_IN_DIRECTORY: 'documents',
     parseImportedLineDelimitedJson: data => [JSON.parse(data)],
     normalizeImportedPlaylistThumbnail: async () => {},
     isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),

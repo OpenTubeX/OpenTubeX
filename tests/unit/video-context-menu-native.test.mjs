@@ -135,10 +135,16 @@ for (const { capacitor, phone } of [
       videoContextMenuItems: items,
       mobileThumbnailActions: { value: [] },
       openMobileContextActions: menu => mobileMenus.push(menu),
-      videoMenuButton: { value: { $el: { querySelector: () => ({
-        focus () {},
-        getBoundingClientRect: () => ({ left: 10, right: 30, bottom: 40 })
-      }) } } },
+      videoMenuButton: {
+        value: {
+          $el: {
+            querySelector: () => ({
+              focus () {},
+              getBoundingClientRect: () => ({ left: 10, right: 30, bottom: 40 })
+            })
+          }
+        }
+      },
       document: { body: { dir: 'ltr' } },
       window: {
         dispatchEvent: event => dispatched.push(event),

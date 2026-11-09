@@ -62,8 +62,11 @@ for (const newWindow of [true, false]) {
     })
     vm.runInContext(navigationSource, context)
     context.openInternalPath({
-      path: '/history', query: { search: 'test' },
-      doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: false
+      path: '/history',
+      query: { search: 'test' },
+      doCreateNewTab: !newWindow,
+      doCreateNewWindow: newWindow,
+      makeActive: false
     })
     assert.deepEqual(structuredClone(calls), [{ path: '/history', query: { search: 'test' }, state: undefined }])
   })
@@ -141,7 +144,8 @@ test('incoming video requests wait while mobile tabs are disabled', async () => 
   for (const mobile of [true, false]) {
     for (const enabled of [true, false]) {
       const acceptsRequest = vm.runInNewContext(condition, {
-        event: { recipient: 'device' }, settings: { syncServerDeviceId: 'device' },
+        event: { recipient: 'device' },
+        settings: { syncServerDeviceId: 'device' },
         rootState: { settings: { enableMobileTabs: enabled } },
         process: { env: { IS_CAPACITOR: mobile, IS_ELECTRON: !mobile } },
         isAppHidden: () => false

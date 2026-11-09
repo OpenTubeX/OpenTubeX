@@ -22,9 +22,17 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
     packageDetails: { version },
     createSyncServerRequestHeaders,
     applySyncServerUserAgent,
-    createAbortError, waitForRequest,
+    createAbortError,
+    waitForRequest,
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
-    URL, URLSearchParams, Request, Response, Headers, AbortController, setTimeout, clearTimeout,
+    URL,
+    URLSearchParams,
+    Request,
+    Response,
+    Headers,
+    AbortController,
+    setTimeout,
+    clearTimeout,
     setActiveTimeout: (callback, ms) => {
       const timeout = setTimeout(callback, ms)
       return () => clearTimeout(timeout)
@@ -190,9 +198,9 @@ test('requires live sync only for servers advertising encrypted sync', async () 
     }))
     assert.equal(await client.supportsEncryptedSync(), capabilities.encrypted_sync === 1)
   }
-  for (const live_sync of [undefined, 0, 2]) {
+  for (const liveSync of [undefined, 0, 2]) {
     const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
-      status: 200, data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync } }), headers: {},
+      status: 200, data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: liveSync } }), headers: {},
     }))
     await assert.rejects(client.supportsEncryptedSync(), { message: 'This server must be updated to support encrypted live sync.' })
   }

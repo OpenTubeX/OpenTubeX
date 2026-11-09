@@ -22,15 +22,22 @@ function mountPost(t, backend, fallback = true) {
     return pending.promise
   }
   const state = scope.run(() => vm.runInNewContext(`${source}; ({ post, authorId, isLoading, unsupported })`, {
-    computed, ref, shallowRef, watch,
+    computed,
+    ref,
+    shallowRef,
+    watch,
     useRoute: () => route,
     useRouter: () => ({ replace: value => replacements.push(value) }),
     useI18n: () => ({ t: value => value }),
     useTabTitle: () => title => titles.push(title),
-    store: { getters: {
-      getBackendPreference: backend, getBackendFallback: fallback,
-      getHideComments: true, getSubscriptionCacheReady: false
-    } },
+    store: {
+      getters: {
+        getBackendPreference: backend,
+        getBackendFallback: fallback,
+        getHideComments: true,
+        getSubscriptionCacheReady: false
+      }
+    },
     usesInvidiousApi: value => value !== 'local',
     getLocalCommunityPost: request('local'),
     getInvidiousCommunityPost: request('invidious'),
@@ -44,7 +51,12 @@ function mountPost(t, backend, fallback = true) {
   }))
   t.after(() => scope.stop())
   return {
-    ...state, requests, titles, errors, toasts, replacements,
+    ...state,
+    requests,
+    titles,
+    errors,
+    toasts,
+    replacements,
     async navigate() {
       route.params.id = 'post-b'
       route.query.authorId = 'author-b'

@@ -100,11 +100,14 @@ test('shared repair runner sends full metadata for different missing fields in d
   const getPlaylists = () => db.playlists.findAsync({ _id: 'selected' })
   const playlists = await getPlaylists()
   const result = await repairHistory({
-    records: playlistRepairRecords(playlists), getRecord: () => video,
+    records: playlistRepairRecords(playlists),
+    getRecord: () => video,
     fetchMetadata: async () => { requests++; return metadata },
     createPatch: (record, info) => ({ ...info, videoId: record.videoId }),
     saveMetadata: info => Playlists.repairMetadata({ playlistIds: ['selected'], metadata: info }),
-    signal: new AbortController().signal, onProgress: () => {}, wait: async () => {},
+    signal: new AbortController().signal,
+    onProgress: () => {},
+    wait: async () => {},
   })
   assert.equal(requests, 1)
   assert.equal(result.repaired, 1)
@@ -118,10 +121,13 @@ test('replaces Takeout video-ID title placeholders even when other metadata is c
   let saved
   await repairHistory({
     records: playlistRepairRecords([{ videos: [imported] }]),
-    needsRepair: needsPlaylistRepair, getRecord: () => imported,
-    createPatch: playlistRepairPatch, fetchMetadata: async () => metadata,
+    needsRepair: needsPlaylistRepair,
+    getRecord: () => imported,
+    createPatch: playlistRepairPatch,
+    fetchMetadata: async () => metadata,
     saveMetadata: async updates => { saved = updates; return { repaired: 1, failed: 0 } },
-    signal: new AbortController().signal, onProgress: () => {},
+    signal: new AbortController().signal,
+    onProgress: () => {},
   })
   assert.equal(saved[0].title, metadata.title)
 })
@@ -143,14 +149,21 @@ test('a partial save failure counts the shared video as failed while keeping suc
 
 test('playlist lookup scans once between changes and follows removed or repaired entries', async () => {
   let reads = 0
-  const playlists = reactive([{ _id: 'selected', videos: Array.from({ length: 1000 }, (_, index) => ({
-    ...video, videoId: String(index).padStart(11, '0'),
-    get title() { reads++; return 'Imported title' },
-  })) }])
+  const playlists = reactive([{
+    _id: 'selected',
+    videos: Array.from({ length: 1000 }, (_, index) => ({
+      ...video,
+      videoId: String(index).padStart(11, '0'),
+      get title() { reads++; return 'Imported title' },
+    }))
+  }])
   const helper = await readFile(new URL('../../src/renderer/helpers/playlistRepair.js', import.meta.url), 'utf8')
   const start = vm.runInNewContext(helper.replace(/^import[^\n]+\n/gm, '').replaceAll('export ', '') + '\nstartPlaylistRepair', {
-    computed, needsPlaylistRepair, playlistRepairRecords,
-    createRepairState: () => ({}), cancelMetadataRepair: () => {},
+    computed,
+    needsPlaylistRepair,
+    playlistRepairRecords,
+    createRepairState: () => ({}),
+    cancelMetadataRepair: () => {},
     runMetadataRepair: (_state, options) => options,
     store: { getters: { getAllPlaylists: playlists } },
   })
@@ -175,11 +188,16 @@ test('conditional repair updates preserve newer fields, membership, and playlist
   const { Playlists } = await fixture()
   const result = await Playlists.repairMetadata({ playlistIds: ['selected'], metadata: [metadata] })
   const update = JSON.parse(JSON.stringify(result.updates[0]))
-  const current = [{ _id: 'selected', playlistName: 'Renamed later', lastUpdatedAt: 9e12, videos: [
-    { ...video, author: 'Edited later', lengthSeconds: 321 },
-    { videoId: 'new-video', playlistItemId: 'new', title: 'Added later' },
-    { ...video, playlistItemId: 'duplicate', author: 'Existing channel' },
-  ] }]
+  const current = [{
+    _id: 'selected',
+    playlistName: 'Renamed later',
+    lastUpdatedAt: 9e12,
+    videos: [
+      { ...video, author: 'Edited later', lengthSeconds: 321 },
+      { videoId: 'new-video', playlistItemId: 'new', title: 'Added later' },
+      { ...video, playlistItemId: 'duplicate', author: 'Existing channel' },
+    ]
+  }]
   applyPlaylistRepairUpdate(current, update)
   assert.equal(current[0].playlistName, 'Renamed later')
   assert.equal(current[0].lastUpdatedAt, 9e12)
@@ -205,10 +223,14 @@ test('large playlist repairs persist larger batches and flush the final short ba
   const byId = new Map(records.map(record => [record.videoId, record]))
   const writes = []
   const result = await repairHistory({
-    records, getRecord: id => byId.get(id), saveBatchSize: 100,
+    records,
+    getRecord: id => byId.get(id),
+    saveBatchSize: 100,
     fetchMetadata: async () => metadata,
     saveMetadata: async patches => { writes.push(patches.length); return { repaired: patches.length, failed: 0 } },
-    signal: new AbortController().signal, onProgress: () => {}, wait: async () => {},
+    signal: new AbortController().signal,
+    onProgress: () => {},
+    wait: async () => {},
   })
   assert.deepEqual(writes, [100, 100, 1])
   assert.equal(result.repaired, 201)
@@ -220,10 +242,14 @@ test('cancellation discards metadata that has not reached a persistence checkpoi
   let requests = 0
   let writes = 0
   const result = await repairHistory({
-    records, getRecord: id => records.find(record => record.videoId === id), saveBatchSize: 100,
+    records,
+    getRecord: id => records.find(record => record.videoId === id),
+    saveBatchSize: 100,
     fetchMetadata: async () => { if (++requests === 5) controller.abort(); return metadata },
     saveMetadata: async patches => { writes++; return { repaired: patches.length, failed: 0 } },
-    signal: controller.signal, onProgress: () => {}, wait: async () => {},
+    signal: controller.signal,
+    onProgress: () => {},
+    wait: async () => {},
   })
   assert.equal(result.repaired, 0)
   assert.equal(writes, 0)

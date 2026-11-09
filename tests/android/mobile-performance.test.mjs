@@ -109,7 +109,8 @@ test('windowed cards release content and retain accurate scroll geometry at scal
         }
         mount()
         const observation = windowing.observe(shell, {
-          mount, isMounted: () => mounted,
+          mount,
+          isMounted: () => mounted,
           isProtected: () => shell.contains(document.activeElement),
           unmount: height => {
             mounted = false
@@ -149,8 +150,10 @@ test('windowed cards release content and retain accurate scroll geometry at scal
       if (trigger === 'resize') await page.setViewportSize({ width: 600, height: 900 })
       await page.waitForTimeout(100)
       const geometry = await page.evaluate(() => ({
-        top: window.scrollY, height: document.documentElement.scrollHeight,
-        viewport: window.innerHeight, end: document.querySelector('#list').getBoundingClientRect().bottom + window.scrollY,
+        top: window.scrollY,
+        height: document.documentElement.scrollHeight,
+        viewport: window.innerHeight,
+        end: document.querySelector('#list').getBoundingClientRect().bottom + window.scrollY,
       }))
       assert.ok(geometry.top <= Math.max(0, geometry.end - geometry.viewport) + 1, `${trigger}: ${JSON.stringify(geometry)}`)
       assert.ok(geometry.height <= Math.max(geometry.viewport, geometry.end) + 1, `${trigger}: no stale scroll range`)
@@ -298,7 +301,6 @@ test('native migration skips corrupt and non-document legacy lines', async () =>
     assert.deepEqual(result.split('\n').map(JSON.parse), [{ _id: 'retained', value: 42 }])
   } finally { await context.close() }
 })
-
 
 for (const source of ['legacy', 'empty']) {
   test(`native migration without IndexedDB enumeration reads ${source} without creating databases`, async () => {

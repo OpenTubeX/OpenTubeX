@@ -19,12 +19,19 @@ for (const state of ['closed', 'dragging', 'settling', 'open', 'closed after com
     const prompts = new Set(['other'])
     const context = vm.createContext({
       pendingSwipeCloses: new Map(),
-      open, organizerGesture, disposed: false, promptId: 'organizer',
-      watch, showSyncedTabsView: ref(false),
-      lockBodyScroll: () => { locks++ }, unlockBodyScroll: () => { locks-- },
+      open,
+      organizerGesture,
+      disposed: false,
+      promptId: 'organizer',
+      watch,
+      showSyncedTabsView: ref(false),
+      lockBodyScroll: () => { locks++ },
+      unlockBodyScroll: () => { locks-- },
       store: { commit: (action, id) => action === 'addOpenPrompt' ? prompts.add(id) : prompts.delete(id) },
       organizerSwipe: { cancel: () => { if (state === 'settling' || state === 'dragging') open.value = false } },
-      resetTabSwipe() {}, resetTabDrag() {}, stopObservingContent() {},
+      resetTabSwipe() {},
+      resetTabDrag() {},
+      stopObservingContent() {},
       onBeforeUnmount: callback => { unmount = callback },
     })
     scope.run(() => vm.runInContext(`${modal}\n${teardown}`, context))

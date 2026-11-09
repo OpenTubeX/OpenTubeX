@@ -32,7 +32,10 @@ function fixture (storedLocale) {
     })
   }
   const context = vm.createContext({
-    store, findCaptionByLocale, AbortController, console,
+    store,
+    findCaptionByLocale,
+    AbortController,
+    console,
     fetch: () => new Promise(() => {}),
     getSubtitleRequestUrl: async url => url,
     getPlayer: () => ({ getTextTracks: () => [{ active: true, language: 'en', label: 'English' }], isLive: () => false }),

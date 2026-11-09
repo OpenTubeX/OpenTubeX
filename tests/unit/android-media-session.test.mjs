@@ -41,9 +41,12 @@ test('media updates throttle successful ticks and retry rejected requests', asyn
   const previousPerformance = globalThis.performance
   const calls = []
   let time = 1000
-  capacitor.PluginHeaders = [{ name: 'AndroidMediaSession', methods: [
-    { name: 'update', rtype: 'promise' }, { name: 'clear', rtype: 'promise' }
-  ] }]
+  capacitor.PluginHeaders = [{
+    name: 'AndroidMediaSession',
+    methods: [
+      { name: 'update', rtype: 'promise' }, { name: 'clear', rtype: 'promise' }
+    ]
+  }]
   capacitor.nativePromise = (plugin, method, options) => {
     calls.push({ plugin, method, options })
     return calls.length === 1 ? Promise.reject(new Error('service unavailable')) : Promise.resolve()

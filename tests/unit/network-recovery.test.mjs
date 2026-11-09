@@ -106,12 +106,33 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
   const window = new EventTarget()
   window.fetch = fetch
   const context = vm.createContext({
-    createInternetConnectivity, createInternetProbe, INTERNET_CHECK_URL, options, window, navigator: { onLine: true }, location: { href: 'https://localhost/', origin: 'https://localhost' },
+    createInternetConnectivity,
+    createInternetProbe,
+    INTERNET_CHECK_URL,
+    options,
+    window,
+    navigator: { onLine: true },
+    location: { href: 'https://localhost/', origin: 'https://localhost' },
     process: { env: { IS_IOS: false, IS_CAPACITOR: !!localNetworkAccess } },
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
-    classifyRequestFailure, createAbortError, waitForRequest, CapacitorHttp: { request: nativeRequest },
-    registerPlugin: () => ({ request: nativeRequest, abort: async () => {} }), crypto: globalThis.crypto,
-    AbortController, AbortSignal, DOMException, EventTarget, CustomEvent, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
+    classifyRequestFailure,
+    createAbortError,
+    waitForRequest,
+    CapacitorHttp: { request: nativeRequest },
+    registerPlugin: () => ({ request: nativeRequest, abort: async () => {} }),
+    crypto: globalThis.crypto,
+    AbortController,
+    AbortSignal,
+    DOMException,
+    EventTarget,
+    CustomEvent,
+    Request,
+    Response,
+    Headers,
+    URL,
+    URLSearchParams,
+    setTimeout,
+    clearTimeout,
   })
   for (const file of ['networkRecovery.js', 'api/capacitor-http.js']) {
     const source = (await readFile(new URL(`../../src/renderer/helpers/${file}`, import.meta.url), 'utf8'))
@@ -160,8 +181,12 @@ test('an interrupted chat response body preserves the session and later permanen
   let ended = false
   const hasError = { value: false }
   const handleError = vm.runInNewContext(`${source.slice(start, end)}\nhandleError`, {
-    isRecoverableNetworkError, handleEnd: () => { ended = true }, console: { error() {} },
-    hasError, errorMessage: { value: '' }, isLoading: { value: false }
+    isRecoverableNetworkError,
+    handleEnd: () => { ended = true },
+    console: { error() {} },
+    hasError,
+    errorMessage: { value: '' },
+    isLoading: { value: false }
   })
   handleError(error)
   assert.equal(ended, false, 'a body-read network failure must leave the session available for its next poll')
@@ -458,7 +483,8 @@ test('LAN without internet pauses startup work and recovers without an OS online
   let probes = 0
   let calls = 0
   const recovery = createNetworkRecovery({
-    eventTarget: new EventTarget(), isOnline: () => true,
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
     checkInternet: async () => { probes++; return reachable },
   })
   t.after(() => recovery.dispose())
@@ -479,7 +505,9 @@ test('app resume detects a router losing internet without polling while healthy'
   let reachable = true
   const visibilityTarget = new EventTarget()
   const recovery = createNetworkRecovery({
-    eventTarget: new EventTarget(), isOnline: () => true, visibilityTarget,
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
+    visibilityTarget,
     checkInternet: async () => reachable,
   })
   t.after(() => recovery.dispose())
@@ -540,8 +568,11 @@ test('a failed request checks reachability and pauses every origin on a WAN outa
 })
 
 test('a caller can cancel while the shared startup internet probe is still pending', async t => {
-  const recovery = createNetworkRecovery({ eventTarget: new EventTarget(), isOnline: () => true,
-    checkInternet: () => new Promise(() => {}) })
+  const recovery = createNetworkRecovery({
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
+    checkInternet: () => new Promise(() => {})
+  })
   t.after(() => recovery.dispose())
   const controller = new AbortController()
   const pending = recovery.run('test', () => assert.fail('Cancelled task ran'), { signal: controller.signal })

@@ -60,17 +60,24 @@ function fixture(platform = 'linux') {
     createFromPath: () => fakeImage(512),
   }
   const context = vm.createContext({
-    process: { platform, env: {} }, path: { join: () => '/icon.png' }, __dirname: '/',
+    process: { platform, env: {} },
+    path: { join: () => '/icon.png' },
+    __dirname: '/',
     selectedTrayImage: { isEmpty: () => true },
     nativeImage,
     getTrayMenuIcon: (name, pack) => `${pack}:${name}`,
-    Tray, BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
+    Tray,
+    BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
     Menu: { buildFromTemplate: items => items },
-    createWindow: () => new Window(), requestQuit: () => {},
+    createWindow: () => new Window(),
+    requestQuit: () => {},
     getDockMediaSession: () => mediaSession,
     requestDockMediaAction: action => mediaActions.push(action),
-    IpcChannels: { WINDOW_MINIMIZED_STATE: 'minimized' }, monitorsKdeWaylandWindowState: true, kdeWaylandWindowStateBackend: null,
-    applyKdeWindowIdentity() {}, releaseKdeWindowIdentity() {},
+    IpcChannels: { WINDOW_MINIMIZED_STATE: 'minimized' },
+    monitorsKdeWaylandWindowState: true,
+    kdeWaylandWindowStateBackend: null,
+    applyKdeWindowIdentity() {},
+    releaseKdeWindowIdentity() {},
     monitorKdeWaylandWindowState: options => { context.kdeCallback = options.onMinimizedState },
     setTimeout: callback => { timers.set(++timerId, callback); return timerId },
     clearTimeout: id => timers.delete(id),
@@ -100,7 +107,13 @@ function fixture(platform = 'linux') {
     }
     function hiddenCount() { return trayWindows.length; }
   `, context)
-  return { context, windows, trays, Window, mediaActions, minimizedStates,
+  return {
+    context,
+    windows,
+    trays,
+    Window,
+    mediaActions,
+    minimizedStates,
     setMedia: session => { mediaSession = session },
     flushTimers() { for (const [id, callback] of [...timers]) { timers.delete(id); callback() } },
   }
@@ -194,7 +207,6 @@ for (const interruption of ['restore', 'show', 'focus', 'disable', 'quit', 'clos
   })
 }
 
-
 test('KWin restore polling does not clear minimized state while hidden in the tray', () => {
   const { context, Window, flushTimers, minimizedStates } = fixture()
   const window = new Window()
@@ -211,6 +223,7 @@ test('KWin restore polling does not clear minimized state while hidden in the tr
 
 test('a recreated tray receives a menu even when its contents are unchanged', () => {
   const { context, Window, trays } = fixture()
+  // eslint-disable-next-line no-new -- the constructor registers the window with the fixture
   new Window()
   context.configure({})
   context.configure({ enabled: false })

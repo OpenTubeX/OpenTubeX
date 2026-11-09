@@ -16,7 +16,7 @@ const end = source.indexOf('\n}\n', start) + 2
 function deferred() {
   let resolve
   let reject
-  const promise = new Promise((res, rej) => { resolve = res; reject = rej })
+  const promise = new Promise((_resolve, _reject) => { resolve = _resolve; reject = _reject })
   return { promise, resolve, reject }
 }
 
@@ -62,7 +62,10 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     extractTotalAdTimeMilliseconds: () => 0,
     extractLocalContentDisclosures: () => null,
     extractLocalInfoPanels: () => null,
-    Constants, Utils, YT, ClientType,
+    Constants,
+    Utils,
+    YT,
+    ClientType,
     createInnertube: () => assert.fail('Unexpected fallback'),
     Response,
     console,
@@ -198,10 +201,14 @@ for (const details of [{ isLive: true }, { isPostLiveDvr: true }]) {
     const loading = load('testVideo01').then(result => { completed = true; return result })
     await new Promise(resolve => setImmediate(resolve))
     assert.equal(completed, false)
-    android.resolve({ data: { streamingData: {
-      hlsManifestUrl: 'https://example.com/live.m3u8',
-      dashManifestUrl: 'https://example.com/post-live.mpd',
-    } } })
+    android.resolve({
+      data: {
+        streamingData: {
+          hlsManifestUrl: 'https://example.com/live.m3u8',
+          dashManifestUrl: 'https://example.com/post-live.mpd',
+        }
+      }
+    })
     const result = await loading
     assert.equal(result.androidLiveHlsManifestUrl, 'https://example.com/live.m3u8')
     assert.equal(result.androidLiveDashManifestUrl, details.isPostLiveDvr ? 'https://example.com/post-live.mpd' : null)
@@ -224,20 +231,43 @@ test('reuses embedded watch metadata and honors skipped token generation', async
 })
 
 test('normalizes legacy popularity markers before parsing watch metadata', async () => {
-  const { load } = loader({ next: Promise.resolve({ data: {
-    contents: { twoColumnWatchNextResults: {
-      results: { results: { contents: [] } }, secondaryResults: { secondaryResults: { results: [] } }
-    } },
-    playerOverlays: { playerOverlayRenderer: { decoratedPlayerBarRenderer: { decoratedPlayerBarRenderer: {
-      playerBar: { multiMarkersPlayerBarRenderer: { markersMap: [{
-        key: 'HEATSEEKER', value: { heatmap: { heatmapRenderer: { heatMarkers: [{
-          heatMarkerRenderer: {
-            timeRangeStartMillis: 1000, markerDurationMillis: 1000, heatMarkerIntensityScoreNormalized: 1
+  const { load } = loader({
+    next: Promise.resolve({
+      data: {
+        contents: {
+          twoColumnWatchNextResults: {
+            results: { results: { contents: [] } }, secondaryResults: { secondaryResults: { results: [] } }
           }
-        }] } } }
-      }] } }
-    } } } }
-  } }) })
+        },
+        playerOverlays: {
+          playerOverlayRenderer: {
+            decoratedPlayerBarRenderer: {
+              decoratedPlayerBarRenderer: {
+                playerBar: {
+                  multiMarkersPlayerBarRenderer: {
+                    markersMap: [{
+                      key: 'HEATSEEKER',
+                      value: {
+                        heatmap: {
+                          heatmapRenderer: {
+                            heatMarkers: [{
+                              heatMarkerRenderer: {
+                                timeRangeStartMillis: 1000, markerDurationMillis: 1000, heatMarkerIntensityScoreNormalized: 1
+                              }
+                            }]
+                          }
+                        }
+                      }
+                    }]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  })
   const result = await load('testVideo01')
   assert.deepEqual(getVideoPopularity(result.info), [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
 })

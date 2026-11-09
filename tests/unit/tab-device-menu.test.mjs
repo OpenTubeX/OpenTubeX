@@ -84,14 +84,20 @@ for (const sameVideo of [false, true]) {
     let release
     const routeChange = new Promise(resolve => { release = resolve })
     const watch = {
-      tabId: 'first', videoId: 'jNQXAC9IVRw', videoLoadGeneration: 0,
+      tabId: 'first',
+      videoId: 'jNQXAC9IVRw',
+      videoLoadGeneration: 0,
       tabRoute: { params: { id: nextId } },
-      saveShortsPlaybackPosition() {}, prefetchLocalVideoInfo: () => null, handleRouteChange: () => routeChange,
+      saveShortsPlaybackPosition() {},
+      prefetchLocalVideoInfo: () => null,
+      handleRouteChange: () => routeChange,
       isCurrentVideoLoad: () => false,
-      $store: { commit(action, { tabId, value }) {
-        assert.equal(action, 'setCurrentWatchTimestamp')
-        timestamps[tabId] = value
-      } },
+      $store: {
+        commit(action, { tabId, value }) {
+          assert.equal(action, 'setCurrentWatchTimestamp')
+          timestamps[tabId] = value
+        }
+      },
     }
     const loading = reload.call(watch)
     try {
@@ -114,9 +120,14 @@ test('late time updates from the outgoing video cannot restore its handoff posit
   const timestamps = {}
   const { menu, calls } = setup({ timestamps })
   const watch = {
-    tabId: 'first', videoId: 'jNQXAC9IVRw', tabRoute: { params: { id: 'aqz-KE-bpKQ' } },
-    sabrErrorRecoveryLastSeconds: null, currentTime: 125, rememberHistory: false,
-    updateCurrentTime() {}, updateCurrentChapter() {},
+    tabId: 'first',
+    videoId: 'jNQXAC9IVRw',
+    tabRoute: { params: { id: 'aqz-KE-bpKQ' } },
+    sabrErrorRecoveryLastSeconds: null,
+    currentTime: 125,
+    rememberHistory: false,
+    updateCurrentTime() {},
+    updateCurrentChapter() {},
     $store: { commit(_action, { tabId, value }) { timestamps[tabId] = value } },
   }
   update.call(watch, 126)

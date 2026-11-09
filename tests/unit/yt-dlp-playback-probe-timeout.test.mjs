@@ -26,19 +26,29 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
         extractions.push(videoId)
         const incomplete = extractions.filter(id => id === videoId).length > incompleteAfterAttempt
         return {
-          isLive: false, liveStatus: 'not_live', duration: 60, storyboardVtt: null,
-          hlsManifestUrl: panorama ? 'https://media.test/panorama.m3u8?expire=4102444800' : null, incomplete,
+          isLive: false,
+          liveStatus: 'not_live',
+          duration: 60,
+          storyboardVtt: null,
+          hlsManifestUrl: panorama ? 'https://media.test/panorama.m3u8?expire=4102444800' : null,
+          incomplete,
           formats: [
             { formatId: '18', height: 360, vcodec: 'avc1.42001E', acodec: 'mp4a.40.2' },
             { formatId: '134', height: 360, vcodec: 'avc1.42001E', acodec: 'none' },
             { formatId: '137', height: 1080, vcodec: 'avc1.640028', acodec: 'none' },
             { formatId: '140', height: null, vcodec: 'none', acodec: 'mp4a.40.2' },
           ].filter(format => !incomplete || format.formatId !== '137').map(format => ({
-            ...format, protocol: 'https', ext: 'mp4',
+            ...format,
+            protocol: 'https',
+            ext: 'mp4',
             width: format.height === null ? null : format.height * 16 / 9,
-            fps: 30, dynamicRange: 'SDR', language: null,
+            fps: 30,
+            dynamicRange: 'SDR',
+            language: null,
             formatNote: panorama && format.height !== null ? 'mesh' : null,
-            audioSampleRate, audioChannels: 2, bitrate: 100_000,
+            audioSampleRate,
+            audioChannels: 2,
+            bitrate: 100_000,
             url: format.formatId === '18' && legacyUrl ? legacyUrl : `https://media.test/${videoId}/${format.formatId}?expire=4102444800`,
           })),
         }
@@ -248,7 +258,11 @@ test('plays ongoing streams from their sq segments and falls back to HLS', async
         ytDlpGetPlaybackInfo: async (videoId, _defaults, _auth, _subtitles, liveFromStart = false) => {
           liveFromStartCalls.push(liveFromStart)
           return {
-            isLive: true, liveStatus: 'is_live', duration: null, storyboardVtt: null, version: 'test',
+            isLive: true,
+            liveStatus: 'is_live',
+            duration: null,
+            storyboardVtt: null,
+            version: 'test',
             // --live-from-start replaces the HLS formats with segmented ones
             hlsManifestUrl: liveFromStart ? null : 'https://manifest.test/live.m3u8',
             formats: liveFromStart
@@ -256,8 +270,16 @@ test('plays ongoing streams from their sq segments and falls back to HLS', async
                   { formatId: '315', ext: 'webm', vcodec: 'vp9', acodec: 'none', width: 3840, height: 2160 },
                   { formatId: '140', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2', width: null, height: null }
                 ].map(format => ({
-                  ...format, protocol: 'http_dash_segments_generator', targetDuration: 5, fps: 60, bitrate: 100_000,
-                  audioSampleRate: 44_100, audioChannels: 2, language: null, formatNote: null, dynamicRange: 'SDR',
+                  ...format,
+                  protocol: 'http_dash_segments_generator',
+                  targetDuration: 5,
+                  fps: 60,
+                  bitrate: 100_000,
+                  audioSampleRate: 44_100,
+                  audioChannels: 2,
+                  language: null,
+                  formatNote: null,
+                  dynamicRange: 'SDR',
                   url: `https://rr1---sn-test.googlevideo.com/videoplayback?itag=${format.formatId}&live=1&expire=4102444800`
                 }))
               : []

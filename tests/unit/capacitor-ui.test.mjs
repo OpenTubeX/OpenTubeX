@@ -75,4 +75,3 @@ test('fullscreen uses the known aspect ratio before video dimensions arrive', as
 
   assert.deepEqual(calls, ['landscape', 'unlock', 'unlock'])
 })
-

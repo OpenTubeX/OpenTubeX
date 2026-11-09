@@ -36,14 +36,35 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
     playlistLoadGeneration: 0,
-    props, randomizedPlaylistItems, shuffleEnabled, loopEnabled, isUserPlaylist: ref(false),
-    isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe, nextTick, triggerRef,
-    playlistContinuationFailed: ref(false), playlistPanelNearEnd: ref(false), requestedPlaylistVideoCount: ref(0),
-    reversePlaylist: ref(false), updatePlaylistPanelNearEnd() {},
-    isLoading, playlistItems, getPlaylistInfoRun: false,
-    playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
-    store: { commit() {} }, playlistCacheTabId: 'android-tab', navigationDownloadId: () => undefined,
-    process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref(backend), usesInvidiousApi,
+    props,
+    randomizedPlaylistItems,
+    shuffleEnabled,
+    loopEnabled,
+    isUserPlaylist: ref(false),
+    isFetchingPlaylistContinuation,
+    hasUnloadedPlaylistVideos,
+    computed,
+    watch: observe,
+    nextTick,
+    triggerRef,
+    playlistContinuationFailed: ref(false),
+    playlistPanelNearEnd: ref(false),
+    requestedPlaylistVideoCount: ref(0),
+    reversePlaylist: ref(false),
+    updatePlaylistPanelNearEnd() {},
+    isLoading,
+    playlistItems,
+    getPlaylistInfoRun: false,
+    playlistTitle: ref(''),
+    playlistTotalVideoCount: ref(0),
+    channelName: ref(''),
+    channelId: ref(''),
+    store: { commit() {} },
+    playlistCacheTabId: 'android-tab',
+    navigationDownloadId: () => undefined,
+    process: { env: { SUPPORTS_LOCAL_API: true } },
+    backendPreference: ref(backend),
+    usesInvidiousApi,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
@@ -53,8 +74,11 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
       if (laterPageError) throw laterPageError
       return null
     },
-    expectedAutoSkipItem: null, router, showToast: toast => toasts.push(toast),
-    showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
+    expectedAutoSkipItem: null,
+    router,
+    showToast: toast => toasts.push(toast),
+    showApiErrorToast: (_message, error) => errors.push(error),
+    t: key => key,
     console: { error: error => errors.push(error) },
   }
   const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendPlaylistVideos(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
@@ -64,17 +88,26 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const shouldStop = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const videoIsLastInInPlaylistItems =', '\n/**\n * Index that')}\nshouldStopDueToPlaylistEnd`, context)
   const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo(', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
   const watch = {
-    isCurrentlyPresented: () => true, handleWatchProgressAutoSaveWhenProgressEnabled() {},
-    customShortsPlayerActive: false, isStandaloneShort: false, playNextQueuedVideo: () => false,
-    autoplayEnabled: true, blockVideoAutoplay: false, watchingPlaylist: true,
-    $refs: { watchVideoPlaylist: {
-      get nextVideo() { return state.nextVideo.value },
-      get isWaitingForNextVideo() { return state.isWaitingForNextVideo.value },
-      get isFetchingPlaylistContinuation() { return isFetchingPlaylistContinuation.value },
-      get shouldStopDueToPlaylistEnd() { return shouldStop.value },
-      playNextVideo: () => playNext(), resetUnavailableSkipChain() {},
-    } },
-    defaultInterval: 5, $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null }, commit() {} },
+    isCurrentlyPresented: () => true,
+    handleWatchProgressAutoSaveWhenProgressEnabled() {},
+    customShortsPlayerActive: false,
+    isStandaloneShort: false,
+    playNextQueuedVideo: () => false,
+    autoplayEnabled: true,
+    blockVideoAutoplay: false,
+    watchingPlaylist: true,
+    $refs: {
+      watchVideoPlaylist: {
+        get nextVideo() { return state.nextVideo.value },
+        get isWaitingForNextVideo() { return state.isWaitingForNextVideo.value },
+        get isFetchingPlaylistContinuation() { return isFetchingPlaylistContinuation.value },
+        get shouldStopDueToPlaylistEnd() { return shouldStop.value },
+        playNextVideo: () => playNext(),
+        resetUnavailableSkipChain() {},
+      }
+    },
+    defaultInterval: 5,
+    $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null }, commit() {} },
   }
   const ended = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoEnded: function () {', '\n    playNextVideoNow:')} })`, {
     setTimeout: () => 1, setInterval: () => 1, Date,
@@ -92,14 +125,31 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
-    items, playlistItems, isLoading, errors, watch, loopEnabled,
-    nextVideo: state.nextVideo, unavailableCount: state.playlistUnavailableVideoCount,
-    props, randomizedPlaylistItems,
+    items,
+    playlistItems,
+    isLoading,
+    errors,
+    watch,
+    loopEnabled,
+    nextVideo: state.nextVideo,
+    unavailableCount: state.playlistUnavailableVideoCount,
+    props,
+    randomizedPlaylistItems,
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     enableShuffle: () => { shuffleEnabled.value = true; shuffle() },
-    load: () => load({ id: 'youtube-playlist', title: 'YouTube playlist', totalVideoCount: 100,
-      channelName: 'Test', channelId: 'channel', items, continuationData: 'continuation' }),
-    finishContinuation, failContinuation, router, playNext,
+    load: () => load({
+      id: 'youtube-playlist',
+      title: 'YouTube playlist',
+      totalVideoCount: 100,
+      channelName: 'Test',
+      channelId: 'channel',
+      items,
+      continuationData: 'continuation'
+    }),
+    finishContinuation,
+    failContinuation,
+    router,
+    playNext,
     endVideo: () => ended.call(watch),
   }
 }
@@ -158,7 +208,6 @@ test('a cached continuation cannot extend a later visit of the same playlist', a
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
 })
 
-
 test('pages arriving during shuffle extend the existing playback order', async () => {
   const state = harness()
   const loading = state.load()
@@ -172,7 +221,6 @@ test('pages arriving during shuffle extend the existing playback order', async (
   state.endVideo()
   assert.ok(['third', 'fourth'].includes(state.watch.autoplayCountdown?.video.videoId))
 })
-
 
 for (const loop of [false, true]) {
   test(`pending pages do not wrap at the last cached video with loop ${loop}`, async () => {
@@ -212,7 +260,6 @@ test('unavailable entries are counted after pagination succeeds', async () => {
   await loading
   assert.equal(state.unavailableCount.value, 97)
 })
-
 
 for (const action of ['cancelAutoplay', 'replayVideo']) {
   test(`${action} prevents delayed pages from restarting autoplay`, async () => {

@@ -27,7 +27,8 @@ for (const metadataOnly of [false, true]) {
     const watch = {
       ...methods,
       tabRoute: { params: { id: 'video' } },
-      backendPreference: 'invidious', backendFallback: true,
+      backendPreference: 'invidious',
+      backendFallback: true,
       isCurrentVideoLoad: () => true,
       scheduleDownloadedPlaybackFallback() {},
       settleDownloadedPlaybackFallback: () => false,

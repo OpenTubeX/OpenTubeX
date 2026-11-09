@@ -46,9 +46,9 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
         isPlaybackEnded: () => false,
         isPlaybackPaused: () => true,
         isPlayerSurfaceTarget: nativeReplay
-          ? vm.runInNewContext(`(${playerSource.match(/function isPlayerSurfaceTarget\(target\) \{[\s\S]*?\n    \}/)[0]})`, {
-            Element: ElementStub, video: { value: {} }, container: { value: { hasAttribute: () => true } }
-          })
+          ? vm.runInNewContext(`(${playerSource.match(/function isPlayerSurfaceTarget\(target\) \{[\s\S]*?\n {4}\}/)[0]})`, {
+              Element: ElementStub, video: { value: {} }, container: { value: { hasAttribute: () => true } }
+            })
           : target => target === surface,
         isScrollMiniPlayerActive: () => mini,
         isShortsPlayer: () => shorts,
@@ -72,7 +72,9 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
           finish: () => calls.push('finish'),
           cancel: () => calls.push('cancel'),
         },
-        setFullscreenMetadata() {}, setShowUiOnPaused() {}, showOverlayControls() {},
+        setFullscreenMetadata() {},
+        setShowUiOnPaused() {},
+        showOverlayControls() {},
         togglePlayerFullScreen: toggleFullscreen ?? (() => calls.push('fullscreen')),
       })
       return () => null
@@ -86,8 +88,19 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
   }
   t.after(() => { unmount(); Object.assign(globalThis, previous) })
   function event(x = 50, y = 150, extra = {}) {
-    return { clientX: x, clientY: y, pointerId: 1, pointerType: 'touch', button: 0, isPrimary: true, target: surface,
-      preventDefault() { this.prevented = true }, stopPropagation() {}, stopImmediatePropagation() {}, ...extra }
+    return {
+      clientX: x,
+      clientY: y,
+      pointerId: 1,
+      pointerType: 'touch',
+      button: 0,
+      isPrimary: true,
+      target: surface,
+      preventDefault() { this.prevented = true },
+      stopPropagation() {},
+      stopImmediatePropagation() {},
+      ...extra
+    }
   }
   const paint = () => frames.splice(0).forEach(callback => callback())
   return { gestures, calls, event, captures, container, unmount, paint, dragStartTimes }
@@ -148,7 +161,7 @@ test('a swipe exits rotation fullscreen without entering native fullscreen', asy
     ui: { getControls: () => ({ toggleFullScreen: () => { nativeToggles++ } }) },
   })
   const fullscreen = vm.runInContext(`(${optionsSource.match(/isFullscreenActive: ([^\n]+),/)[1]})`, context)
-  const toggleFullscreen = vm.runInContext(`(${optionsSource.match(/togglePlayerFullScreen: ([\s\S]*?\n      \}),/)[1]})`, context)
+  const toggleFullscreen = vm.runInContext(`(${optionsSource.match(/togglePlayerFullScreen: ([\s\S]*?\n {6}\}),/)[1]})`, context)
   const { gestures: g, event, paint } = fixture(t, { fullscreen, toggleFullscreen })
   t.mock.timers.enable({ apis: ['setTimeout'] })
   assert.equal(fullscreen(), true, 'Rotation fullscreen must be recognized by gestures')
@@ -253,7 +266,9 @@ for (const [placement, x] of [['toolbar', 50], ['center', 210]]) {
     const target = new ElementStub('.shaka-play-button')
     target.classList = { contains: () => false }
     target.closest = selectors => selectors.includes('.shaka-play-button') ||
-      (placement === 'toolbar' && selectors.includes('.shaka-controls-button-panel')) ? target : null
+      (placement === 'toolbar' && selectors.includes('.shaka-controls-button-panel'))
+      ? target
+      : null
     g.startMobileFullscreenGesture(event(x, 150, { target }))
     g.finishMobileFullscreenGesture(event(x, 150, { target }))
     const touchEnd = event(x, 150, { target, timeStamp: performance.now() })
@@ -329,7 +344,6 @@ for (const x of [50]) {
   })
 }
 
-
 for (const distance of [24, 120]) {
   test(`upward mini-player swipe ${distance}px restores or cancels`, t => {
     const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
@@ -349,7 +363,10 @@ test('revealing Watch preserves a drag and completed dismissal survives visibili
   const dismissing = { value: false }
   vm.runInNewContext(playerSource.slice(start, end), {
     watch: (_sources, callback) => { changed = callback },
-    isActiveTab: {}, scrollMiniPlayerActive: {}, mobileAdjustmentsVisible: {}, props: { videoId: 'video' },
+    isActiveTab: {},
+    scrollMiniPlayerActive: {},
+    mobileAdjustmentsVisible: {},
+    props: { videoId: 'video' },
     scrollMiniPlayerDragStyle: dragging,
     mobileMiniPlayerDismissSettling: dismissing,
     mobileFullscreenBrightnessActive: { value: false },
@@ -369,7 +386,6 @@ test('revealing Watch preserves a drag and completed dismissal survives visibili
   changed([false, true, true, 'other'], [false, true, false, 'video'])
   assert.deepEqual(resets, [true, true, false, false])
 })
-
 
 test('upward swipe also starts on the mini-player transparent touch layer', t => {
   const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
@@ -499,7 +515,6 @@ for (const selector of ['.mobileMiniBarDismiss', '.mobileMiniBarPlayback']) {
     assert.deepEqual(calls, [])
   })
 }
-
 
 test('does not reenter fullscreen when iPadOS already exited during a downward swipe', async t => {
   let fullscreen = true
@@ -642,8 +657,8 @@ for (const [name, dynamic, time, duration, end, expected] of [
 ]) {
   test(`fullscreen swipe commit respects the ${name}`, () => {
     const video = { value: { currentTime: 15, duration, paused: true } }
-    const seekToTimeSource = playerSource.match(/      seekToTime: (time => \{[^]*?\n      \}),/)[1]
-    const seekBySecondsSource = playerSource.match(/    function seekBySeconds\([^]*?\n    }/)[0]
+    const seekToTimeSource = playerSource.match(/ {6}seekToTime: (time => \{[^]*?\n {6}\}),/)[1]
+    const seekBySecondsSource = playerSource.match(/ {4}function seekBySeconds\([^]*?\n {4}}/)[0]
     const remembered = []
     const seekToTime = vm.runInNewContext(`${seekBySecondsSource}\n(${seekToTimeSource})`, {
       video,

@@ -47,11 +47,17 @@ for (const hidden of [false, true]) {
     const api = scope.run(() => vm.runInNewContext(`${layout}\n${watchers}\n;({ updateScrollLayout, updateScrollVisibility, scrollHidden })`, {
       requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
       cancelAnimationFrame: id => frames.delete(id),
-      computed, ref, watch, nextTick, route,
+      computed,
+      ref,
+      watch,
+      nextTick,
+      route,
       useTemplateRef: () => ref({ closest: () => nav }),
       store: { getters: { getAlwaysShowNavigationBar: false } },
-      createMobileNavigationScroll, mobileNavigationMinimizePreview: preview,
-      window: viewport, document: { scrollingElement: { scrollHeight: 3000, clientHeight: 800 } },
+      createMobileNavigationScroll,
+      mobileNavigationMinimizePreview: preview,
+      window: viewport,
+      document: { scrollingElement: { scrollHeight: 3000, clientHeight: 800 } },
       getComputedStyle: () => ({ getPropertyValue: () => '1' })
     }))
     api.updateScrollLayout()

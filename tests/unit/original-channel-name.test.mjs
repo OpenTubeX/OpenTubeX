@@ -23,7 +23,7 @@ test('shares in-flight lookups and reuses successful names across channel cards'
   let release
   const resolve = createOriginalChannelNameResolver(() => {
     calls++
-    return new Promise(done => { release = done })
+    return new Promise(resolve => { release = resolve })
   })
   const first = resolve(channelId)
   const second = resolve(channelId)

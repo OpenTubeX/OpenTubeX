@@ -20,13 +20,15 @@ for (const [snapshot, ref, expected] of [
     const job = (await workflow('package-ios')).jobs.archive
     const metadata = job.steps.find(step => step.id === 'package')
     const result = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', metadata.run], {
-      cwd: directory, encoding: 'utf8',
+      cwd: directory,
+      encoding: 'utf8',
       env: { ...process.env, SNAPSHOT: snapshot, GITHUB_REF: ref, GITHUB_RUN_NUMBER: '123', GITHUB_OUTPUT: output },
     })
     assert.equal(result.status, 0, result.stderr)
     assert.equal(JSON.parse(await readFile(join(directory, 'package.json'), 'utf8')).version, expected)
     assert.equal(await readFile(output, 'utf8'), `name=opentubex-${expected}-ios-unsigned.ipa\n`)
     const artifact = job.steps.find(step => step.uses?.startsWith('actions/upload-artifact@'))
+    // eslint-disable-next-line no-template-curly-in-string -- GitHub Actions expression
     assert.equal(artifact.with.name, '${{ steps.package.outputs.name }}')
     assert.equal(artifact.with['if-no-files-found'], 'error')
   })

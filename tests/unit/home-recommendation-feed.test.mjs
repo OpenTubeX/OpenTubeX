@@ -41,7 +41,8 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     get getRecommendationRecords() { return Object.values(state.recommendations.recommendationRecords) },
   })
   const store = {
-    state, getters,
+    state,
+    getters,
     async dispatch(type, { video }) {
       assert.equal(type, 'recordRecommendationEvent')
       state.recommendations.recommendationRecords[video.videoId] = { ...video, impressions: [Date.now()] }
@@ -50,10 +51,19 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
   let cleanups = []
   const work = { profiles: 0, rankings: 0, requests: 0 }
   const dependencies = {
-    computed, ref, shallowRef, toRaw, watch, store, runCooperatively,
+    computed,
+    ref,
+    shallowRef,
+    toRaw,
+    watch,
+    store,
+    runCooperatively,
     onBeforeUnmount: callback => cleanups.push(callback),
     useTabContext: () => ({}),
-    getRecommendationLearningEntries, recommendationSubscriptionIds, mergeRecommendationCandidates, getUpcomingPremiereTimestamp,
+    getRecommendationLearningEntries,
+    recommendationSubscriptionIds,
+    mergeRecommendationCandidates,
+    getUpcomingPremiereTimestamp,
     isVideoHiddenByPreferences,
     buildRecommendationProfileAsync: async (...args) => { work.profiles++; return buildProfile(...args) },
     rankRecommendationCandidatesAsync: async (videos, profile, { limit, kept = [] }) => {
@@ -71,7 +81,11 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     const feed = scope.run(() => useHomeRecommendations(computed(() => true)))
     const unmountCallbacks = cleanups
     return {
-      feed, state, getters, work, mount,
+      feed,
+      state,
+      getters,
+      work,
+      mount,
       stop() { unmountCallbacks.forEach(callback => callback()); scope.stop() },
     }
   }
@@ -225,8 +239,7 @@ for (const refreshOtherHome of [false, true]) {
       releases.get(2)()
       await new Promise(resolve => setTimeout(resolve, 0))
       assert.equal(second.feed.isLoading.value, true)
-      if (refreshOtherHome) { releases.get(5)(); releases.get(6)() }
-      else releases.get(3)()
+      if (refreshOtherHome) { releases.get(5)(); releases.get(6)() } else releases.get(3)()
       await waitForFeed(second.feed)
       assert.equal(second.feed.recommendations.value.length, 1)
       assert.equal(second.work.requests, refreshOtherHome ? 2 : 1)
@@ -350,7 +363,8 @@ test('impressions preserve the feed and check channel feedback once per record r
 test('Home selects and snapshots only the existing saved and favorite learning budgets', async () => {
   const reads = { favorites: 0, saved: 0 }
   const videos = type => Array.from({ length: 45000 }, (_, index) => ({
-    videoId: `${type}-${index}`, title: 'Linux desktop',
+    videoId: `${type}-${index}`,
+    title: 'Linux desktop',
     get description() { reads[type]++; return 'KDE Plasma' },
   }))
   const playlists = [{ _id: 'favorites', videos: videos('favorites') }, { _id: 'saved', videos: videos('saved') }]

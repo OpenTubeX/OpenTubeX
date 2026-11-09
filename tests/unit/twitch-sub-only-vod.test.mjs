@@ -17,21 +17,35 @@ test('builds a playable HLS master from accessible Twitch VOD qualities', async 
   const fetcher = async (url) => {
     requests.push(url)
     if (url === 'https://gql.twitch.tv/gql') {
-      return Response.json({ data: { video: {
-        title: 'Subscriber archive',
-        lengthSeconds: 10,
-        broadcastType: 'ARCHIVE',
-        seekPreviewsURL: 'https://example.cloudfront.net/cf_vods/archive-key/storyboards/metadata.json',
-        owner: { login: 'example' }
-      } } })
+      return Response.json({
+        data: {
+          video: {
+            title: 'Subscriber archive',
+            lengthSeconds: 10,
+            broadcastType: 'ARCHIVE',
+            seekPreviewsURL: 'https://example.cloudfront.net/cf_vods/archive-key/storyboards/metadata.json',
+            owner: { login: 'example' }
+          }
+        }
+      })
     }
-    if (url.endsWith('/storyboards/metadata.json')) return Response.json([{
-      width: 80, height: 45, rows: 2, cols: 2, count: 5,
-      images: ['low-0.jpg', 'low-1.jpg']
-    }, {
-      width: 160, height: 90, rows: 2, cols: 2, count: 5,
-      images: ['0.jpg', '1.jpg']
-    }])
+    if (url.endsWith('/storyboards/metadata.json')) {
+      return Response.json([{
+        width: 80,
+        height: 45,
+        rows: 2,
+        cols: 2,
+        count: 5,
+        images: ['low-0.jpg', 'low-1.jpg']
+      }, {
+        width: 160,
+        height: 90,
+        rows: 2,
+        cols: 2,
+        count: 5,
+        images: ['0.jpg', '1.jpg']
+      }])
+    }
     if (url.endsWith('/720p60/segment-1.ts')) return new Response(segment)
     return new Response(url.includes('/720p60/') ? '#EXTM3U\nsegment-1.ts\n' : '', {
       status: url.includes('/720p60/') ? 200 : 404
@@ -65,10 +79,16 @@ test('unavailable or invalid seekbar previews do not prevent Twitch VOD playback
     await t.test(name, async () => {
       const segment = Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28])
       const fetcher = async url => {
-        if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-          lengthSeconds: 10,
-          seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/metadata.json'
-        } } })
+        if (url === 'https://gql.twitch.tv/gql') {
+          return Response.json({
+            data: {
+              video: {
+                lengthSeconds: 10,
+                seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/metadata.json'
+              }
+            }
+          })
+        }
         if (url.endsWith('/storyboards/metadata.json')) return previewResponse()
         if (url.endsWith('/720p60/index-dvr.m3u8')) return new Response('#EXTM3U\nsegment-1.ts\n')
         if (url.endsWith('/720p60/segment-1.ts')) return new Response(segment)
@@ -86,10 +106,16 @@ test('stalled seekbar previews have a short deadline without preventing Twitch V
     await t.test(stage, async () => {
       let previewSignal
       const fetcher = async (url, options) => {
-        if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-          lengthSeconds: 10,
-          seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/metadata.json'
-        } } })
+        if (url === 'https://gql.twitch.tv/gql') {
+          return Response.json({
+            data: {
+              video: {
+                lengthSeconds: 10,
+                seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/metadata.json'
+              }
+            }
+          })
+        }
         if (url.endsWith('/storyboards/metadata.json')) {
           previewSignal = options.signal
           const stalled = () => new Promise((resolve, reject) => {
@@ -127,9 +153,15 @@ test('uses each Twitch transport stream quality’s declared H.264 codec', async
     return bytes
   }
   const fetcher = async (url, options) => {
-    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
-    } } })
+    if (url === 'https://gql.twitch.tv/gql') {
+      return Response.json({
+        data: {
+          video: {
+            seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+          }
+        }
+      })
+    }
     if (url.endsWith('/chunked/index-dvr.m3u8') || url.endsWith('/480p30/index-dvr.m3u8')) {
       return new Response('#EXTM3U\n#EXTINF:10,\nsegment-1.ts\n')
     }
@@ -156,9 +188,15 @@ test('keeps a Twitch VOD quality playable when its first segment is muted', asyn
   Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28]).copy(segment, 24)
   const fetcher = async url => {
     requests.push(url)
-    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
-    } } })
+    if (url === 'https://gql.twitch.tv/gql') {
+      return Response.json({
+        data: {
+          video: {
+            seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+          }
+        }
+      })
+    }
     if (url.endsWith('/720p60/index-dvr.m3u8')) {
       return new Response('#EXTM3U\n#EXTINF:10,\n0-unmuted.ts\n')
     }
@@ -180,9 +218,15 @@ test('muted segment probing preserves directory names and signed query strings',
   const expectedUrl = 'https://example.cloudfront.net/archive-key/720p60/parts-unmuted/0-muted.ts?token=keep-unmuted'
   const fetcher = async url => {
     requests.push(url)
-    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
-    } } })
+    if (url === 'https://gql.twitch.tv/gql') {
+      return Response.json({
+        data: {
+          video: {
+            seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+          }
+        }
+      })
+    }
     if (url.endsWith('/720p60/index-dvr.m3u8')) {
       return new Response('#EXTM3U\n#EXTINF:10,\nparts-unmuted/0-unmuted.ts?token=keep-unmuted\n')
     }
@@ -221,10 +265,16 @@ test('reads an MP4 highlight codec from its playlist init segment', async () => 
   const requested = []
   const fetcher = async url => {
     requested.push(url)
-    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
-      broadcastType: 'HIGHLIGHT',
-      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
-    } } })
+    if (url === 'https://gql.twitch.tv/gql') {
+      return Response.json({
+        data: {
+          video: {
+            broadcastType: 'HIGHLIGHT',
+            seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+          }
+        }
+      })
+    }
     if (url.endsWith('/360p30/highlight-12345.m3u8') || url.endsWith('/720p60/highlight-12345.m3u8')) {
       return new Response('#EXTM3U\n#EXT-X-MAP:URI="init-0.mp4"\n#EXTINF:4,\nsegment-0.mp4\n')
     }

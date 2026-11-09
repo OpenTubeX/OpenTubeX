@@ -29,13 +29,15 @@ function setup(t, { decodeError, videos = [], filesystem } = {}) {
   let captureImage = preview
   const uri = '/cache/temporary-screenshot.jpg'
   const tab = { id: 'tab', route: { fullPath: '/home' }, loadState: 'loaded' }
-  const store = { getters: reactive({
-    getShowTabPreviews: true,
-    getPresentedTab: tab,
-    getPresentedTabId: tab.id,
-    getActiveTabId: tab.id,
-    getTabs: [tab],
-  }) }
+  const store = {
+    getters: reactive({
+      getShowTabPreviews: true,
+      getPresentedTab: tab,
+      getPresentedTabId: tab.id,
+      getActiveTabId: tab.id,
+      getTabs: [tab],
+    })
+  }
   const document = new EventTarget()
   let overlayReads = 0
   const drawImage = t.mock.fn(source => {
@@ -106,8 +108,24 @@ function setup(t, { decodeError, videos = [], filesystem } = {}) {
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, filesystem, dispose, drawImage, pageSwipe, organizerSwipeActive, loadingTabs,
-    setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
+  return {
+    document,
+    store,
+    tab,
+    preview,
+    uri,
+    take,
+    remove,
+    warn,
+    filesystem,
+    dispose,
+    drawImage,
+    pageSwipe,
+    organizerSwipeActive,
+    loadingTabs,
+    setCaptureImage: image => { captureImage = image },
+    overlayReads: () => overlayReads
+  }
 }
 
 async function captureScheduledPreview(t) {
@@ -161,12 +179,21 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     const methods = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
     const updates = []
     const ctx = vm.createContext({
-      props: { enabled: true }, open, disposed: false,
-      document: state.document, window: globalThis.window,
-      organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
-      prepareForTabOrganizer, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
+      props: { enabled: true },
+      open,
+      disposed: false,
+      document: state.document,
+      window: globalThis.window,
+      organizerGesture: ref(false),
+      skipDialogTransition: ref(false),
+      activeView: ref('open'),
+      prepareForTabOrganizer,
+      nextTick,
+      presentedTabId: ref('tab'),
+      CSS: { escape: value => value },
       dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
-      openTabsScrollRef: ref(null), organizerSwipeProgress: distance => distance / 320,
+      openTabsScrollRef: ref(null),
+      organizerSwipeProgress: distance => distance / 320,
       createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
     })
     const gesture = vm.runInContext(`${methods}; organizerSwipe`, ctx)

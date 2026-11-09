@@ -8,10 +8,15 @@ for (const end of ['pointerup', 'pointercancel', 'lostpointercapture', 'scroll']
   test(`touch ranges accept accessibility changes after ${end}`, () => {
     const handlers = new Map()
     const input = {
-      value: '50', min: '0', max: '100', style: {},
+      value: '50',
+      min: '0',
+      max: '100',
+      style: {},
       addEventListener: (name, callback) => handlers.set(name, callback),
       removeEventListener: name => handlers.delete(name),
-      setPointerCapture() {}, focus() {}, dispatchEvent() {},
+      setPointerCapture() {},
+      focus() {},
+      dispatchEvent() {},
       getBoundingClientRect: () => ({ left: 0, width: 100 }),
     }
     const attach = vm.runInNewContext(`${source}; attachTouchRange`, { Event, getComputedStyle: () => ({ direction: 'ltr' }) })
@@ -45,10 +50,15 @@ for (const [otherEvent, pointerType] of [
   test(`another ${pointerType} pointer's ${otherEvent} cannot interrupt a touch drag`, () => {
     const handlers = new Map()
     const input = {
-      value: '50', min: '0', max: '100', style: {},
+      value: '50',
+      min: '0',
+      max: '100',
+      style: {},
       addEventListener: (name, callback) => handlers.set(name, callback),
       removeEventListener: name => handlers.delete(name),
-      setPointerCapture() {}, focus() {}, dispatchEvent() {},
+      setPointerCapture() {},
+      focus() {},
+      dispatchEvent() {},
       getBoundingClientRect: () => ({ left: 0, width: 100 }),
     }
     const attach = vm.runInNewContext(`${source}; attachTouchRange`, { Event, getComputedStyle: () => ({ direction: 'ltr' }) })

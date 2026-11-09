@@ -23,14 +23,16 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   const attributes = new Set()
   const video = { style: videoStyle }
   const methods = vm.runInNewContext(`${morphSource}\ncreateMobileMiniMorph({ container, video, mobileMiniBarOverlay })`, {
-    container: { value: {
-      style,
-      hasAttribute: name => attributes.has(name),
-      setAttribute: name => attributes.add(name),
-      removeAttribute: name => attributes.delete(name),
-      querySelector: () => null,
-      querySelectorAll: selector => selector === '.musicAudioMetadata' ? [] : surfaces,
-    } },
+    container: {
+      value: {
+        style,
+        hasAttribute: name => attributes.has(name),
+        setAttribute: name => attributes.add(name),
+        removeAttribute: name => attributes.delete(name),
+        querySelector: () => null,
+        querySelectorAll: selector => selector === '.musicAudioMetadata' ? [] : surfaces,
+      }
+    },
     video: { value: video },
     mobileMiniBarOverlay: { value: { style: overlayStyle } },
   })
@@ -121,13 +123,17 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     ? { x: 172.25, y: 570.75, width: 210.5, height: 118.40625 }
     : { x: 10.25, y: 80.5, width: 390.5, height: 219.65625 }
   const to = { left: 172.25, top: 570.75, width: 210.5, height: 118.40625 }
-  const container = { value: {
-    style, offsetHeight: 219.65625,
-    hasAttribute: name => phonePanel && name === 'data-phone-panel-video',
-    setAttribute() {}, removeAttribute() {},
-    querySelectorAll: () => [],
-    getBoundingClientRect() { reads++; return from },
-  } }
+  const container = {
+    value: {
+      style,
+      offsetHeight: 219.65625,
+      hasAttribute: name => phonePanel && name === 'data-phone-panel-video',
+      setAttribute() {},
+      removeAttribute() {},
+      querySelectorAll: () => [],
+      getBoundingClientRect() { reads++; return from },
+    }
+  }
   const eligibility = source.slice(source.indexOf('  function canUseScrollMiniPlayerBase('), source.indexOf('  function canShowCrossTabMiniPlayer('))
   const methods = vm.runInNewContext(`${morphSource}\nconst { renderMobileMiniMorph, clearMobileMiniMorph } = createMobileMiniMorph({ container, video, mobileMiniBarOverlay })\n${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
     process: { env: { IS_CAPACITOR: false } },
@@ -146,7 +152,8 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     getAnimationSpeedMultiplier: () => 1,
     store: { getters: { getAnimationSpeed: 1 } },
     watchNavigation: {
-      detached: { value: true }, minimize() {},
+      detached: { value: true },
+      minimize() {},
       beginMinimizePreview() { navigations++ },
       beginRestorePreview() { return true },
       updateMinimizePreview(progress) { previewProgress = progress },
@@ -287,7 +294,7 @@ test('an open phone panel allows explicit minimization while blocking automatic 
 })
 
 test('navigation can hide the watch view without losing the drag handoff dimensions', () => {
-  const measure = source.match(/function getScrollMiniPlaceholderLayoutHeight\(\) \{[\s\S]*?\n  \}/)[0]
+  const measure = source.match(/function getScrollMiniPlaceholderLayoutHeight\(\) \{[\s\S]*?\n {2}\}/)[0]
   const height = vm.runInNewContext(`(${measure})()`, {
     inlineDrag: { from: { width: 412.19049, height: 231.857147 } },
     container: { value: { offsetWidth: 0, offsetHeight: 0 } },
@@ -296,7 +303,6 @@ test('navigation can hide the watch view without losing the drag handoff dimensi
   })
   assert.ok(height > 231 && height < 233)
 })
-
 
 for (const commit of [true, false]) {
   test(`upward drag expands toward Watch and ${commit ? 'restores' : 'keeps'} the mini player`, async () => {
@@ -328,13 +334,15 @@ test('Watch return resets browsing scroll before revealing the Watch route', asy
     previewRestoring: { value: true },
     previewScroll: { left: 0, top: 420 },
     disposed: false,
-    navigation: { push: async () => {
-      scrollAtNavigation = window.scrollY
-      browsingEntry.scroll = { left: 0, top: window.scrollY }
-      tab.history.push({ scroll: { left: 0, top: 0 } })
-      tab.historyIndex = 1
-      isWatchRoute.value = true
-    } },
+    navigation: {
+      push: async () => {
+        scrollAtNavigation = window.scrollY
+        browsingEntry.scroll = { left: 0, top: window.scrollY }
+        tab.history.push({ scroll: { left: 0, top: 0 } })
+        tab.historyIndex = 1
+        isWatchRoute.value = true
+      }
+    },
     props: { tabId: 'watch' },
     watchRoute: { value: { fullPath: '/watch/demo' } },
     isWatchRoute,
@@ -381,8 +389,13 @@ for (const mobile of [true]) {
     let observed = false
     const setup = source.slice(source.indexOf('  function setupScrollMiniIntersectionObserver()'), source.indexOf('  /** @param {boolean} [animate] */', source.indexOf('  function setupScrollMiniIntersectionObserver()')))
     const initialize = vm.runInNewContext(`${setup}\nsetupScrollMiniIntersectionObserver`, {
-      scrollMiniIntersectionObserver: null, props: { format: 'audio' }, usesMobileMiniBar: () => mobile,
-      getScrollMiniAnchor: () => ({}), updateScrollMiniPlayer() {}, ENTER_MINI_RATIO: 0.1, EXIT_MINI_RATIO: 0.5,
+      scrollMiniIntersectionObserver: null,
+      props: { format: 'audio' },
+      usesMobileMiniBar: () => mobile,
+      getScrollMiniAnchor: () => ({}),
+      updateScrollMiniPlayer() {},
+      ENTER_MINI_RATIO: 0.1,
+      EXIT_MINI_RATIO: 0.5,
       IntersectionObserver: class { observe() { observed = true } },
     })
     initialize()

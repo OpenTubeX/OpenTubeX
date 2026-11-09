@@ -66,7 +66,12 @@ async function electronHistory(t) {
   t.after(() => Object.values(db).forEach(store => store.driver.close()))
   await db.settings.insertAsync({ _id: 'historyWatchedStatusMigrated', value: true })
   const main = vm.runInNewContext(base.slice(base.indexOf('class Settings {'), base.indexOf('\nclass WatchStats {')) + '\n({ History })', {
-    db, ...seenVideos, migrateLegacyHistoryRecord, newestUniqueHistoryRecords, createIdQuery, migrateStoredSettings,
+    db,
+    ...seenVideos,
+    migrateLegacyHistoryRecord,
+    newestUniqueHistoryRecords,
+    createIdQuery,
+    migrateStoredSettings,
     recommendations: { remove: async () => {} },
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
   }).History

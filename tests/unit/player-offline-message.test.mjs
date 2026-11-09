@@ -16,7 +16,9 @@ test('SponsorBlock refresh waits for connectivity and pending votes', async () =
   const pendingVote = ref(null)
   let refreshes = 0
   const refresh = vm.runInNewContext(`${sponsorBlockSource.slice(start, end)}\nrefreshSponsorBlockInfo`, {
-    props, sponsorBlockEnableSubmission: ref(false), sponsorBlockVotePending: pendingVote,
+    props,
+    sponsorBlockEnableSubmission: ref(false),
+    sponsorBlockVotePending: pendingVote,
     setupSponsorBlock: async () => { refreshes++ }
   })
   await refresh()
@@ -58,16 +60,23 @@ for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) 
     const helperStart = sponsorBlockSource.indexOf('  function syncSponsorBlockPlaybackState()')
     const helper = sponsorBlockSource.slice(helperStart, sponsorBlockSource.indexOf('  async function refreshSponsorBlockInfo()', helperStart))
     vm.runInNewContext(`${helper}\n${source.slice(start, end)}`, {
-      watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(true),
-      sponsorBlockLoadedVideoId: loaded ? 'video' : null, sponsorBlockInfoLoading: ref(loading),
+      watch: (_source, callback) => { change = callback },
+      useSponsorBlock: ref(true),
+      sponsorBlockLoadedVideoId: loaded ? 'video' : null,
+      sponsorBlockInfoLoading: ref(loading),
       props: { videoId: 'video', sponsorBlockAutoSkipDisabled: false },
-      video: ref({ currentTime: 42, paused: true }), sponsorBlockSegments: [{}], canSeek: () => true,
+      video: ref({ currentTime: 42, paused: true }),
+      sponsorBlockSegments: [{}],
+      canSeek: () => true,
       syncPromptSponsorBlockSegments: time => restored.push(['prompt', time]),
       updateSponsorBlockHighlightState: time => restored.push(['highlight', time]),
       syncSponsorBlockMuteSegments: (time, enabled) => restored.push(['mute', time, enabled]),
-      setupSponsorBlock: () => { setups++ }, scheduleSponsorBlockSkip() { schedules++ },
-      closeSponsorBlockInfo() {}, sponsorBlockMuteController: { reset() {} },
-      clearSponsorBlockMuteSegments() {}, cancelSponsorBlockSkipSchedule() {},
+      setupSponsorBlock: () => { setups++ },
+      scheduleSponsorBlockSkip() { schedules++ },
+      closeSponsorBlockInfo() {},
+      sponsorBlockMuteController: { reset() {} },
+      clearSponsorBlockMuteSegments() {},
+      cancelSponsorBlockSkipSchedule() {},
     })
     change(true)
     assert.equal(setups, loaded || loading ? 0 : 1)
@@ -88,11 +97,17 @@ test('a stale SponsorBlock response cannot finish the current request for first'
     ${source.slice(start, end)}
     ({ setupSponsorBlock, loaded: () => sponsorBlockLoadedVideoId })
   `, {
-    props, sponsorBlockInfoLoading: loading, sponsorBlockInfoSegments: ref([]),
+    props,
+    sponsorBlockInfoLoading: loading,
+    sponsorBlockInfoSegments: ref([]),
     hasSponsorBlockMusicOfftopicSegment: ref(false),
-    resetSponsorBlockPlaybackState() {}, emitSponsorBlockInfoState() {},
+    resetSponsorBlockPlaybackState() {},
+    emitSponsorBlockInfoState() {},
     getSponsorBlockSegments: () => new Promise(resolve => requests.push(resolve)),
-    SPONSORBLOCK_INFO_CATEGORIES: [], SPONSORBLOCK_INFO_ACTION_TYPES: [], ui: null, player: null,
+    SPONSORBLOCK_INFO_CATEGORIES: [],
+    SPONSORBLOCK_INFO_ACTION_TYPES: [],
+    ui: null,
+    player: null,
   })
   const first = harness.setupSponsorBlock()
   props.videoId = 'first'
@@ -116,16 +131,22 @@ for (const [change, hasSegments] of [['none', false], ['none', true], ['video', 
     const originalSegments = []
     const info = ref(originalSegments)
     const context = vm.createContext({
-      props: { videoId: 'first' }, sponsorBlockRequestGeneration: 1,
+      props: { videoId: 'first' },
+      sponsorBlockRequestGeneration: 1,
       getRequestGeneration: () => context.sponsorBlockRequestGeneration,
       getSponsorBlockSegments: videoId => {
         assert.equal(videoId, 'first')
         return new Promise(resolve => { respond = resolve })
       },
-      SPONSORBLOCK_INFO_CATEGORIES: [], SPONSORBLOCK_INFO_ACTION_TYPES: [],
-      SPONSORBLOCK_PLAYBACK_ACTION_TYPES: ['skip'], sponsorSkips: ref({ seekBar: ['sponsor'] }),
-      getUi: () => ({}), getPlayer: () => ({}), sponsorBlockInfoSegments: info,
-      setSegments() {}, setAverageVideoDuration() {},
+      SPONSORBLOCK_INFO_CATEGORIES: [],
+      SPONSORBLOCK_INFO_ACTION_TYPES: [],
+      SPONSORBLOCK_PLAYBACK_ACTION_TYPES: ['skip'],
+      sponsorSkips: ref({ seekBar: ['sponsor'] }),
+      getUi: () => ({}),
+      getPlayer: () => ({}),
+      sponsorBlockInfoSegments: info,
+      setSegments() {},
+      setAverageVideoDuration() {},
       hasSponsorBlockMusicOfftopicSegment: ref(false),
       refreshSponsorBlockMarkers: () => effects.push('markers'),
       syncSponsorBlockPlaybackState: () => effects.push('sync'),
@@ -150,8 +171,10 @@ test('temporary offline cleanup preserves manual SponsorBlock mute decisions', (
   const manuallyMuted = new Set(['manual'])
   const doNotMute = new Set(['unmuted'])
   const clear = vm.runInNewContext(`${sponsorBlockSource.slice(start, end)}\nclearSponsorBlockMuteSegments`, {
-    manuallyMutedSponsorBlockSegments: manuallyMuted, sponsorBlockDoNotMuteSegments: doNotMute,
-    notifiedSponsorBlockMuteSegments: new Set(), skippedSponsorBlockSegments: ref([]),
+    manuallyMutedSponsorBlockSegments: manuallyMuted,
+    sponsorBlockDoNotMuteSegments: doNotMute,
+    notifiedSponsorBlockMuteSegments: new Set(),
+    skippedSponsorBlockSegments: ref([]),
     sponsorBlockMuteController: { setSourceActive() {} },
   })
   clear(true)

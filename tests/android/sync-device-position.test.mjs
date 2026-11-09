@@ -44,9 +44,12 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return JSON.parse(JSON.stringify({
-        settings: store.state.settings, route: location.hash,
-        tabIds: store.getters.getTabs.map(tab => tab.id), activeTabId: store.getters.getActiveTabId,
-        history: store.getters.getHistoryCacheSorted, sync: store.state.syncServer,
+        settings: store.state.settings,
+        route: location.hash,
+        tabIds: store.getters.getTabs.map(tab => tab.id),
+        activeTabId: store.getters.getActiveTabId,
+        history: store.getters.getHistoryCacheSorted,
+        sync: store.state.syncServer,
       }))
     })
     await page.exposeBinding('__handoffRequest', async (_source, options) => {
@@ -66,19 +69,31 @@ test('Android sends live tab progress and receives it ahead of stale history', {
       window.Capacitor.nativePromise = function(plugin, method, options, ...rest) {
         if ((plugin === 'CapacitorHttp' || plugin === 'AndroidHttp') && method === 'request') {
           return options.url.startsWith('https://sync.example/')
-            ? window.__handoffRequest(options) : Promise.reject(new Error('Local media fixture'))
+            ? window.__handoffRequest(options)
+            : Promise.reject(new Error('Local media fixture'))
         }
         return window.__handoffNative.call(this, plugin, method, options, ...rest)
       }
       window.__handoffFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__handoffFetch(url, options) : Promise.reject(new Error('Local media fixture'))
+        ? window.__handoffFetch(url, options)
+        : Promise.reject(new Error('Local media fixture'))
       Object.assign(store.state.settings, {
-        currentLocale: 'en-US', videoPlaybackEngine: 'built-in', autoplayVideos: false,
-        useSponsorBlock: false, useReturnYouTubeDislikes: false, rememberHistory: false,
-        syncServerEnabled: true, syncServerAutoSync: false, syncServerUrl: 'https://sync.example',
-        syncServerUsername: 'fixture', syncServerToken: 'fixture', syncServerPrivacyKey: key,
-        syncServerPrivacySalt: salt, syncServerDeviceId: 'phone', enableMobileTabs: true,
+        currentLocale: 'en-US',
+        videoPlaybackEngine: 'built-in',
+        autoplayVideos: false,
+        useSponsorBlock: false,
+        useReturnYouTubeDislikes: false,
+        rememberHistory: false,
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerUrl: 'https://sync.example',
+        syncServerUsername: 'fixture',
+        syncServerToken: 'fixture',
+        syncServerPrivacyKey: key,
+        syncServerPrivacySalt: salt,
+        syncServerDeviceId: 'phone',
+        enableMobileTabs: true,
       })
       store.commit('setSyncServerLiveSupported', true)
       store.commit('setSyncServerDevices', { laptop: { name: 'Test laptop', platform: 'linux' } })
@@ -87,19 +102,32 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     const preparePlayer = async () => {
       await expect.poll(async () => {
         const handle = await page.evaluateHandle(findWatchComponent)
-        try { return await handle.evaluate(component => !!component?.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) }
-        finally { await handle.dispose() }
+        try { return await handle.evaluate(component => !!component?.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
       }, { timeout: 20000 }).toBe(true)
       const watch = await page.evaluateHandle(findWatchComponent)
       await watch.evaluate((component, media) => {
         const watch = component.proxy
         watch.videoLoadGeneration++
         Object.assign(watch, {
-          isLoading: false, ytDlpStreamsPending: false, errorMessage: null, isUpcoming: false,
-          isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-          videoTitle: 'Device handoff fixture', videoLengthSeconds: 60,
-          legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm', width: 320,
-            height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+          isLoading: false,
+          ytDlpStreamsPending: false,
+          errorMessage: null,
+          isUpcoming: false,
+          isLive: false,
+          localFilePlayback: true,
+          activeFormat: 'legacy',
+          videoTitle: 'Device handoff fixture',
+          videoLengthSeconds: 60,
+          legacyFormats: [{
+            itag: 0,
+            qualityLabel: 'Test',
+            mimeType: 'video/webm',
+            width: 320,
+            height: 180,
+            bitrate: 0,
+            localFile: true,
+            url: `data:video/webm;base64,${media}`
+          }],
         })
       }, media)
       await watch.dispose()

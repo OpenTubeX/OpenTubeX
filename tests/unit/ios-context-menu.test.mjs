@@ -20,8 +20,19 @@ function fixture(t, matches = selector => selector.includes('a[href]')) {
   const dispose = installIosContextMenu(document)
   t.after(dispose)
   function send(type, options = {}) {
-    const event = { type, target, pointerId: 1, pointerType: 'touch', isPrimary: true, button: 0, clientX: 40, clientY: 80,
-      preventDefault() { this.prevented = true }, stopImmediatePropagation() {}, ...options }
+    const event = {
+      type,
+      target,
+      pointerId: 1,
+      pointerType: 'touch',
+      isPrimary: true,
+      button: 0,
+      clientX: 40,
+      clientY: 80,
+      preventDefault() { this.prevented = true },
+      stopImmediatePropagation() {},
+      ...options
+    }
     listeners.get(type)?.(event)
     return event
   }

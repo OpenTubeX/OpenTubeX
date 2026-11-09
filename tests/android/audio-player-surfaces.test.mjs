@@ -63,7 +63,8 @@ for (const mode of ['minimize drag', 'restore drag', 'mini bar', 'picture-in-pic
         return {
           display: getComputedStyle(surface).display,
           visibility: getComputedStyle(image).visibility,
-          width: rect.width, height: rect.height,
+          width: rect.width,
+          height: rect.height,
           surface: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
           inSurface: rect.x >= bounds.x && rect.y >= bounds.y && rect.right <= bounds.right + 1 && rect.bottom <= bounds.bottom + 1,
         }

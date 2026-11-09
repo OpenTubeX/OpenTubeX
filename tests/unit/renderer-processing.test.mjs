@@ -128,7 +128,6 @@ test('history edits during serialization prevent stale writes and retry with fre
     video: { id: 'video', title: 'Video', duration: 120, uploader: { id: 'UCtest', name: 'Channel' } },
     metadata: { added_date: 1, watched_state: 'watching', position_millis: 30_000 },
   }]
-  let store
   let edited = false
   const jobs = createJobs(message => {
     if (edited || message.type !== 'chunk' || !message.path.includes('updates')) return
@@ -144,7 +143,7 @@ test('history edits during serialization prevent stale writes and retry with fre
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
-  store = historyStore(context.history)
+  const store = historyStore(context.history)
   store.commit('upsertToHistoryCache', local)
   const uploads = []
   let downloads = 0
@@ -172,9 +171,11 @@ for (const backend of ['encrypted', 'legacy']) {
     test(`history re-added during ${backend} deletion survives retry with a ${baseline} baseline`, async () => {
       const jobs = createJobs()
       let remote = ['kept', 're-added', 'incoming'].map(id => remoteRecord(id))
-      const previous = baseline === 'ids' ? ['kept', 're-added'] : {
-        kept: remote[0].metadata, 're-added': remote[1].metadata,
-      }
+      const previous = baseline === 'ids'
+        ? ['kept', 're-added']
+        : {
+            kept: remote[0].metadata, 're-added': remote[1].metadata,
+          }
       const store = historyStore({ applySyncChanges: async (changes, assertActive) => assertActive?.() })
       store.commit('upsertToHistoryCache', historyRecord('kept'))
       let edited = false
@@ -188,11 +189,13 @@ for (const backend of ['encrypted', 'legacy']) {
       }
       const client = {
         getWatchHistory: async () => remote,
-        ...(backend === 'encrypted' ? { applyWatchHistoryChanges: apply } : {
-          deleteWatchHistory: id => apply([], [id]),
-          supportsBulkSync: async () => true,
-          putWatchHistoryBulk: entries => apply(entries, []),
-        }),
+        ...(backend === 'encrypted'
+          ? { applyWatchHistoryChanges: apply }
+          : {
+              deleteWatchHistory: id => apply([], [id]),
+              supportsBulkSync: async () => true,
+              putWatchHistoryBulk: entries => apply(entries, []),
+            }),
       }
       try {
         const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
@@ -226,12 +229,14 @@ for (const backend of ['encrypted', 'legacy bulk', 'legacy single']) {
       }
       const client = {
         getWatchHistory: async () => remote,
-        ...(backend === 'encrypted' ? { applyWatchHistoryChanges: apply } : {
-          deleteWatchHistory: id => apply([], [id]),
-          supportsBulkSync: async () => backend === 'legacy bulk',
-          putWatchHistoryBulk: entries => apply(entries, []),
-          putWatchHistory: entry => apply([entry], []),
-        }),
+        ...(backend === 'encrypted'
+          ? { applyWatchHistoryChanges: apply }
+          : {
+              deleteWatchHistory: id => apply([], [id]),
+              supportsBulkSync: async () => backend === 'legacy bulk',
+              putWatchHistoryBulk: entries => apply(entries, []),
+              putWatchHistory: entry => apply([entry], []),
+            }),
       }
       try {
         const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
@@ -343,12 +348,16 @@ test('foreground feeds fall back to local parsing if the utility process fails',
   const bytes = await readFile(new URL('../../e2e/fixtures/innertube/channel/shows-channel-info-and-videos/browse-43cf009333cb.0.json.gz', import.meta.url))
   const data = JSON.parse(gunzipSync(bytes))
   const context = vm.createContext({
-    process: { env: { IS_ELECTRON: true } }, console: { error() {}, warn() {} },
+    process: { env: { IS_ELECTRON: true } },
+    console: { error() {}, warn() {} },
     window: { ftElectron: { subscriptionAutoRefresh: { processFeed: async () => { throw new Error('Process exited') } } } },
     createInnertube: async () => ({ actions: { execute: async () => ({ data }) } }),
-    store: { getters: {} }, shouldHideMembersOnlyContent: () => true,
+    store: { getters: {} },
+    shouldHideMembersOnlyContent: () => true,
     runBackgroundJob: executeBackgroundJob,
-    YT, Utils, ...createLocalFeedParsers(() => false),
+    YT,
+    Utils,
+    ...createLocalFeedParsers(() => false),
   })
   const start = local.indexOf('async function processForegroundSubscriptionResponse(')
   const end = local.indexOf('/**\n * @param {YT.Channel} channel', start)
@@ -370,8 +379,14 @@ test('foreground feeds fall back to local parsing if the utility process fails',
 test('backup archives are created and read without blocking renderer input', async () => {
   const jobs = createJobs()
   const history = Array.from({ length: 50_000 }, (_, index) => ({
-    videoId: `video-${index}`, title: `Video ${index}`, authorId: 'UCtest', author: 'Channel',
-    description: `Description ${index} `.repeat(40), lengthSeconds: 120, timeWatched: index + 1, watchProgress: 15,
+    videoId: `video-${index}`,
+    title: `Video ${index}`,
+    authorId: 'UCtest',
+    author: 'Channel',
+    description: `Description ${index} `.repeat(40),
+    lengthSeconds: 120,
+    timeWatched: index + 1,
+    watchProgress: 15,
   }))
   const input = monitorInputDelay()
   try {
@@ -394,7 +409,8 @@ test('background merge preserves data-loss errors and permits an explicit retry'
   try {
     const input = {
       localHistory: [{ videoId: 'test', title: 'A video', authorId: 'UCtest', timeWatched: 100 }],
-      remoteHistory: [], previous: ['test'],
+      remoteHistory: [],
+      previous: ['test'],
     }
     await assert.rejects(jobs.run('mergeHistory', input), error => {
       assert.ok(error instanceof SyncServerDataLossError)
@@ -497,17 +513,22 @@ test('large history database writes yield while removing renderer proxies', asyn
   const context = vm.createContext({
     DBActions: { HISTORY: { APPLY_SYNC_CHANGES: 'sync' } },
     runBackgroundJob: (...args) => jobs.run(...args),
-    window: { ftElectron: { dbHistory: (action, value) => {
-      assert.equal(action, 'sync')
-      assert.equal(inputHandled, true)
-      assert.equal(typeof value, 'string')
-      written = JSON.parse(value)
-    } } },
+    window: {
+      ftElectron: {
+        dbHistory: (action, value) => {
+          assert.equal(action, 'sync')
+          assert.equal(inputHandled, true)
+          assert.equal(typeof value, 'string')
+          written = JSON.parse(value)
+        }
+      }
+    },
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
   const changes = {
-    insertions: [], deletions: [],
+    insertions: [],
+    deletions: [],
     updates: Array.from({ length: 20_000 }, (_, index) => new Proxy({ videoId: `video-${index}`, title: 'Video' }, {})),
   }
   const timer = setTimeout(() => { inputHandled = true }, 0)
@@ -534,7 +555,8 @@ test('cancelling sync during history serialization prevents the database write',
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)
   const changes = {
-    insertions: [], deletions: [],
+    insertions: [],
+    deletions: [],
     updates: Array.from({ length: 20_000 }, (_, index) => ({ videoId: `video-${index}`, title: 'Video' })),
   }
   const timer = setTimeout(() => { cancelled = true }, 0)
@@ -558,10 +580,12 @@ test('datastore writes reach the main process in call order while large payloads
     runBackgroundJob: (operation, { value }) => new Promise(resolve => {
       finishSerializing = () => resolve(JSON.stringify(value))
     }),
-    window: { ftElectron: {
-      dbPlaylists: async (action, value) => { sent.push([action, typeof value]) },
-      dbHistory: async (action, value) => { sent.push([action, typeof value]) },
-    } },
+    window: {
+      ftElectron: {
+        dbPlaylists: async (action, value) => { sent.push([action, typeof value]) },
+        dbHistory: async (action, value) => { sent.push([action, typeof value]) },
+      }
+    },
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') +

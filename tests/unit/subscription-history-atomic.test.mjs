@@ -50,9 +50,11 @@ for (const marks of [[], [{ videoId: 'video', seenAt: 1000, unseenAt: 1000 }]]) 
         return originalMany(updates)
       }
     }
-    const watched = History.updateSubscriptionState({ records: [{
-      videoId: 'video', isWatched: true, watchProgress: 42, timeWatched: 1,
-    }] })
+    const watched = History.updateSubscriptionState({
+      records: [{
+        videoId: 'video', isWatched: true, watchProgress: 42, timeWatched: 1,
+      }]
+    })
     await started
     const unseen = History.updateSubscriptionState({ unseenVideo: { videoId: 'video' } })
     // Keep the first write pending while the competing command is submitted.
@@ -71,9 +73,11 @@ for (const marks of [[], [{ videoId: 'video', seenAt: 1000, unseenAt: 1000 }]]) 
 test('a watched action queued after unseen supersedes it without resetting progress or history order', async () => {
   const { db, History } = await fixture()
   const unseen = History.updateSubscriptionState({ unseenVideo: { videoId: 'video' } })
-  const watched = History.updateSubscriptionState({ records: [{
-    videoId: 'video', isWatched: true, watchProgress: 12, timeWatched: 1,
-  }] })
+  const watched = History.updateSubscriptionState({
+    records: [{
+      videoId: 'video', isWatched: true, watchProgress: 12, timeWatched: 1,
+    }]
+  })
   const [, result] = await Promise.all([unseen, watched])
   const record = await db.history.findOneAsync({ videoId: 'video' })
   assert.equal(record.isWatched, true)
@@ -104,9 +108,11 @@ test('bulk watched edits preserve unrelated history and only supersede matching 
   ])
   await db.history.insertAsync({ videoId: 'other', isWatched: false, watchProgress: 77, timeWatched: 2 })
   const other = await db.history.findOneAsync({ videoId: 'other' })
-  const result = await History.updateSubscriptionState({ records: [{
-    videoId: 'video', isWatched: true, watchProgress: 12, timeWatched: 1,
-  }] })
+  const result = await History.updateSubscriptionState({
+    records: [{
+      videoId: 'video', isWatched: true, watchProgress: 12, timeWatched: 1,
+    }]
+  })
   assert.equal(result.records.length, 1)
   assert.deepEqual(await db.history.findOneAsync({ videoId: 'other' }), other)
   const marks = new Map(JSON.parse(result.seenVideos).map(mark => [mark.videoId, mark]))
@@ -120,9 +126,11 @@ test('ordinary history upserts do not scan history or rewrite seen marks', async
   db.history.ensureIndexAsync = () => { throw new Error('Unexpected seen-merge index work') }
   db.settings.updateAsync = () => { throw new Error('Unexpected seen-mark write') }
   for (const isWatched of [false, true]) {
-    const result = await History.updateSubscriptionState({ records: [{
-      videoId: 'video', isWatched, watchProgress: 12, timeWatched: 1,
-    }] })
+    const result = await History.updateSubscriptionState({
+      records: [{
+        videoId: 'video', isWatched, watchProgress: 12, timeWatched: 1,
+      }]
+    })
     assert.equal(result.records[0].isWatched, isWatched)
     assert.equal(result.seenVideos, null)
   }
@@ -159,10 +167,12 @@ for (const unseen of [false, true]) {
 
 test('metadata repair preserves watch state and does not recreate deleted history', async () => {
   const { db, History } = await fixture()
-  const result = await History.updateSubscriptionState({ metadata: [
-    { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered', pendingDurationRepair: true },
-    { videoId: 'deleted', lengthSeconds: 120 }
-  ] })
+  const result = await History.updateSubscriptionState({
+    metadata: [
+      { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered', pendingDurationRepair: true },
+      { videoId: 'deleted', lengthSeconds: 120 }
+    ]
+  })
   assert.equal(result.records.length, 1)
   const saved = await db.history.findOneAsync({ videoId: 'video' })
   assert.equal(saved.lengthSeconds, 120)
@@ -176,12 +186,14 @@ test('metadata repair preserves watch state and does not recreate deleted histor
 test('metadata repair returns partial success when an individual database write fails', async () => {
   const { db, History, errors } = await fixture()
   await db.history.insertAsync([{ videoId: 'second' }, { videoId: 'third' }])
-  const result = await History.updateSubscriptionState({ metadata: [
-    { videoId: 'video', lengthSeconds: 120 },
-    // A value the datastore rejects
-    { videoId: 'second', lengthSeconds: { $invalid: 120 } },
-    { videoId: 'third', lengthSeconds: 120 },
-  ] })
+  const result = await History.updateSubscriptionState({
+    metadata: [
+      { videoId: 'video', lengthSeconds: 120 },
+      // A value the datastore rejects
+      { videoId: 'second', lengthSeconds: { $invalid: 120 } },
+      { videoId: 'third', lengthSeconds: 120 },
+    ]
+  })
   assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
   for (const videoId of ['video', 'third']) {
     assert.equal((await db.history.findOneAsync({ videoId })).lengthSeconds, 120)

@@ -82,6 +82,7 @@ test('ARM64 archive artifacts and release uploads use the packaged filenames', a
     .filter(step => step.uses?.startsWith('actions/upload-artifact@') && step.if?.includes("'win-arm64'"))
   assert.equal(uploads.length, 3)
   for (const upload of uploads) {
+    // eslint-disable-next-line no-template-curly-in-string -- GitHub Actions expression
     const file = upload.with.path.replace('${{ steps.versionNumber.outputs.version }}', version)
     await writeFile(join(directory, file), 'packaged asset')
     if (/\.(zip|7z)$/.test(file)) assert.equal(upload.with['if-no-files-found'], 'error')

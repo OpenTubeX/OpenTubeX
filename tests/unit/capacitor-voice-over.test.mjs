@@ -8,8 +8,13 @@ const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor
 
 function nativeFetch(request) {
   return vm.runInNewContext(`${source}\ncapacitorVoiceOverFetch`, {
-    registerPlugin: () => ({ request }), createVoiceOverTranslationClient: () => {},
-    Request, Response, Uint8Array, btoa, atob,
+    registerPlugin: () => ({ request }),
+    createVoiceOverTranslationClient: () => {},
+    Request,
+    Response,
+    Uint8Array,
+    btoa,
+    atob,
   })
 }
 

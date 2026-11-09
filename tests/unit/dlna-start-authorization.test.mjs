@@ -22,7 +22,7 @@ async function fixture() {
     invidiousAuthorizations: new Map(),
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
-    getDlnaFfmpegExecutable: () => new Promise((_, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
+    getDlnaFfmpegExecutable: () => new Promise((_resolve, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
     createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => [{ address: '93.184.215.14', family: 4 }] }),
     session: { defaultSession: { resolveProxy: async () => 'DIRECT' } },
     startDlnaCast: async (_owner, payload, _headers, _mux, _addresses, resolveProxy) => {
@@ -39,15 +39,22 @@ async function fixture() {
   const dlnaStart = preload.indexOf('  dlna: {')
   const dlna = vm.runInContext(`({${preload.slice(dlnaStart, preload.indexOf('\n  },\n', dlnaStart) + 4)}}).dlna`, context)
   return {
-    dlna, attempts, invocations, context,
+    dlna,
+    attempts,
+    invocations,
+    context,
     finish() { finishValidation() },
     blur() { focused = false }
   }
 }
 
 const payload = {
-  deviceId: 'tv', mediaUrl: 'https://media.example/video.mp4', audioUrl: 'https://media.example/audio.m4a',
-  fallbackMediaUrl: 'https://media.example/complete.mp4', title: 'Video', startSeconds: 12
+  deviceId: 'tv',
+  mediaUrl: 'https://media.example/video.mp4',
+  audioUrl: 'https://media.example/audio.m4a',
+  fallbackMediaUrl: 'https://media.example/complete.mp4',
+  title: 'Video',
+  startSeconds: 12
 }
 
 test('slow mux validation falls back within the original authorized start after focus and activation expire', async () => {

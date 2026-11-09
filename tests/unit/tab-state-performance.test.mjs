@@ -12,7 +12,8 @@ const source = readFileSync(new URL('../../src/renderer/store/modules/tabs.js', 
 
 function createTabStore() {
   const module = vm.runInNewContext(`${source}; module`, {
-    URL, URLSearchParams,
+    URL,
+    URLSearchParams,
     packageDetails: { productName: 'OpenTubeX' },
     DEFAULT_VIDEO_ZOOM: 1,
     formatTabTitle: title => title,
@@ -24,7 +25,9 @@ function createTabStore() {
 function snapshot(count = 100) {
   return {
     tabs: Array.from({ length: count }, (_, index) => ({
-      id: `tab-${index}`, title: 'History', loadState: 'loaded',
+      id: `tab-${index}`,
+      title: 'History',
+      loadState: 'loaded',
       route: { path: '/history', fullPath: '/history' }
     })),
     groups: [{ id: 'group', name: 'Research' }],

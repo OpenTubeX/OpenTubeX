@@ -33,9 +33,14 @@ before(async () => {
   await page.waitForSelector('#app .app')
   originalSettings = await page.evaluate(() => {
     const app = document.querySelector('#app').__vue_app__.config.globalProperties
-    return { scale: app.$store.getters.getUiScale, auto: app.$store.getters.getMobileAutoPictureInPicture,
-      mini: app.$store.getters.getScrollPlayerMode, animation: app.$store.getters.getAnimationSpeed,
-      motion: app.$store.getters.getReducedMotion, route: app.$router.currentRoute.value.fullPath }
+    return {
+      scale: app.$store.getters.getUiScale,
+      auto: app.$store.getters.getMobileAutoPictureInPicture,
+      mini: app.$store.getters.getScrollPlayerMode,
+      animation: app.$store.getters.getAnimationSpeed,
+      motion: app.$store.getters.getReducedMotion,
+      route: app.$router.currentRoute.value.fullPath
+    }
   })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/abcdefghijk'))
   await page.waitForSelector('.videoLayout')
@@ -63,8 +68,16 @@ before(async () => {
     watch.playabilityStatus = 'OK'
     watch.videoTitle = 'Native PiP regression'
     watch.activeFormat = 'legacy'
-    watch.legacyFormats = [{ url: `data:video/webm;base64,${media}`, mimeType: 'video/webm',
-      width: 640, height: 360, qualityLabel: '360p', fps: 30, localFile: true, localFileLabel: 'test' }]
+    watch.legacyFormats = [{
+      url: `data:video/webm;base64,${media}`,
+      mimeType: 'video/webm',
+      width: 640,
+      height: 360,
+      qualityLabel: '360p',
+      fps: 30,
+      localFile: true,
+      localFileLabel: 'test'
+    }]
     app.config.globalProperties.$store.commit('setScrollPlayerMode', 'mini')
   }, media.toString('base64'))
   await page.waitForFunction(() => document.querySelector('video')?.readyState >= 2)
@@ -76,16 +89,18 @@ after(async () => {
   if (browser) {
     adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
     try {
-      if (!page.isClosed() && originalSettings) await page.evaluate(async settings => {
-        window.__stopPipLifecycleTrace?.()
-        const app = document.querySelector('#app').__vue_app__.config.globalProperties
-        app.$store.commit('setUiScale', settings.scale)
-        app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
-        app.$store.commit('setScrollPlayerMode', settings.mini)
-        app.$store.commit('setAnimationSpeed', settings.animation)
-        app.$store.commit('setReducedMotion', settings.motion)
-        await app.$router.push(settings.route)
-      }, originalSettings)
+      if (!page.isClosed() && originalSettings) {
+        await page.evaluate(async settings => {
+          window.__stopPipLifecycleTrace?.()
+          const app = document.querySelector('#app').__vue_app__.config.globalProperties
+          app.$store.commit('setUiScale', settings.scale)
+          app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
+          app.$store.commit('setScrollPlayerMode', settings.mini)
+          app.$store.commit('setAnimationSpeed', settings.animation)
+          app.$store.commit('setReducedMotion', settings.motion)
+          await app.$router.push(settings.route)
+        }, originalSettings)
+      }
     } finally { await browser.close() }
   }
 })
@@ -204,12 +219,15 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       }
     }, scroll)
     await page.waitForTimeout(400)
-    if (scroll === 'partial') assert.ok(await page.evaluate(() => {
-      const rect = document.querySelector('video').getBoundingClientRect()
-      return rect.top < 0 && rect.bottom > 0 && rect.bottom <= 41
-    }), 'only a narrow strip of the inline video remains inside the viewport')
-    else if (scroll) assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
-      'the real inline video has scrolled entirely above the viewport')
+    if (scroll === 'partial') {
+      assert.ok(await page.evaluate(() => {
+        const rect = document.querySelector('video').getBoundingClientRect()
+        return rect.top < 0 && rect.bottom > 0 && rect.bottom <= 41
+      }), 'only a narrow strip of the inline video remains inside the viewport')
+    } else if (scroll) {
+      assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
+        'the real inline video has scrolled entirely above the viewport')
+    }
     const start = await page.evaluate(() => {
       const video = document.querySelector('video')
       const player = video.closest('.ftVideoPlayer')
@@ -223,12 +241,22 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
       window.addEventListener('opentubex:android-pip', onPip)
       const track = () => {
         const rect = video.getBoundingClientRect()
-        frames.push({ active, returned, returning, entering: document.body.classList.contains('androidPictureInPictureEntering'),
-          rect: [rect.x, rect.y, rect.width, rect.height], outer: [outerWidth, outerHeight],
-          inner: [innerWidth, innerHeight], visual: [visualViewport.width, visualViewport.scale],
-          nativeSize, cssSize: [document.documentElement.style.getPropertyValue('--android-pip-window-width'), document.documentElement.style.getPropertyValue('--android-pip-window-height')],
+        frames.push({
+          active,
+          returned,
+          returning,
+          entering: document.body.classList.contains('androidPictureInPictureEntering'),
+          rect: [rect.x, rect.y, rect.width, rect.height],
+          outer: [outerWidth, outerHeight],
+          inner: [innerWidth, innerHeight],
+          visual: [visualViewport.width, visualViewport.scale],
+          nativeSize,
+          cssSize: [document.documentElement.style.getPropertyValue('--android-pip-window-width'), document.documentElement.style.getPropertyValue('--android-pip-window-height')],
           container: [player.getBoundingClientRect().width, player.getBoundingClientRect().height],
-          body: document.body.className, target: player.hasAttribute('data-android-picture-in-picture-target'), mini: player.classList.contains('scrollMiniPlayer') })
+          body: document.body.className,
+          target: player.hasAttribute('data-android-picture-in-picture-target'),
+          mini: player.classList.contains('scrollMiniPlayer')
+        })
         frame = requestAnimationFrame(track)
       }
       track()
@@ -317,9 +345,20 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'home'], [100, 'h
               videoBounds = [left, top, right + 1, bottom + 1]
             }
           }
-          if (!videoBounds) return { visible: false, videoBounds: null, clock: null, diagnostic: { candidates,
-            outer: [outerWidth, outerHeight], inner: [innerWidth, innerHeight], scale: visualViewport.scale,
-            rect: document.querySelector('video').getBoundingClientRect().toJSON() } }
+          if (!videoBounds) {
+            return {
+              visible: false,
+              videoBounds: null,
+              clock: null,
+              diagnostic: {
+                candidates,
+                outer: [outerWidth, outerHeight],
+                inner: [innerWidth, innerHeight],
+                scale: visualViewport.scale,
+                rect: document.querySelector('video').getBoundingClientRect().toJSON()
+              }
+            }
+          }
           const [left, top, right, bottom] = videoBounds
           // The fixture burns a running clock into the video. Its pixels must
           // keep changing throughout the native transition.
@@ -443,8 +482,10 @@ for (const scale of [100, 125]) {
         activity.match(/Stack #4:\s+mFullscreen=false\s+mBounds=Rect\((\d+), (\d+) - (\d+), (\d+)\)/)
       assert.ok(bounds, 'the native window entered PiP')
       const png = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p'], { maxBuffer: 16 * 1024 * 1024 })
-      if (process.env.ANDROID_ARTIFACT_DIR) await writeFile(
+      if (process.env.ANDROID_ARTIFACT_DIR) {
+        await writeFile(
         `${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-mini-morph.png`, png)
+      }
       const pixels = await page.evaluate(async ({ png, bounds }) => {
         const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(png), character => character.charCodeAt(0))], { type: 'image/png' }))
         const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)

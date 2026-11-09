@@ -55,7 +55,6 @@ test('uses normal fetching when no cookie source is configured and reports downl
   }), /Unable to load subtitle/)
 })
 
-
 test('preserves the SRT format used by automatic caption translations', async () => {
   const srt = '1\n00:00:00,000 --> 00:00:01,000\nÜbersetzung\n'
   const result = await getSubtitleRequestUrl(url.replace('fmt=vtt', 'fmt=srt'), { getYtDlpSubtitleUseCookies: true }, {

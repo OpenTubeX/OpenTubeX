@@ -34,13 +34,16 @@ function fixture() {
         matches: selector => selector === ':hover' && controls.barHovered,
       }
       this.bar = {
-        min: '0', max: '30', events: [],
+        min: '0',
+        max: '30',
+        events: [],
         getBoundingClientRect: () => ({ left: 100, width: 312 }),
         dispatchEvent(event) { this.events.push(event) },
       }
       this.setValue(this.video.currentTime)
       this.update()
     }
+
     get value() { return this.getValue() }
     getValue() { return Number(this.bar.value) }
     setValue(time) { this.bar.value = time }
@@ -48,6 +51,7 @@ function fixture() {
       this.paintedTime = this.value
       this.container.style.background = `linear-gradient(to right, red 0%, red 0%, red ${this.value / 30 * 100}%, white ${this.value / 30 * 100}%, white 90%, black 90%)`
     }
+
     onChangeStart(fromTouchEvent = false) { this.changeStartedFromTouch = fromTouchEvent }
     onChange() {}
     onChangeEnd() { this.changeEnds = (this.changeEnds ?? 0) + 1 }
@@ -60,10 +64,12 @@ function fixture() {
       this.hint = { style: { setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) }, animate() {} }
       this.hintLabel = { dataset: {}, animate() {} }
     }
+
     show(time) {
       this.time = time
       return Promise.resolve()
     }
+
     hide() { this.time = null }
   }
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
@@ -82,10 +88,18 @@ function fixture() {
     },
   })
   const controls = {
-    video: { currentTime: 15, paused: false }, listeners: new Map(), seeking: false, shown: 0, events: [],
+    video: { currentTime: 15, paused: false },
+    listeners: new Map(),
+    seeking: false,
+    shown: 0,
+    events: [],
     timePreview: { style: { visibility: 'visible' } },
-    config: { showUIAlways: false }, hovered: true, barHovered: true, hidden: 0,
-    setSeeking(value) { this.seeking = value }, showUI() { this.shown++; this.seekingWhenShown = this.seeking },
+    config: { showUIAlways: false },
+    hovered: true,
+    barHovered: true,
+    hidden: 0,
+    setSeeking(value) { this.seeking = value },
+    showUI() { this.shown++; this.seekingWhenShown = this.seeking },
     hideUI() { this.hidden++ },
     getConfig() { return this.config },
     getVideoContainer() { return { matches: selector => selector === ':hover' && controls.hovered } },

@@ -15,11 +15,15 @@ function fixture() {
     cancelAnimationFrame() { nextFrame = null },
   })
   windowing.observe(element, {
-    mount() { mounted = true }, unmount() { mounted = false },
-    isMounted: () => mounted, isProtected: () => protectedState,
+    mount() { mounted = true },
+    unmount() { mounted = false },
+    isMounted: () => mounted,
+    isProtected: () => protectedState,
   })
   return {
-    windowing, mounted: () => mounted, reads: () => reads,
+    windowing,
+    mounted: () => mounted,
+    reads: () => reads,
     protect() { protectedState = true },
     far() { intersect([{ target: element, isIntersecting: false }]) },
     resize(width, height) { resize([{ target: element, contentRect: { width, height } }]) },

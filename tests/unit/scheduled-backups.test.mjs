@@ -72,7 +72,11 @@ async function setup(t) {
     now: () => timestamp,
   }
   return {
-    directory, profileDirectory, configuration, options, initialization,
+    directory,
+    profileDirectory,
+    configuration,
+    options,
+    initialization,
     service: createScheduledBackups(options),
     advance: milliseconds => { timestamp += milliseconds },
     reads: () => reads,
@@ -120,15 +124,28 @@ for (const currentSettings of [false, true]) {
   test(`scheduled archives migrate legacy preferences before defaults with current settings ${currentSettings}`, async t => {
     const state = await setup(t)
     const legacy = {
-      useVerticalTabBar: true, showSubscriptionRefreshToast: false, hideLiveChat: true,
-      moveDownloadsToQuickSettings: false, hideAiVideoSummaries: true,
-      hideHome: true, hidePopularVideos: true, hideTrendingVideos: true,
-      autoPictureInPictureMode: 'never', autoPictureInPictureOnTabChange: true, thumbnailSize: 240,
+      useVerticalTabBar: true,
+      showSubscriptionRefreshToast: false,
+      hideLiveChat: true,
+      moveDownloadsToQuickSettings: false,
+      hideAiVideoSummaries: true,
+      hideHome: true,
+      hidePopularVideos: true,
+      hideTrendingVideos: true,
+      autoPictureInPictureMode: 'never',
+      autoPictureInPictureOnTabChange: true,
+      thumbnailSize: 240,
     }
     const current = {
-      tabBarPosition: 'right', showProgressBarToast: true, hideLiveChatReplay: false,
-      moveDownloadsToAppHeader: false, aiVideoSummaryMode: 'expanded', navigationItems: ['history'],
-      autoPictureInPictureTriggers: ['minimize'], scrollPlayerMode: 'mini', playlistThumbnailSize: 180,
+      tabBarPosition: 'right',
+      showProgressBarToast: true,
+      hideLiveChatReplay: false,
+      moveDownloadsToAppHeader: false,
+      aiVideoSummaryMode: 'expanded',
+      navigationItems: ['history'],
+      autoPictureInPictureTriggers: ['minimize'],
+      scrollPlayerMode: 'mini',
+      playlistThumbnailSize: 180,
     }
     const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
     try {
@@ -140,12 +157,19 @@ for (const currentSettings of [false, true]) {
     await state.service.tick()
     const [filename] = await state.backups()
     const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
-    const expected = currentSettings ? current : {
-      tabBarPosition: 'left', showProgressBarToast: false, hideLiveChatReplay: true,
-      moveDownloadsToAppHeader: true, aiVideoSummaryMode: 'hide',
-      navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats'],
-      autoPictureInPictureTriggers: ['tab', 'minimize'], scrollPlayerMode: 'off', playlistThumbnailSize: 240,
-    }
+    const expected = currentSettings
+      ? current
+      : {
+          tabBarPosition: 'left',
+          showProgressBarToast: false,
+          hideLiveChatReplay: true,
+          moveDownloadsToAppHeader: true,
+          aiVideoSummaryMode: 'hide',
+          navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats'],
+          autoPictureInPictureTriggers: ['tab', 'minimize'],
+          scrollPlayerMode: 'off',
+          playlistThumbnailSize: 240,
+        }
     for (const [key, value] of Object.entries(expected)) assert.deepEqual(backup.data.settings[key], value, key)
     for (const key of ['hideHome', 'hidePopularVideos', 'hideTrendingVideos']) {
       assert.equal(backup.data.settings[key], false, key)
@@ -471,7 +495,6 @@ test('changing the folder starts a fresh schedule and shutdown waits for an acti
   assert.equal(state.reads(), 1)
 })
 
-
 test('retention failures preserve successful backup deadlines without five-minute archive retries', async t => {
   t.mock.method(console, 'error', () => {})
   const state = await setup(t)
@@ -559,7 +582,6 @@ for (const [phase, change] of [['preparation', 'disable'], ['temporary write', '
   })
 }
 
-
 test('archive worker failures reject without creating missing profile databases', async t => {
   const state = await setup(t)
   const missing = path.join(state.profileDirectory, 'missing')
@@ -567,7 +589,6 @@ test('archive worker failures reject without creating missing profile databases'
   await assert.rejects(createArchive(), /unable to open database/)
   await assert.rejects(readdir(missing), { code: 'ENOENT' })
 })
-
 
 test('unwritable destinations skip archive preparation', async t => {
   t.mock.method(console, 'error', () => {})
@@ -676,7 +697,6 @@ for (const phase of ['preparation', 'temporary write', 'directory listing']) {
     assert.equal((await state.backups()).length, 5)
   })
 }
-
 
 test('scheduled archives normalize legacy settings and exclude internal window bounds', async t => {
   const state = await setup(t)

@@ -4,7 +4,7 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = readFileSync(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const mimeFunction = source.match(/  function contentTypeFromFileExtension\(extension\) \{[\s\S]*?\n  \}/)[0]
+const mimeFunction = source.match(/ {2}function contentTypeFromFileExtension\(extension\) \{[\s\S]*?\n {2}\}/)[0]
 const contentTypeFromFileExtension = runInNewContext(`(${mimeFunction})`)
 
 test('app protocol serves WebAssembly with a MIME type accepted by streaming compilation', async () => {

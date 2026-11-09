@@ -24,7 +24,13 @@ function createTimer(t, stored = null) {
   const create = vm.runInNewContext(`${source}; useSleepTimer`, {
     onMounted: callback => { restore = callback },
     onBeforeUnmount: () => {},
-    ref, watch, sessionStorage: storage, setTimeout, clearTimeout, setInterval, clearInterval,
+    ref,
+    watch,
+    sessionStorage: storage,
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
   })
   const timer = scope.run(() => create({
     getVideoId: () => videoId.value,

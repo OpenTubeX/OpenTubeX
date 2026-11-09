@@ -172,7 +172,7 @@ test('URL resolution failure clears an earlier share prompt and shows feedback',
 
 test('an older failed URL resolution cannot clear a newer prompt or show stale feedback', async () => {
   let rejectFirst
-  const first = new Promise((_, reject) => { rejectFirst = reject })
+  const first = new Promise((_resolve, reject) => { rejectFirst = reject })
   const h = shareHandler(async (_, url) => url.includes(id) ? first : { urlType: 'video', videoId: '12345678901' })
   const pending = h.share(`https://youtu.be/${id}`)
   await h.share('https://youtu.be/12345678901')
@@ -328,7 +328,7 @@ test('closing the prompt cancels the fallback and prevents its eventual result f
 
 test('closing during metadata loading prevents later actions and duplicate taps', async () => {
   let resolve
-  const pending = new Promise(done => { resolve = done })
+  const pending = new Promise(_resolve => { resolve = _resolve })
   let loads = 0
   const h = videoActions({ backend: 'invidious', invidious: async () => { loads++; return pending } })
   const first = h.add('queue')

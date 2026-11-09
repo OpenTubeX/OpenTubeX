@@ -33,7 +33,8 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
   }
   const elements = tabs.value.map((_, index) => new TabElement(index))
   const container = {
-    scrollLeft: 0, scrollTop: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
     querySelectorAll: () => elements,
     getBoundingClientRect: () => ({ left: 0, top: 0, right: 1000, bottom: 1000 })
   }
@@ -45,19 +46,28 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
     ...reorder,
     buildShiftedTabIds(...args) { calls.orders++; return reorder.buildShiftedTabIds(...args) },
     computeReorderOffsets(...args) { calls.offsets++; return computeReorderOffsets(...args) },
-    ref, watch, nextTick,
-    Element: TabElement, HTMLElement: TabElement,
-    vertical: ref(vertical), tabs, stripItems: tabs,
-    selectedTabIds: ref(new Set()), closeTooltipsSignal: ref(0),
+    ref,
+    watch,
+    nextTick,
+    Element: TabElement,
+    HTMLElement: TabElement,
+    vertical: ref(vertical),
+    tabs,
+    stripItems: tabs,
+    selectedTabIds: ref(new Set()),
+    closeTooltipsSignal: ref(0),
     dropZoneRef: { value: container },
     buildStripItems: items => items,
-    clearTabSelection() {}, setTabSelection() {}, cancelScrollAnimation() {},
+    clearTabSelection() {},
+    setTabSelection() {},
+    cancelScrollAnimation() {},
     stripTransition: { finishAll() {} },
     performance: { now: () => now },
     isElectron: false,
     document: { body: { classList: { add() {}, remove() {} } } },
     window: {
-      addEventListener() {}, removeEventListener() {},
+      addEventListener() {},
+      removeEventListener() {},
       setTimeout(callback) { timers.set(++timerId, callback); return timerId },
       clearTimeout(id) { timers.delete(id) }
     },
@@ -68,15 +78,20 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
   })
   watch(api.tabOffsets, () => calls.updates++, { flush: 'sync' })
   const event = (position, target = elements[0]) => ({
-    button: 0, target,
-    clientX: vertical ? 50 : position, clientY: vertical ? position : 50,
+    button: 0,
+    target,
+    clientX: vertical ? 50 : position,
+    clientY: vertical ? position : 50,
     preventDefault() {}
   })
   api.handleTabContainerPointerDown(event(50.25, elements[sourceIndex]))
   calls.orders = calls.offsets = calls.updates = 0
 
   return {
-    api, calls, frames, container,
+    api,
+    calls,
+    frames,
+    container,
     move: position => api.handleDragPointerMove(event(position)),
     flushFrame(elapsed = 16) {
       now += elapsed

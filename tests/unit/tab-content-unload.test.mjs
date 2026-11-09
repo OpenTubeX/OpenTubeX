@@ -21,17 +21,23 @@ for (const metadata of [{ title: 'New title' }, { isLoading: false }]) {
     let disposals = 0
     const disposal = new Promise(resolve => { finishDisposal = resolve })
     scope.run(() => vm.runInNewContext(lifecycle, {
-      props, initialized, watch, nextTick,
+      props,
+      initialized,
+      watch,
+      nextTick,
       shouldMount: computed(() => props.tab.loadState !== 'unloaded'),
       previousRefreshKey: 0,
       acknowledgedMountRevision: 1,
       navigation: { setLoadingSource() {} },
       TAB_LOADER_LOADING_SOURCE: 'loader',
       tabLifecycleService: { run() { disposals++; return disposal } },
-      tabContentRef: ref(null), document: { pictureInPictureElement: null },
+      tabContentRef: ref(null),
+      document: { pictureInPictureElement: null },
       store: { commit() {}, getters: { getActiveTabId: null } },
-      process: { env: {} }, window: {},
-      updateLoaderState() {}, scheduleLoaderUpdate() {},
+      process: { env: {} },
+      window: {},
+      updateLoaderState() {},
+      scheduleLoaderUpdate() {},
     }))
     await setImmediate()
     props.tab = { ...props.tab, loadState: 'unloaded', refreshKey: 1 }

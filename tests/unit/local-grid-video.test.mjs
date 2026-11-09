@@ -46,9 +46,12 @@ test('flags collaborative grid videos even with a caller-supplied channel ID', (
 
 test('flags collaborative playlist videos without a channel endpoint', () => {
   const result = parseLocalPlaylistVideo({
-    type: 'PlaylistVideo', id: 'collab-id', title: { text: 'Collaboration video' },
+    type: 'PlaylistVideo',
+    id: 'collab-id',
+    title: { text: 'Collaboration video' },
     author: { name: 'Creator One and Creator Two', id: 'N/A' },
-    video_info: {}, duration: { seconds: 83 }
+    video_info: {},
+    duration: { seconds: 83 }
   })
   assert.equal(result.hasCollaborators, true)
 })

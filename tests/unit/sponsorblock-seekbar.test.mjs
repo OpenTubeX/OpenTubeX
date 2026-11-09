@@ -12,10 +12,12 @@ test('marker state follows native seekbar stops, including collapsed pending see
     [[0, 23.3333, 23.3333, 43.3333, 43.3333, 100], ['23.3333', '0', '43.3333']],
   ]) {
     const values = new Map()
-    const container = { style: {
-      background: `linear-gradient(to right, ${stops.map((stop, index) => `${colors[Math.floor(index / 2)]} ${stop}%`).join(', ')})`,
-      setProperty: (name, value) => values.set(name, value),
-    } }
+    const container = {
+      style: {
+        background: `linear-gradient(to right, ${stops.map((stop, index) => `${colors[Math.floor(index / 2)]} ${stop}%`).join(', ')})`,
+        setProperty: (name, value) => values.set(name, value),
+      }
+    }
     updateSponsorBlockSeekBarState(container)
     assert.deepEqual([...values.values()], expected)
   }

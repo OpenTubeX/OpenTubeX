@@ -14,9 +14,13 @@ test('expanding activity moves focus to the first revealed entry after rendering
   const events = []
   const context = vm.createContext({
     showAll: { value: false },
-    activityList: { value: { children: Array.from({ length: 6 }, (_, index) => ({
-      focus() { events.push(`focus ${index}`) },
-    })) } },
+    activityList: {
+      value: {
+        children: Array.from({ length: 6 }, (_, index) => ({
+          focus() { events.push(`focus ${index}`) },
+        }))
+      }
+    },
     async nextTick() {
       assert.equal(context.showAll.value, true)
       events.push('render')

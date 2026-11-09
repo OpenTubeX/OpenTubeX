@@ -179,9 +179,13 @@ test('desktop save dialogs still write and close their file stream', async () =>
   const writes = []
   const save = loadPicker(() => assert.fail('Desktop must not call the Android bridge'), {
     process: { env: { IS_ELECTRON: true } },
-    window: { showSaveFilePicker: async () => ({ createWritable: async () => ({
-      write: async data => writes.push(data), close: async () => writes.push('closed'),
-    }) }) },
+    window: {
+      showSaveFilePicker: async () => ({
+        createWritable: async () => ({
+          write: async data => writes.push(data), close: async () => writes.push('closed'),
+        })
+      })
+    },
   })
   assert.equal(await save('theme.json', '{}', 'JSON', 'application/json', '.json'), true)
   assert.deepEqual(writes, ['{}', 'closed'])
@@ -198,10 +202,12 @@ test('iOS can select exported database files whose extension WebKit does not rec
   const read = vm.runInNewContext(`${pickSource}\n${readSource}\nreadFileWithPicker`, {
     process: { env: { IS_IOS: true } },
     window: { addEventListener() {} },
-    document: { createElement: () => ({
-      files: [file],
-      click() { accept = this.accept; this.onchange() },
-    }) },
+    document: {
+      createElement: () => ({
+        files: [file],
+        click() { accept = this.accept; this.onchange() },
+      })
+    },
   })
   const result = await read('History', { 'application/x-freetube-db': '.db', 'application/json': '.json' })
   assert.equal(accept, '')
@@ -214,10 +220,12 @@ test('Android can select subtitle files on versions without MIME types for them'
   const pick = vm.runInNewContext(`${pickSource}\npickFileWithPicker`, {
     process: { env: { IS_CAPACITOR: true } },
     window: { addEventListener() {} },
-    document: { createElement: () => ({
-      files: [{ name: 'movie.srt' }],
-      click() { accepts.push(this.accept); this.onchange() },
-    }) },
+    document: {
+      createElement: () => ({
+        files: [{ name: 'movie.srt' }],
+        click() { accepts.push(this.accept); this.onchange() },
+      })
+    },
   })
   assert.equal((await pick('Subtitle files', { 'text/vtt': '.vtt', 'application/x-subrip': '.srt' })).name, 'movie.srt')
   // Other imports keep filtering by their file types

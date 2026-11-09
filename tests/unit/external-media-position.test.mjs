@@ -17,13 +17,16 @@ let storage
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
 beforeEach(() => {
   storage = new Map()
-  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
-    get length() { return storage.size },
-    key: index => [...storage.keys()][index] ?? null,
-    getItem: key => storage.get(key) ?? null,
-    setItem: (key, value) => storage.set(key, value),
-    removeItem: key => storage.delete(key),
-  } })
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      get length() { return storage.size },
+      key: index => [...storage.keys()][index] ?? null,
+      getItem: key => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, value),
+      removeItem: key => storage.delete(key),
+    }
+  })
 })
 afterEach(() => {
   mock.restoreAll()

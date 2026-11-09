@@ -14,13 +14,18 @@ test('closing a watch tab releases its player even when saving progress finishes
   const player = { async destroyPlayer() { released = true; return {} } }
   const methods = vm.runInNewContext(`({${cleanup},${destroy}})`, { window: { removeEventListener() {} }, process: { env: { IS_CAPACITOR: true } } })
   const watch = {
-    ...methods, $store: { commit() {} }, $refs: { player }, tabId: 'closing-tab',
+    ...methods,
+    $store: { commit() {} },
+    $refs: { player },
+    tabId: 'closing-tab',
     handleRouteChange: () => new Promise(resolve => { finishSave = resolve }),
     deactivateWatchRuntime() {},
     shortsPreloadGeneration: 0,
-    shortsPlaybackCache: { retain(keys, ids) {
-      clearedShorts = keys.length === 0 && ids.length === 0
-    } },
+    shortsPlaybackCache: {
+      retain(keys, ids) {
+        clearedShorts = keys.length === 0 && ids.length === 0
+      }
+    },
   }
   const pending = watch.cleanupWatchRuntime()
   watch.$refs = {}

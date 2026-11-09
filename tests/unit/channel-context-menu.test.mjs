@@ -22,10 +22,12 @@ test('channel context menus tolerate non-string imported subscription thumbnails
       source.slice(source.indexOf('export function')).replaceAll('export ', '') + '\ngetChannelLinkDetails',
       {
         window: { location: { href: `${prefix}/history` } },
-        store: { getters: {
-          getSubscribedChannelsById: new Map([[id, { thumbnail }]]),
-          getChannelThumbnail: () => null
-        } }
+        store: {
+          getters: {
+            getSubscribedChannelsById: new Map([[id, { thumbnail }]]),
+            getChannelThumbnail: () => null
+          }
+        }
       }
     )
     const details = getDetails(link)

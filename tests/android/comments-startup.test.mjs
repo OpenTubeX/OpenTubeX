@@ -24,11 +24,23 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
     if (await tutorial.isVisible()) await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const values = { StartupBehavior: 'loadLastActiveTab', VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false, HideComments: false, VideoDescriptionMode: 'collapsed', BackendFallback: false,
-        GeneralAutoLoadMorePaginatedItemsEnabled: true, FullscreenActions: ['comments'],
-        PlayingInterfaceHideDelay: 30, RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,
-        ShowPlayerControlsWhenPaused: true, ShowFullscreenActionsWhenPaused: true }
+      const values = {
+        StartupBehavior: 'loadLastActiveTab',
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        HideComments: false,
+        VideoDescriptionMode: 'collapsed',
+        BackendFallback: false,
+        GeneralAutoLoadMorePaginatedItemsEnabled: true,
+        FullscreenActions: ['comments'],
+        PlayingInterfaceHideDelay: 30,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        ShowPlayerControlsWhenPaused: true,
+        ShowFullscreenActionsWhenPaused: true
+      }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, JSON.parse(JSON.stringify(store.getters['get' + key]))]))
       for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
       return { settings, route: location.hash }
@@ -72,14 +84,21 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
       await page.route(nextRequest, (route, request) => {
         if (!JSON.parse(request.postData() ?? '{}').continuation || responseMode === 'loaded') return route.fallback()
         if (responseMode === 'incomplete') incompleteRequests++
-        const data = responseMode === 'incomplete' ? {} : {
-          onResponseReceivedEndpoints: [
-            { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [
-              { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
-            ] } },
-            { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
-          ]
-        }
+        const data = responseMode === 'incomplete'
+          ? {}
+          : {
+              onResponseReceivedEndpoints: [
+                {
+                  reloadContinuationItemsCommand: {
+                    targetId: 'comments-section',
+                    continuationItems: [
+                      { commentsHeaderRenderer: { countText: { simpleText: '0 Comments' } } }
+                    ]
+                  }
+                },
+                { reloadContinuationItemsCommand: { targetId: 'comments-section', continuationItems: [] } }
+              ]
+            }
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })
       })
       await reload.click()
@@ -139,13 +158,15 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
     }
   } finally {
     page.off('console', recordError)
-    if (saved) await page.evaluate(async ({ settings, route }) => {
-      if (document.fullscreenElement) await document.exitFullscreen()
-      document.querySelectorAll('video').forEach(video => video.pause())
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(settings)) await store.dispatch('update' + key, value)
-      location.hash = route
-    }, saved)
+    if (saved) {
+      await page.evaluate(async ({ settings, route }) => {
+        if (document.fullscreenElement) await document.exitFullscreen()
+        document.querySelectorAll('video').forEach(video => video.pause())
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const [key, value] of Object.entries(settings)) await store.dispatch('update' + key, value)
+        location.hash = route
+      }, saved)
+    }
     await page.unrouteAll({ behavior: 'wait' })
     await page.reload()
     await watch?.dispose()

@@ -4,20 +4,28 @@ import { Parser } from 'youtubei.js'
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 
 function videoInfo(results, secondaryResults = []) {
-  return { page: [{}, Parser.parseResponse({
-    contents: { twoColumnWatchNextResults: {
-      results: { results: { contents: results } },
-      secondaryResults: { secondaryResults: { results: secondaryResults } }
-    } }
-  })] }
+  return {
+    page: [{}, Parser.parseResponse({
+      contents: {
+        twoColumnWatchNextResults: {
+          results: { results: { contents: results } },
+          secondaryResults: { secondaryResults: { results: secondaryResults } }
+        }
+      }
+    })]
+  }
 }
 
 function summary(paragraphs) {
-  return { expandableMetadataRenderer: {
-    expandedContent: { videoSummaryContentViewModel: {
-      paragraphs: paragraphs.map(content => ({ videoSummaryParagraphViewModel: { text: { content } } }))
-    } }
-  } }
+  return {
+    expandableMetadataRenderer: {
+      expandedContent: {
+        videoSummaryContentViewModel: {
+          paragraphs: paragraphs.map(content => ({ videoSummaryParagraphViewModel: { text: { content } } }))
+        }
+      }
+    }
+  }
 }
 
 test('extracts YouTube summary paragraphs using the real parser', () => {
@@ -45,19 +53,25 @@ test('handles a summary with invalid paragraphs', () => {
 })
 
 test('ignores non-watch response contents', () => {
-  assert.deepEqual(parseLocalVideoSummary({ page: [{}, Parser.parseResponse({
-    contents: { messageRenderer: { text: { simpleText: 'Unavailable' } } }
-  })] }), [])
+  assert.deepEqual(parseLocalVideoSummary({
+    page: [{}, Parser.parseResponse({
+      contents: { messageRenderer: { text: { simpleText: 'Unavailable' } } }
+    })]
+  }), [])
 })
 
 test('extracts the summary from the structured description panel used by _PEq2T_iAs4', () => {
   const parsed = Parser.parseResponse({
-    engagementPanels: [{ engagementPanelSectionListRenderer: {
-      panelIdentifier: 'engagement-panel-structured-description',
-      content: { structuredDescriptionContentRenderer: {
-        items: [summary(['Cas and Chary XR explores the technical capabilities of this modular, Linux-based headset.'])]
-      } }
-    } }]
+    engagementPanels: [{
+      engagementPanelSectionListRenderer: {
+        panelIdentifier: 'engagement-panel-structured-description',
+        content: {
+          structuredDescriptionContentRenderer: {
+            items: [summary(['Cas and Chary XR explores the technical capabilities of this modular, Linux-based headset.'])]
+          }
+        }
+      }
+    }]
   })
   assert.deepEqual(parseLocalVideoSummary({ page: [{}, parsed] }), [
     'Cas and Chary XR explores the technical capabilities of this modular, Linux-based headset.'

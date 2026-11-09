@@ -33,36 +33,59 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     settings = await page.evaluate(fromChannel => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        KeepPlayingOnNavigation: true, ScrollPlayerMode: 'mini',
-        CapacitorLayoutMode: 'phone', UiScale: 100, HideComments: false,
-        BackendPreference: 'invidious', BackendFallback: false,
-        RotateFullscreenToLandscape: false, EnterFullscreenOnDisplayRotate: false,
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        KeepPlayingOnNavigation: true,
+        ScrollPlayerMode: 'mini',
+        CapacitorLayoutMode: 'phone',
+        UiScale: 100,
+        HideComments: false,
+        BackendPreference: 'invidious',
+        BackendFallback: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__miniNavigationFetch = window.fetch
       window.fetch = (url, options) => {
         if (fromChannel && String(url).includes('/api/v1/channels/UC-title-test')) {
-          const response = String(url).includes('/videos') ? { videos: [] } : {
-            author: 'Test channel', authorId: 'UC-title-test', authorThumbnails: [],
-            authorBanners: [], subCount: 1000, description: 'Channel title regression test',
-            totalViews: 0, joined: 1700000000, relatedChannels: [], tabs: ['videos'],
-          }
+          const response = String(url).includes('/videos')
+            ? { videos: [] }
+            : {
+                author: 'Test channel',
+                authorId: 'UC-title-test',
+                authorThumbnails: [],
+                authorBanners: [],
+                subCount: 1000,
+                description: 'Channel title regression test',
+                totalViews: 0,
+                joined: 1700000000,
+                relatedChannels: [],
+                tabs: ['videos'],
+              }
           return Promise.resolve(new Response(JSON.stringify(response), { headers: { 'Content-Type': 'application/json' } }))
         }
         if (String(url).includes('/api/v1/comments/')) {
           return Promise.resolve(new Response(JSON.stringify({
-            commentCount: 1, comments: [{
-              commentId: 'test-comment', author: 'Test commenter', authorId: 'UC-test-commenter',
-              authorThumbnails: [], content: 'Test comment', contentHtml: 'Test comment',
-              likeCount: 0, published: 1700000000,
+            commentCount: 1,
+            comments: [{
+              commentId: 'test-comment',
+              author: 'Test commenter',
+              authorId: 'UC-test-commenter',
+              authorThumbnails: [],
+              content: 'Test comment',
+              contentHtml: 'Test comment',
+              likeCount: 0,
+              published: 1700000000,
             }],
           }), { headers: { 'Content-Type': 'application/json' } }))
         }
         return String(url).startsWith('https://localhost/')
-          ? window.__miniNavigationFetch(url, options) : Promise.reject(new Error('Offline navigation test'))
+          ? window.__miniNavigationFetch(url, options)
+          : Promise.reject(new Error('Offline navigation test'))
       }
       const style = document.createElement('style')
       style.id = 'mini-navigation-test-style'
@@ -83,8 +106,7 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
     }
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -92,12 +114,28 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: false, activeFormat: 'legacy',
-        isOffline: false, channelId: 'UC-test-channel', channelName: 'Test channel',
-        videoTitle: 'Mini-player navigation test', videoLengthSeconds: 60,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: false,
+        activeFormat: 'legacy',
+        isOffline: false,
+        channelId: 'UC-test-channel',
+        channelName: 'Test channel',
+        videoTitle: 'Mini-player navigation test',
+        videoLengthSeconds: 60,
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 320,
+          height: 180,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')
@@ -145,7 +183,8 @@ for (const audioOnly of [false, true]) {
       const audio = (await readFile(new URL('../../e2e/fixtures/media/demo-audio.mp3', import.meta.url))).toString('base64')
       await watch.evaluate((component, audio) => {
         Object.assign(component.proxy, {
-          localFilePlayback: true, manifestSrc: `data:audio/mpeg;base64,${audio}`,
+          localFilePlayback: true,
+          manifestSrc: `data:audio/mpeg;base64,${audio}`,
           manifestMimeType: 'audio/mpeg',
         })
         component.proxy.enableAudioFormat()

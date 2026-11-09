@@ -20,12 +20,22 @@ test('Android Invidious banners recover through the selected proxy after WebView
   let saved
   try {
     await page.locator('.profileTrigger').waitFor()
-    await page.route(`${instance}/api/v1/channels/**`, route => route.fulfill({ json: {
-      author: 'Banner channel', authorId: new URL(route.request().url()).pathname.split('/')[4], authorThumbnails: [],
-      authorBanners: [{ url: `https://yt3.ggpht.com/banner${nativeSucceeds ? '' : '?case=stall'}` }], description: '',
-      subCount: 10, totalViews: 0, joined: 0, tabs: ['videos'],
-      relatedChannels: [], videos: [], latestVideos: []
-    } }))
+    await page.route(`${instance}/api/v1/channels/**`, route => route.fulfill({
+      json: {
+        author: 'Banner channel',
+        authorId: new URL(route.request().url()).pathname.split('/')[4],
+        authorThumbnails: [],
+        authorBanners: [{ url: `https://yt3.ggpht.com/banner${nativeSucceeds ? '' : '?case=stall'}` }],
+        description: '',
+        subCount: 10,
+        totalViews: 0,
+        joined: 0,
+        tabs: ['videos'],
+        relatedChannels: [],
+        videos: [],
+        latestVideos: []
+      }
+    }))
     await page.route(`${bannerUrl}*`, route => {
       browserRequests++
       if (nativeSucceeds) return route.abort()
@@ -78,14 +88,16 @@ test('Android Invidious banners recover through the selected proxy after WebView
     assert.equal(browserRequests, 3)
     assert.equal(nativeRequests.length, 2)
   } finally {
-    if (saved) await page.evaluate(saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      Object.assign(store.state.settings, saved.settings)
-      store.commit('setCurrentInvidiousInstance', saved.instance)
-      location.hash = saved.route
-      window.Capacitor.nativePromise = window.__bannerNativePromise
-      delete window.__bannerNativePromise
-    }, saved)
+    if (saved) {
+      await page.evaluate(saved => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        Object.assign(store.state.settings, saved.settings)
+        store.commit('setCurrentInvidiousInstance', saved.instance)
+        location.hash = saved.route
+        window.Capacitor.nativePromise = window.__bannerNativePromise
+        delete window.__bannerNativePromise
+      }, saved)
+    }
     await page.unroute(`${instance}/api/v1/channels/**`)
     await page.unroute(`${bannerUrl}*`)
     await browser.close()

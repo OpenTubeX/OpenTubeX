@@ -21,17 +21,23 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        EnableMobileFullscreenSwipe: true, RotateFullscreenToLandscape: false,
-        EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
-        MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        EnableMobileFullscreenSwipe: true,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        PlayingInterfaceHideDelay: 5,
+        MobileLeftSwipeAction: 'disabled',
+        MobileRightSwipeAction: 'disabled',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__fullscreenControlsFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__fullscreenControlsFetch(url, options) : Promise.reject(new Error('Offline fullscreen test'))
+        ? window.__fullscreenControlsFetch(url, options)
+        : Promise.reject(new Error('Offline fullscreen test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-controls-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -41,8 +47,7 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -50,11 +55,25 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'Fullscreen controls test', videoLengthSeconds: 60,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: true,
+        activeFormat: 'legacy',
+        videoTitle: 'Fullscreen controls test',
+        videoLengthSeconds: 60,
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 320,
+          height: 180,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')

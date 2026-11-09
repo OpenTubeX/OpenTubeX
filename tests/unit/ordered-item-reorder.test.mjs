@@ -19,7 +19,8 @@ function createHarness({ items = ['a', 'b', 'c'], visible = items, saved = true 
   const scroller = {
     scrollTop: 0,
     getBoundingClientRect: () => ({ top: -100, bottom: 300, height: 400, left: 0, right: 200 }),
-    addEventListener() {}, removeEventListener() {},
+    addEventListener() {},
+    removeEventListener() {},
     scrollBy({ top }) { this.scrollTop += top }
   }
   const rows = visible.map((id, index) => ({
@@ -31,14 +32,23 @@ function createHarness({ items = ['a', 'b', 'c'], visible = items, saved = true 
   const list = { children: rows, parentElement: scroller }
   const handles = rows.map(row => ({
     closest: () => row,
-    setPointerCapture() {}, hasPointerCapture: () => true, releasePointerCapture() {}
+    setPointerCapture() {},
+    hasPointerCapture: () => true,
+    releasePointerCapture() {}
   }))
   rows.forEach(row => { row.parentElement = list })
   const api = vm.runInNewContext(`${source}\nuseOrderedItemReorder(options)`, {
-    ref, watch, nextTick, onBeforeUnmount() {},
-    computeReorderOffsets, moveItemByVisibleOffset, isReducedMotionEnabled: () => true,
+    ref,
+    watch,
+    nextTick,
+    onBeforeUnmount() {},
+    computeReorderOffsets,
+    moveItemByVisibleOffset,
+    isReducedMotionEnabled: () => true,
     options: {
-      items: ref(items), rowSelector: '.row', itemIdAttribute: 'data-id',
+      items: ref(items),
+      rowSelector: '.row',
+      itemIdAttribute: 'data-id',
       updateItems(order) { writes.push([...order]); return Promise.resolve(saved) },
       announceMoved(id, position) { announcements.push({ id, position }) }
     },
@@ -52,7 +62,11 @@ function createHarness({ items = ['a', 'b', 'c'], visible = items, saved = true 
   })
   const event = y => ({ isPrimary: true, button: 0, pointerId: 1, clientX: 100, clientY: y, preventDefault() {} })
   return {
-    api, frames, writes, announcements, scroller,
+    api,
+    frames,
+    writes,
+    announcements,
+    scroller,
     start(index = 0) {
       api.startPointerDrag({ ...event(index * 48 + 20), currentTarget: handles[index] }, visible[index])
     },

@@ -30,8 +30,19 @@ test('history changes are tracked by video ID until a mutation may change any en
 })
 
 const record = (id, timeWatched, extra = {}) => ({
-  videoId: id, title: `Video ${id}`, author: 'Channel', authorId: 'UC-channel', published: 1, description: '',
-  lengthSeconds: 100, watchProgress: 10, isWatched: false, timeWatched, isLive: false, type: 'video', ...extra,
+  videoId: id,
+  title: `Video ${id}`,
+  author: 'Channel',
+  authorId: 'UC-channel',
+  published: 1,
+  description: '',
+  lengthSeconds: 100,
+  watchProgress: 10,
+  isWatched: false,
+  timeWatched,
+  isLive: false,
+  type: 'video',
+  ...extra,
 })
 
 function converged(count) {

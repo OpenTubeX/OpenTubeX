@@ -10,7 +10,11 @@ const handlers = await readFile(new URL('../../src/datastores/handlers/base.js',
 
 function playlist(_id, playlistName, protectedValue = false) {
   return {
-    _id, playlistName, protected: protectedValue, createdAt: 1, lastUpdatedAt: 1,
+    _id,
+    playlistName,
+    protected: protectedValue,
+    createdAt: 1,
+    lastUpdatedAt: 1,
     videos: [{ videoId: `${_id}-video`, playlistItemId: `${_id}-item`, timeAdded: 1, type: 'video' }],
   }
 }
@@ -49,7 +53,11 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
     },
   }
   return {
-    db, module, errors, handlers: DBPlaylistHandlers, rootState: context.rootState,
+    db,
+    module,
+    errors,
+    handlers: DBPlaylistHandlers,
+    rootState: context.rootState,
     dispatch: context.dispatch,
     async load() {
       await module.actions.grabAllPlaylists(context)

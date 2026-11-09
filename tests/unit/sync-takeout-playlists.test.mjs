@@ -14,7 +14,13 @@ import { historyToRemote as releasedHistoryToRemote, syncPlaylists as syncReleas
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const context = vm.createContext({
-  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
+  DEFAULT_CHANNEL_AVATAR,
+  UNKNOWN_SYNC_UPLOADER_ID,
+  uploaderToLocal,
+  normalizeChannelAvatar,
+  enrichSyncVideo,
+  mergeSyncIds,
+  syncVideoToRemote,
   isPlaylistSortOrder,
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
@@ -159,14 +165,14 @@ test('released clients preserve covers through repeated syncs and title edits', 
 test('released clients preserve sort orders through repeated syncs and title edits', async () => {
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
   const upgraded = createStore([{ _id: 'mixed', playlistName: 'Mixed versions', sortOrder: 'author_ascending', videos: [] }])
-  let upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
+  const upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
   const released = createStore()
   let releasedSnapshot = await syncReleasedPlaylists(adapter, released)
   released.state.playlists.playlists[0].playlistName = 'Renamed by released client'
   releasedSnapshot = await syncReleasedPlaylists(adapter, released, releasedSnapshot)
   await syncReleasedPlaylists(adapter, released, releasedSnapshot)
   assert.equal((await adapter.getPlaylist('mixed')).playlist.sort_order, 'author_ascending')
-  upgradedSnapshot = await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
+  await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
   assert.equal(upgraded.state.playlists.playlists[0].sortOrder, 'author_ascending')
   assert.equal(upgraded.state.playlists.playlists[0].playlistName, 'Renamed by released client')
 })
@@ -190,7 +196,7 @@ test('playlist sort orders sync between devices and unknown values follow the de
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
   assert.equal(first.state.playlists.playlists[0].sortOrder, 'custom')
   second.state.playlists.playlists[0].playlistName = 'Renamed'
-  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  await context.syncPlaylists(adapter, second, secondSnapshot)
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
   assert.deepEqual(syncUpdates, [true, false], 'only a sort order change keeps the update time')
 
@@ -353,10 +359,14 @@ test('only permits unknown uploaders when encrypted playlist sync opts in', () =
 
 test('repaired Takeout metadata replaces encrypted unknown uploaders and fills the receiving device', async () => {
   const options = { allowMissingUploader: true }
-  const imported = { _id: 'repaired', playlistName: 'Imported', videos: [
-    { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'first', timeAdded: 1 },
-    { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'duplicate', timeAdded: 2 },
-  ] }
+  const imported = {
+    _id: 'repaired',
+    playlistName: 'Imported',
+    videos: [
+      { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'first', timeAdded: 1 },
+      { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'duplicate', timeAdded: 2 },
+    ]
+  }
   const sender = createStore([imported])
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
   const sent = await context.syncPlaylists(adapter, sender, {}, options)
@@ -402,7 +412,8 @@ test('released clients preserve imported memberships during mixed-version sync',
 
   // A released client re-uploads the unknown uploader using its ID as the name.
   released.state.playlists.playlists.push({
-    _id: 'released-copy', playlistName: 'Released copy',
+    _id: 'released-copy',
+    playlistName: 'Released copy',
     videos: [{ ...released.state.playlists.playlists[0].videos[0] }],
   })
   await syncReleasedPlaylists(adapter, released, releasedSnapshot)
@@ -445,12 +456,21 @@ test('released clients preserve imported memberships during mixed-version sync',
 
 test('newer imported history preserves known remote uploader metadata and local progress', () => {
   const local = {
-    videoId: 'abcdefghijk', title: 'Imported', timeWatched: 200,
-    watchProgress: 42, isWatched: false, lengthSeconds: 0,
+    videoId: 'abcdefghijk',
+    title: 'Imported',
+    timeWatched: 200,
+    watchProgress: 42,
+    isWatched: false,
+    lengthSeconds: 0,
   }
   const remote = releasedHistoryToRemote({
-    ...local, timeWatched: 100, watchProgress: 10, isWatched: true,
-    authorId: 'known-channel', author: 'Known channel', lengthSeconds: 500,
+    ...local,
+    timeWatched: 100,
+    watchProgress: 10,
+    isWatched: true,
+    authorId: 'known-channel',
+    author: 'Known channel',
+    lengthSeconds: 500,
   })
   const result = mergeHistory({ localHistory: [local], remoteHistory: [remote], options: { allowMissingUploader: true } })
   assert.equal(result.historyToUpload[0].video.uploader.id, remote.video.uploader.id)
@@ -472,10 +492,16 @@ test('newer imported history preserves richer remote video metadata through repe
   ).videos[0]
   const local = { ...imported, timeWatched: 200, watchProgress: 42, isWatched: false }
   const known = {
-    ...local, title: 'Actual video title', published: 123,
-    thumbnail: 'https://example.com/video.jpg', authorThumbnail: 'https://example.com/channel.jpg',
-    authorId: 'known-channel', author: 'Known channel', lengthSeconds: 500,
-    timeWatched: 100, watchProgress: 10,
+    ...local,
+    title: 'Actual video title',
+    published: 123,
+    thumbnail: 'https://example.com/video.jpg',
+    authorThumbnail: 'https://example.com/channel.jpg',
+    authorId: 'known-channel',
+    author: 'Known channel',
+    lengthSeconds: 500,
+    timeWatched: 100,
+    watchProgress: 10,
   }
   const options = { allowMissingUploader: true }
   const remote = releasedHistoryToRemote(known)
@@ -500,10 +526,17 @@ test('newer imported history preserves richer remote video metadata through repe
 
 test('newer unknown remote history preserves locally known video metadata', () => {
   const local = {
-    videoId: 'abcdefghijk', title: 'Actual video title', published: 123,
-    thumbnail: 'https://example.com/video.jpg', authorThumbnail: 'https://example.com/channel.jpg',
-    authorId: 'known-channel', author: 'Known channel', lengthSeconds: 500,
-    timeWatched: 100, watchProgress: 10, isWatched: false,
+    videoId: 'abcdefghijk',
+    title: 'Actual video title',
+    published: 123,
+    thumbnail: 'https://example.com/video.jpg',
+    authorThumbnail: 'https://example.com/channel.jpg',
+    authorId: 'known-channel',
+    author: 'Known channel',
+    lengthSeconds: 500,
+    timeWatched: 100,
+    watchProgress: 10,
+    isWatched: false,
   }
   const options = { allowMissingUploader: true }
   const remote = {

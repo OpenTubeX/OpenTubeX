@@ -4,9 +4,22 @@ import { content, createClient, sync } from '../../_scripts/gitlabIssueSync.mjs'
 
 function fixture() {
   const state = {
-    sources: [{ iid: 1, title: 'Report', description: 'Description', state: 'opened', confidential: false,
-      imported: false, author: { id: 1, username: 'reporter' }, web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/issues/1' }],
-    targets: [], notes: [], comments: [], writes: [], releases: [], downloads: {},
+    sources: [{
+      iid: 1,
+      title: 'Report',
+      description: 'Description',
+      state: 'opened',
+      confidential: false,
+      imported: false,
+      author: { id: 1, username: 'reporter' },
+      web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/issues/1'
+    }],
+    targets: [],
+    notes: [],
+    comments: [],
+    writes: [],
+    releases: [],
+    downloads: {},
   }
   let id = 100
   const copy = value => structuredClone(value)
@@ -21,9 +34,15 @@ function fixture() {
     const item = match && items.find(item => (side === 'gl' && !commentRoute ? item.iid : commentRoute ? item.id : item.number) === Number(match[1]))
     if (method === 'GET') return copy(match ? item : items)
     if (method === 'POST') {
-      const created = { id: ++id, number: id, ...body, state: 'open',
+      const created = {
+        id: ++id,
+        number: id,
+        ...body,
+        state: 'open',
         html_url: `https://github.com/OpenTubeX/OpenTubeX/issues/${id}`,
-        user: { login: 'github-actions[bot]' }, author: { id: 99, username: 'sync-bot' } }
+        user: { login: 'github-actions[bot]' },
+        author: { id: 99, username: 'sync-bot' }
+      }
       items.push(created)
       return copy(created)
     }

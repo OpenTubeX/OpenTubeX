@@ -103,13 +103,15 @@ test('activity navigation focuses its new target even when a previous highlight 
   const start = component.indexOf('provide(settingsSearchNavigationKey, {')
   const end = component.indexOf('\nconst settingsSearchResults', start)
   vm.runInNewContext(component.slice(start, end), {
-    settingsSearchNavigationKey: Symbol(),
+    settingsSearchNavigationKey: Symbol('settingsSearchNavigationKey'),
     provide(_key, value) { navigation = value },
     openSearchResult: async () => targets[nextTarget++],
-    settingsWindowRef: { value: {
-      querySelector: () => targets[0],
-      focus() {},
-    } },
+    settingsWindowRef: {
+      value: {
+        querySelector: () => targets[0],
+        focus() {},
+      }
+    },
   })
   await navigation.open({ section: 'playback', match: { label: 'First setting' } })
   await navigation.open({ section: 'playback', match: { label: 'Second setting' } })
@@ -130,13 +132,19 @@ test('opening touch settings focuses the close button without raising the softwa
       props: { hardwareKeyboardAttached: keyboard },
       unlocked: ref(false),
       store: { getters: { getSettingsPassword: '' } },
-      updateNarrowLayout() {}, handleResize() {}, setInitialSection() {},
+      updateNarrowLayout() {},
+      handleResize() {},
+      setInitialSection() {},
       nextTick: callback => callback(),
-      observeProfileManager() {}, observeStandaloneContent() {},
-      settingsWindowRef: ref(null), windowBounds: ref({ width: 1080 }),
+      observeProfileManager() {},
+      observeStandaloneContent() {},
+      settingsWindowRef: ref(null),
+      windowBounds: ref({ width: 1080 }),
       isNarrowLayout: ref(narrow),
-      settingsCloseButtonRef: focus('close'), settingsSearchInputRef: focus('search'),
-      settingsResizeObserver: {}, observationScheduled: false
+      settingsCloseButtonRef: focus('close'),
+      settingsSearchInputRef: focus('search'),
+      settingsResizeObserver: {},
+      observationScheduled: false
     })
     assert.deepEqual(focused, [expected])
   }

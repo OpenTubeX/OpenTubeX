@@ -6,12 +6,16 @@ const { parseLocalListPlaylist } = createLocalFeedParsers(() => false)
 
 function lockup(contentType, iconName) {
   return {
-    type: 'LockupView', content_type: contentType, content_id: 'PL-types',
+    type: 'LockupView',
+    content_type: contentType,
+    content_id: 'PL-types',
     metadata: { title: { text: 'Playlist type' } },
-    content_image: { primary_thumbnail: {
-      image: [{ url: 'https://example.test/thumbnail.jpg' }],
-      overlays: [{ is: () => true, badges: [{ text: '12 episodes', icon_name: iconName }] }]
-    } }
+    content_image: {
+      primary_thumbnail: {
+        image: [{ url: 'https://example.test/thumbnail.jpg' }],
+        overlays: [{ is: () => true, badges: [{ text: '12 episodes', icon_name: iconName }] }]
+      }
+    }
   }
 }
 
@@ -34,7 +38,9 @@ for (const [iconName, flag] of [['COURSE', 'isCourse'], ['music', 'isAlbum']]) {
 for (const type of ['GridPlaylist', 'Playlist']) {
   test(`recognizes music overlays on ${type} without requiring overlays for ordinary playlists`, () => {
     const playlist = {
-      type, id: 'PL-album', title: { text: 'Album' },
+      type,
+      id: 'PL-album',
+      title: { text: 'Album' },
       thumbnails: [{ url: 'https://example.test/album.jpg' }],
       video_count: { text: '4' }
     }

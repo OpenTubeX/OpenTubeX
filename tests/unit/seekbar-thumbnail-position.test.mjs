@@ -18,7 +18,10 @@ function seekBar({ start = 0, end = 4.2, width = 1000.5, left = 42.25, step = 'a
   const bar = Object.create(shaka.ui.SeekBar.prototype)
   Object.assign(bar, {
     bar: {
-      min: String(start), max: String(end), step, offsetWidth: Math.round(width),
+      min: String(start),
+      max: String(end),
+      step,
+      offsetWidth: Math.round(width),
       getBoundingClientRect: () => ({ left, right: left + width, width })
     },
     player: {

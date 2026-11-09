@@ -17,15 +17,23 @@ const createRegistry = new Function('createSettingsSearchIndex', 'getConfiguredK
 
 test('opening the ordinary command registry does not read the video library', () => {
   const getters = {
-    getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [],
-    getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {},
+    getChannelsHiddenParsed: [],
+    getForbiddenTitlesParsed: [],
+    getTabs: [],
+    getProfileList: [],
+    getAllPlaylists: [],
+    getYtDlpDownloads: {},
   }
   Object.defineProperty(getters, 'getHistoryCacheSorted', {
     get: () => { throw new Error('History was scanned before searching') },
   })
   assert.doesNotThrow(() => createRegistry({
-    isElectron: false, downloads: [], isCapacitor: false, routePath: '/history',
-    routeAvailable: () => true, t: key => key,
+    isElectron: false,
+    downloads: [],
+    isCapacitor: false,
+    routePath: '/history',
+    routeAvailable: () => true,
+    t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
     store: { getters },
   }))

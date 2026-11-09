@@ -51,7 +51,9 @@ function setup(t, state, hidden = false) {
   })
   let started = false
   return {
-    timers, calls, notifications,
+    timers,
+    calls,
+    notifications,
     get shown() { return shownStates(hooks.store) },
     advance: milliseconds => { now += milliseconds },
     // Starting reads the native state once; another tab's progress update reads it again.
@@ -168,12 +170,16 @@ async function setupCancellation(t, { deadline = Date.now() - 1000, enabled = tr
 
   const calls = []
   const context = vm.createContext({
-    process: { env: { IS_CAPACITOR: true } }, window, CustomEvent,
+    process: { env: { IS_CAPACITOR: true } },
+    window,
+    CustomEvent,
     cancelAndroidSubscriptionRefresh: () => calls.push('cancel'),
-    activeRefresh: null, cancelCount: 1,
+    activeRefresh: null,
+    cancelCount: 1,
     store: { getters: { getSubscriptionFeedRefreshInProgress: true, getSubscriptionFeedRefreshTab: 'videos', getActiveProfile: { _id: 'all' } } },
     localStorage: { setItem() {} },
-    SUBSCRIPTION_REFRESH_CANCELLED_EVENT: events.cancelled, SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY: 'cancel',
+    SUBSCRIPTION_REFRESH_CANCELLED_EVENT: events.cancelled,
+    SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY: 'cancel',
   })
   const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
   const localCancellationStart = subscriptions.indexOf('export function cancelSubscriptionRefresh()')

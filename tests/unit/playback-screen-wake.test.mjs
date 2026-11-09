@@ -10,7 +10,8 @@ function fixture(plugin) {
     async allowSleep() { calls.push('sleep') },
   })
   const element = Object.assign(new EventTarget(), {
-    paused: true, ended: false,
+    paused: true,
+    ended: false,
     pause() { this.paused = true; this.dispatchEvent(new Event('pause')) },
     async play() { this.paused = false; this.dispatchEvent(new Event('playing')) },
   })

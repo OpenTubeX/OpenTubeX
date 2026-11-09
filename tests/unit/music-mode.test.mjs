@@ -12,9 +12,14 @@ function watchMethod(name, globals = {}) {
 const { startTimeSeconds } = watchMethod('startTimeSeconds:')
 const { initializePlaybackRate } = watchMethod('initializePlaybackRate()')
 const view = {
-  isLoading: false, isLive: false, musicMode: true,
-  oneTimeTimestamp: null, timestamp: null, videoLengthSeconds: 60,
-  watchedProgressSavingEnabled: true, historyEntryExists: true,
+  isLoading: false,
+  isLive: false,
+  musicMode: true,
+  oneTimeTimestamp: null,
+  timestamp: null,
+  videoLengthSeconds: 60,
+  watchedProgressSavingEnabled: true,
+  historyEntryExists: true,
   historyEntry: { watchProgress: 10 },
 }
 
@@ -22,7 +27,8 @@ test('music mode ignores saved progress and cached Shorts positions', () => {
   assert.equal(startTimeSeconds.call(view), 0)
   assert.equal(startTimeSeconds.call({ ...view, musicMode: false }), 10)
   const short = {
-    ...view, customShortsPlayerActive: true,
+    ...view,
+    customShortsPlayerActive: true,
     tabRoute: { query: { shortSource: 'channel' } },
     shortsPlaybackCache: { getPosition: () => 6 },
   }
@@ -42,7 +48,8 @@ test('music mode ignores cached progress when navigating between Shorts', () => 
     let destination
     let savedPosition = false
     const short = {
-      ...view, musicMode,
+      ...view,
+      musicMode,
       saveShortsPlaybackPosition: () => { savedPosition = true },
       shortsPlaybackCache: { getPosition: () => 6 },
       tabRoute: { query: { shortSource: 'subscriptions' } },
@@ -53,7 +60,8 @@ test('music mode ignores cached progress when navigating between Shorts', () => 
     assert.equal(destination.path, '/watch/second')
     assert.equal(destination.query.oneTimeTimestamp, musicMode ? undefined : '6')
     const oneTimeTimestamp = destination.query.oneTimeTimestamp === undefined
-      ? null : Number(destination.query.oneTimeTimestamp)
+      ? null
+      : Number(destination.query.oneTimeTimestamp)
     assert.equal(startTimeSeconds.call({ ...short, oneTimeTimestamp }), musicMode ? 0 : 6)
   }
 })
@@ -65,8 +73,11 @@ test('music mode overrides global, channel, and recovery speeds without changing
     getEnableChannelSettings: true,
   }
   const watch = {
-    musicMode: true, channelId: 'channel', isMusicVideo: false,
-    sabrReloadState: { playbackRate: 3 }, $store: { getters: settings },
+    musicMode: true,
+    channelId: 'channel',
+    isMusicVideo: false,
+    sabrReloadState: { playbackRate: 3 },
+    $store: { getters: settings },
   }
   initializePlaybackRate.call(watch)
   assert.equal(watch.currentPlaybackRate, 1)

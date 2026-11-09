@@ -18,42 +18,54 @@ const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscrip
 async function fixture({ current = false, alreadyRevoked = false, releasedUploadDuringRevoke = false, postCleanupFailsOnce = false, otherLoginAfterRevoke = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
-  let remote = normalizeSyncSessionsDocument({ devices: {
-    'old-phone': { platform: 'mobile', sessions: [tabSet('old-tabs'), tabSet('older-tabs')] },
-    'new-phone': { platform: 'mobile', sessions: [tabSet('new-tabs')] },
-    laptop: { platform: 'desktop', sessions: [tabSet('laptop-tabs')] },
-  } })
+  let remote = normalizeSyncSessionsDocument({
+    devices: {
+      'old-phone': { platform: 'mobile', sessions: [tabSet('old-tabs'), tabSet('older-tabs')] },
+      'new-phone': { platform: 'mobile', sessions: [tabSet('new-tabs')] },
+      laptop: { platform: 'desktop', sessions: [tabSet('laptop-tabs')] },
+    }
+  })
   if (alreadyRevoked) {
     remote = removeSyncSession(remote, 'old-phone', 'old-tabs', { revokedAccountSessionId: 'former-login' })
     remote = removeSyncSession(remote, 'old-phone', 'older-tabs')
   }
   remote.shared = [tabSet('shared-tabs')]
   const settings = {
-    syncServerEnabled: true, syncServerToken: 'token', syncServerPrivacyKey: key,
-    syncServerPrivacySalt: salt, syncServerDeviceId: current ? 'old-phone' : 'new-phone', syncServerSnapshot: '{}',
+    syncServerEnabled: true,
+    syncServerToken: 'token',
+    syncServerPrivacyKey: key,
+    syncServerPrivacySalt: salt,
+    syncServerDeviceId: current ? 'old-phone' : 'new-phone',
+    syncServerSnapshot: '{}',
   }
   let revoked = false
   let revokeAttempts = 0
   let puts = 0
   let visible = getOtherDeviceSessions(remote, settings.syncServerDeviceId)
-  const context = { rootState: { settings }, commit(name, value) {
-    if (name === 'setSyncServerOtherDeviceSessions') visible = value
-  }, dispatch: async (name, value) => {
-    if (name === 'updateSyncServerSnapshot') settings.syncServerSnapshot = value
-    else if (actions[name]) return actions[name](context, value)
-    else assert.fail(`Unexpected action: ${name}`)
-  } }
+  const context = {
+    rootState: { settings },
+    commit(name, value) {
+      if (name === 'setSyncServerOtherDeviceSessions') visible = value
+    },
+    dispatch: async (name, value) => {
+      if (name === 'updateSyncServerSnapshot') settings.syncServerSnapshot = value
+      else if (actions[name]) return actions[name](context, value)
+      else assert.fail(`Unexpected action: ${name}`)
+    }
+  }
   const actions = vm.runInNewContext(`({${deleteSource}})`, {
     SyncServerClient: class {
       async getAccountSessions() {
         if (cleanupAccountResponse !== undefined) return cleanupAccountResponse
         return accountSessions()
       }
+
       async getEncryptedSyncCollection() {
         if (current && revoked) throw Object.assign(new Error('Session expired'), { status: 401 })
         if (otherLoginDuringCleanup) addLogin()
         return { revision: puts, payload: await encryptSyncDocument(remote, key, salt) }
       }
+
       async putEncryptedSyncCollection(collection, revision, payload) {
         puts++
         if (cleanupFails || (cleanupFailsOnce && puts === 1) || (postCleanupFailsOnce && puts === 2)) throw new Error('Offline')
@@ -65,14 +77,22 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
         remote = await decryptSyncDocument(payload, key)
       }
     },
-    trackSyncClient: client => client, releaseSyncClient() {},
-    assertSyncEnabled() {}, withSyncLock: callback => callback(),
-    ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, readSyncCollection, removeSyncDeviceSessions, removeSyncSession,
+    trackSyncClient: client => client,
+    releaseSyncClient() {},
+    assertSyncEnabled() {},
+    withSyncLock: callback => callback(),
+    ENCRYPTED_SYNC_RETRIES: 3,
+    decryptSyncDocument,
+    encryptSyncDocument,
+    readSyncCollection,
+    removeSyncDeviceSessions,
+    removeSyncSession,
     normalizeSyncSessionsDocument,
     i18n: { global: { t: key => key } },
     parseSnapshot: JSON.parse,
     getSavedOtherDeviceSessions: snapshot => getOtherDeviceSessions(snapshot.sessionsV2, settings.syncServerDeviceId),
-    SyncServerCancelledError: class extends Error {}, isSessionExpiredError: () => false,
+    SyncServerCancelledError: class extends Error {},
+    isSessionExpiredError: () => false,
   })
   const prompt = { value: { id: 'login-id', device_id: 'old-phone', current } }
   const sessions = { value: [prompt.value, ...(otherLogin ? [{ id: 'remaining-login', device_id: 'old-phone' }] : [])] }
@@ -83,9 +103,11 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
   }
   function accountSessions() {
     if (accountResponse !== undefined) return accountResponse
-    return { sessions: sessions.value.filter(session => (
-      (!otherLoginExpires || session.id === 'login-id') && (!revoked || session.id !== 'login-id')
-    )) }
+    return {
+      sessions: sessions.value.filter(session => (
+        (!otherLoginExpires || session.id === 'login-id') && (!revoked || session.id !== 'login-id')
+      ))
+    }
   }
   const revokeDeletesTabs = { value: false }
   const revokeTabsDeleted = { value: false }
@@ -94,15 +116,24 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
   const emitted = []
   let reloads = 0
   const componentContext = vm.createContext({
-    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs, revokeTabsDeleted, revokeAccessRevoked,
+    sessionToRevoke: prompt,
+    promptError,
+    actionBusy: { value: false },
+    sessions,
+    revokeDeletesTabs,
+    revokeTabsDeleted,
+    revokeAccessRevoked,
     client: () => ({
       token: 'token',
       async getAccountSessions() { return accountSessions() },
       async revokeAccountSession() {
         revokeAttempts++
         if (releasedUploadDuringRevoke) {
-          remote = releasedClient.mergeSyncSessions({ remoteValue: remote,
-            localSessions: [tabSet('new-window')], deviceId: 'old-phone', platform: 'desktop',
+          remote = releasedClient.mergeSyncSessions({
+            remoteValue: remote,
+            localSessions: [tabSet('new-window')],
+            deviceId: 'old-phone',
+            platform: 'desktop',
           }).document
         }
         if (otherLoginAfterRevoke) addLogin()
@@ -119,8 +150,11 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
       },
       cancel() {},
     }),
-    store: { dispatch: context.dispatch }, showToast() {}, t: key => key,
-    emit: event => emitted.push(event), loadSessions: async () => { reloads++ },
+    store: { dispatch: context.dispatch },
+    showToast() {},
+    t: key => key,
+    emit: event => emitted.push(event),
+    loadSessions: async () => { reloads++ },
     handleRequestError: async (error, token, target) => { target.value = error.message },
   })
   vm.runInContext(revokeSource, componentContext)

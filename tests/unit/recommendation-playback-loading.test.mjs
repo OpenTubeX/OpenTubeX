@@ -27,12 +27,15 @@ for (const outcome of ['rejection', 'missing epoch']) {
       recommendationPlaybackSample: null,
       recommendationWatchSession: null,
       $refs: { player: { hasLoaded: true, isPaused: () => false } },
-      $store: { getters, async dispatch(action) {
-        assert.equal(action, 'loadRecommendations')
-        calls++
-        if (recover) getters.getRecommendationEpoch = 'recovered'
-        else if (outcome === 'rejection') throw new Error('Datastore unavailable')
-      } },
+      $store: {
+        getters,
+        async dispatch(action) {
+          assert.equal(action, 'loadRecommendations')
+          calls++
+          if (recover) getters.getRecommendationEpoch = 'recovered'
+          else if (outcome === 'rejection') throw new Error('Datastore unavailable')
+        }
+      },
     }
     const tick = async () => { trackRecommendationWatch.call(watch, now / 1000); await Promise.resolve() }
     await tick()

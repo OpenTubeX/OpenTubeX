@@ -70,14 +70,17 @@ const extractionSource = watchSource.slice(
 test('a SABR reload refreshes cached Shorts metadata with the server context', async () => {
   const requests = []
   const methods = vm.runInNewContext(`({${extractionSource}})`, {
-    process: { env: {} }, usesInvidiousApi,
+    process: { env: {} },
+    usesInvidiousApi,
     getLocalVideoInfo: async (_id, options) => {
       requests.push(options)
       return { info: { playability_status: { status: 'OK' } }, call: requests.length }
     },
   })
   const watch = {
-    ...methods, backendPreference: 'local', isYtDlpPlaybackRequested: () => false,
+    ...methods,
+    backendPreference: 'local',
+    isYtDlpPlaybackRequested: () => false,
     shortsPlaybackCache: new ShortsPlaybackCache(),
   }
   const original = await watch.getShortsVideoInformation('short')
@@ -95,7 +98,8 @@ for (const failure of [
   test(`resolved local Shorts failure ${JSON.stringify(failure)} is not reused during recovery`, async () => {
     let calls = 0
     const methods = vm.runInNewContext(`({${extractionSource}})`, {
-      process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
+      process: { env: { IS_CAPACITOR: false } },
+      usesInvidiousApi,
       getLocalVideoInfo: async () => {
         calls++
         return calls === 1
@@ -104,7 +108,9 @@ for (const failure of [
       },
     })
     const watch = {
-      ...methods, backendPreference: 'local', isYtDlpPlaybackRequested: () => false,
+      ...methods,
+      backendPreference: 'local',
+      isYtDlpPlaybackRequested: () => false,
       shortsPlaybackCache: new ShortsPlaybackCache(),
     }
     await watch.getShortsVideoInformation('short')
@@ -134,8 +140,12 @@ for (const shorts of [false, true]) {
     })
     const node = tag => ({ tag, children: [], parent: null })
     const renderer = createRenderer({
-      createElement: node, createComment: () => node('comment'), createText: () => node('text'),
-      setElementText() {}, setText() {}, patchProp() {},
+      createElement: node,
+      createComment: () => node('comment'),
+      createText: () => node('text'),
+      setElementText() {},
+      setText() {},
+      patchProp() {},
       insert(element, parent, anchor) {
         if (element.parent) element.parent.children.splice(element.parent.children.indexOf(element), 1)
         element.parent = parent
@@ -166,7 +176,8 @@ for (const backend of ['local', 'invidious']) {
   test(`Shorts ${backend} extraction shares requests and uses the matching backend`, async () => {
     const calls = []
     const methods = vm.runInNewContext(`({${extractionSource}})`, {
-      process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
+      process: { env: { IS_CAPACITOR: false } },
+      usesInvidiousApi,
       getLocalVideoInfo: async (id, options) => {
         calls.push(['local', id, options.shouldGeneratePoToken()])
         return { id }
@@ -177,9 +188,12 @@ for (const backend of ['local', 'invidious']) {
       },
     })
     const watch = {
-      ...methods, backendPreference: backend, apiServerUrl: 'https://first.example',
+      ...methods,
+      backendPreference: backend,
+      apiServerUrl: 'https://first.example',
       $store: { getters: { getYatteeProxyVideos: true } },
-      isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
+      isYtDlpPlaybackRequested: () => false,
+      shortsPlaybackCache: new ShortsPlaybackCache(),
     }
     const first = watch.getShortsVideoInformation('short')
     assert.equal(watch.getShortsVideoInformation('short'), first)
@@ -197,13 +211,18 @@ for (const backend of ['local', 'invidious']) {
 test('preloaded Yattee Shorts are fetched again after proxying is turned on', async () => {
   const calls = []
   const methods = vm.runInNewContext(`({${extractionSource}})`, {
-    process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
+    process: { env: { IS_CAPACITOR: false } },
+    usesInvidiousApi,
     invidiousGetVideoInformation: async id => { calls.push(id); return { id } },
   })
   const getters = { getYatteeProxyVideos: false }
   const watch = {
-    ...methods, backendPreference: 'yattee', apiServerUrl: 'https://yattee.example', $store: { getters },
-    isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
+    ...methods,
+    backendPreference: 'yattee',
+    apiServerUrl: 'https://yattee.example',
+    $store: { getters },
+    isYtDlpPlaybackRequested: () => false,
+    shortsPlaybackCache: new ShortsPlaybackCache(),
   }
   await watch.getShortsVideoInformation('short')
   getters.getYatteeProxyVideos = true
@@ -214,12 +233,16 @@ test('preloaded Yattee Shorts are fetched again after proxying is turned on', as
 test('an Invidious preload error is retried when the Short is opened', async () => {
   let calls = 0
   const methods = vm.runInNewContext(`({${extractionSource}})`, {
-    process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
+    process: { env: { IS_CAPACITOR: false } },
+    usesInvidiousApi,
     invidiousGetVideoInformation: async () => ++calls === 1 ? { error: 'unavailable' } : { ready: true },
   })
   const watch = {
-    ...methods, backendPreference: 'invidious', apiServerUrl: 'https://first.example',
-    isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
+    ...methods,
+    backendPreference: 'invidious',
+    apiServerUrl: 'https://first.example',
+    isYtDlpPlaybackRequested: () => false,
+    shortsPlaybackCache: new ShortsPlaybackCache(),
   }
   await assert.rejects(watch.getShortsVideoInformation('short'), /unavailable/)
   assert.deepEqual(await watch.getShortsVideoInformation('short'), { ready: true })
@@ -302,20 +325,33 @@ for (const wasPlaying of [false, true]) {
     const emitted = []
     const media = { paused: !wasPlaying, pause() { this.paused = true } }
     const context = {
-      process: { env: { SUPPORTS_LOCAL_API: true } }, props: { shortsPlayer: true, sabrData: {} },
-      video: ref(media), shortsNavigationSuspended: ref(false), musicMode: ref(false),
-      suspendedShortsSabrReload: null, suspendedShortsError: null,
-      sabrStream: null, sabrAbortController: null, playerWidth: 100, playerHeight: 200,
+      process: { env: { SUPPORTS_LOCAL_API: true } },
+      props: { shortsPlayer: true, sabrData: {} },
+      video: ref(media),
+      shortsNavigationSuspended: ref(false),
+      musicMode: ref(false),
+      suspendedShortsSabrReload: null,
+      suspendedShortsError: null,
+      sabrStream: null,
+      sabrAbortController: null,
+      playerWidth: 100,
+      playerHeight: 200,
       AbortController: class { abort() { aborted = true } },
       setupSabrScheme: () => ({
         onBackoffRequested() {}, onReloadOnce(callback) { requestReload = callback },
       }),
       clearSabrBackoffTimer() {},
       getSabrReloadState: () => ({ wasPlaying: !media.paused, playbackRate: 2, videoQuality: '144' }),
-      emit: (...args) => emitted.push(args), registerMediaSessionHandlers() {},
-      sleepTimer: { pauseCountdown() {} }, cancelSponsorBlockSkipSchedule() {}, clearAbRepeatBoundarySchedule() {},
-      tabMediaCoordinator: { setActionHandlers() {}, setPlaybackState() {} }, mediaTabId: 'shorts-tab', mediaSessionSource: 'player-shorts-tab',
-      onDeactivated() {}, onActivated: callback => { activate = callback },
+      emit: (...args) => emitted.push(args),
+      registerMediaSessionHandlers() {},
+      sleepTimer: { pauseCountdown() {} },
+      cancelSponsorBlockSkipSchedule() {},
+      clearAbRepeatBoundarySchedule() {},
+      tabMediaCoordinator: { setActionHandlers() {}, setPlaybackState() {} },
+      mediaTabId: 'shorts-tab',
+      mediaSessionSource: 'player-shorts-tab',
+      onDeactivated() {},
+      onActivated: callback => { activate = callback },
     }
     const suspend = vm.runInNewContext(`${sabrSource}\n${lifecycle}\nsuspendForShortsNavigation`, context)
     suspend()
@@ -341,20 +377,38 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
   let fullscreen = true
   let activate
   const context = {
-    shortsNavigationSuspended: ref(true), musicMode: ref(false), isActiveTab: ref(false), isFullscreen: ref(false),
-    suspendedShortsSabrReload: false, suspendedShortsError: null,
+    shortsNavigationSuspended: ref(true),
+    musicMode: ref(false),
+    isActiveTab: ref(false),
+    isFullscreen: ref(false),
+    suspendedShortsSabrReload: false,
+    suspendedShortsError: null,
     isNativeFullscreenActive: () => fullscreen,
-    androidFullscreenHostActive: ref(false), androidFullscreenHost: null,
+    androidFullscreenHostActive: ref(false),
+    androidFullscreenHost: null,
     finishAndroidFullscreenExit() {},
     handleVideoZoomFullscreenChange() {},
-    props: { shortsPlayer: true }, resetShortsOverflowMenu() {}, suppressPanelTransitions() {}, syncChapterOverlayButton() {},
-    process: { env: {} }, fullWindowEnabled: ref(false),
+    props: { shortsPlayer: true },
+    resetShortsOverflowMenu() {},
+    suppressPanelTransitions() {},
+    syncChapterOverlayButton() {},
+    process: { env: {} },
+    fullWindowEnabled: ref(false),
     rememberAndCloseDockedPanels: () => closed.push('current player panels'),
-    video: ref({}), rotateFullscreenToLandscape: ref(false), fullscreenAspectRatio: ref(1),
-    updateFullscreenOrientation() {}, syncAndroidStatusBarVisibility() {},
-    updateScrollMiniPlayer() {}, nextTick() {}, showOverlayControls() {},
-    onDeactivated() {}, onActivated: callback => { activate = callback },
-    registerMediaSessionHandlers() {}, emit() {}, handleTimeupdate() {}, handlePause() {},
+    video: ref({}),
+    rotateFullscreenToLandscape: ref(false),
+    fullscreenAspectRatio: ref(1),
+    updateFullscreenOrientation() {},
+    syncAndroidStatusBarVisibility() {},
+    updateScrollMiniPlayer() {},
+    nextTick() {},
+    showOverlayControls() {},
+    onDeactivated() {},
+    onActivated: callback => { activate = callback },
+    registerMediaSessionHandlers() {},
+    emit() {},
+    handleTimeupdate() {},
+    handlePause() {},
     rewindOnResumePausedAt: null,
   }
   const handler = vm.runInNewContext(`${source}\nfullscreenChangeHandler`, context)
@@ -379,11 +433,19 @@ test('an inactive Short defers player errors without changing current playback',
   const emitted = []
   const playbackStates = []
   const context = {
-    ignoreErrors: false, shortsNavigationSuspended: ref(true), suspendedShortsError: null, suspendedShortsSabrReload: false,
-    ErrorCode: {}, ErrorSeverity: { RECOVERABLE: 1 }, ErrorCategory: { NETWORK: 2 },
-    navigator: { onLine: true }, logShakaError() {}, props: { videoId: 'old-short' },
+    ignoreErrors: false,
+    shortsNavigationSuspended: ref(true),
+    suspendedShortsError: null,
+    suspendedShortsSabrReload: false,
+    ErrorCode: {},
+    ErrorSeverity: { RECOVERABLE: 1 },
+    ErrorCategory: { NETWORK: 2 },
+    navigator: { onLine: true },
+    logShakaError() {},
+    props: { videoId: 'old-short' },
     shaka: { util: { Error: { Category: { TEXT: 3 }, Code: {} } } },
-    emit: (...args) => emitted.push(args), mediaTabId: 'shorts-tab',
+    emit: (...args) => emitted.push(args),
+    mediaTabId: 'shorts-tab',
     tabMediaCoordinator: { setPlaybackState: (...args) => playbackStates.push(args) },
     process: { env: { IS_ELECTRON: false } },
   }
@@ -398,8 +460,12 @@ test('an inactive Short defers player errors without changing current playback',
   const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
   const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
   vm.runInNewContext(lifecycle, {
-    ...context, musicMode: ref(false), handleError, registerMediaSessionHandlers() {},
-    onDeactivated() {}, onActivated: callback => { activate = callback },
+    ...context,
+    musicMode: ref(false),
+    handleError,
+    registerMediaSessionHandlers() {},
+    onDeactivated() {},
+    onActivated: callback => { activate = callback },
   })
   activate()
   assert.equal(context.shortsNavigationSuspended.value, false)
@@ -418,12 +484,24 @@ test('evicting an inactive Short does not close the current player panels', () =
   const source = playerSource.slice(start, playerSource.indexOf("      document.removeEventListener('keydown'", start))
   const closed = []
   const context = {
-    onBeforeUnmount: callback => callback(), sponsorBlockRequestGeneration: 0,
-    screenWakeBinding: null, androidFullscreenCleanup: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null,
-    nativeCaptionTiming: null, captionTextDisplayer: null, applyCaptionTiming() {}, player: null,
-    clearTimeout() {}, paidPromotionTimer: null, disableTwitchTsVideoGap: null,
-    cancelPendingVolumeUserSet() {}, fullWindowAnimation: null,
-    hasLoaded: ref(true), hasPlaybackPosition: ref(true), shortsNavigationSuspended: ref(true),
+    onBeforeUnmount: callback => callback(),
+    sponsorBlockRequestGeneration: 0,
+    screenWakeBinding: null,
+    androidFullscreenCleanup: null,
+    iosFullscreenCleanup: null,
+    iosCaptionsCleanup: null,
+    nativeCaptionTiming: null,
+    captionTextDisplayer: null,
+    applyCaptionTiming() {},
+    player: null,
+    clearTimeout() {},
+    paidPromotionTimer: null,
+    disableTwitchTsVideoGap: null,
+    cancelPendingVolumeUserSet() {},
+    fullWindowAnimation: null,
+    hasLoaded: ref(true),
+    hasPlaybackPosition: ref(true),
+    shortsNavigationSuspended: ref(true),
     mediaTabId: 'shorts-tab',
     document: { body: { dataset: { playerFullWindowOwner: 'shorts-tab' }, classList: { remove: () => closed.push('fullwindow') } } },
   }

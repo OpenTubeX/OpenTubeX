@@ -13,17 +13,24 @@ function fixture({ saveFails = false, deleteFails = false } = {}) {
   const previous = { id: 'previous' }
   const settings = { syncServerDeviceId: 'pixel', syncServerWatchStatsReset: previous }
   const reset = { id: 'next' }
-  const store = loadStore({ deleteAll: async () => {
-    writes.push('delete')
-    if (deleteFails) throw new Error('Delete failed')
-    deleted = true
-  } }, () => reset, { error: () => {} })
-  const context = { state: store.state, rootState: { settings }, dispatch: async (_name, value) => {
+  const store = loadStore({
+    deleteAll: async () => {
+      writes.push('delete')
+      if (deleteFails) throw new Error('Delete failed')
+      deleted = true
+    }
+  }, () => reset, { error: () => {} })
+  const context = {
+    state: store.state,
+    rootState: { settings },
+    dispatch: async (_name, value) => {
     // Generated settings actions log persistence errors and resolve without committing.
-    if (saveFails) return
-    settings.syncServerWatchStatsReset = value
-    writes.push(value)
-  }, commit: name => writes.push(name) }
+      if (saveFails) return
+      settings.syncServerWatchStatsReset = value
+      writes.push(value)
+    },
+    commit: name => writes.push(name)
+  }
   return { run: () => store.actions.clearWatchStats(context), deleted: () => deleted, settings, writes, previous, reset }
 }
 

@@ -25,7 +25,11 @@ async function fixture(t) {
   const db = { settings: store(), history: store({ indexes: ['videoId'] }) }
   await Promise.all([db.settings.loadDatabaseAsync(), db.history.loadDatabaseAsync()])
   const { History } = vm.runInNewContext(source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {')) + '\n({History})', {
-    db, ...seenVideos, migrateLegacyHistoryRecord, migrateStoredSettings, createIdQuery,
+    db,
+    ...seenVideos,
+    migrateLegacyHistoryRecord,
+    migrateStoredSettings,
+    createIdQuery,
     recommendations: { remove: async () => {} },
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
     console,

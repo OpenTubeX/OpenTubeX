@@ -80,8 +80,10 @@ test('publishes full and lite architecture APKs alongside the existing desktop a
   for (const upload of uploads) {
     assert.equal(upload.with.archive, undefined, 'APK downloads must use the default ZIP artifact archive')
     assert.equal(upload.with['if-no-files-found'], 'error')
-    const path = upload.with.path.replace('${{ steps.apk.outputs.version }}', version)
-    const name = upload.with.name.replace('${{ steps.apk.outputs.version }}', version)
+    // eslint-disable-next-line no-template-curly-in-string -- GitHub Actions expression
+    const versionExpression = '${{ steps.apk.outputs.version }}'
+    const path = upload.with.path.replace(versionExpression, version)
+    const name = upload.with.name.replace(versionExpression, version)
     assert.equal(path.split('/')[0], name.includes('-lite-') ? 'android-lite-apks' : 'android-apks')
     assert.equal(path.split('/').pop(), name)
     uploadedNames.push(name)

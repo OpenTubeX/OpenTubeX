@@ -11,10 +11,17 @@ test('shipped bundle uses the delay for movement, touch, keyboard and seeking', 
   const move = vm.runInNewContext(`(${bundle.match(/function CP\(a,b\)\{[\s\S]*?\}(?=function VP\()/)[0]})`, { LP() {}, DP() {} })
   const seek = vm.runInNewContext(`({${bundle.match(/ci\(a\)\{\(this\.ba=\s*a\)[\s\S]*?\}/)[0]}})`).ci
   const controls = {
-    videoContainer_: container, controlsContainer_: container,
-    mouseStillTimer_: timer, hideSettingsMenusTimer_: timer,
-    computeOpacity() {}, isOpaque: () => true,
-    i: container, l: container, U: timer, W: timer, Ha: () => true,
+    videoContainer_: container,
+    controlsContainer_: container,
+    mouseStillTimer_: timer,
+    hideSettingsMenusTimer_: timer,
+    computeOpacity() {},
+    isOpaque: () => true,
+    i: container,
+    l: container,
+    U: timer,
+    W: timer,
+    Ha: () => true,
   }
   for (const delay of [undefined, '7.5']) {
     if (delay === undefined) delete container.dataset.playingInterfaceHideDelay

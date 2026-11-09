@@ -20,14 +20,18 @@ for (const [index, mode] of [[0, 'hide'], [1, 'collapsed'], [1, 'expanded']]) {
       render: compile(template),
       setup: () => ({
         clampShortsAuxPanelScroll() {},
-        customShortsPlayerActive: false, fullscreenMetadataOpen: false,
-        shortsMetadataOpen: true, isLoading: false, aiVideoSummaryMode: mode,
-        videoSummary: ['<img src=x onerror=alert(1)>', 'Second paragraph'], videoId: 'video'
+        customShortsPlayerActive: false,
+        fullscreenMetadataOpen: false,
+        shortsMetadataOpen: true,
+        isLoading: false,
+        aiVideoSummaryMode: mode,
+        videoSummary: ['<img src=x onerror=alert(1)>', 'Second paragraph'],
+        videoId: 'video'
       })
     })
     app.component('WatchVideoSummary', summaryComponent)
     app.component('FtInlineMetadata', { render() { return h('span', this.$slots.default()) } })
-    app.component('ft-icon', { render: () => h('svg') })
+    app.component('FtIcon', { render: () => h('svg') })
     app.config.globalProperties.$t = key => key
     const html = await renderToString(app)
     assert.equal(html.includes('<details'), mode !== 'hide')

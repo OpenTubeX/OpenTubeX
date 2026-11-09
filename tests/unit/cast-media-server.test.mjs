@@ -271,7 +271,9 @@ test('HTTP requests expose redirects for policy checks with only explicit creden
     }
   }
   const response = await fetchCastMedia(network, 'https://instance.test/video', {
-    method: 'GET', headers: new Headers({ Range: 'bytes=0-3' }), signal: new AbortController().signal,
+    method: 'GET',
+    headers: new Headers({ Range: 'bytes=0-3' }),
+    signal: new AbortController().signal,
     addresses: [{ address: '8.8.8.8', family: 4 }]
   })
   assert.equal(response.status, 302)
@@ -363,8 +365,11 @@ for (const proxy of ['PROXY proxy.test:8080', 'SOCKS5 proxy.test:1080', 'PROXY p
   test(`does not bypass a ${proxy} route with a direct connection`, async () => {
     const network = { request() { assert.fail('No direct request may bypass the proxy') } }
     await assert.rejects(fetchCastMedia(network, 'https://media.test/video', {
-      method: 'GET', headers: new Headers(), signal: new AbortController().signal,
-      addresses: [{ address: '8.8.8.8', family: 4 }], proxy
+      method: 'GET',
+      headers: new Headers(),
+      signal: new AbortController().signal,
+      addresses: [{ address: '8.8.8.8', family: 4 }],
+      proxy
     }), /direct route/)
   })
 }
@@ -545,7 +550,8 @@ test('DASH clock GET requests retain scoped credentials across redirects', async
 test('relayed HTTP clock HEAD preserves and exposes the upstream Date', async t => {
   const date = 'Wed, 01 Jan 2020 00:00:00 GMT'
   const upstream = createServer((request, response) => response.writeHead(200, { Date: date }).end(request.url === '/live.mpd'
-    ? '<MPD type="dynamic"><UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014" value="clock"/></MPD>' : 'clock'))
+    ? '<MPD type="dynamic"><UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014" value="clock"/></MPD>'
+    : 'clock'))
   const origin = await listen(upstream)
   t.after(() => close(upstream))
   const media = createCastMediaServer({ url: `${origin}/live.mpd` }, '127.0.0.1', 'token')
@@ -806,7 +812,7 @@ for (const type of ['application/x-mpegurl', 'application/vnd.apple.mpegurl', un
 }
 
 async function pendingPlaylistRequest(t, query, upstreamQuery = '', targetDuration = 10, prime = true) {
-  let hold = false, release, signal, begin, aborted
+  let hold = false; let release; let signal; let begin; let aborted
   const started = new Promise(resolve => { begin = resolve })
   const cancelled = new Promise(resolve => { aborted = resolve })
   const playlist = `#EXTM3U\n#EXT-X-TARGETDURATION:${targetDuration}\n#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES\n#EXT-X-PART:DURATION=0.5,URI="part.ts"\n`
@@ -919,7 +925,7 @@ test('HLS blocking reload cancels upstream work when the receiver disconnects', 
 })
 
 test('extensionless HLS child reloads preserve variable imports, redirect authorization and destination checks', async t => {
-  const requests = [], destinations = []
+  const requests = []; const destinations = []
   const upstream = createServer((request, response) => {
     requests.push({ url: request.url, authorization: request.headers.authorization })
     if (request.url === '/master') return response.end('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nprivate/playlist?sig=secret\n')
@@ -1220,8 +1226,12 @@ for (const [contentType, filename, body] of [
 ]) {
   test(`remote ${filename} HEAD omits upstream representation headers`, async t => {
     const upstream = createServer((request, response) => {
-      response.writeHead(200, { 'content-type': contentType, 'content-length': Buffer.byteLength(body),
-        'content-range': `bytes 0-${Buffer.byteLength(body) - 1}/${Buffer.byteLength(body)}`, 'accept-ranges': 'bytes' })
+      response.writeHead(200, {
+        'content-type': contentType,
+        'content-length': Buffer.byteLength(body),
+        'content-range': `bytes 0-${Buffer.byteLength(body) - 1}/${Buffer.byteLength(body)}`,
+        'accept-ranges': 'bytes'
+      })
       response.end(request.method === 'HEAD' ? undefined : body)
     })
     const upstreamUrl = await listen(upstream)
@@ -1256,8 +1266,12 @@ test('does not truncate compressed subtitles or advertise compressed byte ranges
   let encoding
   const upstream = createServer((request, response) => {
     encoding = request.headers['accept-encoding']
-    response.writeHead(200, { 'content-type': 'text/vtt', 'content-encoding': 'gzip',
-      'content-length': compressed.length, 'accept-ranges': 'bytes' }).end(compressed)
+    response.writeHead(200, {
+      'content-type': 'text/vtt',
+      'content-encoding': 'gzip',
+      'content-length': compressed.length,
+      'accept-ranges': 'bytes'
+    }).end(compressed)
   })
   const upstreamUrl = await listen(upstream)
   t.after(() => close(upstream))
@@ -1328,7 +1342,6 @@ test('recalculates Invidious authorization on redirects without leaking it to th
   ])
 })
 
-
 test('rejects untrusted upstream destinations before any request', async t => {
   let fetched = false
   const upstream = createServer((request, response) => { fetched = true; response.end('private service') })
@@ -1340,7 +1353,6 @@ test('rejects untrusted upstream destinations before any request', async t => {
   assert.equal((await fetch(media.mediaUrl())).status, 502)
   assert.equal(fetched, false)
 })
-
 
 test('checks manifest resources and redirects against the destination policy', async t => {
   let privateRequests = 0

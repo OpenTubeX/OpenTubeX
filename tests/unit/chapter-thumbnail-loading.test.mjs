@@ -12,7 +12,7 @@ const loaderEnd = source.indexOf('\n    /**', loaderStart)
 
 function deferred() {
   let resolve
-  const promise = new Promise(res => { resolve = res })
+  const promise = new Promise(_resolve => { resolve = _resolve })
   return { promise, resolve }
 }
 
@@ -34,7 +34,12 @@ function setup({ chapterThumbnailsWanted = true } = {}) {
     }
   }
   const dependencies = {
-    props, chapterThumbnails, player, watch, showChaptersOverlay, chapterThumbnailsWanted,
+    props,
+    chapterThumbnails,
+    player,
+    watch,
+    showChaptersOverlay,
+    chapterThumbnailsWanted,
     hasLoaded: ref(true),
     closeChaptersOverlay() {},
     refreshChapterMarkers() {},

@@ -20,27 +20,52 @@ for (const [name, historyLength, presented, selecting, visible] of [
     const app = createSSRApp({
       render,
       data: () => ({
-        tabs: [tab], actionTab: tab,
-        actionTabYoutubeUrl: null, canToggleActionTabLoaded: true,
+        tabs: [tab],
+        actionTab: tab,
+        actionTabYoutubeUrl: null,
+        canToggleActionTabLoaded: true,
         relatedTabIds: { before: [], after: [], other: [] },
-        activeTabId: 'tab', presentedTabId: presented ? 'tab' : 'other', selecting,
+        activeTabId: 'tab',
+        presentedTabId: presented ? 'tab' : 'other',
+        selecting,
         selectedTabIds: new Set(),
-        drag: {}, swipe: {}, dragSettling: false, suppressDragTransition: false,
-        tabCardStyle: () => ({}), tabAriaLabel: () => 'Tab', tabTitle: () => 'Tab', t: key => key,
-        startTabGesture() {}, moveTabGesture() {}, finishTabGesture() {}, cancelTabGesture() {},
-        preventHoldScroll() {}, finishTabTouch() {}, handleTabContextMenu() {}, activateTab() {}, handleTabTargetKeydown() {},
-        toggleTabSelection() {}, closeTab() {}, openTabHistory() {},
-        selectActionTab() {}, closeRelatedTabs() {}, closeActionTab() {}, copyActionTabYoutubeLink() {},
-        closeTabActions() {}, duplicateActionTab() {}, reloadActionTab() {},
-        toggleActionTabLoaded() {}, toggleActionTabPinned() {},
+        drag: {},
+        swipe: {},
+        dragSettling: false,
+        suppressDragTransition: false,
+        tabCardStyle: () => ({}),
+        tabAriaLabel: () => 'Tab',
+        tabTitle: () => 'Tab',
+        t: key => key,
+        startTabGesture() {},
+        moveTabGesture() {},
+        finishTabGesture() {},
+        cancelTabGesture() {},
+        preventHoldScroll() {},
+        finishTabTouch() {},
+        handleTabContextMenu() {},
+        activateTab() {},
+        handleTabTargetKeydown() {},
+        toggleTabSelection() {},
+        closeTab() {},
+        openTabHistory() {},
+        selectActionTab() {},
+        closeRelatedTabs() {},
+        closeActionTab() {},
+        copyActionTabYoutubeLink() {},
+        closeTabActions() {},
+        duplicateActionTab() {},
+        reloadActionTab() {},
+        toggleActionTabLoaded() {},
+        toggleActionTabPinned() {},
       }),
     })
     app.component('FtIcon', { render: () => null })
     app.component('CapacitorTabPreview', { render: () => null })
     app.component('CapacitorTabActionsMenu', {
-      props: ['showHistory'],
-      render: compile(historyButton),
+      props: { showHistory: Boolean },
       data: () => ({ t: key => key, emit() {} }),
+      render: compile(historyButton),
     })
     const html = await renderToString(app)
     assert.equal(html.includes('capacitorPhoneTabHistoryButton'), false, 'cards have no history control')
@@ -63,9 +88,13 @@ test('returning from tab history restores focus to the active card without scrol
     restoreOverlayScrollTop(_element, offset) { assert.equal(offset, 120) },
     observeActiveContent() {},
     showSyncedTabsView: { value: true },
-    dialogRef: { value: { querySelector: selector => selector === '.capacitorPhoneTabTarget[aria-selected="true"]'
-      ? { focus(options) { assert.equal(options.preventScroll, true); focused = true } }
-      : { focus() { assert.fail('Focus must return to the card rather than the Open tabs header') } } } },
+    dialogRef: {
+      value: {
+        querySelector: selector => selector === '.capacitorPhoneTabTarget[aria-selected="true"]'
+          ? { focus(options) { assert.equal(options.preventScroll, true); focused = true } }
+          : { focus() { assert.fail('Focus must return to the card rather than the Open tabs header') } }
+      }
+    },
   })
   vm.runInContext(source.slice(start, source.indexOf('function activeScrollRef()', start)), context)
   const focusStart = source.indexOf('function focusActiveTab()')

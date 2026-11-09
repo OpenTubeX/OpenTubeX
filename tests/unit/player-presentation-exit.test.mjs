@@ -17,16 +17,20 @@ function createExit({ native = true, active = true, eventBeforePromise = false }
     calls.push('close docks')
   })
   const exit = vm.runInNewContext(`${exitSource}\nexitPresentationModes`, {
-    document, isFullscreen, fullWindowEnabled,
-    ui: { getControls: () => ({
-      isFullScreenEnabled: () => isFullscreen.value || fullWindowEnabled.value,
-      async toggleFullScreen() {
-        calls.push('toggle')
-        document.fullscreenElement = null
-        if (!native) fullWindowEnabled.value = false
-        else if (eventBeforePromise) document.dispatchEvent(new Event('fullscreenchange'))
-      }
-    }) },
+    document,
+    isFullscreen,
+    fullWindowEnabled,
+    ui: {
+      getControls: () => ({
+        isFullScreenEnabled: () => isFullscreen.value || fullWindowEnabled.value,
+        async toggleFullScreen() {
+          calls.push('toggle')
+          document.fullscreenElement = null
+          if (!native) fullWindowEnabled.value = false
+          else if (eventBeforePromise) document.dispatchEvent(new Event('fullscreenchange'))
+        }
+      })
+    },
     nextTick: async () => { calls.push('render') },
     fullWindowAnimation: { cancel: () => calls.push('cancel animation') },
     console,

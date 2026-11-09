@@ -57,9 +57,17 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
       } else if (pathname === '/v1/pairing' && method === 'POST') {
         const body = typeof options.data === 'string' ? JSON.parse(options.data) : options.data
         pairingRequests.push(body)
-        pairing = { version: 1, id: body.id, account_id: null, recipient_public_key: body.recipient_public_key,
-          recipient_device_id: body.recipient_device_id, recipient_device_name: body.recipient_device_name,
-          approving_device_id: null, expires_at: Date.now() + 120000, approved: false }
+        pairing = {
+          version: 1,
+          id: body.id,
+          account_id: null,
+          recipient_public_key: body.recipient_public_key,
+          recipient_device_id: body.recipient_device_id,
+          recipient_device_name: body.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120000,
+          approved: false
+        }
         data = pairing
       } else if (pathname.startsWith('/v1/pairing/')) data = pairing
       else throw new Error(`Unexpected native sync fixture request: ${method} ${pathname}`)
@@ -74,15 +82,33 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
           : window.__statsRepairNativePromise(plugin, method, options)
       )
       Object.assign(store.state.settings, {
-        currentLocale: 'en-US', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light',
-        mainColor: 'Red', secColor: 'Blue', rememberHistory: true, enableWatchStats: true,
-        syncServerEnabled: true, syncServerAutoSync: false, syncServerUrl: 'https://sync.example',
-        syncServerUsername: 'test', syncServerToken: 'test-token', syncServerPrivacyMode: 'enhanced',
-        syncServerPrivacyKey: key, syncServerPrivacySalt: salt, syncServerDeviceId: currentId,
-        syncServerDeviceName: 'Pixel', syncServerWatchStatsReset: null,
-        syncServerSyncWatchStats: true, syncServerSyncSubscriptions: false, syncServerSyncPlaylists: false,
-        syncServerSyncHistory: false, syncServerSyncProfiles: false, syncServerSyncSessions: false,
-        syncServerSyncSettings: false, syncServerSyncLiveReminders: false,
+        currentLocale: 'en-US',
+        baseTheme: 'system',
+        systemDarkTheme: 'dark',
+        systemLightTheme: 'light',
+        mainColor: 'Red',
+        secColor: 'Blue',
+        rememberHistory: true,
+        enableWatchStats: true,
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerUrl: 'https://sync.example',
+        syncServerUsername: 'test',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: key,
+        syncServerPrivacySalt: salt,
+        syncServerDeviceId: currentId,
+        syncServerDeviceName: 'Pixel',
+        syncServerWatchStatsReset: null,
+        syncServerSyncWatchStats: true,
+        syncServerSyncSubscriptions: false,
+        syncServerSyncPlaylists: false,
+        syncServerSyncHistory: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncSessions: false,
+        syncServerSyncSettings: false,
+        syncServerSyncLiveReminders: false,
       })
       await store.dispatch('syncWithSyncServer')
       location.hash = '#/stats'

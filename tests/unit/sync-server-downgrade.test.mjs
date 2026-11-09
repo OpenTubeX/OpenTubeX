@@ -35,13 +35,16 @@ import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/
 
 // External media positions sync from the renderer's browser storage.
 const browserStorage = new Map()
-Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
-  get length() { return browserStorage.size },
-  key: index => [...browserStorage.keys()][index] ?? null,
-  getItem: key => browserStorage.get(key) ?? null,
-  setItem: (key, value) => browserStorage.set(key, value),
-  removeItem: key => browserStorage.delete(key),
-} })
+Object.defineProperty(globalThis, 'localStorage', {
+  configurable: true,
+  value: {
+    get length() { return browserStorage.size },
+    key: index => [...browserStorage.keys()][index] ?? null,
+    getItem: key => browserStorage.get(key) ?? null,
+    setItem: (key, value) => browserStorage.set(key, value),
+    removeItem: key => browserStorage.delete(key),
+  }
+})
 
 // These modules use webpack imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
@@ -80,22 +83,34 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const local = { notificationDismissals }
   const common = {
     DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
-    DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
+    DEFAULT_CHANNEL_AVATAR,
+    UNKNOWN_SYNC_UPLOADER_ID,
+    uploaderToLocal,
+    normalizeChannelAvatar,
+    enrichSyncVideo,
+    mergeSyncIds,
+    syncVideoToRemote,
+    selectChangedHistory,
+    mergeChangedHistoryBaseline,
     runBackgroundJob: backgroundJob,
     toRaw,
     ...syncLive,
-    ...(connectionChanges ? {
-      SyncLiveConnectionState: class extends syncLive.SyncLiveConnectionState {
-        setConnected(value) {
-          connectionChanges.push(value)
-          super.setConnected(value)
+    ...(connectionChanges
+      ? {
+          SyncLiveConnectionState: class extends syncLive.SyncLiveConnectionState {
+            setConnected(value) {
+              connectionChanges.push(value)
+              super.setConnected(value)
+            }
+          },
         }
-      },
-    } : {}),
-    ...(reminderService ? {
-      syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
-      SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
-    } : {}),
+      : {}),
+    ...(reminderService
+      ? {
+          syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
+          SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
+        }
+      : {}),
     ...bookmarks,
     ...sessions,
     isValidSyncServerDeviceId,
@@ -129,8 +144,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isSyncReasonEnabled,
     AUTO_SYNC_INTERVAL_MS: 5 * 60 * 1000,
     getConnectionState: () => network.state,
-    navigator: { get onLine() { return network.online },
-      ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {}) },
+    navigator: {
+      get onLine() { return network.online },
+      ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {})
+    },
     connectionEvents,
     ...(browser ? { window: new EventTarget(), document: new EventTarget(), isAppHidden: () => false } : {}),
     ...(desktopTabs ? { getCapacitorTabService: () => desktopTabs, window: { ftElectron: { tabs: desktopTabs } }, localStorage: receiptStorage ?? { getItem: key => storedReceipts.get(key) ?? null, setItem: (key, value) => storedReceipts.set(key, value) } } : {}),
@@ -252,14 +269,19 @@ test('unsupported watch-stat initialization preserves another window’s newer s
   const newer = { playlists: { local: { remoteId: 'server-generated', videos: ['uploaded-video'] } }, watchStats: [] }
   let locked = false
   const f = fixture({
-    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerAutoSync: false,
-    syncServerSyncWatchStats: true, syncServerSnapshot: JSON.stringify({ playlists: {}, watchStats: [] }),
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
+    syncServerAutoSync: false,
+    syncServerSyncWatchStats: true,
+    syncServerSnapshot: JSON.stringify({ playlists: {}, watchStats: [] }),
   }, {
-    locks: { request: async (name, callback) => {
-      assert.equal(name, 'opentubex-sync-server')
-      locked = true
-      try { return await callback() } finally { locked = false }
-    } },
+    locks: {
+      request: async (name, callback) => {
+        assert.equal(name, 'opentubex-sync-server')
+        locked = true
+        try { return await callback() } finally { locked = false }
+      }
+    },
     settingsReader: settings => {
       assert.equal(locked, true, 'read the persisted baseline while holding the shared sync lock')
       return Object.entries({ ...settings, syncServerSnapshot: JSON.stringify(newer) }).map(([_id, value]) => ({ _id, value }))
@@ -276,15 +298,20 @@ for (const stage of ['waiting for lock', 'reading snapshot']) {
     const newerSnapshot = JSON.stringify({ playlists: { otherAccount: { remoteId: 'keep' } } })
     let reads = 0
     const f = fixture({
-      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerAutoSync: false,
-      syncServerSyncWatchStats: true, syncServerSnapshot: JSON.stringify({ watchStats: [] }),
+      syncServerPrivacyMode: 'legacy',
+      syncServerPrivacyKey: '',
+      syncServerAutoSync: false,
+      syncServerSyncWatchStats: true,
+      syncServerSnapshot: JSON.stringify({ watchStats: [] }),
     }, {
-      locks: { request: async (name, callback) => {
-        assert.equal(name, 'opentubex-sync-server')
-        entered.resolve()
-        if (stage === 'waiting for lock') await release.promise
-        return callback()
-      } },
+      locks: {
+        request: async (name, callback) => {
+          assert.equal(name, 'opentubex-sync-server')
+          entered.resolve()
+          if (stage === 'waiting for lock') await release.promise
+          return callback()
+        }
+      },
       settingsReader: settings => {
         reads++
         settings.syncServerToken = 'other-account-token'
@@ -314,7 +341,9 @@ for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new p
     let failed = false
     let snapshots = 0
     const f = fixture({
-      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerSyncHistory: true,
+      syncServerPrivacyMode: 'legacy',
+      syncServerPrivacyKey: '',
+      syncServerSyncHistory: true,
       syncServerSyncSubscriptions: false,
       syncServerSnapshot: JSON.stringify({ history: ['kept', 'first', 'second'], subscriptions: ['old'] }),
     }, {
@@ -428,35 +457,35 @@ test('repeated reads of the same sync snapshot parse it once and return independ
 
 for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
   for (const cached of [false, true]) {
-  test(`${cached ? 'cached' : 'completed'} library sync does not wait for ${refreshAction}`, async () => {
-    const f = liveFixture()
-    if (cached) await f.actions.syncWithSyncServer(f.context)
-    let releaseRefresh
-    const refreshPending = new Promise(resolve => { releaseRefresh = resolve })
-    let refreshStarted
-    const started = new Promise(resolve => { refreshStarted = resolve })
-    const originalDispatch = f.context.dispatch
-    f.context.dispatch = (action, ...args) => {
-      if (action === refreshAction) {
-        refreshStarted()
-        return refreshPending
+    test(`${cached ? 'cached' : 'completed'} library sync does not wait for ${refreshAction}`, async () => {
+      const f = liveFixture()
+      if (cached) await f.actions.syncWithSyncServer(f.context)
+      let releaseRefresh
+      const refreshPending = new Promise(resolve => { releaseRefresh = resolve })
+      let refreshStarted
+      const started = new Promise(resolve => { refreshStarted = resolve })
+      const originalDispatch = f.context.dispatch
+      f.context.dispatch = (action, ...args) => {
+        if (action === refreshAction) {
+          refreshStarted()
+          return refreshPending
+        }
+        return originalDispatch(action, ...args)
       }
-      return originalDispatch(action, ...args)
-    }
-    let completed = false
-    const syncing = f.actions.syncWithSyncServer(f.context, { remoteOnly: cached }).then(() => { completed = true })
-    try {
-      await started
-      await new Promise(resolve => setImmediate(resolve))
-      assert.equal(completed, true, 'Account metadata must not hold library sync open')
-      assert.equal(f.context.state.syncServerStatus, 'success')
-      assert.equal(f.context.state.syncServerProgress, null)
-      assert.ok(f.settings.syncServerLastSyncAt > 0)
-    } finally {
-      releaseRefresh()
-      await syncing
-    }
-  })
+      let completed = false
+      const syncing = f.actions.syncWithSyncServer(f.context, { remoteOnly: cached }).then(() => { completed = true })
+      try {
+        await started
+        await new Promise(resolve => setImmediate(resolve))
+        assert.equal(completed, true, 'Account metadata must not hold library sync open')
+        assert.equal(f.context.state.syncServerStatus, 'success')
+        assert.equal(f.context.state.syncServerProgress, null)
+        assert.ok(f.settings.syncServerLastSyncAt > 0)
+      } finally {
+        releaseRefresh()
+        await syncing
+      }
+    })
   }
 }
 
@@ -518,17 +547,30 @@ for (const [collection, idKey, setting, capability] of [
     }, {
       encrypted: true,
       respond: async url => {
-        if (url.endsWith('/health')) return { capabilities: {
-          encrypted_sync: 1, live_sync: 1, seen_videos: 1, seen_posts: 1, seen_rss_items: 1, external_media_positions: 1,
-          [capability]: supported ? 1 : 0,
-        } }
-        if (url.endsWith('/encrypted_sync')) return {
-          collections: supported ? [{ collection, revision: 1 }] : [], legacy_data: false,
+        if (url.endsWith('/health')) {
+          return {
+            capabilities: {
+              encrypted_sync: 1,
+              live_sync: 1,
+              seen_videos: 1,
+              seen_posts: 1,
+              seen_rss_items: 1,
+              external_media_positions: 1,
+              [capability]: supported ? 1 : 0,
+            }
+          }
         }
-        if (supported && url.endsWith(`/encrypted_sync/${collection}`)) return {
-          revision: 1,
-          payload: await privacy.encryptSyncDocument([{ [idKey]: 'peer-entry', seenAt: 1000 }],
-            f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        if (url.endsWith('/encrypted_sync')) {
+          return {
+            collections: supported ? [{ collection, revision: 1 }] : [], legacy_data: false,
+          }
+        }
+        if (supported && url.endsWith(`/encrypted_sync/${collection}`)) {
+          return {
+            revision: 1,
+            payload: await privacy.encryptSyncDocument([{ [idKey]: 'peer-entry', seenAt: 1000 }],
+              f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+          }
         }
       },
     })
@@ -847,7 +889,6 @@ for (const overrides of [
   })
 }
 
-
 test('blocked background sync notifies the user and links to sync settings', async () => {
   const f = fixture({
     syncServerPrivacyMode: 'legacy',
@@ -865,7 +906,6 @@ test('blocked background sync notifies the user and links to sync settings', asy
   assert.equal(notification.buttonAction, 'open-sync-settings')
   assert.equal(f.requests.some(({ method }) => method === 'DELETE'), false)
 })
-
 
 for (const choice of ['keep', 'delete']) {
   test(`reviewing blocked deletions with ${choice} applies the choice once and resumes automatic sync`, async () => {
@@ -920,7 +960,8 @@ test('dismissing the deletion review keeps sync paused', async () => {
 for (const previouslyEnabled of [true, false]) {
   test(`successful confirmation restores automatic sync only when previously enabled: ${previouslyEnabled}`, async () => {
     const f = fixture({
-      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
+      syncServerPrivacyMode: 'legacy',
+      syncServerPrivacyKey: '',
       syncServerAutoSync: previouslyEnabled,
       syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
     })
@@ -937,7 +978,8 @@ for (const previouslyEnabled of [true, false]) {
 
 test('remembers paused automatic sync across restart and resumes only after success', async () => {
   const f = fixture({
-    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
   })
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
@@ -955,8 +997,10 @@ test('remembers paused automatic sync across restart and resumes only after succ
 
 test('an explicit automatic-sync choice clears a pending resume', async () => {
   const f = fixture({
-    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
-    syncServerAutoSync: false, syncServerResumeAutoSync: true,
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
+    syncServerAutoSync: false,
+    syncServerResumeAutoSync: true,
   })
   await f.actions.setSyncServerAutoSync(f.context, false)
   await f.actions.syncWithSyncServer(f.context)
@@ -966,7 +1010,8 @@ test('an explicit automatic-sync choice clears a pending resume', async () => {
 
 test('disabling sync clears recovery before a later manual sync succeeds', async () => {
   const f = fixture({
-    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
   })
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
@@ -1066,7 +1111,10 @@ test('disconnect cancels an active sync and reconnect waits for it to settle', a
   let signal
   let started
   const requestStarted = new Promise(resolve => { started = resolve })
-  const f = fixture({}, { encrypted: true, connectionState: 'offline', browser: true,
+  const f = fixture({}, {
+    encrypted: true,
+    connectionState: 'offline',
+    browser: true,
     respond: (url, options) => {
       if (signal) return
       signal = options.signal
@@ -1102,9 +1150,11 @@ test('unchanged collection revisions skip downloads and uploads; remote changes 
     encrypted: true,
     respond: (url, options) => {
       const path = new URL(url).pathname
-      if (path === '/v1/encrypted_sync') return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
-        legacy_data: false,
+      if (path === '/v1/encrypted_sync') {
+        return {
+          collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+          legacy_data: false,
+        }
       }
       if (path.startsWith('/v1/encrypted_sync/')) {
         const collection = path.split('/').at(-1)
@@ -1150,9 +1200,11 @@ test('a sign-out received from another window stops sync and clears account acti
 
 test('failed capability discovery can be retried on the same client', async () => {
   let attempts = 0
-  const f = fixture({}, { respond: () => ++attempts === 1
-    ? new Response('temporarily unavailable', { status: 503 })
-    : { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+  const f = fixture({}, {
+    respond: () => ++attempts === 1
+      ? new Response('temporarily unavailable', { status: 503 })
+      : { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+  })
   const client = new f.Client(f.settings.syncServerUrl, f.settings.syncServerToken)
   await assert.rejects(client.getCapabilities(), { status: 503 })
   assert.equal((await client.getCapabilities()).live_sync, 1)
@@ -1174,11 +1226,13 @@ test('unreadable and expired broadcast events advance the activity cursor', asyn
     { id: '002', recipient: '', payload: 'expired', expires_at: now - 1000 },
   ]
   const cursors = []
-  const f = fixture({}, { respond: url => {
-    const since = new URL(url).searchParams.get('since')
-    cursors.push(since)
-    return events.filter(event => event.id > since)
-  } })
+  const f = fixture({}, {
+    respond: url => {
+      const since = new URL(url).searchParams.get('since')
+      cursors.push(since)
+      return events.filter(event => event.id > since)
+    }
+  })
   await f.actions.refreshSyncServerEvents(f.context)
   await f.actions.refreshSyncServerEvents(f.context)
   assert.deepEqual(cursors, ['', '002'])
@@ -1199,9 +1253,11 @@ function liveFixture(settings = {}) {
         if (++polls === 3) queueMicrotask(() => f.actions.stopSyncServerLive())
         return { cursor }
       }
-      if (path === '/v1/encrypted_sync') return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
-        legacy_data: false,
+      if (path === '/v1/encrypted_sync') {
+        return {
+          collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+          legacy_data: false,
+        }
       }
       if (path.startsWith('/v1/encrypted_sync/')) {
         const collection = path.split('/').at(-1)
@@ -1285,9 +1341,13 @@ test('a full sync refreshes capabilities reused by subsequent live checks', asyn
   const f = fixture({ syncServerSyncSubscriptions: false }, {
     encrypted: true,
     respond: (url) => {
-      if (url.endsWith('/health')) return { capabilities: {
-        encrypted_sync: 1, live_sync: 1, watch_stats: upgraded ? 1 : 0, live_reminders: upgraded ? 1 : 0,
-      } }
+      if (url.endsWith('/health')) {
+        return {
+          capabilities: {
+            encrypted_sync: 1, live_sync: 1, watch_stats: upgraded ? 1 : 0, live_reminders: upgraded ? 1 : 0,
+          }
+        }
+      }
       if (new URL(url).pathname === '/v1/encrypted_sync/changes') {
         reachedPoll()
         return new Promise(resolve => { releasePoll = resolve })
@@ -1385,7 +1445,6 @@ test('an automatic check with no net local change neither uploads nor displays a
   assert.equal(f.requests.filter(request => request.method === 'PUT').length, 0)
   assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 0)
 })
-
 
 test('automatic sync still uploads a real setting change and reports progress', async () => {
   const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
@@ -1528,9 +1587,11 @@ test('automatic sync retries reminders after notification permission becomes ava
     respond: async (url) => {
       if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, live_reminders: 1 } }
       if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'liveReminders', revision: 1 }], legacy_data: false }
-      if (url.endsWith('/encrypted_sync/liveReminders')) return {
-        revision: 1,
-        payload: await privacy.encryptSyncDocument([reminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+      if (url.endsWith('/encrypted_sync/liveReminders')) {
+        return {
+          revision: 1,
+          payload: await privacy.encryptSyncDocument([reminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        }
       }
     },
   })
@@ -1576,9 +1637,11 @@ test('a skipped reminder merge after a 409 keeps the prior snapshot and does not
     reminderService,
     respond: async (url, options) => {
       if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, live_reminders: 1 } }
-      if (url.endsWith('/encrypted_sync')) return {
-        collections: uploads > 0 ? [{ collection: 'liveReminders', revision: 1 }] : [],
-        legacy_data: false,
+      if (url.endsWith('/encrypted_sync')) {
+        return {
+          collections: uploads > 0 ? [{ collection: 'liveReminders', revision: 1 }] : [],
+          legacy_data: false,
+        }
       }
       if (url.endsWith('/encrypted_sync/liveReminders')) {
         if (options.method === 'PUT') {
@@ -1586,10 +1649,12 @@ test('a skipped reminder merge after a 409 keeps the prior snapshot and does not
           if (uploads > 1) uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
           return uploads === 1 ? new Response('{}', { status: 409 }) : { revision: 2 }
         }
-        return uploads === 0 ? { revision: 0, payload: null } : {
-          revision: 1,
-          payload: await privacy.encryptSyncDocument([remoteReminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
-        }
+        return uploads === 0
+          ? { revision: 0, payload: null }
+          : {
+              revision: 1,
+              payload: await privacy.encryptSyncDocument([remoteReminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+            }
       }
     },
   })
@@ -1636,9 +1701,11 @@ for (const [scenario, desktopKeys, phoneKeys] of [
     const respond = async (url, options) => {
       const path = new URL(url).pathname
       if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
-      if (path === '/v1/encrypted_sync') return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
-        legacy_data: false,
+      if (path === '/v1/encrypted_sync') {
+        return {
+          collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+          legacy_data: false,
+        }
       }
       if (path === '/v1/encrypted_sync/events') return []
       if (path.startsWith('/v1/encrypted_sync/')) {
@@ -1772,17 +1839,19 @@ for (const syncServerPrivacyMode of ['enhanced', 'legacy']) {
   })
 }
 
-
 test('activity refresh shares an in-flight download and retries after failure', async () => {
   let fail = true
   let release
   let pending = new Promise(resolve => { release = resolve })
-  const f = fixture({}, { encrypted: true, respond: async url => {
-    if (new URL(url).pathname !== '/v1/encrypted_sync/events') return
-    await pending
-    if (fail) throw new Error('Activity unavailable')
-    return []
-  } })
+  const f = fixture({}, {
+    encrypted: true,
+    respond: async url => {
+      if (new URL(url).pathname !== '/v1/encrypted_sync/events') return
+      await pending
+      if (fail) throw new Error('Activity unavailable')
+      return []
+    }
+  })
   const first = f.actions.refreshSyncServerEvents(f.context)
   const second = f.actions.refreshSyncServerEvents(f.context)
   const settled = Promise.allSettled([first, second])
@@ -1823,9 +1892,12 @@ for (const [syncServerUrl, syncServerUsername, syncServerDeviceId] of [
 
 test('cleared activity stays hidden after reauthentication while newer activity remains visible', async () => {
   let events = []
-  const f = fixture({ syncServerDeviceId: 'laptop' }, { encrypted: true, respond: url => {
-    if (new URL(url).pathname === '/v1/encrypted_sync/events') return events
-  } })
+  const f = fixture({ syncServerDeviceId: 'laptop' }, {
+    encrypted: true,
+    respond: url => {
+      if (new URL(url).pathname === '/v1/encrypted_sync/events') return events
+    }
+  })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
@@ -1853,18 +1925,19 @@ test('cleared activity stays hidden after reauthentication while newer activity 
 
 test('a download already in flight cannot restore cleared activity', async () => {
   let release
-  let events
   const pending = new Promise(resolve => { release = resolve })
-  const f = fixture({}, { respond: async url => {
-    if (new URL(url).pathname === '/v1/encrypted_sync/events') {
-      await pending
-      return events
+  const f = fixture({}, {
+    respond: async url => {
+      if (new URL(url).pathname === '/v1/encrypted_sync/events') {
+        await pending
+        return events
+      }
     }
-  } })
+  })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
-  events = ['0001', '0002'].map(id => ({
+  const events = ['0001', '0002'].map(id => ({
     id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000,
   }))
   f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
@@ -1880,13 +1953,15 @@ test('an in-flight activity refresh cannot commit after the username changes bef
   let downloadStarted
   const pending = new Promise(resolve => { release = resolve })
   const started = new Promise(resolve => { downloadStarted = resolve })
-  const f = fixture({ syncServerDeviceId: 'laptop' }, { respond: async url => {
-    if (new URL(url).pathname === '/v1/encrypted_sync/events') {
-      downloadStarted()
-      await pending
-      return events
+  const f = fixture({ syncServerDeviceId: 'laptop' }, {
+    respond: async url => {
+      if (new URL(url).pathname === '/v1/encrypted_sync/events') {
+        downloadStarted()
+        await pending
+        return events
+      }
     }
-  } })
+  })
   const payload = await privacy.encryptSyncDocument({
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
@@ -1927,15 +2002,17 @@ for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevice
   })
 }
 
-
 test('background activity skips another renderer download while explicit refresh waits for the lock', async () => {
   const lockOptions = []
-  const f = fixture({}, { encrypted: true, locks: {
-    request(name, options, callback) {
-      lockOptions.push(options)
-      return Promise.resolve(callback(options.ifAvailable ? null : { name }))
-    },
-  } })
+  const f = fixture({}, {
+    encrypted: true,
+    locks: {
+      request(name, options, callback) {
+        lockOptions.push(options)
+        return Promise.resolve(callback(options.ifAvailable ? null : { name }))
+      },
+    }
+  })
   await f.actions.refreshSyncServerEvents(f.context, { background: true })
   assert.equal(f.requests.length, 0)
   await f.actions.refreshSyncServerEvents(f.context)
@@ -1943,7 +2020,6 @@ test('background activity skips another renderer download while explicit refresh
   assert.equal(lockOptions[0].ifAvailable, true)
   assert.equal(lockOptions[1].ifAvailable, false)
 })
-
 
 test('the live listener retries failed message refresh independently of completed library sync', async () => {
   const f = liveFixture()
@@ -1964,21 +2040,22 @@ test('the live listener retries failed message refresh independently of complete
   assert.equal(f.context.state.syncServerError, '')
 })
 
-
 test('an explicit activity refresh still downloads when a concurrent background refresh skipped a busy renderer', async () => {
-  const f = fixture({}, { encrypted: true, locks: {
-    async request(name, options, callback) {
-      await new Promise(resolve => setImmediate(resolve))
-      return callback(options.ifAvailable ? null : { name })
-    },
-  } })
+  const f = fixture({}, {
+    encrypted: true,
+    locks: {
+      async request(name, options, callback) {
+        await new Promise(resolve => setImmediate(resolve))
+        return callback(options.ifAvailable ? null : { name })
+      },
+    }
+  })
   await Promise.all([
     f.actions.refreshSyncServerEvents(f.context, { background: true }),
     f.actions.refreshSyncServerEvents(f.context),
   ])
   assert.equal(f.requests.length, 1)
 })
-
 
 test('a new live device message is delivered after an older activity response finishes', { timeout: 10_000 }, async () => {
   const recipient = 'test-device'
@@ -1994,11 +2071,13 @@ test('a new live device message is delivered after an older activity response fi
   const opened = []
   const f = fixture({ syncServerDeviceId: recipient }, {
     encrypted: true,
-    desktopTabs: { async create(route) {
-      opened.push(route.route)
-      f.actions.stopSyncServerLive(f.context)
-      return true
-    } },
+    desktopTabs: {
+      async create(route) {
+        opened.push(route.route)
+        f.actions.stopSyncServerLive(f.context)
+        return true
+      }
+    },
     respond: async url => {
       const path = new URL(url).pathname
       if (path === '/v1/encrypted_sync/changes') {
@@ -2018,7 +2097,12 @@ test('a new live device message is delivered after an older activity response fi
     },
   })
   const payload = await privacy.encryptSyncDocument({
-    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Local fixture', position: 12,
+    version: 1,
+    type: 'openVideo',
+    recipient,
+    videoId: 'jNQXAC9IVRw',
+    title: 'Local fixture',
+    position: 12,
     expiresAt: Date.now() + 60000,
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
   const dispatch = f.context.dispatch
@@ -2052,7 +2136,6 @@ test('a device request replayed under new event ids opens only once', async () =
   const opened = []
   const acknowledged = []
   let ids = ['first', 'second']
-  let payload
   const f = fixture({ syncServerDeviceId: recipient }, {
     encrypted: true,
     desktopTabs: { async create({ route }) { opened.push(route); return true } },
@@ -2064,8 +2147,13 @@ test('a device request replayed under new event ids opens only once', async () =
         : undefined
     },
   })
-  payload = await privacy.encryptSyncDocument({
-    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position: 0,
+  const payload = await privacy.encryptSyncDocument({
+    version: 1,
+    type: 'openVideo',
+    recipient,
+    videoId: 'jNQXAC9IVRw',
+    title: 'Video',
+    position: 0,
     expiresAt: Date.now() + 60000,
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
   await f.actions.refreshSyncServerEvents(f.context)
@@ -2082,7 +2170,6 @@ test('a device request opens only after its receipt is saved', async () => {
   const stored = new Map()
   let quotaExceeded = true
   let failOpen = false
-  let payload
   const f = fixture({ syncServerDeviceId: recipient }, {
     encrypted: true,
     desktopTabs: { async create({ route }) { if (failOpen) return false; opened.push(route); return true } },
@@ -2101,8 +2188,13 @@ test('a device request opens only after its receipt is saved', async () => {
         : undefined
     },
   })
-  payload = await privacy.encryptSyncDocument({
-    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position: 0,
+  const payload = await privacy.encryptSyncDocument({
+    version: 1,
+    type: 'openVideo',
+    recipient,
+    videoId: 'jNQXAC9IVRw',
+    title: 'Video',
+    position: 0,
     expiresAt: Date.now() + 60000,
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
   // A receipt that cannot be saved would let the next refresh open the video again
@@ -2124,35 +2216,43 @@ for (const conflict of [false, true]) {
   test(`phone reclamation survives ${conflict ? 'a conflicting upload' : 'an upload failure and retry'} and is consumed after success`, async () => {
     const deviceId = Buffer.alloc(16, 7).toString('base64url')
     const local = [{ sessionId: 'mobile', updatedAt: 2, activeTabId: 'tab', tabs: [{ id: 'tab', url: '/subscriptions' }] }]
-    const previous = sessions.normalizeSyncSessionsDocument({ devices: {
-      [deviceId]: { platform: 'mobile', sessions: local },
-      laptop: { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'laptop' }] },
-    } })
+    const previous = sessions.normalizeSyncSessionsDocument({
+      devices: {
+        [deviceId]: { platform: 'mobile', sessions: local },
+        laptop: { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'laptop' }] },
+      }
+    })
     let remote = sessions.removeSyncSession(previous, deviceId, 'mobile', { revokedAccountSessionId: 'old-login' })
     let revision = 1
     let puts = 0
     const f = fixture({
-      syncServerDeviceId: deviceId, syncServerSyncSubscriptions: false, syncServerSyncSessions: true,
+      syncServerDeviceId: deviceId,
+      syncServerSyncSubscriptions: false,
+      syncServerSyncSessions: true,
       syncServerSnapshot: JSON.stringify({ sessionsV2: previous }),
-    }, { encrypted: true, desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true }, respond: async (url, options) => {
-      if (url.endsWith('/v1/account/sessions')) return { sessions: [{ id: 'new-login', device_id: deviceId, current: true }] }
-      if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
-      if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
-      if (options.method === 'PUT') {
-        puts++
-        if (puts === 1) {
-          if (conflict) {
-            remote.devices.laptop.sessions.push({ ...local[0], sessionId: 'new-laptop' })
-            remote.devices[deviceId] = { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'new-window', updatedAt: 3 }] }
-            revision++
+    }, {
+      encrypted: true,
+      desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true },
+      respond: async (url, options) => {
+        if (url.endsWith('/v1/account/sessions')) return { sessions: [{ id: 'new-login', device_id: deviceId, current: true }] }
+        if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
+        if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
+        if (options.method === 'PUT') {
+          puts++
+          if (puts === 1) {
+            if (conflict) {
+              remote.devices.laptop.sessions.push({ ...local[0], sessionId: 'new-laptop' })
+              remote.devices[deviceId] = { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'new-window', updatedAt: 3 }] }
+              revision++
+            }
+            return new Response('Retry', { status: conflict ? 409 : 503 })
           }
-          return new Response('Retry', { status: conflict ? 409 : 503 })
+          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          revision++
         }
-        remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
-        revision++
+        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
       }
-      return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
-    } })
+    })
     if (!conflict) {
       await assert.rejects(f.actions.syncWithSyncServer(f.context), /Retry/)
       assert.deepEqual(remote.deletedSessions[`revoked-login:${deviceId}`], ['old-login'])
@@ -2170,49 +2270,71 @@ for (const conflict of [false, true]) {
   })
 }
 
-for (const platform of ['mobile', 'desktop']) for (const login of ['old-login', 'new-login', 'ambiguous', 'missing', 'wrong-device']) {
-  test(`upgraded ${platform} client verifies ${login} before reclaiming without local authentication intent`, async () => {
-    const deviceId = Buffer.alloc(16, 8).toString('base64url')
-    const local = [{ sessionId: 'mobile', updatedAt: 2, tabs: [{ id: 'tab', url: '/subscriptions' }] }]
-    let remote = releasedClient.mergeSyncSessions({ deviceId, platform, localSessions: local,
-      remoteValue: { version: 1, mode: 'separate', shared: [], devices: {}, deletedSessions: {
-        [deviceId]: ['mobile'], [`revoked:${deviceId}`]: ['mobile'], [`revoked-login:${deviceId}`]: ['old-login'],
-      } } }).document
-    let revision = 1
-    let reads = 0
-    let puts = 0
-    const f = fixture({ syncServerDeviceId: deviceId, syncServerSyncSubscriptions: false,
-      syncServerSyncSessions: true, syncServerSnapshot: JSON.stringify({ sessionsV2: remote }),
-    }, { encrypted: true, capacitor: platform === 'mobile',
-      desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true }, respond: async (url, options) => {
-        if (url.endsWith('/v1/account/sessions')) {
-          reads++
-          const current = { id: login, device_id: deviceId, current: true }
-          return { sessions: login === 'ambiguous' ? [current, { ...current, id: 'second-login' }]
-            : login === 'missing' ? [] : login === 'wrong-device' ? [{ ...current, device_id: 'another-device' }] : [current] }
+for (const platform of ['mobile', 'desktop']) {
+  for (const login of ['old-login', 'new-login', 'ambiguous', 'missing', 'wrong-device']) {
+    test(`upgraded ${platform} client verifies ${login} before reclaiming without local authentication intent`, async () => {
+      const deviceId = Buffer.alloc(16, 8).toString('base64url')
+      const local = [{ sessionId: 'mobile', updatedAt: 2, tabs: [{ id: 'tab', url: '/subscriptions' }] }]
+      let remote = releasedClient.mergeSyncSessions({
+        deviceId,
+        platform,
+        localSessions: local,
+        remoteValue: {
+          version: 1,
+          mode: 'separate',
+          shared: [],
+          devices: {},
+          deletedSessions: {
+            [deviceId]: ['mobile'], [`revoked:${deviceId}`]: ['mobile'], [`revoked-login:${deviceId}`]: ['old-login'],
+          }
         }
-        if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
-        if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
-        if (options.method === 'PUT') {
-          puts++
-          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
-          revision++
+      }).document
+      let revision = 1
+      let reads = 0
+      let puts = 0
+      const f = fixture({
+        syncServerDeviceId: deviceId,
+        syncServerSyncSubscriptions: false,
+        syncServerSyncSessions: true,
+        syncServerSnapshot: JSON.stringify({ sessionsV2: remote }),
+      }, {
+        encrypted: true,
+        capacitor: platform === 'mobile',
+        desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true },
+        respond: async (url, options) => {
+          if (url.endsWith('/v1/account/sessions')) {
+            reads++
+            const current = { id: login, device_id: deviceId, current: true }
+            return {
+              sessions: login === 'ambiguous'
+                ? [current, { ...current, id: 'second-login' }]
+                : login === 'missing' ? [] : login === 'wrong-device' ? [{ ...current, device_id: 'another-device' }] : [current]
+            }
+          }
+          if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
+          if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
+          if (options.method === 'PUT') {
+            puts++
+            remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+            revision++
+          }
+          return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
         }
-        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
-      } })
-    if (['ambiguous', 'missing', 'wrong-device'].includes(login)) {
-      await assert.rejects(f.actions.syncWithSyncServer(f.context), /Account Management Failed/)
-      assert.equal(puts, 0)
-    } else {
-      if (login === 'old-login') {
-        await assert.rejects(f.actions.syncWithSyncServer(f.context), /Tab Sync Revocation Pending/)
+      })
+      if (['ambiguous', 'missing', 'wrong-device'].includes(login)) {
+        await assert.rejects(f.actions.syncWithSyncServer(f.context), /Account Management Failed/)
         assert.equal(puts, 0)
-      } else await f.actions.syncWithSyncServer(f.context)
-      assert.deepEqual(remote.devices[deviceId].sessions, login === 'new-login' ? local : [])
-      assert.deepEqual(remote.deletedSessions[deviceId], login === 'new-login' ? undefined : ['mobile'])
-    }
-    assert.equal(reads, 1)
-  })
+      } else {
+        if (login === 'old-login') {
+          await assert.rejects(f.actions.syncWithSyncServer(f.context), /Tab Sync Revocation Pending/)
+          assert.equal(puts, 0)
+        } else await f.actions.syncWithSyncServer(f.context)
+        assert.deepEqual(remote.devices[deviceId].sessions, login === 'new-login' ? local : [])
+        assert.deepEqual(remote.deletedSessions[deviceId], login === 'new-login' ? undefined : ['mobile'])
+      }
+      assert.equal(reads, 1)
+    })
+  }
 }
 
 test('a reclamation conflict rechecks login identity against refreshed revocation metadata', async () => {
@@ -2223,9 +2345,14 @@ test('a reclamation conflict rechecks login identity against refreshed revocatio
   let puts = 0
   let reads = 0
   const baseline = structuredClone(remote)
-  const f = fixture({ syncServerDeviceId: deviceId, syncServerSyncSubscriptions: false,
-    syncServerSyncSessions: true, syncServerSnapshot: JSON.stringify({ sessionsV2: baseline }) }, {
-    encrypted: true, desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true },
+  const f = fixture({
+    syncServerDeviceId: deviceId,
+    syncServerSyncSubscriptions: false,
+    syncServerSyncSessions: true,
+    syncServerSnapshot: JSON.stringify({ sessionsV2: baseline })
+  }, {
+    encrypted: true,
+    desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true },
     respond: async (url, options) => {
       if (url.endsWith('/v1/account/sessions')) {
         reads++
@@ -2259,22 +2386,34 @@ for (const initiallyEmpty of [false, true]) {
     const deviceId = Buffer.alloc(16, 11).toString('base64url')
     const original = { sessionId: 'original', tabs: [{ id: 'original-tab', url: '/subscriptions' }] }
     const newlyOpened = { sessionId: 'new-window', tabs: [{ id: 'new-tab', url: '/history' }] }
-    let remote = sessions.removeSyncDeviceSessions(initiallyEmpty ? {} : {
-      devices: { [deviceId]: { platform: 'desktop', sessions: [original] } },
-    }, deviceId, 'target-login')
+    let remote = sessions.removeSyncDeviceSessions(initiallyEmpty
+      ? {}
+      : {
+          devices: { [deviceId]: { platform: 'desktop', sessions: [original] } },
+        }, deviceId, 'target-login')
     let currentLogin = 'target-login'
     let targetActive = true
     let revision = 1
     let puts = 0
     const local = [original, newlyOpened]
-    const f = fixture({ syncServerDeviceId: deviceId, syncServerSyncSubscriptions: true,
-      syncServerSyncSessions: true }, { encrypted: true,
-      desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true }, respond: async (url, options) => {
-        if (url.endsWith('/v1/account/sessions')) return { sessions: [
-          { id: currentLogin, device_id: deviceId, current: true },
-          ...(targetActive && currentLogin !== 'target-login'
-            ? [{ id: 'target-login', device_id: deviceId, current: false }] : []),
-        ] }
+    const f = fixture({
+      syncServerDeviceId: deviceId,
+      syncServerSyncSubscriptions: true,
+      syncServerSyncSessions: true
+    }, {
+      encrypted: true,
+      desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true },
+      respond: async (url, options) => {
+        if (url.endsWith('/v1/account/sessions')) {
+          return {
+            sessions: [
+              { id: currentLogin, device_id: deviceId, current: true },
+              ...(targetActive && currentLogin !== 'target-login'
+                ? [{ id: 'target-login', device_id: deviceId, current: false }]
+                : []),
+            ]
+          }
+        }
         if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
         if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
         if (options.method === 'PUT') {
@@ -2283,7 +2422,8 @@ for (const initiallyEmpty of [false, true]) {
           revision++
         }
         return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
-      } })
+      }
+    })
     const cleaned = structuredClone(remote)
     await assert.rejects(f.actions.syncWithSyncServer(f.context), /Tab Sync Revocation Pending/)
     assert.ok(f.commits.some(([name, value]) => name === 'setSyncServerStatus' && value === 'error'))
@@ -2312,67 +2452,80 @@ for (const initiallyEmpty of [false, true]) {
   })
 }
 
-for (const rememberHistory of [false, true]) for (const position of [0, 125.75]) {
-  test(`received video resumes at the transferred position ${position} instead of stale history (remember history: ${rememberHistory})`, async () => {
-    const recipient = 'test-device'
-    const opened = []
-    let payload
-    const f = fixture({ syncServerDeviceId: recipient }, {
-      encrypted: true,
-      desktopTabs: { async create({ route }) { opened.push(route); return true } },
-      respond: url => new URL(url).pathname === '/v1/encrypted_sync/events'
-        ? [{ id: 'handoff', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
-        : undefined,
-    })
-    payload = await privacy.encryptSyncDocument({
-      version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position,
-      expiresAt: Date.now() + 60000,
-    }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
-    await f.actions.refreshSyncServerEvents(f.context)
-    assert.equal(opened.length, 1)
+for (const rememberHistory of [false, true]) {
+  for (const position of [0, 125.75]) {
+    test(`received video resumes at the transferred position ${position} instead of stale history (remember history: ${rememberHistory})`, async () => {
+      const recipient = 'test-device'
+      const opened = []
+      const f = fixture({ syncServerDeviceId: recipient }, {
+        encrypted: true,
+        desktopTabs: { async create({ route }) { opened.push(route); return true } },
+        respond: url => new URL(url).pathname === '/v1/encrypted_sync/events'
+          ? [{ id: 'handoff', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
+          : undefined,
+      })
+      const payload = await privacy.encryptSyncDocument({
+        version: 1,
+        type: 'openVideo',
+        recipient,
+        videoId: 'jNQXAC9IVRw',
+        title: 'Video',
+        position,
+        expiresAt: Date.now() + 60000,
+      }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+      await f.actions.refreshSyncServerEvents(f.context)
+      assert.equal(opened.length, 1)
 
-    const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-    const checkTimestamp = vm.runInNewContext(`(${watchSource.slice(
+      const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+      const checkTimestamp = vm.runInNewContext(`(${watchSource.slice(
       watchSource.indexOf('    checkIfTimestamp: function () {') + '    checkIfTimestamp: '.length,
       watchSource.indexOf('\n\n    consumeTimestamp:')
     ).trim().replace(/,$/, '')})`)
-    const startTime = vm.runInNewContext(`(${watchSource.slice(
+      const startTime = vm.runInNewContext(`(${watchSource.slice(
       watchSource.indexOf('    startTimeSeconds: function () {') + '    startTimeSeconds: '.length,
       watchSource.indexOf('\n\n    /**', watchSource.indexOf('    startTimeSeconds: function () {'))
     ).trim().replace(/,$/, '')})`)
-    const watch = {
-      tabRoute: { query: Object.fromEntries(new URL(opened[0], 'https://localhost').searchParams) },
-      isLoading: false, isLive: false, musicMode: false, customShortsPlayerActive: false,
-      videoLengthSeconds: 300, watchedProgressSavingEnabled: true,
-      historyEntryExists: true, historyEntry: { watchProgress: 30 },
-    }
-    checkTimestamp.call(watch)
-    assert.equal(startTime.call(watch), Math.floor(position))
-    const consumeTimestamp = vm.runInNewContext(`(${watchSource.slice(
+      const watch = {
+        tabRoute: { query: Object.fromEntries(new URL(opened[0], 'https://localhost').searchParams) },
+        isLoading: false,
+        isLive: false,
+        musicMode: false,
+        customShortsPlayerActive: false,
+        videoLengthSeconds: 300,
+        watchedProgressSavingEnabled: true,
+        historyEntryExists: true,
+        historyEntry: { watchProgress: 30 },
+      }
+      checkTimestamp.call(watch)
+      assert.equal(startTime.call(watch), Math.floor(position))
+      const consumeTimestamp = vm.runInNewContext(`(${watchSource.slice(
       watchSource.indexOf('    consumeTimestamp: async function () {') + '    consumeTimestamp: '.length,
       watchSource.indexOf('\n\n    handleFormatChange:')
     ).trim().replace(/,$/, '')})`)
-    const loaded = vm.runInNewContext(`(${watchSource.slice(
+      const loaded = vm.runInNewContext(`(${watchSource.slice(
       watchSource.indexOf('    handleVideoLoaded: async function (mediaMetadata) {') + '    handleVideoLoaded: '.length,
       watchSource.indexOf('\n\n    checkIfPlaylist:')
     ).trim().replace(/,$/, '')})`, { process: { env: { IS_CAPACITOR: true, IS_ELECTRON: false } } })
-    const savedPositions = []
-    Object.assign(watch, {
-      preparingVideoLoadGeneration: null, localFilePlayback: true, rememberHistory,
-      addToHistory(value) { savedPositions.push(value); this.historyEntry.watchProgress = value },
-      handlePlaylistPersisting() {},
-      updateLocalPlaylistLastPlayedAtSometimes() {},
-      consumeTimestamp: () => consumeTimestamp.call(watch),
-      tabRouter: { async replace(route) { watch.tabRoute = route } },
+      const savedPositions = []
+      Object.assign(watch, {
+        preparingVideoLoadGeneration: null,
+        localFilePlayback: true,
+        rememberHistory,
+        addToHistory(value) { savedPositions.push(value); this.historyEntry.watchProgress = value },
+        handlePlaylistPersisting() {},
+        updateLocalPlaylistLastPlayedAtSometimes() {},
+        consumeTimestamp: () => consumeTimestamp.call(watch),
+        tabRouter: { async replace(route) { watch.tabRoute = route } },
+      })
+      await loaded.call(watch)
+      assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp after loading')
+      assert.deepEqual(savedPositions, rememberHistory ? [Math.floor(position)] : [])
+      if (rememberHistory) assert.equal(startTime.call(watch), Math.floor(position) || null, 'a later source load cannot resurrect stale history')
+      watch.historyEntry.watchProgress = 30
+      checkTimestamp.call(watch)
+      assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
     })
-    await loaded.call(watch)
-    assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp after loading')
-    assert.deepEqual(savedPositions, rememberHistory ? [Math.floor(position)] : [])
-    if (rememberHistory) assert.equal(startTime.call(watch), Math.floor(position) || null, 'a later source load cannot resurrect stale history')
-    watch.historyEntry.watchProgress = 30
-    checkTimestamp.call(watch)
-    assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
-  })
+  }
 }
 
 test('OIDC sign-in reports a browser that fails to open', async () => {

@@ -47,8 +47,11 @@ test('two devices merge persisted post marks without changing video marks or wat
   assert.deepEqual(document.seenPosts.map(entry => entry.postId), ['first', 'second'])
   assert.deepEqual(document.seenVideos, [{ videoId: 'first', seenAt: 500 }])
   assert.deepEqual(document.history, [{ video: { id: 'attached-video' }, metadata: { position_millis: 42000 } }])
-  const post = { postId: 'first', isNewInSubscriptionFeed: true,
-    postContent: { type: 'video', content: { videoId: 'attached-video', isNewInSubscriptionFeed: true } } }
+  const post = {
+    postId: 'first',
+    isNewInSubscriptionFeed: true,
+    postContent: { type: 'video', content: { videoId: 'attached-video', isNewInSubscriptionFeed: true } }
+  }
   const cache = { channel: { posts: [post, { postId: 'unseen', isNewInSubscriptionFeed: true }] } }
   const filtered = seenSync.applySubscriptionSeenPostsToCache(cache, second.state.settings.subscriptionSeenPosts)
   assert.deepEqual(filtered.channel.posts.map(entry => entry.isNewInSubscriptionFeed), [false, true])
@@ -141,11 +144,13 @@ test('mark all limits cache and durable marks to IDs captured before an animatio
     assert.deepEqual((cache.videos ?? cache.posts).map(entry => entry.isNewInSubscriptionFeed), [false, true])
   }
   assert.deepEqual(fixture.recorded, [
-    ['mergeSubscriptionSeenVideos', { videos: [
-      { videoId: 'videoCache', isMembersOnly: false },
-      { videoId: 'shortsCache', isMembersOnly: false },
-      { videoId: 'liveCache', isMembersOnly: false },
-    ] }],
+    ['mergeSubscriptionSeenVideos', {
+      videos: [
+        { videoId: 'videoCache', isMembersOnly: false },
+        { videoId: 'shortsCache', isMembersOnly: false },
+        { videoId: 'liveCache', isMembersOnly: false },
+      ]
+    }],
     ['mergeSubscriptionSeenPosts', { posts: [{ postId: 'post' }] }],
   ])
 })
@@ -366,7 +371,6 @@ test('mark all records videos, Shorts, live streams and community posts', async 
     ['liveCache', 'shortsCache', 'videoCache'])
 })
 
-
 test('seen mark retention keeps the newest 10,000 videos with deterministic timestamp ties', () => {
   const marks = Array.from({ length: 10002 }, (_, index) => ({
     videoId: `video-${String(index).padStart(5, '0')}`,
@@ -401,9 +405,12 @@ test('watched marks are removed before applying the cap while partial and live e
 test('persistence prunes watched marks from saved and stale incoming data before capping', async () => {
   const { db, Settings } = await settingsFixture([{ videoId: 'watched', isWatched: true }])
   const marks = Array.from({ length: 10001 }, (_, index) => ({ videoId: `video-${index}`, seenAt: index + 1 }))
-  await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify([
-    ...marks, { videoId: 'watched', seenAt: 20000 },
-  ]) })
+  await db.settings.insertAsync({
+    _id: 'subscriptionSeenVideos',
+    value: JSON.stringify([
+      ...marks, { videoId: 'watched', seenAt: 20000 },
+    ])
+  })
   const saved = await Settings.mergeSeenVideos([{ videoId: 'watched', seenAt: 30000 }])
   const retained = JSON.parse(saved)
   assert.equal(retained.length, 10000)
@@ -428,15 +435,18 @@ test('sync uploads the retained local set without restoring pruned remote marks'
 
 test('cache filtering uses the same capped mark set as persistence and sync', () => {
   const marks = Array.from({ length: 10001 }, (_, index) => ({ videoId: `video-${index}`, seenAt: index + 1 }))
-  const cache = { channel: { videos: [
-    { videoId: 'video-0', isNewInSubscriptionFeed: true },
-    { videoId: 'video-10000', isNewInSubscriptionFeed: true },
-  ] } }
+  const cache = {
+    channel: {
+      videos: [
+        { videoId: 'video-0', isNewInSubscriptionFeed: true },
+        { videoId: 'video-10000', isNewInSubscriptionFeed: true },
+      ]
+    }
+  }
   const result = seenVideos.applySubscriptionSeenVideosToCache(cache, marks)
   assert.equal(result.channel.videos[0].isNewInSubscriptionFeed, true)
   assert.equal(result.channel.videos[1].isNewInSubscriptionFeed, false)
 })
-
 
 test('seen mark persistence uses the history index instead of scanning unrelated history', async () => {
   const { db, Settings } = await settingsFixture([
@@ -459,8 +469,8 @@ test('individual and bulk UI marking handle failed seen-mark persistence', async
     fixture.context.dispatch = async () => { throw failure }
     await assert.doesNotReject(() => bulk
       ? fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
-        tabs: ['videos', 'shorts', 'live'], channelIds: ['channel'],
-      })
+          tabs: ['videos', 'shorts', 'live'], channelIds: ['channel'],
+        })
       : fixture.actions.markSubscriptionVideoAsSeen(fixture.context, 'videoCache'))
   }
   assert.deepEqual(logged, [failure, failure])
@@ -539,9 +549,11 @@ test('unseen marks persist without creating history for an unwatched video', asy
   await History.updateSubscriptionState(fixture.recorded[0][1])
   assert.equal(await db.history.countAsync({}), 0)
   const saved = await Settings.mergeSeenVideos([{ videoId: 'videoCache', seenAt: 1 }])
-  assert.equal(seenVideos.applySubscriptionSeenVideosToCache({ channel: {
-    videos: [{ videoId: 'videoCache', isNewInSubscriptionFeed: false }],
-  } }, saved).channel.videos[0].isNewInSubscriptionFeed, true)
+  assert.equal(seenVideos.applySubscriptionSeenVideosToCache({
+    channel: {
+      videos: [{ videoId: 'videoCache', isNewInSubscriptionFeed: false }],
+    }
+  }, saved).channel.videos[0].isNewInSubscriptionFeed, true)
 })
 
 test('concurrent windows marking unseen then seen in one millisecond keep the last persisted action', async (t) => {

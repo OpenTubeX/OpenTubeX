@@ -18,8 +18,12 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
   const animations = []
   function animate(frames, options) {
     const animation = {
-      target: this, frames, effect: { getTiming: () => options }, currentTime: 0,
-      playState: 'running', finished: Promise.resolve(),
+      target: this,
+      frames,
+      effect: { getTiming: () => options },
+      currentTime: 0,
+      playState: 'running',
+      finished: Promise.resolve(),
       pause() { this.playState = 'paused' },
       play() { this.playState = 'running' },
       reverseCalls: 0,
@@ -30,7 +34,8 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     return animation
   }
   const element = {
-    isConnected: true, scrollTop: 150.5,
+    isConnected: true,
+    scrollTop: 150.5,
     matches: () => false,
     querySelector: selector => selector === ':scope > .promptCard' ? null : (busy ? {} : null),
     style: {
@@ -42,7 +47,9 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     animate,
   }
   const create = vm.runInNewContext(`${source}; createAndroidBackDialogPreview`, {
-    nextTick, settleAndroidBackAnimation, applyAnimationSpeed: animation => animation,
+    nextTick,
+    settleAndroidBackAnimation,
+    applyAnimationSpeed: animation => animation,
     requestAnimationFrame: callback => queueMicrotask(callback),
     isReducedMotionEnabled: () => reducedMotion,
     getComputedStyle: () => ({ transform: 'none', opacity: '1' }),

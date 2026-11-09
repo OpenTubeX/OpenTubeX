@@ -310,9 +310,18 @@ async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFe
     CapacitorHttp: { request },
     process: { env: { IS_IOS: ios !== null, IS_CAPACITOR: !!preflight } },
     ensureAndroidLocalNetworkAccess: preflight,
-    registerPlugin: name => name === 'IOSHttp' ? ios : android, crypto: globalThis.crypto,
+    registerPlugin: name => name === 'IOSHttp' ? ios : android,
+    crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
-    createAbortError, waitForRequest, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
+    createAbortError,
+    waitForRequest,
+    Request,
+    Response,
+    Headers,
+    URL,
+    URLSearchParams,
+    setTimeout,
+    clearTimeout,
   })
   vm.runInContext(`${source}\nglobalThis.fetchNative = ${entryPoint}`, context)
   return context.fetchNative
@@ -475,7 +484,6 @@ for (const timeoutOption of ['readTimeout']) {
     }
   })
 }
-
 
 test('Android abort cancels the native API request as well as its JavaScript wait', async () => {
   const requests = []

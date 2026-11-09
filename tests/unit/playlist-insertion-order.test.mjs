@@ -32,7 +32,8 @@ function promptSave({ allPlaylists, store, ...context }) {
 
 function storeActions(handlers) {
   return vm.runInNewContext(`({ ${singleActionSource} ${bulkActionSource} })`, {
-    DBPlaylistHandlers: handlers, PlaylistVideoAddResult,
+    DBPlaylistHandlers: handlers,
+    PlaylistVideoAddResult,
     pendingVideoAdds: new Map(),
     generateRandomUniqueId: () => crypto.randomUUID(),
     deepCopy: value => JSON.parse(JSON.stringify(value)),
@@ -204,7 +205,10 @@ test('bulk IPC reports a missing playlist without broadcasting unpersisted addit
   const { db, Playlists } = await fixture(true)
   const broadcasts = []
   const handle = vm.runInNewContext(`(async (data) => { switch (${DBActions.PLAYLISTS.UPSERT_VIDEOS}) { ${bulkIpcSource} } })`, {
-    DBActions, IpcChannels, SyncEvents, PlaylistVideoAddResult,
+    DBActions,
+    IpcChannels,
+    SyncEvents,
+    PlaylistVideoAddResult,
     baseHandlers: { playlists: Playlists },
     syncOtherWindows: (...args) => broadcasts.push(args),
     event: {},
@@ -218,7 +222,10 @@ test('bulk IPC broadcasts the committed direction and only the entries actually 
   const { db, Playlists, state } = await fixture(true)
   const broadcasts = []
   const handle = vm.runInNewContext(`(async (data) => { switch (${DBActions.PLAYLISTS.UPSERT_VIDEOS}) { ${bulkIpcSource} } })`, {
-    DBActions, IpcChannels, SyncEvents, PlaylistVideoAddResult,
+    DBActions,
+    IpcChannels,
+    SyncEvents,
+    PlaylistVideoAddResult,
     baseHandlers: { playlists: Playlists },
     syncOtherWindows: (...args) => broadcasts.push(args),
     event: {},
@@ -238,7 +245,8 @@ test('bulk store action never commits additions rejected by the datastore', asyn
   await db.playlists.removeAsync({ _id: 'custom' })
   const commits = []
   const action = vm.runInNewContext(`({ ${bulkActionSource} }).addVideos`, {
-    DBPlaylistHandlers: Playlists, PlaylistVideoAddResult,
+    DBPlaylistHandlers: Playlists,
+    PlaylistVideoAddResult,
     generateRandomUniqueId: () => 'new-item',
     removeUndesiredVideoAttributes: () => {},
     console,

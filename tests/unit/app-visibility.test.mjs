@@ -37,39 +37,41 @@ test('Android activity readiness remains false through UI grace and an unknown s
   }
 })
 
-for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']) test(`foreground activity wait handles ${outcome} and releases listeners`, async () => {
-  const originalDocument = globalThis.document
-  const document = new EventTarget()
-  const visibilityListeners = new Set()
-  const add = document.addEventListener.bind(document)
-  const remove = document.removeEventListener.bind(document)
-  document.addEventListener = (name, listener) => { visibilityListeners.add(listener); add(name, listener) }
-  document.removeEventListener = (name, listener) => { visibilityListeners.delete(listener); remove(name, listener) }
-  document.hidden = outcome !== 'already visible'
-  globalThis.document = document
-  const controller = new AbortController()
-  try {
-    setAndroidAppActive(outcome === 'already visible')
-    if (outcome === 'already aborted') controller.abort()
-    let settled = false
-    const waiting = waitForAndroidAppState(controller.signal, false).then(result => { settled = true; return result })
-    if (outcome === 'visible' || outcome === 'abort') {
-      await Promise.resolve()
-      assert.equal(settled, false)
-      assert.equal(visibilityListeners.size, 1)
-      if (outcome === 'visible') setAndroidAppActive(true)
-      else controller.abort()
+for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']) {
+  test(`foreground activity wait handles ${outcome} and releases listeners`, async () => {
+    const originalDocument = globalThis.document
+    const document = new EventTarget()
+    const visibilityListeners = new Set()
+    const add = document.addEventListener.bind(document)
+    const remove = document.removeEventListener.bind(document)
+    document.addEventListener = (name, listener) => { visibilityListeners.add(listener); add(name, listener) }
+    document.removeEventListener = (name, listener) => { visibilityListeners.delete(listener); remove(name, listener) }
+    document.hidden = outcome !== 'already visible'
+    globalThis.document = document
+    const controller = new AbortController()
+    try {
+      setAndroidAppActive(outcome === 'already visible')
+      if (outcome === 'already aborted') controller.abort()
+      let settled = false
+      const waiting = waitForAndroidAppState(controller.signal, false).then(result => { settled = true; return result })
+      if (outcome === 'visible' || outcome === 'abort') {
+        await Promise.resolve()
+        assert.equal(settled, false)
+        assert.equal(visibilityListeners.size, 1)
+        if (outcome === 'visible') setAndroidAppActive(true)
+        else controller.abort()
+      }
+      assert.equal(await waiting, outcome.includes('visible') ? true : null)
+      assert.equal(visibilityListeners.size, 0)
+    } finally {
+      controller.abort()
+      setAndroidAppActive(null)
+      setAndroidAppVisible(null)
+      if (originalDocument === undefined) delete globalThis.document
+      else globalThis.document = originalDocument
     }
-    assert.equal(await waiting, outcome.includes('visible') ? true : null)
-    assert.equal(visibilityListeners.size, 0)
-  } finally {
-    controller.abort()
-    setAndroidAppActive(null)
-    setAndroidAppVisible(null)
-    if (originalDocument === undefined) delete globalThis.document
-    else globalThis.document = originalDocument
-  }
-})
+  })
+}
 
 test('Android background playback follows Home even when Chromium stays visible for a refresh', () => {
   const originalDocument = globalThis.document
@@ -135,9 +137,11 @@ for (const eventFirst of [false, true]) {
       CapacitorApp: {
         addListener: async (name, callback) => {
           listeners.set(name, callback)
-          if (name === 'appStateChange') listener = ({ isActive }) => {
-            nativeAppActive = isActive
-            callback({ isActive })
+          if (name === 'appStateChange') {
+            listener = ({ isActive }) => {
+              nativeAppActive = isActive
+              callback({ isActive })
+            }
           }
           return { remove() { removedListeners.push(name) } }
         },

@@ -107,7 +107,7 @@ test('any collapse and expand order restores the layout it started from', () => 
   const permutations = (items) => items.length <= 1
     ? [items]
     : items.flatMap((item, index) => permutations([...items.slice(0, index), ...items.slice(index + 1)])
-      .map(rest => [item, ...rest]))
+        .map(rest => [item, ...rest]))
 
   const openDocks = ['metadata', 'transcript', 'comments', 'playlist']
   // An unevenly resized stack, as the divider drags leave it

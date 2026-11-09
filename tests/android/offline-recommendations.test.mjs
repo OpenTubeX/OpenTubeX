@@ -22,9 +22,16 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     if (await tutorial.isVisible()) await tutorial.locator('.tutorialActions').getByRole('button').last().click()
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const values = { VideoPlaybackEngine: 'built-in', AutoplayVideos: false, UseSponsorBlock: false,
-        UseReturnYouTubeDislikes: false, HideRecommendedVideos: false, CapacitorLayoutMode: 'phone',
-        ThumbnailPreference: '', BlurThumbnails: false }
+      const values = {
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        HideRecommendedVideos: false,
+        CapacitorLayoutMode: 'phone',
+        ThumbnailPreference: '',
+        BlurThumbnails: false
+      }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       const downloads = structuredClone(Object.values(store.getters.getYtDlpDownloads).map(download => JSON.parse(JSON.stringify(download))))
       const queue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
@@ -38,7 +45,8 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
       for (const download of downloads) store.commit('removeYtDlpDownload', download.id)
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
-        ? window.__offlineRecommendationsFetch(url, options) : Promise.reject(new Error('Offline recommendations test'))
+        ? window.__offlineRecommendationsFetch(url, options)
+        : Promise.reject(new Error('Offline recommendations test'))
       location.hash = '#/watch/jNQXAC9IVRw'
     }, saved)
     await expect.poll(async () => {
@@ -53,17 +61,40 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     await watch.evaluate((component, { ids, thumbnail }) => {
       const watch = component.proxy
       watch.videoLoadGeneration++
-      Object.assign(watch, { isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isOffline: false, localFilePlayback: false, isUpcoming: false, isLive: false,
-        videoTitle: 'Offline recommendations regression', channelName: 'Test channel',
-        recommendedVideos: [{ videoId: 'online00001', title: 'Online recommendation', author: 'Online channel',
-          authorId: 'UC-online', lengthSeconds: 60, viewCount: 123, published: Date.now(), type: 'video' }] })
-      for (const [index, id] of ids.entries()) watch.$store.commit('upsertYtDlpDownload', {
-        id, videoId: index === 1 ? '' : `saved00000${index}`, title: `Saved audio ${index + 1}`, author: 'Offline channel',
-        ...(index === 1 ? { retryPayload: { externalUrl: 'https://example.com/video' } } : {}),
-        status: 'completed', mode: 'audio', thumbnail,
-        files: [{ videoId: `saved00000${index}`, ...(index === 1 ? { title: 'Saved audio 2' } : {}), path: '/test.mp3', extension: 'mp3', available: true }],
+      Object.assign(watch, {
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isOffline: false,
+        localFilePlayback: false,
+        isUpcoming: false,
+        isLive: false,
+        videoTitle: 'Offline recommendations regression',
+        channelName: 'Test channel',
+        recommendedVideos: [{
+          videoId: 'online00001',
+          title: 'Online recommendation',
+          author: 'Online channel',
+          authorId: 'UC-online',
+          lengthSeconds: 60,
+          viewCount: 123,
+          published: Date.now(),
+          type: 'video'
+        }]
       })
+      for (const [index, id] of ids.entries()) {
+        watch.$store.commit('upsertYtDlpDownload', {
+          id,
+          videoId: index === 1 ? '' : `saved00000${index}`,
+          title: `Saved audio ${index + 1}`,
+          author: 'Offline channel',
+          ...(index === 1 ? { retryPayload: { externalUrl: 'https://example.com/video' } } : {}),
+          status: 'completed',
+          mode: 'audio',
+          thumbnail,
+          files: [{ videoId: `saved00000${index}`, ...(index === 1 ? { title: 'Saved audio 2' } : {}), path: '/test.mp3', extension: 'mp3', available: true }],
+        })
+      }
     }, { ids, thumbnail })
     const recommendations = page.locator('.watchVideoRecommendations')
     await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
@@ -95,23 +126,27 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     await expect(recommendations.locator('.h3Title')).toHaveText(['Online recommendation'])
   } finally {
     try {
-      if (saved) await page.evaluate(() => {
-        window.fetch = window.__offlineRecommendationsFetch
-        if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
-        else delete navigator.onLine
-        delete window.__offlineRecommendationsOnline
-        delete window.__offlineRecommendationsFetch
-      })
-      if (saved) await page.evaluate(({ saved, ids }) => {
-        document.querySelector('video')?.pause()
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const id of ids) store.commit('removeYtDlpDownload', id)
-        for (const download of saved.downloads) store.commit('upsertYtDlpDownload', download)
-        store.state.watchQueue.items.splice(0, store.state.watchQueue.items.length, ...saved.queue)
-        for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
-        window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))
-        location.hash = saved.route
-      }, { saved, ids })
+      if (saved) {
+        await page.evaluate(() => {
+          window.fetch = window.__offlineRecommendationsFetch
+          if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
+          else delete navigator.onLine
+          delete window.__offlineRecommendationsOnline
+          delete window.__offlineRecommendationsFetch
+        })
+      }
+      if (saved) {
+        await page.evaluate(({ saved, ids }) => {
+          document.querySelector('video')?.pause()
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const id of ids) store.commit('removeYtDlpDownload', id)
+          for (const download of saved.downloads) store.commit('upsertYtDlpDownload', download)
+          store.state.watchQueue.items.splice(0, store.state.watchQueue.items.length, ...saved.queue)
+          for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
+          window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))
+          location.hash = saved.route
+        }, { saved, ids })
+      }
     } finally {
       try {
         await watch?.dispose()

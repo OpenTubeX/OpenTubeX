@@ -13,20 +13,32 @@ function headerGesture(targetSelector = 'button') {
   const timers = new Map()
   let sequence = 0
   const context = vm.createContext({
-    shallowRef: value => ({ value }), isCapacitor: true,
-    topNav: { value: null }, organizerSwipeActive: { value: false },
-    isAnyPromptOpen: { value: false }, activeTabId: { value: 'first' }, presentedTabId: { value: 'first' },
+    shallowRef: value => ({ value }),
+    isCapacitor: true,
+    topNav: { value: null },
+    organizerSwipeActive: { value: false },
+    isAnyPromptOpen: { value: false },
+    activeTabId: { value: 'first' },
+    presentedTabId: { value: 'first' },
     store: { getters: { getTabs: [{ id: 'first', loadState: 'loaded' }, { id: 'second', loadState: 'loaded' }] } },
-    findSwipeTab, shouldFinishPageSwipe,
-    nextTick: async () => {}, capacitorTabService: { activateTab: async id => activations.push(id) },
+    findSwipeTab,
+    shouldFinishPageSwipe,
+    nextTick: async () => {},
+    capacitorTabService: { activateTab: async id => activations.push(id) },
     window: { scrollY: 640, setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
     document: { documentElement: { dataset: { reducedMotion: 'reduce' } }, querySelector: () => ({ getBoundingClientRect: () => ({ width: 375 }) }) },
   })
   vm.runInContext(handlers, context)
   const event = {
-    pointerType: 'touch', pointerId: 1, isPrimary: true, clientX: 250, clientY: 30, timeStamp: 0,
+    pointerType: 'touch',
+    pointerId: 1,
+    isPrimary: true,
+    clientX: 250,
+    clientY: 30,
+    timeStamp: 0,
     target: { closest: selector => selector === '.topNavInner' || selector.split(',').some(part => part.trim() === targetSelector) ? {} : null },
-    currentTarget: { setPointerCapture: id => captures.push(id) }, preventDefault() {},
+    currentTarget: { setPointerCapture: id => captures.push(id) },
+    preventDefault() {},
   }
   return { context, event, captures, timers, activations, swipe: () => vm.runInContext('pageSwipe.value', context) }
 }
@@ -185,11 +197,13 @@ test('an uninterrupted swipe still activates the neighboring tab on release', as
 test('downward organizer drags lock direction and suppress the originating icon click', async () => {
   const { context, event, captures, swipe } = headerGesture()
   const calls = []
-  context.topNav.value = { organizerSwipe: {
-    begin() { calls.push('begin'); return true },
-    update(distance) { calls.push(distance) },
-    finish(elapsed, cancelled) { calls.push({ cancelled }) },
-  } }
+  context.topNav.value = {
+    organizerSwipe: {
+      begin() { calls.push('begin'); return true },
+      update(distance) { calls.push(distance) },
+      finish(elapsed, cancelled) { calls.push({ cancelled }) },
+    }
+  }
   context.startPageSwipe(event)
   context.movePageSwipe({ ...event, clientY: 36 })
   assert.deepEqual(captures, [], 'tap jitter must not capture a control')
@@ -220,10 +234,14 @@ for (const interruption of ['cancel', 'prompt', 'tab']) {
   test(`organizer pull cleans up after ${interruption}`, async () => {
     const { context, event } = headerGesture()
     const calls = []
-    context.topNav.value = { organizerSwipe: {
-      begin: () => true, update() {},
-      cancel() { calls.push('cancel') }, finish(elapsed, cancelled) { calls.push(cancelled) },
-    } }
+    context.topNav.value = {
+      organizerSwipe: {
+        begin: () => true,
+        update() {},
+        cancel() { calls.push('cancel') },
+        finish(elapsed, cancelled) { calls.push(cancelled) },
+      }
+    }
     context.startPageSwipe(event)
     context.movePageSwipe({ ...event, clientY: 100 })
     if (interruption === 'prompt') context.isAnyPromptOpen.value = true
@@ -246,10 +264,13 @@ function iconGesture(disabled = false) {
   let opened = 0
   const emitted = []
   const context = vm.createContext({
-    props: { openOnRightOrLongClick: true, disabled }, LONG_CLICK_BOUNDARY_MS: 500,
+    props: { openOnRightOrLongClick: true, disabled },
+    LONG_CLICK_BOUNDARY_MS: 500,
     settingsOverlayActive: { value: true },
-    setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id),
-    handleIconClick: () => opened++, emit: event => emitted.push(event),
+    setTimeout: fn => { timers.set(++sequence, fn); return sequence },
+    clearTimeout: id => timers.delete(id),
+    handleIconClick: () => opened++,
+    emit: event => emitted.push(event),
     window: {
       addEventListener: (type, fn) => { if (!listeners.has(type)) listeners.set(type, new Set()); listeners.get(type).add(fn) },
       removeEventListener: (type, fn) => listeners.get(type)?.delete(fn),
@@ -258,7 +279,11 @@ function iconGesture(disabled = false) {
   vm.runInContext(`let longPressTimer = null; let longPressStart = null; let longPressClickPointerId = null; ${iconHandlers}`, context)
   const event = { button: 0, pointerId: 1, clientX: 20, clientY: 20 }
   return {
-    context, event, timers, emitted, opened: () => opened,
+    context,
+    event,
+    timers,
+    emitted,
+    opened: () => opened,
     dispatch: (type, event) => { for (const listener of [...listeners.get(type) ?? []]) listener(event) },
     listenerCount: () => [...listeners.values()].reduce((total, set) => total + set.size, 0),
   }

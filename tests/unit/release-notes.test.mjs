@@ -33,7 +33,6 @@ function png(width, height) {
   return buffer
 }
 
-
 test('a release note file is parsed with its category, platforms, and images', () => {
   assert.deepEqual(parseReleaseNoteFile(noteFile({
     frontMatter: 'category: highlight\nplatforms: [android, desktop]',

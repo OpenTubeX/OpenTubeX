@@ -43,17 +43,29 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     settings = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
-        VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
-        UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        EnableMobileFullscreenSwipe: false, EnableMobileFullscreenSeek: true, ShowMobileSeekPreview: true, EnableVideoZoom: false, HoldToDoublePlaybackSpeed: false, RotateFullscreenToLandscape: false,
-        EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
-        MobileLeftSwipeAction: 'speed', MobileRightSwipeAction: 'speed', IconPack: 'material', SettingsWindowSection: 'playback',
+        VideoPlaybackEngine: 'built-in',
+        AutoplayVideos: false,
+        UseSponsorBlock: false,
+        UseReturnYouTubeDislikes: false,
+        EnableMobileFullscreenSwipe: false,
+        EnableMobileFullscreenSeek: true,
+        ShowMobileSeekPreview: true,
+        EnableVideoZoom: false,
+        HoldToDoublePlaybackSpeed: false,
+        RotateFullscreenToLandscape: false,
+        EnterFullscreenOnDisplayRotate: false,
+        PlayingInterfaceHideDelay: 5,
+        MobileLeftSwipeAction: 'speed',
+        MobileRightSwipeAction: 'speed',
+        IconPack: 'material',
+        SettingsWindowSection: 'playback',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__fullscreenSeekFetch = window.fetch
       window.fetch = (url, options) => /^(https:\/\/localhost\/|data:|blob:)/.test(String(url))
-        ? window.__fullscreenSeekFetch(url, options) : Promise.reject(new Error('Offline fullscreen seek test'))
+        ? window.__fullscreenSeekFetch(url, options)
+        : Promise.reject(new Error('Offline fullscreen seek test'))
       const style = document.createElement('style')
       style.id = 'fullscreen-seek-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
@@ -63,8 +75,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
+      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) } finally { await handle.dispose() }
     }).toBe(true)
     watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -72,11 +83,26 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       const watch = component.proxy
       watch.videoLoadGeneration++
       Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'Fullscreen seek test', videoLengthSeconds: 30, videoStoryboardSrc: '',
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        isLoading: false,
+        ytDlpStreamsPending: false,
+        errorMessage: null,
+        isUpcoming: false,
+        isLive: false,
+        localFilePlayback: true,
+        activeFormat: 'legacy',
+        videoTitle: 'Fullscreen seek test',
+        videoLengthSeconds: 30,
+        videoStoryboardSrc: '',
+        legacyFormats: [{
+          itag: 0,
+          qualityLabel: 'Test',
+          mimeType: 'video/webm',
+          width: 320,
+          height: 180,
+          bitrate: 0,
+          localFile: true,
+          url: `data:video/webm;base64,${media}`
+        }],
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')
@@ -220,8 +246,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       const vtt = `WEBVTT\n\n00:00.000 --> 00:15.000\n${uri}#xywh=0,0,160,90\n\n00:15.000 --> 00:30.100\n${uri}#xywh=160,0,160,90\n`
       const storyboard = URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }))
       window.__fullscreenSeekUrls = [storyboard]
-      try { await element.ui.getControls().getPlayer().addThumbnailsTrack(storyboard, 'text/vtt') }
-      catch (error) { throw Error(JSON.stringify({ code: error.code, data: error.data, message: error.message })) }
+      try { await element.ui.getControls().getPlayer().addThumbnailsTrack(storyboard, 'text/vtt') } catch (error) { throw Error(JSON.stringify({ code: error.code, data: error.data, message: error.message }), { cause: error }) }
     }, appSpritePath)
     for (const orientation of ['0', '1']) {
       adb('settings', 'put', 'system', 'user_rotation', orientation)
@@ -237,10 +262,9 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
         })
         return frame?.firstElementChild.style.backgroundPosition
       })
-      try { await expect(filmstrip).toBeVisible() }
-      catch (error) {
+      try { await expect(filmstrip).toBeVisible() } catch (error) {
         const state = await player.evaluate(async element => ({ tracks: element.ui.getControls().getPlayer().getImageTracks(), frame: await element.ui.getControls().getPlayer().getThumbnails(null, 21) }))
-        throw Error(JSON.stringify(state))
+        throw Error(JSON.stringify(state), { cause: error })
       }
       await expect.poll(markedFrame).toBe('-160px 0px')
       await expect(previewLabel).toHaveText('0:21')
@@ -341,7 +365,6 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     await expect(previewToggle.locator('input')).toBeEnabled()
     await expect(previewToggle.locator('input')).not.toBeChecked()
     if (process.env.ANDROID_ARTIFACT_DIR) await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-setting.png`)
-
   } finally {
     try {
       await page.evaluate(async ({ settings, originalRoute }) => {

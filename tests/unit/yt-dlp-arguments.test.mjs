@@ -41,9 +41,19 @@ test('external media downloads use their web URL without treating it as a YouTub
 
 test('desktop and Android download options preserve format, subtitles, clipping, and metadata', () => {
   const { args, truncatesLongTitles } = buildYtDlpDownloadArguments({
-    videoId, mode: 'video', quality: '1080', videoCodec: 'h264', videoFormat: 'mp4',
-    includeSubtitles: true, embedSubtitles: true, subtitleLanguages: 'en,de', subtitleFormat: 'srt',
-    embedThumbnail: true, embedMetadata: true, startTime: '0:10', endTime: '0:15'
+    videoId,
+    mode: 'video',
+    quality: '1080',
+    videoCodec: 'h264',
+    videoFormat: 'mp4',
+    includeSubtitles: true,
+    embedSubtitles: true,
+    subtitleLanguages: 'en,de',
+    subtitleFormat: 'srt',
+    embedThumbnail: true,
+    embedMetadata: true,
+    startTime: '0:10',
+    endTime: '0:15'
   })
   assert.equal(truncatesLongTitles, true)
   for (const [option, value] of [['-S', 'res:1080,codec:h264'], ['--merge-output-format', 'mp4'],
@@ -74,6 +84,7 @@ test('local playlists retain order and escape literal title placeholders', () =>
 })
 
 test('local playlist titles cannot expand into home or environment paths', () => {
+  // eslint-disable-next-line no-template-curly-in-string -- a literal shell expansion in a title
   for (const [title, folder] of [['$HOME', '_HOME'], ['${HOME}', '_{HOME}'], ['~root', '_root']]) {
     const args = buildYtDlpDownloadArguments({ videoIds: [videoId], mode: 'video', isPlaylist: true, title }).args
     assert.ok(args[args.indexOf('--output') + 1].startsWith(`${folder}/`), title)
@@ -110,6 +121,7 @@ test('filename templates cannot leave the download folder', () => {
   // yt-dlp ignores --paths for absolute templates, expands ~ and environment
   // variables, and reads `TYPES:` as the files a template applies to.
   for (const filenameTemplate of ['/tmp/{title}', '\\\\server\\share\\{title}', 'C:\\Users\\{title}', 'c:{title}', '~/{title}',
+    // eslint-disable-next-line no-template-curly-in-string -- a literal shell expansion in a template
     '../{title}', 'Music/../../{title}', 'Music\\..\\{title}', ' .. /{title}', '$HOME/{title}', '${HOME}/{title}',
     '%USERPROFILE%\\{title}', '%(uploader|..)s/{title}', 'thumbnail:/tmp/x', 'Subtitle,thumbnail:x', 'pl_infojson:../x',
     // An uploader named `C` would make a Windows drive, and an empty title would leave `..`.
@@ -139,8 +151,18 @@ test('custom arguments keep unrelated long and short options', () => {
 })
 
 test('playback mapping retains alternate audio and live stream timing', () => {
-  const format = mapPlaybackFormat({ format_id: '140-2', url: 'https://example.test/audio', protocol: 'https', ext: 'm4a',
-    acodec: 'mp4a.40.2', vcodec: 'none', language: 'de', tbr: 128.5, available_at: '123', fragments: [{}, {}] })
+  const format = mapPlaybackFormat({
+    format_id: '140-2',
+    url: 'https://example.test/audio',
+    protocol: 'https',
+    ext: 'm4a',
+    acodec: 'mp4a.40.2',
+    vcodec: 'none',
+    language: 'de',
+    tbr: 128.5,
+    available_at: '123',
+    fragments: [{}, {}]
+  })
   assert.equal(format.language, 'de')
   assert.equal(format.bitrate, 128500)
   assert.equal(format.availableAt, 123)

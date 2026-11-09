@@ -32,7 +32,10 @@ function watchFor(methods, { backendPreference = 'local', short = false } = {}) 
   let releaseRouteChange
   const watch = {
     ...methods,
-    tabId: 'tab', videoId: 'previous001', videoLoadGeneration: 0, backendPreference,
+    tabId: 'tab',
+    videoId: 'previous001',
+    videoLoadGeneration: 0,
+    backendPreference,
     tabRoute: { params: { id: 'nextVideo01' }, query: short ? { short: 'true' } : {} },
     saveShortsPlaybackPosition() {},
     handleRouteChange: () => new Promise(resolve => { releaseRouteChange = resolve }),

@@ -118,9 +118,13 @@ test('repeated repairs keep separate device identities and account-wide totals c
 test('a replaced device sync does not alter sibling histories', () => {
   const { mergeWatchStats } = createHelpers({}, async () => ({ platform: 'android' }))
   const sibling = { deviceId: 'sibling', days: { '2026-10-01': 60 }, replacedAt: 100, overlap: 'max' }
-  const remote = [{ deviceId: 'current', days: {}, replacedDevices: [
-    { deviceId: 'old', days: {}, replacedAt: 100, overlap: 'max' }, sibling,
-  ] }]
+  const remote = [{
+    deviceId: 'current',
+    days: {},
+    replacedDevices: [
+      { deviceId: 'old', days: {}, replacedAt: 100, overlap: 'max' }, sibling,
+    ]
+  }]
   const merged = mergeWatchStats(remote, [{ date: '2026-10-02', seconds: 30 }], 'old', 'Pixel', 'android')
   assert.deepEqual(merged[0].replacedDevices[0].days, { '2026-10-02': 30 })
   assert.deepEqual(merged[0].replacedDevices[1], sibling)
@@ -128,9 +132,13 @@ test('a replaced device sync does not alter sibling histories', () => {
 
 test('resetting a replaced identity clears the entire combined history before and after sync', () => {
   const { mergeWatchStats, watchSecondsForDevice } = createHelpers()
-  const remote = [{ deviceId: 'new', days: { '2026-10-01': 100 }, replacedDevices: [
-    { deviceId: 'old', days: { '2026-10-01': 50 }, overlap: 'sum', replacedAt: 100 },
-  ] }]
+  const remote = [{
+    deviceId: 'new',
+    days: { '2026-10-01': 100 },
+    replacedDevices: [
+      { deviceId: 'old', days: { '2026-10-01': 50 }, overlap: 'sum', replacedAt: 100 },
+    ]
+  }]
   const reset = { at: 200, generation: 1, origin: 'old', baselines: { new: { '2026-10-01': 100 }, old: {} } }
   assert.deepEqual(watchSecondsForDevice({}, remote, 'old', 'local', reset), {})
   const synced = mergeWatchStats(remote, [], 'old', 'Pixel', 'android', reset)
@@ -153,9 +161,13 @@ test('reset metadata copied from reactive settings can be cloned for encrypted s
 
 test('reset while disconnected completes missing repaired baselines on the next sync', () => {
   const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
-  const remote = [{ deviceId: 'pixel', days: { '2026-10-01': 100 }, replacedDevices: [
-    { deviceId: 'old', days: { '2026-10-02': 50 }, overlap: 'sum', replacedAt: 100 },
-  ] }]
+  const remote = [{
+    deviceId: 'pixel',
+    days: { '2026-10-01': 100 },
+    replacedDevices: [
+      { deviceId: 'old', days: { '2026-10-02': 50 }, overlap: 'sum', replacedAt: 100 },
+    ]
+  }]
   const pending = createWatchStatsReset([], 'pixel', 200)
   const merged = mergeWatchStats(remote, [{ date: '2026-10-03', seconds: 10 }], 'pixel', 'Pixel', 'android', pending)
   assert.deepEqual(watchSecondsForDevice({}, merged, 'observer', 'pixel'), { '2026-10-03': 10 })
@@ -164,18 +176,26 @@ test('reset while disconnected completes missing repaired baselines on the next 
 
 test('staging an offline reset keeps it pending until the encrypted upload is accepted', async () => {
   const day = '2026-10-01'
-  const remote = [{ deviceId: 'pixel', days: {}, replacedDevices: [
-    { deviceId: 'old', days: { [day]: 50 }, overlap: 'sum', replacedAt: 100 },
-  ] }]
+  const remote = [{
+    deviceId: 'pixel',
+    days: {},
+    replacedDevices: [
+      { deviceId: 'old', days: { [day]: 50 }, overlap: 'sum', replacedAt: 100 },
+    ]
+  }]
   const { createWatchStatsReset, syncWatchStats, persistUploadedWatchStatsReset } = createHelpers({ find: async () => [] }, async () => ({ platform: 'android' }))
   const pending = createWatchStatsReset([], 'pixel', 200)
   const settings = { syncServerDeviceId: 'pixel', syncServerDeviceName: 'Pixel', syncServerWatchStatsReset: pending }
   let saves = 0
-  const store = { state: { settings }, commit: () => {}, dispatch: async (name, value) => {
-    assert.equal(name, 'updateSyncServerWatchStatsReset')
-    settings.syncServerWatchStatsReset = value
-    saves++
-  } }
+  const store = {
+    state: { settings },
+    commit: () => {},
+    dispatch: async (name, value) => {
+      assert.equal(name, 'updateSyncServerWatchStatsReset')
+      settings.syncServerWatchStatsReset = value
+      saves++
+    }
+  }
   const client = new EncryptedSyncAdapter({ watchStats: remote })
   await syncWatchStats(client, store)
   assert.equal(settings.syncServerWatchStatsReset, pending)
@@ -191,9 +211,13 @@ test('staging an offline reset keeps it pending until the encrypted upload is ac
 test('concurrent resets keep both identities’ new watch time', () => {
   const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
   const day = '2026-10-01'
-  const remote = [{ deviceId: 'a', days: { [day]: 100 }, replacedDevices: [
-    { deviceId: 'b', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
-  ] }]
+  const remote = [{
+    deviceId: 'a',
+    days: { [day]: 100 },
+    replacedDevices: [
+      { deviceId: 'b', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
+    ]
+  }]
   const resetA = createWatchStatsReset(remote, 'a', 200)
   const resetB = createWatchStatsReset(remote, 'b', 50)
   const a = mergeWatchStats(remote, [{ date: day, seconds: 10 }], 'a', 'Pixel', 'android', resetA)
@@ -204,9 +228,13 @@ test('concurrent resets keep both identities’ new watch time', () => {
 test('retrying an accepted pending reset preserves watching since its upload', () => {
   const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
   const day = '2026-10-01'
-  const remote = [{ deviceId: 'pixel', days: {}, replacedDevices: [
-    { deviceId: 'old', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
-  ] }]
+  const remote = [{
+    deviceId: 'pixel',
+    days: {},
+    replacedDevices: [
+      { deviceId: 'old', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
+    ]
+  }]
   const pending = createWatchStatsReset([], 'pixel', 200)
   const accepted = mergeWatchStats(remote, [], 'pixel', 'Pixel', 'android', pending)
   const watched = mergeWatchStats(accepted, [{ date: day, seconds: 110 }], 'old', 'Pixel', 'android')

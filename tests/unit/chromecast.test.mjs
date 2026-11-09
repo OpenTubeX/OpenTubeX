@@ -24,7 +24,9 @@ for (const wait of [false, true]) {
     Object.setPrototypeOf(sender, CastSender.prototype)
     let killed = false
     Object.assign(sender, {
-      nextId: 1, pending: new Map(), closed: false,
+      nextId: 1,
+      pending: new Map(),
+      closed: false,
       lines: { close() {} },
       process: { stdin: { write(_, callback) { queueMicrotask(() => callback(new Error('Broken pipe'))) } }, kill() { killed = true } }
     })
@@ -130,9 +132,14 @@ async function managerForTest(t, powerSaveBlocker) {
 }
 
 const payload = {
-  deviceId: 'device', title: 'Test video', startSeconds: 12, paused: false, playbackRate: 1,
+  deviceId: 'device',
+  title: 'Test video',
+  startSeconds: 12,
+  paused: false,
+  playbackRate: 1,
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
-  captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
+  captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }],
+  captionIndex: 0
 }
 
 test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
@@ -329,7 +336,6 @@ test('failed loads release resources and allow a subsequent cast', async t => {
   assert.equal(manager.active, null)
 })
 
-
 test('a final status timeout releases the session without a second response timeout', async t => {
   const manager = await managerForTest(t)
   if (!manager) return
@@ -351,7 +357,6 @@ test('a final status timeout releases the session without a second response time
   assert.equal(manager.active, null)
   assert.equal(sender.closed, true)
 })
-
 
 test('reports only natural receiver completion as ended', async t => {
   const manager = await managerForTest(t)
