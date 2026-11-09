@@ -10825,6 +10825,8 @@ export default defineComponent({
       })
       handleTimeupdate()
       handlePause()
+      // Navigation paused this Short while it played, which isn't the viewer's pause.
+      if (resume) rewindOnResumePausedAt = null
       if (resume && isTabPresented?.value !== false) {
         video.value?.play().catch(error => {
           console.warn('Could not resume retained Short', error)
