@@ -2645,6 +2645,11 @@ Video:
       reversing playlists: reversing playlists
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
+    Confirm Arguments Title: "Run the external player with custom arguments?"
+    Confirm Arguments Message: "{externalPlayer} will start with these custom arguments:"
+    Confirm Arguments Warning: "Some arguments can run programs or overwrite files. Only continue if you added them yourself."
+    Run: "Run"
+    LaunchCanceledTemplate: "Did not open {externalPlayer}"
   Player:
     Stream Recovery:
       DASH Fallback: "The audio stream failed, switching to DASH formats: {error}"

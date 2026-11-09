@@ -9,7 +9,7 @@ test('the renderer can reset but not set paths that only native pickers choose',
     assert.equal(canRendererWriteSetting(settingId, ['/bin/sh']), false, settingId)
     assert.equal(canRendererWriteSetting(settingId, ''), true, settingId)
   }
-  for (const settingId of ['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus']) {
+  for (const settingId of ['externalPlayerApprovedArgs', 'screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus']) {
     assert.equal(canRendererWriteSetting(settingId, ''), false, settingId)
   }
   assert.equal(canRendererWriteSetting('ytDlpSource', 'system'), true)

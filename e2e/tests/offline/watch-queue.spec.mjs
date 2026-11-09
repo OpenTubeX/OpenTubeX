@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { choosePickerPaths, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { answerNextMessageBox, choosePickerPaths, test, expect, goTo, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -358,6 +358,7 @@ test('removes a queued video that a click opens in the default external player',
     await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
   }, { executable, capturedArguments })
 
+  await answerNextMessageBox(app, 1)
   await queue.locator('.queueItem a.title').filter({ hasText: 'External player video' }).click()
   await expect.poll(async () => {
     try {

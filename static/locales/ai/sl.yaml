@@ -2099,6 +2099,11 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
     LaunchFailedTemplate: "{externalPlayer} ni bilo mogoče zagnati. Preverite, ali je nameščen, ali pa nastavite pot do izvršljive datoteke v nastavitvah zunanjega predvajalnika."
+    Confirm Arguments Title: "Ali želite zagnati zunanji predvajalnik z argumenti po meri?"
+    Confirm Arguments Message: "{externalPlayer} se bo zagnal s temi argumenti po meri:"
+    Confirm Arguments Warning: "Nekateri argumenti lahko zaženejo programe ali prepišejo datoteke. Nadaljujte le, če ste jih dodali sami."
+    Run: "Zaženi"
+    LaunchCanceledTemplate: "{externalPlayer} ni bil odprt"
   Player:
     Playing in Picture-in-Picture: Predvaja se v načinu slika v sliki
     Stream Recovery:

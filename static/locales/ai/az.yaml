@@ -1924,6 +1924,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Söhbət hazırda Yattee serveri ilə dəstəklənmir. YouTube-a birbaşa bağlantı tələb olunur.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} başladıla bilmədi. Onun quraşdırıldığını yoxlayın və ya xarici pleyer ayarlarında icra faylının yolunu təyin edin."
+    Confirm Arguments Title: "Xarici oynadıcı fərdi arqumentlərlə işə salınsın?"
+    Confirm Arguments Message: "{externalPlayer} bu fərdi arqumentlərlə başlayacaq:"
+    Confirm Arguments Warning: "Bəzi arqumentlər proqramları işə sala və ya faylların üzərinə yaza bilər. Yalnız onları özünüz əlavə etmisinizsə davam edin."
+    Run: "İşə sal"
+    LaunchCanceledTemplate: "{externalPlayer} açılmadı"
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə

@@ -2023,6 +2023,11 @@ Video:
   Info panel source: 'ماخذ: {source}'
   External Player:
     LaunchFailedTemplate: "{externalPlayer} شروع نہیں ہو سکا۔ یقینی بنائیں کہ یہ انسٹال ہے، یا بیرونی پلیئر کی ترتیبات میں اس کی قابلِ اجرا فائل کا راستہ مقرر کریں۔"
+    Confirm Arguments Title: "کیا بیرونی پلیئر کو حسب ضرورت دلائل کے ساتھ چلایا جائے؟"
+    Confirm Arguments Message: "{externalPlayer} ان حسب ضرورت دلائل کے ساتھ شروع ہوگا:"
+    Confirm Arguments Warning: "کچھ دلائل پروگرام چلا سکتے ہیں یا فائلیں اوور رائٹ کر سکتے ہیں۔ صرف اسی صورت میں جاری رکھیں جب آپ نے انہیں خود شامل کیا ہو۔"
+    Run: "چلائیں"
+    LaunchCanceledTemplate: "{externalPlayer} نہیں کھولا گیا"
 Playlist:
   Close Playlist: پلے لسٹ بند کریں
   Add Playlist to Queue: پلے لسٹ قطار میں شامل کریں

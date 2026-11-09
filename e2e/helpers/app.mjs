@@ -602,6 +602,24 @@ export async function choosePickerPaths({ electronApp }, page, paths) {
   }
 }
 
+/**
+ * Answers the next native message box with the given button index and keeps
+ * its options in `globalThis.__messageBoxes` of the main process.
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ * @param {number} response
+ */
+export async function answerNextMessageBox({ electronApp }, response) {
+  await electronApp.evaluate(({ dialog }, response) => {
+    globalThis.__messageBoxes ??= []
+    const showMessageBox = dialog.showMessageBox
+    dialog.showMessageBox = async (...args) => {
+      dialog.showMessageBox = showMessageBox
+      globalThis.__messageBoxes.push(args.at(-1))
+      return { response, checkboxChecked: false }
+    }
+  }, response)
+}
+
 /** The renderer's current viewport size. */
 export function getViewport(page) {
   return page.evaluate(() => ({

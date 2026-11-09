@@ -1913,6 +1913,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechatt stöds för närvarande inte via Yattee-servern. En direktanslutning till YouTube krävs.
   External Player:
     LaunchFailedTemplate: Det gick inte att starta {externalPlayer}. Kontrollera att den är installerad, eller ange sökvägen till den körbara filen i inställningarna för extern spelare.
+    Confirm Arguments Title: "Köra den externa spelaren med anpassade argument?"
+    Confirm Arguments Message: "{externalPlayer} startar med dessa anpassade argument:"
+    Confirm Arguments Warning: "Vissa argument kan köra program eller skriva över filer. Fortsätt bara om du själv har lagt till dem."
+    Run: "Kör"
+    LaunchCanceledTemplate: "{externalPlayer} öppnades inte"
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"

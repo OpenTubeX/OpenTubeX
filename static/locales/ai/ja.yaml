@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 現在、ライブチャットは Yattee サーバーでは未対応です。直接 YouTube への接続が必要です。
   External Player:
     LaunchFailedTemplate: "{externalPlayer} を起動できませんでした。インストールされていることを確認するか、外部プレーヤーの設定で実行ファイルのパスを指定してください。"
+    Confirm Arguments Title: "カスタム引数で外部プレーヤーを実行しますか？"
+    Confirm Arguments Message: "{externalPlayer} を次のカスタム引数で起動します:"
+    Confirm Arguments Warning: "引数によってはプログラムを実行したりファイルを上書きしたりできます。自分で追加した場合のみ続行してください。"
+    Run: "実行"
+    LaunchCanceledTemplate: "{externalPlayer} を開きませんでした"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"

@@ -1967,6 +1967,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: הצ׳אט החי כרגע לא נתמך בשרת Yattee. דרוש חיבור ישיר ל־YouTube.
   External Player:
     LaunchFailedTemplate: לא ניתן להפעיל את {externalPlayer}. יש לוודא שהוא מותקן, או להגדיר את נתיב קובץ ההפעלה בהגדרות הנגן החיצוני.
+    Confirm Arguments Title: "להפעיל את הנגן החיצוני עם ארגומנטים מותאמים?"
+    Confirm Arguments Message: "{externalPlayer} יופעל עם הארגומנטים המותאמים האלה:"
+    Confirm Arguments Warning: "ארגומנטים מסוימים יכולים להריץ תוכניות או לדרוס קבצים. יש להמשיך רק אם הוספת אותם בעצמך."
+    Run: "הפעלה"
+    LaunchCanceledTemplate: "{externalPlayer} לא נפתח"
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"

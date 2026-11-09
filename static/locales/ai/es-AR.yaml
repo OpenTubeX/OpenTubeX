@@ -2010,6 +2010,11 @@ Video:
       shuffling playlists: aleatorizar las listas de reproducción
       looping playlists: reproducir en bucle las listas de reproducción
     LaunchFailedTemplate: No se pudo iniciar {externalPlayer}. Comprueba que está instalado o establece la ruta del ejecutable en la configuración del reproductor externo.
+    Confirm Arguments Title: "¿Ejecutar el reproductor externo con argumentos personalizados?"
+    Confirm Arguments Message: "{externalPlayer} se iniciará con estos argumentos personalizados:"
+    Confirm Arguments Warning: "Algunos argumentos pueden ejecutar programas o sobrescribir archivos. Continúa solo si los agregaste tú."
+    Run: "Ejecutar"
+    LaunchCanceledTemplate: "No se abrió {externalPlayer}"
   Player:
     Playing in Picture-in-Picture: Reproduciendo en modo Imagen en imagen
     Stream Recovery:

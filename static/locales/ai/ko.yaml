@@ -2275,6 +2275,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 라이브 채팅은 현재 Yattee 서버에서 지원되지 않습니다. YouTube에 직접 연결해야 합니다.
   External Player:
     LaunchFailedTemplate: "{externalPlayer}을(를) 시작할 수 없습니다. 설치되어 있는지 확인하거나 외부 플레이어 설정에서 실행 파일 경로를 지정하세요."
+    Confirm Arguments Title: "사용자 지정 인수로 외부 플레이어를 실행할까요?"
+    Confirm Arguments Message: "{externalPlayer}이(가) 다음 사용자 지정 인수로 시작됩니다:"
+    Confirm Arguments Warning: "일부 인수는 프로그램을 실행하거나 파일을 덮어쓸 수 있습니다. 직접 추가한 경우에만 계속하세요."
+    Run: "실행"
+    LaunchCanceledTemplate: "{externalPlayer}을(를) 열지 않았습니다"
 Playlist:
   Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
   Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"

@@ -1250,6 +1250,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Czat na żywo nie jest obecnie obsługiwany przez serwer Yattee. Konieczne jest połączenie bezpośrednie z YouTube.
   External Player:
     LaunchFailedTemplate: Nie można uruchomić {externalPlayer}. Sprawdź, czy jest zainstalowany, lub ustaw ścieżkę do pliku wykonywalnego w ustawieniach zewnętrznego odtwarzacza.
+    Confirm Arguments Title: "Uruchomić zewnętrzny odtwarzacz z niestandardowymi argumentami?"
+    Confirm Arguments Message: "{externalPlayer} uruchomi się z tymi niestandardowymi argumentami:"
+    Confirm Arguments Warning: "Niektóre argumenty mogą uruchamiać programy lub nadpisywać pliki. Kontynuuj tylko, jeśli dodano je samodzielnie."
+    Run: "Uruchom"
+    LaunchCanceledTemplate: "Nie otwarto {externalPlayer}"
 Change Format:
   yt-dlp Error Template: "yt-dlp nie mógł dostarczyć strumieni: {error}"
   Local Video File: Lokalny plik filmu

@@ -2008,6 +2008,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Жывы чат зараз не падтрымліваецца серверам Yattee. Патрабуецца прамое падключэнне да YouTube.
   External Player:
     LaunchFailedTemplate: Не ўдалося запусціць {externalPlayer}. Пераканайцеся, што ён усталяваны, або ўкажыце шлях да выканальнага файла ў наладах вонкавага прайгравальніка.
+    Confirm Arguments Title: "Запусціць знешні прайгравальнік з карыстальніцкімі аргументамі?"
+    Confirm Arguments Message: "{externalPlayer} запусціцца з гэтымі карыстальніцкімі аргументамі:"
+    Confirm Arguments Warning: "Некаторыя аргументы могуць запускаць праграмы або перазапісваць файлы. Працягвайце, толькі калі дадалі іх самі."
+    Run: "Запусціць"
+    LaunchCanceledTemplate: "{externalPlayer} не адкрыты"
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"

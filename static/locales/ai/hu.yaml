@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
   External Player:
     LaunchFailedTemplate: A(z) {externalPlayer} nem indítható el. Ellenőrizze, hogy telepítve van-e, vagy adja meg a végrehajtható fájl útvonalát a külső lejátszó beállításaiban.
+    Confirm Arguments Title: "Elindítja a külső lejátszót egyéni argumentumokkal?"
+    Confirm Arguments Message: "A(z) {externalPlayer} ezekkel az egyéni argumentumokkal indul:"
+    Confirm Arguments Warning: "Egyes argumentumok programokat futtathatnak vagy fájlokat írhatnak felül. Csak akkor folytassa, ha saját maga adta hozzá őket."
+    Run: "Futtatás"
+    LaunchCanceledTemplate: "A(z) {externalPlayer} nem nyílt meg"
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"

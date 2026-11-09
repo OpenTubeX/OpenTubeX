@@ -115,7 +115,15 @@ if (process.env.IS_ELECTRON) {
   })
 
   window.ftElectron.handleOpenInExternalPlayerResult(
-    (externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
+    (externalPlayer, unsupportedActions, isPlaylist, launchFailed, cancelled) => {
+      if (cancelled) {
+        showToast({
+          message: i18n.global.t('Video.External Player.LaunchCanceledTemplate', { externalPlayer }),
+          icon: ['fas', 'xmark'],
+        })
+        return
+      }
+
       if (launchFailed) {
         showToast({
           message: i18n.global.t('Video.External Player.LaunchFailedTemplate', { externalPlayer }),

@@ -1958,6 +1958,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Atualmente, a conversa em direto não é suportada pelo servidor Yattee. É necessária uma ligação direta ao YouTube.
   External Player:
     LaunchFailedTemplate: Não foi possível iniciar {externalPlayer}. Verifique se está instalado ou defina o caminho do executável nas definições do reprodutor externo.
+    Confirm Arguments Title: "Executar o leitor externo com argumentos personalizados?"
+    Confirm Arguments Message: "{externalPlayer} será iniciado com estes argumentos personalizados:"
+    Confirm Arguments Warning: "Alguns argumentos podem executar programas ou substituir ficheiros. Continue apenas se os adicionou."
+    Run: "Executar"
+    LaunchCanceledTemplate: "{externalPlayer} não foi aberto"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista já estão pré-carregados"
   Playlist Preload Progress: "A pré-carregar vídeos: {completed} de {requested}"

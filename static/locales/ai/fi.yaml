@@ -1965,6 +1965,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
   External Player:
     LaunchFailedTemplate: Kohdetta {externalPlayer} ei voitu käynnistää. Varmista, että se on asennettu, tai määritä suoritettavan tiedoston polku ulkoisen soittimen asetuksissa.
+    Confirm Arguments Title: "Suoritetaanko ulkoinen soitin mukautetuilla argumenteilla?"
+    Confirm Arguments Message: "{externalPlayer} käynnistyy näillä mukautetuilla argumenteilla:"
+    Confirm Arguments Warning: "Jotkin argumentit voivat suorittaa ohjelmia tai korvata tiedostoja. Jatka vain, jos lisäsit ne itse."
+    Run: "Suorita"
+    LaunchCanceledTemplate: "Kohdetta {externalPlayer} ei avattu"
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"

@@ -1962,6 +1962,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chatul în direct nu este acceptat în prezent cu serverul Yattee. Este necesară o conexiune directă la YouTube.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} nu a putut fi pornit. Verifică dacă este instalat sau setează calea executabilului în setările playerului extern."
+    Confirm Arguments Title: "Rulezi playerul extern cu argumente personalizate?"
+    Confirm Arguments Message: "{externalPlayer} va porni cu aceste argumente personalizate:"
+    Confirm Arguments Warning: "Unele argumente pot rula programe sau suprascrie fișiere. Continuă doar dacă le-ai adăugat tu."
+    Run: "Rulează"
+    LaunchCanceledTemplate: "{externalPlayer} nu a fost deschis"
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"

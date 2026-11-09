@@ -1914,6 +1914,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Kui kasutad Yattee serverit, siis reaalajas vestlus hetkel ei ole toetatud. Selleks on vajalik otseliidestus YouTube'iga.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} käivitamine nurjus. Kontrolli, et see on paigaldatud, või määra välise mängija seadetes käivitusfaili asukoht."
+    Confirm Arguments Title: "Kas käivitada väline mängija kohandatud argumentidega?"
+    Confirm Arguments Message: "{externalPlayer} käivitub nende kohandatud argumentidega:"
+    Confirm Arguments Warning: "Mõned argumendid võivad käivitada programme või faile üle kirjutada. Jätka ainult siis, kui lisasid need ise."
+    Run: "Käivita"
+    LaunchCanceledTemplate: "{externalPlayer} ei avatud"
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"

@@ -1946,6 +1946,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Nid yw Sgwrsio Byw yn cael ei gefnogi gan y gweinydd Yattee ar hyn o bryd. Mae angen cysylltiad uniongyrchol â YouTube.
   External Player:
     LaunchFailedTemplate: Methu cychwyn {externalPlayer}. Gwiriwch ei fod wedi’i osod, neu gosodwch lwybr y ffeil weithredadwy yng ngosodiadau’r chwaraewr allanol.
+    Confirm Arguments Title: "Rhedeg y chwaraewr allanol gyda dadleuon personol?"
+    Confirm Arguments Message: "Bydd {externalPlayer} yn dechrau gyda’r dadleuon personol hyn:"
+    Confirm Arguments Warning: "Gall rhai dadleuon redeg rhaglenni neu drosysgrifo ffeiliau. Dim ond parhau os gwnaethoch eu hychwanegu eich hun."
+    Run: "Rhedeg"
+    LaunchCanceledTemplate: "Heb agor {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"

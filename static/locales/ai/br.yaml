@@ -1921,6 +1921,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: N'eo ket skoret ar flapañ war-eeun gant ar servijer Yattee evit poent. Ret eo bezañ kennasket war-eeun ouzh YouTube.
   External Player:
     LaunchFailedTemplate: N’eus ket bet gallet loc’hañ {externalPlayer}. Gwiriit eo staliet, pe termenit hent ar restr seveniñ e arventennoù al lenner diavaez.
+    Confirm Arguments Title: "Lañsañ al lenner diavaez gant arguzennoù personelaet?"
+    Confirm Arguments Message: "{externalPlayer} a vo lañset gant an arguzennoù personelaet-mañ:"
+    Confirm Arguments Warning: "Arguzennoù zo a c’hall lañsañ programmoù pe flastrañ restroù. Kendalc’hit hepken m’ho peus o ouzhpennet hoc’h-unan."
+    Run: "Lañsañ"
+    LaunchCanceledTemplate: "N’eo ket bet digoret {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"

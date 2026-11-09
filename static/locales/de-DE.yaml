@@ -2284,6 +2284,11 @@ Video:
     LaunchFailedTemplate: '{externalPlayer} konnte nicht gestartet werden. Stelle sicher, dass er installiert ist, oder lege den Pfad zur ausführbaren Datei in den Einstellungen für externe Video-Player fest.'
     playlist: Playlist
     video: Video
+    Confirm Arguments Title: "Externen Player mit benutzerdefinierten Argumenten starten?"
+    Confirm Arguments Message: "{externalPlayer} wird mit diesen benutzerdefinierten Argumenten gestartet:"
+    Confirm Arguments Warning: "Manche Argumente können Programme ausführen oder Dateien überschreiben. Fahre nur fort, wenn du sie selbst hinzugefügt hast."
+    Run: "Starten"
+    LaunchCanceledTemplate: "{externalPlayer} wurde nicht geöffnet"
   Premiere: Premiere
   Premieres: Premiere
   Show Super Chat Comment: Super-Chat-Kommentar anzeigen

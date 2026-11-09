@@ -27,6 +27,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   // ExternalPlayerSettings
   'externalPlayer',
   'externalPlayerExecutable',
+  // Approved in a native dialog on this device.
+  'externalPlayerApprovedArgs',
   'externalPlayerIgnoreWarnings',
   'externalPlayerIgnoreDefaultArgs',
   'externalPlayerCustomArgs',

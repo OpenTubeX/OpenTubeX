@@ -1925,6 +1925,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chat trực tiếp hiện không được hỗ trợ với máy chủ Yattee. Cần có kết nối trực tiếp đến YouTube.
   External Player:
     LaunchFailedTemplate: Không thể khởi động {externalPlayer}. Hãy kiểm tra xem ứng dụng đã được cài đặt chưa, hoặc đặt đường dẫn tệp thực thi trong cài đặt trình phát bên ngoài.
+    Confirm Arguments Title: "Chạy trình phát ngoài với đối số tùy chỉnh?"
+    Confirm Arguments Message: "{externalPlayer} sẽ khởi động với các đối số tùy chỉnh sau:"
+    Confirm Arguments Warning: "Một số đối số có thể chạy chương trình hoặc ghi đè tệp. Chỉ tiếp tục nếu bạn tự thêm chúng."
+    Run: "Chạy"
+    LaunchCanceledTemplate: "Chưa mở {externalPlayer}"
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"

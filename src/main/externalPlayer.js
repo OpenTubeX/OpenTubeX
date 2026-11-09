@@ -1,7 +1,10 @@
 import { spawn } from 'node:child_process'
 import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
+import { BrowserWindow, dialog } from 'electron'
 import { settings } from '../datastores/handlers/base'
+import { createMainTranslator } from './mainTranslator'
+import { EXTERNAL_PLAYER_APPROVED_ARGS_SETTING } from './settingWriteGuard'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels, UnsupportedPlayerActions } from '../constants'
 
@@ -80,11 +83,14 @@ export async function handleOpenInExternalPlayer(event, payload) {
   /** @type {boolean} */
   const ignoreDefaultArgs = (await settings._findOne('externalPlayerIgnoreDefaultArgs'))?.value || false
 
-  /** @type {string[] | string} */
-  const customArgs = (await settings._findOne('externalPlayerCustomArgs'))?.value || '[]'
+  const customArgs = parseCustomArguments((await settings._findOne('externalPlayerCustomArgs'))?.value)
+  if (customArgs === null) {
+    console.error('Invalid external player arguments')
+    return
+  }
 
-  if (typeof customArgs === 'string' && customArgs !== '[]') {
-    args.push(...JSON.parse(customArgs))
+  if (customArgs.length > 0) {
+    args.push(...customArgs)
   } else if (!ignoreDefaultArgs && Array.isArray(cmdArgs.defaultCustomArguments)) {
     args.push(...cmdArgs.defaultCustomArguments)
   }
@@ -183,6 +189,13 @@ export async function handleOpenInExternalPlayer(event, payload) {
 
   const executable = externalPlayerExecutable.length > 0 ? externalPlayerExecutable : cmdArgs.defaultExecutable
 
+  if (!await confirmCustomArguments(event.sender, externalPlayer, executable, customArgs)) {
+    if (!event.sender.isDestroyed()) {
+      event.reply(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT, externalPlayer, [], hasValidPlaylistId, false, true)
+    }
+    return
+  }
+
   let launchFailed = false
   try {
     const child = spawn(executable, args, { detached: true, stdio: 'ignore' })
@@ -206,6 +219,65 @@ export async function handleOpenInExternalPlayer(event, payload) {
     hasValidPlaylistId,
     launchFailed
   )
+}
+
+/**
+ * @param {unknown} value the stored JSON array of arguments
+ * @returns {string[] | null} null when the value is not a list of strings
+ */
+function parseCustomArguments(value) {
+  if (value == null || value === '') return []
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value
+    return Array.isArray(parsed) && parsed.every(argument => typeof argument === 'string') ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The value the user approves: custom arguments can run code or write files
+ * through some players, and the renderer can change them, so a native
+ * dialog in this process asks before they are first used with a player.
+ * @param {string} externalPlayer
+ * @param {string[]} customArgs
+ */
+function customArgumentsApprovalKey(externalPlayer, customArgs) {
+  return JSON.stringify([externalPlayer, customArgs])
+}
+
+/**
+ * @param {import('electron').WebContents} webContents
+ * @param {string} externalPlayer
+ * @param {string} executable
+ * @param {string[]} customArgs
+ * @returns {Promise<boolean>}
+ */
+async function confirmCustomArguments(webContents, externalPlayer, executable, customArgs) {
+  if (customArgs.length === 0) return true
+
+  const approvalKey = customArgumentsApprovalKey(externalPlayer, customArgs)
+  if ((await settings._findOne(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING))?.value === approvalKey) return true
+
+  const t = await createMainTranslator()
+  const window = webContents.isDestroyed() ? null : BrowserWindow.fromWebContents(webContents)
+  /** @type {import('electron').MessageBoxOptions} */
+  const options = {
+    type: 'warning',
+    title: t('Video.External Player.Confirm Arguments Title'),
+    message: t('Video.External Player.Confirm Arguments Message', { externalPlayer }),
+    // JSON quotes show spaces and empty arguments exactly as they are passed.
+    detail: `${executable}\n${customArgs.map(argument => JSON.stringify(argument)).join('\n')}\n\n${t('Video.External Player.Confirm Arguments Warning')}`,
+    buttons: [t('Cancel'), t('Video.External Player.Run')],
+    defaultId: 0,
+    cancelId: 0,
+    noLink: true
+  }
+  const { response } = window ? await dialog.showMessageBox(window, options) : await dialog.showMessageBox(options)
+  if (response !== 1) return false
+
+  await settings.upsert(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING, approvalKey)
+  return true
 }
 
 async function loadExternalPlayerData() {

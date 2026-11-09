@@ -1,4 +1,4 @@
-import { choosePickerPaths, test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { answerNextMessageBox, choosePickerPaths, test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
@@ -476,6 +476,7 @@ test.describe('local video commands', () => {
       await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
     }, { video, executable, capturedArguments })
     const previousUrl = page.url()
+    await answerNextMessageBox(app, 1)
     await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
     await page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
       .filter({ has: page.locator('small', { hasText: 'History ·' }) }).click()

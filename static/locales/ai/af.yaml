@@ -2167,6 +2167,11 @@ Video:
   Info panel source: 'Bron: {source}'
   External Player:
     LaunchFailedTemplate: Kon nie {externalPlayer} begin nie. Maak seker dat dit geïnstalleer is, of stel die pad na die uitvoerbare lêer in die instellings vir die eksterne speler.
+    Confirm Arguments Title: "Laat die eksterne speler met pasgemaakte argumente loop?"
+    Confirm Arguments Message: "{externalPlayer} sal met hierdie pasgemaakte argumente begin:"
+    Confirm Arguments Warning: "Sommige argumente kan programme laat loop of lêers oorskryf. Gaan net voort as jy dit self bygevoeg het."
+    Run: "Laat loop"
+    LaunchCanceledTemplate: "{externalPlayer} is nie oopgemaak nie"
 Playlist:
   Close Playlist: Sluit afspeellys
   Add Playlist to Queue: Voeg afspeellys by tou

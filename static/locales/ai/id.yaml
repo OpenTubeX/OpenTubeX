@@ -1937,6 +1937,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Obrolan Langsung belum didukung dengan server Yattee. Koneksi langsung dengan YouTube dibutuhkan.
   External Player:
     LaunchFailedTemplate: Tidak dapat memulai {externalPlayer}. Pastikan aplikasi tersebut terpasang, atau atur jalur file eksekusinya di pengaturan pemutar eksternal.
+    Confirm Arguments Title: "Jalankan pemutar eksternal dengan argumen khusus?"
+    Confirm Arguments Message: "{externalPlayer} akan dimulai dengan argumen khusus berikut:"
+    Confirm Arguments Warning: "Beberapa argumen dapat menjalankan program atau menimpa file. Lanjutkan hanya jika Anda sendiri yang menambahkannya."
+    Run: "Jalankan"
+    LaunchCanceledTemplate: "{externalPlayer} tidak dibuka"
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"

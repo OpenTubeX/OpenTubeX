@@ -1922,6 +1922,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
   External Player:
     LaunchFailedTemplate: Ezin izan da {externalPlayer} abiarazi. Egiaztatu instalatuta dagoela, edo ezarri exekutagarriaren bidea kanpoko erreproduzigailuaren ezarpenetan.
+    Confirm Arguments Title: "Kanpoko erreproduzigailua argumentu pertsonalizatuekin exekutatu?"
+    Confirm Arguments Message: "{externalPlayer} argumentu pertsonalizatu hauekin abiaraziko da:"
+    Confirm Arguments Warning: "Argumentu batzuek programak exekutatu edo fitxategiak gainidatz ditzakete. Jarraitu zuk zeuk gehitu badituzu soilik."
+    Run: "Exekutatu"
+    LaunchCanceledTemplate: "Ez da {externalPlayer} ireki"
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"

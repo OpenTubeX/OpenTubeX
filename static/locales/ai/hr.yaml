@@ -1946,6 +1946,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Razgovor uživo trenutačno nije podržan s Yattee poslužiteljem. Potrebna je izravna veza s YouTubeom.
   External Player:
     LaunchFailedTemplate: Nije moguće pokrenuti {externalPlayer}. Provjerite je li instaliran ili postavite putanju izvršne datoteke u postavkama vanjskog playera.
+    Confirm Arguments Title: "Pokrenuti vanjski player s prilagođenim argumentima?"
+    Confirm Arguments Message: "{externalPlayer} će se pokrenuti s ovim prilagođenim argumentima:"
+    Confirm Arguments Warning: "Neki argumenti mogu pokretati programe ili prepisivati datoteke. Nastavite samo ako ste ih sami dodali."
+    Run: "Pokreni"
+    LaunchCanceledTemplate: "{externalPlayer} nije otvoren"
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"

@@ -1959,6 +1959,11 @@ Video:
   Info panel source: 'Fonto: {source}'
   External Player:
     LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
+    Confirm Arguments Title: "Ĉu lanĉi la eksteran ludilon kun propraj argumentoj?"
+    Confirm Arguments Message: "{externalPlayer} startos kun ĉi tiuj propraj argumentoj:"
+    Confirm Arguments Warning: "Kelkaj argumentoj povas lanĉi programojn aŭ anstataŭigi dosierojn. Daŭrigu nur se vi mem aldonis ilin."
+    Run: "Lanĉi"
+    LaunchCanceledTemplate: "{externalPlayer} ne estis malfermita"
 Playlist:
   Close Playlist: Fermi ludliston
   Add Playlist to Queue: Aldoni ludliston al la vico

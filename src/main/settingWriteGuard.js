@@ -1,7 +1,15 @@
 // @ts-check
 
-// Written only by native pickers or main-process services.
-const MAIN_PROCESS_SETTINGS = new Set(['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus'])
+// The external player arguments the user approved in a native dialog.
+export const EXTERNAL_PLAYER_APPROVED_ARGS_SETTING = 'externalPlayerApprovedArgs'
+
+// Written only by native pickers, native dialogs or main-process services.
+const MAIN_PROCESS_SETTINGS = new Set([
+  EXTERNAL_PLAYER_APPROVED_ARGS_SETTING,
+  'screenshotFolderPath',
+  'scheduledBackupFolderPath',
+  'scheduledBackupStatus',
+])
 
 // Programs and scripts that main runs, the download destination, and the
 // cookie file that yt-dlp writes back. Native pickers set them, so a

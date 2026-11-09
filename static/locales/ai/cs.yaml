@@ -1912,6 +1912,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálně není podporován se serverem Yattee. Je vyžadováno přímé připojení k YouTube.
   External Player:
     LaunchFailedTemplate: "{externalPlayer} se nepodařilo spustit. Ověřte, že je nainstalován, nebo nastavte cestu ke spustitelnému souboru v nastavení externího přehrávače."
+    Confirm Arguments Title: "Spustit externí přehrávač s vlastními argumenty?"
+    Confirm Arguments Message: "{externalPlayer} se spustí s těmito vlastními argumenty:"
+    Confirm Arguments Warning: "Některé argumenty mohou spouštět programy nebo přepisovat soubory. Pokračujte, jen pokud jste je přidali sami."
+    Run: "Spustit"
+    LaunchCanceledTemplate: "{externalPlayer} nebyl otevřen"
 Playlist:
   Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"

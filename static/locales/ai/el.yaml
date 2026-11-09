@@ -1944,6 +1944,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
   External Player:
     LaunchFailedTemplate: Δεν ήταν δυνατή η εκκίνηση του {externalPlayer}. Βεβαιωθείτε ότι είναι εγκατεστημένο ή ορίστε τη διαδρομή του εκτελέσιμου αρχείου στις ρυθμίσεις εξωτερικού προγράμματος αναπαραγωγής.
+    Confirm Arguments Title: "Εκτέλεση της εξωτερικής εφαρμογής αναπαραγωγής με προσαρμοσμένα ορίσματα;"
+    Confirm Arguments Message: "Το {externalPlayer} θα ξεκινήσει με αυτά τα προσαρμοσμένα ορίσματα:"
+    Confirm Arguments Warning: "Ορισμένα ορίσματα μπορούν να εκτελέσουν προγράμματα ή να αντικαταστήσουν αρχεία. Συνεχίστε μόνο αν τα προσθέσατε εσείς."
+    Run: "Εκτέλεση"
+    LaunchCanceledTemplate: "Το {externalPlayer} δεν άνοιξε"
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"

@@ -568,13 +568,14 @@ export default {
    *   externalPlayer: string,
    *   unsuportedActions: (import('../constants').UnsupportedPlayerAction)[],
    *   isPlaylist: boolean,
-   *   launchFailed: boolean
+   *   launchFailed: boolean,
+   *   cancelled: boolean
    * ) => void} handler
    */
   handleOpenInExternalPlayerResult: (handler) => {
     ipcRenderer.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-      (event, externalPlayer, unsupportedActions, isPlaylist, launchFailed) => {
-        handler(externalPlayer, unsupportedActions, isPlaylist, launchFailed)
+      (event, externalPlayer, unsupportedActions, isPlaylist, launchFailed, cancelled = false) => {
+        handler(externalPlayer, unsupportedActions, isPlaylist, launchFailed, cancelled)
       })
   },
 

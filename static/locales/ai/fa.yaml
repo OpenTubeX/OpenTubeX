@@ -2006,6 +2006,11 @@ Video:
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
   External Player:
     LaunchFailedTemplate: اجرای {externalPlayer} ممکن نشد. مطمئن شوید نصب شده است، یا مسیر فایل اجرایی آن را در تنظیمات پخش‌کنندهٔ خارجی تعیین کنید.
+    Confirm Arguments Title: "پخش‌کنندهٔ خارجی با آرگومان‌های سفارشی اجرا شود؟"
+    Confirm Arguments Message: "{externalPlayer} با این آرگومان‌های سفارشی اجرا می‌شود:"
+    Confirm Arguments Warning: "برخی آرگومان‌ها می‌توانند برنامه اجرا کنند یا فایل‌ها را بازنویسی کنند. فقط اگر خودتان آن‌ها را افزوده‌اید ادامه دهید."
+    Run: "اجرا"
+    LaunchCanceledTemplate: "{externalPlayer} باز نشد"
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
