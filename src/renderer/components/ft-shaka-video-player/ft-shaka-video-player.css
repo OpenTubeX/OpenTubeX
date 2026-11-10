@@ -476,7 +476,10 @@
   width: max-content;
   max-width: min(320px, var(--ft-chapter-preview-max-width, 100%));
   padding: 6px 12px;
-  overflow: hidden;
+
+  /* Clip at the content box, or the top of a clamped fourth line shows in the bottom padding */
+  overflow: clip;
+  overflow-clip-margin: content-box;
   background-color: rgb(27 27 27 / 67%);
 
   /* Half of a single line's height: a pill for one line, rounded corners once it wraps */
@@ -492,7 +495,12 @@
   text-shadow: none;
   pointer-events: none;
   z-index: 11;
-  display: none;
+
+  /* Three lines at most, so tall titles stay inside short players */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 /* added to the body element, and appPlayerFullWindow to <html> */

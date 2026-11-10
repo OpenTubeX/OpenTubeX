@@ -3927,7 +3927,7 @@ export default defineComponent({
         chapterPreview.textContent = chapter.title
       }
 
-      chapterPreview.style.display = 'inline-block'
+      chapterPreview.style.display = ''
 
       const playerRect = container.value.getBoundingClientRect()
       const maxFromSeekBar = rect.width - 8
