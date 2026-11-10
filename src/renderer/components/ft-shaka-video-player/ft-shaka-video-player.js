@@ -25,6 +25,7 @@ import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { withoutNetworkRecovery } from '../../helpers/networkRecovery'
+import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
 import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
 
@@ -9687,7 +9688,11 @@ export default defineComponent({
     // #region setup
     let unbindAndroidMediaErrors = null
     let disableTwitchTsVideoGap = null
+    // Released once the first media loads, or when the player unmounts before that
+    let releasePlaybackStartup = () => {}
+
     onMounted(async () => {
+      releasePlaybackStartup = holdForPlaybackStartup()
       const videoElement = video.value
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         unbindAndroidMediaErrors = bindAndroidMediaErrors(videoElement)
@@ -10008,7 +10013,11 @@ export default defineComponent({
       // cursor is in the video player area when the video first loads
       container.value.classList.add('no-cursor')
 
-      await performFirstLoad()
+      try {
+        await performFirstLoad()
+      } finally {
+        releasePlaybackStartup()
+      }
       // Whatever runs after `performFirstLoad` might be after switching to another page due to SABR backoff
 
       player?.addEventListener('ratechange', () => {
@@ -10022,6 +10031,7 @@ export default defineComponent({
       })
     })
     onUnmounted(() => {
+      releasePlaybackStartup()
       unbindAndroidMediaErrors?.()
       clearSabrBackoffTimer()
       clearPreRollTimer()

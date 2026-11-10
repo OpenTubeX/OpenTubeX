@@ -157,6 +157,7 @@ import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { createUnavailableVideoThumbnail } from '../../helpers/unavailableVideoThumbnail'
 import { getLoadedIconData } from '../../icons/registerMappedIcons'
 import { resolveIconifyId } from '../../icons/resolveIconifyId'
+import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
 
 /**
  * @typedef {{
@@ -1426,6 +1427,10 @@ export default defineComponent({
       }
     },
     isLoading(loading) {
+      // The player holds subscription refreshes itself once it mounts
+      this.releasePlaybackStartup?.()
+      this.releasePlaybackStartup = loading ? holdForPlaybackStartup() : null
+
       if (!loading) {
         // Upcoming videos without a trailer never mount a player to report a
         // playback state. Their settled page must still release startup tabs.
@@ -1537,6 +1542,8 @@ export default defineComponent({
     },
   },
   created: function () {
+    // Pages start loading, so the isLoading watcher only sees them finish
+    this.releasePlaybackStartup = holdForPlaybackStartup()
     // Digital wellbeing limits count playback even when watch statistics are off.
     this.watchTimeIsShort = false
     this.watchTimeTracker = createWatchTimeTracker(
@@ -1612,6 +1619,7 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    this.releasePlaybackStartup?.()
     keepTabLoaded(this.tabId, 'casting', false)
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null

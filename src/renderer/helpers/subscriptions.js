@@ -44,6 +44,7 @@ import {
   updateUpcomingPremiereState
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
+import { waitForPlaybackStartup } from './playbackStartup'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { includeNotificationChannels, reportSubscriptionUploads } from './uploadNotifications'
 import { extractAssignedJsonObject } from './assigned-json'
@@ -375,6 +376,8 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
     channels,
     SUBSCRIPTION_FETCH_CONCURRENCY,
     async channel => {
+      await waitForPlaybackStartup(activeRefresh?.controller.signal)
+
       // Channels that haven't started yet are skipped, the ones in flight
       // still finish and are cached.
       if (isRefreshCancelled()) {
