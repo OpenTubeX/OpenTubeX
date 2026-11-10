@@ -280,8 +280,9 @@ struct WatchTimeProvider: TimelineProvider {
     private func entry(for date: Date, watched: [String: Int]) -> WatchTimeEntry {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: date)
+        // The app keys days by Gregorian date, whatever calendar the system uses.
         let formatter = DateFormatter()
-        formatter.calendar = calendar
+        formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         let days = (0..<HomeWidgetStore.watchTimeDays).reversed().compactMap { offset -> (date: Date, seconds: Int)? in
