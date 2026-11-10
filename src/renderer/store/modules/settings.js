@@ -805,9 +805,12 @@ const customActions = {
   ),
 
   updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Imports pass a write they authorized when the user started them.
+    const authorizedWrite = update?.authorizedWrite
+    if (authorizedWrite) update = update.value
     // Capture authorization during the gesture, before earlier saves can delay this one.
     const persist = process.env.IS_ELECTRON
-      ? window.ftElectron.prepareAutomaticDownloadRulesWrite()
+      ? authorizedWrite ?? window.ftElectron.prepareAutomaticDownloadRulesWrite()
       : value => DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
     // Apply every mutation to saved rules so later edits preserve intervening cleanups.
     pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {

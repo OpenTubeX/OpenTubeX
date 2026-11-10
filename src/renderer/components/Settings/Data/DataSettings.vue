@@ -504,6 +504,7 @@ async function selectUnifiedBackup() {
 
 async function importUnifiedBackup() {
   if (backupBusy.value || !backupData.value) return
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
@@ -529,7 +530,7 @@ async function importUnifiedBackup() {
       await DBWatchStatsHandlers.mergeBackup(data.watchStats)
       await store.dispatch('grabWatchStats')
     }
-    if (selected.has('settings') && (await applyImportedSettings(data.settings)).failed > 0) {
+    if (selected.has('settings') && (await applyImportedSettings(data.settings, authorizedRulesWrite)).failed > 0) {
       throw new Error('Could not restore settings')
     }
     const compaction = await compactAllDatastores().catch(() => false)
@@ -2284,7 +2285,16 @@ const transferableSettings = computed(() => {
   return store.getters.getTransferableSettings
 })
 
+/**
+ * Imports save automatic download rules after the click's user activation has
+ * expired, so authorize that write while the click is still active.
+ */
+function authorizeAutomaticDownloadRulesWrite() {
+  return process.env.IS_ELECTRON ? window.ftElectron.prepareAutomaticDownloadRulesWrite() : null
+}
+
 async function importSettings() {
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
   let response
   try {
     response = await readFileWithPicker(
@@ -2340,7 +2350,7 @@ async function importSettings() {
     return
   }
 
-  const { total, failed } = await applyImportedSettings(importedSettings)
+  const { total, failed } = await applyImportedSettings(importedSettings, authorizedRulesWrite)
   if (total === 0) return
 
   if (failed === 0) {
@@ -2358,7 +2368,7 @@ async function importSettings() {
   })
 }
 
-async function applyImportedSettings(importedSettings) {
+async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
   importedSettings = migrateLegacySettings(importedSettings)
 
   const currentTransferableSettings = transferableSettings.value
@@ -2388,8 +2398,11 @@ async function applyImportedSettings(importedSettings) {
     }
 
     const updaterId = defaultUpdaterId(importedKey)
+    const update = importedKey === 'ytDlpAutomaticDownloadRules' && authorizedRulesWrite
+      ? { value: importedValue, authorizedWrite: authorizedRulesWrite }
+      : importedValue
     try {
-      if (await store.dispatch(updaterId, importedValue) === false) failed++
+      if (await store.dispatch(updaterId, update) === false) failed++
     } catch (error) {
       console.error(error)
       failed++

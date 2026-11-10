@@ -155,6 +155,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     backupBusy: { value: false },
     backupData: { value: data },
     selectedBackupSections: { value: ['profiles', 'playlists'] },
+    authorizeAutomaticDownloadRulesWrite: () => null,
     DBProfileHandlers: Profiles,
     normalizeImportedPlaylistThumbnail: async () => {},
     store: {
