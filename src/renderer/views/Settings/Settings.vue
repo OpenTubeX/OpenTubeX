@@ -1357,51 +1357,65 @@ async function openSearchResult(sectionType, match) {
 
   const content = subpageTitle.value ? settingsSubpageContentRef.value : settingsContentRef.value
   if (!content) return
-  const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
-  const isSectionMatch = [section?.title, section?.description]
-    .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
-  const settingControl = match.settingKey
-    ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
-        element.dataset.settingKey === match.settingKey && isShown(element))
-    : null
-  let target = settingControl ?? (isSectionMatch
-    ? content.querySelector(`.section[data-section="${sectionType}"]`)
-    : null)
-  if (match.subpage && normalizeSearchText(subpageTitle.value) === normalizedLabel) {
-    target = content.querySelector('.settingsSubpageContent')
-  }
-  if (target === null) {
-    const subsectionTarget = settingsSearchSubsectionTargets.value[sectionType]?.find(
-      ({ search }) => normalizeSearchText(search) === normalizedLabel
-    )
-    if (subsectionTarget) {
-      const targetHeading = normalizeSearchText(subsectionTarget.target)
-      const headingElement = [...content.querySelectorAll('h1, h2, h3, h4')]
-        .find(element => getSearchTargetText(element) === targetHeading)
-      target = headingElement?.closest('.settingsSection') ?? null
-    }
-  }
-  if (target === null) {
-    const visibleTextElements = [...content.querySelectorAll(
-      'label, button, input[aria-label], p, h1, h2, h3, h4, span, legend, div'
-    )]
-      .filter(isShown)
-    const labelElement = visibleTextElements
-      .find(element => normalizeSearchText(element.getAttribute('aria-label') ?? '') === normalizedLabel) ?? visibleTextElements
-      .filter(element => getSearchTargetText(element) === normalizedLabel)
-      .at(-1) ?? visibleTextElements
-      .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
-      .at(-1)
-    const settingsSection = labelElement?.matches('h1, h2, h3, h4')
-      ? labelElement.closest('.settingsSection')
+  const findTarget = () => {
+    const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
+    const isSectionMatch = [section?.title, section?.description]
+      .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
+    const settingControl = match.settingKey
+      ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
+          element.dataset.settingKey === match.settingKey && isShown(element))
       : null
-    const control = settingsSection ?? labelElement?.closest(
-      '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
-      '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry'
-    ) ?? labelElement
-    target = control?.classList.contains('ft-input-component')
-      ? control.querySelector('.ft-input')
-      : control
+    let target = settingControl ?? (isSectionMatch
+      ? content.querySelector(`.section[data-section="${sectionType}"]`)
+      : null)
+    if (match.subpage && normalizeSearchText(subpageTitle.value) === normalizedLabel) {
+      target = content.querySelector('.settingsSubpageContent')
+    }
+    if (target === null) {
+      const subsectionTarget = settingsSearchSubsectionTargets.value[sectionType]?.find(
+        ({ search }) => normalizeSearchText(search) === normalizedLabel
+      )
+      if (subsectionTarget) {
+        const targetHeading = normalizeSearchText(subsectionTarget.target)
+        const headingElement = [...content.querySelectorAll('h1, h2, h3, h4')]
+          .find(element => getSearchTargetText(element) === targetHeading)
+        target = headingElement?.closest('.settingsSection') ?? null
+      }
+    }
+    if (target === null) {
+      const visibleTextElements = [...content.querySelectorAll(
+        'label, button, input[aria-label], p, h1, h2, h3, h4, span, legend, div'
+      )]
+        .filter(isShown)
+      const labelElement = visibleTextElements
+        .find(element => normalizeSearchText(element.getAttribute('aria-label') ?? '') === normalizedLabel) ?? visibleTextElements
+        .filter(element => getSearchTargetText(element) === normalizedLabel)
+        .at(-1) ?? visibleTextElements
+        .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
+        .at(-1)
+      const settingsSection = labelElement?.matches('h1, h2, h3, h4')
+        ? labelElement.closest('.settingsSection')
+        : null
+      const control = settingsSection ?? labelElement?.closest(
+        '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
+        '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry'
+      ) ?? labelElement
+      target = control?.classList.contains('ft-input-component')
+        ? control.querySelector('.ft-input')
+        : control
+    }
+    return target
+  }
+  let target = findTarget()
+  // A control can sit on another tab of the opened subpage, such as the
+  // color settings of the theme gallery's other theme list.
+  if (!target && match.subpage) {
+    for (const tab of content.querySelectorAll('[data-settings-subpage-tab]:not([aria-selected="true"])')) {
+      tab.click()
+      await nextTick()
+      target = findTarget()
+      if (target) break
+    }
   }
   if (!target) return
 

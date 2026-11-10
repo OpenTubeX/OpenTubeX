@@ -151,6 +151,7 @@
             role="tab"
             aria-controls="theme-tab-panel"
             :aria-selected="tab.id === section.id"
+            :data-settings-subpage-tab="tab.id"
             :tabindex="tab.id === section.id ? 0 : -1"
             @click="editing = tab.id"
             @keydown.left.right.prevent="switchTab"
