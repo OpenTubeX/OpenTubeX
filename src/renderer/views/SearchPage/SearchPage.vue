@@ -339,6 +339,8 @@ function checkSearchCache(payload) {
   searchCorrection.value = null
   spellCorrection.value = payload.spellCorrection ?? true
   searchParams.value = ''
+  // Cached local results don't restore a page, so start Invidious pagination over.
+  searchPage.value = 1
   cookieSearchFailed.value = false
   isRetryingWithCookies.value = false
   isLoadingMore.value = false
