@@ -116,4 +116,9 @@ test('skips storyboard fragment URLs that could add WebVTT cues', () => {
   // a rejected fragment keeps its time span, so the next thumbnail stays in place
   const vtt = buildYtDlpStoryboardVtt([{ ...format, fragments: [fragments[1], { url: 'https://example.com/d.jpg', duration: 2 }] }], 10)
   assert.match(vtt, /^WEBVTT\n\n00:00:02\.000 --> 00:00:04\.000\nhttps:\/\/example\.com\/d\.jpg#/)
+
+  // skipping a rejected fragment of an oversized grid must not visit its cells
+  const huge = { ...format, rows: 1e8, columns: 1e8 }
+  const hugeVtt = buildYtDlpStoryboardVtt([{ ...huge, fragments: [{ url: 'javascript:bad' }, { url: 'https://example.com/ok.jpg', duration: 1 }] }], null)
+  assert.match(hugeVtt, /https:\/\/example\.com\/ok\.jpg#/)
 })

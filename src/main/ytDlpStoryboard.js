@@ -78,6 +78,11 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
 
     const fragmentDuration = fragment.duration ?? cellsPerFragment * interval
     const cueCount = Math.min(cellsPerFragment, Math.ceil((fragmentDuration / interval) - 1e-6))
+    if (fragment.url === null) {
+      // skip the time span in one step, as its cells add no cues
+      currentTime = Math.min(currentTime + cueCount * interval, durationLimit)
+      continue
+    }
 
     for (
       let index = 0;
@@ -85,10 +90,6 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
       index++
     ) {
       const endTime = Math.min(currentTime + interval, durationLimit)
-      if (fragment.url === null) {
-        currentTime = endTime
-        continue
-      }
       const x = (index % storyboard.columns) * storyboard.width
       const y = Math.floor(index / storyboard.columns) * storyboard.height
 
