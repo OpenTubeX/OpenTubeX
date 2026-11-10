@@ -369,8 +369,7 @@ export class TabPreviewController {
   async _getContentBounds() {
     try {
       return await this.manager.browserWindow.webContents.executeJavaScript(
-        `(${measureTabPreviewContentBounds.toString()})(window, document)`,
-        true
+        `(${measureTabPreviewContentBounds.toString()})(window, document)`
       )
     } catch {
       return null
@@ -412,7 +411,7 @@ export class TabPreviewController {
       : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`
 
     try {
-      return await this.manager.browserWindow.webContents.executeJavaScript(script, true)
+      return await this.manager.browserWindow.webContents.executeJavaScript(script)
     } catch {
       // The shared renderer may be navigating or shutting down.
     }
