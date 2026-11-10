@@ -2616,10 +2616,22 @@ Home Widgets:
   Continue Watching Description: "Lanjutkan video yang mulai Anda tonton"
   Continue Watching Empty: "Video yang mulai Anda tonton akan muncul di sini"
   Quick Access: "Akses cepat"
-  Quick Access Description: "Buka Cari, Langganan, atau Tonton Nanti"
+  Quick Access Description: "Buka hingga 4 halaman pilihan Anda"
+  Choose Pages: "Pilih hingga 4 halaman"
+  Pages: "Halaman"
   Search: "Cari"
   Subscriptions: "Langganan"
   Watch Later: "Tonton Nanti"
+  History: "Riwayat"
+  Playlists: "Daftar Putar"
+  Downloads: "Unduhan"
+  Watch Time: "Waktu tonton"
+  Watch Time Description: "Waktu tonton Anda dalam 7 hari terakhir"
+  Today: "Hari ini"
+  Last 7 Days: "7 hari terakhir"
+  Recent Downloads: "Unduhan terbaru"
+  Recent Downloads Description: "Putar video yang telah Anda unduh"
+  Recent Downloads Empty: "Video yang Anda unduh akan muncul di sini"
 Subscription Groups:
   Groups: Grup
   All: Semua

@@ -2624,10 +2624,22 @@ Home Widgets:
   Continue Watching Description: "Продължете видеоклиповете, които сте започнали"
   Continue Watching Empty: "Тук се показват видеоклиповете, които започнете да гледате"
   Quick Access: "Бърз достъп"
-  Quick Access Description: "Отваряне на Търсене, Абонаменти или За гледане по-късно"
+  Quick Access Description: "Отваряне на до 4 избрани от вас страници"
+  Choose Pages: "Изберете до 4 страници"
+  Pages: "Страници"
   Search: "Търсене"
   Subscriptions: "Абонаменти"
   Watch Later: "За гледане по-късно"
+  History: "История"
+  Playlists: "Плейлисти"
+  Downloads: "Изтегляния"
+  Watch Time: "Време за гледане"
+  Watch Time Description: "Вашето време за гледане през последните 7 дни"
+  Today: "Днес"
+  Last 7 Days: "Последните 7 дни"
+  Recent Downloads: "Скорошни изтегляния"
+  Recent Downloads Description: "Пускане на изтеглените от вас видеоклипове"
+  Recent Downloads Empty: "Тук се показват видеоклиповете, които изтеглите"
 Subscription Groups:
   Groups: Групи
   All: Всички

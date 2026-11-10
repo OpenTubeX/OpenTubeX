@@ -82,6 +82,46 @@
                 android:resource="@xml/widget_quick_access_info" />
         </receiver>
 
+        <!-- Launchers start this to configure a Quick access widget. -->
+        <activity
+            android:name=".QuickAccessConfigActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/widget_quick_access_name"
+            android:taskAffinity=""
+            android:theme="@style/HomeWidgetConfigTheme">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".WatchTimeWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_watch_time_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_watch_time_info" />
+        </receiver>
+
+        <!-- Lite builds omit yt-dlp and cannot download. -->
+        <receiver
+            android:name=".RecentDownloadsWidgetProvider"
+            android:enabled="${bundlesYtDlp}"
+            android:exported="false"
+            android:label="@string/widget_recent_downloads_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_recent_downloads_info" />
+        </receiver>
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density|assetsPaths"
             android:name=".MainActivity"

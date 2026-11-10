@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Retome os vídeos que começou a ver</string>
     <string name="widget_continue_watching_empty">Os vídeos que começar a ver aparecem aqui</string>
     <string name="widget_quick_access_name">Acesso rápido</string>
-    <string name="widget_quick_access_description">Abrir Pesquisar, Subscrições ou Ver mais tarde</string>
+    <string name="widget_quick_access_description">Abrir até 4 páginas à sua escolha</string>
+    <string name="widget_quick_access_choose">Escolha até 4 páginas</string>
+    <string name="widget_quick_access_pages">Páginas</string>
     <string name="widget_search">Pesquisar</string>
     <string name="widget_subscriptions">Subscrições</string>
     <string name="widget_watch_later">Ver mais tarde</string>
+    <string name="widget_history">Histórico</string>
+    <string name="widget_playlists">Playlists</string>
+    <string name="widget_downloads">Transferências</string>
+    <string name="widget_watch_time_name">Tempo de visualização</string>
+    <string name="widget_watch_time_description">O seu tempo de visualização nos últimos 7 dias</string>
+    <string name="widget_today">Hoje</string>
+    <string name="widget_last_7_days">Últimos 7 dias</string>
+    <string name="widget_recent_downloads_name">Transferências recentes</string>
+    <string name="widget_recent_downloads_description">Reproduza os vídeos que transferiu</string>
+    <string name="widget_recent_downloads_empty">Os vídeos que transferir aparecem aqui</string>
 </resources>

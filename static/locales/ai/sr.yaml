@@ -2676,10 +2676,22 @@ Home Widgets:
   Continue Watching Description: "Наставите видео снимке које сте почели да гледате"
   Continue Watching Empty: "Овде се приказују видео снимци које почнете да гледате"
   Quick Access: "Брзи приступ"
-  Quick Access Description: "Отворите Претрагу, Праћења или Погледај касније"
+  Quick Access Description: "Отворите до 4 странице по избору"
+  Choose Pages: "Изаберите до 4 странице"
+  Pages: "Странице"
   Search: "Претрага"
   Subscriptions: "Праћења"
   Watch Later: "Погледај касније"
+  History: "Историја"
+  Playlists: "Листе"
+  Downloads: "Преузимања"
+  Watch Time: "Време гледања"
+  Watch Time Description: "Ваше време гледања у последњих 7 дана"
+  Today: "Данас"
+  Last 7 Days: "Последњих 7 дана"
+  Recent Downloads: "Недавна преузимања"
+  Recent Downloads Description: "Пустите видео снимке које сте преузели"
+  Recent Downloads Empty: "Овде се приказују видео снимци које преузмете"
 Subscription Groups:
   Groups: Групе
   All: Све

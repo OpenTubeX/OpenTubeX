@@ -157,7 +157,7 @@ for (const eventFirst of [false, true]) {
       showInAppNotification: () => {},
       addAndroidMediaSessionActionListener: async () => () => {},
       AppShortcuts: { addListener: async () => ({ remove() {} }) },
-      syncContinueWatchingWidget: () => () => {},
+      syncHomeWidgets: () => () => {},
       watch: () => () => {},
       locale: {},
       setAndroidAppVisible: visible => changes.push(visible),

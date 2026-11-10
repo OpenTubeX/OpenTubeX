@@ -2690,10 +2690,22 @@ Home Widgets:
   Continue Watching Description: "Працягвайце відэа, якія вы пачалі глядзець"
   Continue Watching Empty: "Тут з’явяцца відэа, якія вы пачнеце глядзець"
   Quick Access: "Хуткі доступ"
-  Quick Access Description: "Адкрыць Пошук, Падпіскі або «Паглядзець пазней»"
+  Quick Access Description: "Адкрыць да 4 выбраных вамі старонак"
+  Choose Pages: "Выберыце да 4 старонак"
+  Pages: "Старонкі"
   Search: "Пошук"
   Subscriptions: "Падпіскі"
   Watch Later: "Паглядзець пазней"
+  History: "Гісторыя"
+  Playlists: "Плэй-лісты"
+  Downloads: "Спампоўванні"
+  Watch Time: "Час прагляду"
+  Watch Time Description: "Ваш час прагляду за апошнія 7 дзён"
+  Today: "Сёння"
+  Last 7 Days: "Апошнія 7 дзён"
+  Recent Downloads: "Нядаўнія спампоўванні"
+  Recent Downloads Description: "Прайграць спампаваныя вамі відэа"
+  Recent Downloads Empty: "Тут з’явяцца відэа, якія вы спампуеце"
 Subscription Groups:
   Groups: Групы
   All: Усе

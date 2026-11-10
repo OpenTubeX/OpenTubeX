@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Jatka videoita, joiden katselun aloitit</string>
     <string name="widget_continue_watching_empty">Videot, joiden katselun aloitat, näkyvät täällä</string>
     <string name="widget_quick_access_name">Pikakäyttö</string>
-    <string name="widget_quick_access_description">Avaa Haku, Tilaukset tai Katso myöhemmin</string>
+    <string name="widget_quick_access_description">Avaa enintään 4 valitsemaasi sivua</string>
+    <string name="widget_quick_access_choose">Valitse enintään 4 sivua</string>
+    <string name="widget_quick_access_pages">Sivut</string>
     <string name="widget_search">Hae</string>
     <string name="widget_subscriptions">Tilaukset</string>
     <string name="widget_watch_later">Katso myöhemmin</string>
+    <string name="widget_history">Historia</string>
+    <string name="widget_playlists">Soittolistat</string>
+    <string name="widget_downloads">Lataukset</string>
+    <string name="widget_watch_time_name">Katseluaika</string>
+    <string name="widget_watch_time_description">Katseluaikasi viimeisten 7 päivän aikana</string>
+    <string name="widget_today">Tänään</string>
+    <string name="widget_last_7_days">Viimeiset 7 päivää</string>
+    <string name="widget_recent_downloads_name">Viimeisimmät lataukset</string>
+    <string name="widget_recent_downloads_description">Toista lataamiasi videoita</string>
+    <string name="widget_recent_downloads_empty">Lataamasi videot näkyvät täällä</string>
 </resources>

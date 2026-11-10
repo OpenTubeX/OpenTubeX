@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">استئناف الفيديوهات التي بدأت مشاهدتها</string>
     <string name="widget_continue_watching_empty">تظهر هنا الفيديوهات التي تبدأ مشاهدتها</string>
     <string name="widget_quick_access_name">وصول سريع</string>
-    <string name="widget_quick_access_description">فتح البحث أو الاشتراكات أو المشاهدة لاحقًا</string>
+    <string name="widget_quick_access_description">فتح ما يصل إلى 4 صفحات من اختيارك</string>
+    <string name="widget_quick_access_choose">اختر ما يصل إلى 4 صفحات</string>
+    <string name="widget_quick_access_pages">الصفحات</string>
     <string name="widget_search">بحث</string>
     <string name="widget_subscriptions">الاشتراكات</string>
     <string name="widget_watch_later">المشاهدة لاحقًا</string>
+    <string name="widget_history">السجل</string>
+    <string name="widget_playlists">قوائم التشغيل</string>
+    <string name="widget_downloads">التنزيلات</string>
+    <string name="widget_watch_time_name">وقت المشاهدة</string>
+    <string name="widget_watch_time_description">وقت مشاهدتك خلال آخر 7 أيام</string>
+    <string name="widget_today">اليوم</string>
+    <string name="widget_last_7_days">آخر 7 أيام</string>
+    <string name="widget_recent_downloads_name">التنزيلات الأخيرة</string>
+    <string name="widget_recent_downloads_description">تشغيل الفيديوهات التي نزّلتها</string>
+    <string name="widget_recent_downloads_empty">تظهر هنا الفيديوهات التي تنزّلها</string>
 </resources>

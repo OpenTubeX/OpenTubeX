@@ -25,6 +25,31 @@ public class HomeWidgetsPlugin extends Plugin {
         });
     }
 
+    @PluginMethod
+    public void setDownloads(PluginCall call) {
+        executor.execute(() -> {
+            try {
+                HomeWidgets.setDownloads(getContext(), HomeWidgets.parseDownloads(call.getArray("downloads")),
+                    HomeWidgets.Authorization.fromJson(call.getObject("authorization")));
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to update home screen widgets", error);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void setWatchTime(PluginCall call) {
+        executor.execute(() -> {
+            try {
+                HomeWidgets.setWatchTime(getContext(), HomeWidgets.parseWatchTime(call.getObject("days")));
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to update home screen widgets", error);
+            }
+        });
+    }
+
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();

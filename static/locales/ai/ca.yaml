@@ -3237,10 +3237,22 @@ Home Widgets:
   Continue Watching Description: "Reprèn els vídeos que has començat a mirar"
   Continue Watching Empty: "Els vídeos que comencis a mirar apareixeran aquí"
   Quick Access: "Accés ràpid"
-  Quick Access Description: "Obre Cerca, Subscripcions o Per a més tard"
+  Quick Access Description: "Obre fins a 4 pàgines que triïs"
+  Choose Pages: "Tria fins a 4 pàgines"
+  Pages: "Pàgines"
   Search: "Cerca"
   Subscriptions: "Subscripcions"
   Watch Later: "Per a més tard"
+  History: "Historial"
+  Playlists: "Llistes"
+  Downloads: "Baixades"
+  Watch Time: "Temps de reproducció"
+  Watch Time Description: "El teu temps de reproducció dels darrers 7 dies"
+  Today: "Avui"
+  Last 7 Days: "Darrers 7 dies"
+  Recent Downloads: "Baixades recents"
+  Recent Downloads Description: "Reprodueix els vídeos que has baixat"
+  Recent Downloads Empty: "Els vídeos que baixis apareixeran aquí"
 Subscription Groups:
   Groups: Grups
   All: Tots

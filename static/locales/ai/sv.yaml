@@ -2591,10 +2591,22 @@ Home Widgets:
   Continue Watching Description: "Återuppta videor du har börjat titta på"
   Continue Watching Empty: "Videor du börjar titta på visas här"
   Quick Access: "Snabbåtkomst"
-  Quick Access Description: "Öppna Sök, Prenumerationer eller Titta senare"
+  Quick Access Description: "Öppna upp till 4 valfria sidor"
+  Choose Pages: "Välj upp till 4 sidor"
+  Pages: "Sidor"
   Search: "Sök"
   Subscriptions: "Prenumerationer"
   Watch Later: "Titta senare"
+  History: "Historik"
+  Playlists: "Spellistor"
+  Downloads: "Nedladdningar"
+  Watch Time: "Visningstid"
+  Watch Time Description: "Din visningstid de senaste 7 dagarna"
+  Today: "I dag"
+  Last 7 Days: "Senaste 7 dagarna"
+  Recent Downloads: "Senaste nedladdningar"
+  Recent Downloads Description: "Spela upp videor du har laddat ned"
+  Recent Downloads Empty: "Videor du laddar ned visas här"
 Subscription Groups:
   Groups: Grupper
   All: Alla

@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Tęskite pradėtus žiūrėti vaizdo įrašus</string>
     <string name="widget_continue_watching_empty">Čia rodomi vaizdo įrašai, kuriuos pradedate žiūrėti</string>
     <string name="widget_quick_access_name">Greita prieiga</string>
-    <string name="widget_quick_access_description">Atidaryti Paiešką, Prenumeratas arba Žiūrėti vėliau</string>
+    <string name="widget_quick_access_description">Atidaryti iki 4 pasirinktų puslapių</string>
+    <string name="widget_quick_access_choose">Pasirinkite iki 4 puslapių</string>
+    <string name="widget_quick_access_pages">Puslapiai</string>
     <string name="widget_search">Ieškoti</string>
     <string name="widget_subscriptions">Prenumeratos</string>
     <string name="widget_watch_later">Žiūrėti vėliau</string>
+    <string name="widget_history">Istorija</string>
+    <string name="widget_playlists">Grojaraščiai</string>
+    <string name="widget_downloads">Atsisiuntimai</string>
+    <string name="widget_watch_time_name">Žiūrėjimo laikas</string>
+    <string name="widget_watch_time_description">Jūsų žiūrėjimo laikas per pastarąsias 7 dienas</string>
+    <string name="widget_today">Šiandien</string>
+    <string name="widget_last_7_days">Pastarosios 7 dienos</string>
+    <string name="widget_recent_downloads_name">Naujausi atsisiuntimai</string>
+    <string name="widget_recent_downloads_description">Leiskite atsisiųstus vaizdo įrašus</string>
+    <string name="widget_recent_downloads_empty">Čia rodomi vaizdo įrašai, kuriuos atsisiunčiate</string>
 </resources>

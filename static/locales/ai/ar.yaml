@@ -2628,10 +2628,22 @@ Home Widgets:
   Continue Watching Description: "استئناف الفيديوهات التي بدأت مشاهدتها"
   Continue Watching Empty: "تظهر هنا الفيديوهات التي تبدأ مشاهدتها"
   Quick Access: "وصول سريع"
-  Quick Access Description: "فتح البحث أو الاشتراكات أو المشاهدة لاحقًا"
+  Quick Access Description: "فتح ما يصل إلى 4 صفحات من اختيارك"
+  Choose Pages: "اختر ما يصل إلى 4 صفحات"
+  Pages: "الصفحات"
   Search: "بحث"
   Subscriptions: "الاشتراكات"
   Watch Later: "المشاهدة لاحقًا"
+  History: "السجل"
+  Playlists: "قوائم التشغيل"
+  Downloads: "التنزيلات"
+  Watch Time: "وقت المشاهدة"
+  Watch Time Description: "وقت مشاهدتك خلال آخر 7 أيام"
+  Today: "اليوم"
+  Last 7 Days: "آخر 7 أيام"
+  Recent Downloads: "التنزيلات الأخيرة"
+  Recent Downloads Description: "تشغيل الفيديوهات التي نزّلتها"
+  Recent Downloads Empty: "تظهر هنا الفيديوهات التي تنزّلها"
 Subscription Groups:
   Groups: المجموعات
   All: الكل

@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Συνεχίστε τα βίντεο που αρχίσατε να βλέπετε</string>
     <string name="widget_continue_watching_empty">Τα βίντεο που αρχίζετε να βλέπετε εμφανίζονται εδώ</string>
     <string name="widget_quick_access_name">Γρήγορη πρόσβαση</string>
-    <string name="widget_quick_access_description">Άνοιγμα Αναζήτησης, Συνδρομών ή Παρακολούθησης αργότερα</string>
+    <string name="widget_quick_access_description">Άνοιγμα έως 4 σελίδων της επιλογής σας</string>
+    <string name="widget_quick_access_choose">Επιλέξτε έως 4 σελίδες</string>
+    <string name="widget_quick_access_pages">Σελίδες</string>
     <string name="widget_search">Αναζήτηση</string>
     <string name="widget_subscriptions">Συνδρομές</string>
     <string name="widget_watch_later">Παρακολούθηση αργότερα</string>
+    <string name="widget_history">Ιστορικό</string>
+    <string name="widget_playlists">Λίστες</string>
+    <string name="widget_downloads">Λήψεις</string>
+    <string name="widget_watch_time_name">Χρόνος παρακολούθησης</string>
+    <string name="widget_watch_time_description">Ο χρόνος παρακολούθησής σας τις τελευταίες 7 ημέρες</string>
+    <string name="widget_today">Σήμερα</string>
+    <string name="widget_last_7_days">Τελευταίες 7 ημέρες</string>
+    <string name="widget_recent_downloads_name">Πρόσφατες λήψεις</string>
+    <string name="widget_recent_downloads_description">Αναπαραγωγή βίντεο που έχετε κατεβάσει</string>
+    <string name="widget_recent_downloads_empty">Τα βίντεο που κατεβάζετε εμφανίζονται εδώ</string>
 </resources>

@@ -2558,10 +2558,22 @@ Home Widgets:
   Continue Watching Description: "Reanuda los vídeos que empezaste a ver"
   Continue Watching Empty: "Aquí aparecen los vídeos que empieces a ver"
   Quick Access: "Acceso rápido"
-  Quick Access Description: "Abre Buscar, Suscripciones o Ver más tarde"
+  Quick Access Description: "Abre hasta 4 páginas que elijas"
+  Choose Pages: "Elige hasta 4 páginas"
+  Pages: "Páginas"
   Search: "Buscar"
   Subscriptions: "Suscripciones"
   Watch Later: "Ver más tarde"
+  History: "Historial"
+  Playlists: "Listas"
+  Downloads: "Descargas"
+  Watch Time: "Tiempo de visualización"
+  Watch Time Description: "Tu tiempo de visualización en los últimos 7 días"
+  Today: "Hoy"
+  Last 7 Days: "Últimos 7 días"
+  Recent Downloads: "Descargas recientes"
+  Recent Downloads Description: "Reproduce los vídeos que descargaste"
+  Recent Downloads Empty: "Aquí aparecen los vídeos que descargues"
 Subscription Groups:
   Groups: Grupos
   All: Todos

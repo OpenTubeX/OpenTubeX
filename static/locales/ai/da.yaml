@@ -2685,10 +2685,22 @@ Home Widgets:
   Continue Watching Description: "Genoptag videoer, du er begyndt at se"
   Continue Watching Empty: "Videoer, du begynder at se, vises her"
   Quick Access: "Hurtig adgang"
-  Quick Access Description: "Åbn Søg, Abonnementer eller Se senere"
+  Quick Access Description: "Åbn op til 4 sider efter eget valg"
+  Choose Pages: "Vælg op til 4 sider"
+  Pages: "Sider"
   Search: "Søg"
   Subscriptions: "Abonnementer"
   Watch Later: "Se senere"
+  History: "Historik"
+  Playlists: "Playlister"
+  Downloads: "Downloads"
+  Watch Time: "Visningstid"
+  Watch Time Description: "Din visningstid de seneste 7 dage"
+  Today: "I dag"
+  Last 7 Days: "Seneste 7 dage"
+  Recent Downloads: "Seneste downloads"
+  Recent Downloads Description: "Afspil videoer, du har downloadet"
+  Recent Downloads Empty: "Videoer, du downloader, vises her"
 Subscription Groups:
   Groups: Grupper
   All: Alle

@@ -2598,10 +2598,22 @@ Home Widgets:
   Continue Watching Description: "繼續觀看你已開始觀看的影片"
   Continue Watching Empty: "你開始觀看的影片會顯示在這裡"
   Quick Access: "快速存取"
-  Quick Access Description: "開啟搜尋、訂閱或稍後觀看"
+  Quick Access Description: "開啟最多 4 個你選擇的頁面"
+  Choose Pages: "最多選擇 4 個頁面"
+  Pages: "頁面"
   Search: "搜尋"
   Subscriptions: "訂閱"
   Watch Later: "稍後觀看"
+  History: "觀看紀錄"
+  Playlists: "播放清單"
+  Downloads: "下載"
+  Watch Time: "觀看時間"
+  Watch Time Description: "你過去 7 天的觀看時間"
+  Today: "今天"
+  Last 7 Days: "最近 7 天"
+  Recent Downloads: "最近下載"
+  Recent Downloads Description: "播放你下載的影片"
+  Recent Downloads Empty: "你下載的影片會顯示在這裡"
 Subscription Groups:
   Groups: 群組
   All: 全部

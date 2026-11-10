@@ -2606,10 +2606,22 @@ Home Widgets:
   Continue Watching Description: "Tiếp tục các video bạn đã bắt đầu xem"
   Continue Watching Empty: "Các video bạn bắt đầu xem sẽ xuất hiện ở đây"
   Quick Access: "Truy cập nhanh"
-  Quick Access Description: "Mở Tìm kiếm, Đăng ký hoặc Xem sau"
+  Quick Access Description: "Mở tối đa 4 trang bạn chọn"
+  Choose Pages: "Chọn tối đa 4 trang"
+  Pages: "Trang"
   Search: "Tìm kiếm"
   Subscriptions: "Đăng ký"
   Watch Later: "Xem sau"
+  History: "Lịch sử"
+  Playlists: "Danh sách"
+  Downloads: "Tải xuống"
+  Watch Time: "Thời gian xem"
+  Watch Time Description: "Thời gian xem của bạn trong 7 ngày qua"
+  Today: "Hôm nay"
+  Last 7 Days: "7 ngày qua"
+  Recent Downloads: "Tải xuống gần đây"
+  Recent Downloads Description: "Phát các video bạn đã tải xuống"
+  Recent Downloads Empty: "Các video bạn tải xuống sẽ xuất hiện ở đây"
 Subscription Groups:
   Groups: Nhóm
   All: Tất cả

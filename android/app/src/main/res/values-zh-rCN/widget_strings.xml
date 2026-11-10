@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">继续观看你已开始观看的视频</string>
     <string name="widget_continue_watching_empty">你开始观看的视频会显示在这里</string>
     <string name="widget_quick_access_name">快速访问</string>
-    <string name="widget_quick_access_description">打开搜索、订阅或稍后观看</string>
+    <string name="widget_quick_access_description">打开最多 4 个你选择的页面</string>
+    <string name="widget_quick_access_choose">最多选择 4 个页面</string>
+    <string name="widget_quick_access_pages">页面</string>
     <string name="widget_search">搜索</string>
     <string name="widget_subscriptions">订阅</string>
     <string name="widget_watch_later">稍后观看</string>
+    <string name="widget_history">历史记录</string>
+    <string name="widget_playlists">播放列表</string>
+    <string name="widget_downloads">下载</string>
+    <string name="widget_watch_time_name">观看时长</string>
+    <string name="widget_watch_time_description">你过去 7 天的观看时长</string>
+    <string name="widget_today">今天</string>
+    <string name="widget_last_7_days">最近 7 天</string>
+    <string name="widget_recent_downloads_name">最近下载</string>
+    <string name="widget_recent_downloads_description">播放你下载的视频</string>
+    <string name="widget_recent_downloads_empty">你下载的视频会显示在这里</string>
 </resources>

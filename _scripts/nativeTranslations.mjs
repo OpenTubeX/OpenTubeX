@@ -26,7 +26,19 @@ export const homeWidgetStrings = {
   widget_continue_watching_empty: 'Continue Watching Empty',
   widget_quick_access_name: 'Quick Access',
   widget_quick_access_description: 'Quick Access Description',
+  widget_quick_access_choose: 'Choose Pages',
+  widget_quick_access_pages: 'Pages',
   widget_search: 'Search',
   widget_subscriptions: 'Subscriptions',
-  widget_watch_later: 'Watch Later'
+  widget_watch_later: 'Watch Later',
+  widget_history: 'History',
+  widget_playlists: 'Playlists',
+  widget_downloads: 'Downloads',
+  widget_watch_time_name: 'Watch Time',
+  widget_watch_time_description: 'Watch Time Description',
+  widget_today: 'Today',
+  widget_last_7_days: 'Last 7 Days',
+  widget_recent_downloads_name: 'Recent Downloads',
+  widget_recent_downloads_description: 'Recent Downloads Description',
+  widget_recent_downloads_empty: 'Recent Downloads Empty'
 }

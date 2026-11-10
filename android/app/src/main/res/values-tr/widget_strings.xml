@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">İzlemeye başladığınız videolara devam edin</string>
     <string name="widget_continue_watching_empty">İzlemeye başladığınız videolar burada görünür</string>
     <string name="widget_quick_access_name">Hızlı erişim</string>
-    <string name="widget_quick_access_description">Arama, Abonelikler veya Daha sonra izle sayfasını açın</string>
+    <string name="widget_quick_access_description">Seçtiğiniz en fazla 4 sayfayı açın</string>
+    <string name="widget_quick_access_choose">En fazla 4 sayfa seçin</string>
+    <string name="widget_quick_access_pages">Sayfalar</string>
     <string name="widget_search">Ara</string>
     <string name="widget_subscriptions">Abonelikler</string>
     <string name="widget_watch_later">Daha sonra izle</string>
+    <string name="widget_history">Geçmiş</string>
+    <string name="widget_playlists">Listeler</string>
+    <string name="widget_downloads">İndirilenler</string>
+    <string name="widget_watch_time_name">İzleme süresi</string>
+    <string name="widget_watch_time_description">Son 7 gündeki izleme süreniz</string>
+    <string name="widget_today">Bugün</string>
+    <string name="widget_last_7_days">Son 7 gün</string>
+    <string name="widget_recent_downloads_name">Son indirilenler</string>
+    <string name="widget_recent_downloads_description">İndirdiğiniz videoları oynatın</string>
+    <string name="widget_recent_downloads_empty">İndirdiğiniz videolar burada görünür</string>
 </resources>

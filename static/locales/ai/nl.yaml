@@ -2660,10 +2660,22 @@ Home Widgets:
   Continue Watching Description: "Hervat video's die je bent begonnen te kijken"
   Continue Watching Empty: "Video's die je begint te kijken verschijnen hier"
   Quick Access: "Snelle toegang"
-  Quick Access Description: "Open Zoeken, Abonnementen of Later bekijken"
+  Quick Access Description: "Open maximaal 4 pagina's naar keuze"
+  Choose Pages: "Kies maximaal 4 pagina's"
+  Pages: "Pagina's"
   Search: "Zoeken"
   Subscriptions: "Abonnementen"
   Watch Later: "Later bekijken"
+  History: "Geschiedenis"
+  Playlists: "Playlists"
+  Downloads: "Downloads"
+  Watch Time: "Kijktijd"
+  Watch Time Description: "Je kijktijd in de afgelopen 7 dagen"
+  Today: "Vandaag"
+  Last 7 Days: "Afgelopen 7 dagen"
+  Recent Downloads: "Recente downloads"
+  Recent Downloads Description: "Speel video's af die je hebt gedownload"
+  Recent Downloads Empty: "Video's die je downloadt verschijnen hier"
 Subscription Groups:
   Groups: Groepen
   All: Alles

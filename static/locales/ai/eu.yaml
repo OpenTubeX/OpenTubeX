@@ -2601,10 +2601,22 @@ Home Widgets:
   Continue Watching Description: "Jarraitu ikusten hasitako bideoekin"
   Continue Watching Empty: "Ikusten hasten zaren bideoak hemen agertuko dira"
   Quick Access: "Sarbide azkarra"
-  Quick Access Description: "Ireki Bilatu, Harpidetzak edo Ikusi geroago"
+  Quick Access Description: "Ireki zuk aukeratutako 4 orri gehienez"
+  Choose Pages: "Aukeratu 4 orri gehienez"
+  Pages: "Orriak"
   Search: "Bilatu"
   Subscriptions: "Harpidetzak"
   Watch Later: "Ikusi geroago"
+  History: "Historia"
+  Playlists: "Zerrendak"
+  Downloads: "Deskargak"
+  Watch Time: "Ikustaldi-denbora"
+  Watch Time Description: "Zure ikustaldi-denbora azken 7 egunetan"
+  Today: "Gaur"
+  Last 7 Days: "Azken 7 egunak"
+  Recent Downloads: "Azken deskargak"
+  Recent Downloads Description: "Erreproduzitu deskargatu dituzun bideoak"
+  Recent Downloads Empty: "Deskargatzen dituzun bideoak hemen agertuko dira"
 Subscription Groups:
   Groups: Taldeak
   All: Guztiak

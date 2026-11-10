@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">視聴を始めた動画を再開します</string>
     <string name="widget_continue_watching_empty">視聴を始めた動画がここに表示されます</string>
     <string name="widget_quick_access_name">クイックアクセス</string>
-    <string name="widget_quick_access_description">検索、登録チャンネル、後で見るを開きます</string>
+    <string name="widget_quick_access_description">選んだページを最大4つまで開きます</string>
+    <string name="widget_quick_access_choose">ページを最大4つまで選択</string>
+    <string name="widget_quick_access_pages">ページ</string>
     <string name="widget_search">検索</string>
     <string name="widget_subscriptions">登録チャンネル</string>
     <string name="widget_watch_later">後で見る</string>
+    <string name="widget_history">履歴</string>
+    <string name="widget_playlists">再生リスト</string>
+    <string name="widget_downloads">ダウンロード</string>
+    <string name="widget_watch_time_name">視聴時間</string>
+    <string name="widget_watch_time_description">過去7日間の視聴時間</string>
+    <string name="widget_today">今日</string>
+    <string name="widget_last_7_days">過去7日間</string>
+    <string name="widget_recent_downloads_name">最近のダウンロード</string>
+    <string name="widget_recent_downloads_description">ダウンロードした動画を再生します</string>
+    <string name="widget_recent_downloads_empty">ダウンロードした動画がここに表示されます</string>
 </resources>

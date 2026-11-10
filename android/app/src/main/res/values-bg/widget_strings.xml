@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Продължете видеоклиповете, които сте започнали</string>
     <string name="widget_continue_watching_empty">Тук се показват видеоклиповете, които започнете да гледате</string>
     <string name="widget_quick_access_name">Бърз достъп</string>
-    <string name="widget_quick_access_description">Отваряне на Търсене, Абонаменти или За гледане по-късно</string>
+    <string name="widget_quick_access_description">Отваряне на до 4 избрани от вас страници</string>
+    <string name="widget_quick_access_choose">Изберете до 4 страници</string>
+    <string name="widget_quick_access_pages">Страници</string>
     <string name="widget_search">Търсене</string>
     <string name="widget_subscriptions">Абонаменти</string>
     <string name="widget_watch_later">За гледане по-късно</string>
+    <string name="widget_history">История</string>
+    <string name="widget_playlists">Плейлисти</string>
+    <string name="widget_downloads">Изтегляния</string>
+    <string name="widget_watch_time_name">Време за гледане</string>
+    <string name="widget_watch_time_description">Вашето време за гледане през последните 7 дни</string>
+    <string name="widget_today">Днес</string>
+    <string name="widget_last_7_days">Последните 7 дни</string>
+    <string name="widget_recent_downloads_name">Скорошни изтегляния</string>
+    <string name="widget_recent_downloads_description">Пускане на изтеглените от вас видеоклипове</string>
+    <string name="widget_recent_downloads_empty">Тук се показват видеоклиповете, които изтеглите</string>
 </resources>

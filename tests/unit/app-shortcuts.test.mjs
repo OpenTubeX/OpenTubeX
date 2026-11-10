@@ -50,7 +50,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     getHomeWidgetPage,
     shouldOpenExternalMediaUrl,
     isSyncServerOidcCallbackUrl,
-    syncContinueWatchingWidget: () => () => { widgetSyncStopped = true },
+    syncHomeWidgets: () => () => { widgetSyncStopped = true },
+    playDownloadFromHomeWidget: async id => { paths.push(`download:${id}`) },
     Capacitor: { getPlatform: () => 'android' },
     supportsYtDlp: true,
     handleAndroidBack() {},
@@ -123,12 +124,12 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
   assert.deepEqual(youtubeLinks, ['https://www.youtube.com/feed/history', 'https://youtu.be/123', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'https://www.youtube.com/feed/subscriptions'])
-  for (const page of ['subscriptions', 'watch-later', 'search']) {
+  for (const page of ['subscriptions', 'watch-later', 'search', 'stats', 'downloads', 'download/7']) {
     settingsOpen = true
     listeners.get('appUrlOpen')({ url: `opentubex://open/${page}` })
     await new Promise(resolve => setImmediate(resolve))
   }
-  assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user'])
+  assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user', '/stats', 'settings:downloads', 'download:7'])
   assert.equal(searchFocusRequests, 1)
   assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
   assert.equal(updates[0][2].title, 'en-US:History.History')

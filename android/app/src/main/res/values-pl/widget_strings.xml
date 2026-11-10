@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Wznów filmy, które zacząłeś oglądać</string>
     <string name="widget_continue_watching_empty">Tutaj pojawią się filmy, które zaczniesz oglądać</string>
     <string name="widget_quick_access_name">Szybki dostęp</string>
-    <string name="widget_quick_access_description">Otwórz Szukaj, Subskrypcje lub Do obejrzenia</string>
+    <string name="widget_quick_access_description">Otwórz do 4 wybranych stron</string>
+    <string name="widget_quick_access_choose">Wybierz do 4 stron</string>
+    <string name="widget_quick_access_pages">Strony</string>
     <string name="widget_search">Szukaj</string>
     <string name="widget_subscriptions">Subskrypcje</string>
     <string name="widget_watch_later">Do obejrzenia</string>
+    <string name="widget_history">Historia</string>
+    <string name="widget_playlists">Playlisty</string>
+    <string name="widget_downloads">Pobrane</string>
+    <string name="widget_watch_time_name">Czas oglądania</string>
+    <string name="widget_watch_time_description">Twój czas oglądania w ciągu ostatnich 7 dni</string>
+    <string name="widget_today">Dzisiaj</string>
+    <string name="widget_last_7_days">Ostatnie 7 dni</string>
+    <string name="widget_recent_downloads_name">Ostatnio pobrane</string>
+    <string name="widget_recent_downloads_description">Odtwórz pobrane filmy</string>
+    <string name="widget_recent_downloads_empty">Tutaj pojawią się pobrane filmy</string>
 </resources>

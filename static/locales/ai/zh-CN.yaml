@@ -2591,10 +2591,22 @@ Home Widgets:
   Continue Watching Description: "继续观看你已开始观看的视频"
   Continue Watching Empty: "你开始观看的视频会显示在这里"
   Quick Access: "快速访问"
-  Quick Access Description: "打开搜索、订阅或稍后观看"
+  Quick Access Description: "打开最多 4 个你选择的页面"
+  Choose Pages: "最多选择 4 个页面"
+  Pages: "页面"
   Search: "搜索"
   Subscriptions: "订阅"
   Watch Later: "稍后观看"
+  History: "历史记录"
+  Playlists: "播放列表"
+  Downloads: "下载"
+  Watch Time: "观看时长"
+  Watch Time Description: "你过去 7 天的观看时长"
+  Today: "今天"
+  Last 7 Days: "最近 7 天"
+  Recent Downloads: "最近下载"
+  Recent Downloads Description: "播放你下载的视频"
+  Recent Downloads Empty: "你下载的视频会显示在这里"
 Subscription Groups:
   Groups: 分组
   All: 全部

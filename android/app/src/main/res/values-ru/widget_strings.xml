@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Продолжайте видео, которые вы начали смотреть</string>
     <string name="widget_continue_watching_empty">Здесь появятся видео, которые вы начнёте смотреть</string>
     <string name="widget_quick_access_name">Быстрый доступ</string>
-    <string name="widget_quick_access_description">Открыть Поиск, Подписки или «Смотреть позже»</string>
+    <string name="widget_quick_access_description">Открыть до 4 выбранных вами страниц</string>
+    <string name="widget_quick_access_choose">Выберите до 4 страниц</string>
+    <string name="widget_quick_access_pages">Страницы</string>
     <string name="widget_search">Поиск</string>
     <string name="widget_subscriptions">Подписки</string>
     <string name="widget_watch_later">Смотреть позже</string>
+    <string name="widget_history">История</string>
+    <string name="widget_playlists">Плейлисты</string>
+    <string name="widget_downloads">Загрузки</string>
+    <string name="widget_watch_time_name">Время просмотра</string>
+    <string name="widget_watch_time_description">Ваше время просмотра за последние 7 дней</string>
+    <string name="widget_today">Сегодня</string>
+    <string name="widget_last_7_days">Последние 7 дней</string>
+    <string name="widget_recent_downloads_name">Недавние загрузки</string>
+    <string name="widget_recent_downloads_description">Воспроизводите скачанные вами видео</string>
+    <string name="widget_recent_downloads_empty">Здесь появятся видео, которые вы скачаете</string>
 </resources>

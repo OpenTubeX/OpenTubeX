@@ -5,9 +5,19 @@
     <color name="widget_text">#FF1F1F1F</color>
     <color name="widget_text_secondary">#FF5F5F5F</color>
     <color name="widget_accent">#FFE53935</color>
+    <color name="widget_bar">#FFF2A7A3</color>
     <dimen name="widget_padding">12dp</dimen>
     <dimen name="widget_radius">16dp</dimen>
     <dimen name="widget_inner_radius">10dp</dimen>
+
+    <!-- The Quick access configuration shows only its dialog over the launcher. -->
+    <style name="HomeWidgetConfigTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="colorAccent">@color/widget_accent</item>
+    </style>
 
     <style name="HomeWidgetAction">
         <item name="android:layout_width">0dp</item>

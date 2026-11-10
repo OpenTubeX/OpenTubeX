@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Kenderc\'hel gant ar videoioù boulc\'het ganeoc\'h</string>
     <string name="widget_continue_watching_empty">Ar videoioù a vez boulc\'het ganeoc\'h a zeuio war wel amañ</string>
     <string name="widget_quick_access_name">Haeziñ prim</string>
-    <string name="widget_quick_access_description">Digeriñ Klask, Koumanantoù pe Da sellet diwezhatoc\'h</string>
+    <string name="widget_quick_access_description">Digeriñ betek 4 pajenn dibabet ganeoc\'h</string>
+    <string name="widget_quick_access_choose">Dibabit betek 4 pajenn</string>
+    <string name="widget_quick_access_pages">Pajennoù</string>
     <string name="widget_search">Klask</string>
     <string name="widget_subscriptions">Koumanantoù</string>
     <string name="widget_watch_later">Da sellet diwezhatoc\'h</string>
+    <string name="widget_history">Istor</string>
+    <string name="widget_playlists">Rolloù</string>
+    <string name="widget_downloads">Pellgargadennoù</string>
+    <string name="widget_watch_time_name">Amzer sellout</string>
+    <string name="widget_watch_time_description">Hoc\'h amzer sellout e-pad ar 7 devezh diwezhañ</string>
+    <string name="widget_today">Hiziv</string>
+    <string name="widget_last_7_days">Ar 7 devezh diwezhañ</string>
+    <string name="widget_recent_downloads_name">Pellgargadennoù nevez</string>
+    <string name="widget_recent_downloads_description">Lenn ar videoioù pellgarget ganeoc\'h</string>
+    <string name="widget_recent_downloads_empty">Ar videoioù a bellgargit a zeuio war wel amañ</string>
 </resources>

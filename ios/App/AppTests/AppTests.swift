@@ -2465,6 +2465,15 @@ final class AppTests: XCTestCase {
                        "group.org.opentubex.app")
     }
 
+    func testHomeWidgetsValidateDownloadsAndWatchTime() {
+        XCTAssertNil(HomeWidgetDownload(json: ["id": -1, "title": "Invalid"]))
+        let download = HomeWidgetDownload(json: ["id": 7, "title": "Download", "thumbnail": "http://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg"])
+        XCTAssertEqual(download?.id, 7)
+        XCTAssertEqual(download?.thumbnail, "", "Thumbnails require HTTPS")
+        XCTAssertEqual(HomeWidgetStore.parseWatchTime(["2026-03-03": 90, "../../files": 10, "2026-03-02": -5, "2026-03-01": "x"]),
+                       ["2026-03-03": 90])
+    }
+
     func testHomeWidgetsCacheContinueWatchingAndOpenTheirLinks() async throws {
         try await openApplication()
         XCTAssertNotNil(HomeWidgetStore.directory, "The app and its widgets must share an App Group")

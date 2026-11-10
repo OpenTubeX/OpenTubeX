@@ -3188,10 +3188,22 @@ Home Widgets:
   Continue Watching Description: "Nadaljujte videoposnetke, ki ste jih začeli gledati"
   Continue Watching Empty: "Tukaj se prikažejo videoposnetki, ki jih začnete gledati"
   Quick Access: "Hitri dostop"
-  Quick Access Description: "Odpri Iskanje, Naročnine ali Za poznejši ogled"
+  Quick Access Description: "Odpri do 4 strani po vaši izbiri"
+  Choose Pages: "Izberite do 4 strani"
+  Pages: "Strani"
   Search: "Iskanje"
   Subscriptions: "Naročnine"
   Watch Later: "Za poznejši ogled"
+  History: "Zgodovina"
+  Playlists: "Seznami"
+  Downloads: "Prenosi"
+  Watch Time: "Čas gledanja"
+  Watch Time Description: "Vaš čas gledanja v zadnjih 7 dneh"
+  Today: "Danes"
+  Last 7 Days: "Zadnjih 7 dni"
+  Recent Downloads: "Nedavni prenosi"
+  Recent Downloads Description: "Predvajajte videoposnetke, ki ste jih prenesli"
+  Recent Downloads Empty: "Tukaj se prikažejo videoposnetki, ki jih prenesete"
 Subscription Groups:
   Groups: Skupine
   All: Vse

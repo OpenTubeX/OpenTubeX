@@ -2594,10 +2594,22 @@ Home Widgets:
   Continue Watching Description: "Jätka videoid, mida hakkasid vaatama"
   Continue Watching Empty: "Siin kuvatakse videod, mida hakkad vaatama"
   Quick Access: "Kiirjuurdepääs"
-  Quick Access Description: "Ava Otsing, Tellimused või Vaata hiljem"
+  Quick Access Description: "Ava kuni 4 enda valitud lehte"
+  Choose Pages: "Vali kuni 4 lehte"
+  Pages: "Lehed"
   Search: "Otsi"
   Subscriptions: "Tellimused"
   Watch Later: "Vaata hiljem"
+  History: "Ajalugu"
+  Playlists: "Loendid"
+  Downloads: "Allalaadimised"
+  Watch Time: "Vaatamisaeg"
+  Watch Time Description: "Sinu vaatamisaeg viimase 7 päeva jooksul"
+  Today: "Täna"
+  Last 7 Days: "Viimased 7 päeva"
+  Recent Downloads: "Hiljutised allalaadimised"
+  Recent Downloads Description: "Esita allalaaditud videoid"
+  Recent Downloads Empty: "Siin kuvatakse videod, mille alla laadid"
 Subscription Groups:
   Groups: Rühmad
   All: Kõik

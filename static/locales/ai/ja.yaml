@@ -2591,10 +2591,22 @@ Home Widgets:
   Continue Watching Description: "視聴を始めた動画を再開します"
   Continue Watching Empty: "視聴を始めた動画がここに表示されます"
   Quick Access: "クイックアクセス"
-  Quick Access Description: "検索、登録チャンネル、後で見るを開きます"
+  Quick Access Description: "選んだページを最大4つまで開きます"
+  Choose Pages: "ページを最大4つまで選択"
+  Pages: "ページ"
   Search: "検索"
   Subscriptions: "登録チャンネル"
   Watch Later: "後で見る"
+  History: "履歴"
+  Playlists: "再生リスト"
+  Downloads: "ダウンロード"
+  Watch Time: "視聴時間"
+  Watch Time Description: "過去7日間の視聴時間"
+  Today: "今日"
+  Last 7 Days: "過去7日間"
+  Recent Downloads: "最近のダウンロード"
+  Recent Downloads Description: "ダウンロードした動画を再生します"
+  Recent Downloads Empty: "ダウンロードした動画がここに表示されます"
 Subscription Groups:
   Groups: グループ
   All: すべて

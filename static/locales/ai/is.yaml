@@ -2613,10 +2613,22 @@ Home Widgets:
   Continue Watching Description: "Haltu áfram með myndskeið sem þú byrjaðir að horfa á"
   Continue Watching Empty: "Myndskeið sem þú byrjar að horfa á birtast hér"
   Quick Access: "Flýtiaðgangur"
-  Quick Access Description: "Opna Leit, Áskriftir eða Horfa síðar"
+  Quick Access Description: "Opna allt að 4 síður að eigin vali"
+  Choose Pages: "Veldu allt að 4 síður"
+  Pages: "Síður"
   Search: "Leita"
   Subscriptions: "Áskriftir"
   Watch Later: "Horfa síðar"
+  History: "Áhorf"
+  Playlists: "Listar"
+  Downloads: "Niðurhal"
+  Watch Time: "Áhorfstími"
+  Watch Time Description: "Áhorfstíminn þinn síðustu 7 daga"
+  Today: "Í dag"
+  Last 7 Days: "Síðustu 7 dagar"
+  Recent Downloads: "Nýlegt niðurhal"
+  Recent Downloads Description: "Spilaðu myndskeið sem þú sóttir"
+  Recent Downloads Empty: "Myndskeið sem þú sækir birtast hér"
 Subscription Groups:
   Groups: Hópar
   All: Allt

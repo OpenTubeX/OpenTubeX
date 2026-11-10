@@ -2591,10 +2591,22 @@ Home Widgets:
   Continue Watching Description: "Pokračujte ve videích, která jste začali sledovat"
   Continue Watching Empty: "Zde se zobrazí videa, která začnete sledovat"
   Quick Access: "Rychlý přístup"
-  Quick Access Description: "Otevřít Hledání, Odběry nebo Zhlédnout později"
+  Quick Access Description: "Otevřít až 4 vámi zvolené stránky"
+  Choose Pages: "Vyberte až 4 stránky"
+  Pages: "Stránky"
   Search: "Hledat"
   Subscriptions: "Odběry"
   Watch Later: "Zhlédnout později"
+  History: "Historie"
+  Playlists: "Playlisty"
+  Downloads: "Stahování"
+  Watch Time: "Doba sledování"
+  Watch Time Description: "Vaše doba sledování za posledních 7 dní"
+  Today: "Dnes"
+  Last 7 Days: "Posledních 7 dní"
+  Recent Downloads: "Nedávno stažené"
+  Recent Downloads Description: "Přehrajte videa, která jste stáhli"
+  Recent Downloads Empty: "Zde se zobrazí videa, která stáhnete"
 Subscription Groups:
   Groups: Skupiny
   All: Vše

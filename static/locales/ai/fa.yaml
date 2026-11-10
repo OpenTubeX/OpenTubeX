@@ -2685,10 +2685,22 @@ Home Widgets:
   Continue Watching Description: "ادامهٔ ویدیوهایی که تماشایشان را شروع کرده‌اید"
   Continue Watching Empty: "ویدیوهایی که تماشایشان را شروع می‌کنید اینجا نمایش داده می‌شوند"
   Quick Access: "دسترسی سریع"
-  Quick Access Description: "باز کردن جستجو، دنبال کرده ها یا تماشا در آینده"
+  Quick Access Description: "باز کردن حداکثر 4 صفحه به انتخاب شما"
+  Choose Pages: "حداکثر 4 صفحه انتخاب کنید"
+  Pages: "صفحه‌ها"
   Search: "جستجو"
   Subscriptions: "دنبال کرده ها"
   Watch Later: "تماشا در آینده"
+  History: "تاریخچه"
+  Playlists: "فهرست‌ها"
+  Downloads: "بارگیری‌ها"
+  Watch Time: "زمان تماشا"
+  Watch Time Description: "زمان تماشای شما در 7 روز گذشته"
+  Today: "امروز"
+  Last 7 Days: "7 روز گذشته"
+  Recent Downloads: "بارگیری‌های اخیر"
+  Recent Downloads Description: "پخش ویدیوهایی که بارگیری کرده‌اید"
+  Recent Downloads Empty: "ویدیوهایی که بارگیری می‌کنید اینجا نمایش داده می‌شوند"
 Subscription Groups:
   Groups: گروه‌ها
   All: همه

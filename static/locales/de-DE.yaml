@@ -3810,10 +3810,22 @@ Home Widgets:
   Continue Watching Description: Begonnene Videos fortsetzen
   Continue Watching Empty: Begonnene Videos erscheinen hier
   Quick Access: Schnellzugriff
-  Quick Access Description: Suche, Abos oder Später ansehen öffnen
+  Quick Access Description: Bis zu 4 ausgewählte Seiten öffnen
+  Choose Pages: Bis zu 4 Seiten auswählen
+  Pages: Seiten
   Search: Suche
   Subscriptions: Abos
   Watch Later: Später ansehen
+  History: Verlauf
+  Playlists: Playlists
+  Downloads: Downloads
+  Watch Time: Wiedergabezeit
+  Watch Time Description: Deine Wiedergabezeit der letzten 7 Tage
+  Today: Heute
+  Last 7 Days: Letzte 7 Tage
+  Recent Downloads: Neueste Downloads
+  Recent Downloads Description: Heruntergeladene Videos abspielen
+  Recent Downloads Empty: Heruntergeladene Videos erscheinen hier
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:

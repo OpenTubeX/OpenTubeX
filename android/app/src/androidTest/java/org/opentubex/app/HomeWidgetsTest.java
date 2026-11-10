@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -82,6 +83,36 @@ public class HomeWidgetsTest {
         assertEquals("jNQXAC9IVRw", parsed.get(0).id());
         assertEquals("Thumbnails require HTTPS", "", parsed.get(0).thumbnail());
         assertEquals("Thumbnails must not target the device's network", "", parsed.get(1).thumbnail());
+    }
+
+    @Test
+    public void storedDownloadsAndWatchTimeAreValidated() throws Exception {
+        JSONArray downloads = new JSONArray()
+            .put(new JSONObject().put("id", -1).put("title", "Invalid"))
+            .put(new JSONObject().put("id", 7).put("title", "Download").put("thumbnail", "http://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg"));
+        List<HomeWidgets.Download> parsed = HomeWidgets.parseDownloads(downloads);
+        assertEquals(1, parsed.size());
+        assertEquals(7, parsed.get(0).id());
+        assertEquals("Thumbnails require HTTPS", "", parsed.get(0).thumbnail());
+
+        Map<String, Long> days = HomeWidgets.parseWatchTime(new JSONObject()
+            .put("2026-03-03", 90).put("../../files", 10).put("2026-03-02", -5).put("2026-03-01", "x"));
+        assertEquals(Map.of("2026-03-03", 90L), days);
+    }
+
+    @Test
+    public void quickAccessKeepsEachWidgetsValidPages() {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        int id = 987654;
+        try {
+            assertEquals(HomeWidgets.DEFAULT_QUICK_ACCESS_PAGES, HomeWidgets.quickAccessPages(context, id));
+            HomeWidgets.setQuickAccessPages(context, id, List.of(HomeWidgets.Page.HISTORY, HomeWidgets.Page.SEARCH));
+            assertEquals(List.of(HomeWidgets.Page.HISTORY, HomeWidgets.Page.SEARCH), HomeWidgets.quickAccessPages(context, id));
+            assertEquals(HomeWidgets.DEFAULT_QUICK_ACCESS_PAGES, HomeWidgets.quickAccessPages(context, id + 1));
+        } finally {
+            HomeWidgets.removeQuickAccessPages(context, new int[] { id });
+        }
+        assertEquals(HomeWidgets.DEFAULT_QUICK_ACCESS_PAGES, HomeWidgets.quickAccessPages(context, id));
     }
 
     @Test

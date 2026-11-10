@@ -3828,10 +3828,22 @@ Home Widgets:
   Continue Watching Description: Resume videos you started watching
   Continue Watching Empty: Videos you start watching appear here
   Quick Access: Quick access
-  Quick Access Description: Open Search, Subscriptions or Watch Later
+  Quick Access Description: Open up to 4 pages you choose
+  Choose Pages: Choose up to 4 pages
+  Pages: Pages
   Search: Search
   Subscriptions: Subscriptions
   Watch Later: Watch Later
+  History: History
+  Playlists: Playlists
+  Downloads: Downloads
+  Watch Time: Watch time
+  Watch Time Description: Your watch time over the last 7 days
+  Today: Today
+  Last 7 Days: Last 7 days
+  Recent Downloads: Recent downloads
+  Recent Downloads Description: Play videos you downloaded
+  Recent Downloads Empty: Videos you download appear here
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
