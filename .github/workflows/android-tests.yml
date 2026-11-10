@@ -18,7 +18,7 @@ on:
       - 'e2e/fixtures/media/**'
       - 'e2e/fixtures/player-scripts/**'
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '17 4 * * *'
   workflow_dispatch:
 
 permissions: {}
