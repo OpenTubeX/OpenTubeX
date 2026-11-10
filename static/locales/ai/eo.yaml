@@ -1270,7 +1270,7 @@ Settings:
       Details effect: Ekzistantaj abonoj aŭ videaĵoj estas konservitaj. Enportitaj detaloj de profiloj aŭ ludlistoj anstataŭigas la aktualajn detalojn.
       Merge effect: Ekzistantaj datumoj estas konservitaj kaj kunfanditaj kun kongruaj registroj.
       Subscriptions effect: Ekzistantaj abonoj estas konservitaj. Nur novaj kanaloj estas aldonitaj.
-      History replace effect: La spekthistorio de kongruaj videaĵoj estas anstataŭigita. Alia historio estas konservita.
+      History merge effect: Kongruaj videaĵoj estas kunfanditaj kun via historio, tenante la konservitajn detalojn kaj la plej freŝan spektodaton. Alia historio estas konservita.
     Select export data: Elektu la datumojn elportotajn
     Export selected data: Elporti elektitajn datumojn
     Complete backup: Kompleta savkopio

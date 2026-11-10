@@ -1425,7 +1425,7 @@ Settings:
       Details effect: Bestaande intekeninge of video’s word behou. Ingevoerde profiel- of afspeellysbesonderhede vervang huidige besonderhede.
       Merge effect: Bestaande data word behou en met ooreenstemmende rekords saamgevoeg.
       Subscriptions effect: Bestaande intekeninge word behou. Slegs nuwe kanale word bygevoeg.
-      History replace effect: Kykgeskiedenis vir ooreenstemmende video’s word vervang. Ander geskiedenis word behou.
+      History merge effect: Ooreenstemmende video’s word met jou geskiedenis saamgevoeg, met behoud van gestoorde besonderhede en die jongste kykdatum. Ander geskiedenis word behou.
     Select export data: Kies die data om uit te stuur
     Export selected data: Stuur gekose data uit
     Complete backup: Volledige rugsteun

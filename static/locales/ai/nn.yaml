@@ -1380,7 +1380,7 @@ Settings:
       Details effect: Eksisterande abonnement eller videoar vert tekne vare på. Importerte profil- eller spelelistedetaljar erstattar dei gjeldande.
       Merge effect: Eksisterande data vert tekne vare på og slått saman med samsvarande oppføringar.
       Subscriptions effect: Eksisterande abonnement vert tekne vare på. Berre nye kanalar vert lagde til.
-      History replace effect: Sjåarhistoria for samsvarande videoar vert erstatta. Anna historie vert teken vare på.
+      History merge effect: Samsvarande videoar vert slegne saman med historia di, og lagra detaljar og den nyaste sjådatoen vert behaldne. Anna historie vert teken vare på.
     Select export data: "Vel dataa som skal eksporterast"
     Export selected data: "Eksporter valde data"
     Complete backup: "Fullstendig tryggleikskopi"

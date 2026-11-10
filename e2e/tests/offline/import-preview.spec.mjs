@@ -82,7 +82,7 @@ test('Takeout preview shows matching and new records and remains usable when its
   const preview = await chooseArchive(page, dataSection, archive, 'Import YouTube Takeout ZIP')
   await expect(preview.locator('[data-category="subscriptions"]')).toContainText('New: 1')
   await expect(preview.locator('[data-category="history"]')).toContainText('Skipped: 1')
-  await expect(preview.locator('[data-category="history"]')).toContainText('Watch history for matching videos is replaced')
+  await expect(preview.locator('[data-category="history"]')).toContainText('Matching videos are merged with your history')
   await expect(preview.locator('[data-category="playlists"]')).toContainText('New: 1')
   await expect(preview.locator('[data-category="playlists"]')).toContainText('Existing: 1')
   expect(await savedData(page)).toEqual(before)

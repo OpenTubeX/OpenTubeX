@@ -1252,7 +1252,7 @@ Settings:
       Details effect: Bestaande abonnementen of video’s blijven behouden. Geïmporteerde profiel- of afspeellijstgegevens vervangen de huidige gegevens.
       Merge effect: Bestaande gegevens blijven behouden en worden samengevoegd met overeenkomende records.
       Subscriptions effect: Bestaande abonnementen blijven behouden. Alleen nieuwe kanalen worden toegevoegd.
-      History replace effect: De kijkgeschiedenis van overeenkomende video’s wordt vervangen. Andere geschiedenis blijft behouden.
+      History merge effect: Overeenkomende video’s worden samengevoegd met je geschiedenis, waarbij opgeslagen gegevens en de nieuwste kijkdatum behouden blijven. Andere geschiedenis blijft behouden.
     Select export data: "Selecteer de gegevens om te exporteren"
     Export selected data: "Geselecteerde gegevens exporteren"
     Complete backup: "Volledige back-up"

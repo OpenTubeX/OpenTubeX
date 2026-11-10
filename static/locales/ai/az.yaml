@@ -1236,7 +1236,7 @@ Settings:
       Details effect: Mövcud abunəliklər və ya videolar saxlanılır. İdxal edilmiş profil və ya pleylist məlumatları cari məlumatları əvəz edir.
       Merge effect: Mövcud məlumatlar saxlanılır və uyğun qeydlərlə birləşdirilir.
       Subscriptions effect: Mövcud abunəliklər saxlanılır. Yalnız yeni kanallar əlavə edilir.
-      History replace effect: Uyğun videoların baxış tarixçəsi əvəz edilir. Digər tarixçə saxlanılır.
+      History merge effect: Uyğun videolar tarixçənizlə birləşdirilir, saxlanmış təfərrüatlar və ən son baxış tarixi qorunur. Digər tarixçə saxlanılır.
     Select export data: "İxrac ediləcək məlumatları seçin"
     Export selected data: "Seçilmiş məlumatları ixrac et"
     Complete backup: "Tam ehtiyat nüsxəsi"

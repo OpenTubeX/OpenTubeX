@@ -1234,7 +1234,7 @@ Settings:
       Details effect: Existující odběry nebo videa zůstanou zachovány. Importované údaje profilů nebo playlistů nahradí současné údaje.
       Merge effect: Existující data zůstanou zachována a sloučí se s odpovídajícími záznamy.
       Subscriptions effect: Existující odběry zůstanou zachovány. Přidají se pouze nové kanály.
-      History replace effect: Historie sledování odpovídajících videí bude nahrazena. Ostatní historie zůstane zachována.
+      History merge effect: Odpovídající videa se sloučí s vaší historií, přičemž se zachovají uložené podrobnosti a nejnovější datum zhlédnutí. Ostatní historie zůstane zachována.
     Select export data: "Vyberte data k exportu"
     Export selected data: "Exportovat vybraná data"
     Complete backup: "Úplná záloha"

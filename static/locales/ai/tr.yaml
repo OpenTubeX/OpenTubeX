@@ -1234,7 +1234,7 @@ Settings:
       Details effect: Mevcut abonelikler veya videolar korunur. İçe aktarılan profil veya oynatma listesi ayrıntıları mevcut ayrıntıların yerini alır.
       Merge effect: Mevcut veriler korunur ve eşleşen kayıtlarla birleştirilir.
       Subscriptions effect: Mevcut abonelikler korunur. Yalnızca yeni kanallar eklenir.
-      History replace effect: Eşleşen videoların izleme geçmişi değiştirilir. Diğer geçmiş korunur.
+      History merge effect: Eşleşen videolar geçmişinizle birleştirilir; kayıtlı ayrıntılar ve en son izleme tarihi korunur. Diğer geçmiş korunur.
     Select export data: "Dışa aktarılacak verileri seçin"
     Export selected data: "Seçili verileri dışa aktar"
     Complete backup: "Tam yedek"

@@ -1252,7 +1252,7 @@ Settings:
       Details effect: Nykyiset tilaukset tai videot säilytetään. Tuodut profiilien tai soittolistojen tiedot korvaavat nykyiset tiedot.
       Merge effect: Nykyiset tiedot säilytetään ja yhdistetään vastaaviin tietueisiin.
       Subscriptions effect: Nykyiset tilaukset säilytetään. Vain uudet kanavat lisätään.
-      History replace effect: Vastaavien videoiden katseluhistoria korvataan. Muu historia säilytetään.
+      History merge effect: Vastaavat videot yhdistetään historiaasi säilyttäen tallennetut tiedot ja uusimman katselupäivän. Muu historia säilytetään.
     Select export data: "Valitse vietävät tiedot"
     Export selected data: "Vie valitut tiedot"
     Complete backup: "Täydellinen varmuuskopiointi"

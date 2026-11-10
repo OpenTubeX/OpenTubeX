@@ -1237,7 +1237,7 @@ Settings:
       Details effect: Fyrirliggjandi áskriftir eða myndskeið eru varðveitt. Innfluttar upplýsingar um notandasnið eða spilunarlista koma í stað núverandi upplýsinga.
       Merge effect: Fyrirliggjandi gögn eru varðveitt og sameinuð samsvarandi færslum.
       Subscriptions effect: Fyrirliggjandi áskriftir eru varðveittar. Aðeins nýjum rásum er bætt við.
-      History replace effect: Áhorfssögu samsvarandi myndskeiða er skipt út. Önnur saga er varðveitt.
+      History merge effect: Samsvarandi myndskeið eru sameinuð áhorfssögunni þinni og vistaðar upplýsingar og nýjasta áhorfsdagsetning haldast. Önnur saga er varðveitt.
     Select export data: "Veldu gögnin sem á að flytja út"
     Export selected data: "Flytja út valin gögn"
     Complete backup: "Fullt öryggisafrit"

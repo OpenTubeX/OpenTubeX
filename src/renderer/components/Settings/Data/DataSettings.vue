@@ -367,7 +367,7 @@ import { parseOpmlFeeds } from '../../../helpers/opml'
 import { parseChannelPreferences } from '../../../helpers/channel-preferences'
 import { resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
-import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory, mergeTakeoutHistoryRecord } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, mergeBackupPlaylist, mergeBackupProfile } from '../../../helpers/unifiedBackup'
@@ -1595,7 +1595,7 @@ async function importYouTubeWatchHistory(historyData) {
     showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
   const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
-  for (const entry of entries) historyItems.set(entry.videoId, entry)
+  for (const entry of entries) historyItems.set(entry.videoId, mergeTakeoutHistoryRecord(historyItems.get(entry.videoId), entry))
 
   if (await store.dispatch('overwriteHistory', historyItems) !== true) {
     throw new Error('Could not import history')

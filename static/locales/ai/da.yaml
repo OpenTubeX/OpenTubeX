@@ -1263,7 +1263,7 @@ Settings:
       Details effect: Eksisterende abonnementer eller videoer bevares. Importerede profil- eller afspilningslistedetaljer erstatter de nuværende.
       Merge effect: Eksisterende data bevares og flettes med matchende poster.
       Subscriptions effect: Eksisterende abonnementer bevares. Kun nye kanaler tilføjes.
-      History replace effect: Visningshistorik for matchende videoer erstattes. Øvrig historik bevares.
+      History merge effect: Matchende videoer flettes med din historik, så gemte detaljer og den seneste visningsdato bevares. Øvrig historik bevares.
     Select export data: "Vælg de data, der skal eksporteres"
     Export selected data: "Eksportér valgte data"
     Complete backup: "Fuldfør backup"
