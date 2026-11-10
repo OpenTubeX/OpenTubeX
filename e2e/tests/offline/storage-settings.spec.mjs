@@ -260,6 +260,13 @@ test('separates replaceable search results from saved search history', async ({ 
     stored: (await window.ftElectron.dbSearchHistory(action)).map(entry => entry._id)
   }), DBActions.GENERAL.FIND)).toEqual({ setting: '3', saved: ['recent search'], stored: ['recent search'] })
 
+  // With search history off, its retention cannot be saved, since saving deletes entries.
+  await privacy.locator('label.switch-label').filter({ hasText: 'Remember Search History' }).click()
+  await expect(retention).toBeDisabled()
+  await expect(privacy.locator('.ft-input-component').filter({
+    has: page.getByRole('spinbutton', { name: 'Automatic Search History Retention (Days)', exact: true })
+  }).locator('.inputAction')).toBeDisabled()
+
   await goToSettingsSection(page, 'storage')
   const searchHistory = storage.locator('.storageItem').filter({
     has: page.getByRole('heading', { name: 'Search history', exact: true })
