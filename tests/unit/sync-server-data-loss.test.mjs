@@ -703,7 +703,7 @@ test('after an upload conflict, playlists and videos removed on the server stay 
     { shared: ['local-video'], 'local-list': [] })
 })
 
-test('after an upload conflict, profiles and channels removed on the server stay removed', async () => {
+test('after an upload conflict, profiles and channels removed on the server stay removed, and unsubscribed ones stay', async () => {
   const subscriptions = [{ id: 'local-channel', name: 'Local' }, { id: 'remote-channel', name: 'Remote' }]
   const store = {
     state: {
@@ -727,14 +727,15 @@ test('after an upload conflict, profiles and channels removed on the server stay
   const group = (id, title) => ({ id, local_id: id, title, bg_color: '#000000', text_color: '#FFFFFF' })
   const remote = createEmptySyncDocument()
   remote.profiles = [
-    { group: group('shared', 'Shared'), channels: [{ id: 'remote-channel' }] },
+    // This device is not subscribed to the other device's channel.
+    { group: group('shared', 'Shared'), channels: [{ id: 'remote-channel' }, { id: 'unsubscribed-channel' }] },
     { group: group('remote-profile', 'Remote'), channels: [] },
   ]
   const uploaded = await syncAgainAfterConflict('syncProfiles', store, remote, document => {
-    document.profiles = [{ group: group('shared', 'Shared'), channels: [] }]
+    document.profiles = [{ group: group('shared', 'Shared'), channels: [{ id: 'unsubscribed-channel' }] }]
   })
-  assert.deepEqual(Object.fromEntries(uploaded.profiles.map(entry => [entry.group.id, entry.channels.map(item => item.id)])),
-    { shared: ['local-channel'], 'local-profile': [] })
+  assert.deepEqual(Object.fromEntries(uploaded.profiles.map(entry => [entry.group.id, entry.channels.map(item => item.id).sort()])),
+    { shared: ['local-channel', 'unsubscribed-channel'], 'local-profile': [] })
   assert.deepEqual(Object.fromEntries(structuredClone(store.state.profiles.profileList.slice(1)).map(item => [item._id, item.subscriptions.map(item => item.id)])),
     { shared: ['local-channel'], 'local-profile': [] })
 })

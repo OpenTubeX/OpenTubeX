@@ -1311,8 +1311,11 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     collection: 'profiles',
     getItemName: id => localById.get(id)?.name || remoteById.get(id)?.group.title || previous[id]?.metadata?.title,
   })
+  const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
+  const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
   // A conflicting upload merges again, also against the downloaded profiles,
-  // so their removal on the server is not undone.
+  // so their removal on the server is not undone. Like the snapshot, it only
+  // records saved channels.
   const retryBaseline = { ...previous }
   for (const [id, remote] of remoteById) {
     const old = previous[id]?.metadata
@@ -1320,12 +1323,13 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     retryBaseline[id] = {
       remoteId: remote.remoteId,
       metadata: remoteProfileMetadata(remote.group, old ?? (local ? profileMetadata(local, old) : {})),
-      channels: Array.from(new Set([...(previous[id]?.channels ?? []), ...remote.channels.map(channel => channel.id)])),
+      channels: Array.from(new Set([
+        ...(previous[id]?.channels ?? []),
+        ...remote.channels.map(channel => channel.id).filter(channelId => subscriptionsById.has(channelId)),
+      ])),
     }
   }
   options.onRetryBaseline?.(() => retryBaseline)
-  const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
-  const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
   const next = {}
 
   for (const [id, remote] of remoteById) {
