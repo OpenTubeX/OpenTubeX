@@ -52,6 +52,20 @@ export function createContinueWatchingWidgetVideos(entries, getThumbnailUrl) {
 }
 
 /**
+ * Whether a download's stored thumbnail is YouTube's own. Other sites supply
+ * arbitrary URLs, which widgets must not fetch.
+ * @param {string | undefined} url
+ */
+export function isYouTubeThumbnailUrl(url) {
+  try {
+    const { protocol, hostname, username, password } = new URL(url)
+    return protocol === 'https:' && !username && !password && (hostname === 'ytimg.com' || hostname.endsWith('.ytimg.com'))
+  } catch {
+    return false
+  }
+}
+
+/**
  * Picks the newest downloads that can play offline for the Recent downloads widget.
  * @param {object[]} downloads
  * @param {(download: object) => string | null} getThumbnailUrl

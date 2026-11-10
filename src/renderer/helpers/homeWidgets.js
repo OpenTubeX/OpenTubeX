@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core'
 
-import { createContinueWatchingWidgetVideos, createDownloadWidgetItems, createWatchTimeWidgetDays } from './homeWidgetData'
+import { createContinueWatchingWidgetVideos, createDownloadWidgetItems, createWatchTimeWidgetDays, isYouTubeThumbnailUrl } from './homeWidgetData'
 import { limitWatchSecondsByDate } from './sync-watch-stats'
 import { getVideoThumbnailUrl } from './utils'
 import { supportsYtDlp } from './ytDlpCapabilities'
@@ -54,8 +54,9 @@ export function syncHomeWidgets(store, watch) {
       return {
         downloads: createDownloadWidgetItems(Object.values(getters.getYtDlpDownloads), download => {
           if (getters.getBlurThumbnails || getters.getThumbnailPreference === 'hidden') return null
-          // Single videos follow the thumbnail settings; playlists keep their own image.
-          return download.videoId && !download.playlistId ? videoThumbnail(download.videoId) : download.thumbnail
+          // Single videos follow the thumbnail settings; playlists keep YouTube's own image.
+          if (download.videoId && !download.playlistId) return videoThumbnail(download.videoId)
+          return isYouTubeThumbnailUrl(download.thumbnail) ? download.thumbnail : null
         }),
         authorization: authorization(),
       }

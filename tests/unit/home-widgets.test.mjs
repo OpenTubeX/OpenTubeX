@@ -6,6 +6,7 @@ import {
   createDownloadWidgetItems,
   createWatchTimeWidgetDays,
   getHomeWidgetPage,
+  isYouTubeThumbnailUrl,
 } from '../../src/renderer/helpers/homeWidgetData.js'
 
 test('home screen widget links open only their fixed pages and downloads', () => {
@@ -70,4 +71,14 @@ test('Watch time notices a day recorded after midnight', () => {
   days['2026-03-04'] = 120
   stop()
   assert.deepEqual(sent.at(-1), { '2026-03-03': 60, '2026-03-04': 120 })
+})
+
+test('Recent downloads fetches only YouTube thumbnails', () => {
+  assert.equal(isYouTubeThumbnailUrl('https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg'), true)
+  for (const url of [
+    'https://192.168.1.1/thumbnail.jpg', 'http://i.ytimg.com/vi/x/mqdefault.jpg', 'https://ytimg.com.example.org/x.jpg',
+    'https://user:pass@i.ytimg.com/x.jpg', 'https://example.com/x.jpg', '', undefined
+  ]) {
+    assert.equal(isYouTubeThumbnailUrl(url), false, url)
+  }
 })
