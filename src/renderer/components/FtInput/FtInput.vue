@@ -441,8 +441,18 @@ const inputTextStyle = computed(() => {
 watch(() => props.dataList, () => updateVisibleDataList(removalMade.value), { deep: true })
 watch(inputData, () => updateVisibleDataList())
 watch(() => props.value, (value) => {
-  inputData.value = value
+  if (value === inputData.value) { return }
+  setInputText(value)
 })
+
+/**
+ * Replaces the text without user input, e.g. when a parent restores it.
+ * @param {string} text
+ */
+function setInputText(text) {
+  inputData.value = text
+  handleActionIconChange()
+}
 
 updateVisibleDataList()
 
@@ -538,9 +548,14 @@ function clearText() {
   emit('clear')
 }
 
+// URL lookups are async, so only the latest one may update the icon.
+let actionIconRequestId = 0
+
 async function handleActionIconChange() {
   // Only need to update icon if visible
   if (!props.showActionButton) { return }
+
+  const requestId = ++actionIconRequestId
 
   const inputText = props.isSearch ? inputData.value.trim() : inputData.value
 
@@ -558,6 +573,7 @@ async function handleActionIconChange() {
   // Update action button icon according to input
   try {
     const result = await store.dispatch('getYoutubeUrlInfo', inputText)
+    if (requestId !== actionIconRequestId) { return }
 
     let isYoutubeLink = false
 
@@ -593,7 +609,7 @@ async function handleActionIconChange() {
     }
   } catch (ex) {
     // On exception, consider text as invalid URL
-    if (props.forceActionButtonIconName === null) {
+    if (requestId === actionIconRequestId && props.forceActionButtonIconName === null) {
       actionButtonIconName.value = ['fas', 'search']
     }
 
@@ -882,9 +898,7 @@ defineExpose({
   /**
    * @param {string} text
    */
-  setText: (text) => {
-    inputData.value = text
-  },
+  setText: setInputText,
 
   clear: clearText
 })

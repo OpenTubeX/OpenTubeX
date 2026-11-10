@@ -140,6 +140,8 @@ const state = {
   regionValues: [],
   youtubeCaptionLanguageCodes: [...YOUTUBE_CAPTION_LANGUAGE_CODES],
   searchSettingsByTabId: {},
+  /** Search bar text by tab, since one search bar is shared by every tab. */
+  searchTextByTabId: {},
   externalPlayerNames: [],
   externalPlayerValues: [],
   externalPlayerCmdArguments: {},
@@ -205,6 +207,11 @@ const getters = {
       duration: '',
       features: [],
     }
+  },
+
+  /** @returns {string | undefined} `undefined` until the tab's text is first set */
+  getSearchText: (state) => (tabId = 'web') => {
+    return state.searchTextByTabId[tabId]
   },
 
   getSearchFilterValueChanged: (state) => (tabId = 'web') => {
@@ -1083,7 +1090,7 @@ const mutations = {
 
   // Drops the caches of tabs that no longer exist.
   pruneTabCaches(state, tabIds) {
-    for (const cache of [state.cachedPlaylists, state.searchSettingsByTabId, state.searchFilterValueChangedByTabId]) {
+    for (const cache of [state.cachedPlaylists, state.searchSettingsByTabId, state.searchFilterValueChangedByTabId, state.searchTextByTabId]) {
       for (const tabId of Object.keys(cache)) {
         if (tabId !== 'web' && !tabIds.has(tabId)) {
           delete cache[tabId]
@@ -1098,6 +1105,10 @@ const mutations = {
     } else {
       state.cachedPlaylists[tabId] = value
     }
+  },
+
+  setSearchText (state, { tabId = 'web', value }) {
+    state.searchTextByTabId[tabId] = value
   },
 
   setSearchFilterValueChanged (state, { tabId = 'web', value }) {

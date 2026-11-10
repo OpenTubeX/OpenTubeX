@@ -113,6 +113,7 @@
             :data-list-properties="activeDataListProperties"
             :style="{ '--visible-search-suggestions': visibleSearchSuggestions }"
             show-data-when-empty
+            :value="currentSearchText"
             @input="getSearchSuggestionsDebounce"
             @focus="getSearchSuggestionsDebounce(currentSearchText)"
             @blur="handleSearchBlur"
@@ -794,10 +795,11 @@ function rerunPresentedSearchWithFilters() {
 const searchInput = useTemplateRef('searchInput')
 
 // The search bar renders once for the whole window and is shared by every
-// logical tab, so its text has to be persisted per tab to stay independent.
-// Mirror the live input value here since FtInput doesn't expose a getter.
-const searchTextByTabId = new Map()
-const currentSearchText = ref('')
+// logical tab, so the store keeps its text per tab.
+const currentSearchText = computed({
+  get: () => store.getters.getSearchText(searchFilterTabId.value) ?? '',
+  set: value => store.commit('setSearchText', { tabId: searchFilterTabId.value, value }),
+})
 // The pinned phone search pill shows the text while the input is hidden.
 const pinnedSearchText = computed(() => currentSearchText.value.trim())
 
@@ -818,19 +820,6 @@ function getSearchTextFromPath(path) {
   }
 }
 
-/**
- * @param {string} tabId
- * @returns {string}
- */
-function getSearchTextForTab(tabId) {
-  if (searchTextByTabId.has(tabId)) {
-    return searchTextByTabId.get(tabId) ?? ''
-  }
-
-  const path = store.getters.getTabById(tabId)?.route.path ?? ''
-  return getSearchTextFromPath(path) ?? ''
-}
-
 const presentedRoute = computed(() => {
   if (!usesLogicalTabs) {
     return route
@@ -843,8 +832,8 @@ const presentedRoute = computed(() => {
 const presentedRoutePath = computed(() => presentedRoute.value?.path ?? '')
 
 watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) => {
-  // Tab switches restore that tab's cached draft in the watcher below. Route
-  // changes within one tab restore the submitted query from navigation history.
+  // Tab switches show that tab's text, see the watcher below. Route changes
+  // within one tab restore the submitted query from navigation history.
   if (tabId !== previousTabId) {
     return
   }
@@ -856,30 +845,22 @@ watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) 
   }
 })
 
-if (usesLogicalTabs) {
-  const presentedTabId = computed(() => store.getters.getPresentedTabId)
+watch(searchFilterTabId, (tabId, previousTabId) => {
+  if (store.getters.getSearchText(tabId) == null) {
+    // Restored tabs show their search query. Before the first tab is presented,
+    // text is kept under 'web' (e.g. a search carried into a new window).
+    const carriedText = previousTabId === 'web' ? store.getters.getSearchText('web') : null
+    store.commit('setSearchText', {
+      tabId,
+      value: getSearchTextFromPath(presentedRoutePath.value) ?? carriedText ?? '',
+    })
+  }
+  if (previousTabId === 'web') store.commit('setSearchText', { tabId: 'web', value: undefined })
 
-  watch(presentedTabId, (tabId, previousTabId) => {
-    // Skip the initial null -> id transition during startup so we don't clobber
-    // text that was pre-filled for this tab (e.g. a search carried into a new
-    // window). A search route is the exception: restored tabs have no cached
-    // input text, so hydrate it from the route itself.
-    if (previousTabId == null) {
-      if (tabId != null) {
-        const searchText = getSearchTextForTab(tabId)
-        if (searchText.length > 0) {
-          updateSearchInputText(searchText)
-        }
-      }
-      return
-    }
-
-    searchTextByTabId.set(previousTabId, currentSearchText.value)
-    if (phoneLayout.value) closePhoneSearch()
-    updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
-    cancelSearchSuggestions()
-  })
-}
+  if (phoneLayout.value) closePhoneSearch()
+  cancelSearchSuggestions()
+  lastSuggestionQuery.value = ''
+})
 
 /**
  * @param {string} rawQueryText
@@ -1145,7 +1126,6 @@ function updateSearchInputText(text) {
   resetLinkPreview()
   lastSuggestionQuery.value = ''
   currentSearchText.value = text
-  searchInput.value?.setText(text)
 }
 
 /**
