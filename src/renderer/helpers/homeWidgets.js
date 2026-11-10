@@ -39,12 +39,10 @@ export function syncHomeWidgets(store, watch) {
       }
     }),
     syncWidget(watch, 'setWatchTime', () => {
+      // Turning statistics off clears the widget even if they never loaded.
+      if (!getters.getRememberHistory || !getters.getEnableWatchStats) return { days: {} }
       if (!store.state.watchStats.watchStatsLoaded) return null
-      return {
-        days: getters.getRememberHistory && getters.getEnableWatchStats
-          ? createWatchTimeWidgetDays(limitWatchSecondsByDate(getters, 'all'))
-          : {},
-      }
+      return { days: createWatchTimeWidgetDays(limitWatchSecondsByDate(getters, 'all')) }
     }),
   ]
   if (supportsYtDlp) {
