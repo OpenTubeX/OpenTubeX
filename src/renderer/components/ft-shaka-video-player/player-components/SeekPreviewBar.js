@@ -75,7 +75,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       if (this.video.duration) this.keyboardSeekTime = this.getValue()
     })
     this.eventManager.listen(this.video, 'seeking', () => {
+      if (this.keyboardSeekTime === null) return
       this.keyboardSeekTime = null
+      // Another seek can start before Shaka's delayed one, which seeks to the bar's value.
+      this.setValue(this.video.currentTime)
     })
     this.eventManager.listen(this.container, 'mousedown', () => {
       this.mousePressed = true
