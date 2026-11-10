@@ -64,18 +64,25 @@ public class SettingsSearchTest {
                 awaitCondition(view, "document.activeElement === document.querySelector('.settingsSearch input')");
                 // This test acts as the IME. Hide the system keyboard so it
                 // cannot commit or replace the test's composing region.
-                scenario.onActivity(activity -> activity.getSystemService(InputMethodManager.class)
-                    .hideSoftInputFromWindow(view.getWindowToken(), 0));
+                // A slow keyboard can show itself again after hiding, and its
+                // next hide commits the composing text, so wait until it stays hidden.
                 AtomicBoolean keyboardVisible = new AtomicBoolean(true);
-                long keyboardDeadline = SystemClock.uptimeMillis() + 5000;
-                while (keyboardVisible.get() && SystemClock.uptimeMillis() < keyboardDeadline) {
+                long keyboardDeadline = SystemClock.uptimeMillis() + 15000;
+                long hiddenSince = -1;
+                while (SystemClock.uptimeMillis() < keyboardDeadline) {
                     scenario.onActivity(activity -> {
                         WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
                         keyboardVisible.set(insets == null || insets.isVisible(WindowInsetsCompat.Type.ime()));
+                        if (keyboardVisible.get()) {
+                            activity.getSystemService(InputMethodManager.class).hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
                     });
-                    if (keyboardVisible.get()) Thread.sleep(100);
+                    if (keyboardVisible.get()) hiddenSince = -1;
+                    else if (hiddenSince < 0) hiddenSince = SystemClock.uptimeMillis();
+                    else if (SystemClock.uptimeMillis() - hiddenSince >= 1000) break;
+                    Thread.sleep(100);
                 }
-                assertTrue("System keyboard is hidden before simulating composing input", !keyboardVisible.get());
+                assertTrue("System keyboard stays hidden before simulating composing input", !keyboardVisible.get());
                 AtomicReference<InputConnection> connection = new AtomicReference<>();
                 long deadline = SystemClock.uptimeMillis() + 5000;
                 while (connection.get() == null && SystemClock.uptimeMillis() < deadline) {
