@@ -171,6 +171,7 @@ final class YtDlpDownloads {
             .put("cookies", useCookies ? config.optString("cookies") : "");
         record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
         record.put("errorMessage", JSONObject.NULL).put("started", false);
+        clearCurrentVideo(record);
         if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());
         records.put(id, record);
         publish(record);
@@ -430,6 +431,11 @@ final class YtDlpDownloads {
         } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
     }
 
+    // A requeued record must not show the video its previous run stopped at.
+    private static void clearCurrentVideo(JSONObject record) {
+        for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.remove(key);
+    }
+
     private static Object positiveInteger(String[] fields, int index) {
         try {
             int value = fields.length > index ? Integer.parseInt(fields[index]) : 0;
@@ -483,7 +489,11 @@ final class YtDlpDownloads {
             paused = false;
             for (JSONObject record : records.values()) if (record.optString("status").equals("paused")) updateStatus(record.getLong("id"), "queued", null);
         } else if (action.equals("retry-all")) {
-            for (JSONObject record : records.values()) if (record.optString("status").equals("failed")) updateStatus(record.getLong("id"), paused ? "paused" : "queued", null);
+            for (JSONObject record : records.values()) {
+                if (!record.optString("status").equals("failed")) continue;
+                clearCurrentVideo(record);
+                updateStatus(record.getLong("id"), paused ? "paused" : "queued", null);
+            }
         } else if (!action.equals("refresh")) return false;
         save();
         if (hasQueued()) wake();

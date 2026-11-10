@@ -299,6 +299,12 @@
             {{ channelName }}
           </p>
           <p
+            v-if="currentVideoText"
+            dir="auto"
+          >
+            {{ currentVideoText }}
+          </p>
+          <p
             v-if="summary"
             class="downloadSummary"
           >
