@@ -1431,11 +1431,7 @@ function moveDraggedVideo(playlistItemId, order) {
   // Show the new order right away, while the saved one is updated.
   tempShownPlaylistItems.value = items
   // A later drag can start before this save finishes, so save in order.
-  const id = playlistId.value
-  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items, () => draggedOrderSave === save)).finally(() => {
-    if (draggedOrderSave === save) draggedOrderSave = null
-  })
-  draggedOrderSave = save
+  queueOrderSave(items)
 }
 
 /**
@@ -1444,6 +1440,14 @@ function moveDraggedVideo(playlistItemId, order) {
  */
 function saveMovedVideos(items) {
   playlistItems.value = items
+  queueOrderSave(items)
+}
+
+/**
+ * Saves an order after the earlier moves and drags, in the playlist open now.
+ * @param {any[]} items
+ */
+function queueOrderSave(items) {
   const id = playlistId.value
   const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items, () => draggedOrderSave === save)).finally(() => {
     if (draggedOrderSave === save) draggedOrderSave = null

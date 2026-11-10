@@ -47,7 +47,10 @@ test('restored sync settings sign out and leave the old installation its device 
     const calls = []
     await forgetRestoredSyncServerDevice({
       rootState: { settings },
-      dispatch: async (action, value) => { calls.push(value === undefined ? action : [action, value]) },
+      dispatch: async (action, value) => {
+        calls.push(value === undefined ? action : [action, value])
+        if (action === 'disconnectSyncServer') settings.syncServerToken = ''
+      },
       commit: (mutation, value) => calls.push([mutation, value]),
     })
     return calls
@@ -61,4 +64,14 @@ test('restored sync settings sign out and leave the old installation its device 
   ])
   assert.deepEqual(await run({ syncServerToken: '', syncServerDeviceId: '' }), [])
   assert.equal(forgotten.length, 2)
+
+  // A token that could not be removed stays out of this session, and the restore is checked again next launch
+  const settings = { syncServerToken: 'token', syncServerDeviceId: 'old-device' }
+  const calls = []
+  await assert.rejects(forgetRestoredSyncServerDevice({
+    rootState: { settings },
+    dispatch: async action => { calls.push(action) },
+    commit: (mutation, value) => calls.push([mutation, value]),
+  }), /Could not sign restored app data out of sync/)
+  assert.deepEqual(calls, ['disconnectSyncServer', ['setSyncServerToken', '']])
 })

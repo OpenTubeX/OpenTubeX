@@ -1703,6 +1703,11 @@ const actions = {
     forgetSyncDeviceId()
     if (!syncServerToken && !syncServerDeviceId) return
     await dispatch('disconnectSyncServer')
+    if (rootState.settings.syncServerToken) {
+      // Saving failed. Keep the token out of this session; the next launch tries again.
+      commit('setSyncServerToken', '')
+      throw new Error('Could not sign restored app data out of sync')
+    }
     await dispatch('updateSyncServerDeviceId', '', { root: true })
     await dispatch('updateSyncServerDeviceName', '', { root: true })
     if (syncServerToken) commit('setSyncServerError', SYNC_SERVER_RESTORED_DEVICE_MESSAGE)
