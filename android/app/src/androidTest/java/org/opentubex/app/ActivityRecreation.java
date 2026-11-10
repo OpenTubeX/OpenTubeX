@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * ActivityScenario.recreate can lose track of the relaunched instance, whose
  * intent then no longer matches the one the scenario started.
  */
-final class ActivityRecreation<T extends Activity> {
+final class ActivityRecreation<T extends Activity> implements AutoCloseable {
     private final ActivityScenario<T> scenario;
     private final Class<T> type;
     private T current;
@@ -52,7 +52,8 @@ final class ActivityRecreation<T extends Activity> {
     }
 
     /** Finishes a recreated activity the scenario may no longer close. */
-    void finish() {
+    @Override
+    public void close() {
         T activity = current;
         if (activity != null) InstrumentationRegistry.getInstrumentation().runOnMainSync(activity::finish);
     }

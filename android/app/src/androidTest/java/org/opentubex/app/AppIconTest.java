@@ -287,11 +287,10 @@ public class AppIconTest {
                 assertEquals(before, AppIconPlugin.current(context));
             }
             AppIconPlugin.select(context, "dracula");
-            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-                ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
+            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+                 ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
                 recreation.recreate();
                 assertEquals("dracula", AppIconPlugin.current(context));
-                recreation.finish();
             }
             AppIconPlugin.select(context, "default");
             assertEquals("default", AppIconPlugin.current(context));

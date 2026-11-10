@@ -51,9 +51,9 @@ public class StartupBackgroundTest {
             {"dark", "#0f0f0f"}, {"light", "#f1f1f1"},
             {"openTubeXDark", "#111111"}, {"hotPink", "#dd197f"}
         }) {
-            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+                 ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
                 AtomicReference<WebView> reference = new AtomicReference<>();
-                ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
                 scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
                 WebView view = reference.get();
                 awaitReady(view);
@@ -141,7 +141,6 @@ public class StartupBackgroundTest {
                     evaluate(view, "Promise.all([" + store + ".dispatch('updateHideStartupSplash', " + originalHideSplash + "), " +
                         store + ".dispatch('updateBaseTheme', " + originalTheme + ")]).then(() => window.__startupThemeRestored = true)");
                     awaitCondition(view, "window.__startupThemeRestored === true");
-                    recreation.finish();
                 }
             }
         }

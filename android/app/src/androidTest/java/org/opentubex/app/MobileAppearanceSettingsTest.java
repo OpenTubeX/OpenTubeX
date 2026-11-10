@@ -210,7 +210,8 @@ public class MobileAppearanceSettingsTest {
 
     @Test
     public void alwaysShowScrollbarsControlsNativePageFading() throws Exception {
-        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+             ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
             WebView view = webView(scenario);
             String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
             String saved = evaluate(view, store + ".getters.getAlwaysShowScrollbars");
@@ -248,7 +249,6 @@ public class MobileAppearanceSettingsTest {
                 assertIdlePageScrollbar(scenario, view, true);
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
                 awaitCondition(view, "window.__scrollbarSettingSaved === true");
-                ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
                 recreation.recreate();
                 AtomicReference<WebView> recreatedView = new AtomicReference<>();
                 recreation.onActivity(activity -> recreatedView.set(activity.getBridge().getWebView()));

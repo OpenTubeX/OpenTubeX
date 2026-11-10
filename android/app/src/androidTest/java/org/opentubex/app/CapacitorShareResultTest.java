@@ -48,7 +48,8 @@ public class CapacitorShareResultTest {
             }
         };
         ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(stopRenderer);
-        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+             ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
             scenario.onActivity(activity -> {
                 activity.getBridge().getWebView().loadUrl("about:blank");
                 SharePlugin plugin = (SharePlugin) activity.getBridge().getPlugin("Share").getInstance();
@@ -68,7 +69,6 @@ public class CapacitorShareResultTest {
             // chooser. Restore its pending snapshot in a new Activity, as after
             // process death, then exercise real recreation while still pending.
             dismissChoosers(1);
-            ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
             recreation.recreate();
             recreation.onActivity(activity -> activity.getBridge().restoreInstanceState(saved[0]));
             for (int i = 0; i < 2; i++) {
