@@ -14,6 +14,7 @@ import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.j
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
 import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
 import { waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
+import { waitUnlessAborted } from '../../src/renderer/helpers/abortable.js'
 import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
@@ -107,6 +108,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     SubscriptionNetworkError,
     mapConcurrently,
     waitForPlaybackStartup,
+    waitUnlessAborted,
     buildRequestDiagnostic,
     classifyRequestFailure,
     formatRequestDiagnostic,
@@ -681,6 +683,19 @@ test('a failed channel ends the refresh only after the channels in flight finish
   } finally {
     slowWrite.resolve()
   }
+})
+
+test('a refresh that fails stops waiting for an IP block recovery without cancelling it', async () => {
+  const recovery = Promise.withResolvers()
+  const controller = new AbortController()
+  let recovered = false
+  recovery.promise.then(() => { recovered = true })
+  const wait = waitUnlessAborted(recovery.promise, controller.signal)
+  controller.abort()
+  assert.equal(await wait, undefined)
+  assert.equal(recovered, false)
+  recovery.resolve('done')
+  assert.equal(await waitUnlessAborted(recovery.promise, new AbortController().signal), 'done')
 })
 
 for (const type of ['ReelItem', 'ShortsLockupView']) {

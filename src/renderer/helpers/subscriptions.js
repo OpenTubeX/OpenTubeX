@@ -44,6 +44,7 @@ import {
   updateUpcomingPremiereState
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
+import { waitUnlessAborted } from './abortable'
 import { waitForPlaybackStartup } from './playbackStartup'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { includeNotificationChannels, reportSubscriptionUploads } from './uploadNotifications'
@@ -387,7 +388,9 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
       if (signal.aborted) return
 
       if (process.env.IS_ELECTRON) {
-        await window.ftElectron.waitForIpBlockRecoveryScript()
+        // A failed or cancelled refresh stops waiting, while the recovery
+        // script keeps running for playback.
+        await waitUnlessAborted(window.ftElectron.waitForIpBlockRecoveryScript(), signal)
         if (signal.aborted) return
       }
 
