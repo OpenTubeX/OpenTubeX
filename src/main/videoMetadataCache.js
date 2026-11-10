@@ -1,9 +1,12 @@
 import { app, BrowserWindow, ipcMain, net, session } from 'electron'
 import { stat } from 'node:fs/promises'
+import * as http from 'node:http'
+import * as https from 'node:https'
 
 import { IpcChannels } from '../constants'
 import { settings, videoMetadataCache } from '../datastores'
 import { desktopDatastorePaths } from '../datastores/sqliteNode'
+import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
 import { isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
@@ -302,6 +305,45 @@ async function isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin) {
 }
 
 /**
+ * Requests one hop without following redirects, or returns null for a refused destination.
+ * @param {URL} parsedUrl
+ * @param {string | null} allowedPrivateOrigin
+ * @param {AbortSignal} signal
+ * @returns {Promise<Response | null>}
+ */
+export async function fetchVideoMetadataThumbnailHop(parsedUrl, allowedPrivateOrigin, signal) {
+  if (await session.defaultSession.resolveProxy(parsedUrl.href) === 'DIRECT') {
+    // Connect only to the validated addresses, as a second lookup could rebind to the local network.
+    const addresses = await resolveCastMediaAddresses(
+      parsedUrl,
+      url => url.origin === allowedPrivateOrigin,
+      hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' })
+    )
+    if (!addresses) return null
+
+    // Node's client sends no cookies and has no HTTP cache.
+    return fetchCastMedia(parsedUrl.protocol === 'https:' ? https : http, parsedUrl.href, {
+      method: 'GET',
+      headers: new Headers({ 'User-Agent': session.defaultSession.getUserAgent() }),
+      signal,
+      addresses
+    })
+  }
+
+  // The proxy resolves the hostname, so this connection cannot be pinned here.
+  if (!await isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin)) return null
+
+  return net.fetch(parsedUrl.href, {
+    // Thumbnail replacements often keep the same URL. Comparing a cached
+    // response would hide the change until its HTTP cache entry expires.
+    cache: 'no-store',
+    credentials: 'omit',
+    redirect: 'manual',
+    signal
+  })
+}
+
+/**
  * The main process downloads the thumbnails for the cache, so that private
  * addresses other than the configured API server stay out of reach.
  * @param {object} options
@@ -337,16 +379,8 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
       let response
 
       for (let redirectCount = 0; redirectCount <= MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS; redirectCount += 1) {
-        if (!await isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin)) return null
-
-        response = await net.fetch(parsedUrl.href, {
-          // Thumbnail replacements often keep the same URL. Comparing a cached
-          // response would hide the change until its HTTP cache entry expires.
-          cache: 'no-store',
-          credentials: 'omit',
-          redirect: 'manual',
-          signal: abortController.signal
-        })
+        response = await fetchVideoMetadataThumbnailHop(parsedUrl, allowedPrivateOrigin, abortController.signal)
+        if (!response) return null
 
         if (response.status < 300 || response.status >= 400) break
         if (redirectCount === MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS) return null
