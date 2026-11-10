@@ -404,8 +404,9 @@ let suggestionTimeout
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
-const phoneSearchPinned = computed(() => phoneLayout.value && store.getters.getAlwaysShowMobileSearchBar &&
-  !hideSearchBar.value && !showSearchContainer.value)
+// Search pages always pin the phone search so their query stays visible.
+const phoneSearchPinned = computed(() => phoneLayout.value && !hideSearchBar.value && !showSearchContainer.value &&
+  (store.getters.getAlwaysShowMobileSearchBar || presentedRoutePath.value.startsWith('/search/')))
 watch(hideSearchBar, hidden => {
   if (hidden && phoneLayout.value) closePhoneSearch()
 })

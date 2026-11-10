@@ -285,6 +285,15 @@ test('always-visible phone search returns to its pill and persists', { tag: '@sc
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await enablePhoneHeader(page)
   await expect(page.locator('.pinnedSearchTrigger')).toHaveCount(0)
+  // Search pages pin the search even with the setting off so the query stays visible.
+  await page.locator('.navSearchButton').click()
+  await page.locator('.topNav .ft-input').fill('pinned query')
+  await page.locator('.topNav .ft-input').press('Enter')
+  await expect(page).toHaveURL(/#\/search\/pinned%20query/)
+  await expect(page.locator('.pinnedSearchTrigger')).toHaveText('pinned query')
+  await expect(page.locator('.navSearchButton')).toHaveCount(0)
+  await goTo(page, 'history')
+  await expect(page.locator('.pinnedSearchTrigger')).toHaveCount(0)
   await page.evaluate(async theme => {
     const store = window.$store
     await store.dispatch('updateBaseTheme', theme)
