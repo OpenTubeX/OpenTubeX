@@ -36,6 +36,16 @@ async function expectValidScrollRange(scroller) {
   })).toBe(true)
 }
 
+// Without overflow the content must fill the viewport exactly, with nothing left to scroll
+async function expectNoScrollRange(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    return element.scrollTop <= 1 && Math.abs(end - viewport.height) <= 1 &&
+      element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable')
+  })).toBe(true)
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
 })
@@ -183,5 +193,35 @@ test.describe('with many playlists', () => {
     await filters.click()
     await expect(prompt.locator('.sortSelect')).toBeHidden()
     await expectValidScrollRange(scroller)
+  })
+
+  test('keeps its size while searching and fits a resized window @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1)])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    const card = page.locator('.promptCard')
+    const scroller = prompt.locator('.promptContentScroller')
+    await expect(prompt.locator('.playlist-selector-container')).toHaveCount(12)
+    await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await card.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    const before = await card.boundingBox()
+
+    await prompt.getByRole('searchbox').fill('Playlist 11')
+    await expect(prompt.locator('.playlist-selector-container')).toHaveCount(1)
+    await expectNoScrollRange(scroller)
+    const after = await card.boundingBox()
+    expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1)
+
+    // A smaller window drops the kept height, so no empty space follows the last playlist
+    await setWindowSize(app, page, { width: 500, height: 600 })
+    await expect.poll(() => scroller.evaluate((element) => {
+      const viewport = element.getBoundingClientRect()
+      const container = element.querySelector('.playlists-container').getBoundingClientRect()
+      const lastRow = [...element.querySelectorAll('.playlist-selector-container')].at(-1).getBoundingClientRect()
+      const end = container.bottom - viewport.top + element.scrollTop
+      return container.bottom - lastRow.bottom <= 8 && element.scrollTop <= Math.max(0, end - viewport.height) + 1
+    })).toBe(true)
   })
 })

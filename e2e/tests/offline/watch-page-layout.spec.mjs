@@ -305,6 +305,48 @@ test('opens the toolbar\'s Save to dropdown above the button without scrolling w
   expect(dropdownBounds.y).toBeGreaterThanOrEqual(0)
 })
 
+test.describe('with many playlists', () => {
+  test.use({
+    seed: {
+      settings: WATCH_PAGE_SEED,
+      playlists: Array.from({ length: 12 }, (_, index) => ({
+        _id: `playlist${index}`,
+        playlistName: index === 0 ? 'A long playlist name that widens the dropdown' : `Playlist ${index}`,
+        protected: false,
+        videos: [],
+      })),
+    },
+  })
+
+  test('keeps the toolbar\'s Save to dropdown in place with nothing left to scroll while searching', { tag: '@scale' }, async ({ app, page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateScrollPlayerMode', 'off'))
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const videoInfo = page.locator('.infoArea .watchVideoInfo')
+    await videoInfo.locator('.videoOptions').evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await videoInfo.locator('.videoOptions').getByRole('button', { name: 'Add to playlist', exact: true }).click()
+    const dropdown = videoInfo.locator('.iconDropdown:has(.addToPlaylistDropdown)')
+    const list = dropdown.locator('.playlistList')
+    await expect(dropdown.getByRole('option')).toHaveCount(12)
+    await list.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await dropdown.evaluate(element => Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished)))
+    const before = await dropdown.boundingBox()
+
+    // Playlists 1, 10 and 11 fit without scrolling
+    await dropdown.locator('.playlistSearch input').fill('Playlist 1')
+    await expect(dropdown.getByRole('option')).toHaveCount(3)
+    await expect.poll(() => list.evaluate(element => element.scrollTop === 0 &&
+      element.scrollHeight - element.clientHeight <= 1 &&
+      element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
+    const after = await dropdown.boundingBox()
+    for (const key of ['x', 'y', 'width', 'height']) {
+      expect(Math.abs(after[key] - before[key]), key).toBeLessThanOrEqual(1)
+    }
+  })
+})
+
 test('keeps watch metadata and comment filters inside a narrow viewport', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

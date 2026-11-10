@@ -8,8 +8,10 @@
     @closed="closeDropdown"
   >
     <div
+      ref="root"
       class="addToPlaylistDropdown"
       :class="{ phonePlaylistPicker: phoneLayout }"
+      :style="searchSize && { minInlineSize: searchSize.inlineSize }"
     >
       <p class="dropdownHeader">
         {{ t('User Playlists.Save to') }}
@@ -28,6 +30,7 @@
         ref="listScroller"
         v-overlay-scrollbars
         class="playlistList"
+        :style="searchSize && { minBlockSize: searchSize.listBlockSize }"
       >
         <ul
           ref="listContent"
@@ -82,7 +85,7 @@
 <script setup>
 import FtInput from '../FtInput/FtInput.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, ref, useTemplateRef } from 'vue'
+import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -117,8 +120,28 @@ const sheetOpen = ref(true)
 const listScroller = useTemplateRef('listScroller')
 const listContent = useTemplateRef('listContent')
 useScrollClamp(listScroller, listContent)
+const processedSearch = computed(() => search.value.trim().toLocaleLowerCase())
 const filteredPlaylists = computed(() => playlists.value.filter(playlist =>
-  playlist.playlistName.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
+  playlist.playlistName.toLocaleLowerCase().includes(processedSearch.value)))
+
+// The dropdown sizes itself to its rows, so keep the size it had before searching instead of
+// letting it shrink and move around while typing. The phone sheet has a fixed size already.
+const root = useTemplateRef('root')
+/** @type {import('vue').Ref<{ inlineSize: string, listBlockSize: string } | null>} */
+const lockedSearchSize = ref(null)
+const searchSize = computed(() => phoneLayout.value ? null : lockedSearchSize.value)
+
+// The watcher runs before the DOM updates, so this measures the rows shown before searching
+watch(processedSearch, (processedSearch_) => {
+  if (processedSearch_ === '') {
+    lockedSearchSize.value = null
+  } else if (lockedSearchSize.value === null && root.value && listScroller.value) {
+    lockedSearchSize.value = {
+      inlineSize: getComputedStyle(root.value).inlineSize,
+      listBlockSize: getComputedStyle(listScroller.value).blockSize,
+    }
+  }
+})
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
 

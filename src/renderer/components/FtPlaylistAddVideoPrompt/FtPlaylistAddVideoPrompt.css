@@ -145,6 +145,8 @@
   /* Use remaining height */
   flex-grow: 1;
 
+  /* The height kept while searching includes the padding */
+  box-sizing: border-box;
 }
 
 .playlist-selector-container:not(.disabled) {
