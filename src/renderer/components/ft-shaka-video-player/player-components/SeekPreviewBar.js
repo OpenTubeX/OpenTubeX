@@ -41,6 +41,12 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.cancelTime = 0
     /** @private */
     this.cancelled = false
+    /**
+     * Shaka seeks to a keyboard change after a short delay, during which its
+     * playback updates would move the thumb back to the current time.
+     * @private @type {number | null}
+     */
+    this.keyboardSeekTime = null
 
     // Shaka 5.3 seeks by a second per wheel tick over the bar and cancels the
     // scroll. Let the wheel scroll the page as it did before.
@@ -64,6 +70,13 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
       }
     })
     this.eventManager.listen(this.player, 'unloading', () => this.hideSeekPreview())
+    // Mouse and touch changes prevent the native input, so only keys move the bar natively.
+    this.eventManager.listen(this.bar, 'input', () => {
+      if (this.video.duration) this.keyboardSeekTime = this.getValue()
+    })
+    this.eventManager.listen(this.video, 'seeking', () => {
+      this.keyboardSeekTime = null
+    })
     this.eventManager.listen(this.container, 'mousedown', () => {
       this.mousePressed = true
     }, true)
@@ -90,7 +103,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
    * @param {number} time
    */
   setValue(time) {
-    super.setValue(this.previewTime ?? time)
+    super.setValue(this.previewTime ?? this.keyboardSeekTime ?? time)
   }
 
   update() {

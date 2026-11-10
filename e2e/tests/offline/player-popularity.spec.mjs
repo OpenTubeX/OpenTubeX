@@ -85,7 +85,8 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await expect.poll(async () => Number(await bar.locator('input').inputValue())).toBeCloseTo(22.3, 1)
   await bar.locator('input').press('ArrowRight')
   await expect(tooltip).toContainText('Most replayed')
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+  // Playback updates while the controls are shown must not undo the keyboard seek.
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(22.5)
 
   await setPlayerFullscreen(page, false)
   const normalBox = await bar.boundingBox()
