@@ -221,9 +221,11 @@ test('re-importing older watch history keeps the saved duration, resume position
   assert.equal(newer.timeWatched, Date.parse('2026-06-01T00:00:00Z'))
   assert.deepEqual([newer.title, newer.lengthSeconds, newer.watchProgress, newer.published], ['Saved title', 600, 321, 1])
 
-  // A name from another channel stays out of a record that already has a channel ID
+  // Neither half of another channel's name and ID joins a record that has the other half
   const otherChannel = mergeTakeoutHistoryRecord({ ...saved, authorId: 'UCsaved' }, parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries[0])
   assert.deepEqual([otherChannel.author, otherChannel.authorId], ['', 'UCsaved'])
+  const unnamedChannel = mergeTakeoutHistoryRecord({ ...saved, author: 'Other', authorId: '' }, parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries[0])
+  assert.deepEqual([unnamedChannel.author, unnamedChannel.authorId], ['Other', ''])
 })
 
 test('watch history parsing excludes malformed records from preview counts and preserves usable entries', () => {

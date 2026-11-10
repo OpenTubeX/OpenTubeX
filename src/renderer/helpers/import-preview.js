@@ -135,10 +135,11 @@ export function parseTakeoutWatchHistory(history) {
 export function mergeTakeoutHistoryRecord(current, imported) {
   if (!current) return imported
   const merged = { ...current }
-  const sameChannel = !current.authorId || current.authorId === imported.authorId
+  // The channel name and ID only belong together, so fill neither when the saved one points elsewhere
+  const sameChannel = (!current.authorId || current.authorId === imported.authorId) &&
+    (!current.author || current.author === imported.author)
   for (const [key, value] of Object.entries(imported)) {
-    // A channel name from Takeout only belongs with its own channel ID
-    if (key === 'author' && !sameChannel) continue
+    if ((key === 'author' || key === 'authorId') && !sameChannel) continue
     if (merged[key] == null || merged[key] === '') merged[key] = value
   }
   merged.timeWatched = Math.max(current.timeWatched ?? 0, imported.timeWatched)
