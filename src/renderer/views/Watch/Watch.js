@@ -4849,9 +4849,13 @@ export default defineComponent({
         return
       }
 
+      // Without an entry ID, remove the duplicate the playlist panel shows as playing
+      const shownItem = this.playlistItemId ? null : this.$refs.watchVideoPlaylist?.getPlayingItem()
       const playlistItem = playlist.videos.find((video) => this.playlistItemId
         ? video.playlistItemId === this.playlistItemId
-        : video.videoId === this.videoId)
+        : shownItem?.videoId === this.videoId && shownItem.playlistItemId
+          ? video.playlistItemId === shownItem.playlistItemId
+          : video.videoId === this.videoId)
       if (playlistItem == null) { return }
 
       // Set before the write so later time updates do not queue it again, and
