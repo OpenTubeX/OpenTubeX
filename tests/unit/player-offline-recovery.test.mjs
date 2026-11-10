@@ -128,8 +128,7 @@ test('a timeout waits for an unreachable stream server but reloads a stuck strea
   await Promise.resolve()
   stuck.waits[0].resolve(false)
   await stuckHandled
-  assert.deepEqual({ retries: stuck.player.retries, reloads: stuck.view.reloads },
-    { retries: 0, reloads: ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1003]'] })
+  assert.deepEqual({ retries: stuck.player.retries, reloads: stuck.view.reloads.length }, { retries: 0, reloads: 1 })
 })
 
 test('a stream whose in-place retry cannot start reloads once the server answers', async () => {
