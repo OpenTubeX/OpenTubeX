@@ -264,8 +264,8 @@ kbd {
 /* Animates the dim and blur rather than opacity, like FtPrompt. */
 @keyframes command-palette-backdrop-enter {
   from {
-    background-color: transparent;
-    backdrop-filter: blur(0);
+    background-color: var(--modal-backdrop-enter-color, transparent);
+    backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
   }
 }
 

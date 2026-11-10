@@ -24,6 +24,13 @@
   background: var(--card-bg-color);
   overflow: hidden;
   overscroll-behavior: contain;
+
+  /* The sheet opens, closes, and drags with transforms, which make a fixed
+     layer follow the sheet until the transform ends and it snaps back to the
+     viewport. Cards in sheets paint their image themselves, like FtCard's
+     fixedBackground="false". */
+  --fixed-background-display: none;
+  --fixed-background-host-clip: border-box;
 }
 
 .mobileSheet[open].compactSheet {

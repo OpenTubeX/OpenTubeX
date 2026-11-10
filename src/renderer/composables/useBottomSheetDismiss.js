@@ -2,6 +2,7 @@ import { nextTick, onBeforeUnmount, watch } from 'vue'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers/androidBackGesture'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
+import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from '../helpers/modalBackdropHandoff'
 
 const BACK_PREVIEW_DURATION = 180
 // Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
@@ -197,8 +198,14 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
     const animation = sheetAnimation = animate(element, leaving
       ? [{ transform }, { transform: 'translateY(100%)' }]
       : [{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], leaving ? 140 : 220)
-    animate(backdrop, [{ ...HIDDEN_BACKDROP, offset: leaving ? 1 : 0 }], leaving ? 140 : 220)
-    animation.finished.then(done, done)
+    if (leaving) {
+      animate(backdrop, [{ ...HIDDEN_BACKDROP, offset: 1 }], 140)
+      const release = trackLeavingModalBackdrop(backdrop)
+      animation.finished.finally(release).then(done, done)
+    } else {
+      animate(backdrop, [{ ...(takeOverLeavingModalBackdrop(backdrop) ?? HIDDEN_BACKDROP), offset: 0 }], 220)
+      animation.finished.then(done, done)
+    }
   }
 
   onBeforeUnmount(() => {
