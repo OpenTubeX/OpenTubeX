@@ -140,6 +140,8 @@ import {
   ShortsPlaybackCache
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
+import { getSabrLiveTargetDuration, isSabrLiveBroadcastUrl } from '../../helpers/player/sabrProtocol'
+import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
@@ -3657,7 +3659,23 @@ export default defineComponent({
         if (!metadataOnly && (this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
           let useRemoteManifest = true
 
-          if (this.isPostLiveDvr) {
+          // Unlike for videos, SABR withholds live media after about 30 seconds
+          // from a session pending attestation, and HLS needs no attestation.
+          // Live captions are text formats that only HLS delivers so far.
+          const liveTargetDurationSec = this.isLive && !this.isPostLiveDvr && poToken && isAttestedPoToken(poToken) &&
+            result.streaming_data?.server_abr_streaming_url &&
+            result.player_config?.media_common_config.media_ustreamer_request_config &&
+            isSabrLiveBroadcastUrl(result.streaming_data.server_abr_streaming_url) &&
+            !result.streaming_data.adaptive_formats.some(format => format.mime_type.startsWith('text/'))
+            ? getSabrLiveTargetDuration(result.streaming_data.adaptive_formats)
+            : null
+
+          if (liveTargetDurationSec !== null) {
+            // Only SABR offers ongoing streams above 1080p and their full DVR window
+            this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, [], liveTargetDurationSec)
+            this.manifestMimeType = MANIFEST_TYPE_SABR
+            useRemoteManifest = false
+          } else if (this.isPostLiveDvr) {
             // I wasn't able to get SABR working with Post-Live-DVR yet, so for the moment we'll use YouTube's provided DASH manifest instead.
             // It only contains the last 4 hours of the stream, instead of starting from the beginning but that is better than nothing.
             if (
@@ -3679,8 +3697,8 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            // Ongoing streams and premieres use HLS at the live edge. Remote
-            // DASH can advertise a rewind range whose segments are unavailable.
+            // Without SABR, ongoing streams and premieres use HLS at the live edge.
+            // Remote DASH can advertise a rewind range whose segments are unavailable.
             const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
             const dashManifestUrl = this.isPostLiveDvr
               ? result.streaming_data?.dash_manifest_url ??
@@ -6424,8 +6442,9 @@ export default defineComponent({
      * @param {string} poToken
      * @param {SabrData['clientInfo']} clientInfo
      * @param {import('../../helpers/player/SabrManifestParser').SabrManifest['storyboards']} storyboards
+     * @param {number | null} liveTargetDurationSec segment duration of an ongoing stream
      */
-    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards) {
+    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards, liveTargetDurationSec = null) {
       const url = new URL(videoInfo.streaming_data.server_abr_streaming_url)
       url.searchParams.set('cpn', videoInfo.cpn)
       // Shaka's scheme registry is renderer-global. Each retained tab therefore
@@ -6456,6 +6475,7 @@ export default defineComponent({
         duration: formatDurationsMs.length > 0
           ? Math.min(...formatDurationsMs) / 1000
           : fallbackDurationSeconds,
+        ...(liveTargetDurationSec !== null && { live: { targetDurationSec: liveTargetDurationSec } }),
         formats: formats.map((format) => ({
           itag: format.itag,
           lastModified: format.last_modified_ms,
@@ -6483,7 +6503,8 @@ export default defineComponent({
           colorTransferCharacteristics: format.color_info?.transfer_characteristics,
           colorPrimaries: format.color_info?.primaries
         })),
-        captions: this.captions,
+        // Shaka cannot add external text tracks to a live presentation
+        captions: liveTargetDurationSec !== null ? [] : this.captions,
         chapters: this.videoChapters,
         storyboards
       }
@@ -6982,7 +7003,6 @@ export default defineComponent({
     isSabrVideoStream() {
       return this.activeFormat === 'dash' &&
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
-        !this.isLive &&
         !this.isPostLiveDvr
     },
 

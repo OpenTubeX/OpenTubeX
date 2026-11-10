@@ -2314,8 +2314,13 @@ export default defineComponent({
     // #region player config
 
     const seekingIsPossible = computed(() => {
-      if (props.isLive && (props.playbackEngine === 'built-in' || props.isLiveDvrEnabled === false)) {
+      if (props.isLive && props.isLiveDvrEnabled === false) {
         return false
+      }
+
+      // Only SABR delivers the rewind window of the built-in engine's live streams
+      if (props.isLive && props.playbackEngine === 'built-in') {
+        return props.manifestMimeType === 'application/sabr+json'
       }
 
       if (props.manifestMimeType !== 'application/x-mpegurl' || !props.isLive) {
