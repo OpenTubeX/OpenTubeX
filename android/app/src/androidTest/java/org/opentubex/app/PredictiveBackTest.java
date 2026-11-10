@@ -145,7 +145,7 @@ public class PredictiveBackTest {
                 start(BackEventCompat.EDGE_LEFT);
                 progress(0.5f, BackEventCompat.EDGE_LEFT);
                 await(view, "document.querySelector('.settingsContent').getAnimations().some(a => a.playState === 'paused')");
-                scenario.onActivity(activity -> {
+                onMain(activity -> {
                     activity.getOnBackPressedDispatcher().onBackPressed();
                     activity.getOnBackPressedDispatcher().onBackPressed();
                 });
