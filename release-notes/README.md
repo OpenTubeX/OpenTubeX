@@ -59,6 +59,6 @@ Images are optional. Put them after a blank line as Markdown images, `<img>` tag
 
 ## Follow-up changes
 
-A pull request that changes something unreleased adds no new note. Update the existing note if its wording or images no longer fit. If the note still fits, or the change doesn't meet the bar above, check "No release note needed" in the pull request description.
+A pull request that changes something unreleased adds no new note. Check the latest release, not a nightly, to tell: most unreleased changes have no pending note. If a pull request changes both released and unreleased behavior, the note covers only the released part. Update the existing note if its wording or images no longer fit. If the note still fits, or the change doesn't meet the bar above, check "No release note needed" in the pull request description.
 
 `pnpm run lint` checks every note.

@@ -19,7 +19,7 @@
 
 ## Release note
 <!-- Changes most users will notice need a release note file. See release-notes/README.md for when to add one. -->
-<!-- Check the box if the change needs no note, for example because it is minor polish, a fix for a rare case, or an unreleased change's note still covers it. -->
+<!-- Check the box if the change needs no note, for example because it is minor polish, a fix for a rare case, or it only changes behavior that hasn't been released yet. -->
 - [ ] No release note needed
 
 ## Screenshots
