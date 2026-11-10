@@ -129,13 +129,20 @@
   pointer-events: none;
 }
 
+/* Moves with translate, measured in its own 40% width, so the endless
+   animation does not lay out the page on every frame. */
 .addFeedProgress::before {
   position: absolute;
   inset-block: 0;
+  inset-inline-start: 0;
   inline-size: 40%;
   background-color: var(--primary-color);
   content: '';
   animation: add-feed-progress 1.2s ease-in-out infinite;
+}
+
+.addFeedProgress:dir(rtl)::before {
+  animation-name: add-feed-progress-rtl;
 }
 
 /* Without animations, a full bar still shows that the feed loads */
@@ -145,10 +152,20 @@
 
 @keyframes add-feed-progress {
   from {
-    inset-inline-start: -40%;
+    translate: -100%;
   }
 
   to {
-    inset-inline-start: 100%;
+    translate: 250%;
+  }
+}
+
+@keyframes add-feed-progress-rtl {
+  from {
+    translate: 100%;
+  }
+
+  to {
+    translate: -250%;
   }
 }

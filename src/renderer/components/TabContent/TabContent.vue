@@ -412,11 +412,16 @@ function cancelLoaderSettle() {
 }
 
 /* Android WebView ticks animations under this opacity: 0 layer on the main
-   thread. A spinner in a neighbor would otherwise render a frame per refresh. */
+   thread. A spinner in a neighbor would otherwise render a frame per refresh.
+   Hidden browsing pages behind Watch keep ticking their animations as well. */
 .pageSwipePrewarm,
 .pageSwipePrewarm :deep(*),
 .pageSwipePrewarm :deep(*::before),
-.pageSwipePrewarm :deep(*::after) {
+.pageSwipePrewarm :deep(*::after),
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch,
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*),
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::before),
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch :deep(*::after) {
   animation-play-state: paused !important;
 }
 

@@ -546,26 +546,30 @@ watch(tabAvatarUrl, (avatarUrl) => {
 .tabLoadingLine {
   border-radius: inherit;
   overflow: hidden;
+
+  /* A window 70% as wide as the line sweeps along it. Moving the window with a
+     clip path runs on the compositor, while moving a dash along the stroke
+     would render the page on every frame for as long as the tab loads. */
+  animation: tab-loading-sweep 1.5s ease-in-out infinite;
 }
 
 .tabLoadingLine :deep(.embeddedProgressPath) {
   stroke: var(--accent-color);
   filter: drop-shadow(0 0 2px var(--accent-color));
-  animation: tab-loading-sweep 1.5s ease-in-out infinite;
+  stroke-dasharray: none !important;
 }
 
 @keyframes tab-loading-sweep {
   from {
-    stroke-dashoffset: calc(var(--embedded-progress-path-length) * 0.7);
+    clip-path: inset(0 100% 0 -70%);
   }
 
   to {
-    stroke-dashoffset: calc(var(--embedded-progress-path-length) * -1);
+    clip-path: inset(0 -70% 0 100%);
   }
 }
 
-:root[data-reduced-motion='reduce'] .tabLoadingLine :deep(.embeddedProgressPath) {
+:root[data-reduced-motion='reduce'] .tabLoadingLine {
   animation: none;
-  stroke-dasharray: var(--embedded-progress-path-length) var(--embedded-progress-gap-length) !important;
 }
 </style>

@@ -7,6 +7,7 @@
     :duration="transitionDurations"
     :move-class="moveClass"
     :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
+    :data-feed-enter-together="appear && !reducedMotion ? '' : null"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
       autoGrid: true,
@@ -22,13 +23,13 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 
 import store from '../../store/index'
 
 import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
 import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
-import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
@@ -163,12 +164,48 @@ watch(() => [
   store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]]
 ], applyThumbnailSizeStyles)
 
+// Items that fill an empty grid all fade in at once, so the grid fades in
+// for them: one animated element instead of one per card. Chromium restyles
+// every animated element on each frame the page renders around them, which
+// on a feed of hundreds of cards slows the page that is opening.
+const ENTER_TOGETHER_ATTRIBUTE = 'data-feed-enter-together'
+let fillingEmptyGrid = false
+/** @type {Animation | null} */
+let enterTogetherAnimation = null
+
+/** @param {Element} grid */
+function enterTogether(grid) {
+  if (grid.childElementCount === 0 || reducedMotion.value) {
+    grid.removeAttribute(ENTER_TOGETHER_ATTRIBUTE)
+    return
+  }
+  enterTogetherAnimation?.cancel()
+  const animation = applyAnimationSpeed(grid.animate(
+    { opacity: [0, 1], translate: ['0 10px', '0 0'] },
+    { duration: 300, easing: 'ease' }
+  ))
+  enterTogetherAnimation = animation
+  animation.finished.then(() => {
+    if (enterTogetherAnimation !== animation) return
+    enterTogetherAnimation = null
+    grid.removeAttribute(ENTER_TOGETHER_ATTRIBUTE)
+  }, () => {})
+}
+
+onUpdated(() => {
+  const grid = gridElement.value?.$el
+  if (fillingEmptyGrid && grid instanceof Element) enterTogether(grid)
+  fillingEmptyGrid = false
+})
+
 let leavingItemLayouts = null
 let pendingLeavingItems = []
 onBeforeUpdate(() => {
   leavingItemLayouts = null
   pendingLeavingItems = []
   const grid = gridElement.value?.$el
+  fillingEmptyGrid = grid instanceof Element && grid.childElementCount === 0 && !reducedMotion.value
+  if (fillingEmptyGrid) grid.setAttribute(ENTER_TOGETHER_ATTRIBUTE, '')
   if (!props.itemKeys || !(grid instanceof Element) || grid.closest('.newFeed') === null) return
   const retainedKeys = new Set(props.itemKeys)
   const leaving = Array.from(grid.children).filter(element => (
@@ -315,6 +352,7 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
   resizeObserver.observe(gridElement.value.$el)
   window.addEventListener('scroll', updatePageAtBottom, { passive: true })
+  if (props.appear) enterTogether(gridElement.value.$el)
 })
 
 onBeforeUnmount(() => {

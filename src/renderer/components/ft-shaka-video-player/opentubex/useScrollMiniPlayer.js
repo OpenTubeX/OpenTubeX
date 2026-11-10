@@ -19,7 +19,8 @@ import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
 import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
 import { setAndroidPageScrollbarInsetTop } from '../../../helpers/androidUi'
 import {
-  animateScrollMiniPlayerBounce,
+  BOUNCE_EASING,
+  BOUNCE_MS,
   clampScrollMiniPlayerRect,
   DEFAULT_ASPECT_RATIO,
   getAnchorVisibleRatio,
@@ -1507,21 +1508,23 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         const targetRect = snapScrollMiniPlayerToEdge(currentRect, insets)
         const fromRect = { ...currentRect }
 
-        if (scrollMiniBounceCancel) {
-          scrollMiniBounceCancel()
+        cancelScrollMiniPlayerBounce()
+        const clampedTarget = clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value)
+        applyScrollMiniPlayerRect(clampedTarget, true)
+        // The player takes its new position at once and bounces there with
+        // `translate`. Moving its `left` and `top` on every frame instead
+        // would lay out and render the page, and measure it, each frame.
+        const playerContainer = container.value
+        if (playerContainer && !isReducedMotionEnabled()) {
+          const bounce = applyAnimationSpeed(playerContainer.animate(
+            { translate: [`${fromRect.left - clampedTarget.left}px ${fromRect.top - clampedTarget.top}px`, '0px 0px'] },
+            { duration: BOUNCE_MS, easing: BOUNCE_EASING }
+          ))
+          scrollMiniBounceCancel = () => bounce.cancel()
+          bounce.finished.then(() => {
+            if (scrollMiniBounceCancel !== null) scrollMiniBounceCancel = null
+          }, () => {})
         }
-
-        scrollMiniBounceCancel = animateScrollMiniPlayerBounce(
-          fromRect,
-          targetRect,
-          (rect) => {
-            applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value))
-          },
-          () => {
-            applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value), true)
-            scrollMiniBounceCancel = null
-          }
-        )
       } else {
         applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(currentRect, insets), true)
       }

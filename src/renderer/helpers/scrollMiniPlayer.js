@@ -520,44 +520,8 @@ function getWidthForAspectRatio(height, aspectRatio) {
   return Math.max(1, Math.round(height * normalizeAspectRatio(aspectRatio)))
 }
 
-/**
- * @param {ScrollMiniPlayerRect} from
- * @param {ScrollMiniPlayerRect} to
- * @param {(rect: ScrollMiniPlayerRect) => void} onUpdate
- * @param {() => void} [onComplete]
- * @returns {() => void}
- */
-export function animateScrollMiniPlayerBounce(from, to, onUpdate, onComplete) {
-  const start = performance.now()
-  let rafId = 0
-
-  const tick = (now) => {
-    const elapsed = now - start
-    const progress = Math.min(1, elapsed / BOUNCE_MS)
-    const eased = easeOutBack(progress)
-
-    onUpdate({
-      ...from,
-      left: from.left + (to.left - from.left) * eased,
-      top: from.top + (to.top - from.top) * eased,
-      dock: to.dock,
-    })
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(tick)
-    } else if (onComplete) {
-      onComplete()
-    }
-  }
-
-  rafId = requestAnimationFrame(tick)
-
-  return () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId)
-    }
-  }
-}
+// easeOutBack as a timing function, so the bounce can run on the compositor.
+export const BOUNCE_EASING = `linear(${Array.from({ length: 31 }, (_, step) => Math.round(easeOutBack(step / 30) * 10000) / 10000).join(', ')})`
 
 /**
  * @param {ScrollMiniPlayerRect} rect
