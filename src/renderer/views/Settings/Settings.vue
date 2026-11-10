@@ -1410,12 +1410,15 @@ async function openSearchResult(sectionType, match) {
   // A control can sit on another tab of the opened subpage, such as the
   // color settings of the theme gallery's other theme list.
   if (!target && match.subpage) {
+    const selectedTab = content.querySelector('[data-settings-subpage-tab][aria-selected="true"]')
     for (const tab of content.querySelectorAll('[data-settings-subpage-tab]:not([aria-selected="true"])')) {
       tab.click()
       await nextTick()
       target = findTarget()
       if (target) break
     }
+    // Keep the tab the user was on when no tab has the result.
+    if (!target) selectedTab?.click()
   }
   if (!target) return
 
