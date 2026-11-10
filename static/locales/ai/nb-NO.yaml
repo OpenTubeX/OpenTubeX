@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Stemningsmodus
   Loading More: Laster inn mer
   New: Ny
+  Show Blocked Item: Vis blokkert element
 Search Listing:
   Label:
     Members Only: Bare for medlemmer
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Vis videotittel
     Show Bottom Right Actions Dock: Vis handlingsfelt nederst til høyre
     Paused Interface Hide Delay: Forsinkelse før grensesnittet skjules ved pause
+    Blur Blocked Items: Gjør blokkerte elementer uskarpe i stedet for å skjule dem
   Data Settings:
     Settings could not be imported: "Innstillingene kunne ikke importeres"
     Some settings could not be imported: "Ikke alle innstillingene kunne importeres ({failed} av {total} mislyktes)"

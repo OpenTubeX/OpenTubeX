@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Hangulatvilágítás
   Loading More: Továbbiak betöltése
   New: Új
+  Show Blocked Item: Letiltott elem megjelenítése
 Search Listing:
   Label:
     Members Only: Csak tagoknak
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Videó címének megjelenítése
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
+    Blur Blocked Items: Letiltott elemek elhomályosítása elrejtés helyett
   Data Settings:
     Settings could not be imported: "A beállításokat nem sikerült importálni"
     Some settings could not be imported: "Nem minden beállítást sikerült importálni ({total} beállításból {failed} sikertelen)"

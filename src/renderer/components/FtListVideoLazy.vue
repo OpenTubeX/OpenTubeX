@@ -3,30 +3,35 @@
     v-first-visible="visible ? false : onFirstVisible"
     :style="{ display }"
   >
-    <FtListVideo
+    <FtBlockedItem
       v-if="visible"
-      :data="data"
-      :playlist-id="playlistId"
-      :playlist-type="playlistType"
-      :playlist-index="playlistIndex"
-      :playlist-reverse="playlistReverse"
-      :playlist-shuffle="playlistShuffle"
-      :playlist-loop="playlistLoop"
-      :playlist-item-id="playlistItemId"
-      :force-list-type="forceListType"
-      :appearance="appearance"
-      :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
-      :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-      :can-move-video-up="canMoveVideoUp"
-      :can-move-video-down="canMoveVideoDown"
-      :can-remove-from-playlist="canRemoveFromPlaylist"
-      @move-video-to-the-top="moveVideoToTheTop"
-      @move-video-to-the-bottom="moveVideoToTheBottom"
-      @pause-player="pausePlayer"
-      @move-video-up="moveVideoUp"
-      @move-video-down="moveVideoDown"
-      @remove-from-playlist="removeFromPlaylist"
-    />
+      :blocked="blocked"
+      :reveal-key="data.videoId"
+    >
+      <FtListVideo
+        :data="data"
+        :playlist-id="playlistId"
+        :playlist-type="playlistType"
+        :playlist-index="playlistIndex"
+        :playlist-reverse="playlistReverse"
+        :playlist-shuffle="playlistShuffle"
+        :playlist-loop="playlistLoop"
+        :playlist-item-id="playlistItemId"
+        :force-list-type="forceListType"
+        :appearance="appearance"
+        :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
+        :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+        :can-move-video-up="canMoveVideoUp"
+        :can-move-video-down="canMoveVideoDown"
+        :can-remove-from-playlist="canRemoveFromPlaylist"
+        @move-video-to-the-top="moveVideoToTheTop"
+        @move-video-to-the-bottom="moveVideoToTheBottom"
+        @pause-player="pausePlayer"
+        @move-video-up="moveVideoUp"
+        @move-video-down="moveVideoDown"
+        @remove-from-playlist="removeFromPlaylist"
+      />
+    </FtBlockedItem>
   </div>
 </template>
 
@@ -34,6 +39,7 @@
 import { computed, ref, watch } from 'vue'
 import { vFirstVisible } from '../helpers/firstVisible'
 
+import FtBlockedItem from './FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
 import store from '../store/index'
@@ -137,13 +143,24 @@ const forbiddenTitles = computed(() => {
   return store.getters.getActiveForbiddenTitles
 })
 
+/** Lists keep block list matches and blur them instead of removing them */
+const blurBlockedItems = computed(() => store.getters.getBlurBlockedItemsActive)
+
 const shouldBeVisible = computed(() => {
   return !isVideoHiddenByPreferences(props.data, {
-    hiddenChannelNames: channelsHiddenNames.value,
+    hiddenChannelNames: blurBlockedItems.value ? EMPTY_SET : channelsHiddenNames.value,
     aiSlopChannels: aiSlopChannels.value,
-    forbiddenTitles: forbiddenTitles.value,
+    forbiddenTitles: blurBlockedItems.value ? [] : forbiddenTitles.value,
     hideChannelsBasedOnText: false,
     membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
+  })
+})
+
+const blocked = computed(() => {
+  return blurBlockedItems.value && isVideoHiddenByPreferences(props.data, {
+    hiddenChannelNames: channelsHiddenNames.value,
+    forbiddenTitles: forbiddenTitles.value,
+    hideChannelsBasedOnText: false,
   })
 })
 

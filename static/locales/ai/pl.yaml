@@ -5,6 +5,7 @@ Dismiss: Odrzuć
 Tabs Unloaded To Free Memory: Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywaną kartę | Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywane karty | Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywanych kart
 Global:
   Loading More: Wczytywanie kolejnych elementów
+  Show Blocked Item: Pokaż zablokowany element
 Search Listing:
   Label:
     Members Only: Tylko dla wspierających
@@ -748,6 +749,7 @@ Settings:
     Show Video Title: Pokazuj tytuł filmu
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
+    Blur Blocked Items: Rozmywaj zablokowane elementy zamiast je ukrywać
   Data Settings:
     Settings could not be imported: "Nie udało się zaimportować ustawień"
     Some settings could not be imported: "Nie udało się zaimportować wszystkich ustawień (niepowodzenia: {failed} z {total})"

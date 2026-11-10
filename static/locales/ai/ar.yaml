@@ -57,6 +57,7 @@ Global:
   Ambient Mode: الوضع المحيط
   Loading More: جارٍ تحميل المزيد
   New: جديد
+  Show Blocked Item: إظهار العنصر المحظور
 Search Listing:
   Label:
     Members Only: الأعضاء فقط
@@ -1228,6 +1229,7 @@ Settings:
     Add: إضافة
     Remove: إزالة
     Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
+    Blur Blocked Items: تمويه العناصر المحظورة بدلًا من إخفائها
   Data Settings:
     Settings could not be imported: "تعذّر استيراد الإعدادات"
     Some settings could not be imported: "تعذّر استيراد بعض الإعدادات (فشل {failed} من {total})"

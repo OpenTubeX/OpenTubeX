@@ -52,7 +52,7 @@ useKeepAliveEffectScope()
 const isLoading = ref(true)
 const allPosts = shallowRef([])
 const postList = computed(() => {
-  const forbiddenTitles = store.getters.getActiveForbiddenTitles
+  const forbiddenTitles = store.getters.getForbiddenTitlesToRemove
   return allPosts.value.filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
 })
 const errorChannels = ref([])

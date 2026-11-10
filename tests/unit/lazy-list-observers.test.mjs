@@ -57,6 +57,9 @@ function mountList(Component, props) {
   return app
 }
 
+// Unblocked items render their slot without a wrapper.
+const blockedItemStub = { setup: (_props, { slots }) => () => slots.default?.() }
+
 function videoStub(mounted) {
   return { props: ['data'], setup: props => { mounted.push(props.data.videoId); return () => Vue.h('video') } }
 }
@@ -66,6 +69,7 @@ test('500 lazy video rows share one IntersectionObserver and mount on their firs
   const Lazy = await compileComponent('FtListVideoLazy.vue', {
     store: { getters: { getActiveForbiddenTitles: [] } },
     isVideoHiddenByPreferences: () => false,
+    FtBlockedItem: blockedItemStub,
     FtListVideo: videoStub(mounted),
   })
   const app = mountList(Lazy, index => ({ data: { videoId: `video-${index}` }, appearance: 'result' }))
@@ -104,6 +108,7 @@ test('Electron list cards wait for their first sighting on the shared observer',
     usePlaylistDrag: () => ({
       dragVideo() {}, moveDraggedVideo() {}, afterDrag() {}, pointerDragging: Vue.ref(false), startPointerDrag() {}, moveWithKeyboard() {},
     }),
+    FtBlockedItem: blockedItemStub,
     FtListVideo: videoStub(mounted),
     FtListChannel: {},
     FtListPlaylist: {},

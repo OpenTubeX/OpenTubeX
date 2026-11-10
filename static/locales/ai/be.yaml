@@ -59,6 +59,7 @@ Global:
   Ambient Mode: Фонавая падсветка
   Loading More: Загружаецца яшчэ
   New: Новае
+  Show Blocked Item: Паказаць заблакіраваны элемент
 Search Listing:
   Label:
     Members Only: Толькі для ўдзельнікаў
@@ -1252,6 +1253,7 @@ Settings:
     Add: Дадаць
     Remove: Выдаліць
     Hide Channel Shows: Схаваць укладку «Шоу» канала
+    Blur Blocked Items: Размываць заблакіраваныя элементы замест таго, каб хаваць іх
   Data Settings:
     Settings could not be imported: "Не ўдалося імпартаваць налады"
     Some settings could not be imported: "Не ўсе налады ўдалося імпартаваць (не ўдалося: {failed} з {total})"

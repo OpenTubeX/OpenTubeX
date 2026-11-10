@@ -676,8 +676,8 @@ export default defineComponent({
           if (!video.videoId || seen.has(video.videoId)) return false
           seen.add(video.videoId)
           return !isVideoHiddenByPreferences(video, {
-            hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
-            forbiddenTitles: this.forbiddenTitles,
+            hiddenChannelNames: this.$store.getters.getChannelsHiddenNamesToRemove,
+            forbiddenTitles: this.$store.getters.getForbiddenTitlesToRemove,
             hideChannelsBasedOnText: false
           })
         })
@@ -1175,9 +1175,9 @@ export default defineComponent({
       if (this.isLoading || this.hideRecommendedVideos || (this.isFamilyFriendly === false && this.showFamilyFriendlyOnly)) return false
       if (this.isOffline) return this.offlineDownloadSuggestions.length > 0
       return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
-        hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
+        hiddenChannelNames: this.$store.getters.getChannelsHiddenNamesToRemove,
         aiSlopChannels: this.$store.getters.getAiSlopBlockedChannels,
-        forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
+        forbiddenTitles: this.$store.getters.getForbiddenTitlesToRemove,
         hideChannelsBasedOnText: false,
         membersOnlyChannelIds: this.$store.getters.getMembersOnlyChannelIdSet,
       }))

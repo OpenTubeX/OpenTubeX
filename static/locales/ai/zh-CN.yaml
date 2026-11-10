@@ -57,6 +57,7 @@ Global:
   Ambient Mode: 环境模式
   Loading More: 正在加载更多内容
   New: 新
+  Show Blocked Item: 显示已屏蔽的项目
 Search Listing:
   Label:
     Members Only: 仅限会员
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: 显示视频标题
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
+    Blur Blocked Items: 模糊显示已屏蔽的项目，而不是隐藏
   Data Settings:
     Settings could not be imported: "无法导入设置"
     Some settings could not be imported: "部分设置无法导入（{total} 项中有 {failed} 项失败）"

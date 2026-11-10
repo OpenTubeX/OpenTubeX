@@ -57,6 +57,7 @@ Global:
   Ambient Mode: アンビエントモード
   Loading More: さらに読み込み中
   New: 新着
+  Show Blocked Item: ブロックした項目を表示
 Search Listing:
   Label:
     Members Only: メンバー限定
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: 動画タイトルを表示
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
+    Blur Blocked Items: ブロックした項目を非表示にせずぼかす
   Data Settings:
     Settings could not be imported: "設定をインポートできませんでした"
     Some settings could not be imported: "一部の設定をインポートできませんでした（{total} 件中 {failed} 件が失敗）"

@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Ambientný režim
   Loading More: Načítava sa ďalší obsah
   New: Nové
+  Show Blocked Item: Zobraziť blokovanú položku
 Search Listing:
   Label:
     Members Only: Len pre členov
@@ -1215,6 +1216,7 @@ Settings:
     Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
     Hide Channel Shows: Skryť kartu kanálov "Relácie"
+    Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
   Data Settings:
     Settings could not be imported: "Nastavenia sa nepodarilo importovať"
     Some settings could not be imported: "Niektoré nastavenia sa nepodarilo importovať (zlyhalo {failed} z {total})"

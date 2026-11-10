@@ -41,6 +41,7 @@ Dismiss: Отклонить
 Update to {version}: Обновить до версии {version}
 Global:
   Loading More: Загрузка…
+  Show Blocked Item: Показать заблокированный элемент
 Search Listing:
   Label:
     Members Only: Только для участников
@@ -1190,6 +1191,7 @@ Settings:
     Show Bottom Right Actions Dock: Показывать панель действий в правом нижнем углу
     Paused Interface Hide Delay: Задержка скрытия интерфейса во время паузы
     Hide Channel Shows: Скрыть вкладку «Шоу» канала
+    Blur Blocked Items: Размывать заблокированные элементы вместо скрытия
   Data Settings:
     Settings could not be imported: "Не удалось импортировать настройки"
     Some settings could not be imported: "Не все настройки удалось импортировать (не удалось: {failed} из {total})"

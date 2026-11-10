@@ -110,6 +110,7 @@ Global:
   Posts: Posts
   New: New
   Sort By: Sort By
+  Show Blocked Item: Show blocked item
   Counts:
     Video Count: 1 video | {count} videos
     Channel Count: 1 channel | {count} channels
@@ -1790,6 +1791,7 @@ Settings:
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Hide Channels: Hide Videos From Channels
     Enable Block Lists: Enable block lists
+    Blur Blocked Items: Blur blocked items instead of hiding them
     Hide Channels Disabled Message: Some channels were blocked using ID and weren't processed. Feature is blocked while those IDs are updating
     Hide Channels Placeholder: Channel ID
     Hide Channels Invalid: Channel ID provided was invalid

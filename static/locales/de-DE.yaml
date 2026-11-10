@@ -34,6 +34,7 @@ Global:
   New: Neu
   Posts: Beiträge
   Sort By: Sortieren nach
+  Show Blocked Item: Blockierten Inhalt anzeigen
 
 # Search Bar
   Counts:
@@ -1522,6 +1523,7 @@ Settings:
     Hide Upcoming Premieres: Anstehende Premieren ausblenden
     Hide Channels: Videos aus Kanälen ausblenden
     Enable Block Lists: Blocklisten aktivieren
+    Blur Blocked Items: Blockierte Inhalte unscharf darstellen statt ausblenden
     Hide Channels Placeholder: Kanal-ID
     Display Titles Without Excessive Capitalisation: Titel ohne übermäßige Großschreibung und Zeichensetzung anzeigen
     Hide Channel Playlists: 'Tab „Playlists“ im Kanal ausblenden'

@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Ümbrusrežiim
   Loading More: Laaditakse juurde
   New: Uus
+  Show Blocked Item: Näita blokeeritud üksust
 Search Listing:
   Label:
     Members Only: Ainult liikmetele
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Kuva video pealkiri
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
+    Blur Blocked Items: Hägusta blokeeritud üksused nende peitmise asemel
   Data Settings:
     Settings could not be imported: "Seadeid ei õnnestunud importida"
     Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"

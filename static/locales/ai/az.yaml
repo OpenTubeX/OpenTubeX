@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Mühit rejimi
   Loading More: Daha çox yüklənir
   New: Yeni
+  Show Blocked Item: Bloklanmış elementi göstər
 Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
@@ -1216,6 +1217,7 @@ Settings:
     Show Video Title: Video başlığını göstər
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
+    Blur Blocked Items: Bloklanmış elementləri gizlətmək əvəzinə bulanıqlaşdır
   Data Settings:
     Settings could not be imported: "Parametrləri idxal etmək mümkün olmadı"
     Some settings could not be imported: "Bütün parametrləri idxal etmək mümkün olmadı ({total} parametrdən {failed} uğursuz oldu)"

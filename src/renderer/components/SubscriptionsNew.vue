@@ -248,7 +248,7 @@ const {
   showRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
 
-const forbiddenTitles = computed(() => store.getters.getActiveForbiddenTitles)
+const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesToRemove)
 const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })

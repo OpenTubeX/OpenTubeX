@@ -293,39 +293,44 @@
                 v-for="item in items"
                 :key="item.entry.videoId ?? item.entry.postId"
               >
-                <RouterLink :to="newSubscriptionEntryRoute(item)">
-                  <span class="mediaThumbnail">
-                    <FtRetryImage
-                      v-if="item.entry.videoId"
-                      :src="videoThumbnail(item.entry)"
-                      :class="{ blur: blurThumbnails }"
-                      width="160"
-                      height="90"
-                      loading="lazy"
-                    />
-                    <span
-                      v-else
-                      class="newPostVisual"
-                      aria-hidden="true"
-                    >
-                      <FtIcon :icon="['fas', 'message']" />
-                    </span>
-                    <span class="newContentType">
-                      <FtIcon
-                        :icon="newSubscriptionCategoryIcon(item.category)"
-                        aria-hidden="true"
+                <FtBlockedItem
+                  :blocked="isBlurredByBlockLists(item.entry, { useChannelsHidden: false })"
+                  :reveal-key="item.entry.videoId ?? item.entry.postId"
+                >
+                  <RouterLink :to="newSubscriptionEntryRoute(item)">
+                    <span class="mediaThumbnail">
+                      <FtRetryImage
+                        v-if="item.entry.videoId"
+                        :src="videoThumbnail(item.entry)"
+                        :class="{ blur: blurThumbnails }"
+                        width="160"
+                        height="90"
+                        loading="lazy"
                       />
-                      {{ newSubscriptionCategoryLabel(item.category) }}
+                      <span
+                        v-else
+                        class="newPostVisual"
+                        aria-hidden="true"
+                      >
+                        <FtIcon :icon="['fas', 'message']" />
+                      </span>
+                      <span class="newContentType">
+                        <FtIcon
+                          :icon="newSubscriptionCategoryIcon(item.category)"
+                          aria-hidden="true"
+                        />
+                        {{ newSubscriptionCategoryLabel(item.category) }}
+                      </span>
                     </span>
-                  </span>
-                  <span class="mediaDetails">
-                    <strong
-                      dir="auto"
-                      :title="newSubscriptionEntryTitle(item.entry)"
-                    >{{ newSubscriptionEntryTitle(item.entry) }}</strong>
-                    <span dir="auto">{{ item.entry.author }}</span>
-                  </span>
-                </RouterLink>
+                    <span class="mediaDetails">
+                      <strong
+                        dir="auto"
+                        :title="newSubscriptionEntryTitle(item.entry)"
+                      >{{ newSubscriptionEntryTitle(item.entry) }}</strong>
+                      <span dir="auto">{{ item.entry.author }}</span>
+                    </span>
+                  </RouterLink>
+                </FtBlockedItem>
               </li>
             </ul>
           </template>
@@ -542,6 +547,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import FtAutoGrid from '../../components/FtAutoGrid/FtAutoGrid.vue'
+import FtBlockedItem from '../../components/FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from '../../components/FtListVideo/FtListVideo.vue'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtButton from '../../components/FtButton/FtButton.vue'
@@ -560,6 +566,7 @@ import {
   getRecentDownloads,
   normalizeHomeSectionLayout,
 } from '../../helpers/homeSections'
+import { isBlurredByBlockLists } from '../../helpers/blockedItems'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import {
   getEnabledSubscriptionFeedSources,
@@ -690,7 +697,7 @@ const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
   historyCacheById: store.getters.getHistoryCacheById,
   hideLiveStreams: store.getters.getHideLiveStreams,
   hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getActiveForbiddenTitles,
+  forbiddenTitles: store.getters.getForbiddenTitlesToRemove,
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),

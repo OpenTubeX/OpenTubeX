@@ -52,6 +52,7 @@ export const SYNC_SETTING_LABELS = {
   ],
   channelsHidden: 'Settings.Distraction Free Settings.Hide Channels',
   enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
+  blurBlockedItems: 'Settings.Distraction Free Settings.Blur Blocked Items',
   enableChannelSettings: 'Settings.Channel Settings.Enable Channel Playback Settings',
   checkForUpdates: 'Settings.General Settings.Check for Updates',
   closeWindowWithLastTab: 'Settings.General Settings.Close Window With Last Tab',

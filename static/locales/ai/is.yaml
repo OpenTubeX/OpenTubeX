@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Umhverfislýsing
   Loading More: Hleður inn fleiru
   New: Nýtt
+  Show Blocked Item: Sýna útilokað atriði
 Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
@@ -1217,6 +1218,7 @@ Settings:
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
     Hide Channel Shows: Fela flipann með rásinni "Þættir"
+    Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
   Data Settings:
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
     Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"
