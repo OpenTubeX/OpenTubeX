@@ -2363,6 +2363,7 @@ Downloads:
   Preparing: Valmistellaan…
   Export Failed: "Ladattua tiedostoa ei voitu tallentaa. Valitse latauskansio, johon on kirjoitusoikeus, ja yritä uudelleen."
   Native Code Blocked: "Android esti yt-dlp:tä lataamasta natiivikirjastojaan. Avaa GrapheneOS:ssä tämän sovelluksen tiedot, aseta “Exploit protection”-kohdan “Dynamic code loading via storage” arvoon “Allowed” ja yritä uudelleen."
+  Download Stopped Unexpectedly: "Lataus pysähtyi odottamatta."
   Remove File Permanently Warning: "Tämä poistaa kohteen ”{title}” pysyvästi."
   Download: Lataa
   Download Video: Lataa video

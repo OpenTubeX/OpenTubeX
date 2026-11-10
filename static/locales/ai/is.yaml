@@ -2379,6 +2379,7 @@ Downloads:
   Preparing: Undirbýr…
   Export Failed: "Ekki tókst að vista niðurhalaða skrá. Veldu niðurhalsmöppu með skrifaðgangi og reyndu aftur."
   Native Code Blocked: "Android kom í veg fyrir að yt-dlp hlæði innbyggðum söfnum sínum. Í GrapheneOS skaltu opna upplýsingar um þetta forrit, stilla “Dynamic code loading via storage” undir “Exploit protection” á “Allowed” og reyna aftur."
+  Download Stopped Unexpectedly: "Niðurhalið stöðvaðist óvænt."
   Remove File Permanently Warning: "Þetta eyðir „{title}“ varanlega."
   Download: Niðurhal
   Download Video: Sækja myndband

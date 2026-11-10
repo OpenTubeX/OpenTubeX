@@ -2484,6 +2484,7 @@ Downloads:
   Preparing: تیاری ہو رہی ہے…
   Export Failed: ڈاؤن لوڈ کی گئی فائل محفوظ نہیں ہو سکی۔ قابل تحریر ڈاؤن لوڈ فولڈر منتخب کر کے دوبارہ کوشش کریں۔
   Native Code Blocked: "Android نے yt-dlp کو اس کی نیٹو لائبریریاں لوڈ کرنے سے روک دیا۔ GrapheneOS پر اس ایپ کی معلومات کھولیں، “Exploit protection” کے تحت “Dynamic code loading via storage” کو “Allowed” پر سیٹ کریں اور دوبارہ کوشش کریں۔"
+  Download Stopped Unexpectedly: "ڈاؤن لوڈ غیر متوقع طور پر رک گیا۔"
   Remove File Permanently Warning: اس سے "{title}" مستقل طور پر حذف ہو جائے گی۔
   Download: ڈاؤن لوڈ
   Download Video: ویڈیو ڈاؤن لوڈ کریں

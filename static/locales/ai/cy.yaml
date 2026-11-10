@@ -2394,6 +2394,7 @@ Downloads:
   Preparing: Yn paratoi…
   Export Failed: "Methu cadw’r ffeil a lawrlwythwyd. Dewiswch ffolder lawrlwytho y gellir ysgrifennu ynddi a rhowch gynnig arall arni."
   Native Code Blocked: "Mae Android wedi rhwystro yt-dlp rhag llwytho ei lyfrgelloedd brodorol. Ar GrapheneOS, agorwch wybodaeth yr ap hwn, gosodwch “Dynamic code loading via storage” o dan “Exploit protection” i “Allowed”, a rhowch gynnig arall arni."
+  Download Stopped Unexpectedly: "Stopiodd y lawrlwytho yn annisgwyl."
   Remove File Permanently Warning: "Bydd hyn yn dileu \"{title}\" yn barhaol."
   Download: Lawrlwytho
   Download Video: Lawrlwytho fideo

@@ -2417,6 +2417,7 @@ Downloads:
   Preparing: בהכנה…
   Export Failed: "לא ניתן לשמור את הקובץ שהורד. יש לבחור תיקיית הורדות עם הרשאת כתיבה ולנסות שוב."
   Native Code Blocked: "Android חסמה את טעינת הספריות המקוריות של yt-dlp. ב-GrapheneOS יש לפתוח את פרטי האפליקציה הזו, להגדיר את “Dynamic code loading via storage” תחת “Exploit protection” לערך “Allowed” ולנסות שוב."
+  Download Stopped Unexpectedly: "ההורדה נעצרה באופן בלתי צפוי."
   Remove File Permanently Warning: "פעולה זו תמחק את \"{title}\" לצמיתות."
   Download: הורדה
   Download Video: הורדת סרטון

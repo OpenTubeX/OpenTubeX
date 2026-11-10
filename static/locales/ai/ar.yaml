@@ -2394,6 +2394,7 @@ Downloads:
   Preparing: جارٍ التحضير…
   Export Failed: "تعذر حفظ الملف الذي تم تنزيله. اختر مجلد تنزيلات يمكن الكتابة فيه وحاول مجددًا."
   Native Code Blocked: "منع Android أداة yt-dlp من تحميل مكتباتها الأصلية. على GrapheneOS، افتح معلومات هذا التطبيق، واضبط “Dynamic code loading via storage” ضمن “Exploit protection” على “Allowed”، ثم حاول مجددًا."
+  Download Stopped Unexpectedly: "توقف التنزيل بشكل غير متوقع."
   Remove File Permanently Warning: "سيؤدي هذا إلى حذف \"{title}\" نهائيًا."
   Download: تحميل
   Download Video: تحميل فيديو

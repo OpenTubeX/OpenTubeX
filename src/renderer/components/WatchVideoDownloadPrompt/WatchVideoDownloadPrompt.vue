@@ -297,7 +297,7 @@
             />
             {{ t('Downloads.File Name Shortened') }}
           </p>
-          <DownloadFailureHint v-if="activeDownload.status === 'failed' && !isBlockedNativeCodeError(activeDownload.errorMessage)" />
+          <DownloadFailureHint v-if="activeDownload.status === 'failed' && suggestsYtDlpUpdate(activeDownload.errorMessage)" />
         </div>
       </div>
     </div>
@@ -414,7 +414,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
-import { downloadErrorMessage, isBlockedNativeCodeError } from '../../helpers/downloadErrors'
+import { downloadErrorMessage, suggestsYtDlpUpdate } from '../../helpers/downloadErrors'
 import { isSafeDownloadFilenameTemplate } from '../../../ytDlpArguments'
 
 const props = defineProps({

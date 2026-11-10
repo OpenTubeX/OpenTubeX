@@ -2365,6 +2365,7 @@ Downloads:
   Preparing: O prientiñ…
   Export Failed: "N'eo ket bet posupl enrollañ ar restr pellgarget. Dibabit un teuliad pellgargañ a c'haller skrivañ ennañ ha klaskit en-dro."
   Native Code Blocked: "Stanket eo bet gant Android karga levraouegoù genidik yt-dlp. War GrapheneOS, digorit titouroù an arload-mañ, lakait “Dynamic code loading via storage” e “Exploit protection” war “Allowed” ha klaskit en-dro."
+  Download Stopped Unexpectedly: "Paouezet eo ar pellgargañ dic’hortoz."
   Remove File Permanently Warning: "Diverket e vo \"{title}\" da vat."
   Download: "Pellgargañ"
   Download Video: "Pellgargañ ar video"

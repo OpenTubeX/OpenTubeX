@@ -1,4 +1,7 @@
 /**
+ * Maps items with bounded concurrency. After a mapper fails, no further items
+ * start, and the returned promise rejects with the first error once the items
+ * in flight have settled, so no mapper outlives the call.
  * @template T, U
  * @param {T[]} items
  * @param {number} concurrency
@@ -13,16 +16,23 @@ export async function mapConcurrently(items, concurrency, mapper) {
 
   const results = new Array(items.length)
   let nextIndex = 0
+  /** @type {{ error: unknown } | null} */
+  let failure = null
 
   const mapNext = async () => {
-    while (nextIndex < items.length) {
+    while (failure === null && nextIndex < items.length) {
       const index = nextIndex++
-      results[index] = await mapper(items[index], index)
+      try {
+        results[index] = await mapper(items[index], index)
+      } catch (error) {
+        failure ??= { error }
+      }
     }
   }
 
   const workerCount = Math.min(concurrency, items.length)
   await Promise.all(Array.from({ length: workerCount }, mapNext))
 
+  if (failure !== null) throw failure.error
   return results
 }

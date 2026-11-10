@@ -443,7 +443,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -484,6 +484,7 @@ import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../..
 import store from '../../store/index'
 
 const route = useRoute()
+const router = useRouter()
 const { t, locale } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 const setTabTitle = useTabTitle()
@@ -506,6 +507,8 @@ provide('phonePanelInlinePlayer', () => player.value?.scrollMiniPlayerActive
 const mediaUrl = ref('')
 const currentTime = ref(0)
 const startTime = ref(null)
+/** @type {number | null} where a timestamp link starts the media, instead of the saved position */
+let startTimestamp = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
@@ -890,13 +893,13 @@ function getPositionMedia() {
 
 function restoreCompanionPosition() {
   if (!source.value?.separateAudioUrl || startTime.value === null || !player.value?.hasLoaded) return
+  if (!hasCompanionMetadata()) return
   const video = getCompanionVideo()
   const audio = companionAudio.value
-  if (!Number.isFinite(video?.duration) || (companionAudioNeeded.value && !Number.isFinite(audio?.duration))) return
   // Separate tracks can have different lengths. Wait for metadata before
   // deciding whether the soundtrack or the video supplies the resume timeline.
   const media = getPositionMedia()
-  const position = getExternalMediaPosition(mediaUrl.value, media.duration)
+  const position = getStartPosition(media.duration)
   lastSavedPosition = position ?? 0
   startTime.value = null
   if (position === null) return
@@ -909,9 +912,61 @@ function restoreCompanionPosition() {
   }
 }
 
+/**
+ * Like on the watch page, a timestamp link starts there instead of at the saved position.
+ * @param {number | null} duration
+ */
+function getStartPosition(duration) {
+  if (startTimestamp !== null && (!Number.isFinite(duration) || startTimestamp < duration)) return startTimestamp
+  return store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never'
+    ? getExternalMediaPosition(mediaUrl.value, duration)
+    : null
+}
+
+/** @returns {number | null} */
+function getQueryTimestamp() {
+  const seconds = parseFloat(route.query.timestamp)
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : null
+}
+
+/** Like on the watch page, restoring or reloading the tab later resumes instead of returning to the timestamp. */
+function consumeTimestamp() {
+  if (!('timestamp' in route.query)) return
+  const query = { ...route.query }
+  delete query.timestamp
+  router.replace({
+    path: route.path,
+    query,
+    hash: route.hash,
+    state: { skipTabRouteLoading: true, preserveScroll: true, tabTitle: info.value?.title || hostname.value }
+  })
+}
+
 function handleMediaLoaded() {
   updateCompanionLoop()
   restoreCompanionPosition()
+  applyQueryTimestamp()
+}
+
+function hasCompanionMetadata() {
+  return Number.isFinite(getCompanionVideo()?.duration) &&
+    (!companionAudioNeeded.value || Number.isFinite(companionAudio.value?.duration))
+}
+
+function applyQueryTimestamp() {
+  const seconds = getQueryTimestamp()
+  if (seconds === null || loading.value || !player.value?.hasLoaded) return
+  if (source.value?.separateAudioUrl && !hasCompanionMetadata()) {
+    // Only both tracks' lengths tell which one supplies the timeline, so the
+    // companion restore applies the link once the soundtrack's metadata arrives.
+    startTimestamp = seconds
+    startTime.value = seconds
+  } else {
+    // The link wins over a restore still waiting for companion metadata.
+    startTime.value = null
+    seekTo(seconds)
+  }
+  consumeTimestamp()
 }
 
 function updateCompanionLoop() {
@@ -1017,7 +1072,17 @@ function handlePlaybackStopped() {
   watchTimeTracker.flush()
   savePosition()
 }
-function seekTo(seconds) { player.value?.setCurrentTime(seconds, true) }
+function seekTo(seconds) {
+  // A looping video over a longer soundtrack follows the soundtrack's timeline.
+  const audio = companionAudio.value
+  const video = getCompanionVideo()
+  if (audio && getPositionMedia() === audio && Number.isFinite(video?.duration)) {
+    audio.currentTime = seconds
+    player.value?.setCurrentTime(seconds % video.duration, true)
+  } else {
+    player.value?.setCurrentTime(seconds, true)
+  }
+}
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
 function handlePlayerError(error) {
@@ -1050,6 +1115,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   source.value = null
   currentTime.value = 0
   startTime.value = null
+  startTimestamp = null
   lastPositionSave = 0
   lastSavedPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
@@ -1083,12 +1149,15 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       return
     }
     info.value = result.info
-    if (store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never' && !result.source?.isLive) {
-      startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.separateAudioUrl ? null : result.info.duration)
+    if (!result.source?.isLive) {
+      startTimestamp = getQueryTimestamp()
+      // Separate tracks wait for their metadata before choosing the position.
+      startTime.value = getStartPosition(result.source?.separateAudioUrl ? null : result.info.duration)
       lastSavedPosition = startTime.value ?? 0
     }
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)
+    consumeTimestamp()
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
   } catch (error) {
     if (generation !== loadGeneration) return
@@ -1104,6 +1173,10 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 }
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
+// A timestamp link for the loaded media seeks instead of reloading it. While
+// it loads, the start position reads the link once extraction finishes, and
+// afterwards the player applies it once it has loaded.
+watch(() => route.query.timestamp, applyQueryTimestamp)
 watch(downloadAvailable, available => { if (!available) showDownloadPrompt.value = false })
 useTabLifecycle({
   beforeNavigate: savePositionOnExit,

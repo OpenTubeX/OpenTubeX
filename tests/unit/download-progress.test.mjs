@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { downloadErrorMessage } from '../../src/renderer/helpers/downloadErrors.js'
+
 const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
+const DOWNLOAD_STOPPED_ERROR = /^const DOWNLOAD_STOPPED_ERROR = '([^']+)'$/m.exec(source)[1]
 const handler = source.slice(source.indexOf('  function setDownloadPhase(phase) {'), source.indexOf('\n  let stdoutBuffer', source.indexOf('  function handleStdoutLine(line) {')))
 
 function replay(lines, initialStatus = 'downloading', overrides = {}) {
@@ -181,6 +184,7 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
+    DOWNLOAD_STOPPED_ERROR,
     child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })
@@ -211,6 +215,17 @@ test('a playlist without any saved file and a failed single video still fail', (
   const video = finishDownload({ code: 1, payload: {}, destinations: ['/downloads/Video [aaaaaaaaaaa].mp4'], stderr: [membersOnlyError] })
   assert.equal(video.status.status, 'failed')
   assert.equal(video.status.errorMessage, membersOnlyError)
+})
+
+test('a killed download reports that it stopped instead of its progress sentinels', () => {
+  const { status } = finishDownload({
+    code: null,
+    payload: { isPlaylist: true },
+    destinations: [],
+    stderr: ['__OPENTUBEX_DOWNLOAD__:downloading\t50.0%\t2MiB/s\t00:01', '__OPENTUBEX_PROCESSING__'],
+  })
+  assert.equal(status.status, 'failed')
+  assert.equal(downloadErrorMessage(status.errorMessage, key => key), 'Downloads.Download Stopped Unexpectedly')
 })
 
 test('a playlist keeps the original subtitle when converting a skipped entry failed', () => {

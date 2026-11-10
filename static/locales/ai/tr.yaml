@@ -2357,6 +2357,7 @@ Downloads:
   Preparing: Hazırlanıyor…
   Export Failed: "İndirilen dosya kaydedilemedi. Yazma izni olan bir indirme klasörü seçip yeniden deneyin."
   Native Code Blocked: "Android, yt-dlp’nin yerel kitaplıklarını yüklemesini engelledi. GrapheneOS’ta bu uygulamanın bilgilerini açın, “Exploit protection” altındaki “Dynamic code loading via storage” ayarını “Allowed” olarak belirleyin ve yeniden deneyin."
+  Download Stopped Unexpectedly: "İndirme beklenmedik şekilde durdu."
   Remove File Permanently Warning: "Bu işlem \"{title}\" dosyasını kalıcı olarak silecek."
   Download: İndir
   Download Video: Videoyu İndir

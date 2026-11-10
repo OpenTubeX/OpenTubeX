@@ -2356,6 +2356,7 @@ Downloads:
   Preparing: 準備中…
   Export Failed: "ダウンロードしたファイルを保存できませんでした。書き込み可能なダウンロードフォルダーを選択して、もう一度お試しください。"
   Native Code Blocked: "Android によって yt-dlp のネイティブ ライブラリの読み込みがブロックされました。GrapheneOS では、このアプリのアプリ情報を開き、“Exploit protection” の “Dynamic code loading via storage” を “Allowed” に設定してから、もう一度お試しください。"
+  Download Stopped Unexpectedly: "ダウンロードが予期せず停止しました。"
   Remove File Permanently Warning: "「{title}」を完全に削除します。"
   Download: ダウンロード
   Download Video: 動画をダウンロード

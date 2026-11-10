@@ -2356,6 +2356,7 @@ Downloads:
   Preparing: Příprava…
   Export Failed: "Stažený soubor se nepodařilo uložit. Vyberte složku pro stahování s oprávněním k zápisu a zkuste to znovu."
   Native Code Blocked: "Android zablokoval načtení nativních knihoven yt-dlp. V GrapheneOS otevřete informace o této aplikaci, v části “Exploit protection” nastavte “Dynamic code loading via storage” na “Allowed” a zkuste to znovu."
+  Download Stopped Unexpectedly: "Stahování se neočekávaně zastavilo."
   Remove File Permanently Warning: "Tímto trvale smažete „{title}“."
   Download: Stáhnout
   Download Video: Stáhnout video

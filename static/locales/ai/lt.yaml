@@ -2868,6 +2868,7 @@ Downloads:
   Preparing: Ruošiama…
   Export Failed: "Nepavyko išsaugoti atsisiųsto failo. Pasirinkite atsisiuntimų aplanką su rašymo teise ir bandykite dar kartą."
   Native Code Blocked: "Android užblokavo yt-dlp vietinių bibliotekų įkėlimą. GrapheneOS sistemoje atidarykite šios programos informaciją, skiltyje “Exploit protection” nustatykite “Dynamic code loading via storage” į “Allowed” ir bandykite dar kartą."
+  Download Stopped Unexpectedly: "Atsisiuntimas netikėtai sustojo."
   Remove File Permanently Warning: "„{title}“ bus ištrinta visam laikui."
   Download: Atsisiųsti
   Download Video: Atsisiųsti vaizdo įrašą

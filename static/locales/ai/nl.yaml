@@ -2426,6 +2426,7 @@ Downloads:
   Preparing: Voorbereiden…
   Export Failed: "Het gedownloade bestand kon niet worden opgeslagen. Kies een downloadmap met schrijfrechten en probeer het opnieuw."
   Native Code Blocked: "Android heeft voorkomen dat yt-dlp zijn native bibliotheken laadt. Open op GrapheneOS de app-info van deze app, zet “Dynamic code loading via storage” onder “Exploit protection” op “Allowed” en probeer het opnieuw."
+  Download Stopped Unexpectedly: "De download is onverwacht gestopt."
   Remove File Permanently Warning: "Hiermee wordt \"{title}\" definitief verwijderd."
   Download: Downloaden
   Download Video: Video downloaden

@@ -14,6 +14,7 @@ import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.j
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
 import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
 import { waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
+import { waitUnlessAborted } from '../../src/renderer/helpers/abortable.js'
 import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
@@ -31,7 +32,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Webpack-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, finishNative = async () => {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -101,12 +102,13 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     store: {
       getters,
       commit(key, value) { if (key === 'setSubscriptionFeedRefreshInProgress') getters.getSubscriptionFeedRefreshInProgress = value },
-      async dispatch(key, value) { writes.push({ key, value }) },
+      async dispatch(key, value) { await beforeWrite(key, value); writes.push({ key, value }) },
     },
     createSubscriptionNetworkRecovery,
     SubscriptionNetworkError,
     mapConcurrently,
     waitForPlaybackStartup,
+    waitUnlessAborted,
     buildRequestDiagnostic,
     classifyRequestFailure,
     formatRequestDiagnostic,
@@ -655,6 +657,45 @@ test('confirmed HTTP failures stay accessible while another channel retries and 
     app.cancelSubscriptionRefresh()
     await refresh
   }
+})
+
+test('a failed channel ends the refresh only after the channels in flight finish', async () => {
+  const slowWrite = Promise.withResolvers()
+  const app = createRefresh({
+    beforeWrite: async (key, value) => {
+      if (value?.channelId === 'UC0') throw new Error('write failed')
+      if (value?.channelId === 'UC1') await slowWrite.promise
+    }
+  })
+  app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }, { id: 'UC1' }]
+  app.reconnect()
+  let settled = false
+  const refresh = app.refresh({ t: key => key })
+  refresh.catch(() => {}).finally(() => { settled = true })
+  try {
+    await settle()
+    assert.equal(settled, false, 'a later refresh could otherwise receive this channel')
+    assert.deepEqual(app.events, [])
+    slowWrite.resolve()
+    await assert.rejects(refresh, /write failed/)
+    assert.equal(app.writes.at(-1).value.channelId, 'UC1')
+    assert.deepEqual(app.events, ['finished'])
+  } finally {
+    slowWrite.resolve()
+  }
+})
+
+test('a refresh that fails stops waiting for an IP block recovery without cancelling it', async () => {
+  const recovery = Promise.withResolvers()
+  const controller = new AbortController()
+  let recovered = false
+  recovery.promise.then(() => { recovered = true })
+  const wait = waitUnlessAborted(recovery.promise, controller.signal)
+  controller.abort()
+  assert.equal(await wait, undefined)
+  assert.equal(recovered, false)
+  recovery.resolve('done')
+  assert.equal(await waitUnlessAborted(recovery.promise, new AbortController().signal), 'done')
 })
 
 for (const type of ['ReelItem', 'ShortsLockupView']) {

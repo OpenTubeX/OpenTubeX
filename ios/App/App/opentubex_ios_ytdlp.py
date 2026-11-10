@@ -8,6 +8,7 @@ import subprocess
 from opentubex_ios_ffmpeg import set_control_file
 
 import yt_dlp
+from yt_dlp.downloader.common import FileDownloader
 from yt_dlp.postprocessor.common import PostProcessor
 
 
@@ -154,6 +155,8 @@ def _download(request):
         saved_files.update(Path(path) for path in paths if path)
 
     def processed(progress):
+        if progress['postprocessor'] == 'CurrentVideo':
+            return
         report({'status': 'finished'})
         if progress['status'] == 'finished' and progress['postprocessor'] == 'MoveFiles':
             collect(progress['info_dict'])
@@ -165,16 +168,36 @@ def _download(request):
             collect(info)
             return [], info
 
+    current = {}
+
+    class CurrentVideoPP(PostProcessor):
+        # Desktop and Android parse a --print video: line, which forceprint
+        # cannot deliver here. This stage runs at the same point of each video.
+        def run(self, info):
+            title = info.get('title')
+            current.update({
+                'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
+                'currentTitle': title[:255] if isinstance(title, str) else '',
+                'playlistIndex': _positive(info.get('playlist_autonumber')),
+                'playlistCount': _positive(info.get('n_entries')),
+            })
+            progress_file.write_text(json.dumps({**current, 'status': 'preparing', 'percent': 0,
+                                                 'speed': None, 'eta': None}), encoding='utf-8')
+            return [], info
+
     def report(progress):
         if control_file.exists():
             raise yt_dlp.utils.DownloadError('Download interrupted')
         total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
         value = progress.get('downloaded_bytes') or 0
         processing = progress.get('status') == 'finished'
+        speed = None if processing else progress.get('speed')
+        eta = None if processing else progress.get('eta')
+        # Format them like the _speed_str and _eta_str fields that desktop and Android show.
         data = {'status': 'processing' if processing else 'downloading',
                 'percent': 0 if processing or not total else min(100, value * 100 / total),
-                'speed': None if processing else progress.get('speed'),
-                'eta': None if processing else progress.get('eta')}
+                'speed': None if speed is None else FileDownloader.format_speed(speed).strip(),
+                'eta': None if eta is None else FileDownloader.format_eta(eta).strip(), **current}
         progress_file.write_text(json.dumps(data), encoding='utf-8')
 
     _validate_arguments(request['args'])
@@ -229,6 +252,7 @@ def _download(request):
                 return filename
 
             ydl.prepare_filename = contained_filename
+            ydl.add_post_processor(CurrentVideoPP(ydl), when='video')
             ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
             result = ydl.download(parsed.urls)
         files = []
@@ -247,6 +271,10 @@ def _download(request):
         return {'files': files}
     finally:
         set_control_file('')
+
+
+def _positive(value):
+    return value if isinstance(value, int) and value > 0 else None
 
 
 def _version():
