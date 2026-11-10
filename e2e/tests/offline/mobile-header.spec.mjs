@@ -308,6 +308,8 @@ test('always-visible phone search returns to its pill and persists', { tag: '@sc
   await input.fill('saved draft')
   await input.press('Escape')
   await expect(pill).toBeFocused()
+  await expect(pill).toHaveText('saved draft')
+  await expect(pill).toHaveAccessibleName(/saved draft/)
   await pill.click()
   await expect(input).toHaveValue('saved draft')
   await page.locator('.closeMobileSearch').click()
