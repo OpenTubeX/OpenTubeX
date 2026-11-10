@@ -2461,6 +2461,7 @@ Downloads:
   Preparing: Падрыхтоўка…
   Export Failed: "Не ўдалося захаваць спампаваны файл. Выберыце папку спамповак з дазволам на запіс і паўтарыце спробу."
   Native Code Blocked: "Android заблакаваў загрузку натыўных бібліятэк yt-dlp. У GrapheneOS адкрыйце звесткі пра гэтую праграму, у раздзеле “Exploit protection” задайце для “Dynamic code loading via storage” значэнне “Allowed” і паўтарыце спробу."
+  Download Stopped Unexpectedly: "Спампоўка нечакана спынілася."
   Remove File Permanently Warning: "«{title}» будзе выдалена назаўсёды."
   Download: Спампаваць
   Download Video: Спампаваць відэа

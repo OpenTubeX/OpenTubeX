@@ -2365,6 +2365,7 @@ Downloads:
   Preparing: Hazırlanır…
   Export Failed: Endirilmiş fayl saxlanıla bilmədi. Yazıla bilən endirmə qovluğu seçib yenidən cəhd edin.
   Native Code Blocked: "Android yt-dlp-nin yerli kitabxanalarını yükləməsinin qarşısını aldı. GrapheneOS-da bu tətbiqin məlumat səhifəsini açın, “Exploit protection” bölməsində “Dynamic code loading via storage” seçimini “Allowed” olaraq təyin edin və yenidən cəhd edin."
+  Download Stopped Unexpectedly: "Endirmə gözlənilmədən dayandı."
   Remove File Permanently Warning: Bu, "{title}" faylını həmişəlik siləcək.
   Download: Endir
   Download Video: Videonu endir

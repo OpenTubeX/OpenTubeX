@@ -1553,6 +1553,7 @@ Downloads:
   Preparing: Przygotowywanie…
   Export Failed: "Nie udało się zapisać pobranego pliku. Wybierz folder pobierania z uprawnieniami do zapisu i spróbuj ponownie."
   Native Code Blocked: "Android zablokował wczytywanie natywnych bibliotek yt-dlp. W GrapheneOS otwórz informacje o tej aplikacji, w sekcji “Exploit protection” ustaw “Dynamic code loading via storage” na “Allowed” i spróbuj ponownie."
+  Download Stopped Unexpectedly: "Pobieranie nieoczekiwanie się zatrzymało."
   Remove File Permanently Warning: "Spowoduje to trwałe usunięcie „{title}”."
   Download Playlist: Pobierz playlistę
   Downloading: Pobieranie

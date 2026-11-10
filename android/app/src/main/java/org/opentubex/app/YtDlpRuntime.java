@@ -55,6 +55,9 @@ final class YtDlpRuntime {
 
         void add(String line) {
             if (hasTimedOutWarning(line)) timedOut = true;
+            // Progress sentinels would hide the actual error, and yt-dlp prints
+            // none when it is killed.
+            if (line.startsWith("__OPENTUBEX_")) return;
             tail.append(line).append('\n');
             if (tail.length() > 65536) tail.delete(0, tail.length() - 65536);
         }

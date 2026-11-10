@@ -2334,6 +2334,7 @@ Downloads:
   Preparing: Подготовка…
   Export Failed: "Не удалось сохранить скачанный файл. Выберите папку загрузок с разрешением на запись и повторите попытку."
   Native Code Blocked: "Android заблокировал загрузку нативных библиотек yt-dlp. В GrapheneOS откройте сведения об этом приложении, в разделе “Exploit protection” установите для “Dynamic code loading via storage” значение “Allowed” и повторите попытку."
+  Download Stopped Unexpectedly: "Загрузка неожиданно остановилась."
   Remove File Permanently Warning: "«{title}» будет удалено безвозвратно."
   Download Playlist: Скачать плейлист
   Downloading: Загрузка…

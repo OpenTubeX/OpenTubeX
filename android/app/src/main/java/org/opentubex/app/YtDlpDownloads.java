@@ -353,7 +353,8 @@ final class YtDlpDownloads {
             synchronized (this) {
                 if (!isExecuting(id)) return;
                 String error = downloadError == null ? null
-                    : downloadError.getMessage() == null ? downloadError.getClass().getSimpleName() : downloadError.getMessage();
+                    : downloadError.getMessage() == null ? downloadError.getClass().getSimpleName()
+                    : downloadError.getMessage().isEmpty() ? "DOWNLOAD_STOPPED_UNEXPECTEDLY" : downloadError.getMessage();
                 // yt-dlp skips playlist entries it cannot download, such as members-only
                 // videos, but still exits with an error after downloading the others.
                 boolean skippedPlaylistVideos = downloadError != null &&

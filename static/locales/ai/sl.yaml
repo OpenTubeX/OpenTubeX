@@ -2963,6 +2963,7 @@ Downloads:
   Preparing: Pripravljanje…
   Export Failed: "Prenesene datoteke ni bilo mogoče shraniti. Izberite mapo za prenose z dovoljenjem za pisanje in poskusite znova."
   Native Code Blocked: "Android je preprečil, da bi yt-dlp naložil svoje izvorne knjižnice. V GrapheneOS odprite podatke o tej aplikaciji, v razdelku “Exploit protection” nastavite “Dynamic code loading via storage” na “Allowed” in poskusite znova."
+  Download Stopped Unexpectedly: "Prenos se je nepričakovano ustavil."
   Remove File Permanently Warning: "S tem boste trajno izbrisali »{title}«."
   Download: Prenesi
   Download Video: Prenesi videoposnetek

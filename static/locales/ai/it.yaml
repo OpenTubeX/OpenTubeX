@@ -2352,6 +2352,7 @@ Downloads:
   Preparing: Preparazione…
   Export Failed: "Impossibile salvare il file scaricato. Scegli una cartella di download con permessi di scrittura e riprova."
   Native Code Blocked: "Android ha impedito a yt-dlp di caricare le sue librerie native. Su GrapheneOS, apri le informazioni di questa app, imposta “Dynamic code loading via storage” in “Exploit protection” su “Allowed” e riprova."
+  Download Stopped Unexpectedly: "Il download si è interrotto inaspettatamente."
   Remove File Permanently Warning: "Questa operazione eliminerà definitivamente \"{title}\"."
   Download: Scarica
   Download Video: Scarica video

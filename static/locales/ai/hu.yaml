@@ -2353,6 +2353,7 @@ Downloads:
   Preparing: Előkészítés…
   Export Failed: "A letöltött fájlt nem sikerült menteni. Válasszon írható letöltési mappát, és próbálja újra."
   Native Code Blocked: "Az Android megakadályozta, hogy a yt-dlp betöltse natív könyvtárait. GrapheneOS-en nyissa meg az alkalmazás adatait, állítsa a(z) “Exploit protection” alatti “Dynamic code loading via storage” beállítást “Allowed” értékre, és próbálja újra."
+  Download Stopped Unexpectedly: "A letöltés váratlanul leállt."
   Remove File Permanently Warning: "Ez véglegesen törli a következőt: „{title}”."
   Download: Letöltés
   Download Video: Videó letöltése

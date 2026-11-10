@@ -2412,6 +2412,7 @@ Downloads:
   Preparing: Se pregătește…
   Export Failed: "Fișierul descărcat nu a putut fi salvat. Alegeți un dosar de descărcări cu permisiune de scriere și încercați din nou."
   Native Code Blocked: "Android a împiedicat yt-dlp să își încarce bibliotecile native. În GrapheneOS, deschideți informațiile acestei aplicații, setați “Dynamic code loading via storage” din “Exploit protection” la “Allowed” și încercați din nou."
+  Download Stopped Unexpectedly: "Descărcarea s-a oprit în mod neașteptat."
   Remove File Permanently Warning: "Aceasta va șterge definitiv „{title}”."
   Download: Descarcă
   Download Video: Descarcă videoclipul

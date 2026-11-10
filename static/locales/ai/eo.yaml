@@ -2410,6 +2410,7 @@ Downloads:
   Preparing: Preparado…
   Export Failed: Ne eblis konservi la elŝutitan dosieron. Elektu skribeblan elŝutan dosierujon kaj reprovu.
   Native Code Blocked: "Android malhelpis yt-dlp ŝargi siajn denaskajn bibliotekojn. En GrapheneOS, malfermu la informojn pri ĉi tiu aplikaĵo, agordu “Dynamic code loading via storage” sub “Exploit protection” al “Allowed” kaj reprovu."
+  Download Stopped Unexpectedly: "La elŝuto neatendite haltis."
   Remove File Permanently Warning: Tio ĉi definitive forigos "{title}".
   Download: Elŝuti
   Download Video: Elŝuti videaĵon

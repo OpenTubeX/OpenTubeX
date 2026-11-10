@@ -2377,6 +2377,7 @@ Downloads:
   Preparing: Menyiapkan…
   Export Failed: "File yang diunduh tidak dapat disimpan. Pilih folder unduhan yang dapat ditulisi dan coba lagi."
   Native Code Blocked: "Android memblokir yt-dlp agar tidak memuat pustaka nativenya. Di GrapheneOS, buka info aplikasi ini, atur “Dynamic code loading via storage” di bawah “Exploit protection” ke “Allowed”, lalu coba lagi."
+  Download Stopped Unexpectedly: "Unduhan berhenti secara tidak terduga."
   Remove File Permanently Warning: "Ini akan menghapus \"{title}\" secara permanen."
   Download: Unduh
   Download Video: Unduh Video

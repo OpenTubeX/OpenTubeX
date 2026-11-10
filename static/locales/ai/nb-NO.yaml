@@ -2357,6 +2357,7 @@ Downloads:
   Preparing: Forbereder…
   Export Failed: "Kunne ikke lagre den nedlastede filen. Velg en nedlastingsmappe med skrivetilgang og prøv igjen."
   Native Code Blocked: "Android hindret yt-dlp i å laste inn sine native biblioteker. På GrapheneOS åpner du appinfo for denne appen, setter “Dynamic code loading via storage” under “Exploit protection” til “Allowed” og prøver igjen."
+  Download Stopped Unexpectedly: "Nedlastingen stoppet uventet."
   Remove File Permanently Warning: "Dette sletter «{title}» permanent."
   Download: Last ned
   Download Video: Last ned video

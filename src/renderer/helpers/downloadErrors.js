@@ -19,6 +19,7 @@ export function isBlockedNativeCodeError(error) {
 export function downloadErrorMessage(error, translate) {
   if (error === 'DOWNLOAD_EXPORT_FAILED') return translate('Downloads.Export Failed')
   if (error === 'IOS_DOWNLOAD_FAILED') return translate('Downloads.Download Failed')
+  if (error === 'DOWNLOAD_STOPPED_UNEXPECTEDLY') return translate('Downloads.Download Stopped Unexpectedly')
   if (error === 'INVALID_MEDIA_URL') return translate('Video.Invalid Media URL')
   if (isBlockedNativeCodeError(error)) return translate('Downloads.Native Code Blocked')
   return error

@@ -181,6 +181,7 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
+    DOWNLOAD_STOPPED_ERROR: 'DOWNLOAD_STOPPED_UNEXPECTEDLY',
     child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })
@@ -211,6 +212,17 @@ test('a playlist without any saved file and a failed single video still fail', (
   const video = finishDownload({ code: 1, payload: {}, destinations: ['/downloads/Video [aaaaaaaaaaa].mp4'], stderr: [membersOnlyError] })
   assert.equal(video.status.status, 'failed')
   assert.equal(video.status.errorMessage, membersOnlyError)
+})
+
+test('a killed download reports that it stopped instead of its progress sentinels', () => {
+  const { status } = finishDownload({
+    code: null,
+    payload: { isPlaylist: true },
+    destinations: [],
+    stderr: ['__OPENTUBEX_DOWNLOAD__:downloading\t50.0%\t2MiB/s\t00:01', '__OPENTUBEX_PROCESSING__'],
+  })
+  assert.equal(status.status, 'failed')
+  assert.equal(status.errorMessage, 'DOWNLOAD_STOPPED_UNEXPECTEDLY')
 })
 
 test('a playlist keeps the original subtitle when converting a skipped entry failed', () => {

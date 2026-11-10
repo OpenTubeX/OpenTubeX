@@ -123,6 +123,7 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+const DOWNLOAD_STOPPED_ERROR = 'DOWNLOAD_STOPPED_UNEXPECTEDLY'
 const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
 // Names the process whose download uses a temporary folder
 const TEMPORARY_FOLDER_OWNER_FILE = '.opentubex-owner'
@@ -944,7 +945,9 @@ async function startYtDlpDownload(
     if (!line.startsWith(FINAL_PATH_PREFIX) && !line.startsWith(FINAL_METADATA_PREFIX)) {
       handleStdoutLine(line)
     }
-    if (line.length > 0) stderrLines.push(line)
+    // Progress sentinels would hide the actual error, and yt-dlp prints none
+    // when it is killed.
+    if (line.length > 0 && !line.startsWith('__OPENTUBEX_')) stderrLines.push(line)
     // only keep the last few lines for error reporting
     if (stderrLines.length > 5) {
       stderrLines.splice(0, stderrLines.length - 5)
@@ -1003,7 +1006,7 @@ async function startYtDlpDownload(
       const skippedPlaylistVideos = code !== 0 && payload.isPlaylist === true &&
         status.destinations.some(destination => existsSync(destination))
       if (code === 0 || skippedPlaylistVideos) {
-        if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n')
+        if (skippedPlaylistVideos) status.errorMessage = errorLines.join('\n') || stderrLines.join('\n') || DOWNLOAD_STOPPED_ERROR
         status.status = payload.automatic === true && status.destinations.length === 0
           ? 'skipped'
           : 'completed'
@@ -1013,7 +1016,7 @@ async function startYtDlpDownload(
         }
       } else {
         status.status = 'failed'
-        status.errorMessage = stderrLines.join('\n')
+        status.errorMessage = stderrLines.join('\n') || DOWNLOAD_STOPPED_ERROR
       }
     }
 

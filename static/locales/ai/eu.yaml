@@ -2362,6 +2362,7 @@ Downloads:
   Preparing: Prestatzen…
   Export Failed: "Ezin izan da deskargatutako fitxategia gorde. Aukeratu idazteko baimena duen deskarga-karpeta bat eta saiatu berriro."
   Native Code Blocked: "Android-ek yt-dlp-ri bere liburutegi natiboak kargatzea eragotzi dio. GrapheneOS-en, ireki aplikazio honen informazioa, ezarri “Exploit protection” ataleko “Dynamic code loading via storage” aukera “Allowed” gisa eta saiatu berriro."
+  Download Stopped Unexpectedly: "Deskarga ustekabean gelditu da."
   Remove File Permanently Warning: "Honek \"{title}\" behin betiko ezabatuko du."
   Download: Deskargatu
   Download Video: Deskargatu bideoa

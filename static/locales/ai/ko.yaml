@@ -2818,6 +2818,7 @@ Downloads:
   Preparing: 준비 중…
   Export Failed: "다운로드한 파일을 저장할 수 없습니다. 쓰기 가능한 다운로드 폴더를 선택하고 다시 시도하세요."
   Native Code Blocked: "Android에서 yt-dlp의 네이티브 라이브러리 로드를 차단했습니다. GrapheneOS에서 이 앱의 앱 정보를 열고 “Exploit protection”의 “Dynamic code loading via storage”을(를) “Allowed”(으)로 설정한 후 다시 시도하세요."
+  Download Stopped Unexpectedly: "다운로드가 예기치 않게 중지되었습니다."
   Remove File Permanently Warning: "\"{title}\"을(를) 영구적으로 삭제합니다."
   Download: 다운로드
   Download Video: 동영상 다운로드
