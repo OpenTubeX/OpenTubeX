@@ -64,6 +64,7 @@
       ref="container"
       :data-playing-interface-hide-delay="playingInterfaceHideDelay"
       class="ftVideoPlayer shaka-video-container"
+      data-title-tooltips-above
       :data-tab-id="tabId"
       :data-action-dock-visible="actionDockVisible"
       :data-player-controls-shown="playerControlsShown"
@@ -1935,6 +1936,7 @@
 <style scoped src="./opentubex/controlBarItems.css" />
 <style scoped src="./opentubex/captions.css" />
 <style scoped src="./opentubex/scrollMiniPlayer.css" />
+<style scoped src="./opentubex/tooltips.css" />
 <style scoped src="./opentubex/videoLayout.css" />
 <style scoped src="./opentubex/phonePlayerOptions.css" />
 <style scoped src="./opentubex/classicPlayerControls.css" />
