@@ -26,14 +26,6 @@
         :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
         @change="store.dispatch('updateThumbnailDataSaver', $event)"
       />
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Limit Titles to Two Lines')"
-        :default-value="limitTitlesToTwoLines"
-        setting-key="limitTitlesToTwoLines"
-        compact
-        :tooltip="t('Tooltips.General Settings.Limit Titles to Two Lines')"
-        @change="store.dispatch('updateLimitTitlesToTwoLines', $event)"
-      />
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect
@@ -77,6 +69,17 @@
         :select-values="GRID_COLUMN_VALUES"
         :icon="['fas', 'table-columns']"
         @change="updatePlaylistGridColumns"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.General Settings.Title Lines.Title Lines')"
+        :value="titleLineLimit"
+        setting-key="titleLineLimit"
+        :select-names="titleLineLimitNames"
+        :select-values="TITLE_LINE_LIMIT_VALUES"
+        :tooltip="t('Tooltips.General Settings.Title Lines')"
+        :icon="['fas', 'align-left']"
+        @change="store.dispatch('updateTitleLineLimit', $event)"
       />
       <FtSelect
         size-to-content
@@ -236,7 +239,16 @@ const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)
 
 const thumbnailDataSaver = computed(() => store.getters.getThumbnailDataSaver)
-const limitTitlesToTwoLines = computed(() => store.getters.getLimitTitlesToTwoLines)
+
+// 0 shows titles in full.
+const TITLE_LINE_LIMIT_VALUES = [1, 2, 3, 0]
+
+const titleLineLimitNames = computed(() => TITLE_LINE_LIMIT_VALUES.map(lines => (
+  lines === 0 ? t('Settings.General Settings.Title Lines.Unlimited') : String(lines)
+)))
+
+/** @type {import('vue').ComputedRef<number>} */
+const titleLineLimit = computed(() => store.getters.getTitleLineLimit)
 
 /**
  * @param {boolean} value

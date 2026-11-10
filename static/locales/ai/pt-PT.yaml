@@ -400,7 +400,9 @@ Settings:
       On Hover: "Sublinhar hiperligações ao passar o cursor"
       Never: "Nunca sublinhar hiperligações"
       Always: "Sublinhar sempre as hiperligações"
-    Limit Titles to Two Lines: "Limitar títulos a duas linhas"
+    Title Lines:
+      Title Lines: "Linhas do título"
+      Unlimited: "Ilimitado"
     Close Window With Last Tab: 'Fechar a janela ao fechar o último separador'
     Preferred Video Codec: Codec de vídeo preferido
     Always Use Backup Media Server: "Usar sempre o servidor multimédia de reserva"
@@ -2199,7 +2201,7 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Encurta os títulos de vídeos e listas de reprodução em listas e grelhas para duas linhas com reticências, para cartões mais uniformes. Passe o cursor sobre um título para o ver completo."
+    Title Lines: "Encurta os títulos de vídeos e listas de reprodução em listas e grelhas para o número de linhas escolhido com reticências, para cartões mais uniformes. Passe o cursor sobre um título para o ver completo."
     Close Window With Last Tab: 'Quando desativado, fechar o último separador abre um novo separador, pelo que a janela permanece aberta até a fechar.'
     Preferred Video Codec: |
       O modo automático prefere codecs que o seu dispositivo consegue descodificar por hardware.

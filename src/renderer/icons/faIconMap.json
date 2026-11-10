@@ -3,6 +3,10 @@
     "ri": "order-play-last-line",
     "material": "low-priority-rounded"
   },
+  "align-left": {
+    "ri": "align-left",
+    "material": "notes-rounded"
+  },
   "angle-down": {
     "ri": "arrow-down-s-line",
     "material": "keyboard-arrow-down-rounded"

@@ -397,7 +397,9 @@ Settings:
       On Hover: "Islinennañ al liammoù pa vez tremenet warno"
       Never: "Na islinennañ biken al liammoù"
       Always: "Islinennañ al liammoù bepred"
-    Limit Titles to Two Lines: "Bevenniñ an titloù da zaou linenn"
+    Title Lines:
+      Title Lines: "Linennoù an titl"
+      Unlimited: "Divevenn"
     Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
     Preferred Video Codec: Kodek video gwellañ karet
     Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
@@ -2164,7 +2166,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
   General Settings:
-    Limit Titles to Two Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù da zaou linenn gant ur poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
+    Title Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù d'an niver a linennoù dibabet gant poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
     Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
     Preferred Video Codec: |
       Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.

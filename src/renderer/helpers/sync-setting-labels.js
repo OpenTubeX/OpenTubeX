@@ -194,7 +194,6 @@ export const SYNC_SETTING_LABELS = {
   keyboardShortcuts: 'KeyboardShortcutPrompt.Keyboard Shortcuts',
   landingPage: 'Settings.General Settings.Default Landing Page',
   listType: 'Settings.General Settings.Video View Type.Video View Type',
-  limitTitlesToTwoLines: 'Settings.General Settings.Limit Titles to Two Lines',
   linkUnderline: 'Settings.General Settings.Link Underlines.Link Underlines',
   liveChatFilter: 'Video.Chat Filter',
   loopShorts: 'Settings.Player Settings.Loop Shorts',
@@ -385,6 +384,7 @@ export const SYNC_SETTING_LABELS = {
   thumbnailSize: 'Settings.Theme Settings.Thumbnail Size',
   playlistThumbnailSize: 'Settings.Theme Settings.Playlist Thumbnail Size',
   timeFormat: 'Settings.General Settings.Time Format',
+  titleLineLimit: 'Settings.General Settings.Title Lines.Title Lines',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',
   uiRoundness: 'Settings.Theme Settings.UI Roundness',
   unsubscriptionPopupStatus: 'Settings.Subscription Settings.Confirm Before Unsubscribing',
@@ -543,6 +543,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   tabCloseFocus: { lastActiveTab: `${general}Tab Close Focus.Last active tab`, nextTab: `${general}Tab Close Focus.Next tab in tab order`, previousTab: `${general}Tab Close Focus.Previous tab in tab order` },
   thumbnailPreference: { '': `${general}Thumbnail Preference.Default`, start: `${general}Thumbnail Preference.Beginning`, middle: `${general}Thumbnail Preference.Middle`, end: `${general}Thumbnail Preference.End`, hidden: `${general}Thumbnail Preference.Hidden`, blur: `${general}Thumbnail Preference.Blur` },
   timeFormat: { locale: `${general}Language Default` },
+  titleLineLimit: { 0: `${general}Title Lines.Unlimited` },
   toastPosition: Object.fromEntries(['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'].map(value =>
     [value, `${theme}Toast Position.${value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')}`])),
   userHistorySortBy: { latest_played_first: 'History.DateNewestHistory', earliest_played_first: 'History.DateOldestHistory' },

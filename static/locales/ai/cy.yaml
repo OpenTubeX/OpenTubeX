@@ -396,7 +396,9 @@ Settings:
       On Hover: "Tanlinellu dolenni wrth hofran"
       Never: "Peidio byth â thanlinellu dolenni"
       Always: "Tanlinellu dolenni bob amser"
-    Limit Titles to Two Lines: "Cyfyngu teitlau i ddwy linell"
+    Title Lines:
+      Title Lines: "Llinellau teitl"
+      Unlimited: "Diderfyn"
     Close Window With Last Tab: 'Cau’r ffenestr wrth gau’r tab olaf'
     Preferred Video Codec: Codec fideo dewisol
     Always Use Backup Media Server: "Defnyddio'r gweinydd cyfryngau wrth gefn bob amser"
@@ -2188,7 +2190,7 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Yn byrhau teitlau fideos a rhestrau chwarae mewn rhestrau a gridiau i ddwy linell gydag elipsis, ar gyfer cardiau mwy unffurf. Hofran dros deitl i'w weld yn llawn."
+    Title Lines: "Yn byrhau teitlau fideos a rhestrau chwarae mewn rhestrau a gridiau i'r nifer o linellau a ddewiswyd gydag elipsis, ar gyfer cardiau mwy unffurf. Hofran dros deitl i'w weld yn llawn."
     Close Window With Last Tab: 'Pan fydd i ffwrdd, mae cau’r tab olaf yn agor tab newydd yn lle hynny, felly mae’r ffenestr yn aros ar agor nes i chi ei chau.'
     Preferred Video Codec: |
       Mae'r modd awtomatig yn ffafrio codecs y gall eich dyfais eu datgodio â chaledwedd.

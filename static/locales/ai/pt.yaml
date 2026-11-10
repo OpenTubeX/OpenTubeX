@@ -397,7 +397,9 @@ Settings:
       On Hover: "Sublinhar links ao passar o cursor"
       Never: "Nunca sublinhar links"
       Always: "Sublinhar sempre os links"
-    Limit Titles to Two Lines: "Limitar títulos a duas linhas"
+    Title Lines:
+      Title Lines: "Linhas do título"
+      Unlimited: "Ilimitado"
     Close Window With Last Tab: 'Fechar a janela ao fechar o último separador'
     Preferred Video Codec: Codec de vídeo preferido
     Always Use Backup Media Server: "Usar sempre o servidor multimédia de reserva"
@@ -2156,7 +2158,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
   General Settings:
-    Limit Titles to Two Lines: "Encurta os títulos de vídeos e listas de reprodução em listas e grelhas para duas linhas com reticências, para cartões mais uniformes. Passe o cursor sobre um título para o ver completo."
+    Title Lines: "Encurta os títulos de vídeos e listas de reprodução em listas e grelhas para o número de linhas escolhido com reticências, para cartões mais uniformes. Passe o cursor sobre um título para o ver completo."
     Close Window With Last Tab: 'Quando desativado, fechar o último separador abre um novo separador, pelo que a janela permanece aberta até a fechar.'
     Preferred Video Codec: |
       O modo automático prefere codecs que o seu dispositivo consegue descodificar por hardware.

@@ -56,7 +56,7 @@
       <RouterLink
         class="title"
         :to="to"
-        :title="store.getters.getLimitTitlesToTwoLines ? data.title : null"
+        :title="store.getters.getTitleLineLimit > 0 ? data.title : null"
         @click="markAsSeen"
         @auxclick.middle="markAsSeen"
       >

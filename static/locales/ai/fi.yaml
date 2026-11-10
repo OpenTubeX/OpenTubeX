@@ -397,7 +397,9 @@ Settings:
       On Hover: "Alleviivaa linkit, kun osoitin on niiden päällä"
       Never: "Älä koskaan alleviivaa linkkejä"
       Always: "Alleviivaa linkit aina"
-    Limit Titles to Two Lines: "Rajoita otsikot kahteen riviin"
+    Title Lines:
+      Title Lines: "Otsikon rivit"
+      Unlimited: "Rajoittamaton"
     Close Window With Last Tab: 'Sulje ikkuna, kun viimeinen välilehti suljetaan'
     Preferred Video Codec: Ensisijainen videokoodekki
     Always Use Backup Media Server: "Käytä aina varamediapalvelinta"
@@ -2162,7 +2164,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
   General Settings:
-    Limit Titles to Two Lines: "Lyhentää videoiden ja soittolistojen otsikot luetteloissa ja ruudukoissa kahteen riviin kolmella pisteellä, jotta kortit ovat yhtenäisempiä. Näet koko otsikon viemällä osoittimen sen päälle."
+    Title Lines: "Lyhentää videoiden ja soittolistojen otsikot luetteloissa ja ruudukoissa valittuun rivimäärään kolmella pisteellä, jotta kortit ovat yhtenäisempiä. Näet koko otsikon viemällä osoittimen sen päälle."
     Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
     Preferred Video Codec: |
       Automaattinen tila suosii koodekkeja, joita laitteesi voi purkaa laitteistolla.

@@ -31,7 +31,6 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 const GENERAL_APPEARANCE_KEYS = new Set([
   'Data Saver Thumbnails',
   'Grid Columns',
-  'Limit Titles to Two Lines',
   'Link Underlines',
   'Mobile Layout',
   'Navigation',
@@ -39,6 +38,7 @@ const GENERAL_APPEARANCE_KEYS = new Set([
   'Show Thumbnail Previews',
   'Show Video Menu Button',
   'Thumbnail Preference',
+  'Title Lines',
   'Video View Type'
 ])
 

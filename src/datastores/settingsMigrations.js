@@ -43,6 +43,7 @@ export function isFormerDefaultQuickSettings(value) {
 const REPLACED_SETTING_IDS = new Map([
   ['hideVideoDescription', 'videoDescriptionMode'],
   ['scrollMiniPlayerEnabled', 'scrollPlayerMode'],
+  ['limitTitlesToTwoLines', 'titleLineLimit'],
 ])
 
 /**
@@ -69,6 +70,15 @@ export function scrollPlayerModeFromMiniPlayerSwitch(enabled) {
   return enabled === false ? 'off' : 'mini'
 }
 
+/**
+ * The Title Lines select that replaced the former Limit Titles to Two Lines
+ * switch. 0 shows titles in full.
+ * @param {unknown} enabled
+ */
+export function titleLineLimitFromSwitch(enabled) {
+  return enabled === false ? 0 : 2
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -80,6 +90,7 @@ export async function migrateStoredSettings(datastore) {
         'watchedProgressSavingMode', 'screenshotAskPath', 'quickSettings',
         'hideVideoDescription', 'videoDescriptionMode', 'syncServerSettingsExcluded',
         'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode',
+        'limitTitlesToTwoLines', 'titleLineLimit', 'syncServerSettingUpdatedAt',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -169,10 +180,27 @@ export async function migrateStoredSettings(datastore) {
     }
     await datastore.removeAsync({ _id: 'scrollMiniPlayerEnabled' })
   }
+  // Limit Titles to Two Lines became the Title Lines select, two lines by default.
+  const limitTitlesToTwoLines = stored.get('limitTitlesToTwoLines')
+  if (limitTitlesToTwoLines) {
+    if (!stored.has('titleLineLimit')) {
+      await save('titleLineLimit', titleLineLimitFromSwitch(limitTitlesToTwoLines.value))
+    }
+    await datastore.removeAsync({ _id: 'limitTitlesToTwoLines' })
+  }
   // Keep Playing When Navigating Away now also decides whether switching tabs
   // shows the mini player.
   if (stored.has('scrollMiniPlayerOnAllTabs')) {
     await datastore.removeAsync({ _id: 'scrollMiniPlayerOnAllTabs' })
+  }
+  // Selects derived from a switch keep its sync edit time, so a newer choice from
+  // another device still wins over an edit made here before the upgrade.
+  const updatedAt = stored.get('syncServerSettingUpdatedAt')?.value
+  if (updatedAt && typeof updatedAt === 'object') {
+    const missing = [...REPLACED_SETTING_IDS].filter(([from, to]) => Object.hasOwn(updatedAt, from) && !Object.hasOwn(updatedAt, to))
+    if (missing.length > 0) {
+      await save('syncServerSettingUpdatedAt', { ...updatedAt, ...Object.fromEntries(missing.map(([from, to]) => [to, updatedAt[from]])) })
+    }
   }
   for (const key of ['quickSettings', 'syncServerSettingsExcluded']) {
     const ids = stored.get(key)?.value

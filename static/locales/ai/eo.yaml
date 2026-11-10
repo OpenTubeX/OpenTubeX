@@ -433,7 +433,9 @@ Settings:
       On Hover: "Substreki ligilojn dum ŝvebado"
       Never: "Neniam substreki ligilojn"
       Always: "Ĉiam substreki ligilojn"
-    Limit Titles to Two Lines: "Limigi titolojn al du linioj"
+    Title Lines:
+      Title Lines: "Linioj de titolo"
+      Unlimited: "Senlima"
     Preferred Video Codec: Preferata videokodeko
     Enable Tabs: Ŝalti langetojn
     Thumbnail Swipe Gestures:
@@ -2202,7 +2204,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
   General Settings:
-    Limit Titles to Two Lines: "Mallongigas titolojn de videoj kaj ludlistoj en listoj kaj kradoj al du linioj kun tripunkto, por pli unuformaj kartoj. Ŝvebigu la musmontrilon super titolo por vidi ĝin tute."
+    Title Lines: "Mallongigas titolojn de videoj kaj ludlistoj en listoj kaj kradoj al la elektita nombro de linioj kun tripunkto, por pli unuformaj kartoj. Ŝvebigu la musmontrilon super titolo por vidi ĝin tute."
     Preferred Video Codec: |
       Aŭtomata preferas kodekojn, kiujn via aparato povas malkodi per aparataro.
       AV1: la plej bona kvalito por la malplej da datumoj, sed ne ĉiu videaĵo havas ĝin. Sen aparatara malkodado, ĝi povas malplenigi la baterion aŭ perdi bildojn.

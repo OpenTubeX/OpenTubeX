@@ -397,7 +397,9 @@ Settings:
       On Hover: "Understrek lenker når pekeren holdes over"
       Never: "Aldri understrek lenker"
       Always: "Alltid understrek lenker"
-    Limit Titles to Two Lines: "Begrens titler til to linjer"
+    Title Lines:
+      Title Lines: "Tittellinjer"
+      Unlimited: "Ubegrenset"
     Close Window With Last Tab: 'Lukk vinduet når den siste fanen lukkes'
     Preferred Video Codec: Foretrukket videokodek
     Always Use Backup Media Server: "Bruk alltid reservemedieserveren"
@@ -2160,7 +2162,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Sjekker først RSS-strømmen til hver kanal og laster bare inn videoer, Shorts og direktesendinger fra kanaler med nye opplastinger. Automatiske oppdateringer hopper også over kanaler som er lastet inn de siste 10 minuttene. For kanaler uten nye opplastinger oppdateres visningstall, fjernede videoer og endrede titler bare med noen timers mellomrom, og nye opplastinger kan dukke opp senere når RSS-strømmen henger etter. Ikke tilgjengelig med Invidious-API-et."
   General Settings:
-    Limit Titles to Two Lines: "Forkorter video- og spillelistetitler i lister og rutenett til to linjer med en ellipse, for mer ensartede kort. Hold pekeren over en tittel for å se hele."
+    Title Lines: "Forkorter video- og spillelistetitler i lister og rutenett til valgt antall linjer med en ellipse, for mer ensartede kort. Hold pekeren over en tittel for å se hele."
     Close Window With Last Tab: 'Når dette er av, åpner lukking av den siste fanen en ny fane i stedet, slik at vinduet holder seg åpent til du lukker det.'
     Preferred Video Codec: |
       Automatisk foretrekker kodeker som enheten din kan dekode med maskinvare.

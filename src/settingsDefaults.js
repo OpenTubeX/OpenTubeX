@@ -373,7 +373,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     },
     thumbnailPreference: '',
     thumbnailDataSaver: false,
-    limitTitlesToTwoLines: true,
+    // 0 shows titles in full.
+    titleLineLimit: 2,
     linkUnderline: 'hover',
     modalBackdrop: 'blur',
     showThumbnailPreviews: true,

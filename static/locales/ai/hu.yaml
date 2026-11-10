@@ -397,7 +397,9 @@ Settings:
       On Hover: "Hivatkozások aláhúzása rámutatáskor"
       Never: "Soha ne húzza alá a hivatkozásokat"
       Always: "Mindig húzza alá a hivatkozásokat"
-    Limit Titles to Two Lines: "Címek korlátozása két sorra"
+    Title Lines:
+      Title Lines: "Cím sorainak száma"
+      Unlimited: "Korlátlan"
     Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
     Preferred Video Codec: Előnyben részesített videokodek
     Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
@@ -2156,7 +2158,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
   General Settings:
-    Limit Titles to Two Lines: "A listákban és rácsokban két sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
+    Title Lines: "A listákban és rácsokban a kiválasztott számú sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
     Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
     Preferred Video Codec: |
       Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.

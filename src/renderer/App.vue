@@ -2047,7 +2047,8 @@ onBeforeUnmount(() => {
   capacitorTabService?.dispose()
   removeCapacitorTabPreviews?.()
   removeCapacitorTabAvatars?.()
-  document.documentElement.classList.remove('hideOutlines', 'limitTitlesToTwoLines')
+  document.documentElement.classList.remove('hideOutlines', 'limitTitleLines')
+  document.documentElement.style.removeProperty('--title-line-limit')
   delete document.documentElement.dataset.linkUnderline
   delete document.documentElement.dataset.modalBackdrop
   removeGamepadNavigation()
@@ -2581,8 +2582,10 @@ watch(outlinesHidden, hidden => {
 }, { flush: 'sync', immediate: true })
 
 // On <html>, like hideOutlines, so every list in the document matches.
-watch(() => store.getters.getLimitTitlesToTwoLines, limit => {
-  document.documentElement.classList.toggle('limitTitlesToTwoLines', limit)
+watch(() => store.getters.getTitleLineLimit, lines => {
+  const root = document.documentElement
+  root.classList.toggle('limitTitleLines', lines > 0)
+  root.style.setProperty('--title-line-limit', String(lines))
 }, { flush: 'sync', immediate: true })
 
 watch(() => store.getters.getLinkUnderline, value => {

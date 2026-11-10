@@ -498,6 +498,45 @@ test('migrates the mini player switches to the scroll player select', async () =
   )
 })
 
+test('migrates the Limit Titles to Two Lines switch to the Title Lines select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'limitTitlesToTwoLines', value: false },
+        { _id: 'syncServerSettingsExcluded', value: ['limitTitlesToTwoLines'] },
+        { _id: 'syncServerSettingUpdatedAt', value: { limitTitlesToTwoLines: 20 } },
+      ],
+      {
+        titleLineLimit: 0,
+        syncServerSettingsExcluded: ['titleLineLimit'],
+        syncServerSettingUpdatedAt: { limitTitlesToTwoLines: 20, titleLineLimit: 20 },
+      },
+    ],
+    [[{ _id: 'limitTitlesToTwoLines', value: true }], { titleLineLimit: 2 }],
+    [
+      [
+        { _id: 'limitTitlesToTwoLines', value: false },
+        { _id: 'titleLineLimit', value: 3 },
+        { _id: 'syncServerSettingUpdatedAt', value: { limitTitlesToTwoLines: 20, titleLineLimit: 30 } },
+      ],
+      { titleLineLimit: 3, syncServerSettingUpdatedAt: { limitTitlesToTwoLines: 20, titleLineLimit: 30 } },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ limitTitlesToTwoLines: false }), { titleLineLimit: 0 })
+  assert.deepEqual(migrateLegacySettings({ limitTitlesToTwoLines: true }), { titleLineLimit: 2 })
+  assert.deepEqual(migrateLegacySettings({ limitTitlesToTwoLines: false, titleLineLimit: 1 }), { titleLineLimit: 1 })
+})
+
 const controlBarMigrationStart = settingsSource.indexOf('      // The chapters and screenshot buttons used to sit')
 const controlBarMigrationEnd = settingsSource.indexOf('      // Existing logged-in sync users', controlBarMigrationStart)
 

@@ -265,11 +265,11 @@ if (windowed) {
         !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
     })
   }, { flush: 'post' })
-  // Two-line titles, text settings, and list thumbnail sizes change row
+  // Title line limits, text settings, and list thumbnail sizes change row
   // heights without the width change that remeasures shells.
   watch(
     [
-      () => store.getters.getLimitTitlesToTwoLines,
+      () => store.getters.getTitleLineLimit,
       () => store.getters.getFontSize,
       () => store.getters.getAppFont,
       () => store.state.settings[thumbnailSizeSetting]

@@ -409,7 +409,9 @@ Settings:
       On Hover: "Understrek lenkjer når peikaren er over dei"
       Never: "Aldri understrek lenkjer"
       Always: "Alltid understrek lenkjer"
-    Limit Titles to Two Lines: "Avgrens titlar til to linjer"
+    Title Lines:
+      Title Lines: "Tittellinjer"
+      Unlimited: "Uavgrensa"
     Close Window With Last Tab: 'Lukk vindauget når den siste fana vert lukka'
     Preferred Video Codec: Føretrekt videokodek
     Always Use Backup Media Server: "Bruk alltid reservemedietenaren"
@@ -2463,7 +2465,7 @@ Description:
   Music: Musikk
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Kortar ned video- og spelelistetitlar i lister og rutenett til to linjer med ein ellipse, for meir einsarta kort. Hald peikaren over ein tittel for å sjå heile."
+    Title Lines: "Kortar ned video- og spelelistetitlar i lister og rutenett til valt tal på linjer med ein ellipse, for meir einsarta kort. Hald peikaren over ein tittel for å sjå heile."
     Close Window With Last Tab: 'Når dette er av, opnar lukking av den siste fana ei ny fane i staden, slik at vindauget held seg ope til du lukkar det.'
     Preferred Video Codec: |
       Automatisk føretrekkjer kodekar som eininga di kan dekode med maskinvare.
