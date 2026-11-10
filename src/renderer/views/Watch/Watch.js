@@ -314,6 +314,8 @@ export default defineComponent({
       videoPlayerLoaded: false,
       /** @type {boolean|null} */
       isFamilyFriendly: null,
+      // The video plays while its /next data is still loading
+      watchNextPending: false,
       commentsDisabled: false,
       commentsLoaded: false,
       commentPreviews: [],
@@ -609,6 +611,8 @@ export default defineComponent({
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
+      /** @type {Promise<unknown> | null} the first history write of the current video */
+      firstHistoryWrite: null,
       /** @type {Set<string>} videos whose watched mark is still being written */
       watchedMarkPendingVideoIds: new Set(),
       /** @type {{ playlistId: string, videoId: string, playlistItemId: string | null } | null} the playlist entry removed once watched */
@@ -1207,6 +1211,8 @@ export default defineComponent({
     },
     liveChatAvailable: function () {
       if (this.isOffline && !this.liveChatLoaded) return false
+      // The chat reads its session from /next once, when it opens
+      if (this.watchNextPending) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -1776,6 +1782,7 @@ export default defineComponent({
         }
         return getLocalVideoInfo(videoId, {
           reloadPlaybackContext,
+          lateWatchNext: true,
           shouldGeneratePoToken: () => !process.env.IS_CAPACITOR || !useYtDlp
         }).then(result => {
           if (result.watchPageIpBlocked || result.info?.playability_status?.status !== 'OK') {
@@ -1845,6 +1852,8 @@ export default defineComponent({
       if (
         !this.enableVideoMetadataCache ||
         this.isLoading ||
+        // The /next data can localize the title and description
+        this.watchNextPending ||
         !this.hasResolvedVideoTitle ||
         (this.localFilePlayback && !this.channelId) ||
         typeof window.ftElectron?.videoMetadataCache?.update !== 'function'
@@ -2473,6 +2482,7 @@ export default defineComponent({
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
+      this.firstHistoryWrite = null
       // Re-evaluate per video: this instance is reused across same-tab
       // navigation, so a tab that was presented for the previous video must not
       // keep that state while it loads the next one in the background.
@@ -2526,6 +2536,7 @@ export default defineComponent({
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
       this.isFamilyFriendly = null
+      this.watchNextPending = false
       this.commentsDisabled = false
       this.isLive = false
       this.isLiveDvrEnabled = null
@@ -3264,6 +3275,7 @@ export default defineComponent({
         this.isCurrentVideoLoad(loadGeneration, videoId) && getConnectionState() !== 'offline'
           ? getLocalVideoInfo(videoId, {
               reloadPlaybackContext,
+              lateWatchNext: true,
               // As in getVideoInformationLocal, but the previous video's engine
               // fallback is only reset once its player is gone. Until then, a
               // different video uses the engine setting without that fallback.
@@ -3279,7 +3291,14 @@ export default defineComponent({
       return prefetch
     },
 
-    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false, videoInfoPrefetch = null, reloadPlaybackContext = undefined) {
+    /**
+     * @param {number} [loadGeneration]
+     * @param {boolean} [metadataOnly] keeps the current playback
+     * @param {Promise<any> | null} [videoInfoPrefetch]
+     * @param {import('googlevideo/protos').ReloadPlaybackContext} [reloadPlaybackContext]
+     * @param {boolean} [lateWatchNext] fills in the late /next data of a video that already plays
+     */
+    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false, videoInfoPrefetch = null, reloadPlaybackContext = undefined, lateWatchNext = false) {
       if (this.firstLoad && !metadataOnly) {
         this.isLoading = true
       }
@@ -3287,7 +3306,8 @@ export default defineComponent({
       const videoId = this.tabRoute.params.id
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-      if (getConnectionState() === 'offline') {
+      // The late /next data has already arrived
+      if (getConnectionState() === 'offline' && !lateWatchNext) {
         if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
         // Keep the metadata request queued for reconnect instead of abandoning
         // the watch page with its loading skeleton still visible.
@@ -3304,6 +3324,7 @@ export default defineComponent({
           // A failed prefetch is retried here, like one that never started.
           : (await videoInfoPrefetch?.catch(() => null)) ?? await getLocalVideoInfo(videoId, {
               reloadPlaybackContext,
+              lateWatchNext: true,
               // Metadata extraction can outlive a playback engine switch. Decide
               // when the token is needed, after the preceding network requests.
               shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
@@ -3327,7 +3348,9 @@ export default defineComponent({
           infoPanels,
           androidLiveHlsManifestUrl,
           androidLiveDashManifestUrl,
+          watchNextPromise,
         } = videoInfo
+        if (!lateWatchNext) this.watchNextPending = !!watchNextPromise
 
         this.musicMediaType = musicMediaType
         this.contentDisclosures = contentDisclosures ?? null
@@ -3489,8 +3512,10 @@ export default defineComponent({
           channelId: this.channelId
         })
 
-        this.initializePlaybackRate()
-        this.initializeVideoQuality()
+        if (!lateWatchNext) {
+          this.initializePlaybackRate()
+          this.initializeVideoQuality()
+        }
 
         let published
         if (result.page[0]?.microformat?.publish_date) {
@@ -3539,13 +3564,16 @@ export default defineComponent({
           const likeCount = Number.isFinite(result.basic_info.like_count)
             ? result.basic_info.like_count
             : parseLocalSubscriberCount(descriptionLikes?.accessibility_text ?? descriptionLikes?.value.text ?? '')
-          this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
+          // Only /next has the like count
+          this.videoLikeCount = !result.page[1] ? null : isNaN(likeCount) ? 0 : likeCount
 
-          // YouTube doesn't return dislikes anymore
-          this.videoDislikeCount = null
+          if (!lateWatchNext) {
+            // YouTube doesn't return dislikes anymore
+            this.videoDislikeCount = null
 
-          if (this.useReturnYouTubeDislikes) {
-            this.fetchVideoDislikes()
+            if (this.useReturnYouTubeDislikes) {
+              this.fetchVideoDislikes()
+            }
           }
         }
 
@@ -3624,7 +3652,7 @@ export default defineComponent({
 
           if (chapters.length > 0) {
             this.finalizeChapters(chapters, result.basic_info.duration)
-          } else {
+          } else if (!watchNextPromise) {
             // Community chapters are optional: keep playback and the page skeleton
             // independent of SponsorBlock's response time.
             this.getSponsorBlockCommunityChapters(result.basic_info.duration).then(chapters => {
@@ -3829,7 +3857,8 @@ export default defineComponent({
               this.legacyFormats = result.streaming_data.formats.map(mapLocalLegacyFormat)
             }
 
-            if (result.captions) {
+            // The late /next data has the same captions, which are already loaded
+            if (result.captions && !lateWatchNext) {
               const captionTranslationLanguages = result.captions.translation_languages ?? []
               // Only set when the video has multiple audio tracks, e.g. AI dubs
               const originalLanguage = result.streaming_data.adaptive_formats.find(format => format.has_audio && format.is_original)?.language
@@ -3914,7 +3943,7 @@ export default defineComponent({
 
           let storyboard
 
-          if (result.storyboards?.type === 'PlayerStoryboardSpec') {
+          if (result.storyboards?.type === 'PlayerStoryboardSpec' && !lateWatchNext) {
             /** @type {import('youtubei.js/dist/src/parser/classes/PlayerStoryboardSpec').StoryboardData[]} */
             let source = result.storyboards.boards
             if (window.innerWidth < 500) {
@@ -4038,11 +4067,21 @@ export default defineComponent({
           }
         }
         this.updateShortThumbnail()
-        if (this.isShort) {
+        if (this.isShort && !lateWatchNext) {
           this.loadLocalShortLinkedVideo(this.videoId)
         }
         this.finishMetadataLoad()
         this.updateTitle()
+        if (lateWatchNext) {
+          this.watchNextPending = false
+          this.updateVideoMetadataCache()
+          // Playback may have saved the /player title, description, and date already.
+          if (this.rememberHistory && this.videoPlayerLoaded) {
+            this.refreshHistoryMetadata(loadGeneration, videoId)
+          }
+        } else if (watchNextPromise) {
+          this.applyLateWatchNext(loadGeneration, videoInfo)
+        }
       } catch (err) {
         backendFailed = true
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
@@ -4087,8 +4126,28 @@ export default defineComponent({
       } finally {
         if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
           this.vrStreamsPending = false
+          if (lateWatchNext) this.watchNextPending = false
         }
       }
+    },
+
+    /**
+     * Fills in the metadata that waited for /next, or what's possible without it.
+     * @param {number} loadGeneration
+     * @param {Awaited<ReturnType<typeof getLocalVideoInfo>>} videoInfo
+     */
+    applyLateWatchNext: async function (loadGeneration, videoInfo) {
+      const late = await videoInfo.watchNextPromise.catch(error => {
+        console.warn(`Could not load the /next data of ${videoInfo.info.basic_info.id}`, error)
+        return null
+      })
+      await this.getVideoInformationLocal(
+        loadGeneration,
+        true,
+        Promise.resolve({ ...videoInfo, ...late, watchNextPromise: undefined }),
+        undefined,
+        true
+      )
     },
 
     getVideoInformationInvidious: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false) {
@@ -4774,6 +4833,13 @@ export default defineComponent({
       })
     },
 
+    refreshHistoryMetadata: async function (loadGeneration, videoId) {
+      await this.firstHistoryWrite?.catch(() => {})
+      if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.historyEntryExists) {
+        this.addToHistory(this.historyEntry.watchProgress)
+      }
+    },
+
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
       const now = Date.now()
       // Local playback can start before channel metadata is available.
@@ -5250,11 +5316,11 @@ export default defineComponent({
 
         if (this.rememberHistory) {
           if (this.timestamp !== null) {
-            this.addToHistory(this.timestamp)
+            this.firstHistoryWrite = this.addToHistory(this.timestamp)
           } else if (this.historyEntryExists) {
-            this.addToHistory(this.historyEntry.watchProgress)
+            this.firstHistoryWrite = this.addToHistory(this.historyEntry.watchProgress)
           } else {
-            this.addToHistory(0)
+            this.firstHistoryWrite = this.addToHistory(0)
           }
 
           // Must be called AFTER history entry inserted

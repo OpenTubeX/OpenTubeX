@@ -51,6 +51,17 @@ export function generateContentPoToken(videoId, context, initialAttestationData,
   })
 }
 
+/**
+ * Mints a video-bound PO token from an existing BotGuard attestation.
+ * @param {string} videoId
+ * @returns {Promise<string | null>} `null` when BotGuard would have to run first
+ */
+export async function mintContentPoTokenFromAttestation(videoId) {
+  // Android and iOS keep their attestation in native code without a mint-only call
+  if (!process.env.IS_ELECTRON) return null
+  return await window.ftElectron.mintPoToken(videoId)
+}
+
 async function generateHostPoToken(videoId, context, initialAttestationData, ytConfig) {
   if (process.env.IS_ELECTRON) {
     return window.ftElectron.generatePoToken(

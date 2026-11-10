@@ -340,6 +340,7 @@ function load(fetch, globals = {}) {
     setTimeout,
     clearTimeout,
     console,
+    disableDirectPlayer: () => {},
     ...globals,
   })
   return { ...api, schemes }
@@ -492,9 +493,10 @@ test('withheld media pending attestation reloads after bounded backoffs despite 
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
   let calls = 0
   let reloads = 0
+  const directPlayerFallbacks = []
   const { createSabrTransport } = load(async () => {
     return ++calls === 1 ? response([1]) : policyResponse(2000, 2)
-  }, { Date })
+  }, { Date, disableDirectPlayer: reason => directPlayerFallbacks.push(reason) })
   const transport = createSabrTransport(sabrData, () => context)
   t.after(() => transport.cleanup())
   transport.onReloadOnce(() => reloads++)
@@ -511,6 +513,8 @@ test('withheld media pending attestation reloads after bounded backoffs despite 
   await rejected
   assert.equal(calls, 7)
   assert.equal(reloads, 1)
+  // The reload and later videos load through the watch page
+  assert.ok(directPlayerFallbacks.length > 0)
 })
 
 test('withheld media pending attestation waits to reload until playback needs it', async t => {

@@ -31,6 +31,7 @@ import {
   SABR_LIVE_HEAD_TIME_MS
 } from './sabrProtocol'
 import { fetchGoogleVideo } from './googleVideoFallback'
+import { disableDirectPlayer } from '../api/direct-player.js'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -577,6 +578,10 @@ async function doRequest(
             if (!streamProtectionStatus) break
 
             currentState.sabrStreamState.attestationPending = streamProtectionStatus.status === 2
+            if (streamProtectionStatus.status === 2) {
+              // The watch page's session may be trusted more, so load the next videos through it
+              disableDirectPlayer('SABR reported a session pending attestation')
+            }
             if (streamProtectionStatus.status === 3) {
               invalidPoToken = true
             }

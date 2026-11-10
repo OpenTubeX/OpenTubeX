@@ -219,3 +219,32 @@ test('a seek before the first load creates a complete new history entry', () => 
   assert.equal(f.history.authorId, 'channel')
   assert.ok(f.history.timeWatched > 0)
 })
+
+test('late /next metadata replaces the /player metadata once the first history write lands', async () => {
+  const { refreshHistoryMetadata } = runInNewContext(`({
+    ${source.slice(source.indexOf('    refreshHistoryMetadata:'), source.indexOf('    addToHistory:'))}
+  })`)
+  const history = new Map()
+  let finishFirstWrite
+  const view = {
+    refreshHistoryMetadata,
+    addToHistory,
+    isCurrentVideoLoad: () => true,
+    get historyEntry() { return history.get(this.videoId) },
+    get historyEntryExists() { return history.has(this.videoId) },
+    updateHistory: async record => { history.set(record.videoId, record) },
+    videoId: 'aaaaaaaaaaa',
+    videoTitle: '/next title',
+    videoLengthSeconds: 60,
+    channelId: 'channel',
+    // Started at a timestamp, while the store had no entry yet
+    firstHistoryWrite: new Promise(resolve => { finishFirstWrite = resolve }),
+  }
+
+  const refresh = view.refreshHistoryMetadata(1, view.videoId)
+  history.set(view.videoId, { videoId: view.videoId, title: '/player title', watchProgress: 42 })
+  finishFirstWrite()
+  await refresh
+  assert.equal(history.get(view.videoId).title, '/next title')
+  assert.equal(history.get(view.videoId).watchProgress, 42)
+})

@@ -29,7 +29,9 @@ import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { normalizeVideoPopularityResponse } from '../player/videoPopularity'
 import { parseLocalCollaboratorItems, parseLocalVideoChannels } from '../video-collaborators'
 
-import { evaluatePlayerScript, generateContentPoToken, prewarmPlayerScriptEvaluator } from './local-api-platform'
+import { evaluatePlayerScript, generateContentPoToken, mintContentPoTokenFromAttestation, prewarmPlayerScriptEvaluator } from './local-api-platform'
+import { disableDirectPlayer, getDirectPlayerFallbackReason, isDirectPlayerEnabled } from './direct-player.js'
+import { classifyRequestFailure } from './requestDiagnostics.js'
 import { calculatePublishedDate, deepCopy, extractNumberFromString, getChannelPlaylistId, getRelativeTimeFromDate } from '../utils'
 
 const {
@@ -577,6 +579,7 @@ async function getWatchHTMLWatchPage(videoId, fetchFunc) {
   }
 
   const session = buildSessionFromYtConfig(ytConfig, fetchFunc)
+  lastWatchPageClient = { client: ytConfig.INNERTUBE_CONTEXT?.client, playerId }
 
   return {
     ytConfig,
@@ -683,8 +686,103 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
 }
 
 /**
+ * The client build and player of the last watch page. Sessions generated locally
+ * copy the build, but not the identifiers that would link them to that session.
+ * @type {{ client: any, playerId: string | undefined } | null}
+ */
+let lastWatchPageClient = null
+const DIRECT_PLAYER_CLIENT_FIELDS = ['hl', 'gl', 'clientVersion', 'osName', 'osVersion', 'browserName', 'browserVersion', 'platform', 'clientFormFactor']
+
+/**
+ * Requests /player and /next directly with a locally generated session. The
+ * watch page takes about a second longer, as YouTube only sends its end, with
+ * the embedded responses, once /next is ready. Only BotGuard needs the page's
+ * challenge, so this works once an attestation exists.
+ * @param {string} videoId
+ * @param {(input, init) => Promise<Response>} fetchFunc
+ * @param {import('googlevideo/protos').ReloadPlaybackContext | undefined} reloadPlaybackContext
+ * @returns {Promise<{ session: import('youtubei.js').Session, player: import('youtubei.js').Player, playerResponse: any, poToken: string, nextRequest: Promise<any> } | { fallbackReason: string, sessionWide: boolean } | null>}
+ *   `null` without an attestation. A `sessionWide` fallback is YouTube's answer, not a lost connection.
+ */
+async function requestDirectPlayer(videoId, fetchFunc, reloadPlaybackContext) {
+  const poToken = await mintContentPoTokenFromAttestation(videoId).catch(() => null)
+  if (!poToken) return null
+
+  // Cancels /next when the watch page has to be loaded instead
+  const abortController = new AbortController()
+  try {
+    const { session } = await createInnertube({ generateSessionLocally: true, fetchFunc, signal: abortController.signal })
+    const client = lastWatchPageClient?.client
+    for (const field of DIRECT_PLAYER_CLIENT_FIELDS) {
+      if (client?.[field] !== undefined) session.context.client[field] = client[field]
+    }
+
+    const nextRequest = session.actions.execute('/next', { videoId, racyCheckOk: true, contentCheckOk: true })
+    // A late failure is handled by the watch view, and a fallback discards it
+    nextRequest.catch(() => {})
+
+    const player = process.env.IS_ELECTRON
+      ? await createBackgroundPlayer(new PlayerCache(), localApiFetch, lastWatchPageClient?.playerId, runBackgroundJob)
+      : await Player.create(new UniversalCache(false), localApiFetch, undefined, lastWatchPageClient?.playerId)
+    session.player = player
+
+    const { data: playerResponse } = await session.actions.execute('/player', {
+      videoId,
+      racyCheckOk: true,
+      contentCheckOk: true,
+      playbackContext: {
+        contentPlaybackContext: {
+          vis: 0,
+          splay: false,
+          lactMilliseconds: '-1',
+          signatureTimestamp: player.signature_timestamp
+        },
+        ...(reloadPlaybackContext && { reloadPlaybackContext })
+      },
+      serviceIntegrityDimensions: { poToken }
+    })
+
+    const fallbackReason = getDirectPlayerFallbackReason(playerResponse)
+    if (fallbackReason !== null) {
+      abortController.abort()
+      return { fallbackReason, sessionWide: true }
+    }
+    return { session, player, playerResponse, poToken, nextRequest }
+  } catch (error) {
+    abortController.abort()
+    return { fallbackReason: String(error?.message ?? error), sessionWide: classifyRequestFailure(error) === 'http' }
+  }
+}
+
+/**
+ * Adds the late /next response to a video info that was built without it.
+ * @param {import('youtubei.js').YT.VideoInfo} info the processed video info
+ * @param {{ data: any }} playerResponse the /player response it was built from
+ * @param {{ data: any }} nextResponse
+ * @param {import('youtubei.js').Actions} actions
+ */
+export function mergeLateWatchNext(info, playerResponse, nextResponse, actions) {
+  normalizeVideoPopularityResponse(nextResponse.data)
+  const merged = new YT.VideoInfo([playerResponse, nextResponse], actions, info.cpn)
+  // The playback data was deciphered and adjusted after the player response arrived
+  merged.playability_status = info.playability_status
+  merged.streaming_data = info.streaming_data
+  merged.captions = info.captions
+  merged.storyboards = info.storyboards
+  merged.basic_info.start_timestamp = info.basic_info.start_timestamp
+  merged.basic_info.duration = info.basic_info.duration
+  return {
+    info: merged,
+    contentDisclosures: extractLocalContentDisclosures(merged),
+    infoPanels: extractLocalInfoPanels(merged),
+  }
+}
+
+/**
  * @param {string} id
- * @param {{ shouldGeneratePoToken?: () => boolean, reloadPlaybackContext?: import('googlevideo/protos').ReloadPlaybackContext }} [options]
+ * @param {{ shouldGeneratePoToken?: () => boolean, reloadPlaybackContext?: import('googlevideo/protos').ReloadPlaybackContext, lateWatchNext?: boolean }} [options]
+ *   With `lateWatchNext`, a load that already has an attestation can skip the watch page.
+ *   Its result then lacks the /next data, which `watchNextPromise` resolves to.
  * @returns {Promise<{
  *   info: import('youtubei.js').YT.VideoInfo,
  *   poToken: string | undefined,
@@ -705,10 +803,11 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
  *   getVrHlsManifest: () => Promise<string | null>,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
  *   infoPanels: LocalInfoPanel[] | null,
- *   musicMediaType: import('../player/musicMediaType').MusicMediaType
+ *   musicMediaType: import('../player/musicMediaType').MusicMediaType,
+ *   watchNextPromise?: Promise<{ info: import('youtubei.js').YT.VideoInfo, contentDisclosures: { label: string, description: string, attribution: string }[] | null, infoPanels: LocalInfoPanel[] | null }>
  * }>}
  */
-export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true, reloadPlaybackContext } = {}) {
+export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true, reloadPlaybackContext, lateWatchNext = false } = {}) {
   let responseTime
   let paidPromotionDurationMs = null
   let isPremiere
@@ -720,6 +819,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     }
 
     const response = await localApiFetch(input, init)
+    // youtubei.js reports a refusal with its HTTP status. An HTML error page
+    // would only fail to parse here.
+    if (!response.ok) return response
     const responseText = await response.text()
 
     responseTime = Date.now()
@@ -743,8 +845,26 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   // Deciphering the streams needs the interpreter right after the watch page loads
   prewarmPlayerScriptEvaluator()
 
+  let direct = null
+  let directFallback = null
+  if (lateWatchNext && isDirectPlayerEnabled() && shouldGeneratePoToken()) {
+    direct = await requestDirectPlayer(id, fetchFunc, reloadPlaybackContext)
+    if (direct && 'fallbackReason' in direct) {
+      directFallback = direct
+      console.warn(`Loading ${id} through the watch page instead of /player: ${directFallback.fallbackReason}`)
+      direct = null
+    }
+  }
+
   try {
-    htmlExtracts = await getWatchHTMLWatchPage(id, fetchFunc)
+    if (direct) {
+      htmlExtracts = { session: direct.session, playerResponse: direct.playerResponse }
+      player = direct.player
+      paidPromotionDurationMs ??= getPaidPromotionDurationMs(direct.playerResponse)
+      isPremiere ??= getLocalPremiereState(direct.playerResponse.videoDetails)
+    } else {
+      htmlExtracts = await getWatchHTMLWatchPage(id, fetchFunc)
+    }
     responseTime = Date.now()
   } catch (error) {
     if (!error.isIpBlock) {
@@ -806,8 +926,10 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   async function loadPlayerResponse() {
     // Recheck load validity after script setup before occupying the token queue.
     await playerReady
-    let contentPoToken
-    if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+    let contentPoToken = direct?.poToken
+    if (direct) {
+      player.po_token = contentPoToken
+    } else if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         !watchPageIpBlocked && shouldGeneratePoToken()) {
       try {
         contentPoToken = await generateContentPoToken(
@@ -823,7 +945,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
         throw error
       }
     }
-    const playerResponse = htmlExtracts.playerResponse && !reloadPlaybackContext
+    // The direct request already sent the reload context
+    const playerResponse = htmlExtracts.playerResponse && (!reloadPlaybackContext || direct)
       ? { data: htmlExtracts.playerResponse }
       : await htmlExtracts.session.actions.execute('/player', {
           videoId: id,
@@ -847,24 +970,38 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   }
 
   // /next needs neither the playback token nor the player script.
+  // Without the watch page, playback starts before /next arrives.
   const [{ playerResponse, contentPoToken, musicMediaType }, nextResponse] = await Promise.all([
     loadPlayerResponse(),
-    htmlExtracts.nextResponse
-      ? Promise.resolve({ data: htmlExtracts.nextResponse })
-      : htmlExtracts.session.actions.execute('/next', {
-          videoId: id,
-          racyCheckOk: true,
-          contentCheckOk: true
-        })
+    direct
+      ? null
+      : htmlExtracts.nextResponse
+        ? Promise.resolve({ data: htmlExtracts.nextResponse })
+        : htmlExtracts.session.actions.execute('/next', {
+            videoId: id,
+            racyCheckOk: true,
+            contentCheckOk: true
+          })
   ])
 
   const context = htmlExtracts.session.context
 
   const cpn = Utils.generateRandomString(16)
 
-  normalizeVideoPopularityResponse(nextResponse.data)
+  if (nextResponse) normalizeVideoPopularityResponse(nextResponse.data)
   const isLiveDvrEnabled = getLiveDvrEnabled(playerResponse.data.videoDetails)
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
+  // A video that is unavailable either way says nothing about the direct requests
+  if (directFallback?.sessionWide && info.playability_status.status === 'OK') {
+    disableDirectPlayer(directFallback.fallbackReason)
+  }
+  // Call it once the playback data below is final, as the merge keeps it
+  const getWatchNextPromise = () => {
+    if (!direct) return undefined
+    const promise = direct.nextRequest.then(next => mergeLateWatchNext(info, playerResponse, next, htmlExtracts.session.actions))
+    promise.catch(() => {})
+    return promise
+  }
   // Live streams can need the Android manifest fallback. Regular videos only
   // need its disclosure metadata, which can arrive after playback has started.
   const androidPlayerResponse = info.basic_info.is_live || info.basic_info.is_post_live_dvr
@@ -958,6 +1095,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       musicMediaType,
       contentDisclosures: extractLocalContentDisclosures(info),
       infoPanels: extractLocalInfoPanels(info),
+      watchNextPromise: getWatchNextPromise(),
     }
   }
 
@@ -1036,6 +1174,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     contentDisclosures: extractLocalContentDisclosures(info),
     infoPanels: extractLocalInfoPanels(info),
     getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
+    watchNextPromise: getWatchNextPromise(),
   }
 }
 
