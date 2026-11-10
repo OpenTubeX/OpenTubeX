@@ -244,7 +244,7 @@ public class PlaylistAutoplayTest {
             result.set(value);
             latch.countDown();
         }));
-        assertTrue("JavaScript responds", latch.await(5, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", latch.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

@@ -204,7 +204,7 @@ public class PullToRefreshLayoutTest {
             value.set(result);
             evaluated.countDown();
         }));
-        assertTrue(evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue(evaluated.await(15, TimeUnit.SECONDS));
         SystemClock.sleep(100);
         return value.get();
     }

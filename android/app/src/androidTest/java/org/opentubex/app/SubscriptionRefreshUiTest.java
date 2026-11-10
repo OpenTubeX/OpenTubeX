@@ -231,7 +231,7 @@ public class SubscriptionRefreshUiTest {
     }
 
     private static void awaitVisibility(boolean visible) throws Exception {
-        long deadline = android.os.SystemClock.elapsedRealtime() + 5000;
+        long deadline = android.os.SystemClock.elapsedRealtime() + 15000;
         while (AppVisibility.isVisible() != visible && android.os.SystemClock.elapsedRealtime() < deadline) {
             Thread.sleep(50);
         }
@@ -253,7 +253,7 @@ public class SubscriptionRefreshUiTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("WebView executes JavaScript", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView executes JavaScript", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 }

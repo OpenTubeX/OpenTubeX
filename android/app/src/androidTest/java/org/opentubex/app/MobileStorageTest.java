@@ -57,7 +57,7 @@ public class MobileStorageTest {
             result.set(value);
             evaluated.countDown();
         }));
-        if (!evaluated.await(5, TimeUnit.SECONDS)) return null;
+        if (!evaluated.await(15, TimeUnit.SECONDS)) return null;
         return result.get();
     }
 

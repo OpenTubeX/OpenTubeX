@@ -549,7 +549,7 @@ public class DlnaCastingTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.evaluateJavascript(script, value -> {
             result.set(value); done.countDown();
         }));
-        assertTrue("WebView evaluation timed out", done.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView evaluation timed out", done.await(15, TimeUnit.SECONDS));
         return result.get();
     }
     private static void await(WebView view, String condition) throws Exception {

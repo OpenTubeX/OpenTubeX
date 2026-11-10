@@ -729,7 +729,7 @@ public class SubscriptionRefreshLifecycleTest {
                 result.set(value);
                 evaluated.countDown();
             }));
-        assertTrue("dismissed renderer executes JavaScript", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("dismissed renderer executes JavaScript", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

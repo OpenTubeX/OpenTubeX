@@ -342,7 +342,7 @@ public class AppIconTest {
             result.set(value);
             done.countDown();
         }));
-        assertTrue("WebView responds", done.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView responds", done.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

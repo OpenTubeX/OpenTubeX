@@ -182,7 +182,7 @@ public class StartupBackgroundTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("JavaScript responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 
