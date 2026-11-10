@@ -3940,7 +3940,7 @@ export default defineComponent({
         ),
         0
       )
-      chapterPreview.style.maxWidth = `${maxW}px`
+      chapterPreview.style.setProperty('--ft-chapter-preview-max-width', `${maxW}px`)
 
       const thumbContainer = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-container')
       let bottomPx

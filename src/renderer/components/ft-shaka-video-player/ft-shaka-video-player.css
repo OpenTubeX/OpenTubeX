@@ -468,23 +468,26 @@
   z-index: 1000;
 }
 
-/* Chapter title while hovering the seek bar; bottom/left/max-width from JS */
+/* Chapter title while hovering the seek bar; bottom/left and the seek bar's width limit from JS */
 :deep(.ft-chapter-preview) {
   position: absolute;
   transform: translateX(-50%);
   box-sizing: border-box;
   width: max-content;
+  max-width: min(320px, var(--ft-chapter-preview-max-width, 100%));
   padding: 6px 12px;
   overflow: hidden;
   background-color: rgb(27 27 27 / 67%);
-  border-radius: calc(999px * var(--ui-roundness));
+
+  /* Half of a single line's height: a pill for one line, rounded corners once it wraps */
+  border-radius: calc(15px * var(--ui-roundness));
   color: #fff;
   font-size: 13px;
   font-weight: bold;
   font-family: var(--app-font-family);
   text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
   box-shadow: none;
   text-shadow: none;
   pointer-events: none;
