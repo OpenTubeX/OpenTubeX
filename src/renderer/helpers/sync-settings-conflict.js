@@ -86,8 +86,10 @@ export function mergeSettingItemsEntry(options) {
     const localUpdatedAt = local.updatedAt
     const old = localUpdatedAt === undefined ? undefined : options.old?.value?.[itemId]
     const remoteEntry = remote[itemId]
-    // Without a synced baseline for this item, the newer edit wins and keeps its edit time.
-    const entry = !old && localUpdatedAt !== undefined && !(localUpdatedAt <= remoteEntry?.updatedAt)
+    // A local edit newer than the remote one wins and keeps its edit time, also
+    // when it restores the synced value, or when there is no synced baseline.
+    const entry = localUpdatedAt !== undefined && (!old || localUpdatedAt > old.updatedAt) &&
+      !(localUpdatedAt <= remoteEntry?.updatedAt)
       ? { value: local.value, updatedAt: localUpdatedAt }
       : mergeSettingEntry({
           key: itemId,

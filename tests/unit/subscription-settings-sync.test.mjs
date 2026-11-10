@@ -463,3 +463,14 @@ test('applying merged settings rejects instead of overwriting an edit made after
   await assert.rejects(subscriptionSync.applySubscriptionSettingsSync(store,
     { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 10 } }, mergedChannels), /changed during sync/)
 })
+
+test('a newer local edit back to the synced value beats an older remote edit', () => {
+  const merged = mergeSettingItemsEntry({
+    key: playlistKey,
+    value: { item: { value: { shuffleByDefault: false }, updatedAt: 30 } },
+    old: { key: playlistKey, value: { item: { value: { shuffleByDefault: false }, updatedAt: 10 } }, updatedAt: 10 },
+    remoteEntry: { key: playlistKey, value: { item: { value: { shuffleByDefault: true }, updatedAt: 20 } }, updatedAt: 20 },
+    now: 40,
+  })
+  assert.deepEqual(merged.value.item, { value: { shuffleByDefault: false }, updatedAt: 30 })
+})
