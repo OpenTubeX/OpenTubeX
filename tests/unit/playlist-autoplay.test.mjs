@@ -89,6 +89,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo(', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
   const watch = {
     isCurrentlyPresented: () => true,
+    isPlaybackPresented: () => true,
     handleWatchProgressAutoSaveWhenProgressEnabled() {},
     customShortsPlayerActive: false,
     isStandaloneShort: false,

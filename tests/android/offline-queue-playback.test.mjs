@@ -13,8 +13,8 @@ const enabled = Boolean(process.env.ANDROID_CDP_URL && process.env.ANDROID_SERIA
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, ...args], { encoding: 'utf8' })
 const launch = () => adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
 
-for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) {
-  test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browseDownloads ? ' from Downloads' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
+for (const [browse, autoplayVideos] of [[false, true], [true, false]]) {
+  test(`offline audio queue advances across downloads while locked${sameDownload ? ' replaying the same download' : sameVideo ? ' across copies of one video' : ''}${browse ? ' in the mini player' : ''} with autoplay ${autoplayVideos ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
     assert.ok(process.env.ANDROID_OFFLINE_MEDIA_PATH, 'Set ANDROID_OFFLINE_MEDIA_PATH to app-local demo-audio.mp3')
     assert.ok(process.env.ANDROID_OFFLINE_FIRST_MEDIA_PATH, 'Set ANDROID_OFFLINE_FIRST_MEDIA_PATH to an app-local MP3 at least 20 seconds long')
     let browser, page, saved
@@ -76,9 +76,14 @@ for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) 
         window.__offlineQueueEnds = 0
         window.__offlineQueueEnd = event => { if (event.target.tagName === 'VIDEO') window.__offlineQueueEnds++ }
         document.addEventListener('ended', window.__offlineQueueEnd, true)
+        // The mini player keeps its video's route behind the browsing page.
+        window.__offlineQueueWatchRoute = () => {
+          const tab = store.getters.getActiveTab
+          return tab.route.path.startsWith('/watch/') ? tab.route : tab.history.findLast(entry => entry.route.path.startsWith('/watch/')).route
+        }
         window.__offlineQueuePlay = event => {
           if (event.target.tagName !== 'VIDEO') return
-          const id = Number(store.getters.getActiveTab.route.query.downloadId)
+          const id = Number(window.__offlineQueueWatchRoute().query.downloadId)
           const key = id + ':' + window.__offlineQueueEnds
           if (ids.includes(id) && window.__offlineQueueLastPlay !== key) {
             window.__offlineQueuePlayed.push(id)
@@ -117,8 +122,8 @@ for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) 
       await page.locator('video').evaluate(video => { video.currentTime = 0; return video.play() })
       await expect.poll(() => adb('shell', 'dumpsys', 'media_session'), { timeout: 20000 }).toMatch(/Offline queue track 1/)
       await expect.poll(() => page.locator('video').evaluate(video => !video.paused && video.currentTime > 0.1)).toBe(true)
-      if (browseDownloads) {
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
+      if (browse) {
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/subscriptions'))
         await expect(page.locator('.ftVideoPlayer')).toHaveClass(/mobileMiniBar/)
         await expect(page.locator('.ftVideoPlayer')).not.toHaveAttribute('data-mobile-mini-morph')
       }
@@ -146,10 +151,11 @@ for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) 
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return {
           path: store.getters.getActiveTab.route.path,
+          watchPath: window.__offlineQueueWatchRoute().path,
           queue: store.getters.getWatchQueueLength,
           ended: document.querySelector('video').ended
         }
-      }), { path: '/watch/' + videoIds[2], queue: 0, ended: true })
+      }), { path: browse ? '/subscriptions' : '/watch/' + videoIds[2], watchPath: '/watch/' + videoIds[2], queue: 0, ended: true })
       assert.deepEqual(await page.evaluate(() => window.__offlineQueuePlayed), ids, 'every queued source actually played')
       assert.equal(await page.locator('video').evaluate(video => video.autoplay), autoplayVideos, 'consumed queue requests preserve the autoplay preference')
     } catch (error) {
@@ -190,6 +196,7 @@ for (const [browseDownloads, autoplayVideos] of [[false, true], [true, false]]) 
           document.removeEventListener('play', window.__offlineQueuePlay, true)
           delete window.__offlineQueuePlay
           delete window.__offlineQueuePlayed
+          delete window.__offlineQueueWatchRoute
           document.querySelector('video')?.pause()
           const app = document.querySelector('#app').__vue_app__.config.globalProperties
           app.$router.push(saved.route)

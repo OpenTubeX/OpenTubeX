@@ -548,6 +548,11 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    // The inline height of the mini player this player replaces, or 0.
+    miniPlayerStartHeight: {
+      type: Number,
+      default: 0
+    },
     autoPictureInPictureState: {
       type: Object,
       default: null
@@ -1391,6 +1396,15 @@ export default defineComponent({
     // #region settings
 
     const isCrossTabMiniPlayerPresented = ref(false)
+    // This player replaces one that played in the mini player, for example
+    // the next video, so it may play while its Watch page is hidden until it
+    // docks there too.
+    const miniPlayerStartPending = ref(props.miniPlayerStartHeight > 0)
+    let miniPlayerHandoffHeight = props.miniPlayerStartHeight
+    // A mini player or Picture-in-Picture window keeps showing this player
+    // while its Watch page is hidden.
+    const presentedOutsideTab = computed(() => isCrossTabMiniPlayerPresented.value ||
+      pictureInPictureActive.value || miniPlayerStartPending.value)
 
     const {
       getAutoPictureInPictureState,
@@ -1411,6 +1425,8 @@ export default defineComponent({
       isPictureInPictureRestorePending: () => startInPip,
       initialState: props.autoPictureInPictureState,
     })
+    // The user returned to the Watch page before this player mounted.
+    if (isActiveTab.value) miniPlayerStartPending.value = false
 
     // Capture the replacement player's initial state. The parent clears its
     // pending SABR state after this player loads, but that must not add autoplay
@@ -1428,7 +1444,8 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return (autoplayRequested.value || (!suppressInitialAutoplay && store.getters.getAutoplayVideos)) && isActiveTab.value
+      return (autoplayRequested.value || (!suppressInitialAutoplay && store.getters.getAutoplayVideos)) &&
+        (isActiveTab.value || presentedOutsideTab.value)
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -1438,6 +1455,7 @@ export default defineComponent({
 
     watch(isActiveTab, (active) => {
       if (active) {
+        miniPlayerStartPending.value = false
         nextTick(() => {
           applyPendingPresentationModes()
           remeasureControlPanelWidth()
@@ -4941,7 +4959,8 @@ export default defineComponent({
       if (
         !isActiveTab.value &&
         !isCurrentPictureInPictureVideo &&
-        !scrollMiniPlayerDetached.value
+        !scrollMiniPlayerDetached.value &&
+        !miniPlayerStartPending.value
       ) {
         video.value.pause()
         return
@@ -5526,6 +5545,7 @@ export default defineComponent({
       getSeekRange: () => hasLoaded.value ? player?.seekRange() : null,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,
+      miniPlayerStartPending,
       pictureInPictureActive,
       props,
       tabId,
@@ -5751,6 +5771,24 @@ export default defineComponent({
       isCrossTabMiniPlayerPresented.value = detached
       tabMediaCoordinator.setMiniPlayer(mediaTabId, detached)
     }, { immediate: true })
+    // Synchronous, so the ended event that hides a mini player over another
+    // tab already finds the handoff to the next video's player.
+    watch([scrollMiniPlayerDetached, scrollMiniPlaceholderHeight], ([detached, height]) => {
+      if (detached) {
+        miniPlayerHandoffHeight = height
+        miniPlayerStartPending.value = false
+      } else if (video.value?.ended && miniPlayerHandoffHeight > 0) {
+        miniPlayerStartPending.value = true
+      }
+    }, { flush: 'sync' })
+
+    /**
+     * The inline height that the next player of this Watch page needs to take
+     * over the mini player, or 0 when this one does not play there.
+     */
+    function getMiniPlayerHandoffHeight() {
+      return scrollMiniPlayerDetached.value || miniPlayerStartPending.value ? miniPlayerHandoffHeight : 0
+    }
 
     watch([isActiveTab, isCrossTabMiniPlayerPresented, scrollMiniPlayerDismissed, audioPlayerMode], () => {
       screenWakeBinding?.update()
@@ -11070,6 +11108,8 @@ export default defineComponent({
       hasLoaded,
       hasPlaybackPosition,
       scrollMiniPlayerActive,
+      presentedOutsideTab,
+      getMiniPlayerHandoffHeight,
       exitPresentationModes,
 
       isPaused,

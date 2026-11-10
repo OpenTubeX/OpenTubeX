@@ -74,6 +74,8 @@ const injectedRoute = reactive({})
 const hooks = new Set()
 let disposed = false
 let watchTitle = ''
+// The history entry of the Watch page while it plays on behind browsing pages.
+let retainedHistoryIndex = -1
 let watchTitleOptions
 let disposalPromise = null
 
@@ -109,6 +111,7 @@ const unregister = tabLifecycleService.register(props.tabId, {
       await player.exitPresentationModes()
       const tab = store.getters.getTabById(props.tabId)
       const entry = tab?.history[tab.historyIndex]
+      retainedHistoryIndex = tab?.historyIndex ?? -1
       watchTitle = entry?.title || ''
       watchTitleOptions = { resolveHistoryEntry: entry?.titlePending !== true }
       await run('deactivate', context)
@@ -147,6 +150,21 @@ const unregisterPreviewScrollGuard = router.beforeEach(() => {
 })
 const watchRouter = Object.create(router)
 Object.defineProperty(watchRouter, 'currentRoute', { value: computed(() => watchRoute.value) })
+for (const method of ['push', 'replace']) {
+  Object.defineProperty(watchRouter, method, {
+    value: location => {
+      if (!detached.value || disposed) return router[method](location)
+      const route = navigation.resolve(location, watchRoute.value)
+      if (!route.path.startsWith('/watch/')) return router[method](location)
+      // A detached player moves on to the next video in place, so the tab
+      // stays on the page the user browses to.
+      navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { route })
+      if (route.fullPath !== watchRoute.value.fullPath) watchTitle = ''
+      setWatchRoute(route)
+      return Promise.resolve()
+    }
+  })
+}
 provide(routerKey, watchRouter)
 async function minimize() {
   minimized.value = true
@@ -379,19 +397,24 @@ provide(watchNavigationKey, {
   setTitle: (title, options) => {
     watchTitle = title
     watchTitleOptions = options
+    if (options?.resolveHistoryEntry !== false) navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { title })
   },
   returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath)
 })
+
+function setWatchRoute(route) {
+  watchRoute.value = route
+  for (const key of Object.keys(injectedRoute)) {
+    if (!(key in route)) delete injectedRoute[key]
+  }
+  Object.assign(injectedRoute, route)
+}
 
 watch(() => props.route, route => {
   if (route.path.startsWith('/watch/')) {
     if (watchRoute.value?.fullPath !== route.fullPath) watchTitle = ''
     disposed = false
-    watchRoute.value = route
-    for (const key of Object.keys(injectedRoute)) {
-      if (!(key in route)) delete injectedRoute[key]
-    }
-    Object.assign(injectedRoute, route)
+    setWatchRoute(route)
   } else if (!retained.value) {
     watchRoute.value = null
   }
