@@ -16,12 +16,24 @@ import { useSponsorBlockSubmission } from './useSponsorBlockSubmission'
 
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 export const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
+// Media elements store positions with limited precision (microseconds in Chromium),
+// so seeking to a segment's end can land just before it.
+const SPONSORBLOCK_SEGMENT_END_TOLERANCE_SECONDS = 0.01
 const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 500
 const SPONSORBLOCK_SKIP_POLL_INTERVAL_MS = 4
 const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
+/**
+ * @param {number} currentTime
+ * @param {number} endTime
+ * @returns {boolean}
+ */
+export function isBeforeSponsorBlockSegmentEnd(currentTime, endTime) {
+  return currentTime < endTime - SPONSORBLOCK_SEGMENT_END_TOLERANCE_SECONDS
+}
+
 export const SPONSORBLOCK_CATEGORIES = Object.freeze([
   'sponsor',
   'selfpromo',
@@ -883,7 +895,7 @@ export function useSponsorBlockPlayback({
       return currentTime < segment.startTime
     }
 
-    return currentTime >= segment.startTime && currentTime < segment.endTime
+    return currentTime >= segment.startTime && isBeforeSponsorBlockSegmentEnd(currentTime, segment.endTime)
   }
 
   /**
