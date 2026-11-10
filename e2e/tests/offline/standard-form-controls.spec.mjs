@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, expectOverlayScrollRange, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 test.describe('standard form controls', () => {
   test.use({ seed: { settings: { useQuickPlaybackSpeedBar: true } } })
@@ -65,5 +65,34 @@ test.describe('standard form controls', () => {
     await expect.poll(() => page.evaluate(() => (
       JSON.parse(window.$store.getters.getQuickPlaybackSpeedBarOptions)[0]
     ))).toMatchObject({ speed: 1.25, name: 'Comfortable' })
+  })
+
+  test('keeps the playback speed list scroll range valid when it gets shorter', { tag: '@scale' }, async ({ app, page }) => {
+    // More speeds than the defaults, so resetting shortens the list too
+    const options = JSON.stringify([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5].map(speed => ({ speed, name: '' })))
+    await setWindowSize(app, page, { width: 900, height: 560 })
+    await page.evaluate(value => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', value), options)
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+    const scroller = page.locator('.quickPlaybackSpeedScroll')
+    const entries = scroller.locator('.quickPlaybackSpeedEntry')
+    await expect(entries).toHaveCount(12)
+    const scrollToEnd = () => scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+
+    await scrollToEnd()
+    await entries.last().getByRole('button', { name: 'Delete' }).click()
+    await expect(entries).toHaveCount(11)
+    await expectOverlayScrollRange(scroller)
+
+    await scrollToEnd()
+    await page.getByRole('button', { name: 'Reset to Defaults' }).click()
+    await expect(entries).toHaveCount(9)
+    await expectOverlayScrollRange(scroller)
+
+    await page.evaluate(value => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', value), options)
+    await expect(entries).toHaveCount(12)
+    await scrollToEnd()
+    await setWindowSize(app, page, { width: 1000, height: 760 })
+    await expectOverlayScrollRange(scroller)
   })
 })

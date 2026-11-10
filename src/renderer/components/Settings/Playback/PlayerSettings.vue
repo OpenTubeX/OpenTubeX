@@ -740,10 +740,14 @@
           </FtFlexBox>
         </div>
         <div
+          ref="quickPlaybackSpeedScrollRef"
           v-overlay-scrollbars
           class="quickPlaybackSpeedScroll"
         >
-          <div class="quickPlaybackSpeedList">
+          <div
+            ref="quickPlaybackSpeedListRef"
+            class="quickPlaybackSpeedList"
+          >
             <div
               v-for="(option, index) in quickPlaybackSpeedBarEntries"
               :key="option.id"
@@ -837,7 +841,7 @@
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import { displayAndroidPath, chooseAndroidDirectory } from '../../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -855,6 +859,7 @@ import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import store from '../../../store/index'
 import { showToast } from '../../../helpers/utils'
 import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../../constants'
+import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../../helpers/platform'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
@@ -1437,6 +1442,18 @@ function updateUseQuickPlaybackSpeedBar(value) {
 
 /** @type {import('vue').Ref<boolean>} */
 const showQuickPlaybackSpeedBarManager = ref(false)
+
+const quickPlaybackSpeedScrollRef = useTemplateRef('quickPlaybackSpeedScrollRef')
+const quickPlaybackSpeedListRef = useTemplateRef('quickPlaybackSpeedListRef')
+// Deleting, resetting, or a taller viewport can shorten the list below the scroll offset
+watch(quickPlaybackSpeedListRef, (list, _, onCleanup) => {
+  const scroller = quickPlaybackSpeedScrollRef.value
+  if (!list || !scroller) return
+  const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, list))
+  observer.observe(list)
+  observer.observe(scroller)
+  onCleanup(() => observer.disconnect())
+})
 
 /** @type {import('vue').Ref<string | null>} */
 const editingQuickPlaybackSpeedNameId = ref(null)
