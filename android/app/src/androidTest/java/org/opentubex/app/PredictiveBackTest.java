@@ -67,8 +67,8 @@ public class PredictiveBackTest {
                             await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]')");
                             Thread.sleep(300);
                             if (predictive) {
-                                start(scenario, BackEventCompat.EDGE_LEFT);
-                                progress(scenario, 0.65f, BackEventCompat.EDGE_LEFT);
+                                start(BackEventCompat.EDGE_LEFT);
+                                progress(0.65f, BackEventCompat.EDGE_LEFT);
                                 await(view, "document.querySelector('.settingsWindow').getAnimations().some(a => a.playState === 'paused')");
                             }
                             evaluate(view, """
@@ -142,8 +142,8 @@ public class PredictiveBackTest {
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
                 await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
                 Thread.sleep(300);
-                start(scenario, BackEventCompat.EDGE_LEFT);
-                progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                start(BackEventCompat.EDGE_LEFT);
+                progress(0.5f, BackEventCompat.EDGE_LEFT);
                 await(view, "document.querySelector('.settingsContent').getAnimations().some(a => a.playState === 'paused')");
                 scenario.onActivity(activity -> {
                     activity.getOnBackPressedDispatcher().onBackPressed();
@@ -162,8 +162,8 @@ public class PredictiveBackTest {
 
                 evaluate(view, STORE + ".dispatch('updateReducedMotion', 'on');" + STORE + ".dispatch('showSettingsWindow', 'about')");
                 await(view, "!!document.querySelector('.settingsWindow') && document.documentElement.dataset.reducedMotion === 'reduce'");
-                start(scenario, BackEventCompat.EDGE_LEFT);
-                progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                start(BackEventCompat.EDGE_LEFT);
+                progress(0.5f, BackEventCompat.EDGE_LEFT);
                 assertEquals("Reduced motion uses ordinary modal Back", "false", evaluate(view,
                     "document.querySelector('.settingsWindow').getAnimations().some(a => a.playState === 'paused')"));
                 onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
@@ -180,8 +180,8 @@ public class PredictiveBackTest {
     private static void verifyDialogGesture(ActivityScenario<MainActivity> scenario, WebView view, String selector, boolean closes) throws Exception {
         evaluate(view, "window.__modalElement = document.querySelector('" + selector + "');" +
             "window.__modalScrollTop = window.__modalElement.scrollTop");
-        start(scenario, BackEventCompat.EDGE_LEFT);
-        progress(scenario, 0.6f, BackEventCompat.EDGE_LEFT);
+        start(BackEventCompat.EDGE_LEFT);
+        progress(0.6f, BackEventCompat.EDGE_LEFT);
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
         assertEquals("Progress keeps the view open and page history unchanged", "true", evaluate(view,
             "window.__modalElement.isConnected && " + STORE + ".getters.getActiveTab.historyIndex === window.__modalEntry"));
@@ -191,10 +191,10 @@ public class PredictiveBackTest {
             "window.__modalElement.isConnected && Number(getComputedStyle(window.__modalElement).opacity) === 1 && " +
             "window.__modalElement.scrollTop === window.__modalScrollTop"));
         // Move all the way back to the edge before lifting the finger.
-        start(scenario, BackEventCompat.EDGE_LEFT);
-        progress(scenario, 0.6f, BackEventCompat.EDGE_LEFT);
+        start(BackEventCompat.EDGE_LEFT);
+        progress(0.6f, BackEventCompat.EDGE_LEFT);
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
-        progress(scenario, 0f, BackEventCompat.EDGE_LEFT);
+        progress(0f, BackEventCompat.EDGE_LEFT);
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused' && a.currentTime === 0)");
         evaluate(view, """
             (() => {
@@ -214,8 +214,8 @@ public class PredictiveBackTest {
         evaluate(view, "window.__cancelSampling = false");
         assertEquals("Cancel at the starting edge must not replay the preview", "false", evaluate(view, "window.__cancelFlickered"));
         Thread.sleep(100);
-        start(scenario, BackEventCompat.EDGE_RIGHT);
-        progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+        start(BackEventCompat.EDGE_RIGHT);
+        progress(0.65f, BackEventCompat.EDGE_RIGHT);
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused')");
         if (closes) evaluate(view, """
             (() => {
@@ -304,13 +304,13 @@ public class PredictiveBackTest {
                 Thread.sleep(200);
                 evaluate(view, "window.__backEntry = " + STORE + ".getters.getActiveTab.historyIndex;" +
                     "window.__backTop = document.querySelector('.ftVideoPlayer').getBoundingClientRect().top");
-                start(scenario, BackEventCompat.EDGE_LEFT);
-                progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                start(BackEventCompat.EDGE_LEFT);
+                progress(0.5f, BackEventCompat.EDGE_LEFT);
                 await(view, "document.querySelector('.ftVideoPlayer').hasAttribute('data-mobile-mini-morph') && " +
                     "document.querySelector('.ftVideoPlayer').getBoundingClientRect().top > window.__backTop + 40");
                 assertEquals("Holding the gesture must not navigate", "true",
                     evaluate(view, STORE + ".getters.getActiveTab.historyIndex === window.__backEntry"));
-                progress(scenario, 0.15f, BackEventCompat.EDGE_LEFT);
+                progress(0.15f, BackEventCompat.EDGE_LEFT);
                 onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
                 await(view, "!document.querySelector('[data-inline-mini-drag]')");
                 assertEquals("Cancellation restores the inline player and history", "true", evaluate(view,
@@ -319,8 +319,8 @@ public class PredictiveBackTest {
 
                 // Higher progress, the other edge, and tablet layout share the same dock.
                 evaluate(view, STORE + ".commit('setCapacitorLayoutMode', 'tablet')");
-                start(scenario, BackEventCompat.EDGE_RIGHT);
-                progress(scenario, 0.75f, BackEventCompat.EDGE_RIGHT);
+                start(BackEventCompat.EDGE_RIGHT);
+                progress(0.75f, BackEventCompat.EDGE_RIGHT);
                 await(view, "!!document.querySelector('[data-mobile-mini-morph]')");
                 onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, "!!document.querySelector('.mobileMiniBar') && !document.querySelector('[data-inline-mini-drag]')");
@@ -343,15 +343,15 @@ public class PredictiveBackTest {
                     }
                     Thread.sleep(200);
                     evaluate(view, "window.__backEntry = " + STORE + ".getters.getActiveTab.historyIndex");
-                    start(scenario, BackEventCompat.EDGE_LEFT);
-                    progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                    start(BackEventCompat.EDGE_LEFT);
+                    progress(0.5f, BackEventCompat.EDGE_LEFT);
                     await(view, "!!document.querySelector('[data-mobile-mini-morph]')");
                     onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
                     await(view, "!document.querySelector('[data-inline-mini-drag]')");
                     assertEquals("Cancel preserves paused/loading state", "true", evaluate(view,
                         "window.__backVideo.paused && " + STORE + ".getters.getActiveTab.historyIndex === window.__backEntry"));
-                    start(scenario, BackEventCompat.EDGE_RIGHT);
-                    progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+                    start(BackEventCompat.EDGE_RIGHT);
+                    progress(0.65f, BackEventCompat.EDGE_RIGHT);
                     await(view, "!!document.querySelector('[data-mobile-mini-morph]')");
                     onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                     await(view, "!!document.querySelector('.mobileMiniBar') && !document.querySelector('[data-inline-mini-drag]')");
@@ -369,8 +369,8 @@ public class PredictiveBackTest {
                 await(view, "!window.__backVideo.paused");
                 evaluate(view, STORE + ".dispatch('updateReducedMotion', 'on')");
                 await(view, "document.documentElement.dataset.reducedMotion === 'reduce'");
-                start(scenario, BackEventCompat.EDGE_LEFT);
-                progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                start(BackEventCompat.EDGE_LEFT);
+                progress(0.5f, BackEventCompat.EDGE_LEFT);
                 assertEquals("Reduced motion does not morph the player", "false",
                     evaluate(view, "!!document.querySelector('[data-mobile-mini-morph]')"));
                 onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
@@ -409,8 +409,8 @@ public class PredictiveBackTest {
                 "window.__backScroll = window.__backSheet.querySelector('[data-overlayscrollbars-viewport]');" +
                 "if (window.__backScroll) window.__backScroll.scrollTop = 120;" +
                 "window.__backScrollTop = window.__backScroll?.scrollTop");
-            start(scenario, BackEventCompat.EDGE_LEFT);
-            progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+            start(BackEventCompat.EDGE_LEFT);
+            progress(0.5f, BackEventCompat.EDGE_LEFT);
             await(view, "window.__backSheet.getAnimations().some(a => a.playState === 'paused') && " +
                 "window.__backSheet.getBoundingClientRect().top > window.__backSheetTop + 40");
             assertEquals("Sheet takes priority over player navigation", "true", evaluate(view,
@@ -420,8 +420,8 @@ public class PredictiveBackTest {
             assertEquals("Cancel restores sheet and reading position", "true", evaluate(view,
                 "window.__backSheet.open && Math.abs(window.__backSheet.getBoundingClientRect().top - window.__backSheetTop) < 1 && " +
                 "window.__backScroll?.scrollTop === window.__backScrollTop"));
-            start(scenario, BackEventCompat.EDGE_RIGHT);
-            progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+            start(BackEventCompat.EDGE_RIGHT);
+            progress(0.65f, BackEventCompat.EDGE_RIGHT);
             await(view, "window.__backSheet.getAnimations().some(a => a.playState === 'paused')");
             onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
             await(view, "!document.querySelector('.dockedSheet[open]') && window.__backWatch().mobilePanel === null");
@@ -443,8 +443,8 @@ public class PredictiveBackTest {
                 // Wait for the renderer to publish its ahead-of-time interception state.
                 Thread.sleep(200);
                 if (Build.VERSION.SDK_INT >= 34) {
-                    start(scenario, BackEventCompat.EDGE_LEFT);
-                    progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                    start(BackEventCompat.EDGE_LEFT);
+                    progress(0.5f, BackEventCompat.EDGE_LEFT);
                     await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused')");
                     onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
                     await(view, "document.querySelector('.sideNav').getAnimations().length === 0");
@@ -454,8 +454,8 @@ public class PredictiveBackTest {
                         await(view, "document.documentElement.lang === '" + locale + "'");
                         Thread.sleep(200);
                         evaluate(view, "window.__drawerOpenLeft = document.querySelector('.sideNav').getBoundingClientRect().left");
-                        start(scenario, BackEventCompat.EDGE_RIGHT);
-                        progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+                        start(BackEventCompat.EDGE_RIGHT);
+                        progress(0.65f, BackEventCompat.EDGE_RIGHT);
                         await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
                         evaluate(view, """
                             (() => {
@@ -627,11 +627,11 @@ public class PredictiveBackTest {
         Thread.sleep(200);
     }
 
-    private static void start(ActivityScenario<MainActivity> scenario, int edge) {
+    private static void start(int edge) {
         onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackStarted(new BackEventCompat(0, 400, 0, edge)));
     }
 
-    private static void progress(ActivityScenario<MainActivity> scenario, float progress, int edge) {
+    private static void progress(float progress, int edge) {
         onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackProgressed(new BackEventCompat(100, 400, progress, edge)));
     }
 
