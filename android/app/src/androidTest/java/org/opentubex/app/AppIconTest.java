@@ -82,18 +82,16 @@ public class AppIconTest {
     private static void assertRecentsIcon(LauncherSession scenario, String preset) throws Exception {
         // The system updates the recent task's description asynchronously.
         long deadline = SystemClock.uptimeMillis() + 5000;
-        while (true) {
-            try {
-                checkRecentsIcon(scenario, preset);
-                return;
-            } catch (AssertionError error) {
-                if (SystemClock.uptimeMillis() > deadline) throw error;
-                Thread.sleep(100);
-            }
+        String mismatch;
+        while ((mismatch = recentsIconMismatch(scenario, preset)) != null && SystemClock.uptimeMillis() < deadline) {
+            Thread.sleep(100);
         }
+        assertNull(mismatch, mismatch);
     }
 
-    private static void checkRecentsIcon(LauncherSession scenario, String preset) {
+    /** Reads the icon on the main thread, so assertions stay on the test thread. */
+    private static String recentsIconMismatch(LauncherSession scenario, String preset) {
+        AtomicReference<String> mismatch = new AtomicReference<>();
         scenario.onActivity(activity -> {
             try {
                 int icon = activity.getPackageManager().getActivityInfo(
@@ -102,19 +100,23 @@ public class AppIconTest {
                 android.app.ActivityManager manager = activity.getSystemService(android.app.ActivityManager.class);
                 android.app.ActivityManager.RecentTaskInfo task = manager.getAppTasks().stream()
                     .map(android.app.ActivityManager.AppTask::getTaskInfo)
-                    .filter(info -> info.id == activity.getTaskId()).findFirst().orElseThrow();
-                android.graphics.Bitmap actual = task.taskDescription.getIcon();
-                assertNotNull("Recent apps has the selected bitmap", actual);
+                    .filter(info -> info.id == activity.getTaskId()).findFirst().orElse(null);
+                android.graphics.Bitmap actual = task == null ? null : task.taskDescription.getIcon();
+                if (actual == null) {
+                    mismatch.set("Recent apps has the selected bitmap");
+                    return;
+                }
                 android.graphics.Bitmap expected = android.graphics.Bitmap.createBitmap(
                     actual.getWidth(), actual.getHeight(), android.graphics.Bitmap.Config.ARGB_8888);
                 android.graphics.drawable.Drawable drawable = activity.getDrawable(icon);
                 drawable.setBounds(0, 0, expected.getWidth(), expected.getHeight());
                 drawable.draw(new android.graphics.Canvas(expected));
-                assertTrue("Recent apps should use " + preset, actual.sameAs(expected));
+                if (!actual.sameAs(expected)) mismatch.set("Recent apps should use " + preset);
             } catch (PackageManager.NameNotFoundException error) {
-                throw new AssertionError(error);
+                mismatch.set(error.toString());
             }
         });
+        return mismatch.get();
     }
 
     @Test

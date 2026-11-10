@@ -5,7 +5,18 @@ on:
   # only for native changes. The nightly run covers renderer changes.
   pull_request:
     branches: [ development ]
-    paths: [ 'android/**', '.github/workflows/android-tests.yml' ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-tests.yml'
+      # Scripts the Android build runs, and fixtures the tests bundle
+      - '_scripts/*ndroid*'
+      - '_scripts/brand/**'
+      - '_scripts/cast-sender/**'
+      - '_scripts/castSender.mjs'
+      - '_scripts/goBuild.mjs'
+      - '_scripts/yt-dlp-http/**'
+      - 'e2e/fixtures/media/**'
+      - 'e2e/fixtures/player-scripts/**'
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
