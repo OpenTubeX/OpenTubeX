@@ -137,6 +137,38 @@ test('external media resumes its last playback position after reopening and rest
   expect(await restartedVideo.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(18)
 })
 
+test('external media opens a description timestamp link in a new tab at its time', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, 'Highlights at 0:15 and 0:22')
+  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 5, updatedAt: Date.now() })), mediaUrl)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+
+  await page.locator(`${activeTab} .externalMediaDescription a[data-time="15"]`).click({ button: 'middle' })
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await page.locator(sel.tabs).nth(1).click()
+  // The link wins over the saved position. Background tabs do not autoplay.
+  const linkedVideo = page.locator(`${activeTab} video`)
+  await expect.poll(() => linkedVideo.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(1)
+  await linkedVideo.evaluate(element => element.pause())
+  await expect.poll(() => linkedVideo.evaluate(element => element.currentTime)).toBeCloseTo(15, 0)
+  // The tab drops the timestamp once used, so restoring it resumes instead.
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.tabs.find(tab => tab.id === state.activeTabId)?.route.query.timestamp ?? null
+  })).toBeNull()
+
+  // Opening another timestamp of the same media in this tab seeks without reloading.
+  await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
+    BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
+  }, { channel: IpcChannels.CHANGE_VIEW, route: `/external-media?url=${encodeURIComponent(mediaUrl)}&timestamp=22` })
+  await expect.poll(() => linkedVideo.evaluate(element => element.currentTime)).toBeCloseTo(22, 0)
+})
+
 test('external media resets completed playback and clears positions with watch history', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
@@ -286,6 +318,22 @@ for (const seekBeforeMetadata of [false, true]) {
     await video.evaluate(element => element.play())
     await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)
     await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+    // A timestamp link moves both tracks there once their metadata arrives.
+    const timestamp = Math.floor(position)
+    await page.evaluate(({ url, timestamp }) => window.ftElectron.tabs.create({
+      route: '/external-media', query: { url, timestamp: String(timestamp) }, makeActive: true
+    }), { url: mediaUrl, timestamp })
+    await expect.poll(() => audio.evaluate(element => element.currentTime).catch(() => 0)).toBeCloseTo(timestamp, 1)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(timestamp % videoDuration, 1)
+    // A timestamp for the loaded media seeks the soundtrack's timeline in place.
+    const inPlace = timestamp + 1
+    expect(inPlace).toBeGreaterThan(videoDuration)
+    expect(inPlace).toBeLessThan(await audio.evaluate(element => element.duration))
+    await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
+      BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
+    }, { channel: IpcChannels.CHANGE_VIEW, route: `/external-media?url=${encodeURIComponent(mediaUrl)}&timestamp=${inPlace}` })
+    await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeCloseTo(inPlace, 1)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(inPlace % videoDuration, 1)
   })
 }
 
