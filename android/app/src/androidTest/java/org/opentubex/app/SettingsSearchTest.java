@@ -60,6 +60,8 @@ public class SettingsSearchTest {
                         document.addEventListener('input', window.__settingsSearchInputListener, true);
                     })()
                     """);
+                // Lets a failure say whether the app replaced the field while composing.
+                evaluate(view, "document.querySelector('.settingsSearch input').__composingTestInput = true");
                 tapSearch(scenario, view);
                 awaitCondition(view, "document.activeElement === document.querySelector('.settingsSearch input')");
                 // This test acts as the IME. Hide the system keyboard so it
@@ -179,7 +181,8 @@ public class SettingsSearchTest {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);
         }
-        assertEquals(script + "; search value: " + evaluate(view, "document.querySelector('.settingsSearch input')?.value"),
+        assertEquals(script + "; search value: " + evaluate(view, "document.querySelector('.settingsSearch input')?.value") +
+            ", same field: " + evaluate(view, "!!document.querySelector('.settingsSearch input')?.__composingTestInput"),
             "true", evaluate(view, script));
     }
 }
