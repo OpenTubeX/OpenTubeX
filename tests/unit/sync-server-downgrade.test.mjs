@@ -12,6 +12,7 @@ import { syncLiveReminders } from '../../src/renderer/helpers/sync-live-reminder
 import { syncNotificationDismissals } from '../../src/renderer/helpers/sync-notification-dismissals.js'
 import { mergeNotificationDismissals, normalizeNotificationDismissals } from '../../src/notificationHistory.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
+import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
@@ -20,7 +21,7 @@ import Datastore from '@seald-io/nedb'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
-import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as oidc from '../../src/renderer/helpers/sync-server-oidc.js'
@@ -121,6 +122,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     capacitorHttpFetch: (url, options) => common.fetch(url, options),
     delegateRequests: () => () => {},
     ...subscriptionSettingsSync,
+    ...playlistPreferencesSync,
     ...errors,
     ...oidc,
     openExternalLink: url => openExternalLink(url),
@@ -185,6 +187,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     normalizeCustomThemes,
     areSyncSettingValuesEqual,
     mergeSettingEntry,
+    mergeSettingItemsEntry,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,

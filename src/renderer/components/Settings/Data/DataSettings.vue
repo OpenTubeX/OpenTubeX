@@ -1808,6 +1808,7 @@ async function importPlaylistDatabase(data) {
     'protected',
     'lastUpdatedAt',
     'lastPlayedAt',
+    'preferencesUpdatedAt',
     'removeOnWatched',
 
     'thumbnail',

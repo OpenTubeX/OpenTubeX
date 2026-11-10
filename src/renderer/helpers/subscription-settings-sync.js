@@ -1,6 +1,5 @@
 import { isValidSubscriptionSettingsTimestamp, normalizeSubscriptionChannelSettings } from './subscription-channels.js'
 import { areJsonValuesEqual } from './jsonValues.js'
-import { mergeSettingEntry } from './sync-settings-conflict.js'
 
 // Stored in the existing encrypted settings collection; channel records remain
 // the local source of truth.
@@ -17,33 +16,6 @@ export function getSubscriptionSettingsForSync(store) {
     if (settings.dailyVideoLimit === undefined) delete settings.dailyVideoLimit
     return [[channel.id, { value: settings, updatedAt: channel.subscriptionSettingsUpdatedAt }]]
   }))
-}
-
-export function mergeSubscriptionSettingsEntry(options) {
-  const remote = options.remoteEntry?.value ?? {}
-  // Keep channels absent from this device, and merge each subscribed channel
-  // independently so edits to different channels never overwrite one another.
-  const value = { ...remote }
-  let updatedAt = options.remoteEntry?.updatedAt ?? options.old?.updatedAt ?? 0
-  for (const [channelId, local] of Object.entries(options.value)) {
-    const localUpdatedAt = local.updatedAt
-    const old = localUpdatedAt === undefined ? undefined : options.old?.value?.[channelId]
-    const remoteEntry = remote[channelId]
-    // Without a synced baseline for this channel, the newer edit wins.
-    const entry = !old && localUpdatedAt > remoteEntry?.updatedAt
-      ? { value: local.value, updatedAt: localUpdatedAt }
-      : mergeSettingEntry({
-          key: channelId,
-          value: local.value,
-          old,
-          remoteEntry,
-          localUpdatedAt,
-          now: options.now
-        })
-    value[channelId] = { value: entry.value, updatedAt: entry.updatedAt }
-    updatedAt = Math.max(updatedAt, entry.updatedAt)
-  }
-  return { key: options.key, value, updatedAt }
 }
 
 export async function applySubscriptionSettingsSync(store, value) {

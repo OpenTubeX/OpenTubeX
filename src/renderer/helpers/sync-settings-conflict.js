@@ -72,3 +72,33 @@ export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt
   if (remoteEntry && (!old || remoteEntry.updatedAt >= old.updatedAt)) return remoteEntry
   return old ?? { key, value, updatedAt: now }
 }
+
+/**
+ * Merges a virtual setting that holds `{ value, updatedAt }` records per item,
+ * such as a channel or playlist, so edits to different items on two devices
+ * never overwrite one another. Items absent from this device are kept.
+ */
+export function mergeSettingItemsEntry(options) {
+  const remote = options.remoteEntry?.value ?? {}
+  const value = { ...remote }
+  let updatedAt = options.remoteEntry?.updatedAt ?? options.old?.updatedAt ?? 0
+  for (const [itemId, local] of Object.entries(options.value)) {
+    const localUpdatedAt = local.updatedAt
+    const old = localUpdatedAt === undefined ? undefined : options.old?.value?.[itemId]
+    const remoteEntry = remote[itemId]
+    // Without a synced baseline for this item, the newer edit wins and keeps its edit time.
+    const entry = !old && localUpdatedAt !== undefined && !(localUpdatedAt <= remoteEntry?.updatedAt)
+      ? { value: local.value, updatedAt: localUpdatedAt }
+      : mergeSettingEntry({
+          key: itemId,
+          value: local.value,
+          old,
+          remoteEntry,
+          localUpdatedAt,
+          now: options.now
+        })
+    value[itemId] = { value: entry.value, updatedAt: entry.updatedAt }
+    updatedAt = Math.max(updatedAt, entry.updatedAt)
+  }
+  return { key: options.key, value, updatedAt }
+}

@@ -45,6 +45,7 @@ import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import {
   areSyncSettingValuesEqual,
   mergeSettingEntry,
+  mergeSettingItemsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
@@ -56,9 +57,13 @@ import { setActiveTimeout } from './activeTimeout'
 import {
   SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
   getSubscriptionSettingsForSync,
-  mergeSubscriptionSettingsEntry,
   applySubscriptionSettingsSync
 } from './subscription-settings-sync'
+import {
+  PLAYLIST_PREFERENCES_SYNC_KEY,
+  getPlaylistPreferencesForSync,
+  applyPlaylistPreferencesSync
+} from './playlist-preferences-sync'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -1567,7 +1572,10 @@ export async function syncSessions(client, store, previous = null, { accountClie
   return merged
 }
 
-export async function syncSettings(client, store, previousSnapshot = {}) {
+// `playlistSnapshot` holds the baselines of this sync's playlist merge, which
+// map local playlist IDs to the server's. Without it, playlist preferences stay
+// as the server has them.
+export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null) {
   const remoteEntries = await client.getSettings()
   // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
   const previous = migrateLegacySyncedSettings(previousSnapshot)
@@ -1591,13 +1599,15 @@ export async function syncSettings(client, store, previousSnapshot = {}) {
   if (isSettingSyncEnabled(store.state.settings, SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY)) {
     local[SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY] = getSubscriptionSettingsForSync(store)
   }
+  if (playlistSnapshot && isSettingSyncEnabled(store.state.settings, PLAYLIST_PREFERENCES_SYNC_KEY)) {
+    local[PLAYLIST_PREFERENCES_SYNC_KEY] = getPlaylistPreferencesForSync(store.state.playlists.playlists, playlistSnapshot)
+  }
+  const itemKeys = new Set([SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, PLAYLIST_PREFERENCES_SYNC_KEY])
 
   for (const [key, value] of Object.entries(local)) {
     const old = previous[key]
     const remoteEntry = remote[key]
-    const mergeEntry = key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
-      ? mergeSubscriptionSettingsEntry
-      : mergeSettingEntry
+    const mergeEntry = itemKeys.has(key) ? mergeSettingItemsEntry : mergeSettingEntry
     let entry = mergeEntry({
       key,
       value,
@@ -1616,7 +1626,7 @@ export async function syncSettings(client, store, previousSnapshot = {}) {
       entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
       merged[key] = entry
     }
-    const currentValue = key === CUSTOM_THEMES_SYNC_KEY || key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
+    const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
       ? value
       : store.state.settings[key]
     const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
@@ -1625,6 +1635,8 @@ export async function syncSettings(client, store, previousSnapshot = {}) {
     if (!valuesEqual) {
       if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
         await applySubscriptionSettingsSync(store, entry.value)
+      } else if (key === PLAYLIST_PREFERENCES_SYNC_KEY) {
+        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot)
       } else if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)

@@ -1033,14 +1033,15 @@ test.describe('OpenTubeX sync server', () => {
       let other
 
       async function configure(clientPage) {
-        await clientPage.evaluate(async () => {
+        await clientPage.evaluate(async (syncSettings) => {
           const store = window.$store
           await store.dispatch('updatePlaylistViewType', 'list')
           await store.dispatch('updateSyncServerAutoSync', false)
-          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
+          // Encrypted settings carry the playlist options.
+          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', ...(syncSettings ? [] : ['Settings']), 'WatchStats', 'LiveReminders', 'Notifications']) {
             await store.dispatch(`updateSyncServerSync${collection}`, false)
           }
-        })
+        }, privacy === 'enhanced')
         await clientPage.route('**/account/**', route => route.continue({
           headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
         }))
@@ -1111,6 +1112,19 @@ test.describe('OpenTubeX sync server', () => {
         }
         await connect(other.page, 'login')
         await expectCover(other.page, original)
+
+        if (privacy === 'enhanced') {
+          const getPlaylist = clientPage => clientPage.evaluate(() => {
+            const { _id, shuffleByDefault } = window.$store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')
+            return { _id, shuffleByDefault }
+          })
+          await page.evaluate(async ({ _id }) => {
+            await window.$store.dispatch('updatePlaylist', { _id, shuffleByDefault: true })
+          }, await getPlaylist(page))
+          await sync(page)
+          await sync(other.page)
+          expect((await getPlaylist(other.page)).shuffleByDefault).toBe(true)
+        }
 
         const replacement = await editCover(other.page, path.resolve('e2e/fixtures/media/avatar.png'))
         expect(replacement).not.toBe(original)

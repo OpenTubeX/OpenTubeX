@@ -28,6 +28,7 @@ import {
 import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscription-settings-sync'
+import { PLAYLIST_PREFERENCES_SYNC_KEY } from '../../helpers/playlist-preferences-sync'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
@@ -431,6 +432,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
 
 export function isSettingSyncable(settingKey) {
   return settingKey === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY ||
+    settingKey === PLAYLIST_PREFERENCES_SYNC_KEY ||
     (Object.prototype.hasOwnProperty.call(state, settingKey) &&
       !NON_SYNCABLE_SETTINGS.has(settingKey))
 }

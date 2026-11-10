@@ -3,6 +3,7 @@ import { getConfiguredKeyboardShortcuts } from '../../constants.js'
 import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
+import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_PREFERENCE_KEYS, normalizePlaylistPreferences } from './playlist-preferences-sync.js'
 import { parseCaptionSettings } from './player/caption-settings.js'
 
 // Decrypted collections are cached only for this renderer session. A new account,
@@ -193,6 +194,23 @@ function describeSubscriptionSettings(before, after, changes, channelNames) {
   }
 }
 
+function describePlaylistPreferences(before, after, changes, playlistNames) {
+  const oldPlaylists = before ?? {}
+  const currentPlaylists = after ?? {}
+  for (const id of new Set([...Object.keys(oldPlaylists), ...Object.keys(currentPlaylists)])) {
+    const previous = normalizePlaylistPreferences(oldPlaylists[id]?.value)
+    const current = normalizePlaylistPreferences(currentPlaylists[id]?.value)
+    if (areJsonValuesEqual(previous, current)) continue
+    const playlist = playlistNames.get(id)
+    if (!playlist) { addSummary(changes, 'key', PLAYLIST_PREFERENCES_SYNC_KEY); continue }
+    for (const detail of PLAYLIST_PREFERENCE_KEYS) {
+      if (previous[detail] !== current[detail]) {
+        changes.push({ key: PLAYLIST_PREFERENCES_SYNC_KEY, detail, item: playlist, value: current[detail] })
+      }
+    }
+  }
+}
+
 function describeCaptionSettings(before, after, changes) {
   const previous = parseCaptionSettings(before)
   const current = parseCaptionSettings(after)
@@ -240,7 +258,8 @@ function subscriptionPreferences(value) {
   }))
 }
 
-export function createSyncActivity(collection, before, after, deviceId, deviceName, subscriptions = []) {
+// `playlists` are server playlist headers, whose IDs key the playlist preferences.
+export function createSyncActivity(collection, before, after, deviceId, deviceName, subscriptions = [], playlists = []) {
   if (['history', 'seenVideos', 'seenPosts', 'seenRssItems', 'externalMediaPositions', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
   const channelNames = new Map(subscriptions.map(channel => [channel.id, activityText(channel.name)]))
@@ -255,6 +274,11 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
       )) continue
       if (entry.key === 'subscriptionChannelSettings') {
         describeSubscriptionSettings(previous.get(entry.key), entry.value, changes, channelNames)
+        continue
+      }
+      if (entry.key === PLAYLIST_PREFERENCES_SYNC_KEY) {
+        describePlaylistPreferences(previous.get(entry.key), entry.value, changes,
+          new Map(playlists.map(playlist => [playlist?.id, activityText(playlist?.title)])))
         continue
       }
       if (entry.key === 'defaultCaptionSettings') {
