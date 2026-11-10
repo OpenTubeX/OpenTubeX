@@ -46,6 +46,33 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void topicChannelWithoutUploadsDoesNotFailItsBackgroundRefresh() throws Exception {
+        JSONArray requests = new JSONArray()
+            .put(new JSONObject().put("format", "local"))
+            .put(new JSONObject().put("format", "rss"))
+            .put(new JSONObject().put("format", "localPlaylist"));
+        String missingPlaylist = new JSONObject().put("alerts", new JSONArray().put(new JSONObject().put("alertRenderer", new JSONObject()
+            .put("type", "ERROR").put("text", new JSONObject().put("simpleText", "The playlist does not exist."))))).toString();
+        for (String channelId : List.of("UCtest", "UCother")) {
+            JSONObject page = channelPage(channelId, "featured");
+            page.getJSONObject("metadata").getJSONObject("channelMetadataRenderer").put("musicArtistName", "Artist");
+            SubscriptionRefreshHttpClient.RequestFetcher fetcher = (request, type, id) -> {
+                switch (request.getString("format")) {
+                    case "local": return page.toString();
+                    case "localPlaylist": return missingPlaylist;
+                    default: throw new IOException("HTTP 404");
+                }
+            };
+            if (channelId.equals("UCtest")) {
+                assertEquals(0, SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", fetcher).getJSONArray("videos").length());
+            } else {
+                // Only the subscribed channel's page proves that the missing playlist means no uploads.
+                assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", fetcher));
+            }
+        }
+    }
+
+    @Test
     public void channelWithoutShortsDoesNotFailItsBackgroundRefresh() throws Exception {
         JSONArray requests = new JSONArray()
             .put(new JSONObject().put("format", "rss"))

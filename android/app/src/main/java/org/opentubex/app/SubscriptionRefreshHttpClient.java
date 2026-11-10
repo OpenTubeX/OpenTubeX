@@ -32,6 +32,8 @@ final class SubscriptionRefreshHttpClient {
         // by the settings snapshot when the updated app first opens.
         if (feed.requests == null) throw new IOException("Open the app to update background refresh settings");
         Exception lastError = null;
+        // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
+        boolean topicChannelWithoutVideosTab = false;
         for (int index = 0; index < feed.requests.length(); index++) {
             checkInterrupted();
             JSONObject request = feed.requests.getJSONObject(index);
@@ -54,6 +56,8 @@ final class SubscriptionRefreshHttpClient {
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
                     if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
+                    if (format.equals("localPlaylist") && topicChannelWithoutVideosTab &&
+                        response.optString("alerts").contains("The playlist does not exist.")) return emptyFeed(feed.type);
                     if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
                         throw new IOException("Channel unavailable");
                     }
@@ -61,6 +65,7 @@ final class SubscriptionRefreshHttpClient {
                     JSONObject channelMetadata = metadata == null ? null : metadata.optJSONObject("channelMetadataRenderer");
                     if (format.equals("local") && feed.type.equals("videos") && channelMetadata != null &&
                         !channelMetadata.optString("musicArtistName").isEmpty() && !hasSelectedVideosTab(response.opt("contents"))) {
+                        topicChannelWithoutVideosTab = channelMetadata.optString("externalId").equals(channelId);
                         throw new IOException("Topic channel requires its uploads playlist");
                     }
                     JSONObject payload = new JSONObject().put("backgroundFormat", format).put("data", response);
