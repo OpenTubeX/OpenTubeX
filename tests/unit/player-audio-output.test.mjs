@@ -3,6 +3,7 @@ import test from 'node:test'
 import { createRenderer, shallowRef } from 'vue'
 
 import { usePlayerAudioOutput } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlayerAudioOutput.js'
+import { getLoudnessNormalizationGain } from '../../src/renderer/helpers/player/loudnessNormalization.js'
 
 class FakeAudioNode {
   constructor () {
@@ -70,6 +71,14 @@ function createVideo () {
   return Object.assign(new EventTarget(), { tagName: 'VIDEO', paused: false })
 }
 
+function getGraph (context) {
+  const [voiceOver] = context.sources[0].connections
+  const [boost] = voiceOver.connections
+  const [loudness] = boost.connections
+  const [mono] = loudness.connections
+  return { voiceOver, boost, loudness, mono }
+}
+
 function mountAudioOutput (video) {
   let output
   const renderer = createRenderer({ createComment: () => ({}), insert () {}, remove () {}, parentNode () {}, nextSibling () {} })
@@ -100,19 +109,19 @@ test('player audio stages share one media element source', async (t) => {
 
   await mounted.output.setGain('voiceOver', 0.1)
   await mounted.output.setGain('boost', 1.5)
+  await mounted.output.setGain('loudness', 0.5)
 
   const [context] = FakeAudioContext.instances
   assert.equal(FakeAudioContext.instances.length, 1)
   assert.equal(context.sources.length, 1)
   assert.equal(context.sources[0].element, element)
 
-  const [voiceOver] = context.sources[0].connections
-  const [boost] = voiceOver.connections
-  const [mono] = boost.connections
+  const { voiceOver, boost, loudness, mono } = getGraph(context)
   assert.deepEqual(mono.connections, [context.destination])
   assert.equal(mono.channelCountMode, 'max')
   assert.equal(voiceOver.gain.value, 0.1)
   assert.equal(boost.gain.value, 1.5)
+  assert.equal(loudness.gain.value, 0.5)
 
   await mounted.output.setGain('voiceOver', 1)
   assert.equal(voiceOver.gain.value, 1)
@@ -143,9 +152,7 @@ test('stage values set before the graph exists apply when it is built', async (t
   video.value = createVideo()
   await output.setGain('voiceOver', 0.5)
 
-  const [voiceOver] = FakeAudioContext.instances[0].sources[0].connections
-  const [boost] = voiceOver.connections
-  const [mono] = boost.connections
+  const { voiceOver, boost, mono } = getGraph(FakeAudioContext.instances[0])
   assert.equal(voiceOver.gain.value, 0.5)
   assert.equal(boost.gain.value, 2)
   assert.equal(mono.channelCountMode, 'explicit')
@@ -169,9 +176,7 @@ test('mono downmixes every channel and plays it in both ears', async (t) => {
 
   await output.setMono(true)
   const [context] = FakeAudioContext.instances
-  const [voiceOver] = context.sources[0].connections
-  const [boost] = voiceOver.connections
-  const [mono] = boost.connections
+  const { mono } = getGraph(context)
   assert.deepEqual(mono.connections, [context.destination])
   assert.equal(mono.channelCount, 1)
   assert.equal(mono.channelCountMode, 'explicit')
@@ -209,4 +214,13 @@ test('a suspended graph resumes while the video plays', async (t) => {
   element.paused = false
   element.dispatchEvent(new Event('playing'))
   assert.equal(context.resumeCount, resumesAfterSetup + 2)
+})
+
+test('loudness normalization only turns loud videos down', () => {
+  // YouTube reports 6 dB above its target, so the gain halves the amplitude.
+  assert.ok(Math.abs(getLoudnessNormalizationGain(6) - 0.501) < 0.001)
+  // Quiet videos and videos without loudness information keep their volume.
+  assert.equal(getLoudnessNormalizationGain(-4), 1)
+  assert.equal(getLoudnessNormalizationGain(null), 1)
+  assert.equal(getLoudnessNormalizationGain(Number.NaN), 1)
 })

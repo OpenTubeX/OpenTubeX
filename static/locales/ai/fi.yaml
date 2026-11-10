@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Kelaa taaksepäin jatkettaessa"
     Minimum Pause Before Rewinding: "Vähimmäistauko ennen kelausta"
     Mono Audio: 'Monoääni'
+    Normalize Loudness: 'Normalisoi äänenvoimakkuus'
     Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
     Pause on Stream Recovery: "Keskeytä striimin palautuksessa"
     Buffering:
@@ -2196,6 +2197,7 @@ Tooltips:
     Rewind on Resume: "Hyppää näin monta sekuntia taaksepäin, kun jatkat keskeytettyä videota, jotta näet viimeiset hetket uudelleen. Poista käytöstä asettamalla arvoksi 0."
     Minimum Pause Before Rewinding: "Kelaa taaksepäin vain, jos video oli keskeytettynä vähintään näin kauan. Aseta arvoksi 0, jos haluat kelata jokaisen tauon jälkeen."
     Mono Audio: 'Toistaa vasemman ja oikean äänikanavan molempiin korviin. Käytä tätä, kun videon ääni kuuluu vain kuulokkeiden toiselta puolelta.'
+    Normalize Loudness: 'Hiljentää videoita, jotka ovat useimpia kovempia, jotta äänenvoimakkuus ei hyppää videoiden välillä. Hiljaiset videot säilyttävät äänenvoimakkuutensa. Toimii vain paikallisella API:lla ladatuissa videoissa.'
     Pause on Stream Recovery: "Kun videostriimi epäonnistuu ja soitin lataa sen uudelleen tai vaihtaa toiseen formaattiin tai moottoriin, toisto keskeytetään ja virhe näkyy soittimen yläosassa, kunnes suljet sen. Kun asetus on pois päältä, toisto jatkuu ja virhe näkyy hetken ilmoituksena."
     Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
     Enable Caption Translations: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa.

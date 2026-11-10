@@ -1162,6 +1162,7 @@ Settings:
         Stop: Wiedergabe beenden
     Remember Volume: Lautstärke beibehalten
     Mono Audio: Mono-Audio
+    Normalize Loudness: Lautstärke normalisieren
     Customize Quick Playback Speed Bar: Schnelle Wiedergabegeschwindigkeitsleiste anpassen
     Quick Playback Speed Bar Manager: Schnelle Wiedergabegeschwindigkeitsleiste
     Add Playback Speed: Wiedergabegeschwindigkeit hinzufügen
@@ -2977,6 +2978,7 @@ Tooltips:
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Mono Audio: Spielt den linken und rechten Audiokanal auf beiden Ohren ab. Nutze dies, wenn der Ton eines Videos nur auf einer Seite deiner Kopfhörer zu hören ist.
+    Normalize Loudness: Macht Videos leiser, die lauter als die meisten sind, damit die Lautstärke zwischen Videos nicht springt. Leise Videos behalten ihre Lautstärke. Funktioniert nur bei Videos, die mit der lokalen API geladen wurden.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.
     Use YouTube-style Shorts: Zeigt Shorts auf Abo- und Kanalseiten in einem Hochformatraster an und verwendet den Shorts-Player im YouTube-Stil.
     Loop Shorts: >-

@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Přetočit zpět při obnovení"
     Minimum Pause Before Rewinding: "Minimální pauza před přetočením"
     Mono Audio: 'Mono zvuk'
+    Normalize Loudness: 'Normalizovat hlasitost'
     Show Mono Audio Toggle: 'Zobrazit přepínač mono zvuku'
     Pause on Stream Recovery: "Pozastavit při obnově streamu"
     Buffering:
@@ -2189,6 +2190,7 @@ Tooltips:
     Rewind on Resume: "Při obnovení pozastaveného videa se vrátí o tolik sekund zpět, abyste znovu viděli poslední okamžiky. Nastavením na 0 funkci vypnete."
     Minimum Pause Before Rewinding: "Přetočí zpět, jen pokud bylo video pozastaveno alespoň takto dlouho. Nastavením na 0 se přetočí po každé pauze."
     Mono Audio: 'Přehrává levý i pravý zvukový kanál do obou uší. Použijte, pokud zvuk videa vychází jen z jedné strany sluchátek.'
+    Normalize Loudness: 'Ztiší videa, která jsou hlasitější než většina, aby hlasitost mezi videi neskákala. Tichá videa si zachovají svou hlasitost. Funguje jen u videí načtených přes lokální API.'
     Pause on Stream Recovery: "Když video stream selže a přehrávač ho znovu načte nebo přepne na jiný formát či engine, přehrávání se pozastaví a chyba zůstane v horní části přehrávače, dokud ji nezavřete. Když je vypnuto, přehrávání pokračuje a chyba se krátce zobrazí jako oznámení."
     Continue Playback When Screen Is Locked: 'Ponechá zvuk přehrávaný na pozadí a zpřístupní ovládání médií systému Android. Vypnutím se přehrávání pozastaví, jakmile aplikace přestane být viditelná.'
     Enable Caption Translations: Pokud video neposkytuje odpovídající původní stopu, tlačítko titulků a klávesová zkratka C při zapnutí upřednostní automaticky přeloženou stopu v preferovaném jazyce titulků.

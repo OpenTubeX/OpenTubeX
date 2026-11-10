@@ -195,6 +195,7 @@ function addCommentImages(body, attachments) {
  * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
  * @param {object[]} [options.infoPanels] raw info panel renderers to show below the video
  * @param {string} [options.mediaUrl] serve the demo video's progressive format from this URL
+ * @param {Record<string, number>} [options.loudnessDb] YouTube's loudness above its playback target, by video ID
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -212,7 +213,8 @@ export async function mockWatchPage(app, page, {
   popularity,
   contentDisclosures,
   infoPanels,
-  mediaUrl
+  mediaUrl,
+  loudnessDb = {}
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' ||
@@ -275,6 +277,7 @@ export async function mockWatchPage(app, page, {
       const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
       const json = demoPlayerResponse(videoId)
       if (mediaUrl) json.streamingData.formats[0].url = mediaUrl
+      json.playerConfig.audioConfig.loudnessDb = loudnessDb[videoId] ?? 0
 
       if (includeCaptions && (captionVideoIds === null || captionVideoIds.includes(videoId))) {
         const displayNames = new Intl.DisplayNames(['en'], { type: 'language' })

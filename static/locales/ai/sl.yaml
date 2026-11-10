@@ -935,6 +935,7 @@ Settings:
     Rewind on Resume: "Previj nazaj ob nadaljevanju"
     Minimum Pause Before Rewinding: "Najkrajši premor pred previjanjem"
     Mono Audio: 'Mono zvok'
+    Normalize Loudness: 'Normaliziraj glasnost'
     Show Mono Audio Toggle: 'Prikaži stikalo za mono zvok'
     Default Media Format:
       Default Media Format: 'Prevzeta oblika predstavnosti'
@@ -2699,6 +2700,7 @@ Tooltips:
     Rewind on Resume: "Ob nadaljevanju zaustavljenega videoposnetka skoči toliko sekund nazaj, da znova vidite zadnje trenutke. Nastavite na 0, da to izklopite."
     Minimum Pause Before Rewinding: "Previje nazaj samo, če je bil videoposnetek zaustavljen vsaj tako dolgo. Nastavite na 0, da previje po vsakem premoru."
     Mono Audio: 'Predvaja levi in desni zvočni kanal v obeh ušesih. Uporabite, ko zvok videoposnetka prihaja le z ene strani slušalk.'
+    Normalize Loudness: 'Utiša videoposnetke, ki so glasnejši od večine, da glasnost med videoposnetki ne skače. Tihi videoposnetki ohranijo svojo glasnost. Deluje samo za videoposnetke, naložene prek lokalnega APV.'
     Pause on Stream Recovery: "Ko video pretok ne uspe in predvajalnik ga znova naloži ali preklopi na drug format ali pogon, se predvajanje začasno ustavi, napaka pa ostane na vrhu predvajalnika, dokler je ne opustite. Ko je izklopljeno, se predvajanje nadaljuje, napaka pa se na kratko prikaže kot obvestilo."
     Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.

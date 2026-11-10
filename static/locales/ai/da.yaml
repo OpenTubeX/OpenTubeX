@@ -755,6 +755,7 @@ Settings:
     Rewind on Resume: "Spol tilbage ved genoptagelse"
     Minimum Pause Before Rewinding: "Minimumspause før tilbagespoling"
     Mono Audio: 'Monolyd'
+    Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis knap til monolyd'
     Default Media Format:
       Default Media Format: 'Standardmedieformat'
@@ -2277,6 +2278,7 @@ Tooltips:
     Rewind on Resume: "Springer så mange sekunder tilbage, når du genoptager en video, der er sat på pause, så du kan se de sidste øjeblikke igen. Sæt til 0 for at slå det fra."
     Minimum Pause Before Rewinding: "Spoler kun tilbage, når videoen har været sat på pause i mindst så lang tid. Sæt til 0 for at spole tilbage efter hver pause."
     Mono Audio: 'Afspiller venstre og højre lydkanal i begge ører. Brug det, når lyden i en video kun kommer ud af den ene side af dine hovedtelefoner.'
+    Normalize Loudness: 'Skruer ned for videoer, der er højere end de fleste, så lydstyrken ikke springer mellem videoer. Stille videoer beholder deres lydstyrke. Virker kun for videoer, der er indlæst med den lokale API.'
     Pause on Stream Recovery: "Når videostreamen fejler, og afspilleren genindlæser den eller skifter til et andet format eller en anden motor, sættes afspilningen på pause, og fejlen vises øverst i afspilleren, indtil du afviser den. Når den er slået fra, fortsætter afspilningen, og fejlen vises kortvarigt som en notifikation."
     Continue Playback When Screen Is Locked: 'Fortsætter lydafspilning i baggrunden og viser Android-mediekontroller. Slå dette fra for at sætte på pause, når appen ikke længere er synlig.'
     Enable Caption Translations: Når funktionen er slået til, vælger undertekstknappen og genvejen C automatisk et oversat spor på det foretrukne undertekstsprog, hvis videoen ikke har et tilsvarende originalspor.

@@ -741,6 +741,7 @@ Settings:
     Rewind on Resume: "Mundur saat melanjutkan"
     Minimum Pause Before Rewinding: "Jeda minimum sebelum mundur"
     Mono Audio: 'Audio mono'
+    Normalize Loudness: 'Normalkan kenyaringan'
     Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
     Default Media Format:
       Default Media Format: 'Format Media Bawaan'
@@ -2214,6 +2215,7 @@ Tooltips:
     Rewind on Resume: "Mundur sebanyak detik ini saat Anda melanjutkan video yang dijeda, agar Anda dapat melihat momen terakhir lagi. Atur ke 0 untuk menonaktifkan."
     Minimum Pause Before Rewinding: "Hanya mundur jika video dijeda setidaknya selama ini. Atur ke 0 untuk mundur setelah setiap jeda."
     Mono Audio: 'Memutar saluran audio kiri dan kanan di kedua telinga. Gunakan saat suara video hanya keluar dari satu sisi headphone Anda.'
+    Normalize Loudness: 'Mengecilkan volume video yang lebih keras daripada kebanyakan video agar volume tidak melonjak antarvideo. Video yang pelan tetap pada volumenya. Hanya berfungsi untuk video yang dimuat dengan API Lokal.'
     Pause on Stream Recovery: "Saat streaming video gagal dan pemutar memuatnya ulang atau beralih ke format atau mesin lain, pemutaran dijeda dan galat tetap ditampilkan di bagian atas pemutar sampai Anda menutupnya. Jika dinonaktifkan, pemutaran berlanjut dan galat muncul sebentar sebagai notifikasi."
     Continue Playback When Screen Is Locked: 'Menjaga audio tetap diputar di latar belakang dan menyediakan kontrol media Android. Nonaktifkan untuk menjeda saat aplikasi tidak lagi terlihat.'
     Enable Caption Translations: Jika diaktifkan, tombol takarir dan pintasan C akan memilih trek yang diterjemahkan otomatis ke bahasa takarir pilihan jika video tidak menyediakan trek asli yang cocok.

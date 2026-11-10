@@ -742,6 +742,7 @@ Settings:
     Rewind on Resume: "Davam etdikdə geri çək"
     Minimum Pause Before Rewinding: "Geri çəkməzdən əvvəl minimum fasilə"
     Mono Audio: 'Mono səs'
+    Normalize Loudness: 'Səs səviyyəsini normallaşdır'
     Show Mono Audio Toggle: 'Mono səs açarını göstər'
     Pause on Stream Recovery: "Yayım bərpasında fasilə ver"
     Buffering:
@@ -2202,6 +2203,7 @@ Tooltips:
     Rewind on Resume: "Fasilə verilmiş videonu davam etdirdikdə bu qədər saniyə geri qayıdır ki, son anları yenidən görə biləsiniz. Söndürmək üçün 0 təyin edin."
     Minimum Pause Before Rewinding: "Yalnız video ən azı bu qədər fasilədə olduqda geri çəkir. Hər fasilədən sonra geri çəkmək üçün 0 təyin edin."
     Mono Audio: 'Sol və sağ səs kanallarını hər iki qulaqda səsləndirir. Videonun səsi qulaqlığın yalnız bir tərəfindən gələndə istifadə edin.'
+    Normalize Loudness: 'Əksəriyyətindən yüksək səsli videoların səsini azaldır ki, videolar arasında səs səviyyəsi kəskin dəyişməsin. Sakit videolar öz səs səviyyəsini saxlayır. Yalnız Yerli API ilə yüklənən videolarda işləyir.'
     Pause on Stream Recovery: "Video yayımı uğursuz olduqda və pleyer onu yenidən yüklədikdə və ya başqa formata ya mühərrikə keçdikdə, oxutma dayandırılır və xəta siz bağlayana qədər pleyerin yuxarısında qalır. Söndürüldükdə oxutma davam edir və xəta qısa bildiriş kimi görünür."
     Enable Caption Translations: Aktivləşdirildikdə, videoda uyğun orijinal titr treki yoxdursa, titr düyməsi və C qısayolu üstünlük verilən titr dilinə avtomatik tərcümə olunmuş trekə üstünlük verir.
     Use Quick Playback Speed Bar: Oynadıcının sağ tərəfdəki idarəetmə hissəsində sürətli oynatma sürəti panelini göstərir. Kanal üzrə oynatma sürətinin əl ilə saxlanması aktivdirsə, paneldə cari kanalın sürətini saxlamaq üçün düymə də olur.

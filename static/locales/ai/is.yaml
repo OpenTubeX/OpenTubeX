@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Spóla til baka þegar haldið er áfram"
     Minimum Pause Before Rewinding: "Lágmarkshlé áður en spólað er til baka"
     Mono Audio: 'Einóma hljóð'
+    Normalize Loudness: 'Jafna hljóðstyrk'
     Show Mono Audio Toggle: 'Sýna rofa fyrir einóma hljóð'
     Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
@@ -2210,6 +2211,7 @@ Tooltips:
     Rewind on Resume: "Fer svona margar sekúndur til baka þegar þú heldur áfram með myndskeið í bið, svo þú sjáir síðustu augnablikin aftur. Stilltu á 0 til að slökkva á þessu."
     Minimum Pause Before Rewinding: "Spólar aðeins til baka ef myndskeiðið var í bið að minnsta kosti svona lengi. Stilltu á 0 til að spóla til baka eftir hvert hlé."
     Mono Audio: 'Spilar vinstri og hægri hljóðrás í báðum eyrum. Notaðu þetta þegar hljóð myndskeiðs kemur aðeins úr annarri hlið heyrnartólanna.'
+    Normalize Loudness: 'Lækkar í myndskeiðum sem eru háværari en flest, svo hljóðstyrkurinn hoppi ekki milli myndskeiða. Lágvær myndskeið halda sínum hljóðstyrk. Virkar aðeins fyrir myndskeið sem eru hlaðin með staðværa API-kerfisviðmótinu.'
     Pause on Stream Recovery: "Þegar myndstreymið bregst og spilarinn endurhleður það eða skiptir yfir í annað snið eða aðra vél er gert hlé á spilun og villan helst efst í spilaranum þar til þú lokar henni. Þegar slökkt er á þessu heldur spilun áfram og villan birtist stuttlega sem tilkynning."
     Continue Playback When Screen Is Locked: 'Heldur hljóði í spilun í bakgrunni og birtir miðlunarstýringar Android. Slökktu á þessu til að gera hlé þegar forritið er ekki lengur sýnilegt.'
     Enable Caption Translations: Þegar þetta er virkt velja skjátextahnappurinn og flýtileiðin C sjálfkrafa þýddan texta á völdu tungumáli ef myndbandið býður ekki upp á samsvarandi frumtexta.

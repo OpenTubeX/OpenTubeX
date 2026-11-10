@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Visszatekerés folytatáskor"
     Minimum Pause Before Rewinding: "Minimális szünet a visszatekerés előtt"
     Mono Audio: 'Monó hang'
+    Normalize Loudness: 'Hangerő kiegyenlítése'
     Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
@@ -2190,6 +2191,7 @@ Tooltips:
     Rewind on Resume: "Szüneteltetett videó folytatásakor ennyi másodpercet ugrik vissza, hogy újra láthasd az utolsó pillanatokat. A kikapcsoláshoz állítsd 0-ra."
     Minimum Pause Before Rewinding: "Csak akkor teker vissza, ha a videó legalább ennyi ideig szünetelt. Állítsd 0-ra, hogy minden szünet után visszatekerjen."
     Mono Audio: 'A bal és a jobb hangcsatornát mindkét fülben lejátssza. Használd, ha egy videó hangja csak a fejhallgató egyik oldalán szól.'
+    Normalize Loudness: 'Lehalkítja a legtöbbnél hangosabb videókat, hogy a hangerő ne ugráljon a videók között. A halk videók megtartják a hangerejüket. Csak a helyi API-val betöltött videóknál működik.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.

@@ -1,6 +1,9 @@
 import { onBeforeUnmount } from 'vue'
 
-/** @typedef {'voiceOver' | 'boost'} PlayerAudioGainStage */
+/** @typedef {'voiceOver' | 'boost' | 'loudness'} PlayerAudioGainStage */
+
+/** @type {readonly PlayerAudioGainStage[]} */
+const GAIN_STAGES = ['voiceOver', 'boost', 'loudness']
 
 /**
  * Routes the player's audio through gain stages that multiply with the
@@ -15,7 +18,7 @@ import { onBeforeUnmount } from 'vue'
  */
 export function usePlayerAudioOutput(video) {
   /** @type {Record<PlayerAudioGainStage, number>} */
-  const gains = { voiceOver: 1, boost: 1 }
+  const gains = { voiceOver: 1, boost: 1, loudness: 1 }
   let mono = false
 
   /** @type {AudioContext | null} */
@@ -50,16 +53,19 @@ export function usePlayerAudioOutput(video) {
       return
     }
 
-    const source = audioContext.createMediaElementSource(videoElement)
-    const voiceOver = audioContext.createGain()
-    const boost = audioContext.createGain()
-    voiceOver.gain.value = gains.voiceOver
-    boost.gain.value = gains.boost
+    /** @type {AudioNode} */
+    let output = audioContext.createMediaElementSource(videoElement)
+    const nodes = /** @type {Record<PlayerAudioGainStage, GainNode>} */ ({})
+    for (const stage of GAIN_STAGES) {
+      nodes[stage] = audioContext.createGain()
+      nodes[stage].gain.value = gains[stage]
+      output = output.connect(nodes[stage])
+    }
     monoNode = audioContext.createGain()
     monoNode.channelCount = 1
     applyMono()
-    source.connect(voiceOver).connect(boost).connect(monoNode).connect(audioContext.destination)
-    gainNodes = { voiceOver, boost }
+    output.connect(monoNode).connect(audioContext.destination)
+    gainNodes = nodes
     routedVideo = videoElement
     audioContext.addEventListener('statechange', resumeWhilePlaying)
     videoElement.addEventListener('playing', resumeWhilePlaying)

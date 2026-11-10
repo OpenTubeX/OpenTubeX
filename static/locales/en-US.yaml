@@ -1317,6 +1317,7 @@ Settings:
     Default Volume: Default Volume
     Remember Volume: Remember Volume
     Mono Audio: Mono Audio
+    Normalize Loudness: Normalize Loudness
     Skip Silence: Skip Silence
     Show Skip Silence Toggle: Show Skip Silence Toggle
     Enable DLNA Casting: "Enable DLNA casting"
@@ -3316,6 +3317,7 @@ Tooltips:
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
     Mono Audio: Plays the left and right audio channels in both ears. Use it when a video's sound only comes out of one side of your headphones.
+    Normalize Loudness: Turns down videos that are louder than most, so the volume doesn't jump between videos. Quiet videos keep their volume. Only works for videos loaded with the Local API.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.
     Parallel Segment Loading: |
       How many video and audio segments to load at once ahead of playback.

@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Spola tillbaka vid återupptagning"
     Minimum Pause Before Rewinding: "Minsta paus före tillbakaspolning"
     Mono Audio: 'Monoljud'
+    Normalize Loudness: 'Normalisera ljudstyrka'
     Show Mono Audio Toggle: 'Visa reglage för monoljud'
     Pause on Stream Recovery: "Pausa vid återställning av ström"
     Buffering:
@@ -2190,6 +2191,7 @@ Tooltips:
     Rewind on Resume: "Hoppar tillbaka så många sekunder när du återupptar en pausad video, så att du kan se de sista ögonblicken igen. Ställ in på 0 för att stänga av."
     Minimum Pause Before Rewinding: "Spolar bara tillbaka om videon har varit pausad minst så länge. Ställ in på 0 för att spola tillbaka efter varje paus."
     Mono Audio: 'Spelar upp vänster och höger ljudkanal i båda öronen. Använd det när ljudet i en video bara hörs på ena sidan av hörlurarna.'
+    Normalize Loudness: 'Sänker volymen på videor som är högre än de flesta, så att volymen inte hoppar mellan videor. Tysta videor behåller sin volym. Fungerar bara för videor som har lästs in med det lokala API:et.'
     Pause on Stream Recovery: "När videoströmmen misslyckas och spelaren läser in den igen eller byter till ett annat format eller en annan motor pausas uppspelningen och felet visas överst i spelaren tills du stänger det. När inställningen är av fortsätter uppspelningen och felet visas kort som en avisering."
     Continue Playback When Screen Is Locked: 'Fortsätter spela upp ljud i bakgrunden och tillhandahåller Android-mediekontroller. Stäng av detta för att pausa när appen inte längre är synlig.'
     Enable Caption Translations: När funktionen är aktiverad föredrar undertextknappen och kortkommandot C ett automatiskt översatt spår på det föredragna undertextspråket om videon saknar ett matchande originalspår.
