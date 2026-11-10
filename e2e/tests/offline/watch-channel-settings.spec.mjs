@@ -11,7 +11,6 @@ test.use({
       autoUpdateChannelVideoQualities: false,
       autoUpdateChannelSubtitlesStates: false,
       autoUpdateChannelVolumes: false,
-      useQuickPlaybackSpeedBar: false,
       baseTheme: 'system',
       systemDarkTheme: 'dark',
       systemLightTheme: 'light',
@@ -139,6 +138,8 @@ test('quick speed action saves, replaces and removes the channel speed through i
   await expect(action).toHaveText('Set Default')
   await expect.poll(async () => (await savedValues(page))[0]).toEqual({ other: 1.25 })
   expect(await video.evaluate(video => video.playbackRate)).toBe(1.5)
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  await expect(page.locator('.channelSettingRow').first()).toContainText('Playback Speed')
 })
 
 test('ignores saved channel settings while channel playback settings are off', async ({ app, page }) => {

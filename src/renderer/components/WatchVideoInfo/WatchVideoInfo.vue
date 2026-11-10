@@ -883,13 +883,8 @@ function saveWatchedProgressManually() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const useQuickPlaybackSpeedBar = computed(() => store.getters.getUseQuickPlaybackSpeedBar)
-
 const showSaveChannelPlaybackSpeedButton = computed(() => {
-  return !props.isUpcoming &&
-    !autoUpdateChannelPlaybackSpeeds.value &&
-    !useQuickPlaybackSpeedBar.value
+  return !props.isUpcoming && !autoUpdateChannelPlaybackSpeeds.value
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
