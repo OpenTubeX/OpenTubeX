@@ -79,29 +79,28 @@
         />
       </swiper-slide>
       <!-- Swiper wires up these light DOM controls, so they can use the
-           theme and icon pack. -->
-      <button
+           theme and icon pack. Its a11y module makes them buttons; real
+           buttons would get disabled and drop keyboard focus at either end. -->
+      <div
         ref="swiperPrevRef"
         slot="container-end"
-        type="button"
         class="sliderButton swiper-button-prev"
       >
         <FtIcon
           :icon="['fas', 'angle-left']"
           aria-hidden="true"
         />
-      </button>
-      <button
+      </div>
+      <div
         ref="swiperNextRef"
         slot="container-end"
-        type="button"
         class="sliderButton swiper-button-next"
       >
         <FtIcon
           :icon="['fas', 'angle-right']"
           aria-hidden="true"
         />
-      </button>
+      </div>
       <div
         ref="swiperPaginationRef"
         slot="container-end"
