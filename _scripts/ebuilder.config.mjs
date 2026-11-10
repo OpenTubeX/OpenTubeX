@@ -99,7 +99,10 @@ export default {
       'xdg-utils',
       'libatspi2.0-0',
       'libuuid1',
-      'libsecret-1-0'
+      'libsecret-1-0',
+      // Electron links these directly, and minimal installs and containers lack them
+      'libgbm1',
+      'libasound2'
     ],
     ...(packageChangelogs && { fpm: ['--deb-changelog', path.join(packageChangelogs, 'debian')] }),
   },
