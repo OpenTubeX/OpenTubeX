@@ -125,7 +125,7 @@ public class PredictiveBackTest {
                         evaluate(view, "document.querySelector('.settingsBackButton')?.click()");
                         await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]')");
                         Thread.sleep(300);
-                        verifyDialogGesture(scenario, view, ".settingsWindow", true);
+                        verifyDialogGesture(view, ".settingsWindow", true);
                     }
                 }
 
@@ -137,7 +137,7 @@ public class PredictiveBackTest {
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
                 await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
                 Thread.sleep(300);
-                verifyDialogGesture(scenario, view, ".settingsContent", false);
+                verifyDialogGesture(view, ".settingsContent", false);
                 await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]') && " + STORE + ".getters.getSettingsWindowOpen");
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
                 await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
@@ -158,7 +158,7 @@ public class PredictiveBackTest {
                 onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, "!!document.querySelector('.prompt')");
                 Thread.sleep(300);
-                verifyDialogGesture(scenario, view, ".prompt", true);
+                verifyDialogGesture(view, ".prompt", true);
 
                 evaluate(view, STORE + ".dispatch('updateReducedMotion', 'on');" + STORE + ".dispatch('showSettingsWindow', 'about')");
                 await(view, "!!document.querySelector('.settingsWindow') && document.documentElement.dataset.reducedMotion === 'reduce'");
@@ -177,7 +177,7 @@ public class PredictiveBackTest {
         }
     }
 
-    private static void verifyDialogGesture(ActivityScenario<MainActivity> scenario, WebView view, String selector, boolean closes) throws Exception {
+    private static void verifyDialogGesture(WebView view, String selector, boolean closes) throws Exception {
         evaluate(view, "window.__modalElement = document.querySelector('" + selector + "');" +
             "window.__modalScrollTop = window.__modalElement.scrollTop");
         start(BackEventCompat.EDGE_LEFT);
@@ -332,7 +332,7 @@ public class PredictiveBackTest {
                 await(view, "!!window.__backWatch()?.$refs.player && !document.querySelector('.mobileMiniBar, [data-inline-mini-drag]')");
                 evaluate(view, STORE + ".commit('setCapacitorLayoutMode', 'phone')");
                 await(view, "window.__backWatch().phonePanelsEnabled");
-                verifyBottomSheets(scenario, view);
+                verifyBottomSheets(view);
 
                 for (boolean loading : new boolean[] { false, true }) {
                     evaluate(view, "window.__backVideo.pause(); window.__backSource = window.__backVideo.currentSrc");
@@ -398,7 +398,7 @@ public class PredictiveBackTest {
         }
     }
 
-    private static void verifyBottomSheets(ActivityScenario<MainActivity> scenario, WebView view) throws Exception {
+    private static void verifyBottomSheets(WebView view) throws Exception {
         for (String panel : new String[] { "comments", "description", "chapters" }) {
             evaluate(view, "window.__backWatch().openPhonePanel('" + panel + "')");
             await(view, "!!document.querySelector('.dockedSheet[open]')");
