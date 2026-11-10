@@ -109,10 +109,11 @@ jobs:
         # Several tests check WebView and system animations.
         disable-animations: false
         emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle
+        # A hung test fails after ten minutes instead of using up the shard.
         # Gradle can report success after the emulator has crashed and skipped
         # the remaining tests, so require it to still be running.
         script: |
-          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
+          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000
           adb get-state
 
     - name: Show why the emulator stopped
@@ -122,7 +123,8 @@ jobs:
         free -m
 
     - name: Upload test reports
-      if: ${{ !cancelled() }}
+      # Also after a timeout, to show which test was running.
+      if: ${{ always() }}
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: android-test-reports-${{ matrix.shard }}
