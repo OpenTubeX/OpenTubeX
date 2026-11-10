@@ -532,7 +532,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
-    Theme and Colors: "Kolorit və rənglər"
+    Theme and Colors: "Mövzu və rənglər"
     Font Size: Şrift ölçüsü
     Sections:
       Interface: "İnterfeys"
