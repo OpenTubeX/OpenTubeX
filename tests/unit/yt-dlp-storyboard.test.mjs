@@ -112,4 +112,8 @@ test('skips storyboard fragment URLs that could add WebVTT cues', () => {
   const fragments = ['https://example.com/a.jpg\n\n00:00.000 --> 99:00.000\nfile:///etc/passwd', 'javascript:alert(1)', 'https://example.com/b-->c.jpg']
     .map(url => ({ url, duration: 2 }))
   assert.equal(buildYtDlpStoryboardVtt([{ ...format, fragments }], 10), null)
+
+  // a rejected fragment keeps its time span, so the next thumbnail stays in place
+  const vtt = buildYtDlpStoryboardVtt([{ ...format, fragments: [fragments[1], { url: 'https://example.com/d.jpg', duration: 2 }] }], 10)
+  assert.match(vtt, /^WEBVTT\n\n00:00:02\.000 --> 00:00:04\.000\nhttps:\/\/example\.com\/d\.jpg#/)
 })

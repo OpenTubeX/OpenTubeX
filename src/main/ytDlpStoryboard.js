@@ -41,19 +41,22 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
     }
 
     const fragments = format.fragments.flatMap((fragment) => {
-      // A line break or `-->` in the URL would start a new cue in the generated WebVTT
-      if (fragment === null || typeof fragment !== 'object' || typeof fragment.url !== 'string' ||
-        !/^https?:\/\/\S+$/.test(fragment.url) || fragment.url.includes('-->')) {
+      if (fragment === null || typeof fragment !== 'object') {
         return []
       }
 
+      // A line break or `-->` in the URL would start a new cue in the generated WebVTT.
+      // Such fragments keep their time span, so later thumbnails stay in place.
+      const url = typeof fragment.url === 'string' && /^https?:\/\/\S+$/.test(fragment.url) && !fragment.url.includes('-->')
+        ? fragment.url
+        : null
       return [{
-        url: fragment.url,
+        url,
         duration: finitePositiveNumber(fragment.duration)
       }]
     })
 
-    return fragments.length === 0
+    return fragments.every(fragment => fragment.url === null)
       ? []
       : [{ width, height, fps, rows: Math.floor(rows), columns: Math.floor(columns), fragments }]
   })
@@ -82,6 +85,10 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
       index++
     ) {
       const endTime = Math.min(currentTime + interval, durationLimit)
+      if (fragment.url === null) {
+        currentTime = endTime
+        continue
+      }
       const x = (index % storyboard.columns) * storyboard.width
       const y = Math.floor(index / storyboard.columns) * storyboard.height
 
