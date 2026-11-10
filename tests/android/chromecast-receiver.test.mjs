@@ -80,7 +80,7 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
     })
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
-      await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
+      await tutorial.locator('.tutorialSkip button').click()
       await expect(tutorial).toBeHidden()
     }
     await expect.poll(async () => { const h = await page.evaluateHandle(findWatchComponent); try { return await h.evaluate(c => !!c && c.proxy.preparingVideoLoadGeneration === null) } finally { await h.dispose() } }).toBe(true)

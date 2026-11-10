@@ -362,6 +362,15 @@ test('resumes the tutorial after opening settings from it and replays it from Ab
   await page.getByRole('dialog', { name: 'About' }).getByRole('button', { name: 'Show tutorial' }).click()
   await expect(page.locator('.settingsWindow')).toHaveCount(0)
   await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+
+  // A replay from About starts over even while the tutorial waits to resume
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await tutorial.getByRole('button', { name: 'Theme and colors' }).click()
+  await expect(page.locator('.themeGallery .themeSection')).toBeVisible()
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
+  await page.getByRole('dialog', { name: 'About' }).getByRole('button', { name: 'Show tutorial' }).click()
+  await expect(page.locator('.settingsWindow')).toHaveCount(0)
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
 })
 
 test('repositions the navigation highlight after crossing the mobile breakpoint', async ({ app, page }) => {

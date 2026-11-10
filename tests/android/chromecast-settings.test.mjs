@@ -42,7 +42,7 @@ test('Android enables Google Cast from settings and opens the native device menu
     })
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
-      await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
+      await tutorial.locator('.tutorialSkip button').click()
       await expect(tutorial).toBeHidden()
     }
     if (await page.locator('.settingsWindow').isVisible()) {

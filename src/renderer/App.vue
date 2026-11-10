@@ -1727,7 +1727,8 @@ watch(
   (settingsWindowClosed) => {
     if (!settingsWindowClosed || tutorialResumeStep === null) return
 
-    store.commit('setTutorialStep', tutorialResumeStep)
+    // A replay started from About while the window was open keeps its own step
+    if (store.getters.getTutorialStep === null) store.commit('setTutorialStep', tutorialResumeStep)
     tutorialResumeStep = null
   }
 )
