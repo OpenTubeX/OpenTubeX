@@ -498,6 +498,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 (queuePosition($0) == queuePosition($1) && $0 < $1) }
     }
 
+    private static let currentVideoKeys = ["currentVideoId", "currentTitle", "playlistIndex", "playlistCount"]
+
     private func refreshProgress() {
         for id in running {
             if ["pausing", "paused", "cancelled"].contains(records[id]?["status"] as? String ?? "") { continue }
@@ -505,11 +507,13 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                   let progress = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
             let previous = records[id]?["percent"] as? Double ?? 0
             let percent = progress["percent"] as? Double ?? 0
-            if abs(percent - previous) < 0.1 && records[id]?["status"] as? String == "downloading" { continue }
+            if abs(percent - previous) < 0.1 && records[id]?["status"] as? String == "downloading"
+                && progress["status"] as? String == "downloading" { continue }
             records[id]?["status"] = progress["status"] ?? "downloading"
             records[id]?["percent"] = percent
             records[id]?["speed"] = progress["speed"] ?? NSNull()
             records[id]?["eta"] = progress["eta"] ?? NSNull()
+            for key in Self.currentVideoKeys { records[id]?[key] = progress[key] }
             publish(id)
         }
     }
@@ -644,7 +648,12 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             let status = records[id]?["status"] as? String ?? ""
             if action == "pause-all" && ["queued", "preparing", "downloading", "processing"].contains(status) { _ = control(id, "pause") }
             if action == "resume-all" && status == "paused" { _ = control(id, "resume") }
-            if action == "retry-all" && status == "failed" { records[id]?["status"] = "queued"; publish(id) }
+            if action == "retry-all" && status == "failed" {
+                // A requeued record must not show the video its previous run stopped at.
+                for key in Self.currentVideoKeys { records[id]?[key] = nil }
+                records[id]?["status"] = "queued"
+                publish(id)
+            }
         }
         startNext()
         call.resolve(["ok": true])
