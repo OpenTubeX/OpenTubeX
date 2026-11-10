@@ -2,10 +2,10 @@
 category: feature
 ---
 
-Storage settings have a clearer layout with a usage bar, and saved searches can now be removed automatically after a set number of days, like watch history.
+Storage settings have a clearer layout with a usage bar. Watch history retention moved to Privacy settings, where saved searches can now also be removed automatically after a set number of days.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/11b9b5ed-a84c-4b15-ab28-56be96023f6b">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/a51a5bc0-a222-41ae-8f7a-e225efb9a0fe">
-  <img alt="Stored histories in Storage settings with the automatic search history retention field" src="https://github.com/user-attachments/assets/11b9b5ed-a84c-4b15-ab28-56be96023f6b">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/4d2584dc-67e2-4cb2-96da-8a7d969f7bdd">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3172db3c-b23c-4884-96b5-2a505301b3b7">
+  <img alt="Privacy settings with the automatic watch history and search history retention fields" src="https://github.com/user-attachments/assets/4d2584dc-67e2-4cb2-96da-8a7d969f7bdd">
 </picture>

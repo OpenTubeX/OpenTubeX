@@ -159,7 +159,7 @@ test('moves storage controls into one searchable category', async ({ app, attach
     window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(5)
-  await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
+  await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveCount(0)
   await expect(storage.getByRole('checkbox', { name: 'Replace HTTP Cache' })).toHaveCount(0)
   await expect(storage.locator('.storageLocation').filter({ hasText: 'downloads.json' })
     .locator('[data-icon="file-lines"]')).toBeVisible()
@@ -205,14 +205,13 @@ test('moves storage controls into one searchable category', async ({ app, attach
 
   const privacy = await goToSettingsSection(page, 'privacy')
   await expect(privacy.getByRole('checkbox', { name: 'Metadata history' })).toHaveCount(0)
-  await expect(privacy.getByLabel('Automatic History Retention (Days)')).toHaveCount(0)
+  await expect(privacy.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
   await expect(privacy.getByRole('button', { name: 'Remove Watch History' })).toHaveCount(0)
 
   const search = page.getByRole('searchbox', { name: 'Search settings' })
   await search.fill('Automatic History Retention')
   await page.getByRole('button', { name: 'Automatic History Retention (Days)', exact: true }).click()
-  await expect(page.locator('.settingsContent > [data-section="data"]')).toBeVisible()
-  await expect(page.locator('[data-settings-tab="storage"]')).toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
   await expect(page.getByLabel('Automatic History Retention (Days)')).toHaveClass(/settingsSearchTarget/)
 
   await search.fill('Clear Search History and Cache')
@@ -249,11 +248,9 @@ test('separates replaceable search results from saved search history', async ({ 
   }))).toEqual({ cached: 0, saved: 2 })
   await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
 
-  const searchHistory = storage.locator('.storageItem').filter({
-    has: page.getByRole('heading', { name: 'Search history', exact: true })
-  })
   // Retention removes only the searches last used before its cutoff, in the saved list and its datastore.
-  const retention = searchHistory.getByRole('spinbutton', { name: 'Automatic Search History Retention (Days)', exact: true })
+  const privacy = await goToSettingsSection(page, 'privacy')
+  const retention = privacy.getByRole('spinbutton', { name: 'Automatic Search History Retention (Days)', exact: true })
   await retention.fill('3')
   await retention.press('Enter')
   await expect(page.locator('.toast', { hasText: 'History retention has been saved' })).toBeVisible()
@@ -262,6 +259,18 @@ test('separates replaceable search results from saved search history', async ({ 
     saved: window.$store.getters.getSearchHistoryEntries.map(entry => entry._id),
     stored: (await window.ftElectron.dbSearchHistory(action)).map(entry => entry._id)
   }), DBActions.GENERAL.FIND)).toEqual({ setting: '3', saved: ['recent search'], stored: ['recent search'] })
+
+  // With search history off, its retention cannot be saved, since saving deletes entries.
+  await privacy.locator('label.switch-label').filter({ hasText: 'Remember Search History' }).click()
+  await expect(retention).toBeDisabled()
+  await expect(privacy.locator('.ft-input-component').filter({
+    has: page.getByRole('spinbutton', { name: 'Automatic Search History Retention (Days)', exact: true })
+  }).locator('.inputAction')).toBeDisabled()
+
+  await goToSettingsSection(page, 'storage')
+  const searchHistory = storage.locator('.storageItem').filter({
+    has: page.getByRole('heading', { name: 'Search history', exact: true })
+  })
   await searchHistory.getByRole('button', { name: 'Delete search history' }).click()
   await page.getByRole('dialog', { name: 'Delete all saved search history?' })
     .getByRole('button', { name: 'Delete' })

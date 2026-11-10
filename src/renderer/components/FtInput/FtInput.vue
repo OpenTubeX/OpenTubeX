@@ -88,9 +88,10 @@
         v-if="showActionButton"
         class="inputAction"
         :class="{
-          enabled: inputDataPresent || allowActionButtonWhenEmpty,
+          enabled: !disabled && (inputDataPresent || allowActionButtonWhenEmpty),
           withLabel: showLabel
         }"
+        :disabled="disabled"
         :aria-label="actionButtonLabel"
         :title="actionButtonLabel"
         @click="handleClick"
