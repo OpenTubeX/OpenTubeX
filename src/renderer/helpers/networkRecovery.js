@@ -329,7 +329,8 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
 export function waitUntilReachable(url, signal) {
   const probe = createInternetProbe((input, init) => withoutNetworkRecovery(() => window.fetch(input, init)), url)
   return initializeNetworkRecovery().run(new URL(url).origin, async probeSignal => {
-    if (!await probe(probeSignal)) throw new Error(`Connection to ${new URL(url).origin} failed`)
+    // Hostnames must stay out of the message, which classifies the failure
+    if (!await probe(probeSignal)) throw new Error('Connection failed')
   }, { signal, retryDuringOutage: true })
 }
 

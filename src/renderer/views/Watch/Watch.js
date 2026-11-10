@@ -5886,8 +5886,9 @@ export default defineComponent({
       try {
         await waitUntilReachable(probeUrl, controller.signal)
       } catch {
-        // The player was replaced, and the error with it
-        return true
+        // A cancelled wait belongs to a replaced player. Anything else still
+        // needs the normal recovery.
+        return controller.signal.aborted
       } finally {
         if (this.playbackNetworkWaitController === controller) {
           this.playbackNetworkWaitController = null

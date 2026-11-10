@@ -8837,6 +8837,12 @@ export default defineComponent({
         return
       }
 
+      // Notice buttons, such as Retry now, activate like other buttons
+      if ((isSpaceKey(event) || event.key === 'Enter') && event.target instanceof Element &&
+        event.target.closest('.streamRecoveryNotice button')) {
+        return
+      }
+
       const matches = shortcut => matchesKeyboardShortcut(event, shortcut)
 
       // exit fullscreen and/or fullwindow if keyboard shortcut modal is opened

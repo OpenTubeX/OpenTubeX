@@ -55,7 +55,7 @@ function createUnreachableStreamView() {
     console: { warn () {} },
     // Resolves once the test makes the server reachable again
     waitUntilReachable: (url, signal) => new Promise((resolve, reject) => {
-      waits.push({ url, resolve })
+      waits.push({ url, resolve, reject })
       signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
     })
   })
@@ -121,6 +121,17 @@ test('a stream whose in-place retry cannot start reloads once the server answers
   waits[0].resolve()
   await handled
   assert.deepEqual(view.reloads, ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'])
+})
+
+test('a wait that fails without being cancelled falls back to the reload', async () => {
+  const { view, player, waits } = createUnreachableStreamView()
+  view.isAndroidTransientHttpRecoveryEnabled = () => false
+  const handled = view.handlePlayerError(lostConnection())
+  await Promise.resolve()
+  waits[0].reject(new Error('certificate rejected'))
+  await handled
+  assert.deepEqual({ retries: player.retries, reloads: view.reloads, origin: view.playbackNetworkWaitOrigin },
+    { retries: 0, reloads: ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'], origin: null })
 })
 
 test('a replaced player ends the wait without retrying or reloading', async () => {
