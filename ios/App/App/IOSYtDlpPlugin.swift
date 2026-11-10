@@ -507,8 +507,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                   let progress = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
             let previous = records[id]?["percent"] as? Double ?? 0
             let percent = progress["percent"] as? Double ?? 0
+            // A playlist can move to the next video between two refreshes without a percent change.
             if abs(percent - previous) < 0.1 && records[id]?["status"] as? String == "downloading"
-                && progress["status"] as? String == "downloading" { continue }
+                && progress["status"] as? String == "downloading"
+                && records[id]?["currentVideoId"] as? String == progress["currentVideoId"] as? String
+                && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int { continue }
             records[id]?["status"] = progress["status"] ?? "downloading"
             records[id]?["percent"] = percent
             records[id]?["speed"] = progress["speed"] ?? NSNull()
