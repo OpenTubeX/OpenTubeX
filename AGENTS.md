@@ -12,6 +12,10 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - Never end a turn waiting for something that only you or the user can cause. Before you go quiet, name the event that will wake you (a check, a bot reply, a review you requested); if there is none, act or ask the user.
 - End the PR description with a blurb about the model and harness that made the changes. Use the public model name the harness reports for the model that made the changes. If the harness does not expose a model name, use the harness name. Do not guess.
 
+## User examples
+
+Screenshots, recordings, logs, URLs, and data the user shares show their own content: video titles, channel names, thumbnails, video and playlist IDs, comments, and account details. Use that content only to understand the task and in replies to the user. Never put it anywhere public or persistent: committed files (code, tests, fixtures, comments), commit messages, PR and issue text, review replies, release notes, or uploaded screenshots and recordings. Replace it with neutral, made-up placeholders that reproduce the property that matters (length, script, special characters, aspect ratio) instead of the original text, and check captures for leftovers before uploading them.
+
 ## Follow-ups
 
 Fix follow-ups in the current task by default, including bugs that predate it: a missing test, an edge case or cleanup, a bug in a component you touched or of the same kind as the one you are fixing, and anything raised in review of your PR. "It predates this PR" or "it affects other places too" is not a reason to defer.
