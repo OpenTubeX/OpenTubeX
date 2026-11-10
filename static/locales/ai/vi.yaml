@@ -2375,6 +2375,7 @@ Downloads:
   Add Download: Thêm lượt tải xuống
   Preparing: Đang chuẩn bị…
   Export Failed: "Không thể lưu tệp đã tải xuống. Hãy chọn thư mục tải xuống có quyền ghi và thử lại."
+  Native Code Blocked: "Android đã chặn yt-dlp tải các thư viện gốc của nó. Trên GrapheneOS, hãy mở thông tin của ứng dụng này, đặt “Dynamic code loading via storage” trong “Exploit protection” thành “Allowed” rồi thử lại."
   Remove File Permanently Warning: "Thao tác này sẽ xóa vĩnh viễn \"{title}\"."
   Download: Tải xuống
   Download Video: Tải video

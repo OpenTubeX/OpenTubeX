@@ -2357,6 +2357,7 @@ Downloads:
   Add Download: Add download
   Preparing: Preparing…
   Export Failed: "Could not save the downloaded file. Choose a writable download folder and retry."
+  Native Code Blocked: "Android blocked yt-dlp from loading its native libraries. On GrapheneOS, open this app’s App info, set “Dynamic code loading via storage” under “Exploit protection” to “Allowed”, and retry."
   Remove File Permanently Warning: "This will permanently delete \"{title}\"."
   Download: Download
   Download Video: Download Video

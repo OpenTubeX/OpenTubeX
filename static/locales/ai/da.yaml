@@ -2453,6 +2453,7 @@ Downloads:
   Add Download: Tilføj download
   Preparing: Forbereder…
   Export Failed: "Den downloadede fil kunne ikke gemmes. Vælg en downloadmappe med skriveadgang, og prøv igen."
+  Native Code Blocked: "Android blokerede yt-dlp i at indlæse sine native biblioteker. På GrapheneOS skal du åbne appinfo for denne app, sætte “Dynamic code loading via storage” under “Exploit protection” til “Allowed” og prøve igen."
   Remove File Permanently Warning: "Dette sletter \"{title}\" permanent."
   Download: Download
   Download Video: Download video

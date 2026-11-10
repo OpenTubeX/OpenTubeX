@@ -2361,6 +2361,7 @@ Downloads:
   Add Download: Lisa allalaadimine
   Preparing: Ettevalmistamine…
   Export Failed: "Allalaaditud faili ei saanud salvestada. Vali allalaadimiskaust, kuhu saab kirjutada, ja proovi uuesti."
+  Native Code Blocked: "Android blokeeris yt-dlp natiivteekide laadimise. Ava GrapheneOS-is selle rakenduse teave, määra jaotises “Exploit protection” valiku “Dynamic code loading via storage” väärtuseks “Allowed” ja proovi uuesti."
   Remove File Permanently Warning: "See kustutab faili „{title}“ jäädavalt."
   Download: Laadi alla
   Download Video: Laadi video alla

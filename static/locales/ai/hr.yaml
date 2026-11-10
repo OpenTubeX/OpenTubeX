@@ -2396,6 +2396,7 @@ Downloads:
   Add Download: Dodaj preuzimanje
   Preparing: Priprema…
   Export Failed: "Preuzetu datoteku nije moguće spremiti. Odaberite mapu za preuzimanja s dozvolom pisanja i pokušajte ponovno."
+  Native Code Blocked: "Android je spriječio yt-dlp da učita svoje izvorne biblioteke. U GrapheneOS-u otvorite informacije o ovoj aplikaciji, u odjeljku “Exploit protection” postavite “Dynamic code loading via storage” na “Allowed” i pokušajte ponovno."
   Remove File Permanently Warning: "Time ćete trajno izbrisati „{title}“."
   Download: Preuzmi
   Download Video: Preuzmi videozapis

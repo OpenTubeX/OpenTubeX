@@ -2372,6 +2372,7 @@ Downloads:
   Add Download: Προσθήκη λήψης
   Preparing: Προετοιμασία…
   Export Failed: "Δεν ήταν δυνατή η αποθήκευση του ληφθέντος αρχείου. Επιλέξτε έναν φάκελο λήψεων με δικαίωμα εγγραφής και δοκιμάστε ξανά."
+  Native Code Blocked: "Το Android εμπόδισε το yt-dlp να φορτώσει τις εγγενείς βιβλιοθήκες του. Στο GrapheneOS, ανοίξτε τις πληροφορίες αυτής της εφαρμογής, ορίστε το “Dynamic code loading via storage” στην ενότητα “Exploit protection” σε “Allowed” και δοκιμάστε ξανά."
   Remove File Permanently Warning: "Αυτό θα διαγράψει οριστικά το «{title}»."
   Download: Λήψη
   Download Video: Λήψη βίντεο
