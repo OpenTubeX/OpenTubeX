@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Riavvolgi alla ripresa"
     Minimum Pause Before Rewinding: "Pausa minima prima di riavvolgere"
     Mono Audio: 'Audio mono'
+    Normalize Loudness: 'Normalizza il volume'
     Show Mono Audio Toggle: 'Mostra l''interruttore dell''audio mono'
     Pause on Stream Recovery: "Metti in pausa al ripristino dello stream"
     Buffering:
@@ -2189,6 +2190,7 @@ Tooltips:
     Rewind on Resume: "Torna indietro di questo numero di secondi quando riprendi un video in pausa, così puoi rivedere gli ultimi istanti. Imposta 0 per disattivarlo."
     Minimum Pause Before Rewinding: "Riavvolge solo se il video è rimasto in pausa almeno per questo tempo. Imposta 0 per riavvolgere dopo ogni pausa."
     Mono Audio: 'Riproduce i canali audio sinistro e destro in entrambe le orecchie. Usalo quando l''audio di un video esce solo da un lato delle cuffie.'
+    Normalize Loudness: 'Abbassa il volume dei video più forti della maggior parte, così il volume non cambia bruscamente tra un video e l''altro. I video più bassi mantengono il loro volume. Funziona solo con i video caricati tramite le API locali.'
     Pause on Stream Recovery: "Quando lo stream video non riesce e il lettore lo ricarica o passa a un altro formato o motore, la riproduzione viene messa in pausa e l'errore rimane nella parte superiore del lettore finché non lo chiudi. Se disattivato, la riproduzione continua e l'errore appare brevemente come notifica."
     Continue Playback When Screen Is Locked: 'Mantiene l’audio in riproduzione in background e fornisce i controlli multimediali di Android. Disattiva questa opzione per mettere in pausa quando l’app non è più visibile.'
     Enable Caption Translations: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente.

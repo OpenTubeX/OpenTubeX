@@ -709,6 +709,7 @@ Settings:
     Rewind on Resume: "Voltar ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de voltar"
     Mono Audio: 'Áudio mono'
+    Normalize Loudness: 'Normalizar volume'
     Show Mono Audio Toggle: 'Mostrar a chave de áudio mono'
     Pause on Stream Recovery: "Pausar na recuperação da transmissão"
     Buffering:
@@ -2159,6 +2160,7 @@ Tooltips:
     Rewind on Resume: "Volta esta quantidade de segundos ao retomar um vídeo pausado, para que você possa ver os últimos momentos novamente. Defina como 0 para desativar."
     Minimum Pause Before Rewinding: "Só volta quando o vídeo ficou pausado por pelo menos esse tempo. Defina como 0 para voltar após cada pausa."
     Mono Audio: 'Reproduz os canais de áudio esquerdo e direito nos dois ouvidos. Use quando o som de um vídeo sair apenas de um lado dos seus fones de ouvido.'
+    Normalize Loudness: 'Abaixa o volume dos vídeos mais altos que a maioria, para que o volume não oscile entre vídeos. Vídeos mais baixos mantêm o volume. Funciona apenas com vídeos carregados pela API local.'
     Pause on Stream Recovery: "Quando a transmissão de vídeo falha e o player a recarrega ou muda para outro formato ou mecanismo, a reprodução é pausada e o erro fica no topo do player até você dispensá-lo. Quando desativado, a reprodução continua e o erro aparece brevemente como notificação."
     Continue Playback When Screen Is Locked: 'Mantém o áudio tocando em segundo plano e fornece controles de mídia do Android. Desative para pausar quando o aplicativo não estiver mais visível.'
     Enable Caption Translations: Quando esta opção está ativada e o vídeo não fornece uma faixa original no idioma de legendas preferido, o botão de legendas e o atalho C dão preferência a uma faixa traduzida automaticamente para esse idioma.

@@ -254,6 +254,7 @@ export const SYNC_SETTING_LABELS = {
   rememberTabNavigationHistory: 'Settings.General Settings.Remember Tab Navigation History',
   rememberVolume: 'Settings.Player Settings.Remember Volume',
   monoAudio: 'Settings.Player Settings.Mono Audio',
+  normalizeLoudness: 'Settings.Player Settings.Normalize Loudness',
   rewindOnResume: 'Settings.Player Settings.Rewind on Resume',
   rewindOnResumeMinimumPause: 'Settings.Player Settings.Minimum Pause Before Rewinding',
   returnYouTubeDislikesUrl: 'Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url',

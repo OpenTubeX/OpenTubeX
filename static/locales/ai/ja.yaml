@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "再開時に巻き戻す"
     Minimum Pause Before Rewinding: "巻き戻しまでの最小一時停止時間"
     Mono Audio: 'モノラル音声'
+    Normalize Loudness: 'ラウドネスを正規化'
     Show Mono Audio Toggle: 'モノラル音声の切り替えを表示'
     Pause on Stream Recovery: "ストリーム復旧時に一時停止"
     Buffering:
@@ -2189,6 +2190,7 @@ Tooltips:
     Rewind on Resume: "一時停止した動画を再開するときに、この秒数だけ巻き戻して直前の場面をもう一度見られるようにします。0 にするとオフになります。"
     Minimum Pause Before Rewinding: "この時間以上一時停止していた場合にのみ巻き戻します。0 にすると一時停止のたびに巻き戻します。"
     Mono Audio: '左右の音声チャンネルを両耳で再生します。動画の音がヘッドホンの片側からしか聞こえないときに使用します。'
+    Normalize Loudness: 'ほとんどの動画より音が大きい動画の音量を下げ、動画間で音量が急に変わらないようにします。音が小さい動画の音量はそのままです。内部 API で読み込んだ動画でのみ機能します。'
     Pause on Stream Recovery: "動画ストリームが失敗し、プレーヤーが再読み込みするか別の形式やエンジンに切り替えたとき、再生を一時停止し、閉じるまでエラーをプレーヤー上部に表示します。オフにすると再生は続行され、エラーは通知として短時間表示されます。"
     Continue Playback When Screen Is Locked: 'バックグラウンドで音声の再生を続け、Android のメディアコントロールを提供します。アプリが表示されなくなったときに一時停止するには無効にしてください。'
     Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。

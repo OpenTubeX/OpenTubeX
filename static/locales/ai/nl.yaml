@@ -745,6 +745,7 @@ Settings:
     Rewind on Resume: "Terugspoelen bij hervatten"
     Minimum Pause Before Rewinding: "Minimale pauze voor terugspoelen"
     Mono Audio: 'Mono-audio'
+    Normalize Loudness: 'Volume normaliseren'
     Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
     Default Media Format:
       Default Media Format: 'Standaardmediaformaat'
@@ -2255,6 +2256,7 @@ Tooltips:
     Rewind on Resume: "Springt dit aantal seconden terug wanneer je een gepauzeerde video hervat, zodat je de laatste momenten opnieuw kunt zien. Stel in op 0 om dit uit te schakelen."
     Minimum Pause Before Rewinding: "Spoelt alleen terug als de video minstens zo lang gepauzeerd was. Stel in op 0 om na elke pauze terug te spoelen."
     Mono Audio: 'Speelt het linker- en rechteraudiokanaal in beide oren af. Gebruik dit als het geluid van een video maar uit één kant van je koptelefoon komt.'
+    Normalize Loudness: 'Zet video''s die luider zijn dan de meeste zachter, zodat het volume niet verspringt tussen video''s. Zachte video''s behouden hun volume. Werkt alleen voor video''s die met de lokale API zijn geladen.'
     Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
     Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.

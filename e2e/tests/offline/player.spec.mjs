@@ -20,8 +20,8 @@ test.use({ seed: { settings: PLAYER_SEED } })
 /**
  * @param {{ app: import('../../helpers/app.mjs').ElectronAppFixture, page: import('@playwright/test').Page }} fixtures
  */
-async function openDemoVideo({ app, page }) {
-  await mockPlayableWatchPage(app, page)
+async function openDemoVideo({ app, page }, options = {}) {
+  await mockPlayableWatchPage(app, page, options)
   return await openMockedVideo(page)
 }
 
@@ -819,7 +819,8 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
     return gain === null ? null : Math.round(gain * 100) / 100
   }, sourceIndex)
 
-  await openDemoVideo({ app, page })
+  // About 6 dB halves the amplitude.
+  await openDemoVideo({ app, page }, { loudnessDb: { 'aqz-KE-bpKQ': 20 * Math.log10(2) } })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
   await openPlayerOptions(player)
@@ -859,9 +860,12 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await boostMenu.getByRole('button', { name: '200%' }).click()
   await expect.poll(outputGain).toBe(2)
 
-  // Another video in the same tab keeps the boost.
+  // Another video in the same tab keeps the boost, and loudness
+  // normalization turns it down because YouTube reports it as louder.
   await openMockedVideo(page, 'aqz-KE-bpKQ')
   await expect.poll(sourceCount).toBe(2)
+  await expect.poll(outputGain).toBe(1)
+  await page.evaluate(() => window.$store.dispatch('updateNormalizeLoudness', false))
   await expect.poll(outputGain).toBe(2)
 
   // A new tab starts without a boost.

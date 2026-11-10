@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "Distreiñ en ur adkregiñ"
     Minimum Pause Before Rewinding: "Ehan izek a-raok distreiñ"
     Mono Audio: 'Son mono'
+    Normalize Loudness: 'Reizhañ an ampled'
     Show Mono Audio Toggle: 'Diskouez an afell son mono'
     Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
     Buffering:
@@ -2198,6 +2199,7 @@ Tooltips:
     Rewind on Resume: "Distreiñ a ra kement-se a eilennoù pa adkregit gant ur video ehanet, evit gwelet ar mareoù diwezhañ en-dro. Lakait 0 evit e lazhañ."
     Minimum Pause Before Rewinding: "Distreiñ a ra hepken pa oa ehanet ar video da nebeutañ e-pad an amzer-se. Lakait 0 evit distreiñ goude pep ehan."
     Mono Audio: 'Seniñ a ra ar c''hanolioù son kleiz ha dehou en div skouarn. Implijit anezhañ pa ne zeu son ur video nemet eus un tu eus ho selaouelloù.'
+    Normalize Loudness: 'Digreskiñ a ra ampled ar videoioù a zo kreñvoc''h eget ar peurliesañ, evit na lammfe ket an ampled etre ar videoioù. Ar videoioù sioul a vir o ampled. Ne ya en-dro nemet evit ar videoioù karget gant an API lec''hel.'
     Pause on Stream Recovery: "Pa c'hwit al lanv video hag e adkarg al lenner anezhañ pe e tremen d'ur furmad pe d'ur c'heflusker all, e vez ehanet al lenn hag e chom ar fazi e krec'h al lenner betek ma vo kuzhet ganeoc'h. Diweredekaet, e kendalc'h al lenn hag e vez diskouezet ar fazi berr evel ur gemenadenn."
     Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'
     Enable Caption Translations: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ."

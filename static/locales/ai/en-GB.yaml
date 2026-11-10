@@ -728,6 +728,7 @@ Settings:
     Rewind on Resume: "Rewind on resume"
     Minimum Pause Before Rewinding: "Minimum pause before rewinding"
     Mono Audio: 'Mono Audio'
+    Normalize Loudness: 'Normalise Loudness'
     Show Mono Audio Toggle: 'Show Mono Audio Toggle'
     Pause on Stream Recovery: "Pause on Stream Recovery"
     Buffering:
@@ -2187,6 +2188,7 @@ Tooltips:
     Rewind on Resume: "Jumps back this many seconds when you resume a paused video, so you can catch the last moments again. Set to 0 to turn it off."
     Minimum Pause Before Rewinding: "Only rewinds when the video was paused for at least this long. Set to 0 to rewind after every pause."
     Mono Audio: 'Plays the left and right audio channels in both ears. Use it when a video''s sound only comes out of one side of your headphones.'
+    Normalize Loudness: 'Turns down videos that are louder than most, so the volume doesn''t jump between videos. Quiet videos keep their volume. Only works for videos loaded with the Local API.'
     Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
     Continue Playback When Screen Is Locked: 'Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.'
     Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.

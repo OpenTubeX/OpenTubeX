@@ -1015,6 +1015,7 @@ Settings:
     Concurrent Preloads: Gelyktydige voorlaaie
     Remember Volume: Onthou volume
     Mono Audio: Mono-oudio
+    Normalize Loudness: 'Normaliseer luidheid'
     Skip Silence: Slaan stilte oor
     Show Skip Silence Toggle: Wys Slaan stilte oor-wisselaar
     Enable DLNA Casting: Aktiveer DLNA-uitsaai
@@ -2461,6 +2462,7 @@ Tooltips:
     Hold to Double Playback Speed: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik te verdubbel.
     Ambient Mode: Meng die video se kleure in die area rondom die speler in.
     Mono Audio: Speel die linker- en regteroudiokanale in albei ore. Gebruik dit wanneer ’n video se klank slegs uit een kant van u oorfone kom.
+    Normalize Loudness: 'Maak video''s sagter wat harder as die meeste is, sodat die volume nie tussen video''s spring nie. Sagte video''s behou hul volume. Werk slegs vir video''s wat met die plaaslike API gelaai is.'
     Default Volume: Gedeaktiveer terwyl Onthou volume geaktiveer is. Skakel Onthou volume af om ’n vaste beginvolume vir elke video te stel.
     Parallel Segment Loading: |
       Hoeveel video- en oudiosegmente gelyktydig voor afspeel gelaai word.

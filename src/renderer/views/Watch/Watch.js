@@ -518,6 +518,8 @@ export default defineComponent({
       },
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
+      /** @type {number | null} */
+      loudnessDb: null,
       autoplayNextRecommendedVideo: false,
       autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
@@ -2613,6 +2615,7 @@ export default defineComponent({
       this.showSidebarChapters = false
       this.videoChapterThumbnails = []
       this.vrProjection = null
+      this.loudnessDb = null
       this.recommendedVideos = []
       this.playabilityStatus = ''
       this.adEndTimeUnixMs = 0
@@ -3905,6 +3908,9 @@ export default defineComponent({
           } else if (!metadataOnly && this.restrictedPlaybackError === null) {
             console.warn('Built-in metadata has no streams; continuing so yt-dlp can provide the playback source')
           }
+
+          // The loudness describes the video's audio, so it also applies when yt-dlp provides the streams
+          this.loudnessDb = result.player_config?.audio_config.loudness_db ?? null
 
           let storyboard
 

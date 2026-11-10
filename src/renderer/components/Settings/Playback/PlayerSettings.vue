@@ -32,6 +32,15 @@
         @change="store.dispatch('updateMonoAudio', $event)"
       />
       <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Normalize Loudness')"
+        :compact="true"
+        :default-value="store.getters.getNormalizeLoudness"
+        setting-key="normalizeLoudness"
+        :tooltip="t('Tooltips.Player Settings.Normalize Loudness')"
+        @change="store.dispatch('updateNormalizeLoudness', $event)"
+      />
+      <FtToggleSwitch
         v-if="!IS_CAPACITOR"
         :label="t('Settings.Player Settings.Automatically Open Chapters')"
         :compact="true"

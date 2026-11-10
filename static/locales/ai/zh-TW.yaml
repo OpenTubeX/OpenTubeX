@@ -740,6 +740,7 @@ Settings:
     Rewind on Resume: "恢復播放時倒轉"
     Minimum Pause Before Rewinding: "倒轉前的最短暫停時間"
     Mono Audio: '單聲道音訊'
+    Normalize Loudness: '響度正規化'
     Show Mono Audio Toggle: '顯示單聲道音訊開關'
     Pause on Stream Recovery: "串流復原時暫停"
     Buffering:
@@ -2196,6 +2197,7 @@ Tooltips:
     Rewind on Resume: "恢復播放已暫停的影片時倒轉這麼多秒，讓你能再次看到最後的片段。設為 0 即可關閉。"
     Minimum Pause Before Rewinding: "僅在影片暫停至少這麼久時才倒轉。設為 0 則每次暫停後都會倒轉。"
     Mono Audio: '在雙耳播放左右聲道。當影片的聲音只從耳機的一側傳出時使用。'
+    Normalize Loudness: '降低比多數影片更大聲的影片音量，避免切換影片時音量忽大忽小。較安靜的影片會維持原本的音量。僅適用於透過本機 API 載入的影片。'
     Pause on Stream Recovery: "當影片串流失敗且播放器重新載入或切換至其他格式或引擎時，暫停播放，並在播放器頂端保留錯誤訊息，直到你將其關閉。停用後，播放會繼續，錯誤會以通知短暫顯示。"
     Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
     Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。

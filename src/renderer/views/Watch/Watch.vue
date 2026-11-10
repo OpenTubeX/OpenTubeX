@@ -181,6 +181,7 @@
               :can-skip-next="canSkipToNextVideo"
               :can-skip-previous="canSkipToPreviousVideo"
               :vr-projection="vrProjection"
+              :loudness-db="loudnessDb"
               :start-in-fullscreen="startNextVideoInFullscreen"
               :start-in-fullwindow="startNextVideoInFullwindow"
               :start-in-pip="startNextVideoInPip"

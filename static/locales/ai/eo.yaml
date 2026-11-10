@@ -878,6 +878,7 @@ Settings:
     Concurrent Preloads: Samtempaj antaŭŝargoj
     Remember Volume: Memori laŭtecon
     Mono Audio: Monofonia sono
+    Normalize Loudness: 'Normigi laŭtecon'
     Skip Silence: Salti silenton
     Show Skip Silence Toggle: Montri baskulon de silento-saltado
     Enable DLNA Casting: Ŝalti elsendadon per DLNA
@@ -2252,6 +2253,7 @@ Tooltips:
     Hold to Double Playback Speed: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore duobligi la aktualan ludrapidon.
     Ambient Mode: Miksas la kolorojn de la videaĵo en la areon ĉirkaŭ la ludilo.
     Mono Audio: Ludas la maldekstran kaj dekstran sonkanalojn en ambaŭ oreloj. Uzu ĝin kiam la sono de videaĵo venas nur el unu flanko de viaj kapaŭskultiloj.
+    Normalize Loudness: 'Mallaŭtigas videojn, kiuj estas pli laŭtaj ol la plimulto, por ke la laŭteco ne saltu inter videoj. Mallaŭtaj videoj konservas sian laŭtecon. Funkcias nur por videoj ŝargitaj per la Loka API.'
     Default Volume: Malŝaltita dum "Memori laŭtecon" estas ŝaltita. Malŝaltu "Memori laŭtecon" por difini fiksan startan laŭtecon por ĉiu videaĵo.
     Parallel Segment Loading: |
       Kiom da video- kaj sonsegmentoj ŝargi samtempe antaŭ la ludado.
