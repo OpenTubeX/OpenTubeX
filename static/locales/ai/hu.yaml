@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: Törlő művelet rámutatáskor és fókuszban
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
+    Modal Backdrop:
+      Modal Backdrop: "Párbeszédablakok háttere"
+      Dim and Blur: "Sötétítés és elmosás"
+      Dim Only: "Csak sötétítés"
   Player Settings:
     Rewind on Resume: "Visszatekerés folytatáskor"
     Minimum Pause Before Rewinding: "Minimális szünet a visszatekerés előtt"
@@ -902,6 +906,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Régebbi formátumok"
       Modern Formats: "Modern formátumok"
+    Ask Before Preloading Large Playlists: "Kérdezzen nagy lejátszási listák előtöltése előtt"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -2208,6 +2213,7 @@ Tooltips:
     Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
+    Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.
@@ -2259,6 +2265,7 @@ Tooltips:
     Use Fixed Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon, a címükhöz igazodó méretezés helyett.
     Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
+    Modal Backdrop: "Beállítja, hogyan nézzen ki az alkalmazás a párbeszédablakok és menük mögött. Az elmosás lassú lehet kevésbé erős eszközökön."
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
 External link opening has been disabled in Settings → Privacy: A külső hivatkozások megnyitása ki van kapcsolva a Beállítások → Adatvédelem menüben
 KeyboardShortcutPrompt:

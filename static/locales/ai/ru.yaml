@@ -705,6 +705,10 @@ Settings:
         Destructive hover and focus: Опасное действие при наведении и фокусе
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
+    Modal Backdrop:
+      Modal Backdrop: "Фон диалогов"
+      Dim and Blur: "Затемнять и размывать"
+      Dim Only: "Только затемнять"
   Player Settings:
     Rewind on Resume: "Перемотка назад при возобновлении"
     Minimum Pause Before Rewinding: "Минимальная пауза перед перемоткой"
@@ -875,6 +879,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Устаревшие форматы"
       Modern Formats: "Современные форматы"
+    Ask Before Preloading Large Playlists: "Спрашивать перед предзагрузкой больших плейлистов"
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
@@ -2187,6 +2192,7 @@ Tooltips:
     Upcoming Videos to Preload: "Максимальное количество следующих видео, адреса yt-dlp которых загружаются в фоне."
     Concurrent Preloads: "Максимальное количество процессов yt-dlp, используемых для одновременной предзагрузки видео. Более высокие значения требуют больше ресурсов процессора, памяти и пропускной способности сети."
     Ignore System Rotation Lock for Fullscreen: Поворачивайте устройство, чтобы входить в полноэкранный режим и выходить из него, даже если автоповорот в Android отключён.
+    Ask Before Preloading Large Playlists: "Запрашивает подтверждение перед предзагрузкой всех видео плейлиста, в котором больше {count} видео."
   Download Settings:
     Download Folder: Видео сохраняются в эту папку. Оставьте поле пустым, чтобы использовать системную папку «Загрузки».
     Global Additional yt-dlp Arguments: Дополнительные аргументы командной строки, передаваемые yt-dlp при каждой загрузке, например --cookies-from-browser firefox.
@@ -2238,6 +2244,7 @@ Tooltips:
     Use Fixed Tab Width: Устанавливает одинаковую ширину всех вкладок на горизонтальной панели вместо подгонки под заголовок.
     Use Custom Title Bar: Заменяет системную строку заголовка панелью вкладок или, если вкладки расположены не сверху, верхней панелью навигации, чтобы сэкономить место по вертикали. Кнопки управления окном отображаются в углу этой панели.
     Use Grid Player Menu: Располагает меню настроек проигрывателя видео в виде сетки плиток вместо списка строк.
+    Modal Backdrop: "Определяет, как выглядит приложение за диалогами и меню. Размытие может замедлять работу на менее мощных устройствах."
 The playlist is at the beginning. Enable loop to continue playing: Достигнуто начало плейлиста. Включите повтор, чтобы продолжить воспроизведение
 External link opening has been disabled in Settings → Privacy: Открытие внешних ссылок отключено в разделе «Настройки» → «Конфиденциальность»
 KeyboardShortcutPrompt:

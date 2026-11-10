@@ -733,6 +733,10 @@ Settings:
         Destructive hover and focus: Tindakan destruktif saat ditunjuk dan difokuskan
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
+    Modal Backdrop:
+      Modal Backdrop: "Latar dialog"
+      Dim and Blur: "Redupkan dan buramkan"
+      Dim Only: "Redupkan saja"
   Player Settings:
     Rewind on Resume: "Mundur saat melanjutkan"
     Minimum Pause Before Rewinding: "Jeda minimum sebelum mundur"
@@ -905,6 +909,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Format lama"
       Modern Formats: "Format modern"
+    Ask Before Preloading Large Playlists: "Tanyakan sebelum pramuat daftar putar besar"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -2232,6 +2237,7 @@ Tooltips:
     Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
     Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
     Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
+    Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.
@@ -2283,6 +2289,7 @@ Tooltips:
     Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
     Use Custom Title Bar: Mengganti bilah judul sistem dengan bilah tab, atau dengan navigasi atas saat tab tidak berada di atas, untuk menghemat ruang vertikal. Kontrol jendela muncul di sudut bilah tersebut.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
+    Modal Backdrop: "Mengatur tampilan aplikasi di belakang dialog dan menu. Efek buram dapat lambat pada perangkat yang kurang bertenaga."
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
 KeyboardShortcutPrompt:

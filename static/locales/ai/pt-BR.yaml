@@ -701,6 +701,10 @@ Settings:
         Destructive hover and focus: Ação destrutiva ao passar o mouse ou focar
         Destructive pressed: Ação destrutiva ao premir
         Text and icons on destructive actions: Texto e ícones nas ações destrutivas
+    Modal Backdrop:
+      Modal Backdrop: "Fundo das caixas de diálogo"
+      Dim and Blur: "Escurecer e desfocar"
+      Dim Only: "Apenas escurecer"
   Player Settings:
     Rewind on Resume: "Voltar ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de voltar"
@@ -871,6 +875,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formatos antigos"
       Modern Formats: "Formatos modernos"
+    Ask Before Preloading Large Playlists: "Perguntar antes de pré-carregar playlists grandes"
   Channel Settings:
     Channel Settings: Configurações dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as configurações escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -2177,6 +2182,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cujos URL do yt-dlp são obtidos em segundo plano."
     Concurrent Preloads: "O número máximo de processos do yt-dlp usados para pré-carregar vídeos ao mesmo tempo. Valores maiores usam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Gire fisicamente o dispositivo para entrar e sair da tela cheia, mesmo quando a rotação automática do Android estiver desativada.
+    Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma playlist com mais de {count} vídeos."
   Download Settings:
     Download Folder: Os vídeos são salvos nesta pasta. Deixe em branco para usar a pasta Downloads do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada download, por exemplo --cookies-from-browser firefox.
@@ -2228,6 +2234,7 @@ Tooltips:
     Use Fixed Tab Width: Atribui a mesma largura a todas as guias na barra horizontal, em vez de ajustar a largura ao respectivo título.
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de guias ou, quando as guias não estão no topo, pela navegação superior, para economizar espaço vertical. Os controles da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de configurações do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
+    Modal Backdrop: "Define a aparência do app atrás das caixas de diálogo e dos menus. O desfoque pode ficar lento em dispositivos menos potentes."
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar reproduzindo
 External link opening has been disabled in Settings → Privacy: A abertura de links externas foi desativada em Configurações → Privacidade
 KeyboardShortcutPrompt:

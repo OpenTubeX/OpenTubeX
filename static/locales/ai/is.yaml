@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: Eyðandi aðgerð við yfirsvif og fókus
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
+    Modal Backdrop:
+      Modal Backdrop: "Bakgrunnur glugga"
+      Dim and Blur: "Dekkja og móða"
+      Dim Only: "Aðeins dekkja"
   Player Settings:
     Rewind on Resume: "Spóla til baka þegar haldið er áfram"
     Minimum Pause Before Rewinding: "Lágmarkshlé áður en spólað er til baka"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Eldri snið"
       Modern Formats: "Nútímaleg snið"
+    Ask Before Preloading Large Playlists: "Spyrja áður en stórir spilunarlistar eru forhlaðnir"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -2228,6 +2233,7 @@ Tooltips:
     Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
+    Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.
@@ -2279,6 +2285,7 @@ Tooltips:
     Use Fixed Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd í stað þess að laga breidd þeirra að titlinum.
     Use Custom Title Bar: Skiptir titilstiku kerfisins út fyrir flipastikuna, eða efri leiðsögnina þegar fliparnir eru ekki efst, til að spara lóðrétt pláss. Gluggahnapparnir birtast í horni þeirrar stiku.
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
+    Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."
   Experimental Settings:
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram

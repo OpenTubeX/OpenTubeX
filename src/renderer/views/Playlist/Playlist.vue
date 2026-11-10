@@ -402,7 +402,7 @@ const playlistPreloadVideoIds = computed(() => [...new Set(playlistItems.value
   .filter(videoId => typeof videoId === 'string' && videoId !== ''))])
 // Remote playlists only load their first page before preloading, so also use their reported total
 const playlistPreloadRequiresConfirmation = computed(() => {
-  return Math.max(videoCount.value, playlistPreloadVideoIds.value.length) > PLAYLIST_PRELOAD_CONFIRM_THRESHOLD
+  return store.getters.getConfirmLargePlaylistPreload && Math.max(videoCount.value, playlistPreloadVideoIds.value.length) > PLAYLIST_PRELOAD_CONFIRM_THRESHOLD
 })
 const playlistPreloadVideoIdsKey = computed(() => playlistPreloadVideoIds.value.join('\0'))
 const ytDlpPlaybackCacheKey = computed(() => buildYtDlpPlaybackCacheKey(store.getters))

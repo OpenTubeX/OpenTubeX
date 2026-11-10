@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: 破壊的な操作のホバー・フォーカス時
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
+    Modal Backdrop:
+      Modal Backdrop: "ダイアログの背景"
+      Dim and Blur: "暗くしてぼかす"
+      Dim Only: "暗くするだけ"
   Player Settings:
     Rewind on Resume: "再開時に巻き戻す"
     Minimum Pause Before Rewinding: "巻き戻しまでの最小一時停止時間"
@@ -902,6 +906,7 @@ Settings:
     Screenshot:
       Legacy Formats: "従来の形式"
       Modern Formats: "新しい形式"
+    Ask Before Preloading Large Playlists: "大きな再生リストを先読みする前に確認"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -2207,6 +2212,7 @@ Tooltips:
     Upcoming Videos to Preload: "バックグラウンドで yt-dlp URL を取得する次の動画の最大数です。"
     Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
+    Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'
@@ -2258,6 +2264,7 @@ Tooltips:
     Use Fixed Tab Width: 横型タブバーの各タブを、タイトルに合わせた幅ではなく同じ幅にします。
     Use Custom Title Bar: 縦方向のスペースを節約するため、システムのタイトルバーをタブバー（タブが上部にない場合は上部ナビゲーション）に置き換えます。ウィンドウ操作ボタンはそのバーの隅に表示されます。
     Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
+    Modal Backdrop: "ダイアログやメニューの背後にあるアプリの見え方を設定します。ぼかしは性能の低いデバイスでは動作が遅くなることがあります。"
 The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください
 External link opening has been disabled in Settings → Privacy: 「設定」→「プライバシー」で外部リンクを開く機能が無効になっています
 KeyboardShortcutPrompt:

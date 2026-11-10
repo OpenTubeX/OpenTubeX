@@ -326,9 +326,9 @@
         theme="readable-width"
         :label="t('Playlist.Preload Playlist Warning Title')"
         :extra-labels="[t('Playlist.Preload Playlist Warning')]"
-        :option-names="[t('Yes'), t('No')]"
-        :option-values="['preload', 'cancel']"
-        :option-icons="[['fas', 'forward'], ['fas', 'xmark']]"
+        :option-names="[t('Yes'), t('No'), t('Confirmations.Never Ask Again')]"
+        :option-values="['preload', 'cancel', 'neverAskAgain']"
+        :option-icons="[['fas', 'forward'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
         @click="handlePreloadPlaylistPromptAnswer"
       />
       <FtPrompt
@@ -1166,11 +1166,12 @@ const deletePlaylistPromptNames = computed(() => [
 ])
 
 /**
- * @param {'preload' | 'cancel' | null} option
+ * @param {'preload' | 'cancel' | 'neverAskAgain' | null} option
  */
 function handlePreloadPlaylistPromptAnswer(option) {
   showPreloadPlaylistPrompt.value = false
-  if (option === 'preload') { emit('preload-playlist') }
+  if (option === 'neverAskAgain') { store.dispatch('updateConfirmLargePlaylistPreload', false) }
+  if (option === 'preload' || option === 'neverAskAgain') { emit('preload-playlist') }
 }
 
 /** @type {import('vue').ComputedRef<number>} */

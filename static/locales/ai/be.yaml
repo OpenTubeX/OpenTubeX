@@ -757,6 +757,10 @@ Settings:
       Catppuccin Macchiato Blue: "Catppuccin Macchiato Сіні"
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato Лаванда"
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
+    Modal Backdrop:
+      Modal Backdrop: "Фон дыялогаў"
+      Dim and Blur: "Зацямняць і размываць"
+      Dim Only: "Толькі зацямняць"
   Player Settings:
     Rewind on Resume: "Перамотка назад пры аднаўленні"
     Minimum Pause Before Rewinding: "Мінімальная паўза перад перамоткай"
@@ -937,6 +941,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Здымкі экрана
     Enable FCast: "Уключыць FCast"
+    Ask Before Preloading Large Playlists: "Пытацца перад папярэдняй загрузкай вялікіх плэйлістоў"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -2309,6 +2314,7 @@ Tooltips:
     Upcoming Videos to Preload: "Максімальная колькасць наступных відэа, спасылкі на якія атрымліваюцца ў фоне."
     Concurrent Preloads: "Найбольшая колькасць працэсаў yt-dlp, якія адначасова папярэдне загружаюць відэа. Большыя значэнні выкарыстоўваюць больш рэсурсаў працэсара, памяці і прапускной здольнасці сеткі."
     Ignore System Rotation Lock for Fullscreen: Паварочвайце прыладу, каб уваходзіць у поўнаэкранны рэжым і выходзіць з яго, нават калі аўтапаварот у Android выключаны.
+    Ask Before Preloading Large Playlists: "Запытвае пацвярджэнне перад папярэдняй загрузкай усіх відэа плэйліста, у якім больш за {count} відэа."
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.
@@ -2361,6 +2367,7 @@ Tooltips:
     Use Fixed Tab Width: Задае ўсім укладкам на гарызантальнай панэлі аднолькавую шырыню замест падбору шырыні паводле назвы.
     Use Custom Title Bar: Замяняе сістэмную панэль загалоўка панэллю ўкладак або верхняй навігацыяй, калі ўкладкі размешчаны не ўверсе, каб зэканоміць месца па вертыкалі. Кнопкі кіравання акном з’яўляюцца ў куце гэтай панэлі.
     Use Grid Player Menu: Размяшчае меню налад відэапрайгравальніка ў выглядзе сеткі плітак замест спіса радкоў.
+    Modal Backdrop: "Вызначае, як выглядае праграма за дыялогамі і меню. Размыццё можа запавольваць працу на менш магутных прыладах."
   Experimental Settings:
     Disable Hardware Acceleration: Адключае апаратнае паскарэнне GPU. Гэта можа вырашыць графічныя праблемы, але, верагодна, знізіць прадукцыйнасць.
 The playlist is at the beginning. Enable loop to continue playing: Гэта пачатак спіса прайгравання. Уключыце паўтор, каб працягнуць прайграванне

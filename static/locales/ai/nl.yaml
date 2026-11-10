@@ -737,6 +737,10 @@ Settings:
         Destructive hover and focus: Verwijderactie bij aanwijzen en focus
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
+    Modal Backdrop:
+      Modal Backdrop: "Achtergrond van dialoogvensters"
+      Dim and Blur: "Dimmen en vervagen"
+      Dim Only: "Alleen dimmen"
   Player Settings:
     Rewind on Resume: "Terugspoelen bij hervatten"
     Minimum Pause Before Rewinding: "Minimale pauze voor terugspoelen"
@@ -917,6 +921,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Schermafbeeldingen
     Enable FCast: "FCast inschakelen"
+    Ask Before Preloading Large Playlists: "Vragen voordat grote afspeellijsten vooraf worden geladen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -2273,6 +2278,7 @@ Tooltips:
     Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
     Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
+    Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.
@@ -2324,6 +2330,7 @@ Tooltips:
     Use Fixed Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte in plaats van de breedte aan de titel aan te passen.
     Use Custom Title Bar: Vervangt de titelbalk van het systeem door de tabbladbalk, of door de bovenste navigatie als de tabbladen niet bovenaan staan, om verticale ruimte te besparen. De vensterknoppen verschijnen in de hoek van die balk.
     Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
+    Modal Backdrop: "Bepaalt hoe de app er achter dialoogvensters en menu’s uitziet. Vervagen kan traag zijn op minder krachtige apparaten."
   Experimental Settings:
     Disable Hardware Acceleration: Schakelt GPU-hardwareversnelling uit. Kan grafische problemen oplossen, maar zal waarschijnlijk de prestaties verminderen.
 The playlist is at the beginning. Enable loop to continue playing: De afspeellijst staat aan het begin. Schakel herhalen in om door te gaan met afspelen

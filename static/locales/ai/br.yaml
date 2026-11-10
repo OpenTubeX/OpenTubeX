@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: "Ober distrujus dindan al logodenn pe gant ar fokus"
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
+    Modal Backdrop:
+      Modal Backdrop: "Drekleur ar boestoù-emziviz"
+      Dim and Blur: "Teñvalaat ha dispisaat"
+      Dim Only: "Teñvalaat hepken"
   Player Settings:
     Rewind on Resume: "Distreiñ en ur adkregiñ"
     Minimum Pause Before Rewinding: "Ehan izek a-raok distreiñ"
@@ -902,6 +906,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Furmadoù kozh"
       Modern Formats: "Furmadoù modern"
+    Ask Before Preloading Large Playlists: "Goulenn a-raok rakgargañ rolloù-lenn bras"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -2216,6 +2221,7 @@ Tooltips:
     Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
     Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
     Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
+    Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."
@@ -2267,6 +2273,7 @@ Tooltips:
     Use Fixed Tab Width: "Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen e-lec'h azasaat anezho diouzh o zitl."
     Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
+    Modal Backdrop: "Termeniñ a ra penaos e weler an arload a-dreñv ar boestoù-emziviz hag al lañserioù. Gorrek e c’hall bezañ an dispisaat war ar binvioù nebeutoc’h galloudek."
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
 External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"
 KeyboardShortcutPrompt:

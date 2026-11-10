@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: Deštruktívna akcia po umiestnení kurzora alebo zameraní
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
+    Modal Backdrop:
+      Modal Backdrop: "Pozadie dialógov"
+      Dim and Blur: "Stmaviť a rozmazať"
+      Dim Only: "Iba stmaviť"
   Player Settings:
     Rewind on Resume: "Pretočiť späť pri obnovení"
     Minimum Pause Before Rewinding: "Minimálna pauza pred pretočením"
@@ -902,6 +906,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Staršie formáty"
       Modern Formats: "Moderné formáty"
+    Ask Before Preloading Large Playlists: "Pýtať sa pred prednačítaním veľkých playlistov"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -2213,6 +2218,7 @@ Tooltips:
     Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
     Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
+    Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.
@@ -2264,6 +2270,7 @@ Tooltips:
     Use Fixed Tab Width: Všetkým kartám na vodorovnom paneli priradí rovnakú šírku namiesto prispôsobenia podľa ich názvu.
     Use Custom Title Bar: Nahradí systémové záhlavie okna panelom kariet alebo hornou navigáciou, ak karty nie sú hore, a ušetrí tak zvislý priestor. Ovládacie prvky okna sa zobrazia v rohu tohto panela.
     Use Grid Player Menu: Usporiada ponuku nastavení prehrávača videa do mriežky dlaždíc namiesto zoznamu riadkov.
+    Modal Backdrop: "Určuje, ako aplikácia vyzerá za dialógmi a ponukami. Rozmazanie môže byť na menej výkonných zariadeniach pomalé."
 The playlist is at the beginning. Enable loop to continue playing: Zoznam videí je na začiatku. Ak chcete pokračovať v prehrávaní, zapnite opakovanie
 External link opening has been disabled in Settings → Privacy: Otváranie externých odkazov bolo vypnuté v časti Nastavenia → Súkromie
 KeyboardShortcutPrompt:

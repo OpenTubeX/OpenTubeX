@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: Destruktiv handling ved peking og fokus
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
+    Modal Backdrop:
+      Modal Backdrop: "Bakgrunn bak dialoger"
+      Dim and Blur: "Demp og gjør uskarp"
+      Dim Only: "Bare demp"
   Player Settings:
     Rewind on Resume: "Spol tilbake ved gjenopptak"
     Minimum Pause Before Rewinding: "Minste pause før tilbakespoling"
@@ -902,6 +906,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Eldre formater"
       Modern Formats: "Moderne formater"
+    Ask Before Preloading Large Playlists: "Spør før forhåndslasting av store spillelister"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -2212,6 +2217,7 @@ Tooltips:
     Upcoming Videos to Preload: "Maksimalt antall kommende videoer som får yt-dlp-adressene hentet i bakgrunnen."
     Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Roter enheten fysisk for å åpne og avslutte fullskjerm, selv når automatisk rotasjon er slått av i Android.
+    Ask Before Preloading Large Playlists: "Ber om bekreftelse før alle videoene i en spilleliste med mer enn {count} videoer forhåndslastes."
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.
     Global Additional yt-dlp Arguments: Ekstra kommandolinjeargumenter som sendes til yt-dlp for hver nedlasting, for eksempel --cookies-from-browser firefox.
@@ -2263,6 +2269,7 @@ Tooltips:
     Use Fixed Tab Width: Gir alle faner i det vannrette fanefeltet samme bredde i stedet for å tilpasse bredden etter tittelen.
     Use Custom Title Bar: Erstatter systemets tittellinje med fanelinjen, eller med den øverste navigasjonen når fanene ikke er øverst, for å spare loddrett plass. Vindusknappene vises i hjørnet av den linjen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
+    Modal Backdrop: "Angir hvordan appen ser ut bak dialoger og menyer. Uskarphet kan være tregt på mindre kraftige enheter."
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern
 KeyboardShortcutPrompt:

@@ -420,6 +420,10 @@ Settings:
     Font:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
+    Modal Backdrop:
+      Modal Backdrop: "Tło okien dialogowych"
+      Dim and Blur: "Przyciemnij i rozmyj"
+      Dim Only: "Tylko przyciemnij"
   Player Settings:
     Auto Picture in Picture:
       On Tab Change Mini Player: Przełączanie kart wyświetla zamiast tego mini odtwarzacz. Aby z tego korzystać, ustaw „Po opuszczeniu filmu” na „Zatrzymaj odtwarzanie”.
@@ -531,6 +535,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Starsze formaty"
       Modern Formats: "Nowoczesne formaty"
+    Ask Before Preloading Large Playlists: "Pytaj przed wstępnym wczytaniem dużych playlist"
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
@@ -1442,6 +1447,7 @@ Tooltips:
     Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
+    Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.
@@ -1482,6 +1488,7 @@ Tooltips:
     Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
     Use Custom Title Bar: Zastępuje systemowy pasek tytułu paskiem kart lub, gdy karty nie są u góry, górną nawigacją, aby zaoszczędzić miejsce w pionie. Przyciski sterowania oknem pojawiają się w rogu tego paska.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
+    Modal Backdrop: "Określa, jak wygląda aplikacja za oknami dialogowymi i menu. Rozmycie może działać wolno na słabszych urządzeniach."
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
 KeyboardShortcutPrompt:

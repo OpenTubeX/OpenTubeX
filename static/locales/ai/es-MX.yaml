@@ -834,6 +834,10 @@ Settings:
       Everforest Light Aqua: Everforest Claro Aguamarina
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
+    Modal Backdrop:
+      Modal Backdrop: "Fondo de los diálogos"
+      Dim and Blur: "Oscurecer y desenfocar"
+      Dim Only: "Solo oscurecer"
   Player Settings:
     Rewind on Resume: "Retroceder al reanudar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de retroceder"
@@ -1023,6 +1027,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Capturas de pantalla
     Enable FCast: "Activar FCast"
+    Ask Before Preloading Large Playlists: "Preguntar antes de precargar listas de reproducción grandes"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -2567,6 +2572,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
     Concurrent Preloads: "La cantidad máxima de procesos de yt-dlp usados para precargar videos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Gira físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
+    Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los videos de una lista de reproducción con más de {count} videos."
   External Player Settings:
     Ignore Default Arguments: No envíe ningún argumento predeterminado al reproductor externo aparte de la URL del video (por ejemplo, velocidad de reproducción, URL de la lista de reproducción, etc.). Los argumentos personalizados se seguirán transmitiendo.
   Download Settings:
@@ -2623,6 +2629,7 @@ Tooltips:
     Use Fixed Tab Width: Asigna el mismo ancho a todas las pestañas de la barra horizontal en lugar de adaptarlo a su título.
     Use Custom Title Bar: Reemplaza la barra de título del sistema por la barra de pestañas, o por la navegación superior cuando las pestañas no están arriba, para ahorrar espacio vertical. Los controles de la ventana aparecen en la esquina de esa barra.
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de video como una cuadrícula de mosaicos en lugar de una lista de filas.
+    Modal Backdrop: "Define cómo se ve la aplicación detrás de los diálogos y menús. El desenfoque puede ser lento en dispositivos menos potentes."
   Experimental Settings:
     Replace HTTP Cache: Desactiva la caché HTTP basada en Electron disk y habilite una caché para la imagen en la memoria personalizada. Esto aumentará el uso de la memoria RAM.
     Disable Hardware Acceleration: Desactiva la aceleración por hardware de la GPU. Puede resolver problemas gráficos, pero probablemente reducirá el rendimiento.

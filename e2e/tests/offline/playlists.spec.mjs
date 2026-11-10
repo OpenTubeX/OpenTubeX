@@ -21,7 +21,7 @@ async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {'Yes' | 'No'} answer
+ * @param {'Yes' | 'No' | 'Never ask again'} answer
  */
 async function answerPlaylistPreloadPrompt(page, answer) {
   const prompt = page.getByRole('dialog', { name: 'Preload all videos?' })
@@ -216,6 +216,20 @@ test.describe('seeded playlists', () => {
       'Preloaded 0 of 51 videos. 51 could not be preloaded.'
     )).toBeVisible()
     expect(await app.electronApp.evaluate(() => new Set(globalThis.__ytDlpPreloadVideoIds).size)).toBe(51)
+
+    // Never ask again still preloads, and later preloads skip the prompt
+    const takePreloadedVideoCount = () => app.electronApp.evaluate(() => new Set(globalThis.__ytDlpPreloadVideoIds.splice(0)).size)
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
+    await takePreloadedVideoCount()
+    await page.getByRole('menu').getByRole('menuitem', { name: 'Preload all videos' }).click()
+    await answerPlaylistPreloadPrompt(page, 'Never ask again')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getConfirmLargePlaylistPreload)).toBe(false)
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled({ timeout: 30_000 })
+    expect(await takePreloadedVideoCount()).toBe(51)
+    await page.getByRole('menu').getByRole('menuitem', { name: 'Preload all videos' }).click()
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled({ timeout: 30_000 })
+    expect(await takePreloadedVideoCount()).toBe(51)
+    await expect(page.getByRole('dialog', { name: 'Preload all videos?' })).toHaveCount(0)
   })
 
   test('preloads every video in a user playlist with yt-dlp', async ({ app, page }) => {

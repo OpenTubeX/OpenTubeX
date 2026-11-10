@@ -901,6 +901,10 @@ Settings:
       Catppuccin Macchiato Lavender: Catppuccin Macchiato Laventel
       Catppuccin Latte Mauve: Catppuccin Latte Malva
       Catppuccin Latte Red: Catppuccin Latte Rooi
+    Modal Backdrop:
+      Modal Backdrop: "Dialoogagtergrond"
+      Dim and Blur: "Verdonker en vervaag"
+      Dim Only: "Slegs verdonker"
   Player Settings:
     Rewind on Resume: "Spoel terug wanneer hervat word"
     Minimum Pause Before Rewinding: "Minimum pouse voor terugspoel"
@@ -1081,6 +1085,7 @@ Settings:
     Show Swipe to Seek Preview: Wys voorskou vir swiep-om-te-spoel
     Enable Google Cast: Aktiveer Google Cast
     Enable FCast: Aktiveer FCast
+    Ask Before Preloading Large Playlists: "Vra voordat groot snitlyste vooraf gelaai word"
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -2463,6 +2468,7 @@ Tooltips:
     Upcoming Videos to Preload: Die maksimum aantal komende video’s waarvan die yt-dlp-stroom-URL’s in die agtergrond opgehaal word.
     Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
+    Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
   Download Settings:
     Download Folder: Video’s word in hierdie vouer gestoor. Laat leeg om u stelsel se Aflaaie-vouer te gebruik.
     Global Additional yt-dlp Arguments: Bykomende opdragreëlargumente wat vir elke aflaai aan yt-dlp deurgegee word, byvoorbeeld --cookies-from-browser firefox.
@@ -2514,6 +2520,7 @@ Tooltips:
     Use Custom Title Bar: Vervang die stelsel se titelbalk met die oortjiebalk, of met die boonste navigasie wanneer oortjies nie bo is nie, om vertikale spasie te bespaar. Die vensterkontroles verskyn in die hoek van daardie balk.
     Use Grid Player Menu: Rangskik die videospeler se instellingskieslys as ’n rooster van teëls in plaas van ’n lys rye.
     Compact Settings Categories: Versteek beskrywings en verminder die hoogte van instellingskategorieë.
+    Modal Backdrop: "Bepaal hoe die toep agter dialoë en kieslyste lyk. Vervaging kan op minder kragtige toestelle stadig wees."
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiveer GPU-hardewareversnelling. Kan grafiese probleme oplos, maar sal waarskynlik swakker presteer.
 Yattee Server:

@@ -768,6 +768,10 @@ Settings:
       Catppuccin Macchiato Sapphire: Catppuccin Macchiato safiro
       Catppuccin Macchiato Blue: Catppuccin Macchiato bluo
       Catppuccin Macchiato Lavender: Catppuccin Macchiato lavendo
+    Modal Backdrop:
+      Modal Backdrop: "Fono de dialogoj"
+      Dim and Blur: "Malheligi kaj malklarigi"
+      Dim Only: "Nur malheligi"
   Player Settings:
     Rewind on Resume: "Malantaŭeniri je daŭrigo"
     Minimum Pause Before Rewinding: "Minimuma paŭzo antaŭ malantaŭeniro"
@@ -938,6 +942,7 @@ Settings:
     Show Swipe to Seek Preview: Montri antaŭrigardon de saltado per ŝovo
     Enable Google Cast: Ŝalti Google Cast
     Enable FCast: Ŝalti FCast
+    Ask Before Preloading Large Playlists: "Demandi antaŭ antaŭŝargi grandajn ludlistojn"
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -2254,6 +2259,7 @@ Tooltips:
     Upcoming Videos to Preload: La maksimuma nombro de venontaj videaĵoj, kies URL-oj de yt-dlp-fluoj estas venigataj fone.
     Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
+    Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
     Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.
@@ -2305,6 +2311,7 @@ Tooltips:
     Use Custom Title Bar: Anstataŭigas la sisteman titolbreton per la langetobreto, aŭ per la supra navigado kiam langetoj ne estas supre, por ŝpari vertikalan spacon. La fenestraj regiloj aperas en la angulo de tiu breto.
     Use Grid Player Menu: Aranĝas la agordan menuon de la videaĵa ludilo kiel kradon de kaheloj anstataŭ listo de vicoj.
     Compact Settings Categories: Kaŝas priskribojn kaj malpliigas la altecon de agordaj kategorioj.
+    Modal Backdrop: "Agordas, kiel la aplikaĵo aspektas malantaŭ dialogoj kaj menuoj. Malklarigo povas esti malrapida en malpli potencaj aparatoj."
 Yattee Server:
   API Error (Click to copy): Eraro de Yattee-servilo (alklaku por kopii)
   Errors:

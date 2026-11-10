@@ -3,11 +3,9 @@
     <h4 class="groupTitle">
       {{ t('Settings.Theme Settings.Sections.Interface') }}
     </h4>
-    <FtFlexBox
-      v-if="IS_CAPACITOR"
-      class="themeSelectRow"
-    >
+    <FtFlexBox class="themeSelectRow">
       <FtSelect
+        v-if="IS_CAPACITOR"
         size-to-content
         :placeholder="t('Settings.General Settings.Mobile Layout.Mobile Layout')"
         :value="capacitorLayoutMode"
@@ -16,6 +14,17 @@
         :select-values="CAPACITOR_LAYOUT_MODE_VALUES"
         :icon="['fas', 'display']"
         @change="store.dispatch('updateCapacitorLayoutMode', $event)"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Theme Settings.Modal Backdrop.Modal Backdrop')"
+        :value="modalBackdrop"
+        setting-key="modalBackdrop"
+        :select-names="modalBackdropNames"
+        :select-values="MODAL_BACKDROP_VALUES"
+        :tooltip="t('Tooltips.Theme Settings.Modal Backdrop')"
+        :icon="['fas', 'opacity']"
+        @change="store.dispatch('updateModalBackdrop', $event)"
       />
     </FtFlexBox>
     <div class="appearanceSwitchGrid switchFlowGrid">
@@ -446,6 +455,14 @@ const capacitorLayoutModeNames = computed(() => [
   t('Settings.General Settings.Mobile Layout.Phone'),
   t('Settings.General Settings.Mobile Layout.Tablet')
 ])
+
+const MODAL_BACKDROP_VALUES = ['blur', 'dim']
+const modalBackdropNames = computed(() => [
+  t('Settings.Theme Settings.Modal Backdrop.Dim and Blur'),
+  t('Settings.Theme Settings.Modal Backdrop.Dim Only')
+])
+/** @type {import('vue').ComputedRef<'blur' | 'dim'>} */
+const modalBackdrop = computed(() => store.getters.getModalBackdrop)
 
 const toastPositionNames = computed(() => [
   t('Settings.Theme Settings.Toast Position.Bottom Left'),

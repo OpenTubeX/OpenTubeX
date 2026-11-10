@@ -732,6 +732,10 @@ Settings:
         Destructive hover and focus: Poistava toiminto osoitettaessa ja kohdistettaessa
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
+    Modal Backdrop:
+      Modal Backdrop: "Valintaikkunoiden tausta"
+      Dim and Blur: "Himmennä ja sumenna"
+      Dim Only: "Vain himmennä"
   Player Settings:
     Rewind on Resume: "Kelaa taaksepäin jatkettaessa"
     Minimum Pause Before Rewinding: "Vähimmäistauko ennen kelausta"
@@ -902,6 +906,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Kuvakaappaukset
     Enable FCast: "Ota FCast käyttöön"
+    Ask Before Preloading Large Playlists: "Kysy ennen suurten soittolistojen esilatausta"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -2214,6 +2219,7 @@ Tooltips:
     Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
+    Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.
@@ -2265,6 +2271,7 @@ Tooltips:
     Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
     Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
+    Modal Backdrop: "Määrittää, miltä sovellus näyttää valintaikkunoiden ja valikoiden takana. Sumennus voi olla hidas tehottomammilla laitteilla."
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
 External link opening has been disabled in Settings → Privacy: Ulkoisten linkkien avaaminen on poistettu käytöstä kohdassa Asetukset → Tietosuoja
 KeyboardShortcutPrompt:

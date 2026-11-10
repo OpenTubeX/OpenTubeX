@@ -120,7 +120,8 @@ const YT_DLP_STREAMING_KEYS = new Set([
   'Preload Upcoming Videos',
   'Parallel Segment Loading',
   'Upcoming Videos to Preload',
-  'Concurrent Preloads'
+  'Concurrent Preloads',
+  'Ask Before Preloading Large Playlists'
 ])
 
 export const SETTINGS_SEARCH_SOURCES = {
@@ -396,6 +397,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Tab Layout': ['Tab Layout'],
     'Tab Loading Indicator': ['Tab Loading Indicator'],
     'Toast Position': ['Toast Position'],
+    'Modal Backdrop': ['Modal Backdrop'],
     'Base Theme': ['Base Theme'],
     'Icon Pack': ['Icon Pack'],
     Font: ['App Font'],

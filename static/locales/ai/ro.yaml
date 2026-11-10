@@ -733,6 +733,10 @@ Settings:
         Destructive hover and focus: Acțiune distructivă la trecerea indicatorului și focalizare
         Destructive pressed: Acțiune distructivă la apăsare
         Text and icons on destructive actions: Text și pictograme pentru acțiunile distructive
+    Modal Backdrop:
+      Modal Backdrop: "Fundalul dialogurilor"
+      Dim and Blur: "Întunecare și estompare"
+      Dim Only: "Doar întunecare"
   Player Settings:
     Rewind on Resume: "Derulează înapoi la reluare"
     Minimum Pause Before Rewinding: "Pauză minimă înainte de derulare"
@@ -907,6 +911,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formate mai vechi"
       Modern Formats: "Formate moderne"
+    Ask Before Preloading Large Playlists: "Întreabă înainte de preîncărcarea listelor de redare mari"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -2263,6 +2268,7 @@ Tooltips:
     Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
+    Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.
@@ -2314,6 +2320,7 @@ Tooltips:
     Use Fixed Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală, în loc să o dimensioneze după titlu.
     Use Custom Title Bar: Înlocuiește bara de titlu a sistemului cu bara de file sau, când filele nu sunt sus, cu navigarea de sus, pentru a economisi spațiu vertical. Butoanele de control ale ferestrei apar în colțul acelei bare.
     Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
+    Modal Backdrop: "Stabilește cum arată aplicația în spatele dialogurilor și meniurilor. Estomparea poate fi lentă pe dispozitivele mai puțin performante."
   Experimental Settings:
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.
 The playlist is at the beginning. Enable loop to continue playing: Playlistul este la început. Activați redarea în buclă pentru a continua

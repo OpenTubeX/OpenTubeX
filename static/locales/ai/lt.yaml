@@ -917,6 +917,10 @@ Settings:
       Everforest Light Aqua: Everforest Light Aqua
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
+    Modal Backdrop:
+      Modal Backdrop: "Dialogų fonas"
+      Dim and Blur: "Pritemdyti ir sulieti"
+      Dim Only: "Tik pritemdyti"
   Player Settings:
     Rewind on Resume: "Atsukti atgal tęsiant"
     Minimum Pause Before Rewinding: "Mažiausia pauzė prieš atsukant"
@@ -1103,6 +1107,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Ekrano kopijos
     Enable FCast: "Įjungti FCast"
+    Ask Before Preloading Large Playlists: "Klausti prieš iš anksto įkeliant didelius grojaraščius"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -2632,6 +2637,7 @@ Tooltips:
     Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
     Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
+    Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:
@@ -2689,6 +2695,7 @@ Tooltips:
     Use Fixed Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį, užuot pritaikius jį prie pavadinimo.
     Use Custom Title Bar: Pakeičia sistemos pavadinimo juostą kortelių juosta arba, kai kortelės nėra viršuje, viršutine naršymo juosta, kad būtų sutaupyta vertikalios vietos. Lango valdikliai rodomi tos juostos kampe.
     Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
+    Modal Backdrop: "Nustato, kaip programa atrodo už dialogų ir meniu. Suliejimas gali veikti lėtai mažiau galinguose įrenginiuose."
   SponsorBlock Settings:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.

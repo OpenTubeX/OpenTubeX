@@ -158,6 +158,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpPreloadEnabled: false,
     ytDlpPreloadCount: DEFAULT_YT_DLP_PRELOAD_COUNT,
     ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
+    confirmLargePlaylistPreload: true,
     ytDlpFfmpegSource: 'system',
     ytDlpFfmpegPath: '',
     // F-Droid only allows downloading executable code after the user opts in.
@@ -373,6 +374,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     thumbnailDataSaver: false,
     limitTitlesToTwoLines: true,
     linkUnderline: 'hover',
+    modalBackdrop: 'blur',
     showThumbnailPreviews: true,
     showVideoMenuButton: false,
     thumbnailSize: DEFAULT_THUMBNAIL_SIZE,

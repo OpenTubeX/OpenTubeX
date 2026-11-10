@@ -782,6 +782,10 @@ Settings:
       Catppuccin Macchiato Sapphire: Catppuccin Macchiato Sapphire
       Catppuccin Macchiato Blue: Catppuccin Macchiato Blue
       Catppuccin Macchiato Lavender: Catppuccin Macchiato Lavender
+    Modal Backdrop:
+      Modal Backdrop: "ڈائیلاگ کا پس منظر"
+      Dim and Blur: "مدھم اور دھندلا کریں"
+      Dim Only: "صرف مدھم کریں"
   Player Settings:
     Rewind on Resume: "دوبارہ شروع کرنے پر پیچھے کریں"
     Minimum Pause Before Rewinding: "پیچھے کرنے سے پہلے کم از کم وقفہ"
@@ -962,6 +966,7 @@ Settings:
     Show Swipe to Seek Preview: سوائپ سے سیک کا پیش نظارہ دکھائیں
     Enable Google Cast: Google Cast فعال کریں
     Enable FCast: FCast فعال کریں
+    Ask Before Preloading Large Playlists: "بڑی پلے لسٹس پہلے سے لوڈ کرنے سے پہلے پوچھیں"
   Channel Settings:
     Channel Settings: چینل سیٹنگز
     Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
@@ -2320,6 +2325,7 @@ Tooltips:
     Upcoming Videos to Preload: آنے والی ویڈیوز کی زیادہ سے زیادہ تعداد جن کے yt-dlp اسٹریم URLs پس منظر میں حاصل کیے جاتے ہیں۔
     Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
     Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
+    Ask Before Preloading Large Playlists: "{count} سے زیادہ ویڈیوز والی پلے لسٹ کی تمام ویڈیوز پہلے سے لوڈ کرنے سے پہلے تصدیق مانگتا ہے۔"
   Download Settings:
     Download Folder: ویڈیوز اس فولڈر میں محفوظ ہوتی ہیں۔ اپنے سسٹم کا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں۔
     Global Additional yt-dlp Arguments: ہر ڈاؤن لوڈ کے لیے yt-dlp کو دیے جانے والے اضافی کمانڈ لائن آرگیومینٹس، مثلاً --cookies-from-browser firefox۔
@@ -2371,6 +2377,7 @@ Tooltips:
     Use Custom Title Bar: عمودی جگہ بچانے کے لیے سسٹم ٹائٹل بار کو ٹیب بار سے، یا ٹیبز اوپر نہ ہونے پر اوپری نیویگیشن سے بدل دیتا ہے۔ ونڈو کنٹرولز اس بار کے کونے میں ظاہر ہوتے ہیں۔
     Use Grid Player Menu: ویڈیو پلیئر کے سیٹنگز مینو کو قطاروں کی فہرست کے بجائے ٹائلز کے گرڈ کی صورت میں ترتیب دیتا ہے۔
     Compact Settings Categories: تفصیلات چھپاتا ہے اور سیٹنگز کیٹیگریز کی اونچائی کم کرتا ہے۔
+    Modal Backdrop: "طے کرتا ہے کہ ڈائیلاگز اور مینیوز کے پیچھے ایپ کیسی دکھائی دے۔ دھندلا کرنا کم طاقتور آلات پر سست ہو سکتا ہے۔"
   Experimental Settings:
     Disable Hardware Acceleration: GPU ہارڈ ویئر ایکسلریشن غیر فعال کرتا ہے۔ گرافیکل مسائل حل ہو سکتے ہیں، لیکن کارکردگی غالباً کم ہو جائے گی۔
 Yattee Server:
